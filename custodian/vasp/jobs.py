@@ -98,20 +98,3 @@ class SecondRelaxationVaspJob(BasicVaspJob):
     def name(self):
         return "Second relaxation Vasp Job"
 
-
-def aflow_run():
-    #An example of an aflow run.
-    from pymatpro.custodian.handlers import IncarErrorHandler,\
-        KpointsErrorHandler, UnconvergedErrorHandler
-    from pymatpro.custodian.jobs import BasicVaspJob, SecondRelaxationVaspJob
-    import logging
-    FORMAT = '%(asctime)s %(message)s'
-    logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
-    handlers = [IncarErrorHandler(), KpointsErrorHandler(),
-                UnconvergedErrorHandler()]
-    jobs = [BasicVaspJob(), SecondRelaxationVaspJob()]
-    c = Custodian(handlers, jobs, max_errors=10)
-    c.run()
-
-if __name__ == "__main__":
-    aflow_run()
