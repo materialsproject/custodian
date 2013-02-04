@@ -2,11 +2,11 @@ import os
 
 from distribute_setup import use_setuptools
 use_setuptools(version='0.6.10')
-from setuptools import setup, find_packages, Extension
+from setuptools import setup, find_packages
 
 with open("README.rst") as f:
     long_desc = f.read()
-    
+
 setup(
     name="custodian",
     packages=find_packages(),
