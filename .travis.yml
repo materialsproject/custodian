@@ -5,8 +5,6 @@ git:
   depth: 1
 # command to install dependencies
 install: "pip install -q -r requirements.txt --use-mirrors"
-# This is needed, otherwise, nosetests can't find the installed pymatgen C
-# extensions.
 before_script:
   - mv custodian cust
 # command to run tests, e.g. python setup.py test
@@ -18,5 +16,5 @@ notifications:
   email:
     recipients:
       - shyuep@gmail.com
-    on_success: change
-    on_failure: always
+    on_success: never
+    on_failure: never
