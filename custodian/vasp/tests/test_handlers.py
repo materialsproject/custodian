@@ -26,6 +26,8 @@ test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
 class VaspErrorHandlerTest(unittest.TestCase):
 
     def test_check_correct(self):
+        if "VASP_PSP_DIR" not in os.environ:
+            os.environ["VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
         h = VaspErrorHandler("vasp.teterror")
         h.check()
