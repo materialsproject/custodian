@@ -6,6 +6,8 @@ from setuptools import setup, find_packages
 
 with open("README.rst") as f:
     long_desc = f.read()
+    ind = long_desc.find("\n")
+    long_desc = long_desc[ind+1:]
 
 setup(
     name="custodian",
