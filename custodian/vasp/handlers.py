@@ -13,12 +13,14 @@ __email__ = "shyuep@gmail.com"
 __status__ = "Beta"
 __date__ = "2/4/13"
 
-
+import os
 import shutil
+import json
 
 from custodian.handlers import ErrorHandler
 from pymatgen.io.vaspio.vasp_input import Incar, Poscar, VaspInput
 from pymatgen.io.vaspio.vasp_output import Vasprun
+from custodian.ansible.actions import DictActions, FileActions
 from custodian.ansible.intepreter import Modder
 
 
@@ -42,38 +44,46 @@ class VaspErrorHandler(ErrorHandler):
         self.output_filename = output_filename
 
     def check(self):
+        self.errors = set()
         with open(self.output_filename, "r") as f:
             for line in f:
                 l = line.strip()
                 for err, msgs in VaspErrorHandler.error_msgs.items():
                     for msg in msgs:
                         if l.startswith(msg):
-                            self.error = err
-                            return True
-        return False
+                            self.errors.add(err)
+        return len(self.errors) > 0
 
     def correct(self):
         actions = []
         vi = VaspInput.from_directory(".")
-        if self.error == "tet":
+        history = []
+
+        if "tet" in self.errors:
             actions.append({'_set': {'INCAR->ISMEAR': 0}})
-        elif self.error == "inv_rot_mat":
+        if "inv_rot_mat" in self.errors:
             actions.append({'_set': {'INCAR->SYMPREC': 1e-8}})
-        elif self.error == "brmix":
+        if "brmix" in self.errors:
             actions.append({'_set': {'INCAR->IMIX': 1}})
-        elif self.error == "subspacematrix":
+        if "subspacematrix" in self.errors:
             actions.append({'_set': {'INCAR->LREAL': False}})
-        elif self.error == "tetirr":
+        if "tetirr" in self.errors:
             actions.append({'_set': {'KPOINTS->style': "Gamma"}})
-        elif self.error == "incorrect_shift":
+        if "incorrect_shift" in self.errors:
             actions.append({'_set': {'KPOINTS->style': "Gamma"}})
-        elif self.error == "mesh_symmetry":
+        if "mesh_symmetry" in self.errors:
             m = max(vi["KPOINTS"].kpts[0])
             actions.append({'_set': {'KPOINTS->kpoints': [[m] * 3]}})
         m = Modder()
         for a in actions:
             vi = m.modify_object(a, vi)
         self.actions = actions
+        if os.path.exists("corrections.json"):
+            with open("corrections.json", "r") as f:
+                history = json.load(f)
+        history.append({'errors': list(self.errors), 'actions': actions})
+        with open("corrections.json", "w") as f:
+            json.dump(history, f)
         vi.write_input(".")
 
     def __str__(self):
@@ -81,6 +91,7 @@ class VaspErrorHandler(ErrorHandler):
 
 
 class UnconvergedErrorHandler(ErrorHandler):
+    #todo: Make this work using ansible.
 
     def check(self):
         v = Vasprun('vasprun.xml')
