@@ -32,7 +32,6 @@ class Custodian(object):
     3. At the end of each individual job, Custodian will run through the list
        error handlers. If an error is detected, corrective measures are taken
        and the particular job is rerun.
-    4.
     """
 
     def __init__(self, handlers, jobs, max_errors=1):
