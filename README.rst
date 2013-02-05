@@ -8,15 +8,15 @@ for different applications.
 
 Custodian is now in an very early alpha. Use with care.
 
-Getting pymatgen
-================
+Getting custodian
+=================
 
 Stable version
 --------------
 
 The version at the Python Package Index (PyPI) is always the latest stable
 release that will be hopefully, be relatively bug-free. The easiest way to
-install pymatgen on any system is to use easy_install or pip, as follows::
+install custodian on any system is to use easy_install or pip, as follows::
 
     easy_install custodian
 
@@ -45,12 +45,7 @@ or to install the package in developmental mode::
 Requirements
 ============
 
-All required dependencies should be automatically taken care of if you
-install pymatgen using easy_install or pip. Otherwise, these packages should
-be available on `PyPI <http://pypi.python.org>`_.
-
-1. Python 2.7+ required. New default modules such as json are used, as well as
-   new unittest features in Python 2.7.
+Custodian requires Python 2.7+. There are no other required dependencies.
 
 Optional dependencies
 ---------------------
