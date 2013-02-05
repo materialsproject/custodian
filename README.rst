@@ -57,6 +57,6 @@ Optional dependencies
 
 Optional libraries that are required if you need certain features:
 
-1. pymatgen 2.4.3+: To use the plugin for VASP.
+1. pymatgen 2.5+: To use the plugin for VASP.
 2. nose - For complete unittesting.
 
