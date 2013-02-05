@@ -16,9 +16,8 @@ __date__ = "2/4/13"
 import logging
 
 from custodian.custodian import Custodian
-from pymatpro.custodian.handlers import IncarErrorHandler,\
-    KpointsErrorHandler, UnconvergedErrorHandler
-from pymatpro.custodian.jobs import BasicVaspJob, SecondRelaxationVaspJob
+from custodian.vasp.handlers import VaspErrorHandler, UnconvergedErrorHandler
+from custodian.vasp.jobs import BasicVaspJob, SecondRelaxationVaspJob
 
 
 def aflow_run():
@@ -26,8 +25,7 @@ def aflow_run():
 
     FORMAT = '%(asctime)s %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
-    handlers = [IncarErrorHandler(), KpointsErrorHandler(),
-                UnconvergedErrorHandler()]
+    handlers = [VaspErrorHandler(), UnconvergedErrorHandler()]
     jobs = [BasicVaspJob(), SecondRelaxationVaspJob()]
     c = Custodian(handlers, jobs, max_errors=10)
     c.run()
