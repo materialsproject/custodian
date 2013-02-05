@@ -18,10 +18,15 @@ import os
 
 from custodian.vasp.handlers import VaspErrorHandler
 
+
+test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
+                        'test_files')
+
+
 class VaspErrorHandlerTest(unittest.TestCase):
 
     def test_check_correct(self):
-        os.chdir(os.path.join("..", "..", "..", "test_files"))
+        os.chdir(test_dir)
         h = VaspErrorHandler("vasp.teterror")
         h.check()
         h.correct()
