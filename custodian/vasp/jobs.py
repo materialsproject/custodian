@@ -23,7 +23,7 @@ from pymatgen.io.vaspio.vasp_input import Incar, Poscar
 from pymatgen.io.cifio import CifParser
 from pymatgen.io.vaspio_set import MITVaspInputSet
 
-from custodian.jobs import Job
+from custodian.custodian import Job
 
 
 class BasicVaspJob(Job):

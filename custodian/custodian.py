@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
-'''
-Created on May 2, 2012
-'''
+"""
+This module implements the main Custodian class, which manages a list of jobs
+given a set of error handlers, and the abstract base classes for the
+ErrorHandlers and Jobs.
+"""
 
 from __future__ import division
 
@@ -16,9 +18,22 @@ __date__ = "May 2, 2012"
 import logging
 import os
 import tarfile
+import abc
 
 
 class Custodian(object):
+    """
+    The Custodian class is the manager for a list of jobs given a list of
+    error handlers. The way it works is as follows:
+
+    1. Let's say you have defined a list of jobs as [job1, job2, job3, ...] and
+       you have defined a list of possible error handlers as [err1, err2, ...]
+    2. Custodian will run the jobs in the order of job1, job2, ...
+    3. At the end of each individual job, Custodian will run through the list
+       error handlers. If an error is detected, corrective measures are taken
+       and the particular job is rerun.
+    4.
+    """
 
     def __init__(self, handlers, jobs, max_errors=1):
         """
@@ -41,7 +56,10 @@ class Custodian(object):
         for i, job in enumerate(self.jobs):
             attempt = 0
             while total_errors < self.max_errors:
-                logging.info("Starting job no. {} ({}) attempt no. {}. Errors thus far = {}.".format(i + 1, job.name, attempt + 1, total_errors))
+                logging.info("Starting job no. {} ({}) attempt no. {}. Errors"
+                             " thus far = {}.".format(i + 1, job.name,
+                                                      attempt + 1,
+                                                      total_errors))
                 job.setup()
                 job.run()
                 error = False
@@ -70,4 +88,67 @@ class Custodian(object):
         for f in os.listdir("."):
             tar.add(f)
         tar.close()
+
+
+class ErrorHandler(object):
+    """
+    Abstract base class defining the interface for an ErrorHandler.
+    """
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def check(self):
+        """
+        This method is called at the end of a job. Returns a boolean value
+        indicating if errors are detected.
+        """
+        pass
+
+    @abc.abstractmethod
+    def correct(self):
+        """
+        This method is called at the end of a job when an error is detected.
+        It should perform any corrective measures relating to the detected
+        error.
+        """
+        pass
+
+
+class Job(object):
+    """
+    Abstract base class defining the interface for a Job.
+    """
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def setup(self):
+        """
+        This method is run before the start of a job. Allows for some
+        pre-processing.
+        """
+        pass
+
+    @abc.abstractmethod
+    def run(self):
+        """
+        This method perform the actual work for the job.
+        """
+        pass
+
+    @abc.abstractmethod
+    def postprocess(self):
+        """
+        This method is called at the end of a job, *after* error detection.
+        This allows post-processing, such as cleanup, analysis of results,
+        etc.
+        """
+        pass
+
+    @abc.abstractproperty
+    def name(self):
+        """
+        A nice string name for the job.
+        """
+        pass
+
 

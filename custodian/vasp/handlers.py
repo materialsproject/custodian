@@ -17,7 +17,7 @@ import os
 import shutil
 import json
 
-from custodian.handlers import ErrorHandler
+from custodian.custodian import ErrorHandler
 from pymatgen.io.vaspio.vasp_input import Incar, Poscar, VaspInput
 from pymatgen.io.vaspio.vasp_output import Vasprun
 from custodian.ansible.actions import DictActions, FileActions
