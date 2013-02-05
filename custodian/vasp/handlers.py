@@ -15,12 +15,11 @@ __date__ = "2/4/13"
 
 
 import shutil
-import numpy as np
-import logging
 
 from custodian.handlers import ErrorHandler
-from pymatgen.io.vaspio.vasp_input import Incar, Kpoints, Poscar
+from pymatgen.io.vaspio.vasp_input import Incar, Poscar, VaspInput
 from pymatgen.io.vaspio.vasp_output import Vasprun
+from custodian.ansible.intepreter import Modder
 
 
 class VaspErrorHandler(ErrorHandler):
@@ -28,7 +27,8 @@ class VaspErrorHandler(ErrorHandler):
     error_msgs = {
         "tet": ["Tetrahedron method fails for NKPT<4",
                 "Fatal error detecting k-mesh",
-                "Fatal error: unable to match k-point""Routine TETIRR needs special values"],
+                "Fatal error: unable to match k-point",
+                "Routine TETIRR needs special values"],
         "inv_rot_mat": ["inverse of rotation matrix was not found (increase SYMPREC)"],
         "brmix": ["BRMIX: very serious problems"],
         "subspacematrix": ["WARNING: Sub-Space-Matrix is not hermitian in DAV"],
@@ -38,8 +38,11 @@ class VaspErrorHandler(ErrorHandler):
                           "different class of lattices."]
     }
 
+    def __init__(self, output_filename="vasp.out"):
+        self.output_filename = output_filename
+
     def check(self):
-        with open("vasp.out", "r") as f:
+        with open(self.output_filename, "r") as f:
             for line in f:
                 l = line.strip()
                 for err, msgs in VaspErrorHandler.error_msgs.items():
@@ -51,64 +54,30 @@ class VaspErrorHandler(ErrorHandler):
 
     def correct(self):
         actions = []
-        incar = Incar.from_file("INCAR")
-        kpoints = Kpoints.from_file("KPOINTS")
+        vi = VaspInput.from_directory(".")
         if self.error == "tet":
-            incar["ISMEAR"] = 0
-            actions.append({'_atomic_set': {'INCAR.ISMEAR': 0}})
+            actions.append({'_set': {'INCAR->ISMEAR': 0}})
         elif self.error == "inv_rot_mat":
-            incar["SYMPREC"] = 1e-8
-            actions.append({'_atomic_set': {'INCAR.SYMPREC': 1e-8}})
+            actions.append({'_set': {'INCAR->SYMPREC': 1e-8}})
         elif self.error == "brmix":
-            actions.append({'_atomic_set': {'INCAR.IMIX': 1}})
+            actions.append({'_set': {'INCAR->IMIX': 1}})
         elif self.error == "subspacematrix":
-            actions.append({'_atomic_set': {'INCAR.LREAL': False}})
+            actions.append({'_set': {'INCAR->LREAL': False}})
         elif self.error == "tetirr":
-            actions.append({'_atomic_set': {'KPOINTS.style': "Gamma"}})
+            actions.append({'_set': {'KPOINTS->style': "Gamma"}})
         elif self.error == "incorrect_shift":
-            actions.append({'_atomic_set': {'KPOINTS.style': "Gamma"}})
+            actions.append({'_set': {'KPOINTS->style': "Gamma"}})
         elif self.error == "mesh_symmetry":
-            m = np.max(kpoints.kpts)
-            actions.append({'_atomic_set': {'KPOINTS.kpts': [[m] * 3]}})
+            m = max(vi["KPOINTS"].kpts[0])
+            actions.append({'_set': {'KPOINTS->kpoints': [[m] * 3]}})
+        m = Modder()
+        for a in actions:
+            vi = m.modify_object(a, vi)
+        self.actions = actions
+        vi.write_input(".")
 
     def __str__(self):
         return "Vasp error"
-
-
-class KpointsErrorHandler(ErrorHandler):
-
-    error_msgs = {
-        "tetirr": ["Routine TETIRR needs special values"],
-        "incorrect_shift": ["Could not get correct shifts"],
-        "mesh_symmetry": ["Reciprocal lattice and k-lattice belong to "
-                          "different class of lattices."]
-    }
-
-    def check(self):
-        with open("vasp.out", "r") as f:
-            for line in f:
-                l = line.strip()
-                for err, msgs in KpointsErrorHandler.error_msgs.items():
-                    for msg in msgs:
-                        if l.startswith(msg):
-                            self.error = err
-                            return True
-        return False
-
-    def correct(self):
-        shutil.copy("KPOINTS", "KPOINTS.orig")
-        kpoints = Kpoints.from_file("KPOINTS")
-        if self.error == "tetirr":
-            kpoints.style = "Gamma"
-        elif self.error == "incorrect_shift":
-            kpoints.style = "Gamma"
-        elif self.error == "mesh_symmetry":
-            m = np.max(kpoints.kpts)
-            kpoints.kpts = [[m] * 3]
-        kpoints.write_file("KPOINTS")
-
-    def __str__(self):
-        return "KPOINTS error"
 
 
 class UnconvergedErrorHandler(ErrorHandler):

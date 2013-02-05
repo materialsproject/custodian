@@ -54,7 +54,7 @@ class DictActions(object):
     However, note that "_set" does not support modification of nested dicts
     using the mongo {"a.b":1} notation. This is because mongo does not allow
     keys with "." to be inserted. Instead, nested dict modification is
-    supported using a special "_atomic_set" keyword.
+    supported using a special "->" keyword, e.g. {"a->b": 1}
     """
 
     @staticmethod

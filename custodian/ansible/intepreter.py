@@ -21,7 +21,7 @@ from custodian.ansible.actions import DictActions
 
 
 class Modder(object):
-    '''
+    """
     Class to modify a dict/file/any object using a mongo-like language.
     Keywords are mostly adopted from mongo's syntax, but instead of $, an
     underscore precedes action keywords. This is so that the modification can
@@ -40,7 +40,7 @@ class Modder(object):
     'World'
     >>> d['Hello']
     'Universe'
-    '''
+    """
     def __init__(self, actions=None, strict=True):
         """
         Args:
@@ -57,8 +57,8 @@ class Modder(object):
         actions = actions if actions is not None else [DictActions]
         for action in actions:
             for i in dir(action):
-                if (not re.match('__\w+__', i)) and callable(getattr(action,
-                                                                     i)):
+                if (not re.match('__\w+__', i)) and \
+                        callable(getattr(action, i)):
                     self.supported_actions["_" + i] = getattr(action, i)
         self.strict = strict
 

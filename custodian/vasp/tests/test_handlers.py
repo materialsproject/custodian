@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+
+'''
+Created on Jun 1, 2012
+'''
+
+from __future__ import division
+
+__author__ = "Shyue Ping Ong"
+__copyright__ = "Copyright 2012, The Materials Project"
+__version__ = "0.1"
+__maintainer__ = "Shyue Ping Ong"
+__email__ = "shyue@mit.edu"
+__date__ = "Jun 1, 2012"
+
+import unittest
+import os
+
+from custodian.vasp.handlers import VaspErrorHandler
+
+class VaspErrorHandlerTest(unittest.TestCase):
+
+    def test_check_correct(self):
+        os.chdir(os.path.join("..", "..", "..", "test_files"))
+        h = VaspErrorHandler("vasp.teterror")
+        h.check()
+        h.correct()
+        self.assertEqual(h.error, "tet")
+        self.assertEqual(h.actions, [{'_set': {'INCAR->ISMEAR': 0}}])
+        h = VaspErrorHandler("vasp.classrotmat")
+        h.check()
+        h.correct()
+        self.assertEqual(h.error, "mesh_symmetry")
+        self.assertEqual(h.actions, [{'_set': {'KPOINTS->kpoints': [[8, 8, 8]]}}])
+
+if __name__ == "__main__":
+    #import sys;sys.argv = ['', 'Test.testName']
+    unittest.main()
