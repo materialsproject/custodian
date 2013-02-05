@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-'''
+"""
 This module implements a Modder class that performs modifications on objects
 using support actions.
-'''
+"""
 
 from __future__ import division
 

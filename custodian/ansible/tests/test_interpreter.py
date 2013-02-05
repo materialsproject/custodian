@@ -17,7 +17,6 @@ import unittest
 
 from custodian.ansible.intepreter import Modder
 from custodian.ansible.actions import FileActions
-from pymatgen.core.structure import Structure
 
 
 class ModderTest(unittest.TestCase):
@@ -149,12 +148,25 @@ class ModderTest(unittest.TestCase):
                           {'_file_create': {'content': 'Test data'}},
                           'test_file')
 
-    def modify_object(self):
+    def test_modify_object(self):
         modder = Modder()
-        s = Structure([[10, 0, 0], [0, 10, 0], [0, 0, 10]], ["Si", "Si"],
-                      [[0, 0, 0], [0.5, 0.5, 0.5]])
-        mod_s = modder.modify_object({'_atomic_set': {'lattice->a': 20}}, s)
-        self.assertEqual(mod_s.volume, 200)
+        o = MyObject(1)
+        self.assertEqual(o.b["a"], 1)
+        mod_o = modder.modify_object({'_set': {'b->a': 20}}, o)
+        self.assertEqual(mod_o.b["a"], 20)
+
+class MyObject():
+
+    def __init__(self, a):
+        self.b = {'a': a}
+
+    @property
+    def to_dict(self):
+        return {'b': {'a': self.b['a']}}
+
+    @staticmethod
+    def from_dict(d):
+        return MyObject(d["b"]["a"])
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
