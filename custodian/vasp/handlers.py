@@ -18,7 +18,6 @@ __date__ = "2/4/13"
 import os
 import shutil
 import json
-import collections
 
 from custodian.custodian import ErrorHandler
 from pymatgen.io.vaspio.vasp_input import Incar, Poscar, VaspInput
@@ -57,29 +56,32 @@ class VaspErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
-        actions = collections.defaultdict(list)
+        actions = []
         vi = VaspInput.from_directory(".")
         history = []
 
         if "tet" in self.errors:
-            actions["INCAR"].append({'_set': {'ISMEAR': 0}})
+            actions.append({'filename': 'INCAR',
+                            'action': {'_set': {'ISMEAR': 0}}})
         if "inv_rot_mat" in self.errors:
-            actions["INCAR"].append({'_set': {'SYMPREC': 1e-8}})
+            actions.append({'filename': 'INCAR',
+                            'action': {'_set': {'SYMPREC': 1e-8}}})
         if "brmix" in self.errors:
-            actions["INCAR"].append({'_set': {'IMIX': 1}})
+            actions.append({'filename': 'INCAR',
+                            'action': {'_set': {'IMIX': 1}}})
         if "subspacematrix" in self.errors:
-            actions.append({'_set': {'INCAR->LREAL': False}})
-        if "tetirr" in self.errors:
-            actions["KPOINTS"].append({'_set': {'style': "Gamma"}})
-        if "incorrect_shift" in self.errors:
-            actions["KPOINTS"].append({'_set': {'>style': "Gamma"}})
+            actions.append({'filename': 'INCAR',
+                            'action': {'_set': {'INCAR->LREAL': False}}})
+        if "tetirr" in self.errors or "incorrect_shift" in self.errors:
+            actions.append({'filename': 'KPOINTS',
+                            'action': {'_set': {'style': "Gamma"}}})
         if "mesh_symmetry" in self.errors:
             m = max(vi["KPOINTS"].kpts[0])
-            actions["KPOINTS"].append({'_set': {'kpoints': [[m] * 3]}})
+            actions.append({'filename': 'KPOINTS',
+                            'action': {'_set': {'kpoints': [[m] * 3]}}})
         m = Modder()
-        for k, a in actions.items():
-            for aa in a:
-                vi[k] = m.modify_object(aa, vi[k])
+        for a in actions:
+            vi[a["filename"]] = m.modify_object(a["action"], vi[a["filename"]])
         self.actions = actions
         if os.path.exists("corrections.json"):
             with open("corrections.json", "r") as f:
