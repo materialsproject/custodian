@@ -18,11 +18,11 @@ __date__ = "2/4/13"
 import os
 import shutil
 import json
+import collections
 
 from custodian.custodian import ErrorHandler
 from pymatgen.io.vaspio.vasp_input import Incar, Poscar, VaspInput
 from pymatgen.io.vaspio.vasp_output import Vasprun
-from custodian.ansible.actions import DictActions, FileActions
 from custodian.ansible.intepreter import Modder
 
 
@@ -57,35 +57,36 @@ class VaspErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
-        actions = []
+        actions = collections.defaultdict(list)
         vi = VaspInput.from_directory(".")
         history = []
 
         if "tet" in self.errors:
-            actions.append({'_set': {'INCAR->ISMEAR': 0}})
+            actions["INCAR"].append({'_set': {'ISMEAR': 0}})
         if "inv_rot_mat" in self.errors:
-            actions.append({'_set': {'INCAR->SYMPREC': 1e-8}})
+            actions["INCAR"].append({'_set': {'SYMPREC': 1e-8}})
         if "brmix" in self.errors:
-            actions.append({'_set': {'INCAR->IMIX': 1}})
+            actions["INCAR"].append({'_set': {'IMIX': 1}})
         if "subspacematrix" in self.errors:
             actions.append({'_set': {'INCAR->LREAL': False}})
         if "tetirr" in self.errors:
-            actions.append({'_set': {'KPOINTS->style': "Gamma"}})
+            actions["KPOINTS"].append({'_set': {'style': "Gamma"}})
         if "incorrect_shift" in self.errors:
-            actions.append({'_set': {'KPOINTS->style': "Gamma"}})
+            actions["KPOINTS"].append({'_set': {'>style': "Gamma"}})
         if "mesh_symmetry" in self.errors:
             m = max(vi["KPOINTS"].kpts[0])
-            actions.append({'_set': {'KPOINTS->kpoints': [[m] * 3]}})
+            actions["KPOINTS"].append({'_set': {'kpoints': [[m] * 3]}})
         m = Modder()
-        for a in actions:
-            vi = m.modify_object(a, vi)
+        for k, a in actions.items():
+            for aa in a:
+                vi[k] = m.modify_object(aa, vi[k])
         self.actions = actions
         if os.path.exists("corrections.json"):
             with open("corrections.json", "r") as f:
                 history = json.load(f)
         history.append({'errors': list(self.errors), 'actions': actions})
         with open("corrections.json", "w") as f:
-            json.dump(history, f)
+            json.dump(history, f, indent=4)
         vi.write_input(".")
 
     def __str__(self):
