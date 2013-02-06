@@ -19,7 +19,7 @@ import os
 import shutil
 
 from pymatgen.util.io_utils import zopen
-from pymatgen.io.vaspio.vasp_input import Incar, Poscar, VaspInput
+from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput
 from pymatgen.io.cifio import CifParser
 from pymatgen.io.vaspio_set import MITVaspInputSet
 
@@ -107,18 +107,20 @@ class VaspJob(Job):
                 raise RuntimeError("{} structures found. Unable to continue.")
             else:
                 self.default_vis.write_input(struct, ".")
+
         if self.backup:
             for f in VASP_INPUT_FILES:
                 shutil.copy(f, "{}.orig".format(f))
+
         if self.settings_override is not None:
             vi = VaspInput.from_directory(".")
             m = Modder([FileActions, DictActions])
             for a in self.settings_override:
                 if "dict" in a:
-                    vi[a["dict"]] = m.modify_object(a["actions"],
+                    vi[a["dict"]] = m.modify_object(a["action"],
                                                     vi[a["dict"]])
                 elif "filename" in a:
-                    m.modify(a["actions"], a["filename"])
+                    m.modify(a["action"], a["filename"])
             vi.write_input(".")
 
     def run(self):
@@ -132,45 +134,13 @@ class VaspJob(Job):
                     shutil.move(f, "{}{}".format(f, self.suffix))
                 elif self.suffix != "":
                     shutil.copy(f, "{}{}".format(f, self.suffix))
+
         if self.gzipped:
             gzip_directory(".")
 
     @property
     def name(self):
         return "Vasp Job"
-
-
-class SecondRelaxationVaspJob(VaspJob):
-    """
-    Second relaxation vasp job.
-    """
-
-    OUTPUT_FILES = ['DOSCAR', 'INCAR', 'KPOINTS', 'POSCAR', 'PROCAR',
-                    'vasprun.xml', 'CHGCAR', 'CHG', 'EIGENVAL', 'OSZICAR',
-                    'WAVECAR', 'CONTCAR', 'IBZKPT', 'OUTCAR', 'vasp.out']
-
-    def setup(self):
-        for f in SecondRelaxationVaspJob.OUTPUT_FILES:
-            if os.path.exists(f):
-                shutil.copy(f, "{}.relax1".format(f))
-        shutil.copy("CONTCAR", "POSCAR")
-        incar = Incar.from_file("INCAR")
-        incar['ISTART'] = 1
-        incar.write_file("INCAR")
-
-    def postprocess(self):
-        for f in SecondRelaxationVaspJob.OUTPUT_FILES:
-            if os.path.exists(f):
-                shutil.move(f, "{}.relax2".format(f))
-        for f in os.listdir("."):
-            if not f.endswith("gz"):
-                with zopen(f, 'rb') as f_in, zopen('{}.gz'.format(f), 'wb') as f_out:
-                    f_out.writelines(f_in)
-                os.remove(f)
-
-    @property
-    def name(self):
-        return "Second Relaxation Vasp Job"
 
 
 def gzip_directory(path):
