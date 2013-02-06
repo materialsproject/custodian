@@ -33,12 +33,16 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h.check()
         h.correct()
         self.assertEqual(h.errors, set(['tet']))
-        self.assertEqual(h.actions, [{'_set': {'INCAR->ISMEAR': 0}}])
+        self.assertEqual(h.actions,
+                         [{'action': {'_set': {'ISMEAR': 0}},
+                           'filename': 'INCAR'}])
         h = VaspErrorHandler("vasp.classrotmat")
         h.check()
         h.correct()
         self.assertEqual(h.errors, set(['mesh_symmetry']))
-        self.assertEqual(h.actions, [{'_set': {'KPOINTS->kpoints': [[8, 8, 8]]}}])
+        self.assertEqual(h.actions,
+                         [{'action': {'_set': {'kpoints': [[8, 8, 8]]}},
+                           'filename': 'KPOINTS'}])
         os.remove("corrections.json")
 
 if __name__ == "__main__":
