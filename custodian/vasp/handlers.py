@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 """
-TODO: Change the module doc.
+This module implements specific error handlers for VASP runs. These handlers
+tries to detect common errors in vasp runs and attempt to fix them on the fly
+by modifying the input files.
 """
 
 from __future__ import division
@@ -133,11 +135,6 @@ class PoscarErrorHandler(ErrorHandler):
 
 
 """
-Aflow Error 5 (classrotmat)
-
-grep : "Reciprocal lattice and k-lattice belong"
-fix : SYMPREC = 1E-10, KPOINTS (equilize mesh)
-
 Aflow Error 9 (davidson)
 
 grep : "WARNING: Sub-Space-Matrix is not hermitian in DAV"

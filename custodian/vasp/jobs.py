@@ -32,13 +32,16 @@ class BasicVaspJob(Job):
     conceivably can be a complex processing of inputs etc. with initialization.
     """
 
-    def __init__(self, default_vasp_input_set=MITVaspInputSet()):
+    def __init__(self, output_file="vasp.out",
+                 default_vasp_input_set=MITVaspInputSet()):
+        self.output_file = output_file
         self.default_vis = default_vasp_input_set
 
     def setup(self):
+        input_files = set(["INCAR", "POSCAR", "POTCAR", "KPOINTS"])
         files = os.listdir(".")
         num_structures = 0
-        if not set(files).issuperset(set(["INCAR", "POSCAR", "POTCAR", "KPOINTS"])):
+        if not set(files).issuperset(input_files):
             for f in files:
                 if f.startswith("POSCAR") or f.startswith("CONTCAR"):
                     poscar = Poscar.from_file(f)
@@ -55,9 +58,8 @@ class BasicVaspJob(Job):
 
     def run(self):
         args = ["mpirun", "/share/apps/bin/pvasp.5.2.11"]
-        output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
-        with open("vasp.out", 'w') as f:
-            f.write(output)
+        with open(self.output_file, 'w') as f:
+            subprocess.call(args, stdout=f)
 
     def postprocess(self):
         pass
