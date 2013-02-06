@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-TODO: Change the module doc.
+This module implements basic kinds of jobs for VASP runs.
 """
 
 from __future__ import division
@@ -28,12 +28,25 @@ from custodian.custodian import Job
 
 class BasicVaspJob(Job):
     """
-    Very basic vasp job. Just runs whatever is in the directory. But
+    A basic vasp job. Just runs whatever is in the directory. But
     conceivably can be a complex processing of inputs etc. with initialization.
     """
 
     def __init__(self, output_file="vasp.out",
                  default_vasp_input_set=MITVaspInputSet()):
+        """
+        Args:
+            output_file:
+                Name of file to direct standard out to. Defaults to vasp.out.
+            default_vasp_input_set:
+                Species the default input set to use for directories that do
+                not contain full set of VASP input files. For example,
+                if a directory contains only a POSCAR or a cif,
+                the vasp input set will be used to generate the necessary
+                input files for the run. If the directory already
+                contain a full set of VASP input files,
+                this input is ignored. Defaults to the MITVaspInputSet.
+        """
         self.output_file = output_file
         self.default_vis = default_vasp_input_set
 
@@ -98,5 +111,4 @@ class SecondRelaxationVaspJob(BasicVaspJob):
 
     @property
     def name(self):
-        return "Second relaxation Vasp Job"
-
+        return "Second Relaxation Vasp Job"
