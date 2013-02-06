@@ -70,9 +70,10 @@ is as follows::
 
     from custodian.custodian import Custodian
     from custodian.vasp.handlers import VaspErrorHandler, UnconvergedErrorHandler
-    from custodian.vasp.jobs import BasicVaspJob, SecondRelaxationVaspJob
+    from custodian.vasp.jobs import VaspJob
 
-    handlers = [VaspErrorHandler(), UnconvergedErrorHandler(), PoscarErrorHandler()]
-    jobs = [BasicVaspJob(), SecondRelaxationVaspJob()]
+    handlers = [VaspErrorHandler(), UnconvergedErrorHandler(),
+                PoscarErrorHandler()]
+    jobs = VaspJob.aflow_style_run(["mpirun", "/share/apps/bin/pvasp.5.2.11"])
     c = Custodian(handlers, jobs, max_errors=10)
     c.run()
