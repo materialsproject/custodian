@@ -27,7 +27,8 @@ def aflow_run():
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
     handlers = [VaspErrorHandler(), UnconvergedErrorHandler(),
                 PoscarErrorHandler()]
-    jobs = [BasicVaspJob(), SecondRelaxationVaspJob()]
+    vasp_command = ["mpirun", "/share/apps/bin/pvasp.5.2.11"]
+    jobs = [BasicVaspJob(vasp_command), SecondRelaxationVaspJob(vasp_command)]
     c = Custodian(handlers, jobs, max_errors=10)
     c.run()
 

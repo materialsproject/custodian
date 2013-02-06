@@ -32,10 +32,14 @@ class BasicVaspJob(Job):
     conceivably can be a complex processing of inputs etc. with initialization.
     """
 
-    def __init__(self, output_file="vasp.out",
+    def __init__(self, vasp_command, output_file="vasp.out",
                  default_vasp_input_set=MITVaspInputSet()):
         """
         Args:
+            vasp_command:
+                Command to run vasp as a list of args. For example,
+                if you are using mpirun, it can be something like
+                ["mpirun", "pvasp.5.2.11"]
             output_file:
                 Name of file to direct standard out to. Defaults to vasp.out.
             default_vasp_input_set:
@@ -47,6 +51,7 @@ class BasicVaspJob(Job):
                 contain a full set of VASP input files,
                 this input is ignored. Defaults to the MITVaspInputSet.
         """
+        self.vasp_command = vasp_command
         self.output_file = output_file
         self.default_vis = default_vasp_input_set
 
@@ -70,9 +75,8 @@ class BasicVaspJob(Job):
                 self.default_vis.write_input(struct, ".")
 
     def run(self):
-        args = ["mpirun", "/share/apps/bin/pvasp.5.2.11"]
         with open(self.output_file, 'w') as f:
-            subprocess.call(args, stdout=f)
+            subprocess.call(self.vasp_command, stdout=f)
 
     def postprocess(self):
         pass
@@ -84,8 +88,7 @@ class BasicVaspJob(Job):
 
 class SecondRelaxationVaspJob(BasicVaspJob):
     """
-    Very basic vasp job. Just runs whatever is in the directory. But
-    conceivably can be a complex processing of inputs etc. with initialization.
+    Second relaxation vasp job.
     """
 
     OUTPUT_FILES = ['DOSCAR', 'INCAR', 'KPOINTS', 'POSCAR', 'PROCAR',
@@ -94,7 +97,8 @@ class SecondRelaxationVaspJob(BasicVaspJob):
 
     def setup(self):
         for f in SecondRelaxationVaspJob.OUTPUT_FILES:
-            shutil.copy(f, "{}.relax1".format(f))
+            if os.path.exists(f):
+                shutil.copy(f, "{}.relax1".format(f))
         shutil.copy("CONTCAR", "POSCAR")
         incar = Incar.from_file("INCAR")
         incar['ISTART'] = 1
@@ -102,7 +106,8 @@ class SecondRelaxationVaspJob(BasicVaspJob):
 
     def postprocess(self):
         for f in SecondRelaxationVaspJob.OUTPUT_FILES:
-            shutil.copy(f, "{}.relax2".format(f))
+            if os.path.exists(f):
+                shutil.copy(f, "{}.relax2".format(f))
         for f in os.listdir("."):
             if not f.endswith("gz"):
                 with zopen(f, 'rb') as f_in, zopen('{}.gz'.format(f), 'wb') as f_out:
