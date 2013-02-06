@@ -61,27 +61,27 @@ class VaspErrorHandler(ErrorHandler):
         history = []
 
         if "tet" in self.errors:
-            actions.append({'filename': 'INCAR',
+            actions.append({'dict': 'INCAR',
                             'action': {'_set': {'ISMEAR': 0}}})
         if "inv_rot_mat" in self.errors:
-            actions.append({'filename': 'INCAR',
+            actions.append({'dict': 'INCAR',
                             'action': {'_set': {'SYMPREC': 1e-8}}})
         if "brmix" in self.errors:
-            actions.append({'filename': 'INCAR',
+            actions.append({'dict': 'INCAR',
                             'action': {'_set': {'IMIX': 1}}})
         if "subspacematrix" in self.errors:
-            actions.append({'filename': 'INCAR',
+            actions.append({'dict': 'INCAR',
                             'action': {'_set': {'INCAR->LREAL': False}}})
         if "tetirr" in self.errors or "incorrect_shift" in self.errors:
-            actions.append({'filename': 'KPOINTS',
+            actions.append({'dict': 'KPOINTS',
                             'action': {'_set': {'style': "Gamma"}}})
         if "mesh_symmetry" in self.errors:
             m = max(vi["KPOINTS"].kpts[0])
-            actions.append({'filename': 'KPOINTS',
+            actions.append({'dict': 'KPOINTS',
                             'action': {'_set': {'kpoints': [[m] * 3]}}})
         m = Modder()
         for a in actions:
-            vi[a["filename"]] = m.modify_object(a["action"], vi[a["filename"]])
+            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
         self.actions = actions
         if os.path.exists("corrections.json"):
             with open("corrections.json", "r") as f:

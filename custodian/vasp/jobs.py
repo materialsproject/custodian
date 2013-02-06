@@ -19,21 +19,32 @@ import os
 import shutil
 
 from pymatgen.util.io_utils import zopen
-from pymatgen.io.vaspio.vasp_input import Incar, Poscar
+from pymatgen.io.vaspio.vasp_input import Incar, Poscar, VaspInput
 from pymatgen.io.cifio import CifParser
 from pymatgen.io.vaspio_set import MITVaspInputSet
 
+from custodian.ansible.intepreter import Modder
+from custodian.ansible.actions import FileActions, DictActions
 from custodian.custodian import Job
 
 
-class BasicVaspJob(Job):
+VASP_INPUT_FILES = set(["INCAR", "POSCAR", "POTCAR", "KPOINTS"])
+
+VASP_OUTPUT_FILES = ['DOSCAR', 'INCAR', 'KPOINTS', 'POSCAR', 'PROCAR',
+                     'vasprun.xml', 'CHGCAR', 'CHG', 'EIGENVAL', 'OSZICAR',
+                     'WAVECAR', 'CONTCAR', 'IBZKPT', 'OUTCAR']
+
+
+class VaspJob(Job):
     """
     A basic vasp job. Just runs whatever is in the directory. But
     conceivably can be a complex processing of inputs etc. with initialization.
     """
 
-    def __init__(self, vasp_command, output_file="vasp.out",
-                 default_vasp_input_set=MITVaspInputSet()):
+    def __init__(self, vasp_command, output_file="vasp.out", suffix="",
+                 final=True, gzipped=False, backup=True,
+                 default_vasp_input_set=MITVaspInputSet(),
+                 settings_override=None):
         """
         Args:
             vasp_command:
@@ -42,6 +53,19 @@ class BasicVaspJob(Job):
                 ["mpirun", "pvasp.5.2.11"]
             output_file:
                 Name of file to direct standard out to. Defaults to vasp.out.
+            suffix:
+                A suffix to be appended to the final output. E.g.,
+                to rename all VASP output from say vasp.out to
+                vasp.out.relax1, provide ".relax1" as the suffix.
+            final:
+                Boolean indicating whether this is the final vasp job in a
+                series. Defaults to True.
+            backup:
+                Boolean whether to backup the initial input files. If True,
+                the INCAR, KPOINTS, POSCAR and POTCAR will be copied with a
+                ".orig" appended. Defaults to True.
+            gzipped:
+                Whether to gzip the final output. Defaults to False.
             default_vasp_input_set:
                 Species the default input set to use for directories that do
                 not contain full set of VASP input files. For example,
@@ -50,16 +74,26 @@ class BasicVaspJob(Job):
                 input files for the run. If the directory already
                 contain a full set of VASP input files,
                 this input is ignored. Defaults to the MITVaspInputSet.
+            settings_override:
+                An ansible style list of dict to override changes. For example,
+                to set ISTART=1 for subsequent runs and to copy the CONTCAR
+                to the POSCAR, you will provide
+                [{"dict": "INCAR", "action": {"_set": {"ISTART": 1}}},
+                 {"filename": "CONTCAR", "action": {"_file_copy": "POSCAR"}}]
         """
         self.vasp_command = vasp_command
         self.output_file = output_file
+        self.final = final
+        self.backup = backup
+        self.gzipped = gzipped
         self.default_vis = default_vasp_input_set
+        self.suffix = suffix
+        self.settings_override = settings_override
 
     def setup(self):
-        input_files = set(["INCAR", "POSCAR", "POTCAR", "KPOINTS"])
         files = os.listdir(".")
         num_structures = 0
-        if not set(files).issuperset(input_files):
+        if not set(files).issuperset(VASP_INPUT_FILES):
             for f in files:
                 if f.startswith("POSCAR") or f.startswith("CONTCAR"):
                     poscar = Poscar.from_file(f)
@@ -73,22 +107,40 @@ class BasicVaspJob(Job):
                 raise RuntimeError("{} structures found. Unable to continue.")
             else:
                 self.default_vis.write_input(struct, ".")
-        for f in input_files:
-            shutil.copy(f, "{}.orig".format(f))
+        if self.backup:
+            for f in VASP_INPUT_FILES:
+                shutil.copy(f, "{}.orig".format(f))
+        if self.settings_override is not None:
+            vi = VaspInput.from_directory(".")
+            m = Modder([FileActions, DictActions])
+            for a in self.settings_override:
+                if "dict" in a:
+                    vi[a["dict"]] = m.modify_object(a["actions"],
+                                                    vi[a["dict"]])
+                elif "filename" in a:
+                    m.modify(a["actions"], a["filename"])
+            vi.write_input(".")
 
     def run(self):
         with open(self.output_file, 'w') as f:
             subprocess.call(self.vasp_command, stdout=f)
 
     def postprocess(self):
-        pass
+        for f in VASP_OUTPUT_FILES + [self.output_file]:
+            if os.path.exists(f):
+                if self.final and self.suffix != "":
+                    shutil.move(f, "{}{}".format(f, self.suffix))
+                elif self.suffix != "":
+                    shutil.copy(f, "{}{}".format(f, self.suffix))
+        if self.gzipped:
+            gzip_directory(".")
 
     @property
     def name(self):
-        return "Basic Vasp Job"
+        return "Vasp Job"
 
 
-class SecondRelaxationVaspJob(BasicVaspJob):
+class SecondRelaxationVaspJob(VaspJob):
     """
     Second relaxation vasp job.
     """
@@ -119,3 +171,11 @@ class SecondRelaxationVaspJob(BasicVaspJob):
     @property
     def name(self):
         return "Second Relaxation Vasp Job"
+
+
+def gzip_directory(path):
+    for f in os.listdir(path):
+        if not f.endswith("gz"):
+            with zopen(f, 'rb') as f_in, zopen('{}.gz'.format(f), 'wb') as f_out:
+                f_out.writelines(f_in)
+            os.remove(f)
