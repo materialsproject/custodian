@@ -53,13 +53,14 @@ class Custodian(object):
     def run(self):
         total_errors = 0
         for i, job in enumerate(self.jobs):
-            attempt = 0
-            while total_errors < self.max_errors:
+            error = False
+            for attempt in xrange(self.max_errors):
                 logging.info("Starting job no. {} ({}) attempt no. {}. Errors"
                              " thus far = {}.".format(i + 1, job.name,
                                                       attempt + 1,
                                                       total_errors))
-                job.setup()
+                if not error:
+                    job.setup()
                 job.run()
                 error = False
                 for h in self.handlers:
@@ -68,11 +69,10 @@ class Custodian(object):
                         self.backup(i, attempt)
                         h.correct()
                         total_errors += 1
-                        attempt += 1
                         error = True
                         break
-                job.postprocess()
                 if not error:
+                    job.postprocess()
                     break
         if total_errors == self.max_errors:
             logging.info("Max {} errors reached. Exited".format(total_errors))
@@ -85,7 +85,8 @@ class Custodian(object):
         logging.info("Backing up run to {}.".format(filename))
         tar = tarfile.open(filename, "w:gz")
         for f in os.listdir("."):
-            tar.add(f)
+            if not (f.startswith("job_") and f.endswith(".tar.gz")):
+                tar.add(f)
         tar.close()
 
 

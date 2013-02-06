@@ -90,13 +90,11 @@ class SecondRelaxationVaspJob(BasicVaspJob):
 
     OUTPUT_FILES = ['DOSCAR', 'INCAR', 'KPOINTS', 'POSCAR', 'PROCAR',
                     'vasprun.xml', 'CHGCAR', 'CHG', 'EIGENVAL', 'OSZICAR',
-                    'WAVECAR', 'CONTCAR', 'IBZKPT', 'OUTCAR', 'vasp.out',
-                    'corrections.json']
+                    'WAVECAR', 'CONTCAR', 'IBZKPT', 'OUTCAR', 'vasp.out']
 
     def setup(self):
         for f in SecondRelaxationVaspJob.OUTPUT_FILES:
-            if os.path.exists(f):
-                shutil.copy(f, "{}.relax1".format(f))
+            shutil.copy(f, "{}.relax1".format(f))
         shutil.copy("CONTCAR", "POSCAR")
         incar = Incar.from_file("INCAR")
         incar['ISTART'] = 1
@@ -104,8 +102,7 @@ class SecondRelaxationVaspJob(BasicVaspJob):
 
     def postprocess(self):
         for f in SecondRelaxationVaspJob.OUTPUT_FILES:
-            if os.path.exists(f):
-                shutil.copy(f, "{}.relax2".format(f))
+            shutil.copy(f, "{}.relax2".format(f))
         for f in os.listdir("."):
             if not f.endswith("gz"):
                 with zopen(f, 'rb') as f_in, zopen('{}.gz'.format(f), 'wb') as f_out:
