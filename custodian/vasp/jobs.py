@@ -84,7 +84,7 @@ class VaspJob(Job):
                 to the POSCAR, you will provide
                 [{"dict": "INCAR", "action": {"_set": {"ISTART": 1}}},
                  {"filename": "CONTCAR",
-                  "action": {"_file_copy": {'dest': "POSCAR"}}}]
+                  "action": {"_file_copy": {"dest": "POSCAR"}}}]
         """
         self.vasp_command = vasp_command
         self.output_file = output_file
