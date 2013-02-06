@@ -73,6 +73,8 @@ class BasicVaspJob(Job):
                 raise RuntimeError("{} structures found. Unable to continue.")
             else:
                 self.default_vis.write_input(struct, ".")
+        for f in input_files:
+            shutil.copy(f, "{}.orig".format(f))
 
     def run(self):
         with open(self.output_file, 'w') as f:
@@ -107,7 +109,7 @@ class SecondRelaxationVaspJob(BasicVaspJob):
     def postprocess(self):
         for f in SecondRelaxationVaspJob.OUTPUT_FILES:
             if os.path.exists(f):
-                shutil.copy(f, "{}.relax2".format(f))
+                shutil.move(f, "{}.relax2".format(f))
         for f in os.listdir("."):
             if not f.endswith("gz"):
                 with zopen(f, 'rb') as f_in, zopen('{}.gz'.format(f), 'wb') as f_out:
