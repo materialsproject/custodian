@@ -66,9 +66,9 @@ electronic structure calculations based on the Vienna Ab Initio Simulation
 Package (VASP) are implemented in the custodian.vasp package.
 
 A simple example of a script using Custodian to run a two-relaxation VASP job
-is as follows:
+is as follows::
 
-.. code-block:: pycon
+.. code-block:: python
 
     from custodian.custodian import Custodian
     from custodian.vasp.handlers import VaspErrorHandler, UnconvergedErrorHandler
