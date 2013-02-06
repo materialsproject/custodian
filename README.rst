@@ -55,3 +55,24 @@ Optional libraries that are required if you need certain features:
 1. pymatgen 2.5+: To use the plugin for VASP.
 2. nose - For complete unittesting.
 
+Basic usage
+===========
+
+The main class in the workflow is known as Custodian, which manages a series
+of jobs with a list of error handlers. To use custodian, you need to implement
+concrete implementation of the abstract base classes custodian.custodian.Job
+and custodian.custodian.ErrorHandler. Specific examples of this for
+electronic structure calculations based on the Vienna Ab Initio Simulation
+Package (VASP) are implemented in the custodian.vasp package.
+
+A simple example of a script using Custodian to run a two-relaxation VASP job
+is as follows::
+
+    from custodian.custodian import Custodian
+    from custodian.vasp.handlers import VaspErrorHandler, UnconvergedErrorHandler
+    from custodian.vasp.jobs import BasicVaspJob, SecondRelaxationVaspJob
+
+    handlers = [VaspErrorHandler(), UnconvergedErrorHandler(), PoscarErrorHandler()]
+    jobs = [BasicVaspJob(), SecondRelaxationVaspJob()]
+    c = Custodian(handlers, jobs, max_errors=10)
+    c.run()

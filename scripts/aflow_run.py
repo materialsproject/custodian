@@ -16,7 +16,7 @@ __date__ = "2/4/13"
 import logging
 
 from custodian.custodian import Custodian
-from custodian.vasp.handlers import VaspErrorHandler, UnconvergedErrorHandler
+from custodian.vasp.handlers import VaspErrorHandler, UnconvergedErrorHandler, PoscarErrorHandler
 from custodian.vasp.jobs import BasicVaspJob, SecondRelaxationVaspJob
 
 
@@ -25,7 +25,8 @@ def aflow_run():
 
     FORMAT = '%(asctime)s %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
-    handlers = [VaspErrorHandler(), UnconvergedErrorHandler()]
+    handlers = [VaspErrorHandler(), UnconvergedErrorHandler(),
+                PoscarErrorHandler()]
     jobs = [BasicVaspJob(), SecondRelaxationVaspJob()]
     c = Custodian(handlers, jobs, max_errors=10)
     c.run()
