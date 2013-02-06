@@ -26,14 +26,7 @@ def aflow_run():
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
     handlers = [VaspErrorHandler(), UnconvergedErrorHandler(),
                 PoscarErrorHandler()]
-    vasp_command = ["mpirun", "/share/apps/bin/pvasp.5.2.11"]
-    jobs = [VaspJob(vasp_command, final=False, suffix=".relax1"),
-            VaspJob(vasp_command, final=True, backup=False, suffix=".relax2",
-                    gzipped=True,
-                    settings_override=[{"dict": "INCAR",
-                                        "action": {"_set": {"ISTART": 1}}},
-                                       {"filename": "CONTCAR",
-                                        "action": {"_file_copy": "POSCAR"}}])]
+    jobs = VaspJob.aflow_style_run(["mpirun", "/share/apps/bin/pvasp.5.2.11"])
     c = Custodian(handlers, jobs, max_errors=10)
     c.run()
 

@@ -46,6 +46,10 @@ class VaspJob(Job):
                  default_vasp_input_set=MITVaspInputSet(),
                  settings_override=None):
         """
+        This constructor is necessarily complex due to the need for
+        flexibility. For standard kinds of runs, it's often better to use one
+        of the static constructors.
+
         Args:
             vasp_command:
                 Command to run vasp as a list of args. For example,
@@ -142,10 +146,41 @@ class VaspJob(Job):
     def name(self):
         return "Vasp Job"
 
+    @staticmethod
+    def aflow_style_run(vasp_command):
+        """
+        Returns a list of two jobs corresponding to an AFLOW style run.
+
+        Args:
+            vasp_command:
+                Command to run vasp as a list of args. For example,
+                if you are using mpirun, it can be something like
+                ["mpirun", "pvasp.5.2.11"]
+
+        Returns:
+            List of two jobs corresponding to an AFLOW style run.
+        """
+        return [VaspJob(vasp_command, final=False, suffix=".relax1"),
+                VaspJob(
+                    vasp_command, final=True, backup=False,
+                    suffix=".relax2", gzipped=True,
+                    settings_override=[{"dict": "INCAR",
+                                        "action": {"_set": {"ISTART": 1}}},
+                                       {"filename": "CONTCAR",
+                                        "action": {"_file_copy": "POSCAR"}}])]
+
 
 def gzip_directory(path):
+    """
+    Gzips all files in a directory.
+
+    Args:
+        path:
+            Path to directory.
+    """
     for f in os.listdir(path):
         if not f.endswith("gz"):
-            with zopen(f, 'rb') as f_in, zopen('{}.gz'.format(f), 'wb') as f_out:
+            with zopen(f, 'rb') as f_in, \
+                    zopen('{}.gz'.format(f), 'wb') as f_out:
                 f_out.writelines(f_in)
             os.remove(f)
