@@ -83,7 +83,8 @@ class VaspJob(Job):
                 to set ISTART=1 for subsequent runs and to copy the CONTCAR
                 to the POSCAR, you will provide
                 [{"dict": "INCAR", "action": {"_set": {"ISTART": 1}}},
-                 {"filename": "CONTCAR", "action": {"_file_copy": "POSCAR"}}]
+                 {"filename": "CONTCAR",
+                  "action": {"_file_copy": {'dest': "POSCAR"}}}]
         """
         self.vasp_command = vasp_command
         self.output_file = output_file
@@ -167,7 +168,9 @@ class VaspJob(Job):
                     settings_override=[{"dict": "INCAR",
                                         "action": {"_set": {"ISTART": 1}}},
                                        {"filename": "CONTCAR",
-                                        "action": {"_file_copy": "POSCAR"}}])]
+                                        "action":
+                                            {"_file_copy":
+                                                 {"dest": "POSCAR"}}}])]
 
 
 def gzip_directory(path):
