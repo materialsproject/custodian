@@ -16,5 +16,5 @@ notifications:
   email:
     recipients:
       - shyuep@gmail.com
-    on_success: never
-    on_failure: never
+    on_success: change
+    on_failure: always
