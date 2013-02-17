@@ -21,6 +21,8 @@ import json
 
 from custodian.custodian import ErrorHandler
 from pymatgen.io.vaspio.vasp_input import Incar, Poscar, VaspInput
+from pymatgen.transformations.standard_transformations import \
+    PerturbStructureTransformation
 from pymatgen.io.vaspio.vasp_output import Vasprun
 from custodian.ansible.intepreter import Modder
 
@@ -32,7 +34,8 @@ class VaspErrorHandler(ErrorHandler):
                 "Fatal error detecting k-mesh",
                 "Fatal error: unable to match k-point",
                 "Routine TETIRR needs special values"],
-        "inv_rot_mat": ["inverse of rotation matrix was not found (increase SYMPREC)"],
+        "inv_rot_mat": ["inverse of rotation matrix was not found (increase "
+                        "SYMPREC)"],
         "brmix": ["BRMIX: very serious problems"],
         "subspacematrix": ["WARNING: Sub-Space-Matrix is not hermitian in DAV"],
         "tetirr": ["Routine TETIRR needs special values"],
@@ -121,13 +124,13 @@ class PoscarErrorHandler(ErrorHandler):
             output = f.read()
             for line in output.split("\n"):
                 l = line.strip()
-                if l.startswith("Found some non-integer element in rotation matrix"):
+                if l.startswith("Found some non-integer element in rotation "
+                                "matrix"):
                     return True
         return False
 
     def correct(self):
         #TODO: Add transformation applied to transformation.json if exists.
-        from pymatgen.transformations.standard_transformations import PerturbStructureTransformation
         shutil.copy("POSCAR", "POSCAR.orig")
         p = Poscar.from_file("POSCAR")
         s = p.struct
@@ -135,23 +138,3 @@ class PoscarErrorHandler(ErrorHandler):
         new_s = trans.apply_transformation(s)
         p = Poscar(new_s)
         p.write_file("POSCAR")
-
-
-"""
-Aflow Error 9 (davidson)
-
-grep : "WARNING: Sub-Space-Matrix is not hermitian in DAV"
-fix : INCAR -> remove ALGO, IMIX, set ALGO=VERY_FAST
-
-Aflow Error 10 (nbands)
-
-grep : "BRMIX: very serious problems"
-fix :
-notes:
-aflow tries to get NBANDS from the OUTCAR
--> nbands=atoi(word.substr(word.find("NBANDS")+7).c_str());
-aflow then tries to get NBANDS from INCAR
-Then it increases NBANDS via
-nbands=nbands+5+nbands/5
-
-"""

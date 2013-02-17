@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-'''
+"""
 This module defines various classes of supported actions. All actions are
 implemented as static methods, but are defined using classes (as opposed to
 modules) so that a set of well-defined actions can be namespaced easily.
-'''
+"""
 
 from __future__ import division
 
@@ -31,7 +31,7 @@ def get_nested_dict(input_dict, key):
         if tok not in current and i < n - 1:
             current[tok] = {}
         elif i == n - 1:
-            return (current, toks[-1])
+            return current, toks[-1]
         current = current[tok]
 
 
