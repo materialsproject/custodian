@@ -96,7 +96,9 @@ class VaspErrorHandler(ErrorHandler):
         history.append({'errors': list(self.errors), 'actions': actions})
         with open("corrections.json", "w") as f:
             json.dump(history, f, indent=4)
-        vi.write_input(".")
+        vi["INCAR"].write_file("INCAR")
+        vi["POSCAR"].write_file("POSCAR")
+        vi["KPOINTS"].write_file("KPOINTS")
 
     def __str__(self):
         return "Vasp error"
