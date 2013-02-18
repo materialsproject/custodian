@@ -126,7 +126,9 @@ class VaspJob(Job):
                                                     vi[a["dict"]])
                 elif "filename" in a:
                     m.modify(a["action"], a["filename"])
-            vi.write_input(".")
+            vi["INCAR"].write_file("INCAR")
+            vi["POSCAR"].write_file("POSCAR")
+            vi["KPOINTS"].write_file("KPOINTS")
 
     def run(self):
         with open(self.output_file, 'w') as f:
