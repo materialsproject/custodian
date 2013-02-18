@@ -106,9 +106,12 @@ class UnconvergedErrorHandler(ErrorHandler):
     #todo: Make this work using ansible.
 
     def check(self):
-        v = Vasprun('vasprun.xml')
-        if not v.converged:
-            return True
+        try:
+            v = Vasprun('vasprun.xml')
+            if not v.converged:
+                return True
+        except:
+            return False
         return False
 
     def correct(self):
