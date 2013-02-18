@@ -16,8 +16,6 @@ __email__ = "shyue@mit.edu"
 __date__ = "May 2, 2012"
 
 import logging
-import os
-import tarfile
 import abc
 
 
@@ -66,7 +64,6 @@ class Custodian(object):
                 for h in self.handlers:
                     if h.check():
                         logging.error(str(h))
-                        self.backup(i, attempt)
                         h.correct()
                         total_errors += 1
                         error = True
@@ -79,15 +76,6 @@ class Custodian(object):
         else:
             logging.info("Run completed")
 
-    def backup(self, job_no, attempt_no):
-        filename = "job_{}_attempt_{}.tar.gz".format(job_no + 1,
-                                                     attempt_no + 1)
-        logging.info("Backing up run to {}.".format(filename))
-        tar = tarfile.open(filename, "w:gz")
-        for f in os.listdir("."):
-            if not (f.startswith("job_") and f.endswith(".tar.gz")):
-                tar.add(f)
-        tar.close()
 
 
 class ErrorHandler(object):

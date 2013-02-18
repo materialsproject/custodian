@@ -18,6 +18,9 @@ __date__ = "2/4/13"
 import os
 import shutil
 import json
+import logging
+import tarfile
+import glob
 
 from custodian.custodian import ErrorHandler
 from pymatgen.io.vaspio.vasp_input import Incar, Poscar, VaspInput
@@ -59,6 +62,7 @@ class VaspErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
+        backup()
         actions = []
         vi = VaspInput.from_directory(".")
         history = []
@@ -108,6 +112,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
+        backup()
         shutil.copy("CONTCAR", "POSCAR")
         incar = Incar.from_file("INCAR")
         incar['ISTART'] = 1
@@ -131,6 +136,7 @@ class PoscarErrorHandler(ErrorHandler):
 
     def correct(self):
         #TODO: Add transformation applied to transformation.json if exists.
+        backup()
         shutil.copy("POSCAR", "POSCAR.orig")
         p = Poscar.from_file("POSCAR")
         s = p.struct
@@ -138,3 +144,17 @@ class PoscarErrorHandler(ErrorHandler):
         new_s = trans.apply_transformation(s)
         p = Poscar(new_s)
         p.write_file("POSCAR")
+
+
+def backup():
+    error_num = 0
+    for f in glob.glob("error.*.tar.gz"):
+        toks = f.split(".")
+        error_num = max(error_num, int(toks[1]))
+    filename = "error.{}.tar.gz".format(error_num + 1)
+    logging.info("Backing up run to {}.".format(filename))
+    tar = tarfile.open(filename, "w:gz")
+    for f in os.listdir("."):
+        if not (f.startswith("error") and f.endswith(".tar.gz")):
+            tar.add(f)
+    tar.close()
