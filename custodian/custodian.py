@@ -77,7 +77,6 @@ class Custodian(object):
             logging.info("Run completed")
 
 
-
 class ErrorHandler(object):
     """
     Abstract base class defining the interface for an ErrorHandler.
@@ -138,5 +137,3 @@ class Job(object):
         A nice string name for the job.
         """
         pass
-
-
