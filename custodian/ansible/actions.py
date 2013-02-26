@@ -167,7 +167,7 @@ class FileActions(object):
                              "'content'.")
         for k, v in settings.items():
             if k == "content":
-                with open(filename, 'wb') as f:
+                with open(filename, 'w') as f:
                     f.write(v)
 
     @staticmethod
