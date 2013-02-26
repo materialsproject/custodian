@@ -20,9 +20,6 @@ import os
 import shutil
 
 
-from pymatgen import zopen
-
-
 def get_nested_dict(input_dict, key):
     current = input_dict
     toks = key.split("->")
@@ -170,7 +167,7 @@ class FileActions(object):
                              "'content'.")
         for k, v in settings.items():
             if k == "content":
-                with zopen(filename, 'wb') as f:
+                with open(filename, 'wb') as f:
                     f.write(v)
 
     @staticmethod
