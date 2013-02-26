@@ -44,6 +44,8 @@ class VaspErrorHandlerTest(unittest.TestCase):
                          [{'action': {'_set': {'kpoints': [[8, 8, 8]]}},
                            'dict': 'KPOINTS'}])
         os.remove("corrections.json")
+        os.remove(os.path.join(test_dir, "error.1.tar.gz"))
+        os.remove(os.path.join(test_dir, "error.2.tar.gz"))
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
