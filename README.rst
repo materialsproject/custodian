@@ -32,7 +32,7 @@ or::
     pip install custodian
 
 Some plugins (e.g., vasp management) require additional setup (please see
-`custodian's documentation <http://packages.python.org/custodian>`_).
+`pymatgen's documentation <http://pythonhosted.org/pymatgen/>`_).
 
 Developmental version
 ---------------------

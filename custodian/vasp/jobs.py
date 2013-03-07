@@ -167,12 +167,11 @@ class VaspJob(Job):
                 VaspJob(
                     vasp_command, final=True, backup=False,
                     suffix=".relax2", gzipped=True,
-                    settings_override=[{"dict": "INCAR",
-                                        "action": {"_set": {"ISTART": 1}}},
-                                       {"filename": "CONTCAR",
-                                        "action":
-                                            {"_file_copy":
-                                                 {"dest": "POSCAR"}}}])]
+                    settings_override=[
+                        {"dict": "INCAR",
+                         "action": {"_set": {"ISTART": 1}}},
+                        {"filename": "CONTCAR",
+                         "action": {"_file_copy": {"dest": "POSCAR"}}}])]
 
 
 def gzip_directory(path):
