@@ -21,13 +21,12 @@ from custodian.vasp.handlers import VaspErrorHandler, \
 from custodian.vasp.jobs import VaspJob
 
 
-def double_relax():
+def double_relax(args):
     FORMAT = '%(asctime)s %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
     handlers = [VaspErrorHandler(), UnconvergedErrorHandler(),
                 PoscarErrorHandler()]
-    jobs = VaspJob.double_relaxation_run(
-        ["mpirun", "/share/apps/bin/pvasp.5.2.11"])
+    jobs = VaspJob.double_relaxation_run(args.command)
     c = Custodian(handlers, jobs, max_errors=10)
     c.run()
 
