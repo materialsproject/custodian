@@ -150,9 +150,10 @@ class VaspJob(Job):
         return "Vasp Job"
 
     @staticmethod
-    def aflow_style_run(vasp_command):
+    def double_relaxation_run(vasp_command):
         """
-        Returns a list of two jobs corresponding to an AFLOW style run.
+        Returns a list of two jobs corresponding to an AFLOW style double
+        relaxation run.
 
         Args:
             vasp_command:
