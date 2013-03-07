@@ -26,7 +26,7 @@ def double_relax(args):
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
     handlers = [VaspErrorHandler(), UnconvergedErrorHandler(),
                 PoscarErrorHandler()]
-    jobs = VaspJob.double_relaxation_run(args.command)
+    jobs = VaspJob.double_relaxation_run([args.command])
     c = Custodian(handlers, jobs, max_errors=10)
     c.run()
 
