@@ -84,6 +84,6 @@ two-relaxation VASP job is as follows:
 
     handlers = [VaspErrorHandler(), UnconvergedErrorHandler(),
                 PoscarErrorHandler()]
-    jobs = VaspJob.aflow_style_run(["mpirun", "/share/apps/bin/pvasp.5.2.11"])
+    jobs = VaspJob.double_relaxation_run(args.command.split())
     c = Custodian(handlers, jobs, max_errors=10)
     c.run()
