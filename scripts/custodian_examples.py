@@ -15,7 +15,7 @@ __date__ = "2/17/13"
 
 import numpy as np
 
-from custodian import Job, ErrorHandler, Custodian
+from custodian.custodian import Job, ErrorHandler, Custodian
 
 total = 0
 initial = 0
