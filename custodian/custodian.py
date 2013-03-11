@@ -50,6 +50,13 @@ class Custodian(object):
         self.handlers = handlers
 
     def run(self):
+        """
+        Runs the job.
+
+        Returns:
+            All errors encountered as a list of list.
+            [[error_dicts for job 1], [error_dicts for job 2], ....]
+        """
         all_errors = []
         for i, job in enumerate(self.jobs):
             all_errors.append(list())
@@ -79,6 +86,7 @@ class Custodian(object):
                          .format(self.max_errors))
         else:
             logging.info("Run completed")
+        return all_errors
 
 
 class ErrorHandler(object):
