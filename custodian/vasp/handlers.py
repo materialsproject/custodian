@@ -90,7 +90,7 @@ class VaspErrorHandler(ErrorHandler):
         vi["INCAR"].write_file("INCAR")
         vi["POSCAR"].write_file("POSCAR")
         vi["KPOINTS"].write_file("KPOINTS")
-        return {"errors": self.errors, "actions": actions}
+        return {"errors": list(self.errors), "actions": actions}
 
     def __str__(self):
         return "Vasp error"
