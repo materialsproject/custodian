@@ -57,7 +57,7 @@ class Custodian(object):
                 logging.info(
                     "Starting job no. {} ({}) attempt no. {}. Errors thus far"
                     " = {}.".format(i + 1, job.name, attempt + 1,
-                                    len(all_errors)))
+                                    sum(map(len, all_errors))))
                 if not all_errors[-1]:
                     job.setup()
                 job.run()
@@ -74,7 +74,7 @@ class Custodian(object):
                     break
             with open("corrections.json", "w") as f:
                 json.dump(all_errors, f, indent=4)
-        if sum([len(e) for e in all_errors]) == self.max_errors:
+        if sum(map(len, all_errors)) == self.max_errors:
             logging.info("Max {} errors reached. Exited"
                          .format(self.max_errors))
         else:
