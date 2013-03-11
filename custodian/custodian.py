@@ -58,7 +58,7 @@ class Custodian(object):
                     "Starting job no. {} ({}) attempt no. {}. Errors thus far"
                     " = {}.".format(i + 1, job.name, attempt + 1,
                                     len(all_errors)))
-                if not error:
+                if not all_errors[-1]:
                     job.setup()
                 job.run()
                 error = False
