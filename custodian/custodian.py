@@ -65,8 +65,8 @@ class Custodian(object):
                 for h in self.handlers:
                     if h.check():
                         logging.error(str(h))
-                        actions = h.correct()
-                        all_errors[-1].append(actions)
+                        d = h.correct()
+                        all_errors[-1].append(d)
                         error = True
                         break
                 if not error:

@@ -31,19 +31,18 @@ class VaspErrorHandlerTest(unittest.TestCase):
         os.chdir(test_dir)
         h = VaspErrorHandler("vasp.teterror")
         h.check()
-        h.correct()
+        d = h.correct()
         self.assertEqual(h.errors, set(['tet']))
-        self.assertEqual(h.actions,
+        self.assertEqual(d["actions"],
                          [{'action': {'_set': {'ISMEAR': 0}},
                            'dict': 'INCAR'}])
         h = VaspErrorHandler("vasp.classrotmat")
         h.check()
-        h.correct()
+        d = h.correct()
         self.assertEqual(h.errors, set(['mesh_symmetry']))
-        self.assertEqual(h.actions,
+        self.assertEqual(d["actions"],
                          [{'action': {'_set': {'kpoints': [[8, 8, 8]]}},
                            'dict': 'KPOINTS'}])
-        os.remove("corrections.json")
         os.remove(os.path.join(test_dir, "error.1.tar.gz"))
         os.remove(os.path.join(test_dir, "error.2.tar.gz"))
 
