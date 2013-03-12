@@ -16,7 +16,7 @@ __email__ = "shyue@mit.edu"
 __date__ = "May 2, 2012"
 
 import logging
-import multiprocessing
+import subprocess
 import time
 import abc
 
