@@ -132,7 +132,7 @@ class VaspJob(Job):
 
     def run(self):
         with open(self.output_file, 'w') as f:
-            subprocess.call(self.vasp_command, stdout=f)
+            return subprocess.Popen(self.vasp_command, stdout=f)
 
     def postprocess(self):
         for f in VASP_OUTPUT_FILES + [self.output_file]:

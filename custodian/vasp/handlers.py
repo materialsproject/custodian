@@ -20,6 +20,7 @@ import shutil
 import json
 import logging
 import tarfile
+import time
 import glob
 
 from custodian.custodian import ErrorHandler
@@ -146,6 +147,37 @@ class PoscarErrorHandler(ErrorHandler):
         p = Poscar.from_file("POSCAR")
         s = p.struct
         trans = PerturbStructureTransformation(0.05)
+        new_s = trans.apply_transformation(s)
+        p = Poscar(new_s)
+        p.write_file("POSCAR")
+
+
+class FrozenJobErrorHandler(ErrorHandler):
+    
+    def __init__(self, output_file = 'vasp.out', 
+                 timeout = 3600):
+        '''
+        Detects an error when the output file has not been updated 
+        in timeout seconds. Perturbs structure and restarts
+        '''
+        self.output_file = output_file
+        self.timeout = timeout
+    
+    @property
+    def run_parallel(self):
+        return True
+    
+    def check(self):
+        st = os.stat(self.output_file)
+        if time.time() - st.ST_MTIME > self.timeout:
+            return True
+        
+    def correct(self):
+        backup()
+        shutil.copy("CONTCAR", "POSCAR")
+        p = Poscar.from_file("POSCAR")
+        s = p.struct
+        trans = PerturbStructureTransformation(0.01)
         new_s = trans.apply_transformation(s)
         p = Poscar(new_s)
         p.write_file("POSCAR")

@@ -16,6 +16,8 @@ __email__ = "shyue@mit.edu"
 __date__ = "May 2, 2012"
 
 import logging
+import multiprocessing
+import time
 import abc
 
 
@@ -47,6 +49,7 @@ class Custodian(object):
         self.max_errors = max_errors
         self.jobs = jobs
         self.handlers = handlers
+        self.parallel_handlers = filter(lambda x: x.run_parallel, handlers)
 
     def run(self):
         total_errors = 0
@@ -59,8 +62,29 @@ class Custodian(object):
                                                       total_errors))
                 if not error:
                     job.setup()
-                job.run()
+                
+                p = job.run()
                 error = False
+                
+                if isinstance(p, subprocess.Popen):
+                    if self.parallel_handlers:
+                        #checks that the process is still alive every 10s
+                        #checks for errors hourly
+                        n = 0
+                        while True:
+                            n += 1
+                            time.sleep(10)
+                            if p.poll():
+                                break
+                            if not n % 360 == 0:
+                                continue
+                            for h in self.parallel_handlers:
+                                if h.check():
+                                    p.terminate()
+                                    break
+                    else:
+                        p.wait()
+                
                 for h in self.handlers:
                     if h.check():
                         logging.error(str(h))
@@ -99,6 +123,14 @@ class ErrorHandler(object):
         error.
         """
         pass
+    
+    def run_parallel(self):
+        """
+        This property determines whether the error handler should be run parallel
+        to the job. If the handler notices an error, the job will be sent a 
+        termination signal.
+        """
+        return False
 
 
 class Job(object):
@@ -118,7 +150,8 @@ class Job(object):
     @abc.abstractmethod
     def run(self):
         """
-        This method perform the actual work for the job.
+        This method perform the actual work for the job. If parallel error checking
+        is desired, this must return a Popen process
         """
         pass
 
