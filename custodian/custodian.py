@@ -74,7 +74,7 @@ class Custodian(object):
                         while True:
                             n += 1
                             time.sleep(10)
-                            if p.poll():
+                            if p.poll() is not None:
                                 break
                             if not n % 360 == 0:
                                 continue
