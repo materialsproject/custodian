@@ -169,7 +169,7 @@ class FrozenJobErrorHandler(ErrorHandler):
     
     def check(self):
         st = os.stat(self.output_file)
-        if time.time() - st.ST_MTIME > self.timeout:
+        if time.time() - st.st_mtime > self.timeout:
             return True
         
     def correct(self):
