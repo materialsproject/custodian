@@ -19,6 +19,7 @@ import logging
 import subprocess
 import time
 import abc
+import json
 
 
 class Custodian(object):
@@ -52,15 +53,22 @@ class Custodian(object):
         self.parallel_handlers = filter(lambda x: x.run_parallel, handlers)
 
     def run(self):
-        total_errors = 0
+        """
+        Runs the job.
+
+        Returns:
+            All errors encountered as a list of list.
+            [[error_dicts for job 1], [error_dicts for job 2], ....]
+        """
+        all_errors = []
         for i, job in enumerate(self.jobs):
-            error = False
+            all_errors.append(list())
             for attempt in xrange(self.max_errors):
-                logging.info("Starting job no. {} ({}) attempt no. {}. Errors"
-                             " thus far = {}.".format(i + 1, job.name,
-                                                      attempt + 1,
-                                                      total_errors))
-                if not error:
+                logging.info(
+                    "Starting job no. {} ({}) attempt no. {}. Errors thus far"
+                    " = {}.".format(i + 1, job.name, attempt + 1,
+                                    sum(map(len, all_errors))))
+                if not all_errors[-1]:
                     job.setup()
                 
                 p = job.run()
@@ -88,17 +96,21 @@ class Custodian(object):
                 for h in self.handlers:
                     if h.check():
                         logging.error(str(h))
-                        h.correct()
-                        total_errors += 1
+                        d = h.correct()
+                        all_errors[-1].append(d)
                         error = True
                         break
                 if not error:
                     job.postprocess()
                     break
-        if total_errors == self.max_errors:
-            logging.info("Max {} errors reached. Exited".format(total_errors))
+            with open("corrections.json", "w") as f:
+                json.dump(all_errors, f, indent=4)
+        if sum(map(len, all_errors)) == self.max_errors:
+            logging.info("Max {} errors reached. Exited"
+                         .format(self.max_errors))
         else:
             logging.info("Run completed")
+        return all_errors
 
 
 class ErrorHandler(object):
@@ -121,6 +133,10 @@ class ErrorHandler(object):
         This method is called at the end of a job when an error is detected.
         It should perform any corrective measures relating to the detected
         error.
+
+        This method should return a JSON serializable dict that describes
+        the errors and actions taken. E.g.
+        {"errors": list_of_errors, "actions": list_of_actions_taken}
         """
         pass
     

@@ -17,7 +17,6 @@ __date__ = "2/4/13"
 
 import os
 import shutil
-import json
 import logging
 import tarfile
 import time
@@ -66,7 +65,6 @@ class VaspErrorHandler(ErrorHandler):
         backup()
         actions = []
         vi = VaspInput.from_directory(".")
-        history = []
 
         if "tet" in self.errors:
             actions.append({'dict': 'INCAR',
@@ -90,16 +88,10 @@ class VaspErrorHandler(ErrorHandler):
         m = Modder()
         for a in actions:
             vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
-        self.actions = actions
-        if os.path.exists("corrections.json"):
-            with open("corrections.json", "r") as f:
-                history = json.load(f)
-        history.append({'errors': list(self.errors), 'actions': actions})
-        with open("corrections.json", "w") as f:
-            json.dump(history, f, indent=4)
         vi["INCAR"].write_file("INCAR")
         vi["POSCAR"].write_file("POSCAR")
         vi["KPOINTS"].write_file("KPOINTS")
+        return {"errors": list(self.errors), "actions": actions}
 
     def __str__(self):
         return "Vasp error"
@@ -123,6 +115,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         incar = Incar.from_file("INCAR")
         incar['ISTART'] = 1
         incar.write_file("INCAR")
+        return {"errors": ["Unconverged"], "actions": "Restart from CONTCAR"}
 
     def __str__(self):
         return "Run unconverged."
@@ -150,6 +143,8 @@ class PoscarErrorHandler(ErrorHandler):
         new_s = trans.apply_transformation(s)
         p = Poscar(new_s)
         p.write_file("POSCAR")
+        return {"errors": ["Rotation matrix"],
+                "actions": "Peturb POSCAR and restart."}
 
 
 class FrozenJobErrorHandler(ErrorHandler):

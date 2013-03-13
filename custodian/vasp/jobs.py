@@ -19,8 +19,8 @@ import os
 import shutil
 
 from pymatgen.util.io_utils import zopen
-from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput
-from pymatgen.io.cifio import CifParser
+from pymatgen.io.vaspio.vasp_input import VaspInput
+from pymatgen.io.smartio import read_structure
 from pymatgen.io.vaspio_set import MITVaspInputSet
 
 from custodian.ansible.intepreter import Modder
@@ -100,14 +100,11 @@ class VaspJob(Job):
         num_structures = 0
         if not set(files).issuperset(VASP_INPUT_FILES):
             for f in files:
-                if f.startswith("POSCAR") or f.startswith("CONTCAR"):
-                    poscar = Poscar.from_file(f)
-                    struct = poscar.struct
+                try:
+                    struct = read_structure(f)
                     num_structures += 1
-                elif f.lower().endswith(".cif"):
-                    parser = CifParser(f)
-                    struct = parser.get_structures()[0]
-                    num_structures += 1
+                except:
+                    pass
             if num_structures != 1:
                 raise RuntimeError("{} structures found. Unable to continue.")
             else:
