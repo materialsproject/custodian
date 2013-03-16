@@ -16,17 +16,17 @@ __status__ = "Beta"
 __date__ = "2/4/13"
 
 import os
-import shutil
 import logging
 import tarfile
 import glob
 
 from custodian.custodian import ErrorHandler
-from pymatgen.io.vaspio.vasp_input import Incar, Poscar, VaspInput
+from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput
 from pymatgen.transformations.standard_transformations import \
     PerturbStructureTransformation
 from pymatgen.io.vaspio.vasp_output import Vasprun
 from custodian.ansible.intepreter import Modder
+from custodian.ansible.actions import FileActions, DictActions
 
 
 class VaspErrorHandler(ErrorHandler):
@@ -97,24 +97,36 @@ class VaspErrorHandler(ErrorHandler):
 
 
 class UnconvergedErrorHandler(ErrorHandler):
-    #todo: Make this work using ansible.
+    """
+    Check if a run is converged
+    """
+    def __init__(self, output_filename="vasprun.xml"):
+        self.output_filename = output_filename
 
     def check(self):
         try:
-            v = Vasprun('vasprun.xml')
+            v = Vasprun(self.output_filename)
             if not v.converged:
                 return True
         except:
-            return False
-        return False
+            return True
 
     def correct(self):
         backup()
-        shutil.copy("CONTCAR", "POSCAR")
-        incar = Incar.from_file("INCAR")
-        incar['ISTART'] = 1
-        incar.write_file("INCAR")
-        return {"errors": ["Unconverged"], "actions": "Restart from CONTCAR"}
+        actions = [{'file': 'CONTCAR',
+                    'action': {'_file_copy': {'dest': 'POSCAR'}}},
+                   {'dict': 'INCAR',
+                    'action': {'_set': {'ISTART': 1}}}]
+        vi = VaspInput.from_directory(".")
+        m = Modder(actions=[DictActions, FileActions])
+        for a in actions:
+            if "dict" in a:
+                vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+            elif "file" in a:
+                m.modify(a["action"], a["file"])
+        vi["INCAR"].write_file("INCAR")
+
+        return {"errors": ["Unconverged"], "actions": actions}
 
     def __str__(self):
         return "Run unconverged."
@@ -122,8 +134,11 @@ class UnconvergedErrorHandler(ErrorHandler):
 
 class PoscarErrorHandler(ErrorHandler):
 
+    def __init__(self, output_filename="vasp.out"):
+        self.output_filename = output_filename
+
     def check(self):
-        with open("vasp.out", "r") as f:
+        with open(self.output_filename, "r") as f:
             output = f.read()
             for line in output.split("\n"):
                 l = line.strip()
@@ -133,17 +148,21 @@ class PoscarErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
-        #TODO: Add transformation applied to transformation.json if exists.
         backup()
-        shutil.copy("POSCAR", "POSCAR.orig")
         p = Poscar.from_file("POSCAR")
-        s = p.struct
+        s = p.structure
         trans = PerturbStructureTransformation(0.05)
         new_s = trans.apply_transformation(s)
-        p = Poscar(new_s)
-        p.write_file("POSCAR")
+        actions = [{'dict': 'POSCAR',
+                    'action': {'_set': {'structure': new_s.to_dict}}}]
+        m = Modder()
+        vi = VaspInput.from_directory(".")
+        for a in actions:
+            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+        vi["POSCAR"].write_file("POSCAR")
+
         return {"errors": ["Rotation matrix"],
-                "actions": "Peturb POSCAR and restart."}
+                "actions": actions}
 
 
 def backup():
