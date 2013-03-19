@@ -147,7 +147,7 @@ class VaspJob(Job):
         return "Vasp Job"
 
     @staticmethod
-    def double_relaxation_run(vasp_command):
+    def double_relaxation_run(vasp_command, gzipped=True):
         """
         Returns a list of two jobs corresponding to an AFLOW style double
         relaxation run.
@@ -164,7 +164,7 @@ class VaspJob(Job):
         return [VaspJob(vasp_command, final=False, suffix=".relax1"),
                 VaspJob(
                     vasp_command, final=True, backup=False,
-                    suffix=".relax2", gzipped=True,
+                    suffix=".relax2", gzipped=gzipped,
                     settings_override=[
                         {"dict": "INCAR",
                          "action": {"_set": {"ISTART": 1}}},
