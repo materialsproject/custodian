@@ -28,7 +28,7 @@ from custodian.ansible.actions import FileActions, DictActions
 from custodian.custodian import Job
 
 
-VASP_INPUT_FILES = set(["INCAR", "POSCAR", "POTCAR", "KPOINTS"])
+VASP_INPUT_FILES = {"INCAR", "POSCAR", "POTCAR", "KPOINTS"}
 
 VASP_OUTPUT_FILES = ['DOSCAR', 'INCAR', 'KPOINTS', 'POSCAR', 'PROCAR',
                      'vasprun.xml', 'CHGCAR', 'CHG', 'EIGENVAL', 'OSZICAR',
@@ -106,7 +106,8 @@ class VaspJob(Job):
                 except:
                     pass
             if num_structures != 1:
-                raise RuntimeError("{} structures found. Unable to continue.")
+                raise RuntimeError("{} structures found. Unable to continue."
+                                   .format(num_structures))
             else:
                 self.default_vis.write_input(struct, ".")
 
