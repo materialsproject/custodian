@@ -19,6 +19,7 @@ import os
 import logging
 import tarfile
 import glob
+import operator
 
 from custodian.custodian import ErrorHandler
 from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput
@@ -81,7 +82,10 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({'dict': 'KPOINTS',
                             'action': {'_set': {'style': "Gamma"}}})
         if "mesh_symmetry" in self.errors:
-            m = max(vi["KPOINTS"].kpts[0])
+            m = reduce(operator.mul, vi["KPOINTS"].kpts[0])
+            m = max(int(round(m ** (1 / 3))), 1)
+            if vi["KPOINTS"].style.lower().startswith("m"):
+                m += m % 2
             actions.append({'dict': 'KPOINTS',
                             'action': {'_set': {'kpoints': [[m] * 3]}}})
         m = Modder()

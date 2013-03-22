@@ -31,6 +31,8 @@ class VaspErrorHandlerTest(unittest.TestCase):
         if "VASP_PSP_DIR" not in os.environ:
             os.environ["VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("KPOINTS", "KPOINTS.orig")
         h = VaspErrorHandler("vasp.teterror")
         h.check()
         d = h.correct()
@@ -43,8 +45,10 @@ class VaspErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ['mesh_symmetry'])
         self.assertEqual(d["actions"],
-                         [{'action': {'_set': {'kpoints': [[8, 8, 8]]}},
+                         [{'action': {'_set': {'kpoints': [[4, 4, 4]]}},
                            'dict': 'KPOINTS'}])
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("KPOINTS.orig", "KPOINTS")
         os.remove(os.path.join(test_dir, "error.1.tar.gz"))
         os.remove(os.path.join(test_dir, "error.2.tar.gz"))
 

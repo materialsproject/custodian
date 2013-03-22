@@ -6,11 +6,11 @@ perform error checking, job management and error recovery. It has a simple
 plugin framework that allows you to develop specific job management workflows
 for different applications.
 
-The specific use case for custodian is for long running jobs,
-with potentially random errors. For example, there may be a script that takes
-several days to run on a server, with a 1% chance of some IO error causing
-the job to fail. Using custodian, one can develop a mechanism to gracefully
-recover from the error, and potentially restart the job if necessary.
+The specific use case for custodian is for long running jobs, with potentially
+random errors. For example, there may be a script that takes several days to
+run on a server, with a 1% chance of some IO error causing the job to fail.
+Using custodian, one can develop a mechanism to gracefully recover from the
+error, and potentially restart the job if necessary.
 
 Custodian is now in an very early alpha, and there may be many frequent API
 changes. Please use with care.
@@ -69,7 +69,7 @@ The main class in the workflow is known as Custodian, which manages a series
 of jobs with a list of error handlers. To use custodian, you need to implement
 concrete implementation of the abstract base classes custodian.custodian.Job
 and custodian.custodian.ErrorHandler. An very simple example implementation is
-given in the examples.py script in the scripts directory.
+given in the custodian_examples.py script in the scripts directory.
 
 Other specific examples for electronic structure calculations based on the
 Vienna Ab Initio Simulation Package (VASP) are implemented in the
@@ -87,3 +87,7 @@ two-relaxation VASP job is as follows:
     jobs = VaspJob.double_relaxation_run(args.command.split())
     c = Custodian(handlers, jobs, max_errors=10)
     c.run()
+
+The above will gracefully deal with many VASP errors encountered during
+relaxation. For example, it will correct ISMEAR to 0 if there are
+insufficient KPOINTS to use ISMEAR = -5.
