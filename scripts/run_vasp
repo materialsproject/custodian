@@ -57,7 +57,7 @@ def do_run(args):
                 {"filename": "CONTCAR",
                  "action": {"_file_copy": {"dest": "POSCAR"}}}]
 
-        gzip = True if args.gzip and i == njobs - 1 else False
+        gzip = True if args.gzip and final else False
 
         jobs.append(VaspJob(vasp_command, final=final, suffix=suffix,
                             backup=backup, settings_override=settings,
