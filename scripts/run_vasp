@@ -33,7 +33,7 @@ def do_run(args):
         final = False if i != njobs - 1 else True
         suffix = ".{}{}".format(job_type, i + 1)
         settings = None
-        backup = True if i = 0 else False
+        backup = True if i == 0 else False
         if i > 0:
             settings = [
                 {"dict": "INCAR",
