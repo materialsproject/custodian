@@ -21,57 +21,31 @@ from custodian.vasp.handlers import VaspErrorHandler, \
 from custodian.vasp.jobs import VaspJob
 
 
-def relaxation_run(args):
+def do_run(args):
     FORMAT = '%(asctime)s %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
     handlers = [VaspErrorHandler(), UnconvergedErrorHandler(),
                 PoscarErrorHandler()]
     vasp_command = args.command.split()
     jobs = []
-    if args.repeat == 1:
-        jobs.append(VaspJob(vasp_command, final=True, suffix="",
-                            gzipped=args.gzip))
-    elif args.repeat > 1:
-        jobs.append(VaspJob(vasp_command, final=False, suffix=".relax1"))
-        for i in xrange(1, args.repeat):
-            if i != args.repeat - 1:
-                jobs.append(
-                    VaspJob(
-                        vasp_command, final=False,
-                        suffix=".relax{}".format(i + 1),
-                        settings_override=[
-                            {"dict": "INCAR",
-                             "action": {"_set": {"ISTART": 1}}},
-                            {"filename": "CONTCAR",
-                             "action": {"_file_copy": {"dest": "POSCAR"}}}]))
-            else:
-                jobs.append(
-                    VaspJob(
-                        vasp_command, final=True, backup=False,
-                        suffix=".relax{}".format(i + 1), gzipped=args.gzip,
-                        settings_override=[
-                            {"dict": "INCAR",
-                             "action": {"_set": {"ISTART": 1}}},
-                            {"filename": "CONTCAR",
-                             "action": {"_file_copy": {"dest": "POSCAR"}}}]))
+    njobs = len(args.jobs)
+    for i, job_type in enumerate(args.jobs):
+        final = False if i != njobs - 1 else True
+        suffix = ".{}{}".format(job_type, i + 1)
+        settings = None
+        if i > 0:
+            settings = [
+                {"dict": "INCAR",
+                 "action": {"_set": {"ISTART": 1}}},
+                {"filename": "CONTCAR",
+                 "action": {"_file_copy": {"dest": "POSCAR"}}}]
+        gzip = True if args.gzip and i == njobs - 1 else False
 
-    c = Custodian(handlers, jobs, max_errors=10)
-    c.run()
+        jobs.append(
+            VaspJob(vasp_command, final=final, suffix=suffix,
+                    settings_override=settings,
+                    gzipped=gzip))
 
-
-def static_run(args):
-    FORMAT = '%(asctime)s %(message)s'
-    logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
-    handlers = [VaspErrorHandler()]
-    vasp_command = args.command.split()
-    jobs = [VaspJob(
-        vasp_command, final=True,
-        suffix=".static",
-        settings_override=[
-            {"dict": "INCAR",
-             "action": {"_set": {"ISTART": 1, "NSW": 0}}},
-            {"filename": "CONTCAR",
-             "action": {"_file_copy": {"dest": "POSCAR"}}}])]
     c = Custodian(handlers, jobs, max_errors=10)
     c.run()
 
@@ -86,38 +60,24 @@ if __name__ == "__main__":
     Version: {}
     Last updated: {}""".format(__version__, __date__))
 
-    subparsers = parser.add_subparsers()
-
-    prelax = subparsers.add_parser("relax", help="Do relaxation run.")
-
-    prelax.add_argument(
+    parser.add_argument(
         "-c", "--command", dest="command", nargs="?",
         default="pvasp", type=str,
         help="VASP command. Defaults to pvasp. If you are using mpirun, "
              "set this to something like \"mpirun pvasp\".")
 
-    prelax.add_argument(
-        "-r", "--repeat", dest="repeat", default=2, type=int,
-        help="Number of repeats for the vasprun. Defaults to 2 for a double "
-             "relaxation.")
+    parser.add_argument("jobs", metavar="jobs", type=str,
+                         default=["relax", "relax"],
+                         help="Jobs to execute. Only sequences of relax "
+                              "and static are supported at the moment. For "
+                              "example, \"relax relax static\" will run a "
+                              "double relaxation followed by a static run.")
 
-    prelax.add_argument(
+    parser.add_argument(
         "-z", "--gzip", dest="gzip", action="store_true",
         help="Add this option to gzip the final output. Do not gzip if you "
              "are going to perform an additional static run."
     )
 
-    prelax.set_defaults(func=relaxation_run)
-
-    pstatic = subparsers.add_parser("static", help="Do a static run.")
-
-    pstatic.add_argument(
-        "-c", "--command", dest="command", nargs="?",
-        default="pvasp", type=str,
-        help="VASP command. Defaults to pvasp. If you are using mpirun, "
-             "set this to something like \"mpirun pvasp\".")
-
-    pstatic.set_defaults(func=static_run)
-
     args = parser.parse_args()
-    args.func(args)
+    do_run(args)
