@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 """
-TODO: Change the module doc.
+This is a master vasp running script to perform variuos combinations of VASP
+runs.
 """
 
 from __future__ import division
@@ -55,6 +56,7 @@ def do_run(args):
                  'action': {'_set': {'kpoints': [m]}}},
                 {"filename": "CONTCAR",
                  "action": {"_file_copy": {"dest": "POSCAR"}}}]
+
         gzip = True if args.gzip and i == njobs - 1 else False
 
         jobs.append(VaspJob(vasp_command, final=final, suffix=suffix,
