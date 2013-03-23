@@ -33,6 +33,7 @@ def do_run(args):
         final = False if i != njobs - 1 else True
         suffix = ".{}{}".format(job_type, i + 1)
         settings = None
+        backup = True if i = 0 else False
         if i > 0:
             settings = [
                 {"dict": "INCAR",
@@ -41,10 +42,9 @@ def do_run(args):
                  "action": {"_file_copy": {"dest": "POSCAR"}}}]
         gzip = True if args.gzip and i == njobs - 1 else False
 
-        jobs.append(
-            VaspJob(vasp_command, final=final, suffix=suffix,
-                    settings_override=settings,
-                    gzipped=gzip))
+        jobs.append(VaspJob(vasp_command, final=final, suffix=suffix,
+                            backup=backup, settings_override=settings,
+                            gzipped=gzip))
 
     c = Custodian(handlers, jobs, max_errors=10)
     c.run()
