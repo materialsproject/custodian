@@ -14,11 +14,13 @@ __status__ = "Beta"
 __date__ = "2/4/13"
 
 import logging
+import sys
 
 from custodian.custodian import Custodian
 from custodian.vasp.handlers import VaspErrorHandler, \
     UnconvergedErrorHandler, PoscarErrorHandler
 from custodian.vasp.jobs import VaspJob
+from pymatgen.io.vaspio.vasp_input import VaspInput
 
 
 def do_run(args):
@@ -30,14 +32,27 @@ def do_run(args):
     jobs = []
     njobs = len(args.jobs)
     for i, job_type in enumerate(args.jobs):
+        if job_type not in ("relax", "static"):
+            print("Unsupported job type: {}".format(job_type))
+            sys.exit(-1)
         final = False if i != njobs - 1 else True
         suffix = ".{}{}".format(job_type, i + 1)
         settings = None
         backup = True if i == 0 else False
-        if i > 0:
+        if i > 0 and job_type != "static":
             settings = [
                 {"dict": "INCAR",
                  "action": {"_set": {"ISTART": 1}}},
+                {"filename": "CONTCAR",
+                 "action": {"_file_copy": {"dest": "POSCAR"}}}]
+        elif job_type == "static":
+            vinput = VaspInput.from_directory(".")
+            m = [i * args.static_kpoint for i in vinput["KPOINTS"].kpts[0]]
+            settings = [
+                {"dict": "INCAR",
+                 "action": {"_set": {"ISTART": 1}}},
+                {'dict': 'KPOINTS',
+                 'action': {'_set': {'kpoints': [m]}}},
                 {"filename": "CONTCAR",
                  "action": {"_file_copy": {"dest": "POSCAR"}}}]
         gzip = True if args.gzip and i == njobs - 1 else False
@@ -70,6 +85,17 @@ if __name__ == "__main__":
         "-z", "--gzip", dest="gzip", action="store_true",
         help="Add this option to gzip the final output. Do not gzip if you "
              "are going to perform an additional static run."
+    )
+
+    parser.add_argument(
+        "-ks", "--kpoint-static", dest="static_kpoint", nargs="?",
+        default=1, type=int,
+        help="The multiplier to use for the KPOINTS of a static run (if "
+             "any). For example, setting this to 2 means that if your "
+             "original run was done using a k-point grid of 2x3x3, "
+             "the static run will be done with a k-point grid of 4x6x6. This "
+             "defaults to 1, i.e., static runs are performed with the same "
+             "k-point grid as relaxation runs."
     )
 
     parser.add_argument("jobs", metavar="jobs", type=str, nargs='+',
