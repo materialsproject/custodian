@@ -21,7 +21,7 @@ from custodian.vasp.handlers import VaspErrorHandler, \
 from custodian.vasp.jobs import VaspJob
 
 
-def relax(args):
+def relaxation_run(args):
     FORMAT = '%(asctime)s %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
     handlers = [VaspErrorHandler(), UnconvergedErrorHandler(),
@@ -58,6 +58,22 @@ def relax(args):
     c.run()
 
 
+def static_run(args):
+    FORMAT = '%(asctime)s %(message)s'
+    logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
+    handlers = [VaspErrorHandler()]
+    vasp_command = args.command.split()
+    jobs = [VaspJob(
+        vasp_command, final=True,
+        suffix=".static",
+        settings_override=[
+            {"dict": "INCAR",
+             "action": {"_set": {"ISTART": 1, "NSW": 0}}},
+            {"filename": "CONTCAR",
+             "action": {"_file_copy": {"dest": "POSCAR"}}}])]
+    c = Custodian(handlers, jobs, max_errors=10)
+    c.run()
+
 
 if __name__ == "__main__":
     import argparse
@@ -84,4 +100,16 @@ if __name__ == "__main__":
         help="Number of repeats for the vasprun. Defaults to 2 for a double "
              "relaxation.")
 
-    prelax.set_defaults(func=relax)
+    prelax.set_defaults(func=relaxation_run)
+
+    pstatic = subparsers.add_parser("static", help="Do a static run.")
+
+    pstatic.add_argument(
+        "-c", "--command", dest="command", nargs="?",
+        default="pvasp", type=str,
+        help="VASP command. Defaults to pvasp. If you are using mpirun, "
+             "set this to something like \"mpirun pvasp\".")
+
+    pstatic.set_defaults(func=static_run)
+
+    parser.parse_args()
