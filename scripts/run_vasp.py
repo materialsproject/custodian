@@ -112,4 +112,5 @@ if __name__ == "__main__":
 
     pstatic.set_defaults(func=static_run)
 
-    parser.parse_args()
+    args = parser.parse_args()
+    args.func(args)
