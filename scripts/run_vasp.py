@@ -29,7 +29,8 @@ def relaxation_run(args):
     vasp_command = args.command.split()
     jobs = []
     if args.repeat == 1:
-        jobs.append(VaspJob(vasp_command, final=True, suffix="", gzipped=True))
+        jobs.append(VaspJob(vasp_command, final=True, suffix="",
+                            gzipped=args.gzip))
     elif args.repeat > 1:
         jobs.append(VaspJob(vasp_command, final=False, suffix=".relax1"))
         for i in xrange(1, args.repeat):
@@ -47,7 +48,7 @@ def relaxation_run(args):
                 jobs.append(
                     VaspJob(
                         vasp_command, final=True, backup=False,
-                        suffix=".relax{}".format(i + 1), gzipped=True,
+                        suffix=".relax{}".format(i + 1), gzipped=args.gzip,
                         settings_override=[
                             {"dict": "INCAR",
                              "action": {"_set": {"ISTART": 1}}},
@@ -99,6 +100,12 @@ if __name__ == "__main__":
         "-r", "--repeat", dest="repeat", default=2, type=int,
         help="Number of repeats for the vasprun. Defaults to 2 for a double "
              "relaxation.")
+
+    prelax.add_argument(
+        "-z", "--gzip", dest="gzip", action="store_true",
+        help="Add this option to gzip the final output. Do not gzip if you "
+             "are going to perform an additional static run."
+    )
 
     prelax.set_defaults(func=relaxation_run)
 
