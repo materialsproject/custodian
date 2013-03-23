@@ -66,18 +66,18 @@ if __name__ == "__main__":
         help="VASP command. Defaults to pvasp. If you are using mpirun, "
              "set this to something like \"mpirun pvasp\".")
 
-    parser.add_argument("jobs", metavar="jobs", type=str,
-                         default=["relax", "relax"],
-                         help="Jobs to execute. Only sequences of relax "
-                              "and static are supported at the moment. For "
-                              "example, \"relax relax static\" will run a "
-                              "double relaxation followed by a static run.")
-
     parser.add_argument(
         "-z", "--gzip", dest="gzip", action="store_true",
         help="Add this option to gzip the final output. Do not gzip if you "
              "are going to perform an additional static run."
     )
+
+    parser.add_argument("jobs", metavar="jobs", type=str, nargs='+',
+                         default=["relax", "relax"],
+                         help="Jobs to execute. Only sequences of relax "
+                              "and static are supported at the moment. For "
+                              "example, \"relax relax static\" will run a "
+                              "double relaxation followed by a static run.")
 
     args = parser.parse_args()
     do_run(args)
