@@ -76,15 +76,13 @@ class Custodian(object):
                         all_errors[-1].append(d)
                         error = True
                         break
+                with open("corrections.json", "w") as f:
+                    logging.info("Logging corrections to corrections.json...")
+                    json.dump(all_errors, f, indent=4)
                 if not error:
                     job.postprocess()
                     break
-            with open("corrections.json", "w") as f:
-                logging.info("Logging corrections to corrections.json...")
-                json.dump(all_errors, f, indent=4)
-        with open("corrections.json", "w") as f:
-            logging.info("Final logging to corrections.json...")
-            json.dump(all_errors, f, indent=4)
+
         if sum(map(len, all_errors)) == self.max_errors:
             logging.info("Max {} errors reached. Exited"
                          .format(self.max_errors))
