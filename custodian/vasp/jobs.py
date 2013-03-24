@@ -22,6 +22,7 @@ from pymatgen.util.io_utils import zopen
 from pymatgen.io.vaspio.vasp_input import VaspInput
 from pymatgen.io.smartio import read_structure
 from pymatgen.io.vaspio_set import MITVaspInputSet
+from pymatgen.serializers.json_coders import MSONable, PMGJSONDecoder
 
 from custodian.ansible.intepreter import Modder
 from custodian.ansible.actions import FileActions, DictActions
@@ -35,7 +36,7 @@ VASP_OUTPUT_FILES = ['DOSCAR', 'INCAR', 'KPOINTS', 'POSCAR', 'PROCAR',
                      'WAVECAR', 'CONTCAR', 'IBZKPT', 'OUTCAR']
 
 
-class VaspJob(Job):
+class VaspJob(Job, MSONable):
     """
     A basic vasp job. Just runs whatever is in the directory. But
     conceivably can be a complex processing of inputs etc. with initialization.
@@ -171,6 +172,27 @@ class VaspJob(Job):
                          "action": {"_set": {"ISTART": 1}}},
                         {"filename": "CONTCAR",
                          "action": {"_file_copy": {"dest": "POSCAR"}}}])]
+
+    @property
+    def to_dict(self):
+        d = dict(vasp_command=self.vasp_command,
+                 output_file=self.output_file, suffix=self.suffix,
+                 final=self.final, gzipped=self.gzipped, backup=self.backup,
+                 default_vasp_input_set=self.default_vis.to_dict,
+                 settings_override=self.settings_override
+                 )
+        d["@module"] = self.__class__.__module__
+        d["@class"] = self.__class__.__name__
+        return d
+
+    @staticmethod
+    def from_dict(d):
+        vis = PMGJSONDecoder().process_decoded(d["default_vasp_input_set"])
+        return VaspJob(
+            vasp_command=d["vasp_command"], output_file=d["output_file"],
+            suffix=d["suffix"], final=d["final"], gzipped=d["gzipped"],
+            backup=d["backup"], default_vasp_input_set=vis,
+            settings_override=d["settings_override"])
 
 
 def gzip_directory(path):

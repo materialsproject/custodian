@@ -65,9 +65,16 @@ class Custodian(object):
                     "Starting job no. {} ({}) attempt no. {}. Errors thus far"
                     " = {}.".format(i + 1, job.name, attempt + 1,
                                     sum(map(len, all_errors))))
+
+                # If this is the start of the job, do the setup.
                 if not all_errors[-1]:
                     job.setup()
+
+                # Run the job.
                 job.run()
+
+                # Check for errors using the error handlers and perform
+                # corrections.
                 error = False
                 for h in self.handlers:
                     if h.check():
@@ -76,9 +83,14 @@ class Custodian(object):
                         all_errors[-1].append(d)
                         error = True
                         break
+
+                #Log the corrections to a json file.
                 with open("corrections.json", "w") as f:
                     logging.info("Logging corrections to corrections.json...")
                     json.dump(all_errors, f, indent=4)
+
+                # If there are no errors detected, perform postprocessing and
+                # exit.
                 if not error:
                     job.postprocess()
                     break
