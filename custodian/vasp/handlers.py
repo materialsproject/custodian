@@ -155,7 +155,7 @@ class UnconvergedErrorHandler(ErrorHandler, MSONable):
 
     @staticmethod
     def from_dict(d):
-        return VaspErrorHandler(d["output_filename"])
+        return UnconvergedErrorHandler(d["output_filename"])
 
 
 class PoscarErrorHandler(ErrorHandler, MSONable):
@@ -198,7 +198,8 @@ class PoscarErrorHandler(ErrorHandler, MSONable):
 
     @staticmethod
     def from_dict(d):
-        return VaspErrorHandler(d["output_filename"])
+        return PoscarErrorHandler(d["output_filename"])
+
 
 def backup():
     error_num = 0
