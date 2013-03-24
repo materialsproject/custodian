@@ -38,8 +38,8 @@ VASP_OUTPUT_FILES = ['DOSCAR', 'INCAR', 'KPOINTS', 'POSCAR', 'PROCAR',
 
 class VaspJob(Job, MSONable):
     """
-    A basic vasp job. Just runs whatever is in the directory. But
-    conceivably can be a complex processing of inputs etc. with initialization.
+    A basic vasp job. Just runs whatever is in the directory. But conceivably
+     can be a complex processing of inputs etc. with initialization.
     """
 
     def __init__(self, vasp_command, output_file="vasp.out", suffix="",
@@ -82,10 +82,11 @@ class VaspJob(Job, MSONable):
             settings_override:
                 An ansible style list of dict to override changes. For example,
                 to set ISTART=1 for subsequent runs and to copy the CONTCAR
-                to the POSCAR, you will provide
-                [{"dict": "INCAR", "action": {"_set": {"ISTART": 1}}},
-                 {"filename": "CONTCAR",
-                  "action": {"_file_copy": {"dest": "POSCAR"}}}]
+                to the POSCAR, you will provide::
+
+                    [{"dict": "INCAR", "action": {"_set": {"ISTART": 1}}},
+                     {"filename": "CONTCAR",
+                      "action": {"_file_copy": {"dest": "POSCAR"}}}]
         """
         self.vasp_command = vasp_command
         self.output_file = output_file

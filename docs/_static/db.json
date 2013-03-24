@@ -1,0 +1,29 @@
+{
+    "host": "localhost",
+    "port": 27017,
+    "database": "vasp",
+    "admin_user": null,
+    "admin_password": null,
+    "readonly_user": null,
+    "readonly_password": null,
+    "collection": "tasks",
+    "aliases_config": {
+        "aliases": {
+            "energy": "output.final_energy",
+            "energy_per_atom": "output.final_energy_per_atom",
+            "final_atoms": "output.crystal.sites",
+            "final_lattice": "output.crystal.lattice",
+            "final_structure": "output.crystal",
+            "formula": "unit_cell_formula",
+            "initial_atoms": "input.crystal.sites",
+            "initial_lattice": "input.crystal.lattice",
+            "initial_structure": "input.crystal",
+            "normalized_formula": "reduced_cell_formula",
+            "reduced_cell_formula": "reduced_cell_formula",
+            "volume": "output.crystal.lattice.volume"
+        },
+        "defaults": {
+            "state": "successful"
+        }
+    }
+}

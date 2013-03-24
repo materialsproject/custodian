@@ -37,6 +37,7 @@ class DictActions(object):
     Class to implement the supported mongo-like modifications on a dict.
     Supported keywords include the following Mongo-based keywords, with the
     usual meanings (refer to Mongo documentation for information):
+
         _inc
         _set
         _unset
