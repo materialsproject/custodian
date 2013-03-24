@@ -14,7 +14,7 @@ setup(
     packages=find_packages(),
     version="0.2.4a",
     install_requires=[],
-    extras_require={"vasp": ["pymatgen>=2.5.0"]},
+    extras_require={"vasp": ["pymatgen>=2.6.2"]},
     package_data={},
     author="Shyue Ping Ong",
     author_email="shyuep@gmail.com",

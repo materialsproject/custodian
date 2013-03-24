@@ -53,6 +53,13 @@ class VaspErrorHandlerTest(unittest.TestCase):
         os.remove(os.path.join(test_dir, "error.2.tar.gz"))
 
 
+    def test_to_from_dict(self):
+        h = VaspErrorHandler("random_name")
+        h2 = VaspErrorHandler.from_dict(h.to_dict)
+        self.assertEqual(type(h2), type(h))
+        self.assertEqual(h2.output_filename, "random_name")
+
+
 class UnconvergedErrorHandlerTest(unittest.TestCase):
 
     def test_check_correct(self):
@@ -71,6 +78,12 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                            'action': {'_set': {'ISTART': 1}}}])
         os.remove(os.path.join(subdir, "error.1.tar.gz"))
 
+    def test_to_from_dict(self):
+        h = UnconvergedErrorHandler("random_name.xml")
+        h2 = UnconvergedErrorHandler.from_dict(h.to_dict)
+        self.assertEqual(type(h2), UnconvergedErrorHandler)
+        self.assertEqual(h2.output_filename, "random_name.xml")
+
 
 class PoscarErrorHandlerTest(unittest.TestCase):
 
@@ -87,6 +100,13 @@ class PoscarErrorHandlerTest(unittest.TestCase):
         os.remove(os.path.join(subdir, "error.1.tar.gz"))
         shutil.copy("POSCAR.orig", "POSCAR")
         os.remove("POSCAR.orig")
+
+    def test_to_from_dict(self):
+        h = PoscarErrorHandler("random_name.out")
+        h2 = PoscarErrorHandler.from_dict(h.to_dict)
+        self.assertEqual(type(h2), PoscarErrorHandler)
+        self.assertEqual(h2.output_filename, "random_name.out")
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

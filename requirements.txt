@@ -1,1 +1,1 @@
-pymatgen>=2.5.0
+pymatgen>=2.6.2

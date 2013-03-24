@@ -25,12 +25,14 @@ from custodian.custodian import ErrorHandler
 from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput
 from pymatgen.transformations.standard_transformations import \
     PerturbStructureTransformation
+from pymatgen.serializers.json_coders import MSONable
+
 from pymatgen.io.vaspio.vasp_output import Vasprun
 from custodian.ansible.intepreter import Modder
 from custodian.ansible.actions import FileActions, DictActions
 
 
-class VaspErrorHandler(ErrorHandler):
+class VaspErrorHandler(ErrorHandler, MSONable):
 
     error_msgs = {
         "tet": ["Tetrahedron method fails for NKPT<4",
@@ -99,8 +101,18 @@ class VaspErrorHandler(ErrorHandler):
     def __str__(self):
         return "Vasp error"
 
+    @property
+    def to_dict(self):
+        return {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__,
+                "output_filename": self.output_filename}
 
-class UnconvergedErrorHandler(ErrorHandler):
+    @staticmethod
+    def from_dict(d):
+        return VaspErrorHandler(d["output_filename"])
+
+
+class UnconvergedErrorHandler(ErrorHandler, MSONable):
     """
     Check if a run is converged
     """
@@ -135,8 +147,18 @@ class UnconvergedErrorHandler(ErrorHandler):
     def __str__(self):
         return "Run unconverged."
 
+    @property
+    def to_dict(self):
+        return {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__,
+                "output_filename": self.output_filename}
 
-class PoscarErrorHandler(ErrorHandler):
+    @staticmethod
+    def from_dict(d):
+        return VaspErrorHandler(d["output_filename"])
+
+
+class PoscarErrorHandler(ErrorHandler, MSONable):
 
     def __init__(self, output_filename="vasp.out"):
         self.output_filename = output_filename
@@ -168,6 +190,15 @@ class PoscarErrorHandler(ErrorHandler):
         return {"errors": ["Rotation matrix"],
                 "actions": actions}
 
+    @property
+    def to_dict(self):
+        return {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__,
+                "output_filename": self.output_filename}
+
+    @staticmethod
+    def from_dict(d):
+        return VaspErrorHandler(d["output_filename"])
 
 def backup():
     error_num = 0
