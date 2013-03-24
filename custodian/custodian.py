@@ -83,7 +83,7 @@ class Custodian(object):
                 logging.info("Logging corrections to corrections.json...")
                 json.dump(all_errors, f, indent=4)
         with open("corrections.json", "w") as f:
-            logging.info("Final logging corrections to corrections.json...")
+            logging.info("Final logging to corrections.json...")
             json.dump(all_errors, f, indent=4)
         if sum(map(len, all_errors)) == self.max_errors:
             logging.info("Max {} errors reached. Exited"
