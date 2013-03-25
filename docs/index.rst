@@ -13,11 +13,7 @@ error, and potentially restart the job if necessary.
 Change log
 ==========
 
-1. run_vasp script that now provides flexible specification of vasp runs.
-2. Vastly improved error handling for VASP runs.
-3. Improved logging system for custodian.
-4. Improved API for custodian return types during run.
-5. First stable release.
+1. Bug fix for run_vasp script for static runs.
 
 Getting custodian
 =================
