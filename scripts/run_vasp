@@ -51,7 +51,7 @@ def do_run(args):
             m = [i * args.static_kpoint for i in vinput["KPOINTS"].kpts[0]]
             settings = [
                 {"dict": "INCAR",
-                 "action": {"_set": {"ISTART": 1}}},
+                 "action": {"_set": {"ISTART": 1, "NSW": 0}}},
                 {'dict': 'KPOINTS',
                  'action': {'_set': {'kpoints': [m]}}},
                 {"filename": "CONTCAR",
