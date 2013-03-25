@@ -35,6 +35,5 @@ setup(
         "Topic :: Scientific/Engineering :: Chemistry",
         "Topic :: Software Development :: Libraries :: Python Modules"
     ],
-    download_url="https://github.com/materialsproject/custodian/archive/master.zip",
     scripts=[os.path.join("scripts", f) for f in os.listdir("scripts")]
 )
