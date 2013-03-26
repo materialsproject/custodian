@@ -16,7 +16,7 @@ __email__ = "shyue@mit.edu"
 __date__ = "May 2, 2012"
 
 import logging
-import abc
+from abc import ABCMeta, abstractmethod, abstractproperty
 import json
 
 
@@ -57,17 +57,18 @@ class Custodian(object):
             All errors encountered as a list of list.
             [[error_dicts for job 1], [error_dicts for job 2], ....]
         """
-        all_errors = []
+        run_log = []
+        total_errors = 0
         for i, job in enumerate(self.jobs):
-            all_errors.append(list())
+            run_log.append({"job": job.to_dict, "corrections": []})
             for attempt in xrange(self.max_errors):
                 logging.info(
                     "Starting job no. {} ({}) attempt no. {}. Errors thus far"
                     " = {}.".format(i + 1, job.name, attempt + 1,
-                                    sum(map(len, all_errors))))
+                                    total_errors))
 
                 # If this is the start of the job, do the setup.
-                if not all_errors[-1]:
+                if not run_log[-1]["corrections"]:
                     job.setup()
 
                 # Run the job.
@@ -78,16 +79,17 @@ class Custodian(object):
                 error = False
                 for h in self.handlers:
                     if h.check():
+                        total_errors += 1
                         d = h.correct()
                         logging.error(str(d))
-                        all_errors[-1].append(d)
+                        run_log[-1]["corrections"].append(d)
                         error = True
                         break
 
                 #Log the corrections to a json file.
-                with open("corrections.json", "w") as f:
-                    logging.info("Logging corrections to corrections.json...")
-                    json.dump(all_errors, f, indent=4)
+                with open("custodian.json", "w") as f:
+                    logging.info("Logging to custodian.json...")
+                    json.dump(run_log, f, indent=4)
 
                 # If there are no errors detected, perform postprocessing and
                 # exit.
@@ -95,21 +97,21 @@ class Custodian(object):
                     job.postprocess()
                     break
 
-        if sum(map(len, all_errors)) == self.max_errors:
+        if total_errors == self.max_errors:
             logging.info("Max {} errors reached. Exited"
                          .format(self.max_errors))
         else:
             logging.info("Run completed")
-        return all_errors
+        return run_log
 
 
 class ErrorHandler(object):
     """
     Abstract base class defining the interface for an ErrorHandler.
     """
-    __metaclass__ = abc.ABCMeta
+    __metaclass__ = ABCMeta
 
-    @abc.abstractmethod
+    @abstractmethod
     def check(self):
         """
         This method is called at the end of a job. Returns a boolean value
@@ -117,7 +119,7 @@ class ErrorHandler(object):
         """
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def correct(self):
         """
         This method is called at the end of a job when an error is detected.
@@ -130,14 +132,32 @@ class ErrorHandler(object):
         """
         pass
 
+    @abstractproperty
+    def to_dict(self):
+        """
+        This method should return a JSON serializable dict describing the
+        ErrorHandler, and can be deserialized using the from_dict static
+        method.
+        """
+        pass
+
+    @staticmethod
+    def from_dict(d):
+        """
+        This simply raises a NotImplementedError to force subclasses to
+        implement this static method. Abstract static methods are not
+        implemented until Python 3+.
+        """
+        raise NotImplementedError("ErrorHandler objects must implement a "
+                                  "from_dict static method.")
 
 class Job(object):
     """
     Abstract base class defining the interface for a Job.
     """
-    __metaclass__ = abc.ABCMeta
+    __metaclass__ = ABCMeta
 
-    @abc.abstractmethod
+    @abstractmethod
     def setup(self):
         """
         This method is run before the start of a job. Allows for some
@@ -145,14 +165,14 @@ class Job(object):
         """
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def run(self):
         """
         This method perform the actual work for the job.
         """
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def postprocess(self):
         """
         This method is called at the end of a job, *after* error detection.
@@ -161,9 +181,28 @@ class Job(object):
         """
         pass
 
-    @abc.abstractproperty
+    @abstractproperty
     def name(self):
         """
         A nice string name for the job.
         """
         pass
+
+    @abstractproperty
+    def to_dict(self):
+        """
+        This method should return a JSON serializable dict describing the
+        Job, and can be deserialized using the from_dict static
+        method.
+        """
+        pass
+
+    @staticmethod
+    def from_dict(d):
+        """
+        This simply raises a NotImplementedError to force subclasses to
+        implement this static method. Abstract static methods are not
+        implemented until Python 3+.
+        """
+        raise NotImplementedError("Job objects must implement a from_dict"
+                                  "static method.")

@@ -49,6 +49,14 @@ class ExampleJob(Job):
     def name(self):
         return "ExampleJob{}".format(self.jobid)
 
+    @property
+    def to_dict(self):
+        return {"jobid": self.jobid}
+
+    @staticmethod
+    def from_dict(d):
+        return ExampleJob(d["jobid"])
+
 
 class ExampleHandler(ErrorHandler):
     """
@@ -63,6 +71,15 @@ class ExampleHandler(ErrorHandler):
         global initial
         initial += 1
         print "Total < 50. Incrementing initial to {}".format(initial)
+        return {"errors": "total < 50", "actions": "increment by 1"}
+
+    @property
+    def to_dict(self):
+        return {}
+
+    @staticmethod
+    def from_dict(d):
+        return ExampleHandler()
 
 
 if __name__ == "__main__":
