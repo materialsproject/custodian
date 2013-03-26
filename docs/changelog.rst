@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+Version 0.2.6
+-------------
+1. Bug fix for run_vasp script for static runs.
+
 Version 0.2.5
 -------------
 1. run_vasp script that now provides flexible specification of vasp runs.

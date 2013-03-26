@@ -13,7 +13,9 @@ error, and potentially restart the job if necessary.
 Change log
 ==========
 
-1. Bug fix for run_vasp script for static runs.
+1. Major update to custodian API. Custodian now perform more comprehensive
+   logging in a file called custodian.json, which logs all jobs and
+   corrections performed.
 
 Getting custodian
 =================
