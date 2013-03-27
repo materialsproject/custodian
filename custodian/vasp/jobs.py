@@ -120,14 +120,16 @@ class VaspJob(Job, MSONable):
         if self.settings_override is not None:
             vi = VaspInput.from_directory(".")
             m = Modder([FileActions, DictActions])
+            modified = []
             for a in self.settings_override:
                 if "dict" in a:
+                    modified.append(a["dict"])
                     vi[a["dict"]] = m.modify_object(a["action"],
                                                     vi[a["dict"]])
                 elif "filename" in a:
                     m.modify(a["action"], a["filename"])
-            vi["INCAR"].write_file("INCAR")
-            vi["KPOINTS"].write_file("KPOINTS")
+            for f in modified:
+                vi[f].write_file(f)
 
     def run(self):
         with open(self.output_file, 'w') as f:
