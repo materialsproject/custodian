@@ -29,6 +29,8 @@ Change log
    logging in a file called custodian.json, which logs all jobs and
    corrections performed.
 
+:doc:`Older versions </changelog>`
+
 Getting custodian
 =================
 
