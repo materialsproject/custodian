@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "-t", "--target", dest="target", nargs="?",
-        default=1, type=float,
+        default=0.001, type=float,
         help="The target converge in energy per atom to achieve "
              "convergence. E.g., 1e-3 means the KPOINTS will be increased "
              "until a converged of 1meV is reached."

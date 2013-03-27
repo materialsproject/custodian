@@ -18,6 +18,13 @@ error, and potentially restart the job if necessary.
 Change log
 ==========
 
+0.3.2
+-----
+1. Important bug fix for VaspJob and converge_kpoints script.
+
+0.3.0
+-----
+
 1. Major update to custodian API. Custodian now perform more comprehensive
    logging in a file called custodian.json, which logs all jobs and
    corrections performed.
