@@ -127,7 +127,6 @@ class VaspJob(Job, MSONable):
                 elif "filename" in a:
                     m.modify(a["action"], a["filename"])
             vi["INCAR"].write_file("INCAR")
-            vi["POSCAR"].write_file("POSCAR")
             vi["KPOINTS"].write_file("KPOINTS")
 
     def run(self):
