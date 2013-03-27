@@ -4,6 +4,11 @@ perform error checking, job management and error recovery. It has a simple
 plugin framework that allows you to develop specific job management workflows
 for different applications.
 
+Error recovery is an important aspect of many *high-throughput* projects that
+generate data on a large scale. When you are running on the order of hundreds
+of thousands of jobs, even an error-rate of 1% would mean thousands of errored
+jobs that would be impossible to deal with on a case-by-case basis.
+
 The specific use case for custodian is for long running jobs, with potentially
 random errors. For example, there may be a script that takes several days to
 run on a server, with a 1% chance of some IO error causing the job to fail.
@@ -70,6 +75,9 @@ concrete implementation of the abstract base classes custodian.custodian.Job
 and custodian.custodian.ErrorHandler. An very simple example implementation is
 given in the custodian_examples.py script in the scripts directory.
 
+Electronic structure calculations
+---------------------------------
+
 Other specific examples for electronic structure calculations based on the
 Vienna Ab Initio Simulation Package (VASP) are implemented in the
 custodian.vasp package. A simple example of a script using Custodian to run a
@@ -90,6 +98,10 @@ two-relaxation VASP job is as follows:
 The above will gracefully deal with many VASP errors encountered during
 relaxation. For example, it will correct ISMEAR to 0 if there are
 insufficient KPOINTS to use ISMEAR = -5.
+
+Using custodian, you can even setup potentially indefinite jobs,
+e.g. kpoints convergence jobs with a target energy. Please see the
+converge_kpoints scripts for an example.
 
 How to cite custodian
 =====================

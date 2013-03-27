@@ -151,6 +151,7 @@ class ErrorHandler(object):
         raise NotImplementedError("ErrorHandler objects must implement a "
                                   "from_dict static method.")
 
+
 class Job(object):
     """
     Abstract base class defining the interface for a Job.
