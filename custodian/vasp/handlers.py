@@ -42,6 +42,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         "inv_rot_mat": ["inverse of rotation matrix was not found (increase "
                         "SYMPREC)"],
         "brmix": ["BRMIX: very serious problems"],
+        "rspher": ["ERROR RSPHER"],
         "subspacematrix": ["WARNING: Sub-Space-Matrix is not hermitian in DAV"],
         "tetirr": ["Routine TETIRR needs special values"],
         "incorrect_shift": ["Could not get correct shifts"],
@@ -77,7 +78,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         if "brmix" in self.errors:
             actions.append({'dict': 'INCAR',
                             'action': {'_set': {'IMIX': 1}}})
-        if "subspacematrix" in self.errors:
+        if "subspacematrix" in self.errors or "rspher" in self.errors:
             actions.append({'dict': 'INCAR',
                             'action': {'_set': {'INCAR->LREAL': False}}})
         if "tetirr" in self.errors or "incorrect_shift" in self.errors:
