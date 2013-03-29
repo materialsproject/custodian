@@ -92,11 +92,12 @@ class VaspErrorHandler(ErrorHandler, MSONable):
             actions.append({'dict': 'KPOINTS',
                             'action': {'_set': {'kpoints': [[m] * 3]}}})
         m = Modder()
+        modified = []
         for a in actions:
+            modified.append(a["dict"])
             vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
-        vi["INCAR"].write_file("INCAR")
-        vi["POSCAR"].write_file("POSCAR")
-        vi["KPOINTS"].write_file("KPOINTS")
+        for f in modified:
+            vi[f].write_file(f)
         return {"errors": list(self.errors), "actions": actions}
 
     def __str__(self):
