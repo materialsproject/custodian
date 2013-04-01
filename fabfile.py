@@ -48,7 +48,7 @@ def makedoc():
                     fid.write("".join(newoutput))
 
         local("make html")
-        local("cp favicon.ico ../../docs/custodian/html/static/favicon.ico")
+        local("cp favicon.ico _build/html/_static/favicon.ico")
 
 
 def publish():
@@ -62,14 +62,6 @@ def test():
 def setver():
     local("sed s/version=.*,/version=\\\"{}\\\",/ setup.py > newsetup".format(ver))
     local("mv newsetup setup.py")
-
-
-def update_dev_doc():
-    makedoc()
-    with lcd("../docs/custodian/html/"):
-        local("git add .")
-        local("git commit -a -m \"Update dev docs\"")
-        local("git push origin gh-pages")
 
 
 def release():
