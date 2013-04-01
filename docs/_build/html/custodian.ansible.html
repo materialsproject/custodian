@@ -1,0 +1,364 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ansible Package &mdash; custodian 0.3.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.3.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="top" title="custodian 0.3.3 documentation" href="index.html" />
+ 
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39574369-1']);
+  _gaq.push(['_trackPageview']);
+</script>
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">custodian 0.3.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="ansible-package">
+<h1>ansible Package<a class="headerlink" href="#ansible-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-custodian.ansible.actions">
+<span id="actions-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">actions</span></tt> Module<a class="headerlink" href="#module-custodian.ansible.actions" title="Permalink to this headline">¶</a></h2>
+<p>This module defines various classes of supported actions. All actions are
+implemented as static methods, but are defined using classes (as opposed to
+modules) so that a set of well-defined actions can be namespaced easily.</p>
+<dl class="class">
+<dt id="custodian.ansible.actions.DictActions">
+<em class="property">class </em><tt class="descname">DictActions</tt><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Class to implement the supported mongo-like modifications on a dict.
+Supported keywords include the following Mongo-based keywords, with the
+usual meanings (refer to Mongo documentation for information):</p>
+<blockquote>
+<div>_inc
+_set
+_unset
+_push
+_push_all
+_add_to_set (but _each is not supported)
+_pop
+_pull
+_pull_all
+_rename</div></blockquote>
+<p>However, note that &#8220;_set&#8221; does not support modification of nested dicts
+using the mongo {&#8220;a.b&#8221;:1} notation. This is because mongo does not allow
+keys with &#8221;.&#8221; to be inserted. Instead, nested dict modification is
+supported using a special &#8220;-&gt;&#8221; keyword, e.g. {&#8220;a-&gt;b&#8221;: 1}</p>
+<dl class="staticmethod">
+<dt id="custodian.ansible.actions.DictActions.add_to_set">
+<em class="property">static </em><tt class="descname">add_to_set</tt><big>(</big><em>input_dict</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.add_to_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.add_to_set" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.ansible.actions.DictActions.inc">
+<em class="property">static </em><tt class="descname">inc</tt><big>(</big><em>input_dict</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.inc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.inc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.ansible.actions.DictActions.pop">
+<em class="property">static </em><tt class="descname">pop</tt><big>(</big><em>input_dict</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.pop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.pop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.ansible.actions.DictActions.pull">
+<em class="property">static </em><tt class="descname">pull</tt><big>(</big><em>input_dict</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.pull"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.pull" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.ansible.actions.DictActions.pull_all">
+<em class="property">static </em><tt class="descname">pull_all</tt><big>(</big><em>input_dict</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.pull_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.pull_all" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.ansible.actions.DictActions.push">
+<em class="property">static </em><tt class="descname">push</tt><big>(</big><em>input_dict</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.push"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.push" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.ansible.actions.DictActions.push_all">
+<em class="property">static </em><tt class="descname">push_all</tt><big>(</big><em>input_dict</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.push_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.push_all" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.ansible.actions.DictActions.rename">
+<em class="property">static </em><tt class="descname">rename</tt><big>(</big><em>input_dict</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.rename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.ansible.actions.DictActions.set">
+<em class="property">static </em><tt class="descname">set</tt><big>(</big><em>input_dict</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.set" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.ansible.actions.DictActions.unset">
+<em class="property">static </em><tt class="descname">unset</tt><big>(</big><em>input_dict</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.unset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.unset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="custodian.ansible.actions.FileActions">
+<em class="property">class </em><tt class="descname">FileActions</tt><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Class of supported file actions. For FileActions, the modder class takes in
+a filename as a string. The filename should preferably be a full path to
+avoid ambiguity.</p>
+<dl class="staticmethod">
+<dt id="custodian.ansible.actions.FileActions.file_copy">
+<em class="property">static </em><tt class="descname">file_copy</tt><big>(</big><em>filename</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies a file. {&#8216;_file_copy&#8217;: {&#8216;dest&#8217;: &#8216;new_file_name&#8217;}}</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>filename:</dt>
+<dd>Filename.</dd>
+<dt>settings:</dt>
+<dd>Must be {&#8220;dest&#8221;: path of new file}</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.ansible.actions.FileActions.file_create">
+<em class="property">static </em><tt class="descname">file_create</tt><big>(</big><em>filename</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a file.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>filename:</dt>
+<dd>Filename.</dd>
+<dt>settings:</dt>
+<dd>Must be {&#8220;content&#8221;: actual_content}</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.ansible.actions.FileActions.file_delete">
+<em class="property">static </em><tt class="descname">file_delete</tt><big>(</big><em>filename</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes a file. {&#8216;_file_delete&#8217;: {&#8216;mode&#8217;: &#8220;actual&#8221;}}</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>filename:</dt>
+<dd>Filename.</dd>
+<dt>settings:</dt>
+<dd>Must be {&#8220;mode&#8221;: actual/simulated}. Simulated mode only prints
+the action without performing it.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.ansible.actions.FileActions.file_move">
+<em class="property">static </em><tt class="descname">file_move</tt><big>(</big><em>filename</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_move"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_move" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves a file. {&#8216;_file_move&#8217;: {&#8216;dest&#8217;: &#8216;new_file_name&#8217;}}</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>filename:</dt>
+<dd>Filename.</dd>
+<dt>settings:</dt>
+<dd>Must be {&#8220;dest&#8221;: path of new file}</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="custodian.ansible.actions.get_nested_dict">
+<tt class="descname">get_nested_dict</tt><big>(</big><em>input_dict</em>, <em>key</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#get_nested_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.get_nested_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-custodian.ansible.intepreter">
+<span id="intepreter-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">intepreter</span></tt> Module<a class="headerlink" href="#module-custodian.ansible.intepreter" title="Permalink to this headline">¶</a></h2>
+<p>This module implements a Modder class that performs modifications on objects
+using support actions.</p>
+<dl class="class">
+<dt id="custodian.ansible.intepreter.Modder">
+<em class="property">class </em><tt class="descname">Modder</tt><big>(</big><em>actions=None</em>, <em>strict=True</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/intepreter.html#Modder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.intepreter.Modder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Class to modify a dict/file/any object using a mongo-like language.
+Keywords are mostly adopted from mongo&#8217;s syntax, but instead of $, an
+underscore precedes action keywords. This is so that the modification can
+be inserted into a mongo db easily.</p>
+<p>Allowable actions are supplied as a list of classes as an argument. Refer
+to the action classes on what the actions do. Action classes are in
+pymatpro.ansible.actions.</p>
+<p>Examples:
+&gt;&gt;&gt; modder = Modder()
+&gt;&gt;&gt; d = {&#8220;Hello&#8221;: &#8220;World&#8221;}
+&gt;&gt;&gt; mod = {&#8216;_set&#8217;: {&#8216;Hello&#8217;:&#8217;Universe&#8217;, &#8216;Bye&#8217;: &#8216;World&#8217;}}
+&gt;&gt;&gt; modder.modify(mod, d)
+&gt;&gt;&gt; d[&#8216;Bye&#8217;]
+&#8216;World&#8217;
+&gt;&gt;&gt; d[&#8216;Hello&#8217;]
+&#8216;Universe&#8217;</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>actions:</dt>
+<dd>A sequence of supported actions. Default is None, which means
+only DictActions are supported.</dd>
+<dt>strict:</dt>
+<dd>Boolean indicating whether to use strict mode. In non-strict
+mode, unsupported actions are simply ignored without any
+errors raised. In strict mode, if an unsupported action is
+supplied, a ValueError is raised. Defaults to True.</dd>
+</dl>
+</dd>
+</dl>
+<dl class="method">
+<dt id="custodian.ansible.intepreter.Modder.modify">
+<tt class="descname">modify</tt><big>(</big><em>modification</em>, <em>obj</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/intepreter.html#Modder.modify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.intepreter.Modder.modify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note that modify makes actual in-place modifications. It does not
+return a copy.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>modification:</dt>
+<dd>Modification must be {action_keyword : settings}</dd>
+<dt>obj:</dt>
+<dd>Object to modify depending on actions. For example, for
+DictActions, obj will be a dict to be modified. For
+FileActions, obj will be a string with a full pathname to a
+file.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="custodian.ansible.intepreter.Modder.modify_object">
+<tt class="descname">modify_object</tt><big>(</big><em>modification</em>, <em>obj</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/intepreter.html#Modder.modify_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.intepreter.Modder.modify_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modify an object that supports pymatgen&#8217;s to_dict and from_dict API.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>modification:</dt>
+<dd>Modification must be {action_keyword : settings}</dd>
+<dt>obj:</dt>
+<dd>Object to modify</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ansible Package</a><ul>
+<li><a class="reference internal" href="#module-custodian.ansible.actions"><tt class="docutils literal"><span class="pre">actions</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-custodian.ansible.intepreter"><tt class="docutils literal"><span class="pre">intepreter</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/custodian.ansible.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">custodian 0.3.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, Shyue Ping Ong.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+<script type="text/javascript">
+  (function() {
+    var ga = document.createElement('script');
+    ga.src = ('https:' == document.location.protocol ?
+              'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    ga.setAttribute('async', 'true');
+    document.documentElement.firstChild.appendChild(ga);
+  })();
+</script>
+</div>
+
+  </body>
+</html>

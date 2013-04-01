@@ -1,0 +1,591 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>vasp Package &mdash; custodian 0.3.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.3.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="top" title="custodian 0.3.3 documentation" href="index.html" />
+ 
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39574369-1']);
+  _gaq.push(['_trackPageview']);
+</script>
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">custodian 0.3.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="vasp-package">
+<h1>vasp Package<a class="headerlink" href="#vasp-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">vasp</span></tt> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-custodian.vasp"></span><p>TODO: Change the module doc.</p>
+</div>
+<div class="section" id="module-custodian.vasp.handlers">
+<span id="handlers-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">handlers</span></tt> Module<a class="headerlink" href="#module-custodian.vasp.handlers" title="Permalink to this headline">¶</a></h2>
+<p>This module implements specific error handlers for VASP runs. These handlers
+tries to detect common errors in vasp runs and attempt to fix them on the fly
+by modifying the input files.</p>
+<dl class="class">
+<dt id="custodian.vasp.handlers.PoscarErrorHandler">
+<em class="property">class </em><tt class="descname">PoscarErrorHandler</tt><big>(</big><em>output_filename='vasp.out'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PoscarErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PoscarErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">pymatgen.serializers.json_coders.MSONable</span></tt></p>
+<dl class="method">
+<dt id="custodian.vasp.handlers.PoscarErrorHandler.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PoscarErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PoscarErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.handlers.PoscarErrorHandler.correct">
+<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PoscarErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PoscarErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.vasp.handlers.PoscarErrorHandler.from_dict">
+<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PoscarErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PoscarErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.PoscarErrorHandler.to_dict">
+<tt class="descname">to_dict</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PoscarErrorHandler.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PoscarErrorHandler.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="custodian.vasp.handlers.UnconvergedErrorHandler">
+<em class="property">class </em><tt class="descname">UnconvergedErrorHandler</tt><big>(</big><em>output_filename='vasprun.xml'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">pymatgen.serializers.json_coders.MSONable</span></tt></p>
+<p>Check if a run is converged</p>
+<dl class="method">
+<dt id="custodian.vasp.handlers.UnconvergedErrorHandler.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.handlers.UnconvergedErrorHandler.correct">
+<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.vasp.handlers.UnconvergedErrorHandler.from_dict">
+<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.UnconvergedErrorHandler.to_dict">
+<tt class="descname">to_dict</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="custodian.vasp.handlers.VaspErrorHandler">
+<em class="property">class </em><tt class="descname">VaspErrorHandler</tt><big>(</big><em>output_filename='vasp.out'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">pymatgen.serializers.json_coders.MSONable</span></tt></p>
+<dl class="method">
+<dt id="custodian.vasp.handlers.VaspErrorHandler.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.handlers.VaspErrorHandler.correct">
+<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.VaspErrorHandler.error_msgs">
+<tt class="descname">error_msgs</tt><em class="property"> = {'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'mesh_symmetry': ['Reciprocal lattice and k-lattice belong to different class of lattices.'], 'incorrect_shift': ['Could not get correct shifts'], 'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'rspher': ['ERROR RSPHER'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values'], 'brmix': ['BRMIX: very serious problems'], 'tetirr': ['Routine TETIRR needs special values']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.vasp.handlers.VaspErrorHandler.from_dict">
+<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.VaspErrorHandler.to_dict">
+<tt class="descname">to_dict</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="custodian.vasp.handlers.backup">
+<tt class="descname">backup</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.backup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-custodian.vasp.jobs">
+<span id="jobs-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">jobs</span></tt> Module<a class="headerlink" href="#module-custodian.vasp.jobs" title="Permalink to this headline">¶</a></h2>
+<p>This module implements basic kinds of jobs for VASP runs.</p>
+<dl class="class">
+<dt>
+<tt class="descname">VaspJob(vasp_command, output_file='vasp.out', suffix='', final=True, gzipped=False, backup=True, default_vasp_input_set=MIT</tt></dt>
+<dt>
+<tt class="descname"></tt></dt>
+<dt>
+<tt class="descname">INCAR settings</tt></dt>
+<dt>
+<tt class="descname">NELM = 100</tt></dt>
+<dt>
+<tt class="descname">IBRION = 2</tt></dt>
+<dt>
+<tt class="descname">LDAUTYPE = 2</tt></dt>
+<dt>
+<tt class="descname">LWAVE = False</tt></dt>
+<dt>
+<tt class="descname">SIGMA = 0.05</tt></dt>
+<dt>
+<tt class="descname">MAGMOM = {u'Ni': 2, u'Mn4+': 3, u'Co': 5, u'Ni3+': 1, u'Fe2+': 4, u'Mn': 5, u'Co3+': 0.6, u'Fe3+': 5, u'Ni4+': 0.6, u'Mn2+': 5, u'Fe': 5, u'W': 5, u'Mn3+': 4, u'Mo': 5, u'Cr': 5, u'V': 5, u'Fe4+': 4, u'Co4+': 1, u'Ta': 5}</tt></dt>
+<dt>
+<tt class="descname">NELMIN = 6</tt></dt>
+<dt>
+<tt class="descname">LDAUL = {u'S': {u'Mn': 2.5, u'Fe': 2}, u'O': {u'Ni': 2, u'Co': 2, u'Ag': 2, u'Mo': 2, u'Mn': 2, u'Re': 2, u'Fe': 2, u'W': 2, u'V': 2, u'Cr': 2, u'Nb': 2, u'Cu': 2, u'Ta': 2}, u'F': {u'Ni': 2, u'Co': 2, u'Ag': 2, u'Mo': 2, u'Mn': 2, u'Re': 2, u'Fe': 2, u'W': 2, u'V': 2, u'Cr': 2, u'Nb': 2, u'Cu': 2, u'Ta': 2}}</tt></dt>
+<dt>
+<tt class="descname">LDAUJ = {u'S': {u'Mn': 0, u'Fe': 0}, u'O': {u'Ni': 0, u'Co': 0, u'Ag': 0, u'Mo': 0, u'Mn': 0, u'Re': 0, u'Fe': 0, u'W': 0, u'V': 0, u'Cr': 0, u'Nb': 0, u'Cu': 0, u'Ta': 0}, u'F': {u'Ni': 0, u'Co': 0, u'Ag': 0, u'Mo': 0, u'Mn': 0, u'Re': 0, u'Fe': 0, u'W': 0, u'V': 0, u'Cr': 0, u'Nb': 0, u'Cu': 0, u'Ta': 0}}</tt></dt>
+<dt>
+<tt class="descname">ENCUT = 520</tt></dt>
+<dt>
+<tt class="descname">ISIF = 3</tt></dt>
+<dt>
+<tt class="descname">ICHARG = 1</tt></dt>
+<dt>
+<tt class="descname">LDAUU = {u'S': {u'Mn': 2.5, u'Fe': 1.9}, u'O': {u'Ni': 6, u'Co': 3.4, u'Ag': 1.5, u'Mo': 4.38, u'Mn': 3.9, u'Re': 2, u'Fe': 4.0, u'W': 4.0, u'V': 3.1, u'Cr': 3.5, u'Nb': 1.5, u'Cu': 4, u'Ta': 2}, u'F': {u'Ni': 6, u'Co': 3.4, u'Ag': 1.5, u'Mo': 4.38, u'Mn': 3.9, u'Re': 2, u'Fe': 4.0, u'W': 4.0, u'V': 3.1, u'Cr': 3.5, u'Nb': 1.5, u'Cu': 4, u'Ta': 2}}</tt></dt>
+<dt>
+<tt class="descname">EDIFF = 0.00005</tt></dt>
+<dt>
+<tt class="descname">NSW = 99</tt></dt>
+<dt>
+<tt class="descname">LREAL = AUTO</tt></dt>
+<dt>
+<tt class="descname">ISMEAR = -5</tt></dt>
+<dt>
+<tt class="descname">NPAR = 1</tt></dt>
+<dt>
+<tt class="descname">PREC = Accurate</tt></dt>
+<dt>
+<tt class="descname">LDAU = TRUE</tt></dt>
+<dt>
+<tt class="descname">ALGO = FAST</tt></dt>
+<dt>
+<tt class="descname">ISPIN = 2</tt></dt>
+<dt>
+<tt class="descname">LORBIT = 11</tt></dt>
+<dt>
+<tt class="descname"></tt></dt>
+<dt>
+<tt class="descname">KPOINTS settings</tt></dt>
+<dt>
+<tt class="descname">grid_density = 1000</tt></dt>
+<dt>
+<tt class="descname"></tt></dt>
+<dt>
+<tt class="descname">POTCAR settings</tt></dt>
+<dt>
+<tt class="descname">Ru = Ru_pv</tt></dt>
+<dt>
+<tt class="descname">Re = Re</tt></dt>
+<dt>
+<tt class="descname">Rb = Rb_pv</tt></dt>
+<dt>
+<tt class="descname">Rh = Rh</tt></dt>
+<dt>
+<tt class="descname">Be = Be</tt></dt>
+<dt>
+<tt class="descname">Ba = Ba_sv</tt></dt>
+<dt>
+<tt class="descname">Bi = Bi</tt></dt>
+<dt>
+<tt class="descname">Br = Br</tt></dt>
+<dt>
+<tt class="descname">H = H</tt></dt>
+<dt>
+<tt class="descname">P = P</tt></dt>
+<dt>
+<tt class="descname">Os = Os</tt></dt>
+<dt>
+<tt class="descname">Ge = Ge</tt></dt>
+<dt>
+<tt class="descname">Gd = Gd</tt></dt>
+<dt>
+<tt class="descname">Ga = Ga</tt></dt>
+<dt>
+<tt class="descname">Pr = Pr</tt></dt>
+<dt>
+<tt class="descname">Pt = Pt</tt></dt>
+<dt>
+<tt class="descname">Pu = Pu</tt></dt>
+<dt>
+<tt class="descname">C = C</tt></dt>
+<dt>
+<tt class="descname">Pb = Pb</tt></dt>
+<dt>
+<tt class="descname">Pa = Pa</tt></dt>
+<dt>
+<tt class="descname">Pd = Pd</tt></dt>
+<dt>
+<tt class="descname">Cd = Cd</tt></dt>
+<dt>
+<tt class="descname">Pm = Pm</tt></dt>
+<dt>
+<tt class="descname">Ho = Ho_3</tt></dt>
+<dt>
+<tt class="descname">Hf = Hf</tt></dt>
+<dt>
+<tt class="descname">Hg = Hg</tt></dt>
+<dt>
+<tt class="descname">He = He</tt></dt>
+<dt>
+<tt class="descname">Mg = Mg</tt></dt>
+<dt>
+<tt class="descname">K = K_sv</tt></dt>
+<dt>
+<tt class="descname">Mn = Mn</tt></dt>
+<dt>
+<tt class="descname">O = O</tt></dt>
+<dt>
+<tt class="descname">S = S</tt></dt>
+<dt>
+<tt class="descname">W = W_pv</tt></dt>
+<dt>
+<tt class="descname">Zn = Zn</tt></dt>
+<dt>
+<tt class="descname">Eu = Eu</tt></dt>
+<dt>
+<tt class="descname">Zr = Zr</tt></dt>
+<dt>
+<tt class="descname">Er = Er_3</tt></dt>
+<dt>
+<tt class="descname">Ni = Ni</tt></dt>
+<dt>
+<tt class="descname">Na = Na</tt></dt>
+<dt>
+<tt class="descname">Nb = Nb_pv</tt></dt>
+<dt>
+<tt class="descname">Nd = Nd</tt></dt>
+<dt>
+<tt class="descname">Ne = Ne</tt></dt>
+<dt>
+<tt class="descname">Np = Np</tt></dt>
+<dt>
+<tt class="descname">Fe = Fe</tt></dt>
+<dt>
+<tt class="descname">B = B</tt></dt>
+<dt>
+<tt class="descname">F = F</tt></dt>
+<dt>
+<tt class="descname">Sr = Sr_sv</tt></dt>
+<dt>
+<tt class="descname">N = N</tt></dt>
+<dt>
+<tt class="descname">Kr = Kr</tt></dt>
+<dt>
+<tt class="descname">Si = Si</tt></dt>
+<dt>
+<tt class="descname">Sn = Sn_d</tt></dt>
+<dt>
+<tt class="descname">Sm = Sm_3</tt></dt>
+<dt>
+<tt class="descname">V = V_pv</tt></dt>
+<dt>
+<tt class="descname">Sc = Sc_sv</tt></dt>
+<dt>
+<tt class="descname">Sb = Sb</tt></dt>
+<dt>
+<tt class="descname">Se = Se</tt></dt>
+<dt>
+<tt class="descname">Co = Co</tt></dt>
+<dt>
+<tt class="descname">Cl = Cl</tt></dt>
+<dt>
+<tt class="descname">Ca = Ca_sv</tt></dt>
+<dt>
+<tt class="descname">Ce = Ce</tt></dt>
+<dt>
+<tt class="descname">Xe = Xe</tt></dt>
+<dt>
+<tt class="descname">Tm = Tm_3</tt></dt>
+<dt>
+<tt class="descname">Cs = Cs_sv</tt></dt>
+<dt>
+<tt class="descname">Cr = Cr</tt></dt>
+<dt>
+<tt class="descname">Cu = Cu</tt></dt>
+<dt>
+<tt class="descname">La = La</tt></dt>
+<dt>
+<tt class="descname">Li = Li</tt></dt>
+<dt>
+<tt class="descname">Tl = Tl</tt></dt>
+<dt>
+<tt class="descname">Lu = Lu_3</tt></dt>
+<dt>
+<tt class="descname">Th = Th</tt></dt>
+<dt>
+<tt class="descname">Ti = Ti</tt></dt>
+<dt>
+<tt class="descname">Te = Te</tt></dt>
+<dt>
+<tt class="descname">Tb = Tb_3</tt></dt>
+<dt>
+<tt class="descname">Tc = Tc</tt></dt>
+<dt>
+<tt class="descname">Ta = Ta</tt></dt>
+<dt>
+<tt class="descname">Yb = Yb</tt></dt>
+<dt>
+<tt class="descname">Dy = Dy_3</tt></dt>
+<dt>
+<tt class="descname">I = I</tt></dt>
+<dt>
+<tt class="descname">U = U</tt></dt>
+<dt>
+<tt class="descname">Y = Y_sv</tt></dt>
+<dt>
+<tt class="descname">Ac = Ac</tt></dt>
+<dt>
+<tt class="descname">Ag = Ag</tt></dt>
+<dt>
+<tt class="descname">Ir = Ir</tt></dt>
+<dt>
+<tt class="descname">Al = Al</tt></dt>
+<dt>
+<tt class="descname">As = As</tt></dt>
+<dt>
+<tt class="descname">Ar = Ar</tt></dt>
+<dt>
+<tt class="descname">Au = Au</tt></dt>
+<dt>
+<tt class="descname">In = In</tt></dt>
+<dt>
+<tt class="descname">Mo = Mo_pv</tt></dt>
+<dt>
+<tt class="descname">, settings_override=None)</tt></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Job</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">pymatgen.serializers.json_coders.MSONable</span></tt></p>
+<dl class="docutils">
+<dt>A basic vasp job. Just runs whatever is in the directory. But conceivably</dt>
+<dd>can be a complex processing of inputs etc. with initialization.</dd>
+</dl>
+<p>This constructor is necessarily complex due to the need for
+flexibility. For standard kinds of runs, it&#8217;s often better to use one
+of the static constructors.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>vasp_command:</dt>
+<dd>Command to run vasp as a list of args. For example,
+if you are using mpirun, it can be something like
+[&#8220;mpirun&#8221;, &#8220;pvasp.5.2.11&#8221;]</dd>
+<dt>output_file:</dt>
+<dd>Name of file to direct standard out to. Defaults to vasp.out.</dd>
+<dt>suffix:</dt>
+<dd>A suffix to be appended to the final output. E.g.,
+to rename all VASP output from say vasp.out to
+vasp.out.relax1, provide &#8221;.relax1&#8221; as the suffix.</dd>
+<dt>final:</dt>
+<dd>Boolean indicating whether this is the final vasp job in a
+series. Defaults to True.</dd>
+<dt>backup:</dt>
+<dd>Boolean whether to backup the initial input files. If True,
+the INCAR, KPOINTS, POSCAR and POTCAR will be copied with a
+&#8221;.orig&#8221; appended. Defaults to True.</dd>
+<dt>gzipped:</dt>
+<dd>Whether to gzip the final output. Defaults to False.</dd>
+<dt>default_vasp_input_set:</dt>
+<dd>Species the default input set to use for directories that do
+not contain full set of VASP input files. For example,
+if a directory contains only a POSCAR or a cif,
+the vasp input set will be used to generate the necessary
+input files for the run. If the directory already
+contain a full set of VASP input files,
+this input is ignored. Defaults to the MITVaspInputSet.</dd>
+<dt>settings_override:</dt>
+<dd><p class="first">An ansible style list of dict to override changes. For example,
+to set ISTART=1 for subsequent runs and to copy the CONTCAR
+to the POSCAR, you will provide:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="p">[{</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}},</span>
+ <span class="p">{</span><span class="s">&quot;filename&quot;</span><span class="p">:</span> <span class="s">&quot;CONTCAR&quot;</span><span class="p">,</span>
+  <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;dest&quot;</span><span class="p">:</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">}}}]</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="staticmethod">
+<dt id="custodian.vasp.jobs.VaspJob.double_relaxation_run">
+<em class="property">static </em><tt class="descclassname">VaspJob.</tt><tt class="descname">double_relaxation_run</tt><big>(</big><em>vasp_command</em>, <em>gzipped=True</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.double_relaxation_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.double_relaxation_run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of two jobs corresponding to an AFLOW style double
+relaxation run.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>vasp_command:</dt>
+<dd>Command to run vasp as a list of args. For example,
+if you are using mpirun, it can be something like
+[&#8220;mpirun&#8221;, &#8220;pvasp.5.2.11&#8221;]</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>List of two jobs corresponding to an AFLOW style run.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.vasp.jobs.VaspJob.from_dict">
+<em class="property">static </em><tt class="descclassname">VaspJob.</tt><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.jobs.VaspJob.name">
+<tt class="descclassname">VaspJob.</tt><tt class="descname">name</tt><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.jobs.VaspJob.postprocess">
+<tt class="descclassname">VaspJob.</tt><tt class="descname">postprocess</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.postprocess" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.jobs.VaspJob.run">
+<tt class="descclassname">VaspJob.</tt><tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.jobs.VaspJob.setup">
+<tt class="descclassname">VaspJob.</tt><tt class="descname">setup</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.setup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.jobs.VaspJob.to_dict">
+<tt class="descclassname">VaspJob.</tt><tt class="descname">to_dict</tt><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="custodian.vasp.jobs.gzip_directory">
+<tt class="descname">gzip_directory</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#gzip_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.gzip_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gzips all files in a directory.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>path:</dt>
+<dd>Path to directory.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">vasp Package</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">vasp</span></tt> Package</a></li>
+<li><a class="reference internal" href="#module-custodian.vasp.handlers"><tt class="docutils literal"><span class="pre">handlers</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-custodian.vasp.jobs"><tt class="docutils literal"><span class="pre">jobs</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/custodian.vasp.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">custodian 0.3.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, Shyue Ping Ong.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+<script type="text/javascript">
+  (function() {
+    var ga = document.createElement('script');
+    ga.src = ('https:' == document.location.protocol ?
+              'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    ga.setAttribute('async', 'true');
+    document.documentElement.firstChild.appendChild(ga);
+  })();
+</script>
+</div>
+
+  </body>
+</html>
