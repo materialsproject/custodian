@@ -122,7 +122,7 @@ class DentetErrorHandler(ErrorHandler):
         Detects an error when the output file has not been updated
         in timeout seconds. Perturbs structure and restarts
         """
-        self.output_file = output_file
+        self.output_filename = output_file
 
     @property
     def run_parallel(self):
@@ -150,6 +150,16 @@ class DentetErrorHandler(ErrorHandler):
         for f in modified:
             vi[f].write_file(f)
         return {"errors": "DENTET", "actions": actions}
+
+    @property
+    def to_dict(self):
+        return {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__,
+                "output_filename": self.output_filename}
+
+    @staticmethod
+    def from_dict(d):
+        return DentetErrorHandler(d["output_filename"])
 
 
 class UnconvergedErrorHandler(ErrorHandler, MSONable):
@@ -243,7 +253,7 @@ class PoscarErrorHandler(ErrorHandler, MSONable):
 
 class FrozenJobErrorHandler(ErrorHandler):
 
-    def __init__(self, output_file='vasp.out', timeout = 3600):
+    def __init__(self, output_file='vasp.out', timeout=3600):
         """
         Detects an error when the output file has not been updated
         in timeout seconds. Perturbs structure and restarts
