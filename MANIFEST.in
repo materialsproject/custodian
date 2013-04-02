@@ -1,0 +1,6 @@
+include *.rst LICENSE
+include distribute_setup.py
+recursive-include custodian *.py
+recursive-include scripts *.py
+prune */*/tests
+prune */*/*/tests

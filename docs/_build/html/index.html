@@ -1,0 +1,291 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Change log &mdash; custodian 0.3.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.3.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="top" title="custodian 0.3.3 documentation" href="#" />
+ 
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39574369-1']);
+  _gaq.push(['_trackPageview']);
+</script>
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">custodian 0.3.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <p>Custodian is a simple, robust and flexible just-in-time (JIT) job management
+framework written in Python. Using custodian, you can create wrappers that
+perform error checking, job management and error recovery. It has a simple
+plugin framework that allows you to develop specific job management workflows
+for different applications.</p>
+<p>Error recovery is an important aspect of many <em>high-throughput</em> projects that
+generate data on a large scale. When you are running on the order of hundreds
+of thousands of jobs, even an error-rate of 1% would mean thousands of errored
+jobs that would be impossible to deal with on a case-by-case basis.</p>
+<p>The specific use case for custodian is for long running jobs, with potentially
+random errors. For example, there may be a script that takes several days to
+run on a server, with a 1% chance of some IO error causing the job to fail.
+Using custodian, one can develop a mechanism to gracefully recover from the
+error, and potentially restart the job if necessary.</p>
+<div class="section" id="change-log">
+<h1>Change log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2>0.3.2<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Important bug fix for VaspJob and converge_kpoints script.</li>
+</ol>
+</div>
+<div class="section" id="id2">
+<h2>0.3.0<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Major update to custodian API. Custodian now perform more comprehensive
+logging in a file called custodian.json, which logs all jobs and
+corrections performed.</li>
+</ol>
+<p><a class="reference internal" href="changelog.html"><em>Older versions</em></a></p>
+</div>
+</div>
+<div class="section" id="getting-custodian">
+<h1>Getting custodian<a class="headerlink" href="#getting-custodian" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="stable-version">
+<h2>Stable version<a class="headerlink" href="#stable-version" title="Permalink to this headline">¶</a></h2>
+<p>The version at the Python Package Index (PyPI) is always the latest stable
+release that will be hopefully, be relatively bug-free. The easiest way to
+install custodian on any system is to use easy_install or pip, as follows:</p>
+<div class="highlight-python"><pre>easy_install custodian</pre>
+</div>
+<p>or:</p>
+<div class="highlight-python"><pre>pip install custodian</pre>
+</div>
+<p>Some plugins (e.g., vasp management) require additional setup (please see
+<a class="reference external" href="http://pythonhosted.org/pymatgen/">pymatgen&#8217;s documentation</a>).</p>
+</div>
+<div class="section" id="developmental-version">
+<h2>Developmental version<a class="headerlink" href="#developmental-version" title="Permalink to this headline">¶</a></h2>
+<p>The bleeding edge developmental version is at the custodian&#8217;s <a class="reference external" href="https://github.com/materialsproject/custodian">Github repo</a>. The developmental
+version is likely to be more buggy, but may contain new features. The
+Github version include test files as well for complete unit testing. After
+cloning the source, you can type:</p>
+<div class="highlight-python"><pre>python setup.py install</pre>
+</div>
+<p>or to install the package in developmental mode:</p>
+<div class="highlight-python"><pre>python setup.py develop</pre>
+</div>
+</div>
+</div>
+<div class="section" id="requirements">
+<h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
+<p>Custodian requires Python 2.7+. There are no other required dependencies.</p>
+<div class="section" id="optional-dependencies">
+<h2>Optional dependencies<a class="headerlink" href="#optional-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>Optional libraries that are required if you need certain features:</p>
+<ol class="arabic">
+<li><p class="first">pymatgen 2.6.2+: To use the plugin for VASP. Please install using:</p>
+<div class="highlight-python"><pre>pip install pymatgen</pre>
+</div>
+<p>For more information, please consult <a class="reference external" href="http://pythonhosted.org/pymatgen/">pymatgen&#8217;s documentation</a>.</p>
+</li>
+<li><p class="first">nose - For complete unittesting.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="section" id="basic-usage">
+<h1>Basic usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h1>
+<p>The main class in the workflow is known as Custodian, which manages a series
+of jobs with a list of error handlers. To use custodian, you need to implement
+concrete implementation of the abstract base classes custodian.custodian.Job
+and custodian.custodian.ErrorHandler. An very simple example implementation is
+given in the custodian_examples.py script in the scripts directory.</p>
+<div class="section" id="electronic-structure-calculations">
+<h2>Electronic structure calculations<a class="headerlink" href="#electronic-structure-calculations" title="Permalink to this headline">¶</a></h2>
+<p>Other specific examples for electronic structure calculations based on the
+Vienna Ab Initio Simulation Package (VASP) are implemented in the
+custodian.vasp package. A simple example of a script using Custodian to run a
+two-relaxation VASP job is as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">Custodian</span>
+<span class="kn">from</span> <span class="nn">custodian.vasp.handlers</span> <span class="kn">import</span> <span class="n">VaspErrorHandler</span><span class="p">,</span> <span class="n">UnconvergedErrorHandler</span>
+<span class="kn">from</span> <span class="nn">custodian.vasp.jobs</span> <span class="kn">import</span> <span class="n">VaspJob</span>
+
+<span class="n">handlers</span> <span class="o">=</span> <span class="p">[</span><span class="n">VaspErrorHandler</span><span class="p">(),</span> <span class="n">UnconvergedErrorHandler</span><span class="p">(),</span>
+            <span class="n">PoscarErrorHandler</span><span class="p">()]</span>
+<span class="n">jobs</span> <span class="o">=</span> <span class="n">VaspJob</span><span class="o">.</span><span class="n">double_relaxation_run</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">Custodian</span><span class="p">(</span><span class="n">handlers</span><span class="p">,</span> <span class="n">jobs</span><span class="p">,</span> <span class="n">max_errors</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">c</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The above will gracefully deal with many VASP errors encountered during
+relaxation. For example, it will correct ISMEAR to 0 if there are
+insufficient KPOINTS to use ISMEAR = -5.</p>
+</div>
+</div>
+<div class="section" id="api-reference-docs">
+<h1>API/Reference Docs<a class="headerlink" href="#api-reference-docs" title="Permalink to this headline">¶</a></h1>
+<p>The API docs are generated using Sphinx auto-doc and outlines the purpose of all
+modules and classes, and the expected argument and returned objects for most
+methods. They are available at the link below.</p>
+<p><a class="reference internal" href="modules.html"><em>custodian API docs</em></a></p>
+</div>
+<div class="section" id="how-to-cite-custodian">
+<h1>How to cite custodian<a class="headerlink" href="#how-to-cite-custodian" title="Permalink to this headline">¶</a></h1>
+<p>If you use custodian in your research, especially the VASP component, please
+consider citing the following work:</p>
+<blockquote>
+<div>Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Geoffroy Hautier,
+Michael Kocher, Shreyas Cholia, Dan Gunter, Vincent Chevrier, Kristin A.
+Persson, Gerbrand Ceder. <em>Python Materials Genomics (pymatgen) : A Robust,
+Open-Source Python Library for Materials Analysis.</em> Computational
+Materials Science, 2013, 68, 314–319. <a class="reference external" href="http://dx.doi.org/10.1016/j.commatsci.2012.10.028">doi:10.1016/j.commatsci.2012.10.028</a></div></blockquote>
+</div>
+<div class="section" id="license">
+<h1>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h1>
+<p>Custodian is released under the MIT License. The terms of the license are as
+follows:</p>
+<div class="highlight-python"><pre>The MIT License (MIT)
+Copyright (c) 2011-2012 MIT &amp; LBNL
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software")
+, to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.</pre>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Change log</a><ul>
+<li><a class="reference internal" href="#id1">0.3.2</a></li>
+<li><a class="reference internal" href="#id2">0.3.0</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#getting-custodian">Getting custodian</a><ul>
+<li><a class="reference internal" href="#stable-version">Stable version</a></li>
+<li><a class="reference internal" href="#developmental-version">Developmental version</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#requirements">Requirements</a><ul>
+<li><a class="reference internal" href="#optional-dependencies">Optional dependencies</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#basic-usage">Basic usage</a><ul>
+<li><a class="reference internal" href="#electronic-structure-calculations">Electronic structure calculations</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#api-reference-docs">API/Reference Docs</a></li>
+<li><a class="reference internal" href="#how-to-cite-custodian">How to cite custodian</a></li>
+<li><a class="reference internal" href="#license">License</a></li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">custodian 0.3.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, Shyue Ping Ong.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+<script type="text/javascript">
+  (function() {
+    var ga = document.createElement('script');
+    ga.src = ('https:' == document.location.protocol ?
+              'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    ga.setAttribute('async', 'true');
+    document.documentElement.firstChild.appendChild(ga);
+  })();
+</script>
+</div>
+
+  </body>
+</html>

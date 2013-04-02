@@ -1,0 +1,290 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>custodian Package &mdash; custodian 0.3.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.3.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="top" title="custodian 0.3.3 documentation" href="index.html" />
+ 
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39574369-1']);
+  _gaq.push(['_trackPageview']);
+</script>
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">custodian 0.3.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="custodian-package">
+<h1>custodian Package<a class="headerlink" href="#custodian-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">custodian</span></tt> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-custodian.__init__"></span></div>
+<div class="section" id="module-custodian.custodian">
+<span id="custodian-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">custodian</span></tt> Module<a class="headerlink" href="#module-custodian.custodian" title="Permalink to this headline">¶</a></h2>
+<p>This module implements the main Custodian class, which manages a list of jobs
+given a set of error handlers, and the abstract base classes for the
+ErrorHandlers and Jobs.</p>
+<dl class="class">
+<dt id="custodian.custodian.Custodian">
+<em class="property">class </em><tt class="descname">Custodian</tt><big>(</big><em>handlers</em>, <em>jobs</em>, <em>max_errors=1</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>The Custodian class is the manager for a list of jobs given a list of
+error handlers. The way it works is as follows:</p>
+<ol class="arabic simple">
+<li>Let&#8217;s say you have defined a list of jobs as [job1, job2, job3, ...] and
+you have defined a list of possible error handlers as [err1, err2, ...]</li>
+<li>Custodian will run the jobs in the order of job1, job2, ...</li>
+<li>At the end of each individual job, Custodian will run through the list
+error handlers. If an error is detected, corrective measures are taken
+and the particular job is rerun.</li>
+</ol>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>handlers:</dt>
+<dd>Error handlers. In order of priority of fixing.</dd>
+<dt>jobs:</dt>
+<dd>List of Jobs. Allow for multistep jobs. E.g., give it two
+BasicVaspJobs and you effectively have a aflow
+double-relaxation.</dd>
+<dt>max_errors:</dt>
+<dd>Maximum number of errors allowed before exiting.</dd>
+</dl>
+</dd>
+</dl>
+<dl class="method">
+<dt id="custodian.custodian.Custodian.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Custodian.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the job.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>All errors encountered as a list of list.
+[[error_dicts for job 1], [error_dicts for job 2], ....]</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="custodian.custodian.ErrorHandler">
+<em class="property">class </em><tt class="descname">ErrorHandler</tt><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Abstract base class defining the interface for an ErrorHandler.</p>
+<dl class="method">
+<dt id="custodian.custodian.ErrorHandler.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is called at the end of a job. Returns a boolean value
+indicating if errors are detected.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="custodian.custodian.ErrorHandler.correct">
+<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is called at the end of a job when an error is detected.
+It should perform any corrective measures relating to the detected
+error.</p>
+<p>This method should return a JSON serializable dict that describes
+the errors and actions taken. E.g.
+{&#8220;errors&#8221;: list_of_errors, &#8220;actions&#8221;: list_of_actions_taken}</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.custodian.ErrorHandler.from_dict">
+<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>This simply raises a NotImplementedError to force subclasses to
+implement this static method. Abstract static methods are not
+implemented until Python 3+.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.custodian.ErrorHandler.to_dict">
+<tt class="descname">to_dict</tt><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method should return a JSON serializable dict describing the
+ErrorHandler, and can be deserialized using the from_dict static
+method.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="custodian.custodian.Job">
+<em class="property">class </em><tt class="descname">Job</tt><a class="reference internal" href="_modules/custodian/custodian.html#Job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Abstract base class defining the interface for a Job.</p>
+<dl class="staticmethod">
+<dt id="custodian.custodian.Job.from_dict">
+<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Job.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>This simply raises a NotImplementedError to force subclasses to
+implement this static method. Abstract static methods are not
+implemented until Python 3+.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.custodian.Job.name">
+<tt class="descname">name</tt><a class="reference internal" href="_modules/custodian/custodian.html#Job.name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>A nice string name for the job.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="custodian.custodian.Job.postprocess">
+<tt class="descname">postprocess</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Job.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.postprocess" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is called at the end of a job, <em>after</em> error detection.
+This allows post-processing, such as cleanup, analysis of results,
+etc.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="custodian.custodian.Job.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Job.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method perform the actual work for the job.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="custodian.custodian.Job.setup">
+<tt class="descname">setup</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Job.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is run before the start of a job. Allows for some
+pre-processing.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.custodian.Job.to_dict">
+<tt class="descname">to_dict</tt><a class="reference internal" href="_modules/custodian/custodian.html#Job.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method should return a JSON serializable dict describing the
+Job, and can be deserialized using the from_dict static
+method.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="custodian.ansible.html">ansible Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="custodian.ansible.html#module-custodian.ansible.actions"><tt class="docutils literal"><span class="pre">actions</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custodian.ansible.html#module-custodian.ansible.intepreter"><tt class="docutils literal"><span class="pre">intepreter</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custodian.vasp.html">vasp Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="custodian.vasp.html#id1"><tt class="docutils literal"><span class="pre">vasp</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.handlers"><tt class="docutils literal"><span class="pre">handlers</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.jobs"><tt class="docutils literal"><span class="pre">jobs</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">custodian Package</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">custodian</span></tt> Package</a></li>
+<li><a class="reference internal" href="#module-custodian.custodian"><tt class="docutils literal"><span class="pre">custodian</span></tt> Module</a></li>
+<li><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/custodian.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">custodian 0.3.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, Shyue Ping Ong.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+<script type="text/javascript">
+  (function() {
+    var ga = document.createElement('script');
+    ga.src = ('https:' == document.location.protocol ?
+              'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    ga.setAttribute('async', 'true');
+    document.documentElement.firstChild.appendChild(ga);
+  })();
+</script>
+</div>
+
+  </body>
+</html>

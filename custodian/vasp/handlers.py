@@ -16,21 +16,24 @@ __status__ = "Beta"
 __date__ = "2/4/13"
 
 import os
-import shutil
 import logging
 import tarfile
 import time
 import glob
+import operator
 
 from custodian.custodian import ErrorHandler
-from pymatgen.io.vaspio.vasp_input import Incar, Poscar, VaspInput
+from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput
 from pymatgen.transformations.standard_transformations import \
     PerturbStructureTransformation
+from pymatgen.serializers.json_coders import MSONable
+
 from pymatgen.io.vaspio.vasp_output import Vasprun
 from custodian.ansible.intepreter import Modder
+from custodian.ansible.actions import FileActions, DictActions
 
 
-class VaspErrorHandler(ErrorHandler):
+class VaspErrorHandler(ErrorHandler, MSONable):
 
     error_msgs = {
         "tet": ["Tetrahedron method fails for NKPT<4",
@@ -40,6 +43,7 @@ class VaspErrorHandler(ErrorHandler):
         "inv_rot_mat": ["inverse of rotation matrix was not found (increase "
                         "SYMPREC)"],
         "brmix": ["BRMIX: very serious problems"],
+        "rspher": ["ERROR RSPHER"],
         "subspacematrix": ["WARNING: Sub-Space-Matrix is not hermitian in DAV"],
         "tetirr": ["Routine TETIRR needs special values"],
         "incorrect_shift": ["Could not get correct shifts"],
@@ -75,56 +79,95 @@ class VaspErrorHandler(ErrorHandler):
         if "brmix" in self.errors:
             actions.append({'dict': 'INCAR',
                             'action': {'_set': {'IMIX': 1}}})
-        if "subspacematrix" in self.errors:
+        if "subspacematrix" in self.errors or "rspher" in self.errors:
             actions.append({'dict': 'INCAR',
                             'action': {'_set': {'INCAR->LREAL': False}}})
         if "tetirr" in self.errors or "incorrect_shift" in self.errors:
             actions.append({'dict': 'KPOINTS',
                             'action': {'_set': {'style': "Gamma"}}})
         if "mesh_symmetry" in self.errors:
-            m = max(vi["KPOINTS"].kpts[0])
+            m = reduce(operator.mul, vi["KPOINTS"].kpts[0])
+            m = max(int(round(m ** (1 / 3))), 1)
+            if vi["KPOINTS"].style.lower().startswith("m"):
+                m += m % 2
             actions.append({'dict': 'KPOINTS',
                             'action': {'_set': {'kpoints': [[m] * 3]}}})
         m = Modder()
+        modified = []
         for a in actions:
+            modified.append(a["dict"])
             vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
-        vi["INCAR"].write_file("INCAR")
-        vi["POSCAR"].write_file("POSCAR")
-        vi["KPOINTS"].write_file("KPOINTS")
+        for f in modified:
+            vi[f].write_file(f)
         return {"errors": list(self.errors), "actions": actions}
 
     def __str__(self):
         return "Vasp error"
 
+    @property
+    def to_dict(self):
+        return {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__,
+                "output_filename": self.output_filename}
 
-class UnconvergedErrorHandler(ErrorHandler):
-    #todo: Make this work using ansible.
+    @staticmethod
+    def from_dict(d):
+        return VaspErrorHandler(d["output_filename"])
+
+
+class UnconvergedErrorHandler(ErrorHandler, MSONable):
+    """
+    Check if a run is converged
+    """
+    def __init__(self, output_filename="vasprun.xml"):
+        self.output_filename = output_filename
 
     def check(self):
         try:
-            v = Vasprun('vasprun.xml')
+            v = Vasprun(self.output_filename)
             if not v.converged:
                 return True
         except:
-            return False
-        return False
+            return True
 
     def correct(self):
         backup()
-        shutil.copy("CONTCAR", "POSCAR")
-        incar = Incar.from_file("INCAR")
-        incar['ISTART'] = 1
-        incar.write_file("INCAR")
-        return {"errors": ["Unconverged"], "actions": "Restart from CONTCAR"}
+        actions = [{'file': 'CONTCAR',
+                    'action': {'_file_copy': {'dest': 'POSCAR'}}},
+                   {'dict': 'INCAR',
+                    'action': {'_set': {'ISTART': 1}}}]
+        vi = VaspInput.from_directory(".")
+        m = Modder(actions=[DictActions, FileActions])
+        for a in actions:
+            if "dict" in a:
+                vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+            elif "file" in a:
+                m.modify(a["action"], a["file"])
+        vi["INCAR"].write_file("INCAR")
+
+        return {"errors": ["Unconverged"], "actions": actions}
 
     def __str__(self):
         return "Run unconverged."
 
+    @property
+    def to_dict(self):
+        return {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__,
+                "output_filename": self.output_filename}
 
-class PoscarErrorHandler(ErrorHandler):
+    @staticmethod
+    def from_dict(d):
+        return UnconvergedErrorHandler(d["output_filename"])
+
+
+class PoscarErrorHandler(ErrorHandler, MSONable):
+
+    def __init__(self, output_filename="vasp.out"):
+        self.output_filename = output_filename
 
     def check(self):
-        with open("vasp.out", "r") as f:
+        with open(self.output_filename, "r") as f:
             output = f.read()
             for line in output.split("\n"):
                 l = line.strip()
@@ -134,17 +177,31 @@ class PoscarErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
-        #TODO: Add transformation applied to transformation.json if exists.
         backup()
-        shutil.copy("POSCAR", "POSCAR.orig")
         p = Poscar.from_file("POSCAR")
-        s = p.struct
+        s = p.structure
         trans = PerturbStructureTransformation(0.05)
         new_s = trans.apply_transformation(s)
-        p = Poscar(new_s)
-        p.write_file("POSCAR")
+        actions = [{'dict': 'POSCAR',
+                    'action': {'_set': {'structure': new_s.to_dict}}}]
+        m = Modder()
+        vi = VaspInput.from_directory(".")
+        for a in actions:
+            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+        vi["POSCAR"].write_file("POSCAR")
+
         return {"errors": ["Rotation matrix"],
-                "actions": "Peturb POSCAR and restart."}
+                "actions": actions}
+
+    @property
+    def to_dict(self):
+        return {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__,
+                "output_filename": self.output_filename}
+
+    @staticmethod
+    def from_dict(d):
+        return PoscarErrorHandler(d["output_filename"])
 
 
 class FrozenJobErrorHandler(ErrorHandler):

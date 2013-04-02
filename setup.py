@@ -6,15 +6,13 @@ from setuptools import setup, find_packages
 
 with open("README.rst") as f:
     long_desc = f.read()
-    ind = long_desc.find("\n")
-    long_desc = long_desc[ind+1:]
 
 setup(
     name="custodian",
     packages=find_packages(),
-    version="0.2.2a",
+    version="0.3.3",
     install_requires=[],
-    extras_require={"vasp": ["pymatgen>=2.5.0"]},
+    extras_require={"vasp": ["pymatgen>=2.6.2"]},
     package_data={},
     author="Shyue Ping Ong",
     author_email="shyuep@gmail.com",
@@ -35,6 +33,5 @@ setup(
         "Topic :: Scientific/Engineering :: Chemistry",
         "Topic :: Software Development :: Libraries :: Python Modules"
     ],
-    download_url="https://github.com/materialsproject/custodian/archive/master.zip",
     scripts=[os.path.join("scripts", f) for f in os.listdir("scripts")]
 )
