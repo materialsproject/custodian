@@ -115,6 +115,43 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         return VaspErrorHandler(d["output_filename"])
 
 
+class DentetErrorHandler(ErrorHandler):
+
+    def __init__(self, output_file='vasp.out'):
+        """
+        Detects an error when the output file has not been updated
+        in timeout seconds. Perturbs structure and restarts
+        """
+        self.output_file = output_file
+
+    @property
+    def run_parallel(self):
+        return True
+
+    def check(self):
+        with open(self.output_filename, "r") as f:
+            for line in f:
+                l = line.strip()
+                if l.find("DENTET") != -1:
+                    return True
+        return False
+
+    def correct(self):
+        backup()
+        actions = []
+        vi = VaspInput.from_directory(".")
+        actions.append({'dict': 'INCAR',
+                        'action': {'_set': {'ISMEAR': 0}}})
+        m = Modder()
+        modified = []
+        for a in actions:
+            modified.append(a["dict"])
+            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+        for f in modified:
+            vi[f].write_file(f)
+        return {"errors": "DENTET", "actions": actions}
+
+
 class UnconvergedErrorHandler(ErrorHandler, MSONable):
     """
     Check if a run is converged
