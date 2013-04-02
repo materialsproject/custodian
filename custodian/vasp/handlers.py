@@ -205,34 +205,40 @@ class PoscarErrorHandler(ErrorHandler, MSONable):
 
 
 class FrozenJobErrorHandler(ErrorHandler):
-    
-    def __init__(self, output_file = 'vasp.out', 
-                 timeout = 3600):
-        '''
-        Detects an error when the output file has not been updated 
+
+    def __init__(self, output_file='vasp.out', timeout = 3600):
+        """
+        Detects an error when the output file has not been updated
         in timeout seconds. Perturbs structure and restarts
-        '''
+        """
         self.output_file = output_file
         self.timeout = timeout
-    
+
     @property
     def run_parallel(self):
         return True
-    
+
     def check(self):
         st = os.stat(self.output_file)
         if time.time() - st.st_mtime > self.timeout:
             return True
-        
+
     def correct(self):
         backup()
-        shutil.copy("CONTCAR", "POSCAR")
         p = Poscar.from_file("POSCAR")
-        s = p.struct
-        trans = PerturbStructureTransformation(0.01)
+        s = p.structure
+        trans = PerturbStructureTransformation(0.05)
         new_s = trans.apply_transformation(s)
-        p = Poscar(new_s)
-        p.write_file("POSCAR")
+        actions = [{'dict': 'POSCAR',
+                    'action': {'_set': {'structure': new_s.to_dict}}}]
+        m = Modder()
+        vi = VaspInput.from_directory(".")
+        for a in actions:
+            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+        vi["POSCAR"].write_file("POSCAR")
+
+        return {"errors": ["Frozen job"],
+                "actions": actions}
 
 
 def backup():
