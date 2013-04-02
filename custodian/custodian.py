@@ -49,7 +49,7 @@ class Custodian(object):
         """
         self.max_errors = max_errors
         self.jobs = jobs
-        self.handlers = handlers
+        self.handlers = filter(lambda x: not x.run_parallel, handlers)
         self.parallel_handlers = filter(lambda x: x.run_parallel, handlers)
 
     def run(self):
@@ -81,31 +81,33 @@ class Custodian(object):
 
                 if isinstance(p, subprocess.Popen):
                     if self.parallel_handlers:
-                        #checks that the process is still alive every 10s
-                        #checks for errors hourly
                         n = 0
                         while True:
                             n += 1
                             time.sleep(10)
                             if p.poll() is not None:
                                 break
-                            if not n % 360 == 0:
-                                continue
-                            for h in self.parallel_handlers:
-                                if h.check():
-                                    p.terminate()
-                                    break
+                            if n % 30 == 0:
+                                for h in self.parallel_handlers:
+                                    if h.check():
+                                        p.terminate()
+                                        d = h.correct()
+                                        logging.error(str(d))
+                                        run_log[-1]["corrections"].append(d)
+                                        error = True
+                                        break
                     else:
                         p.wait()
 
-                for h in self.handlers:
-                    if h.check():
-                        total_errors += 1
-                        d = h.correct()
-                        logging.error(str(d))
-                        run_log[-1]["corrections"].append(d)
-                        error = True
-                        break
+                if not error:
+                    for h in self.handlers:
+                        if h.check():
+                            total_errors += 1
+                            d = h.correct()
+                            logging.error(str(d))
+                            run_log[-1]["corrections"].append(d)
+                            error = True
+                            break
 
                 #Log the corrections to a json file.
                 with open("custodian.json", "w") as f:
@@ -153,9 +155,10 @@ class ErrorHandler(object):
         """
         pass
 
+    @property
     def run_parallel(self):
         """
-        This property determines whether the error handler should be run
+        This property indicates whether the error handler should be run
         parallel to the job. If the handler notices an error, the job will be
         sent a termination signal.
         """
@@ -199,7 +202,7 @@ class Job(object):
     def run(self):
         """
         This method perform the actual work for the job. If parallel error
-        checking is desired, this must return a Popen process
+        checking is desired, this must return a Popen process.
         """
         pass
 
