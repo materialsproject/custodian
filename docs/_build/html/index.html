@@ -106,7 +106,7 @@ install custodian on any system is to use easy_install or pip, as follows:</p>
 <div class="highlight-python"><pre>pip install custodian</pre>
 </div>
 <p>Some plugins (e.g., vasp management) require additional setup (please see
-<a class="reference external" href="http://pythonhosted.org/pymatgen/">pymatgen&#8217;s documentation</a>).</p>
+<a class="reference external" href="http://pythonhosted.org/pymatgen">pymatgen&#8217;s documentation</a>).</p>
 </div>
 <div class="section" id="developmental-version">
 <h2>Developmental version<a class="headerlink" href="#developmental-version" title="Permalink to this headline">¶</a></h2>
@@ -128,10 +128,11 @@ cloning the source, you can type:</p>
 <h2>Optional dependencies<a class="headerlink" href="#optional-dependencies" title="Permalink to this headline">¶</a></h2>
 <p>Optional libraries that are required if you need certain features:</p>
 <ol class="arabic">
-<li><p class="first">pymatgen 2.6.2+: To use the plugin for VASP. Please install using:</p>
+<li><p class="first">Python Materials Genomics (<a class="reference external" href="https://pypi.python.org/pypi/pymatgen">pymatgen</a>) 2.6.2+: To use the plugin for VASP.
+Please install using:</p>
 <div class="highlight-python"><pre>pip install pymatgen</pre>
 </div>
-<p>For more information, please consult <a class="reference external" href="http://pythonhosted.org/pymatgen/">pymatgen&#8217;s documentation</a>.</p>
+<p>For more information, please consult <a class="reference external" href="http://pythonhosted.org/pymatgen">pymatgen&#8217;s documentation</a>.</p>
 </li>
 <li><p class="first">nose - For complete unittesting.</p>
 </li>
@@ -169,8 +170,11 @@ Project</a>.</p>
 <p>The Custodian package comes with a fairly comprehensive plugin to deal
 with jobs (<a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.jobs" title="custodian.vasp.jobs"><tt class="xref py py-mod docutils literal"><span class="pre">custodian.vasp.jobs</span></tt></a>) and errors
 (<a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.handlers" title="custodian.vasp.handlers"><tt class="xref py py-mod docutils literal"><span class="pre">custodian.vasp.handlers</span></tt></a>) in electronic structure calculations based
-on the Vienna Ab Initio Simulation Package (VASP). A simple example of a
-script using Custodian to run a two-relaxation VASP job is as follows:</p>
+on the Vienna Ab Initio Simulation Package (VASP). To do this,
+Custodian uses the Python Materials Genomics (<a class="reference external" href="https://pypi.python.org/pypi/pymatgen">pymatgen</a>) package to
+perform analysis and io from VASP input and output files.</p>
+<p>A simple example of a script using Custodian to run a two-relaxation VASP job
+is as follows:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">Custodian</span>
 <span class="kn">from</span> <span class="nn">custodian.vasp.handlers</span> <span class="kn">import</span> <span class="n">VaspErrorHandler</span><span class="p">,</span> \
     <span class="n">UnconvergedErrorHandler</span><span class="p">,</span> <span class="n">PoscarErrorHandler</span><span class="p">,</span> <span class="n">DentetErrorHandler</span>

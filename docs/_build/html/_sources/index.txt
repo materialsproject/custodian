@@ -54,7 +54,7 @@ or::
     pip install custodian
 
 Some plugins (e.g., vasp management) require additional setup (please see
-`pymatgen's documentation <http://pythonhosted.org/pymatgen/>`_).
+`pymatgen's documentation`_).
 
 Developmental version
 ---------------------
@@ -81,7 +81,8 @@ Optional dependencies
 
 Optional libraries that are required if you need certain features:
 
-1. pymatgen 2.6.2+: To use the plugin for VASP. Please install using::
+1. Python Materials Genomics (`pymatgen`_) 2.6.2+: To use the plugin for VASP.
+   Please install using::
 
     pip install pymatgen
 
@@ -124,13 +125,17 @@ in the area of electronic structure calculations. Electronic structure
 calculations tend to be long running and often terminates due to errors,
 random or otherwise. Such errors become a major issue in projects that
 performs such calculations in high throughput, such as the `Materials
-Project <https://www.materialsproject.org>`_.
+Project`_.
 
 The Custodian package comes with a fairly comprehensive plugin to deal
 with jobs (:mod:`custodian.vasp.jobs`) and errors
 (:mod:`custodian.vasp.handlers`) in electronic structure calculations based
-on the Vienna Ab Initio Simulation Package (VASP). A simple example of a
-script using Custodian to run a two-relaxation VASP job is as follows:
+on the Vienna Ab Initio Simulation Package (VASP). To do this,
+Custodian uses the Python Materials Genomics (`pymatgen`_) package to
+perform analysis and io from VASP input and output files.
+
+A simple example of a script using Custodian to run a two-relaxation VASP job
+is as follows:
 
 .. code-block:: python
 
@@ -201,3 +206,7 @@ follows::
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
+
+.. _`pymatgen's documentation`: http://pythonhosted.org/pymatgen
+.. _`Materials Project`: https://www.materialsproject.org
+.. _`pymatgen`: https://pypi.python.org/pypi/pymatgen
