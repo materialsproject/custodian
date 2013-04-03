@@ -108,14 +108,90 @@ The Custodian class takes in two general inputs - a **sequence of Jobs** and
 a **list of ErrorHandlers**. **Jobs** should be subclasses of the
 :class:`custodian.custodian.Job` abstract base class and **ErrorHandlers**
 should be subclasses of the :class:`custodian.custodian.ErrorHandler` abstract
-base class. To use custodian, you need to implement concrete implementation
+base class. To use custodian, you need to implement concrete implementations
 of these abstract base classes.
 
 Simple example
 --------------
 
 An very simple example implementation is given in the custodian_examples.py
-script in the scripts directory. **This will be expanded in detail soon.**
+script in the scripts directory. We will now go through the example in detail
+here.
+
+The ExampleJob has the following code.
+
+.. code-block:: python
+
+    class ExampleJob(Job):
+
+        def __init__(self, jobid, params={"initial": 0, "total": 0}):
+            self.jobid = jobid
+            self.params = params
+
+        def setup(self):
+            self.params["initial"] = 0
+            self.params["total"] = 0
+
+        def run(self):
+            print "Running job {}".format(self.jobid)
+            sequence = np.random.rand(100, 1)
+            self.params["total"] = self.params["initial"] + np.sum(sequence)
+            print "Current total = {}".format(self.params["total"])
+
+        def postprocess(self):
+            print "Success for job {}".format(self.jobid)
+
+        def name(self):
+            return "ExampleJob{}".format(self.jobid)
+
+        @property
+        def to_dict(self):
+            return {"jobid": self.jobid}
+
+        @staticmethod
+        def from_dict(d):
+            return ExampleJob(d["jobid"])
+
+This example job simply sums a random sequence of 100 numbers between 0 and
+1, adds it to an initial value and puts the value in 'total' variable. Let us
+now define an ErrorHandler that will check if the total value is >= 50,
+and if it is not, it will increment the initial value by 1 and rerun the
+ExampleJob again.
+
+.. code-block:: python
+
+    class ExampleHandler(ErrorHandler):
+
+        def __init__(self, params):
+            self.params = params
+
+        def check(self):
+            return self.params["total"] < 50
+
+        def correct(self):
+            self.params["initial"] += 1
+            print "Total < 50. Incrementing initial to {}".format(
+                self.params["initial"])
+            return {"errors": "total < 50", "actions": "increment by 1"}
+
+        @property
+        def is_monitor(self):
+            return False
+
+        @property
+        def to_dict(self):
+            return {}
+
+        @staticmethod
+        def from_dict(d):
+            return ExampleHandler()
+
+The transfer of information between the Job and ErrorHandler is done using
+the params argument in this example, which is not ideal but is sufficiently
+for demonstrating the Custodian API. In real world usage,
+a more common transfer of information may involve the Job writing the output
+to a file, and the ErrorHandler checking the contents of those files to
+detect error situations.
 
 Practical example: Electronic structure calculations
 ----------------------------------------------------

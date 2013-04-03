@@ -17,33 +17,32 @@ import numpy as np
 
 from custodian.custodian import Job, ErrorHandler, Custodian
 
-total = 0
-initial = 0
-
 
 class ExampleJob(Job):
     """
     This example job simply sums a random sequence of 100 numbers between 0
-    and 1, adds it to an initial value and puts the value in 'total' global
-    variable.
+    and 1, adds it to an initial value and puts the value in 'total'
+    key in params.
     """
 
-    def __init__(self, jobid):
+    def __init__(self, jobid, params={"initial": 0, "total": 0}):
         self.jobid = jobid
+        self.params = params
 
     def setup(self):
-        global initial
-        initial = 0
+        # The initial and total values should be set to zero at the start of
+        # a Job.
+        self.params["initial"] = 0
+        self.params["total"] = 0
 
     def run(self):
         print "Running job {}".format(self.jobid)
-        global initial
-        global total
         sequence = np.random.rand(100, 1)
-        total = initial + np.sum(sequence)
-        print "Current total = {}".format(total)
+        self.params["total"] = self.params["initial"] + np.sum(sequence)
+        print "Current total = {}".format(self.params["total"])
 
     def postprocess(self):
+        # Simply just print a success message.
         print "Success for job {}".format(self.jobid)
 
     def name(self):
@@ -61,16 +60,21 @@ class ExampleJob(Job):
 class ExampleHandler(ErrorHandler):
     """
     This example error handler checks if the value of total is >= 50. If it is
-    not, the Example job should be run again until a total >= 50 is obtained.
+    not, the handler increments the initial value and rerun the ExampleJob
+    until a total >= 50 is obtained.
     """
 
+    def __init__(self, params):
+        self.params = params
+
     def check(self):
-        return total < 50
+        return self.params["total"] < 50
 
     def correct(self):
-        global initial
-        initial += 1
-        print "Total < 50. Incrementing initial to {}".format(initial)
+        # Increment the initial value by 1.
+        self.params["initial"] += 1
+        print "Total < 50. Incrementing initial to {}".format(
+            self.params["initial"])
         return {"errors": "total < 50", "actions": "increment by 1"}
 
     @property
@@ -87,6 +91,12 @@ class ExampleHandler(ErrorHandler):
 
 
 if __name__ == "__main__":
-    c = Custodian([ExampleHandler()], [ExampleJob(i) for i in xrange(10)],
-                  max_errors=5)
-    c.run()
+    njobs = 100
+    params = {"initial": 0, "total": 0}
+    c = Custodian([ExampleHandler(params)],
+                  [ExampleJob(i, params) for i in xrange(njobs)],
+                  max_errors=njobs)
+    output = c.run()
+    total_errors = sum([len(d["corrections"]) for d in output])
+    print
+    print "Total errors = {}".format(total_errors)
