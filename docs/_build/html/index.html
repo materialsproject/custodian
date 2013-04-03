@@ -138,25 +138,46 @@ cloning the source, you can type:</p>
 </ol>
 </div>
 </div>
-<div class="section" id="basic-usage">
-<h1>Basic usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
 <p>The main class in the workflow is known as Custodian, which manages a series
-of jobs with a list of error handlers. To use custodian, you need to implement
-concrete implementation of the abstract base classes custodian.custodian.Job
-and custodian.custodian.ErrorHandler. An very simple example implementation is
-given in the custodian_examples.py script in the scripts directory.</p>
-<div class="section" id="electronic-structure-calculations">
-<h2>Electronic structure calculations<a class="headerlink" href="#electronic-structure-calculations" title="Permalink to this headline">¶</a></h2>
-<p>Other specific examples for electronic structure calculations based on the
-Vienna Ab Initio Simulation Package (VASP) are implemented in the
-custodian.vasp package. A simple example of a script using Custodian to run a
-two-relaxation VASP job is as follows:</p>
+of jobs with a list of error handlers. The general workflow for Custodian is
+presented in the figure below.</p>
+<div class="align-center figure align-center">
+<img alt="Custodian workflow" src="_images/Custodian.png" style="width: 500px;" />
+<p class="caption">Overview of the Custodian workflow.</p>
+</div>
+<p>The Custodian class takes in two general inputs - a <strong>sequence of Jobs</strong> and
+a <strong>list of ErrorHandlers</strong>. <strong>Jobs</strong> should be subclasses of the
+<a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Job</span></tt></a> abstract base class and <strong>ErrorHandlers</strong>
+should be subclasses of the <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a> abstract
+base class. To use custodian, you need to implement concrete implementation
+of these abstract base classes.</p>
+<div class="section" id="simple-example">
+<h2>Simple example<a class="headerlink" href="#simple-example" title="Permalink to this headline">¶</a></h2>
+<p>An very simple example implementation is given in the custodian_examples.py
+script in the scripts directory. <strong>This will be expanded in detail soon.</strong></p>
+</div>
+<div class="section" id="practical-example-electronic-structure-calculations">
+<h2>Practical example: Electronic structure calculations<a class="headerlink" href="#practical-example-electronic-structure-calculations" title="Permalink to this headline">¶</a></h2>
+<p>A practical example where the Custodian framework is particularly useful is
+in the area of electronic structure calculations. Electronic structure
+calculations tend to be long running and often terminates due to errors,
+random or otherwise. Such errors become a major issue in projects that
+performs such calculations in high throughput, such as the <a class="reference external" href="https://www.materialsproject.org">Materials
+Project</a>.</p>
+<p>The Custodian package comes with a fairly comprehensive plugin to deal
+with jobs (<a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.jobs" title="custodian.vasp.jobs"><tt class="xref py py-mod docutils literal"><span class="pre">custodian.vasp.jobs</span></tt></a>) and errors
+(<a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.handlers" title="custodian.vasp.handlers"><tt class="xref py py-mod docutils literal"><span class="pre">custodian.vasp.handlers</span></tt></a>) in electronic structure calculations based
+on the Vienna Ab Initio Simulation Package (VASP). A simple example of a
+script using Custodian to run a two-relaxation VASP job is as follows:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">Custodian</span>
-<span class="kn">from</span> <span class="nn">custodian.vasp.handlers</span> <span class="kn">import</span> <span class="n">VaspErrorHandler</span><span class="p">,</span> <span class="n">UnconvergedErrorHandler</span>
+<span class="kn">from</span> <span class="nn">custodian.vasp.handlers</span> <span class="kn">import</span> <span class="n">VaspErrorHandler</span><span class="p">,</span> \
+    <span class="n">UnconvergedErrorHandler</span><span class="p">,</span> <span class="n">PoscarErrorHandler</span><span class="p">,</span> <span class="n">DentetErrorHandler</span>
 <span class="kn">from</span> <span class="nn">custodian.vasp.jobs</span> <span class="kn">import</span> <span class="n">VaspJob</span>
 
 <span class="n">handlers</span> <span class="o">=</span> <span class="p">[</span><span class="n">VaspErrorHandler</span><span class="p">(),</span> <span class="n">UnconvergedErrorHandler</span><span class="p">(),</span>
-            <span class="n">PoscarErrorHandler</span><span class="p">()]</span>
+            <span class="n">PoscarErrorHandler</span><span class="p">(),</span> <span class="n">DentetErrorHandler</span><span class="p">()]</span>
 <span class="n">jobs</span> <span class="o">=</span> <span class="n">VaspJob</span><span class="o">.</span><span class="n">double_relaxation_run</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
 <span class="n">c</span> <span class="o">=</span> <span class="n">Custodian</span><span class="p">(</span><span class="n">handlers</span><span class="p">,</span> <span class="n">jobs</span><span class="p">,</span> <span class="n">max_errors</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="n">c</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
@@ -165,6 +186,9 @@ two-relaxation VASP job is as follows:</p>
 <p>The above will gracefully deal with many VASP errors encountered during
 relaxation. For example, it will correct ISMEAR to 0 if there are
 insufficient KPOINTS to use ISMEAR = -5.</p>
+<p>Using custodian, you can even setup potentially indefinite jobs,
+e.g. kpoints convergence jobs with a target energy convergence. Please see the
+converge_kpoints script in the scripts for an example.</p>
 </div>
 </div>
 <div class="section" id="api-reference-docs">
@@ -235,8 +259,9 @@ DEALINGS IN THE SOFTWARE.</pre>
 <li><a class="reference internal" href="#optional-dependencies">Optional dependencies</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#basic-usage">Basic usage</a><ul>
-<li><a class="reference internal" href="#electronic-structure-calculations">Electronic structure calculations</a></li>
+<li><a class="reference internal" href="#usage">Usage</a><ul>
+<li><a class="reference internal" href="#simple-example">Simple example</a></li>
+<li><a class="reference internal" href="#practical-example-electronic-structure-calculations">Practical example: Electronic structure calculations</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#api-reference-docs">API/Reference Docs</a></li>

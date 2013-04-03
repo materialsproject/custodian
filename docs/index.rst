@@ -88,31 +88,59 @@ Optional libraries that are required if you need certain features:
    For more information, please consult `pymatgen's documentation`_.
 2. nose - For complete unittesting.
 
-Basic usage
-===========
+Usage
+=====
 
 The main class in the workflow is known as Custodian, which manages a series
-of jobs with a list of error handlers. To use custodian, you need to implement
-concrete implementation of the abstract base classes custodian.custodian.Job
-and custodian.custodian.ErrorHandler. An very simple example implementation is
-given in the custodian_examples.py script in the scripts directory.
+of jobs with a list of error handlers. The general workflow for Custodian is
+presented in the figure below.
 
-Electronic structure calculations
----------------------------------
+.. figure:: _static/Custodian.png
+    :width: 500px
+    :align: center
+    :alt: Custodian workflow
+    :figclass: align-center
 
-Other specific examples for electronic structure calculations based on the
-Vienna Ab Initio Simulation Package (VASP) are implemented in the
-custodian.vasp package. A simple example of a script using Custodian to run a
-two-relaxation VASP job is as follows:
+    Overview of the Custodian workflow.
+
+The Custodian class takes in two general inputs - a **sequence of Jobs** and
+a **list of ErrorHandlers**. **Jobs** should be subclasses of the
+:class:`custodian.custodian.Job` abstract base class and **ErrorHandlers**
+should be subclasses of the :class:`custodian.custodian.ErrorHandler` abstract
+base class. To use custodian, you need to implement concrete implementation
+of these abstract base classes.
+
+Simple example
+--------------
+
+An very simple example implementation is given in the custodian_examples.py
+script in the scripts directory. **This will be expanded in detail soon.**
+
+Practical example: Electronic structure calculations
+----------------------------------------------------
+
+A practical example where the Custodian framework is particularly useful is
+in the area of electronic structure calculations. Electronic structure
+calculations tend to be long running and often terminates due to errors,
+random or otherwise. Such errors become a major issue in projects that
+performs such calculations in high throughput, such as the `Materials
+Project <https://www.materialsproject.org>`_.
+
+The Custodian package comes with a fairly comprehensive plugin to deal
+with jobs (:mod:`custodian.vasp.jobs`) and errors
+(:mod:`custodian.vasp.handlers`) in electronic structure calculations based
+on the Vienna Ab Initio Simulation Package (VASP). A simple example of a
+script using Custodian to run a two-relaxation VASP job is as follows:
 
 .. code-block:: python
 
     from custodian.custodian import Custodian
-    from custodian.vasp.handlers import VaspErrorHandler, UnconvergedErrorHandler
+    from custodian.vasp.handlers import VaspErrorHandler, \
+        UnconvergedErrorHandler, PoscarErrorHandler, DentetErrorHandler
     from custodian.vasp.jobs import VaspJob
 
     handlers = [VaspErrorHandler(), UnconvergedErrorHandler(),
-                PoscarErrorHandler()]
+                PoscarErrorHandler(), DentetErrorHandler()]
     jobs = VaspJob.double_relaxation_run(args.command.split())
     c = Custodian(handlers, jobs, max_errors=10)
     c.run()
@@ -120,6 +148,10 @@ two-relaxation VASP job is as follows:
 The above will gracefully deal with many VASP errors encountered during
 relaxation. For example, it will correct ISMEAR to 0 if there are
 insufficient KPOINTS to use ISMEAR = -5.
+
+Using custodian, you can even setup potentially indefinite jobs,
+e.g. kpoints convergence jobs with a target energy convergence. Please see the
+converge_kpoints script in the scripts for an example.
 
 API/Reference Docs
 ==================

@@ -66,42 +66,12 @@ Optional libraries that are required if you need certain features:
    For more information, please consult `pymatgen's documentation`_.
 2. nose - For complete unittesting.
 
-Basic usage
+Usage
 ===========
 
-The main class in the workflow is known as Custodian, which manages a series
-of jobs with a list of error handlers. To use custodian, you need to implement
-concrete implementation of the abstract base classes custodian.custodian.Job
-and custodian.custodian.ErrorHandler. An very simple example implementation is
-given in the custodian_examples.py script in the scripts directory.
-
-Electronic structure calculations
----------------------------------
-
-Other specific examples for electronic structure calculations based on the
-Vienna Ab Initio Simulation Package (VASP) are implemented in the
-custodian.vasp package. A simple example of a script using Custodian to run a
-two-relaxation VASP job is as follows:
-
-.. code-block:: python
-
-    from custodian.custodian import Custodian
-    from custodian.vasp.handlers import VaspErrorHandler, UnconvergedErrorHandler
-    from custodian.vasp.jobs import VaspJob
-
-    handlers = [VaspErrorHandler(), UnconvergedErrorHandler(),
-                PoscarErrorHandler()]
-    jobs = VaspJob.double_relaxation_run(args.command.split())
-    c = Custodian(handlers, jobs, max_errors=10)
-    c.run()
-
-The above will gracefully deal with many VASP errors encountered during
-relaxation. For example, it will correct ISMEAR to 0 if there are
-insufficient KPOINTS to use ISMEAR = -5.
-
-Using custodian, you can even setup potentially indefinite jobs,
-e.g. kpoints convergence jobs with a target energy. Please see the
-converge_kpoints scripts for an example.
+Please refer to the `official custodian docs
+<http://pythonhosted.org//custodian>`_ for details on how to use
+custodian.
 
 How to cite custodian
 =====================
