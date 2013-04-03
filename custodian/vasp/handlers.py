@@ -149,7 +149,7 @@ class DentetErrorHandler(ErrorHandler):
             vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
         for f in modified:
             vi[f].write_file(f)
-        return {"errors": "DENTET", "actions": actions}
+        return {"errors": ["dentet"], "actions": actions}
 
     @property
     def is_monitor(self):
