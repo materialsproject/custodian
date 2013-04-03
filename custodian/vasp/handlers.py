@@ -101,6 +101,10 @@ class VaspErrorHandler(ErrorHandler, MSONable):
             vi[f].write_file(f)
         return {"errors": list(self.errors), "actions": actions}
 
+    @property
+    def is_monitor(self):
+        return False
+
     def __str__(self):
         return "Vasp error"
 
@@ -124,10 +128,6 @@ class DentetErrorHandler(ErrorHandler):
         """
         self.output_filename = output_file
 
-    @property
-    def run_parallel(self):
-        return True
-
     def check(self):
         with open(self.output_filename, "r") as f:
             for line in f:
@@ -150,6 +150,10 @@ class DentetErrorHandler(ErrorHandler):
         for f in modified:
             vi[f].write_file(f)
         return {"errors": "DENTET", "actions": actions}
+
+    @property
+    def is_monitor(self):
+        return True
 
     @property
     def to_dict(self):
@@ -198,6 +202,10 @@ class UnconvergedErrorHandler(ErrorHandler, MSONable):
         return "Run unconverged."
 
     @property
+    def is_monitor(self):
+        return False
+
+    @property
     def to_dict(self):
         return {"@module": self.__class__.__module__,
                 "@class": self.__class__.__name__,
@@ -241,6 +249,10 @@ class PoscarErrorHandler(ErrorHandler, MSONable):
                 "actions": actions}
 
     @property
+    def is_monitor(self):
+        return False
+
+    @property
     def to_dict(self):
         return {"@module": self.__class__.__module__,
                 "@class": self.__class__.__name__,
@@ -253,20 +265,16 @@ class PoscarErrorHandler(ErrorHandler, MSONable):
 
 class FrozenJobErrorHandler(ErrorHandler):
 
-    def __init__(self, output_file='vasp.out', timeout=3600):
+    def __init__(self, output_filename='vasp.out', timeout=3600):
         """
         Detects an error when the output file has not been updated
         in timeout seconds. Perturbs structure and restarts
         """
-        self.output_file = output_file
+        self.output_filename = output_filename
         self.timeout = timeout
 
-    @property
-    def run_parallel(self):
-        return True
-
     def check(self):
-        st = os.stat(self.output_file)
+        st = os.stat(self.output_filename)
         if time.time() - st.st_mtime > self.timeout:
             return True
 
@@ -286,6 +294,22 @@ class FrozenJobErrorHandler(ErrorHandler):
 
         return {"errors": ["Frozen job"],
                 "actions": actions}
+
+    @property
+    def is_monitor(self):
+        return True
+
+    @property
+    def to_dict(self):
+        return {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__,
+                "output_filename": self.output_filename,
+                "timeout": self.timeout}
+
+    @staticmethod
+    def from_dict(d):
+        return FrozenJobErrorHandler(d["output_filename"],
+                                     timeout=d["timeout"])
 
 
 def backup():

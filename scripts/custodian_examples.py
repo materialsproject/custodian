@@ -74,6 +74,10 @@ class ExampleHandler(ErrorHandler):
         return {"errors": "total < 50", "actions": "increment by 1"}
 
     @property
+    def is_monitor(self):
+        return False
+
+    @property
     def to_dict(self):
         return {}
 

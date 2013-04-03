@@ -18,6 +18,12 @@ error, and potentially restart the job if necessary.
 Change log
 ==========
 
+0.3.4
+-----
+1. Added support for handlers that perform monitor a job as it is progressing
+   and terminates it if necessary. Useful for correcting errors that come up
+   by do not cause immediate job failures.
+
 0.3.2
 -----
 1. Important bug fix for VaspJob and converge_kpoints script.

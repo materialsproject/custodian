@@ -49,8 +49,8 @@ class Custodian(object):
         """
         self.max_errors = max_errors
         self.jobs = jobs
-        self.handlers = filter(lambda x: not x.run_parallel, handlers)
-        self.parallel_handlers = filter(lambda x: x.run_parallel, handlers)
+        self.handlers = filter(lambda x: not x.is_monitor, handlers)
+        self.monitors = filter(lambda x: x.is_monitor, handlers)
 
     def run(self):
         """
@@ -80,7 +80,7 @@ class Custodian(object):
                 error = False
 
                 if isinstance(p, subprocess.Popen):
-                    if self.parallel_handlers:
+                    if self.monitors:
                         n = 0
                         while True:
                             n += 1
@@ -88,7 +88,7 @@ class Custodian(object):
                             if p.poll() is not None:
                                 break
                             if n % 30 == 0:
-                                for h in self.parallel_handlers:
+                                for h in self.monitors:
                                     if h.check():
                                         p.terminate()
                                         d = h.correct()
@@ -155,12 +155,15 @@ class ErrorHandler(object):
         """
         pass
 
-    @property
-    def run_parallel(self):
+    @abstractproperty
+    def is_monitor(self):
         """
-        This property indicates whether the error handler should be run
-        parallel to the job. If the handler notices an error, the job will be
-        sent a termination signal.
+        This property indicates whether the error handler is a monitor,
+        i.e., a handler that monitors a job as it is running. If a
+        monitor-type handler notices an error, the job will be sent a
+        termination signal, the error is then corrected,
+        and then the job is restarted. This is useful for catching errors
+        that occur early in the run but do not cause immediate failure.
         """
         return False
 
