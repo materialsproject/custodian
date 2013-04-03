@@ -14,7 +14,7 @@ setup(
     install_requires=[],
     extras_require={"vasp": ["pymatgen>=2.6.2"]},
     package_data={},
-    author="Shyue Ping Ong",
+    author="Shyue Ping Ong, William Davidson Richards",
     author_email="shyuep@gmail.com",
     maintainer="Shyue Ping Ong",
     url="https://github.com/materialsproject/custodian",
