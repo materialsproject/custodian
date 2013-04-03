@@ -52,7 +52,6 @@ class VaspErrorHandlerTest(unittest.TestCase):
         os.remove(os.path.join(test_dir, "error.1.tar.gz"))
         os.remove(os.path.join(test_dir, "error.2.tar.gz"))
 
-
     def test_to_from_dict(self):
         h = VaspErrorHandler("random_name")
         h2 = VaspErrorHandler.from_dict(h.to_dict)
