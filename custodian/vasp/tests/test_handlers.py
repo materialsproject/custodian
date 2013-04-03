@@ -124,7 +124,7 @@ class DentetErrorHandlerTest(unittest.TestCase):
         os.remove(os.path.join(test_dir, "error.1.tar.gz"))
         shutil.move("INCAR.orig", "INCAR")
 
-def test_to_from_dict(self):
+    def test_to_from_dict(self):
         h = DentetErrorHandler("random_name.out")
         h2 = DentetErrorHandler.from_dict(h.to_dict)
         self.assertEqual(type(h2), DentetErrorHandler)
