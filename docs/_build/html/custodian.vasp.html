@@ -1,3 +1,4 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -6,15 +7,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>vasp Package &mdash; custodian 0.3.3 documentation</title>
+    <title>vasp Package &mdash; custodian 0.3.4b documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.3.3',
+        URL_ROOT:    '',
+        VERSION:     '0.3.4b',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +25,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.3.3 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.3.4b documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +44,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.3.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.3.4b documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -64,6 +65,72 @@
 tries to detect common errors in vasp runs and attempt to fix them on the fly
 by modifying the input files.</p>
 <dl class="class">
+<dt id="custodian.vasp.handlers.DentetErrorHandler">
+<em class="property">class </em><tt class="descname">DentetErrorHandler</tt><big>(</big><em>output_file='vasp.out'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DentetErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DentetErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<p>Detects an error when the output file has not been updated
+in timeout seconds. Perturbs structure and restarts</p>
+<dl class="method">
+<dt id="custodian.vasp.handlers.DentetErrorHandler.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DentetErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DentetErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.handlers.DentetErrorHandler.correct">
+<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DentetErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DentetErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.vasp.handlers.DentetErrorHandler.from_dict">
+<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DentetErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DentetErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.DentetErrorHandler.is_monitor">
+<tt class="descname">is_monitor</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DentetErrorHandler.is_monitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DentetErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.DentetErrorHandler.to_dict">
+<tt class="descname">to_dict</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DentetErrorHandler.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DentetErrorHandler.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="custodian.vasp.handlers.FrozenJobErrorHandler">
+<em class="property">class </em><tt class="descname">FrozenJobErrorHandler</tt><big>(</big><em>output_filename='vasp.out'</em>, <em>timeout=3600</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<p>Detects an error when the output file has not been updated
+in timeout seconds. Perturbs structure and restarts</p>
+<dl class="method">
+<dt id="custodian.vasp.handlers.FrozenJobErrorHandler.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.handlers.FrozenJobErrorHandler.correct">
+<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.vasp.handlers.FrozenJobErrorHandler.from_dict">
+<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.FrozenJobErrorHandler.is_monitor">
+<tt class="descname">is_monitor</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler.is_monitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.FrozenJobErrorHandler.to_dict">
+<tt class="descname">to_dict</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="custodian.vasp.handlers.PoscarErrorHandler">
 <em class="property">class </em><tt class="descname">PoscarErrorHandler</tt><big>(</big><em>output_filename='vasp.out'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PoscarErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PoscarErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">pymatgen.serializers.json_coders.MSONable</span></tt></p>
@@ -80,6 +147,11 @@ by modifying the input files.</p>
 <dl class="staticmethod">
 <dt id="custodian.vasp.handlers.PoscarErrorHandler.from_dict">
 <em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PoscarErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PoscarErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.PoscarErrorHandler.is_monitor">
+<tt class="descname">is_monitor</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PoscarErrorHandler.is_monitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PoscarErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -107,6 +179,11 @@ by modifying the input files.</p>
 <dl class="staticmethod">
 <dt id="custodian.vasp.handlers.UnconvergedErrorHandler.from_dict">
 <em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.UnconvergedErrorHandler.is_monitor">
+<tt class="descname">is_monitor</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.is_monitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -138,6 +215,11 @@ by modifying the input files.</p>
 <dl class="staticmethod">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.from_dict">
 <em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.VaspErrorHandler.is_monitor">
+<tt class="descname">is_monitor</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler.is_monitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -565,13 +647,13 @@ if you are using mpirun, it can be something like
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.3.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.3.4b documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

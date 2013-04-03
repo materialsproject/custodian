@@ -48,7 +48,6 @@ def makedoc():
                     fid.write("".join(newoutput))
 
         local("make html")
-        local("cp favicon.ico _build/html/_static/favicon.ico")
 
 
 def publish():

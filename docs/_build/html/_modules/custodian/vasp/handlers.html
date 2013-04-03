@@ -1,3 +1,4 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -6,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp.handlers &mdash; custodian 0.3.3 documentation</title>
+    <title>custodian.vasp.handlers &mdash; custodian 0.3.4b documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.3.3',
+        VERSION:     '0.3.4b',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +25,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.3.3 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.3.4b documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +45,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.3.3 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.3.4b documentation</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -75,6 +76,7 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">tarfile</span>
+<span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">operator</span>
 
@@ -157,6 +159,10 @@
             <span class="n">vi</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">),</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 </div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="VaspErrorHandler.is_monitor"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler.is_monitor">[docs]</a>    <span class="k">def</span> <span class="nf">is_monitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s">&quot;Vasp error&quot;</span>
 
@@ -169,6 +175,53 @@
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="VaspErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">VaspErrorHandler</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_filename&quot;</span><span class="p">])</span>
+
+</div></div>
+<div class="viewcode-block" id="DentetErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.DentetErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">DentetErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s">&#39;vasp.out&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Detects an error when the output file has not been updated</span>
+<span class="sd">        in timeout seconds. Perturbs structure and restarts</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span> <span class="o">=</span> <span class="n">output_file</span>
+
+<div class="viewcode-block" id="DentetErrorHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.DentetErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">l</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&quot;DENTET&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="DentetErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.DentetErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">backup</span><span class="p">()</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;dict&#39;</span><span class="p">:</span> <span class="s">&#39;INCAR&#39;</span><span class="p">,</span>
+                        <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;_set&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;ISMEAR&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}})</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">()</span>
+        <span class="n">modified</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
+            <span class="n">modified</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">])</span>
+            <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]])</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">modified</span><span class="p">:</span>
+            <span class="n">vi</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;dentet&quot;</span><span class="p">],</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="DentetErrorHandler.is_monitor"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.DentetErrorHandler.is_monitor">[docs]</a>    <span class="k">def</span> <span class="nf">is_monitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="DentetErrorHandler.to_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.DentetErrorHandler.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;@module&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span>
+                <span class="s">&quot;@class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                <span class="s">&quot;output_filename&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">}</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="DentetErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.DentetErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">DentetErrorHandler</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_filename&quot;</span><span class="p">])</span>
 
 </div></div>
 <div class="viewcode-block" id="UnconvergedErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.UnconvergedErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">UnconvergedErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">,</span> <span class="n">MSONable</span><span class="p">):</span>
@@ -206,6 +259,10 @@
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s">&quot;Run unconverged.&quot;</span>
 
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="UnconvergedErrorHandler.is_monitor"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.UnconvergedErrorHandler.is_monitor">[docs]</a>    <span class="k">def</span> <span class="nf">is_monitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
     <span class="nd">@property</span>
 <div class="viewcode-block" id="UnconvergedErrorHandler.to_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.UnconvergedErrorHandler.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;@module&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span>
@@ -250,6 +307,10 @@
                 <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 </div>
     <span class="nd">@property</span>
+<div class="viewcode-block" id="PoscarErrorHandler.is_monitor"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PoscarErrorHandler.is_monitor">[docs]</a>    <span class="k">def</span> <span class="nf">is_monitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+    <span class="nd">@property</span>
 <div class="viewcode-block" id="PoscarErrorHandler.to_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PoscarErrorHandler.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;@module&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span>
                 <span class="s">&quot;@class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
@@ -258,6 +319,55 @@
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="PoscarErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PoscarErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">PoscarErrorHandler</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_filename&quot;</span><span class="p">])</span>
+
+</div></div>
+<div class="viewcode-block" id="FrozenJobErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.FrozenJobErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">FrozenJobErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="o">=</span><span class="s">&#39;vasp.out&#39;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">3600</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Detects an error when the output file has not been updated</span>
+<span class="sd">        in timeout seconds. Perturbs structure and restarts</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span> <span class="o">=</span> <span class="n">output_filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>
+
+<div class="viewcode-block" id="FrozenJobErrorHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.FrozenJobErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">st</span><span class="o">.</span><span class="n">st_mtime</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="FrozenJobErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.FrozenJobErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">backup</span><span class="p">()</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Poscar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s">&quot;POSCAR&quot;</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">structure</span>
+        <span class="n">trans</span> <span class="o">=</span> <span class="n">PerturbStructureTransformation</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
+        <span class="n">new_s</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">apply_transformation</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&#39;dict&#39;</span><span class="p">:</span> <span class="s">&#39;POSCAR&#39;</span><span class="p">,</span>
+                    <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;_set&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;structure&#39;</span><span class="p">:</span> <span class="n">new_s</span><span class="o">.</span><span class="n">to_dict</span><span class="p">}}}]</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">()</span>
+        <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
+            <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]])</span>
+        <span class="n">vi</span><span class="p">[</span><span class="s">&quot;POSCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="s">&quot;POSCAR&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Frozen job&quot;</span><span class="p">],</span>
+                <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="FrozenJobErrorHandler.is_monitor"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.FrozenJobErrorHandler.is_monitor">[docs]</a>    <span class="k">def</span> <span class="nf">is_monitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="FrozenJobErrorHandler.to_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.FrozenJobErrorHandler.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;@module&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span>
+                <span class="s">&quot;@class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                <span class="s">&quot;output_filename&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">,</span>
+                <span class="s">&quot;timeout&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">}</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="FrozenJobErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.FrozenJobErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">FrozenJobErrorHandler</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_filename&quot;</span><span class="p">],</span>
+                                     <span class="n">timeout</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;timeout&quot;</span><span class="p">])</span>
 
 </div></div>
 <div class="viewcode-block" id="backup"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.backup">[docs]</a><span class="k">def</span> <span class="nf">backup</span><span class="p">():</span>
@@ -305,14 +415,14 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.3.3 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.3.4b documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

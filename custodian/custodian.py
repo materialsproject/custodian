@@ -29,13 +29,42 @@ class Custodian(object):
 
     1. Let's say you have defined a list of jobs as [job1, job2, job3, ...] and
        you have defined a list of possible error handlers as [err1, err2, ...]
-    2. Custodian will run the jobs in the order of job1, job2, ...
+    2. Custodian will run the jobs in the order of job1, job2, ... During each
+       job, custodian will monitor for errors using the handlers that have
+       is_monitor == True. If an error is detected, corrective measures are
+       taken and the particular job is rerun.
     3. At the end of each individual job, Custodian will run through the list
-       error handlers. If an error is detected, corrective measures are taken
-       and the particular job is rerun.
+       error handlers that have is_monitor == False. If an error is detected,
+       corrective measures are taken and the particular job is rerun.
+
+    .. attribute: max_errors
+
+        Maximum number of errors allowed.
+
+    .. attribute: handlers
+
+        Error handlers that are not Monitors.
+
+    .. attribute: monitors
+
+        Error handlers that are Monitors, i.e., handlers that monitors a job
+        as it is being run.
+
+    .. attribute: polling_time_step
+
+        The length of time in seconds between steps in which a job is
+        checked for completion.
+
+    .. attribute: monitor_freq
+
+        The number of polling steps before monitoring occurs. For example,
+        if you have a polling_time_step of 10seconds and a monitor_freq of
+        30, this means that Custodian uses the monitors to check for errors
+        every 30 x 10 = 300 seconds, i.e., 5 minutes.
     """
 
-    def __init__(self, handlers, jobs, max_errors=1):
+    def __init__(self, handlers, jobs, max_errors=1, polling_time_step=10,
+                 monitor_freq=30):
         """
         Args:
             handlers:
@@ -46,11 +75,22 @@ class Custodian(object):
                 double-relaxation.
             max_errors:
                 Maximum number of errors allowed before exiting.
+            polling_time_step:
+                The length of time in seconds between steps in which a
+                job is checked for completion. Defaults to 10 seconds.
+            monitor_freq:
+                The number of polling steps before monitoring occurs. For
+                example, if you have a polling_time_step of 10seconds and a
+                monitor_freq of 30, this means that Custodian uses the
+                monitors to check for errors every 30 x 10 = 300 seconds,
+                i.e., 5 minutes.
         """
         self.max_errors = max_errors
         self.jobs = jobs
         self.handlers = filter(lambda x: not x.is_monitor, handlers)
         self.monitors = filter(lambda x: x.is_monitor, handlers)
+        self.polling_time_step = polling_time_step
+        self.monitor_freq = monitor_freq
 
     def run(self):
         """
@@ -67,8 +107,7 @@ class Custodian(object):
             for attempt in xrange(self.max_errors):
                 logging.info(
                     "Starting job no. {} ({}) attempt no. {}. Errors thus far"
-                    " = {}.".format(i + 1, job.name, attempt + 1,
-                                    total_errors))
+                    " = {}.".format(i + 1, job.name, attempt + 1, total_errors))
 
                 # If this is the start of the job, do the setup.
                 if not run_log[-1]["corrections"]:
@@ -79,15 +118,17 @@ class Custodian(object):
                 # corrections.
                 error = False
 
+                # While the job is running, we use the handlers that are
+                # monitors to monitor the job.
                 if isinstance(p, subprocess.Popen):
                     if self.monitors:
                         n = 0
                         while True:
                             n += 1
-                            time.sleep(10)
+                            time.sleep(self.polling_time_step)
                             if p.poll() is not None:
                                 break
-                            if n % 30 == 0:
+                            if n % self.monitor_freq == 0:
                                 for h in self.monitors:
                                     if h.check():
                                         p.terminate()
@@ -99,6 +140,8 @@ class Custodian(object):
                     else:
                         p.wait()
 
+                # If there are no errors *during* the run, we now check for
+                # errors *after* the run using handlers that are not monitors.
                 if not error:
                     for h in self.handlers:
                         if h.check():

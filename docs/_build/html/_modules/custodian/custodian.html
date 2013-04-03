@@ -1,3 +1,4 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -6,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.custodian &mdash; custodian 0.3.3 documentation</title>
+    <title>custodian.custodian &mdash; custodian 0.3.4b documentation</title>
     
     <link rel="stylesheet" href="../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.3.3',
+        VERSION:     '0.3.4b',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +25,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.3.3 documentation" href="../../index.html" />
+    <link rel="top" title="custodian 0.3.4b documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +45,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">custodian 0.3.3 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">custodian 0.3.4b documentation</a> &raquo;</li>
           <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -73,6 +74,8 @@
 <span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;May 2, 2012&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">abstractproperty</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
@@ -84,13 +87,42 @@
 
 <span class="sd">    1. Let&#39;s say you have defined a list of jobs as [job1, job2, job3, ...] and</span>
 <span class="sd">       you have defined a list of possible error handlers as [err1, err2, ...]</span>
-<span class="sd">    2. Custodian will run the jobs in the order of job1, job2, ...</span>
+<span class="sd">    2. Custodian will run the jobs in the order of job1, job2, ... During each</span>
+<span class="sd">       job, custodian will monitor for errors using the handlers that have</span>
+<span class="sd">       is_monitor == True. If an error is detected, corrective measures are</span>
+<span class="sd">       taken and the particular job is rerun.</span>
 <span class="sd">    3. At the end of each individual job, Custodian will run through the list</span>
-<span class="sd">       error handlers. If an error is detected, corrective measures are taken</span>
-<span class="sd">       and the particular job is rerun.</span>
+<span class="sd">       error handlers that have is_monitor == False. If an error is detected,</span>
+<span class="sd">       corrective measures are taken and the particular job is rerun.</span>
+
+<span class="sd">    .. attribute: max_errors</span>
+
+<span class="sd">        Maximum number of errors allowed.</span>
+
+<span class="sd">    .. attribute: handlers</span>
+
+<span class="sd">        Error handlers that are not Monitors.</span>
+
+<span class="sd">    .. attribute: monitors</span>
+
+<span class="sd">        Error handlers that are Monitors, i.e., handlers that monitors a job</span>
+<span class="sd">        as it is being run.</span>
+
+<span class="sd">    .. attribute: polling_time_step</span>
+
+<span class="sd">        The length of time in seconds between steps in which a job is</span>
+<span class="sd">        checked for completion.</span>
+
+<span class="sd">    .. attribute: monitor_freq</span>
+
+<span class="sd">        The number of polling steps before monitoring occurs. For example,</span>
+<span class="sd">        if you have a polling_time_step of 10seconds and a monitor_freq of</span>
+<span class="sd">        30, this means that Custodian uses the monitors to check for errors</span>
+<span class="sd">        every 30 x 10 = 300 seconds, i.e., 5 minutes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handlers</span><span class="p">,</span> <span class="n">jobs</span><span class="p">,</span> <span class="n">max_errors</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handlers</span><span class="p">,</span> <span class="n">jobs</span><span class="p">,</span> <span class="n">max_errors</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">polling_time_step</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                 <span class="n">monitor_freq</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            handlers:</span>
@@ -101,10 +133,22 @@
 <span class="sd">                double-relaxation.</span>
 <span class="sd">            max_errors:</span>
 <span class="sd">                Maximum number of errors allowed before exiting.</span>
+<span class="sd">            polling_time_step:</span>
+<span class="sd">                The length of time in seconds between steps in which a</span>
+<span class="sd">                job is checked for completion. Defaults to 10 seconds.</span>
+<span class="sd">            monitor_freq:</span>
+<span class="sd">                The number of polling steps before monitoring occurs. For</span>
+<span class="sd">                example, if you have a polling_time_step of 10seconds and a</span>
+<span class="sd">                monitor_freq of 30, this means that Custodian uses the</span>
+<span class="sd">                monitors to check for errors every 30 x 10 = 300 seconds,</span>
+<span class="sd">                i.e., 5 minutes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_errors</span> <span class="o">=</span> <span class="n">max_errors</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span> <span class="o">=</span> <span class="n">jobs</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span> <span class="o">=</span> <span class="n">handlers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="ow">not</span> <span class="n">x</span><span class="o">.</span><span class="n">is_monitor</span><span class="p">,</span> <span class="n">handlers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">is_monitor</span><span class="p">,</span> <span class="n">handlers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">polling_time_step</span> <span class="o">=</span> <span class="n">polling_time_step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monitor_freq</span> <span class="o">=</span> <span class="n">monitor_freq</span>
 
 <div class="viewcode-block" id="Custodian.run"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Custodian.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -121,27 +165,50 @@
             <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_errors</span><span class="p">):</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                     <span class="s">&quot;Starting job no. {} ({}) attempt no. {}. Errors thus far&quot;</span>
-                    <span class="s">&quot; = {}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">attempt</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-                                    <span class="n">total_errors</span><span class="p">))</span>
+                    <span class="s">&quot; = {}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">attempt</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">total_errors</span><span class="p">))</span>
 
                 <span class="c"># If this is the start of the job, do the setup.</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&quot;corrections&quot;</span><span class="p">]:</span>
                     <span class="n">job</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
 
-                <span class="c"># Run the job.</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-
+                <span class="n">p</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
                 <span class="c"># Check for errors using the error handlers and perform</span>
                 <span class="c"># corrections.</span>
                 <span class="n">error</span> <span class="o">=</span> <span class="bp">False</span>
-                <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">check</span><span class="p">():</span>
-                        <span class="n">total_errors</span> <span class="o">+=</span> <span class="mi">1</span>
-                        <span class="n">d</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">correct</span><span class="p">()</span>
-                        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
-                        <span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&quot;corrections&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-                        <span class="n">error</span> <span class="o">=</span> <span class="bp">True</span>
-                        <span class="k">break</span>
+
+                <span class="c"># While the job is running, we use the handlers that are</span>
+                <span class="c"># monitors to monitor the job.</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">:</span>
+                        <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+                            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polling_time_step</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                                <span class="k">break</span>
+                            <span class="k">if</span> <span class="n">n</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor_freq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">check</span><span class="p">():</span>
+                                        <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                                        <span class="n">d</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">correct</span><span class="p">()</span>
+                                        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+                                        <span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&quot;corrections&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                                        <span class="n">error</span> <span class="o">=</span> <span class="bp">True</span>
+                                        <span class="k">break</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">p</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+                <span class="c"># If there are no errors *during* the run, we now check for</span>
+                <span class="c"># errors *after* the run using handlers that are not monitors.</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">error</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">check</span><span class="p">():</span>
+                            <span class="n">total_errors</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">d</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">correct</span><span class="p">()</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+                            <span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&quot;corrections&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                            <span class="n">error</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="k">break</span>
 
                 <span class="c">#Log the corrections to a json file.</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;custodian.json&quot;</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -190,6 +257,18 @@
         <span class="k">pass</span>
 </div>
     <span class="nd">@abstractproperty</span>
+<div class="viewcode-block" id="ErrorHandler.is_monitor"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.ErrorHandler.is_monitor">[docs]</a>    <span class="k">def</span> <span class="nf">is_monitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This property indicates whether the error handler is a monitor,</span>
+<span class="sd">        i.e., a handler that monitors a job as it is running. If a</span>
+<span class="sd">        monitor-type handler notices an error, the job will be sent a</span>
+<span class="sd">        termination signal, the error is then corrected,</span>
+<span class="sd">        and then the job is restarted. This is useful for catching errors</span>
+<span class="sd">        that occur early in the run but do not cause immediate failure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+    <span class="nd">@abstractproperty</span>
 <div class="viewcode-block" id="ErrorHandler.to_dict"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.ErrorHandler.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method should return a JSON serializable dict describing the</span>
@@ -226,7 +305,8 @@
     <span class="nd">@abstractmethod</span>
 <div class="viewcode-block" id="Job.run"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Job.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This method perform the actual work for the job.</span>
+<span class="sd">        This method perform the actual work for the job. If parallel error</span>
+<span class="sd">        checking is desired, this must return a Popen process.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 </div>
@@ -297,14 +377,14 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">custodian 0.3.3 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">custodian 0.3.4b documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
