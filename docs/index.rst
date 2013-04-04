@@ -123,52 +123,109 @@ The ExampleJob has the following code.
 .. code-block:: python
 
     class ExampleJob(Job):
+        """
+        This example job simply sums a random sequence of 100 numbers between 0
+        and 1, adds it to an initial value and puts the value in 'total'
+        key in params. Note that it subclasses the Job abstract base class.
+        """
 
         def __init__(self, jobid, params={"initial": 0, "total": 0}):
+            """
+            The initialization of the ExampleJob requires a jobid,
+            something to simply identify a job, and a params argument,
+            which is a mutable dict that enables storage of the results and can
+            be transferred from Job to Handler.
+            """
             self.jobid = jobid
             self.params = params
 
         def setup(self):
+            """
+            The setup sets the initial and total values to zero at the start of
+            a Job.
+            """
             self.params["initial"] = 0
             self.params["total"] = 0
 
         def run(self):
+            """
+            Doing the actual run, i.e., generating a random sequence of 100
+            numbers between 0 and 1, summing it and adding it to the inital
+            value to get the total value.
+            """
             print "Running job {}".format(self.jobid)
-            sequence = np.random.rand(100, 1)
-            self.params["total"] = self.params["initial"] + np.sum(sequence)
+            sequence = [random.uniform(0, 1) for i in range(100)]
+            self.params["total"] = self.params["initial"] + sum(sequence)
             print "Current total = {}".format(self.params["total"])
 
         def postprocess(self):
+            # Simply just print a success message.
             print "Success for job {}".format(self.jobid)
 
         def name(self):
+            """
+            A name for the job.
+            """
             return "ExampleJob{}".format(self.jobid)
 
         @property
         def to_dict(self):
+            """
+            All Jobs must implement a to_dict property that returns a JSON
+            serializable dict to enable Custodian to log the job information in
+            a json file.
+            """
             return {"jobid": self.jobid}
 
         @staticmethod
         def from_dict(d):
+            """
+            Similarly, all Jobs must implement a from_dict static method
+            that takes in a dict of the form returned by to_dict and returns a
+            actual Job.
+            """
             return ExampleJob(d["jobid"])
 
-This example job simply sums a random sequence of 100 numbers between 0 and
-1, adds it to an initial value and puts the value in 'total' variable. Let us
-now define an ErrorHandler that will check if the total value is >= 50,
+The ExampleJob simply sums a random sequence of 100 numbers between 0 and
+1, adds it to an initial value and puts the value in 'total' variable. The
+ExampleJob subclasses the Job abstract base class, and implements the necessary
+API comprising of just three key methods: **setup(), run(),
+and postprocess()**.
+
+Let us now define an ErrorHandler that will check if the total value is >= 50,
 and if it is not, it will increment the initial value by 1 and rerun the
 ExampleJob again.
 
 .. code-block:: python
 
     class ExampleHandler(ErrorHandler):
+        """
+        This example error handler checks if the value of total is >= 50. If it
+        is not, the handler increments the initial value and rerun the
+        ExampleJob until a total >= 50 is obtained.
+        """
 
         def __init__(self, params):
+            """
+            The initialization of the ExampleHandler takes in the same params
+            argument, which should contain the results from the ExampleJob.
+            """
             self.params = params
 
         def check(self):
+            """
+            The check() step should return a boolean indicating if there are
+            errors. In this case, we define an error to be a situation where the
+            total is less than 50.
+            """
             return self.params["total"] < 50
 
         def correct(self):
+            """
+            The correct() step should fix any errors and return a dict
+            summarizing the actions taken. In this case, we increment the initial
+            value by 1 in an attempt to increase the total.
+            """
             self.params["initial"] += 1
             print "Total < 50. Incrementing initial to {}".format(
                 self.params["initial"])
@@ -176,15 +233,32 @@ ExampleJob again.
 
         @property
         def is_monitor(self):
+            """
+            This property indicates whether this handler is a monitor, i.e.,
+            whether it turns in the background as the run is taking place and
+            correcting errors.
+            """
             return False
 
         @property
         def to_dict(self):
+            """
+            Similar to Jobs, ErrorHandlers should have a to_dict property that
+            returns a JSON-serializable dict.
+            """
             return {}
 
         @staticmethod
         def from_dict(d):
+            """
+            Similar to Jobs, ErrorHandlers should have a from_dict static property
+            that returns the Example Handler from a JSON-serializable dict.
+            """
             return ExampleHandler()
+
+As you can see above, the ExampleHandler subclasses the ErrorHandler abstract
+base class, and implements the necessary API comprising of just two key
+methods: **check() and correct()**.
 
 The transfer of information between the Job and ErrorHandler is done using
 the params argument in this example, which is not ideal but is sufficiently
@@ -192,6 +266,22 @@ for demonstrating the Custodian API. In real world usage,
 a more common transfer of information may involve the Job writing the output
 to a file, and the ErrorHandler checking the contents of those files to
 detect error situations.
+
+To run the job, one simply needs to supply a list of ExampleJobs and
+ErrorHandlers to a Custodian.
+
+.. code-block:: python
+
+    njobs = 100
+    params = {"initial": 0, "total": 0}
+    c = Custodian([ExampleHandler(params)],
+                  [ExampleJob(i, params) for i in xrange(njobs)],
+                  max_errors=njobs)
+    c.run()
+
+If you run custodian_example.py in the scripts directory, you will noticed that
+a **custodian.json** file was generated, which summarizes the jobs that have
+been run and any corrections performed.
 
 Practical example: Electronic structure calculations
 ----------------------------------------------------

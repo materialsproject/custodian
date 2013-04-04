@@ -1,3 +1,4 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -13,7 +14,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '0.3.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -144,7 +145,7 @@ Please install using:</p>
 of jobs with a list of error handlers. The general workflow for Custodian is
 presented in the figure below.</p>
 <div class="align-center figure align-center">
-<a class="reference internal image-reference" href="_images/Custodian.png"><img alt="Custodian workflow" src="_images/Custodian.png" style="width: 500px;" /></a>
+<img alt="Custodian workflow" src="_images/Custodian.png" style="width: 500px;" />
 <p class="caption">Overview of the Custodian workflow.</p>
 </div>
 <p>The Custodian class takes in two general inputs - a <strong>sequence of Jobs</strong> and
@@ -160,50 +161,106 @@ script in the scripts directory. We will now go through the example in detail
 here.</p>
 <p>The ExampleJob has the following code.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ExampleJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This example job simply sums a random sequence of 100 numbers between 0</span>
+<span class="sd">    and 1, adds it to an initial value and puts the value in &#39;total&#39;</span>
+<span class="sd">    key in params. Note that it subclasses the Job abstract base class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jobid</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">&quot;initial&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;total&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The initialization of the ExampleJob requires a jobid,</span>
+<span class="sd">        something to simply identify a job, and a params argument,</span>
+<span class="sd">        which is a mutable dict that enables storage of the results and can</span>
+<span class="sd">        be transferred from Job to Handler.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">jobid</span> <span class="o">=</span> <span class="n">jobid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
 
     <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The setup sets the initial and total values to zero at the start of</span>
+<span class="sd">        a Job.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;initial&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;total&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Doing the actual run, i.e., generating a random sequence of 100</span>
+<span class="sd">        numbers between 0 and 1, summing it and adding it to the inital</span>
+<span class="sd">        value to get the total value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">print</span> <span class="s">&quot;Running job {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jobid</span><span class="p">)</span>
-        <span class="n">sequence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;total&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;initial&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+        <span class="n">sequence</span> <span class="o">=</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;total&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;initial&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
         <span class="k">print</span> <span class="s">&quot;Current total = {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;total&quot;</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Simply just print a success message.</span>
         <span class="k">print</span> <span class="s">&quot;Success for job {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jobid</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A name for the job.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s">&quot;ExampleJob{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jobid</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        All Jobs must implement a to_dict property that returns a JSON</span>
+<span class="sd">        serializable dict to enable Custodian to log the job information in</span>
+<span class="sd">        a json file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;jobid&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobid</span><span class="p">}</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Similarly, all Jobs must implement a from_dict static method</span>
+<span class="sd">        that takes in a dict of the form returned by to_dict and returns a</span>
+<span class="sd">        actual Job.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">ExampleJob</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;jobid&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>This example job simply sums a random sequence of 100 numbers between 0 and
-1, adds it to an initial value and puts the value in &#8216;total&#8217; variable. Let us
-now define an ErrorHandler that will check if the total value is &gt;= 50,
+<p>The ExampleJob simply sums a random sequence of 100 numbers between 0 and
+1, adds it to an initial value and puts the value in &#8216;total&#8217; variable. The
+ExampleJob subclasses the Job abstract base class, and implements the necessary
+API comprising of just three key methods: <strong>setup(), run(),
+and postprocess()</strong>.</p>
+<p>Let us now define an ErrorHandler that will check if the total value is &gt;= 50,
 and if it is not, it will increment the initial value by 1 and rerun the
 ExampleJob again.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ExampleHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This example error handler checks if the value of total is &gt;= 50. If it</span>
+<span class="sd">    is not, the handler increments the initial value and rerun the</span>
+<span class="sd">    ExampleJob until a total &gt;= 50 is obtained.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The initialization of the ExampleHandler takes in the same params</span>
+<span class="sd">        argument, which should contain the results from the ExampleJob.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
 
     <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The check() step should return a boolean indicating if there are</span>
+<span class="sd">        errors. In this case, we define an error to be a situation where the</span>
+<span class="sd">        total is less than 50.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;total&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">50</span>
 
     <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The correct() step should fix any errors and return a dict</span>
+<span class="sd">        summarizing the actions taken. In this case, we increment the initial</span>
+<span class="sd">        value by 1 in an attempt to increase the total.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;initial&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">print</span> <span class="s">&quot;Total &lt; 50. Incrementing initial to {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;initial&quot;</span><span class="p">])</span>
@@ -211,23 +268,52 @@ ExampleJob again.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_monitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This property indicates whether this handler is a monitor, i.e.,</span>
+<span class="sd">        whether it turns in the background as the run is taking place and</span>
+<span class="sd">        correcting errors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">False</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Similar to Jobs, ErrorHandlers should have a to_dict property that</span>
+<span class="sd">        returns a JSON-serializable dict.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{}</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Similar to Jobs, ErrorHandlers should have a from_dict static property</span>
+<span class="sd">        that returns the Example Handler from a JSON-serializable dict.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">ExampleHandler</span><span class="p">()</span>
 </pre></div>
 </div>
+<p>As you can see above, the ExampleHandler subclasses the ErrorHandler abstract
+base class, and implements the necessary API comprising of just two key
+methods: <strong>check() and correct()</strong>.</p>
 <p>The transfer of information between the Job and ErrorHandler is done using
 the params argument in this example, which is not ideal but is sufficiently
 for demonstrating the Custodian API. In real world usage,
 a more common transfer of information may involve the Job writing the output
 to a file, and the ErrorHandler checking the contents of those files to
 detect error situations.</p>
+<p>To run the job, one simply needs to supply a list of ExampleJobs and
+ErrorHandlers to a Custodian.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">njobs</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;initial&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;total&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">Custodian</span><span class="p">([</span><span class="n">ExampleHandler</span><span class="p">(</span><span class="n">params</span><span class="p">)],</span>
+              <span class="p">[</span><span class="n">ExampleJob</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">njobs</span><span class="p">)],</span>
+              <span class="n">max_errors</span><span class="o">=</span><span class="n">njobs</span><span class="p">)</span>
+<span class="n">c</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>If you run custodian_example.py in the scripts directory, you will noticed that
+a <strong>custodian.json</strong> file was generated, which summarizes the jobs that have
+been run and any corrections performed.</p>
 </div>
 <div class="section" id="practical-example-electronic-structure-calculations">
 <h2>Practical example: Electronic structure calculations<a class="headerlink" href="#practical-example-electronic-structure-calculations" title="Permalink to this headline">¶</a></h2>
@@ -380,7 +466,7 @@ DEALINGS IN THE SOFTWARE.</pre>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
