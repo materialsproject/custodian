@@ -81,10 +81,10 @@ class VaspErrorHandler(ErrorHandler, MSONable):
                             'action': {'_set': {'IMIX': 1}}})
         if "subspacematrix" in self.errors or "rspher" in self.errors:
             actions.append({'dict': 'INCAR',
-                            'action': {'_set': {'INCAR->LREAL': False}}})
+                            'action': {'_set': {'LREAL': False}}})
         if "tetirr" in self.errors or "incorrect_shift" in self.errors:
             actions.append({'dict': 'KPOINTS',
-                            'action': {'_set': {'style': "Gamma"}}})
+                            'action': {'_set': {'generation_style': "Gamma"}}})
         if "mesh_symmetry" in self.errors:
             m = reduce(operator.mul, vi["KPOINTS"].kpts[0])
             m = max(int(round(m ** (1 / 3))), 1)
