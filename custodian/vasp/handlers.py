@@ -25,7 +25,7 @@ import operator
 from custodian.custodian import ErrorHandler
 from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput
 from pymatgen.transformations.standard_transformations import \
-    PerturbStructureTransformation
+    PerturbStructureTransformation, SupercellTransformation
 from pymatgen.serializers.json_coders import MSONable
 
 from pymatgen.io.vaspio.vasp_output import Vasprun
@@ -261,6 +261,53 @@ class PoscarErrorHandler(ErrorHandler, MSONable):
     @staticmethod
     def from_dict(d):
         return PoscarErrorHandler(d["output_filename"])
+
+
+class TripleProductErrorHandler(ErrorHandler, MSONable):
+
+    def __init__(self, output_filename="vasp.out"):
+        self.output_filename = output_filename
+
+    def check(self):
+        with open(self.output_filename, "r") as f:
+            output = f.read()
+            for line in output.split("\n"):
+                l = line.strip()
+                if l.startswith("ERROR: the triple product of the "
+                                "basis vectors"):
+                    return True
+        return False
+
+    def correct(self):
+        backup()
+        p = Poscar.from_file("POSCAR")
+        s = p.structure
+        trans = SupercellTransformation(((1,0,0),(0,0,1),(0,1,0)))
+        new_s = trans.apply_transformation(s)
+        actions = [{'dict': 'POSCAR',
+                    'action': {'_set': {'structure': new_s.to_dict}}}]
+        m = Modder()
+        vi = VaspInput.from_directory(".")
+        for a in actions:
+            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+        vi["POSCAR"].write_file("POSCAR")
+
+        return {"errors": ["Triple product"],
+                "actions": actions}
+
+    @property
+    def is_monitor(self):
+        return False
+
+    @property
+    def to_dict(self):
+        return {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__,
+                "output_filename": self.output_filename}
+
+    @staticmethod
+    def from_dict(d):
+        return TripleProductErrorHandler(d["output_filename"])
 
 
 class FrozenJobErrorHandler(ErrorHandler):
