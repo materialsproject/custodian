@@ -74,7 +74,10 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                          [{'file': 'CONTCAR',
                            'action': {'_file_copy': {'dest': 'POSCAR'}}},
                           {'dict': 'INCAR',
-                           'action': {'_set': {'ISTART': 1}}}])
+                           'action': {'_set': {"ISTART": 1, "ALGO": "Normal",
+                                               "NELMDL": 6, "BMIX": 0.001,
+                                               "AMIX_MAG": 0.8,
+                                               "BMIX_MAG": 0.001}}}])
         os.remove(os.path.join(subdir, "error.1.tar.gz"))
 
     def test_to_from_dict(self):
