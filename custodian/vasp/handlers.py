@@ -168,7 +168,7 @@ class DentetErrorHandler(ErrorHandler):
 
 class UnconvergedErrorHandler(ErrorHandler, MSONable):
     """
-    Check if a run is converged
+    Check if a run is converged. Switches to ALGO = Normal.
     """
     def __init__(self, output_filename="vasprun.xml"):
         self.output_filename = output_filename
@@ -183,10 +183,15 @@ class UnconvergedErrorHandler(ErrorHandler, MSONable):
 
     def correct(self):
         backup()
-        actions = [{'file': 'CONTCAR',
-                    'action': {'_file_copy': {'dest': 'POSCAR'}}},
-                   {'dict': 'INCAR',
-                    'action': {'_set': {'ISTART': 1}}}]
+        actions = [{"file": "CONTCAR",
+                    "action": {"_file_copy": {"dest": "POSCAR"}}},
+                   {"dict": "INCAR",
+                    "action": {"_set": {"ISTART": 1,
+                                        "ALGO": "Normal",
+                                        "NELMDL": 6,
+                                        "BMIX": 0.001,
+                                        "AMIX_MAG": 0.8,
+                                        "BMIX_MAG": 0.001}}}]
         vi = VaspInput.from_directory(".")
         m = Modder(actions=[DictActions, FileActions])
         for a in actions:
