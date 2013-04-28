@@ -1,4 +1,7 @@
-ALGO = Fast
+ALGO = Normal
+AMIX_MAG = 0.8
+BMIX = 0.001
+BMIX_MAG = 0.001
 EDIFF = 0.0004
 ENCUT = 520
 IBRION = 2
@@ -18,6 +21,7 @@ LREAL = Auto
 LWAVE = False
 MAGMOM = 2*0.6 1*5 5*0.6
 NELM = 100
+NELMDL = 6
 NELMIN = 6
 NPAR = 1
 NSW = 99

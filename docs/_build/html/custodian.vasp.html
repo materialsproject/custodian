@@ -1,4 +1,3 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -7,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>vasp Package &mdash; custodian 0.3.4 documentation</title>
+    <title>vasp Package &mdash; custodian 0.3.5 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '0.3.4',
+        URL_ROOT:    './',
+        VERSION:     '0.3.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.3.4 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.3.5 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -44,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.3.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.3.5 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -162,10 +161,41 @@ in timeout seconds. Perturbs structure and restarts</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="custodian.vasp.handlers.TripleProductErrorHandler">
+<em class="property">class </em><tt class="descname">TripleProductErrorHandler</tt><big>(</big><em>output_filename='vasp.out'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#TripleProductErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.TripleProductErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">pymatgen.serializers.json_coders.MSONable</span></tt></p>
+<dl class="method">
+<dt id="custodian.vasp.handlers.TripleProductErrorHandler.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#TripleProductErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.TripleProductErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.handlers.TripleProductErrorHandler.correct">
+<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#TripleProductErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.TripleProductErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="custodian.vasp.handlers.TripleProductErrorHandler.from_dict">
+<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#TripleProductErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.TripleProductErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.TripleProductErrorHandler.is_monitor">
+<tt class="descname">is_monitor</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#TripleProductErrorHandler.is_monitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.TripleProductErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.TripleProductErrorHandler.to_dict">
+<tt class="descname">to_dict</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#TripleProductErrorHandler.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.TripleProductErrorHandler.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="custodian.vasp.handlers.UnconvergedErrorHandler">
 <em class="property">class </em><tt class="descname">UnconvergedErrorHandler</tt><big>(</big><em>output_filename='vasprun.xml'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">pymatgen.serializers.json_coders.MSONable</span></tt></p>
-<p>Check if a run is converged</p>
+<p>Check if a run is converged. Switches to ALGO = Normal.</p>
 <dl class="method">
 <dt id="custodian.vasp.handlers.UnconvergedErrorHandler.check">
 <tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.check" title="Permalink to this definition">¶</a></dt>
@@ -272,7 +302,7 @@ in timeout seconds. Perturbs structure and restarts</p>
 <dt>
 <tt class="descname">LDAUU = {u'S': {u'Mn': 2.5, u'Fe': 1.9}, u'O': {u'Ni': 6, u'Co': 3.4, u'Ag': 1.5, u'Mo': 4.38, u'Mn': 3.9, u'Re': 2, u'Fe': 4.0, u'W': 4.0, u'V': 3.1, u'Cr': 3.5, u'Nb': 1.5, u'Cu': 4, u'Ta': 2}, u'F': {u'Ni': 6, u'Co': 3.4, u'Ag': 1.5, u'Mo': 4.38, u'Mn': 3.9, u'Re': 2, u'Fe': 4.0, u'W': 4.0, u'V': 3.1, u'Cr': 3.5, u'Nb': 1.5, u'Cu': 4, u'Ta': 2}}</tt></dt>
 <dt>
-<tt class="descname">EDIFF = 0.00005</tt></dt>
+<tt class="descname">EDIFF = 5e-05</tt></dt>
 <dt>
 <tt class="descname">NSW = 99</tt></dt>
 <dt>
@@ -284,7 +314,7 @@ in timeout seconds. Perturbs structure and restarts</p>
 <dt>
 <tt class="descname">PREC = Accurate</tt></dt>
 <dt>
-<tt class="descname">LDAU = TRUE</tt></dt>
+<tt class="descname">LDAU = True</tt></dt>
 <dt>
 <tt class="descname">ALGO = FAST</tt></dt>
 <dt>
@@ -647,13 +677,13 @@ if you are using mpirun, it can be something like
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.3.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.3.5 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

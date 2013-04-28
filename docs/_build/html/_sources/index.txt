@@ -18,6 +18,13 @@ error, and potentially restart the job if necessary.
 Change log
 ==========
 
+0.3.5
+-----
+1. Bug fix for incorrect shift error handler in VASP.
+2. More robust fix for unconverged VASP runs (switching from ALGO fast to
+   normal).
+3. Expanded documentation.
+
 0.3.4
 -----
 1. Added support for handlers that perform monitor a job as it is progressing
