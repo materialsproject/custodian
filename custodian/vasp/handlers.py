@@ -48,7 +48,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         "tetirr": ["Routine TETIRR needs special values"],
         "incorrect_shift": ["Could not get correct shifts"],
         "mesh_symmetry": ["Reciprocal lattice and k-lattice belong to "
-                          "different class of lattices."]
+                          "different class of lattices."],
         "real_optlay": ["REAL_OPTLAY: internal error"]
     }
 
