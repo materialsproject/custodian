@@ -18,7 +18,8 @@ import os
 import shutil
 
 from custodian.vasp.handlers import VaspErrorHandler, \
-    UnconvergedErrorHandler, PoscarErrorHandler, DentetErrorHandler
+    UnconvergedErrorHandler, PoscarErrorHandler, DentetErrorHandler, \
+    TooFewBandsErrorHandler
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
@@ -125,6 +126,30 @@ class DentetErrorHandlerTest(unittest.TestCase):
                          [{'action': {'_set': {'ISMEAR': 0}},
                            'dict': 'INCAR'}])
         os.remove(os.path.join(test_dir, "error.1.tar.gz"))
+        shutil.move("INCAR.orig", "INCAR")
+
+    def test_to_from_dict(self):
+        h = DentetErrorHandler("random_name.out")
+        h2 = DentetErrorHandler.from_dict(h.to_dict)
+        self.assertEqual(type(h2), DentetErrorHandler)
+        self.assertEqual(h2.output_filename, "random_name.out")
+
+
+class TooFewBandsErrorHandlerTest(unittest.TestCase):
+
+    def test_check_correct(self):
+        if "VASP_PSP_DIR" not in os.environ:
+            os.environ["VASP_PSP_DIR"] = test_dir
+        os.chdir(os.path.join(test_dir, "too_few_bands"))
+        shutil.copy("INCAR", "INCAR.orig")
+        h = TooFewBandsErrorHandler("vasp.too_few_bands")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ['too_few_bands'])
+        self.assertEqual(d["actions"],
+                         [{'action': {'_set': {'NBANDS': 547}},
+                           'dict': 'INCAR'}])
+        os.remove("error.1.tar.gz")
         shutil.move("INCAR.orig", "INCAR")
 
     def test_to_from_dict(self):
