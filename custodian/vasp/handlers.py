@@ -49,6 +49,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         "incorrect_shift": ["Could not get correct shifts"],
         "mesh_symmetry": ["Reciprocal lattice and k-lattice belong to "
                           "different class of lattices."]
+        "real_optlay": ["REAL_OPTLAY: internal error"]
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -79,7 +80,8 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         if "brmix" in self.errors:
             actions.append({'dict': 'INCAR',
                             'action': {'_set': {'IMIX': 1}}})
-        if "subspacematrix" in self.errors or "rspher" in self.errors:
+        if "subspacematrix" in self.errors or "rspher" in self.errors or \
+                "real_optlay" in self.errors:
             actions.append({'dict': 'INCAR',
                             'action': {'_set': {'LREAL': False}}})
         if "tetirr" in self.errors or "incorrect_shift" in self.errors:
@@ -92,6 +94,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
                 m += m % 2
             actions.append({'dict': 'KPOINTS',
                             'action': {'_set': {'kpoints': [[m] * 3]}}})
+
         m = Modder()
         modified = []
         for a in actions:
@@ -287,7 +290,7 @@ class TripleProductErrorHandler(ErrorHandler, MSONable):
         backup()
         p = Poscar.from_file("POSCAR")
         s = p.structure
-        trans = SupercellTransformation(((1,0,0),(0,0,1),(0,1,0)))
+        trans = SupercellTransformation(((1, 0, 0),(0, 0, 1),(0, 1, 0)))
         new_s = trans.apply_transformation(s)
         actions = [{'dict': 'POSCAR',
                     'action': {'_set': {'structure': new_s.to_dict}}}]
