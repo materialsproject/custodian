@@ -87,7 +87,7 @@ class Custodian(object):
         """
         self.max_errors = max_errors
         self.jobs = jobs
-        self.handlers = filter(lambda x: not x.is_monitor, handlers)
+        self.handlers = handlers
         self.monitors = filter(lambda x: x.is_monitor, handlers)
         self.polling_time_step = polling_time_step
         self.monitor_freq = monitor_freq

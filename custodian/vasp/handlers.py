@@ -43,13 +43,17 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         "inv_rot_mat": ["inverse of rotation matrix was not found (increase "
                         "SYMPREC)"],
         "brmix": ["BRMIX: very serious problems"],
-        "rspher": ["ERROR RSPHER"],
         "subspacematrix": ["WARNING: Sub-Space-Matrix is not hermitian in DAV"],
         "tetirr": ["Routine TETIRR needs special values"],
         "incorrect_shift": ["Could not get correct shifts"],
         "mesh_symmetry": ["Reciprocal lattice and k-lattice belong to "
                           "different class of lattices."],
-        "real_optlay": ["REAL_OPTLAY: internal error"]
+        "real_optlay": ["REAL_OPTLAY: internal error"],
+        "rspher": ["ERROR RSPHER"],
+        "dentet": ["DENTET"],
+        "too_few_bands": ["TOO FEW BANDS"],
+        "triple_product": ["ERROR: the triple product of the basis vectors"],
+        "rot_matrix": ["Found some non-integer element in rotation matrix"]
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -62,7 +66,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
                 l = line.strip()
                 for err, msgs in VaspErrorHandler.error_msgs.items():
                     for msg in msgs:
-                        if l.startswith(msg):
+                        if l.find(msg) != -1:
                             self.errors.add(err)
         return len(self.errors) > 0
 
@@ -71,7 +75,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         actions = []
         vi = VaspInput.from_directory(".")
 
-        if "tet" in self.errors:
+        if "tet" in self.errors or "dentet" in self.errors:
             actions.append({'dict': 'INCAR',
                             'action': {'_set': {'ISMEAR': 0}}})
         if "inv_rot_mat" in self.errors:
@@ -94,6 +98,35 @@ class VaspErrorHandler(ErrorHandler, MSONable):
                 m += m % 2
             actions.append({'dict': 'KPOINTS',
                             'action': {'_set': {'kpoints': [[m] * 3]}}})
+        if "too_few_bands" in self.errors:
+            if "NBANDS" in vi["INCAR"]:
+                nbands = int(vi["INCAR"]["NBANDS"])
+            else:
+                with open("OUTCAR", 'r') as f:
+                    for line in f:
+                        if "NBANDS" in line:
+                            try:
+                                d = line.split("=")
+                                nbands = int(d[-1].strip())
+                                break
+                            except:
+                                pass
+            actions.append({'dict': 'INCAR',
+                            'action': {'_set': {'NBANDS': int(1.2 * nbands)}}})
+
+        if "triple_product" in self.errors:
+            s = vi["POSCAR"].structure
+            trans = SupercellTransformation(((1, 0, 0),(0, 0, 1),(0, 1, 0)))
+            new_s = trans.apply_transformation(s)
+            actions.append({'dict': 'POSCAR',
+                            'action': {'_set': {'structure': new_s.to_dict}}})
+
+        if "rot_matrix" in self.errors:
+            s = vi["POSCAR"].structure
+            trans = PerturbStructureTransformation(0.05)
+            new_s = trans.apply_transformation(s)
+            actions.append({'dict': 'POSCAR',
+                            'action': {'_set': {'structure': new_s.to_dict}}})
 
         m = Modder()
         modified = []
@@ -106,7 +139,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
 
     @property
     def is_monitor(self):
-        return False
+        return True
 
     def __str__(self):
         return "Vasp error"
@@ -120,114 +153,6 @@ class VaspErrorHandler(ErrorHandler, MSONable):
     @staticmethod
     def from_dict(d):
         return VaspErrorHandler(d["output_filename"])
-
-
-class DentetErrorHandler(ErrorHandler):
-
-    def __init__(self, output_file='vasp.out'):
-        """
-        Detects an error when the output file has not been updated
-        in timeout seconds. Perturbs structure and restarts
-        """
-        self.output_filename = output_file
-
-    def check(self):
-        with open(self.output_filename, "r") as f:
-            for line in f:
-                l = line.strip()
-                if l.find("DENTET") != -1:
-                    return True
-        return False
-
-    def correct(self):
-        backup()
-        actions = []
-        vi = VaspInput.from_directory(".")
-        actions.append({'dict': 'INCAR',
-                        'action': {'_set': {'ISMEAR': 0}}})
-        m = Modder()
-        modified = []
-        for a in actions:
-            modified.append(a["dict"])
-            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
-        for f in modified:
-            vi[f].write_file(f)
-        return {"errors": ["dentet"], "actions": actions}
-
-    @property
-    def is_monitor(self):
-        return True
-
-    @property
-    def to_dict(self):
-        return {"@module": self.__class__.__module__,
-                "@class": self.__class__.__name__,
-                "output_filename": self.output_filename}
-
-    @staticmethod
-    def from_dict(d):
-        return DentetErrorHandler(d["output_filename"])
-
-
-
-class TooFewBandsErrorHandler(ErrorHandler):
-
-    def __init__(self, output_file='vasp.out'):
-        """
-        Detects an error when the output file has not been updated
-        in timeout seconds. Perturbs structure and restarts
-        """
-        self.output_filename = output_file
-
-    def check(self):
-        with open(self.output_filename, "r") as f:
-            for line in f:
-                l = line.strip()
-                if l.find("TOO FEW BANDS") != -1:
-                    return True
-        return False
-
-    def correct(self):
-        backup()
-        actions = []
-        vi = VaspInput.from_directory(".")
-        if "NBANDS" in vi["INCAR"]:
-            nbands = int(vi["INCAR"]["NBANDS"])
-        else:
-            with open("OUTCAR", 'r') as f:
-                for line in f:
-                    if "NBANDS" in line:
-                        try:
-                            d = line.split("=")
-                            nbands = int(d[-1].strip())
-                            break
-                        except:
-                            pass
-        actions.append({'dict': 'INCAR',
-                        'action': {'_set': {'NBANDS': int(1.2 * nbands)}}})
-        m = Modder()
-        modified = []
-        for a in actions:
-            modified.append(a["dict"])
-            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
-        for f in modified:
-            vi[f].write_file(f)
-        return {"errors": ["too_few_bands"], "actions": actions}
-
-    @property
-    def is_monitor(self):
-        return True
-
-    @property
-    def to_dict(self):
-        return {"@module": self.__class__.__module__,
-                "@class": self.__class__.__name__,
-                "output_filename": self.output_filename}
-
-    @staticmethod
-    def from_dict(d):
-        return TooFewBandsErrorHandler(d["output_filename"])
-
 
 
 class UnconvergedErrorHandler(ErrorHandler, MSONable):
@@ -283,100 +208,6 @@ class UnconvergedErrorHandler(ErrorHandler, MSONable):
     @staticmethod
     def from_dict(d):
         return UnconvergedErrorHandler(d["output_filename"])
-
-
-class PoscarErrorHandler(ErrorHandler, MSONable):
-
-    def __init__(self, output_filename="vasp.out"):
-        self.output_filename = output_filename
-
-    def check(self):
-        with open(self.output_filename, "r") as f:
-            output = f.read()
-            for line in output.split("\n"):
-                l = line.strip()
-                if l.startswith("Found some non-integer element in rotation "
-                                "matrix"):
-                    return True
-        return False
-
-    def correct(self):
-        backup()
-        p = Poscar.from_file("POSCAR")
-        s = p.structure
-        trans = PerturbStructureTransformation(0.05)
-        new_s = trans.apply_transformation(s)
-        actions = [{'dict': 'POSCAR',
-                    'action': {'_set': {'structure': new_s.to_dict}}}]
-        m = Modder()
-        vi = VaspInput.from_directory(".")
-        for a in actions:
-            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
-        vi["POSCAR"].write_file("POSCAR")
-
-        return {"errors": ["Rotation matrix"],
-                "actions": actions}
-
-    @property
-    def is_monitor(self):
-        return False
-
-    @property
-    def to_dict(self):
-        return {"@module": self.__class__.__module__,
-                "@class": self.__class__.__name__,
-                "output_filename": self.output_filename}
-
-    @staticmethod
-    def from_dict(d):
-        return PoscarErrorHandler(d["output_filename"])
-
-
-class TripleProductErrorHandler(ErrorHandler, MSONable):
-
-    def __init__(self, output_filename="vasp.out"):
-        self.output_filename = output_filename
-
-    def check(self):
-        with open(self.output_filename, "r") as f:
-            output = f.read()
-            for line in output.split("\n"):
-                l = line.strip()
-                if l.startswith("ERROR: the triple product of the "
-                                "basis vectors"):
-                    return True
-        return False
-
-    def correct(self):
-        backup()
-        p = Poscar.from_file("POSCAR")
-        s = p.structure
-        trans = SupercellTransformation(((1, 0, 0),(0, 0, 1),(0, 1, 0)))
-        new_s = trans.apply_transformation(s)
-        actions = [{'dict': 'POSCAR',
-                    'action': {'_set': {'structure': new_s.to_dict}}}]
-        m = Modder()
-        vi = VaspInput.from_directory(".")
-        for a in actions:
-            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
-        vi["POSCAR"].write_file("POSCAR")
-
-        return {"errors": ["Triple product"],
-                "actions": actions}
-
-    @property
-    def is_monitor(self):
-        return False
-
-    @property
-    def to_dict(self):
-        return {"@module": self.__class__.__module__,
-                "@class": self.__class__.__name__,
-                "output_filename": self.output_filename}
-
-    @staticmethod
-    def from_dict(d):
-        return TripleProductErrorHandler(d["output_filename"])
 
 
 class FrozenJobErrorHandler(ErrorHandler):
