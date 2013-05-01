@@ -47,12 +47,22 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["errors"], ['rot_matrix', 'mesh_symmetry'])
         self.assertEqual(set([a["dict"] for a in d["actions"]]),
                          set(["POSCAR", "KPOINTS"]))
+
+        h = VaspErrorHandler("vasp.real_optlay")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ['real_optlay'])
+        self.assertEqual(d["actions"],
+                         [{'action': {'_set': {'LREAL': False}},
+                           'dict': 'INCAR'}])
+
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("KPOINTS.orig", "KPOINTS")
         shutil.move("POSCAR.orig", "POSCAR")
 
         os.remove(os.path.join(test_dir, "error.1.tar.gz"))
         os.remove(os.path.join(test_dir, "error.2.tar.gz"))
+        os.remove(os.path.join(test_dir, "error.3.tar.gz"))
 
     def test_dentet(self):
         if "VASP_PSP_DIR" not in os.environ:
