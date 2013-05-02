@@ -18,29 +18,14 @@ error, and potentially restart the job if necessary.
 Change log
 ==========
 
-0.3.5
+0.4.0
 -----
-1. Bug fix for incorrect shift error handler in VASP.
-2. More robust fix for unconverged VASP runs (switching from ALGO fast to
-   normal).
-3. Expanded documentation.
-
-0.3.4
------
-1. Added support for handlers that perform monitor a job as it is progressing
-   and terminates it if necessary. Useful for correcting errors that come up
-   by do not cause immediate job failures.
-
-0.3.2
------
-1. Important bug fix for VaspJob and converge_kpoints script.
-
-0.3.0
------
-
-1. Major update to custodian API. Custodian now perform more comprehensive
-   logging in a file called custodian.json, which logs all jobs and
-   corrections performed.
+1. Many VASP handlers are now consolidated into a single VaspErrorHandler.
+2. Many more fixes for VASP runs, including the "too few bands",
+   "triple product" and "dentet" errors.
+3. VaspJob now includes an auto_npar option, which automatically optimizes
+   the NPAR setting to be sqrt(number of cores) as per the VASP
+   recommendation for DFT runs.
 
 :doc:`Older versions </changelog>`
 
