@@ -45,7 +45,7 @@ class VaspJob(Job, MSONable):
 
     def __init__(self, vasp_command, output_file="vasp.out", suffix="",
                  final=True, gzipped=False, backup=True,
-                 default_vasp_input_set=MITVaspInputSet(),
+                 default_vasp_input_set=MITVaspInputSet(), auto_npar=True,
                  settings_override=None):
         """
         This constructor is necessarily complex due to the need for
@@ -80,6 +80,11 @@ class VaspJob(Job, MSONable):
                 input files for the run. If the directory already
                 contain a full set of VASP input files,
                 this input is ignored. Defaults to the MITVaspInputSet.
+            auto_npar:
+                Whether to automatically tune NPAR to be sqrt(number of
+                cores) as recommended by VASP for DFT calculations.
+                Generally, this results in significant speedups. Defaults to
+                True. Set to False for HF, GW and RPA calculations.
             settings_override:
                 An ansible style list of dict to override changes. For example,
                 to set ISTART=1 for subsequent runs and to copy the CONTCAR
@@ -97,6 +102,7 @@ class VaspJob(Job, MSONable):
         self.default_vis = default_vasp_input_set
         self.suffix = suffix
         self.settings_override = settings_override
+        self.auto_npar = auto_npar
 
     def setup(self):
         files = os.listdir(".")
@@ -118,19 +124,21 @@ class VaspJob(Job, MSONable):
             for f in VASP_INPUT_FILES:
                 shutil.copy(f, "{}.orig".format(f))
 
-        try:
-            vi = VaspInput.from_directory(".")
-            incar = vi["INCAR"]
-            if not incar.get("LHFCALC"):
-                import multiprocessing
-                ncores = multiprocessing.cpu_count()
-                for npar in range(int(round(math.sqrt(ncores))), ncores):
-                    if ncores % npar == 0:
-                        incar["NPAR"] = npar
-                        break
-                incar.write_file("INCAR")
-        except:
-            pass
+        if self.auto_npar:
+            try:
+                vi = VaspInput.from_directory(".")
+                incar = vi["INCAR"]
+                #Only optimized NPAR for non-HF and non-RPA calculations.
+                if (not incar.get("LHFCALC")) and (not incar.get("LRPA")):
+                    import multiprocessing
+                    ncores = multiprocessing.cpu_count()
+                    for npar in range(int(round(math.sqrt(ncores))), ncores):
+                        if ncores % npar == 0:
+                            incar["NPAR"] = npar
+                            break
+                    incar.write_file("INCAR")
+            except:
+                pass
 
         if self.settings_override is not None:
             vi = VaspInput.from_directory(".")
