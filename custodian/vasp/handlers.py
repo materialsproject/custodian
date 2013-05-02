@@ -47,8 +47,6 @@ class VaspErrorHandler(ErrorHandler, MSONable):
                            "DAV"],
         "tetirr": ["Routine TETIRR needs special values"],
         "incorrect_shift": ["Could not get correct shifts"],
-        "mesh_symmetry": ["Reciprocal lattice and k-lattice belong to "
-                          "different class of lattices."],
         "real_optlay": ["REAL_OPTLAY: internal error"],
         "rspher": ["ERROR RSPHER"],
         "dentet": ["DENTET"],
@@ -92,13 +90,6 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         if "tetirr" in self.errors or "incorrect_shift" in self.errors:
             actions.append({"dict": "KPOINTS",
                             "action": {"_set": {"generation_style": "Gamma"}}})
-        if "mesh_symmetry" in self.errors:
-            m = reduce(operator.mul, vi["KPOINTS"].kpts[0])
-            m = max(int(round(m ** (1 / 3))), 1)
-            if vi["KPOINTS"].style.lower().startswith("m"):
-                m += m % 2
-            actions.append({"dict": "KPOINTS",
-                            "action": {"_set": {"kpoints": [[m] * 3]}}})
         if "too_few_bands" in self.errors:
             if "NBANDS" in vi["INCAR"]:
                 nbands = int(vi["INCAR"]["NBANDS"])
@@ -145,7 +136,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         return True
 
     def __str__(self):
-        return "Vasp error"
+        return "VaspErrorHandler"
 
     @property
     def to_dict(self):
@@ -156,6 +147,68 @@ class VaspErrorHandler(ErrorHandler, MSONable):
     @staticmethod
     def from_dict(d):
         return VaspErrorHandler(d["output_filename"])
+
+
+class MeshSymmetryErrorHandler(ErrorHandler, MSONable):
+    """
+    Corrects the mesh symmetry error in VASP. This error is sometimes
+    non-fatal. So this error handler only checks at the end of the run,
+    and if the run has converged, no error is recorded.
+    """
+
+    def __init__(self, output_filename="vasp.out"):
+        self.output_filename = output_filename
+
+    def check(self):
+        msg = "Reciprocal lattice and k-lattice belong to different class of " \
+              "lattices."
+        try:
+            v = Vasprun(self.output_filename)
+            if v.converged:
+                return False
+        except:
+            pass
+        with open(self.output_filename, "r") as f:
+            for line in f:
+                l = line.strip()
+                if l.find(msg) != -1:
+                    return True
+        return False
+
+    def correct(self):
+        backup()
+        vi = VaspInput.from_directory(".")
+        m = reduce(operator.mul, vi["KPOINTS"].kpts[0])
+        m = max(int(round(m ** (1 / 3))), 1)
+        if vi["KPOINTS"].style.lower().startswith("m"):
+            m += m % 2
+        actions = [{"dict": "KPOINTS",
+                    "action": {"_set": {"kpoints": [[m] * 3]}}}]
+        m = Modder()
+        modified = []
+        for a in actions:
+            modified.append(a["dict"])
+            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+        for f in modified:
+            vi[f].write_file(f)
+        return {"errors": ["mesh_symmetry"], "actions": actions}
+
+    @property
+    def is_monitor(self):
+        return False
+
+    def __str__(self):
+        return "MeshSymmetryErrorHandler"
+
+    @property
+    def to_dict(self):
+        return {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__,
+                "output_filename": self.output_filename}
+
+    @staticmethod
+    def from_dict(d):
+        return MeshSymmetryErrorHandler(d["output_filename"])
 
 
 class UnconvergedErrorHandler(ErrorHandler, MSONable):
@@ -171,7 +224,8 @@ class UnconvergedErrorHandler(ErrorHandler, MSONable):
             if not v.converged:
                 return True
         except:
-            return True
+            pass
+        return False
 
     def correct(self):
         backup()

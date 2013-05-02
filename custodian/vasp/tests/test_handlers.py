@@ -15,10 +15,11 @@ __date__ = "Jun 1, 2012"
 
 import unittest
 import os
+import glob
 import shutil
 
 from custodian.vasp.handlers import VaspErrorHandler, \
-    UnconvergedErrorHandler
+    UnconvergedErrorHandler, MeshSymmetryErrorHandler
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
@@ -27,13 +28,16 @@ test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
 
 class VaspErrorHandlerTest(unittest.TestCase):
 
-    def test_check_correct(self):
+    @classmethod
+    def setUpClass(cls):
         if "VASP_PSP_DIR" not in os.environ:
             os.environ["VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
         shutil.copy("INCAR", "INCAR.orig")
         shutil.copy("KPOINTS", "KPOINTS.orig")
         shutil.copy("POSCAR", "POSCAR.orig")
+
+    def test_check_correct(self):
         h = VaspErrorHandler("vasp.teterror")
         h.check()
         d = h.correct()
@@ -44,9 +48,9 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h = VaspErrorHandler("vasp.classrotmat")
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ['rot_matrix', 'mesh_symmetry'])
+        self.assertEqual(d["errors"], ['rot_matrix'])
         self.assertEqual(set([a["dict"] for a in d["actions"]]),
-                         set(["POSCAR", "KPOINTS"]))
+                         set(["POSCAR"]))
 
         h = VaspErrorHandler("vasp.real_optlay")
         h.check()
@@ -56,19 +60,16 @@ class VaspErrorHandlerTest(unittest.TestCase):
                          [{'action': {'_set': {'LREAL': False}},
                            'dict': 'INCAR'}])
 
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("KPOINTS.orig", "KPOINTS")
-        shutil.move("POSCAR.orig", "POSCAR")
-
-        os.remove(os.path.join(test_dir, "error.1.tar.gz"))
-        os.remove(os.path.join(test_dir, "error.2.tar.gz"))
-        os.remove(os.path.join(test_dir, "error.3.tar.gz"))
+    def test_mesh_symmetry(self):
+        h = MeshSymmetryErrorHandler("vasp.classrotmat")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ['mesh_symmetry'])
+        self.assertEqual(d["actions"],
+                         [{'action': {'_set': {'kpoints': [[4, 4, 4]]}},
+                           'dict': 'KPOINTS'}])
 
     def test_dentet(self):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
-        os.chdir(test_dir)
-        shutil.copy("INCAR", "INCAR.orig")
         h = VaspErrorHandler("vasp.dentet")
         h.check()
         d = h.correct()
@@ -76,12 +77,8 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["actions"],
                          [{'action': {'_set': {'ISMEAR': 0}},
                            'dict': 'INCAR'}])
-        os.remove(os.path.join(test_dir, "error.1.tar.gz"))
-        shutil.move("INCAR.orig", "INCAR")
-
+        
     def test_too_few_bands(self):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
         os.chdir(os.path.join(test_dir, "too_few_bands"))
         shutil.copy("INCAR", "INCAR.orig")
         h = VaspErrorHandler("vasp.too_few_bands")
@@ -113,6 +110,15 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h2 = VaspErrorHandler.from_dict(h.to_dict)
         self.assertEqual(type(h2), type(h))
         self.assertEqual(h2.output_filename, "random_name")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(test_dir)
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("KPOINTS.orig", "KPOINTS")
+        shutil.move("POSCAR.orig", "POSCAR")
+        for f in glob.glob("error.*.tar.gz"):
+            os.remove(f)
 
 
 class UnconvergedErrorHandlerTest(unittest.TestCase):
