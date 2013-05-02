@@ -43,7 +43,8 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         "inv_rot_mat": ["inverse of rotation matrix was not found (increase "
                         "SYMPREC)"],
         "brmix": ["BRMIX: very serious problems"],
-        "subspacematrix": ["WARNING: Sub-Space-Matrix is not hermitian in DAV"],
+        "subspacematrix": ["WARNING: Sub-Space-Matrix is not hermitian in "
+                           "DAV"],
         "tetirr": ["Routine TETIRR needs special values"],
         "incorrect_shift": ["Could not get correct shifts"],
         "mesh_symmetry": ["Reciprocal lattice and k-lattice belong to "
@@ -76,33 +77,33 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         vi = VaspInput.from_directory(".")
 
         if "tet" in self.errors or "dentet" in self.errors:
-            actions.append({'dict': 'INCAR',
-                            'action': {'_set': {'ISMEAR': 0}}})
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"ISMEAR": 0}}})
         if "inv_rot_mat" in self.errors:
-            actions.append({'dict': 'INCAR',
-                            'action': {'_set': {'SYMPREC': 1e-8}}})
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"SYMPREC": 1e-8}}})
         if "brmix" in self.errors:
-            actions.append({'dict': 'INCAR',
-                            'action': {'_set': {'IMIX': 1}}})
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"IMIX": 1}}})
         if "subspacematrix" in self.errors or "rspher" in self.errors or \
                 "real_optlay" in self.errors:
-            actions.append({'dict': 'INCAR',
-                            'action': {'_set': {'LREAL': False}}})
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"LREAL": False}}})
         if "tetirr" in self.errors or "incorrect_shift" in self.errors:
-            actions.append({'dict': 'KPOINTS',
-                            'action': {'_set': {'generation_style': "Gamma"}}})
+            actions.append({"dict": "KPOINTS",
+                            "action": {"_set": {"generation_style": "Gamma"}}})
         if "mesh_symmetry" in self.errors:
             m = reduce(operator.mul, vi["KPOINTS"].kpts[0])
             m = max(int(round(m ** (1 / 3))), 1)
             if vi["KPOINTS"].style.lower().startswith("m"):
                 m += m % 2
-            actions.append({'dict': 'KPOINTS',
-                            'action': {'_set': {'kpoints': [[m] * 3]}}})
+            actions.append({"dict": "KPOINTS",
+                            "action": {"_set": {"kpoints": [[m] * 3]}}})
         if "too_few_bands" in self.errors:
             if "NBANDS" in vi["INCAR"]:
                 nbands = int(vi["INCAR"]["NBANDS"])
             else:
-                with open("OUTCAR", 'r') as f:
+                with open("OUTCAR", "r") as f:
                     for line in f:
                         if "NBANDS" in line:
                             try:
@@ -111,22 +112,24 @@ class VaspErrorHandler(ErrorHandler, MSONable):
                                 break
                             except:
                                 pass
-            actions.append({'dict': 'INCAR',
-                            'action': {'_set': {'NBANDS': int(1.2 * nbands)}}})
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"NBANDS": int(1.2 * nbands)}}})
 
         if "triple_product" in self.errors:
             s = vi["POSCAR"].structure
-            trans = SupercellTransformation(((1, 0, 0),(0, 0, 1),(0, 1, 0)))
+            trans = SupercellTransformation(((1, 0, 0), (0, 0, 1), (0, 1, 0)))
             new_s = trans.apply_transformation(s)
-            actions.append({'dict': 'POSCAR',
-                            'action': {'_set': {'structure': new_s.to_dict}}})
+            actions.append({"dict": "POSCAR",
+                            "action": {"_set": {"structure": new_s.to_dict}},
+                            "transformation": trans.to_dict})
 
         if "rot_matrix" in self.errors:
             s = vi["POSCAR"].structure
             trans = PerturbStructureTransformation(0.05)
             new_s = trans.apply_transformation(s)
-            actions.append({'dict': 'POSCAR',
-                            'action': {'_set': {'structure': new_s.to_dict}}})
+            actions.append({"dict": "POSCAR",
+                            "action": {"_set": {"structure": new_s.to_dict}},
+                            "transformation": trans.to_dict})
 
         m = Modder()
         modified = []
@@ -212,7 +215,7 @@ class UnconvergedErrorHandler(ErrorHandler, MSONable):
 
 class FrozenJobErrorHandler(ErrorHandler):
 
-    def __init__(self, output_filename='vasp.out', timeout=3600):
+    def __init__(self, output_filename="vasp.out", timeout=3600):
         """
         Detects an error when the output file has not been updated
         in timeout seconds. Perturbs structure and restarts
@@ -231,8 +234,9 @@ class FrozenJobErrorHandler(ErrorHandler):
         s = p.structure
         trans = PerturbStructureTransformation(0.05)
         new_s = trans.apply_transformation(s)
-        actions = [{'dict': 'POSCAR',
-                    'action': {'_set': {'structure': new_s.to_dict}}}]
+        actions = [{"dict": "POSCAR",
+                    "action": {"_set": {"structure": new_s.to_dict}},
+                    "transformation": trans.to_dict}]
         m = Modder()
         vi = VaspInput.from_directory(".")
         for a in actions:

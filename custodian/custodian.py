@@ -70,9 +70,7 @@ class Custodian(object):
             handlers:
                 Error handlers. In order of priority of fixing.
             jobs:
-                List of Jobs. Allow for multistep jobs. E.g., give it two
-                BasicVaspJobs and you effectively have a aflow
-                double-relaxation.
+                List of Jobs to be run sequentially.
             max_errors:
                 Maximum number of errors allowed before exiting.
             polling_time_step:
