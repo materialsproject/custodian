@@ -77,7 +77,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["actions"],
                          [{'action': {'_set': {'ISMEAR': 0}},
                            'dict': 'INCAR'}])
-        
+
     def test_too_few_bands(self):
         os.chdir(os.path.join(test_dir, "too_few_bands"))
         shutil.copy("INCAR", "INCAR.orig")

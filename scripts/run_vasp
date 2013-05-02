@@ -18,8 +18,8 @@ import logging
 import sys
 
 from custodian.custodian import Custodian
-from custodian.vasp.handlers import VaspErrorHandler, \
-    UnconvergedErrorHandler
+from custodian.vasp.handlers import VaspErrorHandler, UnconvergedErrorHandler, \
+    MeshSymmetryErrorHandler
 from custodian.vasp.jobs import VaspJob
 from pymatgen.io.vaspio.vasp_input import VaspInput
 
@@ -27,7 +27,8 @@ from pymatgen.io.vaspio.vasp_input import VaspInput
 def do_run(args):
     FORMAT = '%(asctime)s %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
-    handlers = [VaspErrorHandler(), UnconvergedErrorHandler()]
+    handlers = [VaspErrorHandler(), MeshSymmetryErrorHandler(),
+                UnconvergedErrorHandler()]
     vasp_command = args.command.split()
     jobs = []
     njobs = len(args.jobs)
@@ -71,7 +72,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="""
     run_vasp is a master script to perform various kinds of VASP runs.
     """,
-    epilog="""
+                                     epilog="""
     Author: Shyue Ping Ong
     Version: {}
     Last updated: {}""".format(__version__, __date__))
@@ -100,11 +101,11 @@ if __name__ == "__main__":
     )
 
     parser.add_argument("jobs", metavar="jobs", type=str, nargs='+',
-                         default=["relax", "relax"],
-                         help="Jobs to execute. Only sequences of relax "
-                              "and static are supported at the moment. For "
-                              "example, \"relax relax static\" will run a "
-                              "double relaxation followed by a static run.")
+                        default=["relax", "relax"],
+                        help="Jobs to execute. Only sequences of relax "
+                             "and static are supported at the moment. For "
+                             "example, \"relax relax static\" will run a "
+                             "double relaxation followed by a static run.")
 
     args = parser.parse_args()
     do_run(args)
