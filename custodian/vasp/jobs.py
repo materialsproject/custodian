@@ -17,6 +17,7 @@ __date__ = "2/4/13"
 import subprocess
 import os
 import shutil
+import math
 
 from pymatgen.util.io_utils import zopen
 from pymatgen.io.vaspio.vasp_input import VaspInput
@@ -116,6 +117,20 @@ class VaspJob(Job, MSONable):
         if self.backup:
             for f in VASP_INPUT_FILES:
                 shutil.copy(f, "{}.orig".format(f))
+
+        try:
+            vi = VaspInput.from_directory(".")
+            incar = vi["INCAR"]
+            if not incar.get("LHFCALC"):
+                import multiprocessing
+                ncores = multiprocessing.cpu_count()
+                for npar in range(int(round(math.sqrt(ncores))), ncores):
+                    if ncores % npar == 0:
+                        incar["NPAR"] = npar
+                        break
+                incar.write_file("INCAR")
+        except:
+            pass
 
         if self.settings_override is not None:
             vi = VaspInput.from_directory(".")
