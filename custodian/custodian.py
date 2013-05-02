@@ -43,7 +43,8 @@ class Custodian(object):
 
     .. attribute: handlers
 
-        Error handlers that are not Monitors.
+        All error handlers (including monitors). All error handlers are used
+        to check for errors at the end of a run.
 
     .. attribute: monitors
 
@@ -105,7 +106,8 @@ class Custodian(object):
             for attempt in xrange(self.max_errors):
                 logging.info(
                     "Starting job no. {} ({}) attempt no. {}. Errors thus far"
-                    " = {}.".format(i + 1, job.name, attempt + 1, total_errors))
+                    " = {}.".format(i + 1, job.name, attempt + 1,
+                                    total_errors))
 
                 # If this is the start of the job, do the setup.
                 if not run_log[-1]["corrections"]:
