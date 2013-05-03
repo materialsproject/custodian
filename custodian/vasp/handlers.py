@@ -21,7 +21,6 @@ import tarfile
 import time
 import glob
 import operator
-import sys
 
 from custodian.custodian import ErrorHandler
 from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput
@@ -165,8 +164,8 @@ class MeshSymmetryErrorHandler(ErrorHandler, MSONable):
         self.output_filename = output_filename
 
     def check(self):
-        msg = "Reciprocal lattice and k-lattice belong to different class of " \
-              "lattices."
+        msg = "Reciprocal lattice and k-lattice belong to different class of" \
+              " lattices."
         try:
             v = Vasprun(self.output_filename)
             if v.converged:
