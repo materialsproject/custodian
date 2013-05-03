@@ -65,7 +65,7 @@ class Custodian(object):
     """
 
     def __init__(self, handlers, jobs, max_errors=1, polling_time_step=10,
-                 monitor_freq=30):
+                 monitor_freq=30, log_file="custodian.json"):
         """
         Args:
             handlers:
@@ -83,6 +83,9 @@ class Custodian(object):
                 monitor_freq of 30, this means that Custodian uses the
                 monitors to check for errors every 30 x 10 = 300 seconds,
                 i.e., 5 minutes.
+            log_file:
+                Log file to log all jobs and corrections to. Defaults
+                to custodian.json. Set to None for no logging.
         """
         self.max_errors = max_errors
         self.jobs = jobs
@@ -90,6 +93,7 @@ class Custodian(object):
         self.monitors = filter(lambda x: x.is_monitor, handlers)
         self.polling_time_step = polling_time_step
         self.monitor_freq = monitor_freq
+        self.log_file = log_file
 
     def run(self):
         """
@@ -154,10 +158,11 @@ class Custodian(object):
                             error = True
                             break
 
-                #Log the corrections to a json file.
-                with open("custodian.json", "w") as f:
-                    logging.info("Logging to custodian.json...")
-                    json.dump(run_log, f, indent=4)
+                if self.log_file is not None:
+                    #Log the corrections to a json file.
+                    with open(self.log_file, "w") as f:
+                        logging.info("Logging to {}...".format(self.log_file))
+                        json.dump(run_log, f, indent=4)
 
                 # If there are no errors detected, perform postprocessing and
                 # exit.

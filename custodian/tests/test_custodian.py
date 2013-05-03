@@ -107,23 +107,20 @@ class CustodianTest(unittest.TestCase):
         params = {"initial": 0, "total": 0}
         c = Custodian([ExampleHandler(params)],
                       [ExampleJob(i, params) for i in xrange(njobs)],
-                      max_errors=njobs)
+                      max_errors=njobs, log_file=None)
         output = c.run()
-        total_errors = sum([len(d["corrections"]) for d in output])
         self.assertEqual(len(output), njobs)
-        os.remove("custodian.json")
 
     def test_unrecoverable(self):
         njobs = 100
         params = {"initial": 0, "total": 0}
         c = Custodian([ExampleHandler2(params)],
                       [ExampleJob(i, params) for i in xrange(njobs)],
-                      max_errors=njobs)
+                      max_errors=njobs, log_file=None)
         output = c.run()
         #Because this is unrecoverable, there should only be one output.
         self.assertEqual(len(output), 1)
-        os.remove("custodian.json")
-
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
