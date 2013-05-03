@@ -101,6 +101,7 @@ class Custodian(object):
         """
         run_log = []
         total_errors = 0
+        unrecoverable = False
         for i, job in enumerate(self.jobs):
             run_log.append({"job": job.to_dict, "corrections": []})
             for attempt in xrange(self.max_errors):
@@ -132,6 +133,7 @@ class Custodian(object):
                                 for h in self.monitors:
                                     if h.check():
                                         p.terminate()
+                                        total_errors += 1
                                         d = h.correct()
                                         logging.error(str(d))
                                         run_log[-1]["corrections"].append(d)
@@ -162,6 +164,14 @@ class Custodian(object):
                 if not error:
                     job.postprocess()
                     break
+                elif run_log[-1]["corrections"]["actions"] is None:
+                    #There is an error. Check if it is unrecoverable.
+                    logging.info("Unrecoverable error.")
+                    unrecoverable = True
+                    break
+
+            if unrecoverable:
+                break
 
         if total_errors == self.max_errors:
             logging.info("Max {} errors reached. Exited"
@@ -194,7 +204,8 @@ class ErrorHandler(object):
 
         This method should return a JSON serializable dict that describes
         the errors and actions taken. E.g.
-        {"errors": list_of_errors, "actions": list_of_actions_taken}
+        {"errors": list_of_errors, "actions": list_of_actions_taken}.
+        If this is an unfixable error, actions should be set to None.
         """
         pass
 

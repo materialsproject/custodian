@@ -21,6 +21,7 @@ import tarfile
 import time
 import glob
 import operator
+import sys
 
 from custodian.custodian import ErrorHandler
 from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput
@@ -28,7 +29,7 @@ from pymatgen.transformations.standard_transformations import \
     PerturbStructureTransformation, SupercellTransformation
 from pymatgen.serializers.json_coders import MSONable
 
-from pymatgen.io.vaspio.vasp_output import Vasprun
+from pymatgen.io.vaspio.vasp_output import Vasprun, Oszicar
 from custodian.ansible.intepreter import Modder
 from custodian.ansible.actions import FileActions, DictActions
 
@@ -52,7 +53,8 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         "dentet": ["DENTET"],
         "too_few_bands": ["TOO FEW BANDS"],
         "triple_product": ["ERROR: the triple product of the basis vectors"],
-        "rot_matrix": ["Found some non-integer element in rotation matrix"]
+        "rot_matrix": ["Found some non-integer element in rotation matrix"],
+        "brions": ["BRIONS problems: POTIM should be increased"]
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -121,7 +123,10 @@ class VaspErrorHandler(ErrorHandler, MSONable):
             actions.append({"dict": "POSCAR",
                             "action": {"_set": {"structure": new_s.to_dict}},
                             "transformation": trans.to_dict})
-
+        if "brions" in self.errors:
+            potim = vi["INCAR"].get("POTIM", 0.5) + 0.1
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"POTIM": potim}}})
         m = Modder()
         modified = []
         for a in actions:
@@ -315,6 +320,45 @@ class FrozenJobErrorHandler(ErrorHandler):
     def from_dict(d):
         return FrozenJobErrorHandler(d["output_filename"],
                                      timeout=d["timeout"])
+
+
+class NonConvergingErrorHandler(ErrorHandler, MSONable):
+    """
+    Check if a run is hitting the maximum number of electronic steps at the
+    last 10 ionic steps. If so, kill the job.
+    """
+    def __init__(self, output_filename="OSZICAR"):
+        self.output_filename = output_filename
+
+    def check(self):
+        vi = VaspInput.from_directory(".")
+        nelm = vi["INCAR"].get("NELM", 60)
+        oszicar = Oszicar(self.output_filename)
+        esteps = oszicar.ionic_steps
+        if len(esteps) > 10:
+            return all([len(e) == nelm for e in esteps[-11:-1]])
+        return False
+
+    def correct(self):
+        #Unfixable error. Just return None for actions.
+        return {"errors": ["Non-converging job"], "actions": None}
+
+    def __str__(self):
+        return "Run not converging."
+
+    @property
+    def is_monitor(self):
+        return True
+
+    @property
+    def to_dict(self):
+        return {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__,
+                "output_filename": self.output_filename}
+
+    @staticmethod
+    def from_dict(d):
+        return NonConvergingErrorHandler(d["output_filename"])
 
 
 def backup():
