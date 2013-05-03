@@ -15,7 +15,6 @@ __date__ = "Jun 1, 2012"
 
 import unittest
 import random
-import os
 from custodian.custodian import Job, ErrorHandler, Custodian
 
 
@@ -120,7 +119,7 @@ class CustodianTest(unittest.TestCase):
         output = c.run()
         #Because this is unrecoverable, there should only be one output.
         self.assertEqual(len(output), 1)
-        
+
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

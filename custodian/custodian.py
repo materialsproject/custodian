@@ -13,7 +13,7 @@ __copyright__ = "Copyright 2012, The Materials Project"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
 __email__ = "shyue@mit.edu"
-__date__ = "May 2, 2012"
+__date__ = "May 3, 2013"
 
 import logging
 import subprocess
