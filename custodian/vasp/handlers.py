@@ -318,10 +318,8 @@ class FrozenJobErrorHandler(ErrorHandler):
 
 
 def backup():
-    error_num = 0
-    for f in glob.glob("error.*.tar.gz"):
-        toks = f.split(".")
-        error_num = max(error_num, int(toks[1]))
+    error_num = max([0] + [int(f.split(".")[1])
+                           for f in glob.glob("error.*.tar.gz")])
     filename = "error.{}.tar.gz".format(error_num + 1)
     logging.info("Backing up run to {}.".format(filename))
     tar = tarfile.open(filename, "w:gz")
