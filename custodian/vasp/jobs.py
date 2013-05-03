@@ -46,7 +46,7 @@ class VaspJob(Job, MSONable):
     def __init__(self, vasp_command, output_file="vasp.out", suffix="",
                  final=True, gzipped=False, backup=True,
                  default_vasp_input_set=MITVaspInputSet(), auto_npar=True,
-                 settings_override=None):
+                 auto_gamma=True, settings_override=None):
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -85,6 +85,12 @@ class VaspJob(Job, MSONable):
                 cores) as recommended by VASP for DFT calculations.
                 Generally, this results in significant speedups. Defaults to
                 True. Set to False for HF, GW and RPA calculations.
+            auto_gamma:
+                Whether to automatically check if run is a Gamma 1x1x1 run,
+                and whether a Gamma optimized version of VASP exists with
+                ".gamma" appended to the name of the VASP executable. If so,
+                run the gamma optimized version of VASP instead of regular
+                VASP.
             settings_override:
                 An ansible style list of dict to override changes. For example,
                 to set ISTART=1 for subsequent runs and to copy the CONTCAR
@@ -103,6 +109,7 @@ class VaspJob(Job, MSONable):
         self.suffix = suffix
         self.settings_override = settings_override
         self.auto_npar = auto_npar
+        self.auto_gamma = auto_gamma
 
     def setup(self):
         files = os.listdir(".")
@@ -155,8 +162,16 @@ class VaspJob(Job, MSONable):
                 vi[f].write_file(f)
 
     def run(self):
+        cmd = list(self.vasp_command)
+        if self.auto_gamma:
+            vi = VaspInput.from_directory(".")
+            kpts = vi["KPOINTS"]
+            if kpts.style == "Gamma" and tuple(kpts.kpts[0]) == (1, 1, 1):
+                if os.path.exists(cmd[-1] + ".gamma"):
+                    cmd[-1] += ".gamma"
+
         with open(self.output_file, 'w') as f:
-            return subprocess.Popen(self.vasp_command, stdout=f)
+            return subprocess.Popen(cmd, stdout=f)
 
     def postprocess(self):
         for f in VASP_OUTPUT_FILES + [self.output_file]:
