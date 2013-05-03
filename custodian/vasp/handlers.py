@@ -302,8 +302,7 @@ class FrozenJobErrorHandler(ErrorHandler):
             vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
         vi["POSCAR"].write_file("POSCAR")
 
-        return {"errors": ["Frozen job"],
-                "actions": actions}
+        return {"errors": ["Frozen job"], "actions": actions}
 
     @property
     def is_monitor(self):

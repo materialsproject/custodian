@@ -164,7 +164,7 @@ class Custodian(object):
                 if not error:
                     job.postprocess()
                     break
-                elif run_log[-1]["corrections"]["actions"] is None:
+                elif run_log[-1]["corrections"][-1]["actions"] is None:
                     #There is an error. Check if it is unrecoverable.
                     logging.info("Unrecoverable error.")
                     unrecoverable = True
