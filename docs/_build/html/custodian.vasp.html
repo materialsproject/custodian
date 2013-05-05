@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>vasp Package &mdash; custodian 0.3.5 documentation</title>
+    <title>vasp Package &mdash; custodian 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.3.5',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.3.5 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.4.0 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.3.5 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -63,39 +63,6 @@
 <p>This module implements specific error handlers for VASP runs. These handlers
 tries to detect common errors in vasp runs and attempt to fix them on the fly
 by modifying the input files.</p>
-<dl class="class">
-<dt id="custodian.vasp.handlers.DentetErrorHandler">
-<em class="property">class </em><tt class="descname">DentetErrorHandler</tt><big>(</big><em>output_file='vasp.out'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DentetErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DentetErrorHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
-<p>Detects an error when the output file has not been updated
-in timeout seconds. Perturbs structure and restarts</p>
-<dl class="method">
-<dt id="custodian.vasp.handlers.DentetErrorHandler.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DentetErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DentetErrorHandler.check" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="custodian.vasp.handlers.DentetErrorHandler.correct">
-<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DentetErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DentetErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="staticmethod">
-<dt id="custodian.vasp.handlers.DentetErrorHandler.from_dict">
-<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DentetErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DentetErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="custodian.vasp.handlers.DentetErrorHandler.is_monitor">
-<tt class="descname">is_monitor</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DentetErrorHandler.is_monitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DentetErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="custodian.vasp.handlers.DentetErrorHandler.to_dict">
-<tt class="descname">to_dict</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DentetErrorHandler.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DentetErrorHandler.to_dict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 <dl class="class">
 <dt id="custodian.vasp.handlers.FrozenJobErrorHandler">
 <em class="property">class </em><tt class="descname">FrozenJobErrorHandler</tt><big>(</big><em>output_filename='vasp.out'</em>, <em>timeout=3600</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler" title="Permalink to this definition">¶</a></dt>
@@ -130,63 +97,68 @@ in timeout seconds. Perturbs structure and restarts</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="custodian.vasp.handlers.PoscarErrorHandler">
-<em class="property">class </em><tt class="descname">PoscarErrorHandler</tt><big>(</big><em>output_filename='vasp.out'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PoscarErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PoscarErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler">
+<em class="property">class </em><tt class="descname">MeshSymmetryErrorHandler</tt><big>(</big><em>output_filename='vasp.out'</em><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">pymatgen.serializers.json_coders.MSONable</span></tt></p>
+<p>Corrects the mesh symmetry error in VASP. This error is sometimes
+non-fatal. So this error handler only checks at the end of the run,
+and if the run has converged, no error is recorded.</p>
 <dl class="method">
-<dt id="custodian.vasp.handlers.PoscarErrorHandler.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PoscarErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PoscarErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="custodian.vasp.handlers.PoscarErrorHandler.correct">
-<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PoscarErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PoscarErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler.correct">
+<tt class="descname">correct</tt><big>(</big><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="staticmethod">
-<dt id="custodian.vasp.handlers.PoscarErrorHandler.from_dict">
-<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PoscarErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PoscarErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler.from_dict">
+<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="custodian.vasp.handlers.PoscarErrorHandler.is_monitor">
-<tt class="descname">is_monitor</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PoscarErrorHandler.is_monitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PoscarErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler.is_monitor">
+<tt class="descname">is_monitor</tt><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="custodian.vasp.handlers.PoscarErrorHandler.to_dict">
-<tt class="descname">to_dict</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PoscarErrorHandler.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PoscarErrorHandler.to_dict" title="Permalink to this definition">¶</a></dt>
+<dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler.to_dict">
+<tt class="descname">to_dict</tt><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.to_dict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="custodian.vasp.handlers.TripleProductErrorHandler">
-<em class="property">class </em><tt class="descname">TripleProductErrorHandler</tt><big>(</big><em>output_filename='vasp.out'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#TripleProductErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.TripleProductErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dt id="custodian.vasp.handlers.NonConvergingErrorHandler">
+<em class="property">class </em><tt class="descname">NonConvergingErrorHandler</tt><big>(</big><em>output_filename='OSZICAR'</em><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">pymatgen.serializers.json_coders.MSONable</span></tt></p>
+<p>Check if a run is hitting the maximum number of electronic steps at the
+last 10 ionic steps. If so, kill the job.</p>
 <dl class="method">
-<dt id="custodian.vasp.handlers.TripleProductErrorHandler.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#TripleProductErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.TripleProductErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<dt id="custodian.vasp.handlers.NonConvergingErrorHandler.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="custodian.vasp.handlers.TripleProductErrorHandler.correct">
-<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#TripleProductErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.TripleProductErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dt id="custodian.vasp.handlers.NonConvergingErrorHandler.correct">
+<tt class="descname">correct</tt><big>(</big><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="staticmethod">
-<dt id="custodian.vasp.handlers.TripleProductErrorHandler.from_dict">
-<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#TripleProductErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.TripleProductErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<dt id="custodian.vasp.handlers.NonConvergingErrorHandler.from_dict">
+<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="custodian.vasp.handlers.TripleProductErrorHandler.is_monitor">
-<tt class="descname">is_monitor</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#TripleProductErrorHandler.is_monitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.TripleProductErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<dt id="custodian.vasp.handlers.NonConvergingErrorHandler.is_monitor">
+<tt class="descname">is_monitor</tt><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="custodian.vasp.handlers.TripleProductErrorHandler.to_dict">
-<tt class="descname">to_dict</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#TripleProductErrorHandler.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.TripleProductErrorHandler.to_dict" title="Permalink to this definition">¶</a></dt>
+<dt id="custodian.vasp.handlers.NonConvergingErrorHandler.to_dict">
+<tt class="descname">to_dict</tt><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.to_dict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -239,7 +211,7 @@ in timeout seconds. Perturbs structure and restarts</p>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.error_msgs">
-<tt class="descname">error_msgs</tt><em class="property"> = {'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'mesh_symmetry': ['Reciprocal lattice and k-lattice belong to different class of lattices.'], 'incorrect_shift': ['Could not get correct shifts'], 'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'rspher': ['ERROR RSPHER'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values'], 'brmix': ['BRMIX: very serious problems'], 'tetirr': ['Routine TETIRR needs special values']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">error_msgs</tt><em class="property"> = {'too_few_bands': ['TOO FEW BANDS'], 'real_optlay': ['REAL_OPTLAY: internal error'], 'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'rspher': ['ERROR RSPHER'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values'], 'dentet': ['DENTET'], 'triple_product': ['ERROR: the triple product of the basis vectors'], 'brions': ['BRIONS problems: POTIM should be increased'], 'brmix': ['BRMIX: very serious problems'], 'incorrect_shift': ['Could not get correct shifts'], 'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'rot_matrix': ['Found some non-integer element in rotation matrix'], 'tetirr': ['Routine TETIRR needs special values']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="staticmethod">
@@ -510,7 +482,7 @@ in timeout seconds. Perturbs structure and restarts</p>
 <dt>
 <tt class="descname">Mo = Mo_pv</tt></dt>
 <dt>
-<tt class="descname">, settings_override=None)</tt></dt>
+<tt class="descname">, auto_npar=True, auto_gamma=True, settings_override=None)</tt></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Job</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">pymatgen.serializers.json_coders.MSONable</span></tt></p>
 <dl class="docutils">
 <dt>A basic vasp job. Just runs whatever is in the directory. But conceivably</dt>
@@ -549,6 +521,17 @@ the vasp input set will be used to generate the necessary
 input files for the run. If the directory already
 contain a full set of VASP input files,
 this input is ignored. Defaults to the MITVaspInputSet.</dd>
+<dt>auto_npar:</dt>
+<dd>Whether to automatically tune NPAR to be sqrt(number of
+cores) as recommended by VASP for DFT calculations.
+Generally, this results in significant speedups. Defaults to
+True. Set to False for HF, GW and RPA calculations.</dd>
+<dt>auto_gamma:</dt>
+<dd>Whether to automatically check if run is a Gamma 1x1x1 run,
+and whether a Gamma optimized version of VASP exists with
+&#8221;.gamma&#8221; appended to the name of the VASP executable. If so,
+run the gamma optimized version of VASP instead of regular
+VASP.</dd>
 <dt>settings_override:</dt>
 <dd><p class="first">An ansible style list of dict to override changes. For example,
 to set ISTART=1 for subsequent runs and to copy the CONTCAR
@@ -677,7 +660,7 @@ if you are using mpirun, it can be something like
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.3.5 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

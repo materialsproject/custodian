@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Change log &mdash; custodian 0.3.5 documentation</title>
+    <title>Change log &mdash; custodian 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.3.5',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.3.5 documentation" href="#" />
+    <link rel="top" title="custodian 0.4.0 documentation" href="#" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.3.5 documentation</a> &raquo;</li> 
+        <li><a href="#">custodian 0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -69,34 +69,14 @@ error, and potentially restart the job if necessary.</p>
 <div class="section" id="change-log">
 <h1>Change log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
-<h2>0.3.5<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>0.4.0<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li>Bug fix for incorrect shift error handler in VASP.</li>
-<li>More robust fix for unconverged VASP runs (switching from ALGO fast to
-normal).</li>
-<li>Expanded documentation.</li>
-</ol>
-</div>
-<div class="section" id="id2">
-<h2>0.3.4<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li>Added support for handlers that perform monitor a job as it is progressing
-and terminates it if necessary. Useful for correcting errors that come up
-by do not cause immediate job failures.</li>
-</ol>
-</div>
-<div class="section" id="id3">
-<h2>0.3.2<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li>Important bug fix for VaspJob and converge_kpoints script.</li>
-</ol>
-</div>
-<div class="section" id="id4">
-<h2>0.3.0<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li>Major update to custodian API. Custodian now perform more comprehensive
-logging in a file called custodian.json, which logs all jobs and
-corrections performed.</li>
+<li>Many VASP handlers are now consolidated into a single VaspErrorHandler.</li>
+<li>Many more fixes for VASP runs, including the &#8220;too few bands&#8221;,
+&#8220;triple product&#8221; and &#8220;dentet&#8221; errors.</li>
+<li>VaspJob now includes an auto_npar option, which automatically optimizes
+the NPAR setting to be sqrt(number of cores) as per the VASP
+recommendation for DFT runs.</li>
 </ol>
 <p><a class="reference internal" href="changelog.html"><em>Older versions</em></a></p>
 </div>
@@ -413,10 +393,7 @@ DEALINGS IN THE SOFTWARE.</pre>
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Change log</a><ul>
-<li><a class="reference internal" href="#id1">0.3.5</a></li>
-<li><a class="reference internal" href="#id2">0.3.4</a></li>
-<li><a class="reference internal" href="#id3">0.3.2</a></li>
-<li><a class="reference internal" href="#id4">0.3.0</a></li>
+<li><a class="reference internal" href="#id1">0.4.0</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#getting-custodian">Getting custodian</a><ul>
@@ -469,7 +446,7 @@ DEALINGS IN THE SOFTWARE.</pre>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.3.5 documentation</a> &raquo;</li> 
+        <li><a href="#">custodian 0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

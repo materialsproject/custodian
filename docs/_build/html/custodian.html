@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian Package &mdash; custodian 0.3.5 documentation</title>
+    <title>custodian Package &mdash; custodian 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.3.5',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.3.5 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.4.0 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.3.5 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -64,7 +64,7 @@ given a set of error handlers, and the abstract base classes for the
 ErrorHandlers and Jobs.</p>
 <dl class="class">
 <dt id="custodian.custodian.Custodian">
-<em class="property">class </em><tt class="descname">Custodian</tt><big>(</big><em>handlers</em>, <em>jobs</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descname">Custodian</tt><big>(</big><em>handlers</em>, <em>jobs</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em>, <em>log_file='custodian.json'</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>The Custodian class is the manager for a list of jobs given a list of
 error handlers. The way it works is as follows:</p>
@@ -85,9 +85,7 @@ corrective measures are taken and the particular job is rerun.</li>
 <dt>handlers:</dt>
 <dd>Error handlers. In order of priority of fixing.</dd>
 <dt>jobs:</dt>
-<dd>List of Jobs. Allow for multistep jobs. E.g., give it two
-BasicVaspJobs and you effectively have a aflow
-double-relaxation.</dd>
+<dd>List of Jobs to be run sequentially.</dd>
 <dt>max_errors:</dt>
 <dd>Maximum number of errors allowed before exiting.</dd>
 <dt>polling_time_step:</dt>
@@ -99,6 +97,9 @@ example, if you have a polling_time_step of 10seconds and a
 monitor_freq of 30, this means that Custodian uses the
 monitors to check for errors every 30 x 10 = 300 seconds,
 i.e., 5 minutes.</dd>
+<dt>log_file:</dt>
+<dd>Log file to log all jobs and corrections to. Defaults
+to custodian.json. Set to None for no logging.</dd>
 </dl>
 </dd>
 </dl>
@@ -135,7 +136,8 @@ It should perform any corrective measures relating to the detected
 error.</p>
 <p>This method should return a JSON serializable dict that describes
 the errors and actions taken. E.g.
-{&#8220;errors&#8221;: list_of_errors, &#8220;actions&#8221;: list_of_actions_taken}</p>
+{&#8220;errors&#8221;: list_of_errors, &#8220;actions&#8221;: list_of_actions_taken}.
+If this is an unfixable error, actions should be set to None.</p>
 </dd></dl>
 
 <dl class="staticmethod">
@@ -288,7 +290,7 @@ method.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.3.5 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
