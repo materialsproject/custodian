@@ -72,11 +72,12 @@ error, and potentially restart the job if necessary.</p>
 <h2>0.4.0<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li>Many VASP handlers are now consolidated into a single VaspErrorHandler.</li>
-<li>Many more fixes for VASP runs, including the &#8220;too few bands&#8221;,
-&#8220;triple product&#8221; and &#8220;dentet&#8221; errors.</li>
-<li>VaspJob now includes an auto_npar option, which automatically optimizes
-the NPAR setting to be sqrt(number of cores) as per the VASP
-recommendation for DFT runs.</li>
+<li>Many more fixes for VASP runs, including the &#8220;TOO FEW BANDS&#8221;,
+&#8220;TRIPLE PRODUCT&#8221;, &#8220;DENTET&#8221; and &#8220;BRIONS&#8221; errors.</li>
+<li>VaspJob now includes the auto_npar and auto_gamma options, which
+automatically optimizes the NPAR setting to be sqrt(number of cores) as
+per the VASP recommendation for DFT runs and tries to search for a
+gamma-only compiled version of VASP for gamma 1x1x1 runs.</li>
 </ol>
 <p><a class="reference internal" href="changelog.html"><em>Older versions</em></a></p>
 </div>

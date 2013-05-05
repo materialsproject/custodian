@@ -21,11 +21,12 @@ Change log
 0.4.0
 -----
 1. Many VASP handlers are now consolidated into a single VaspErrorHandler.
-2. Many more fixes for VASP runs, including the "too few bands",
-   "triple product" and "dentet" errors.
-3. VaspJob now includes an auto_npar option, which automatically optimizes
-   the NPAR setting to be sqrt(number of cores) as per the VASP
-   recommendation for DFT runs.
+2. Many more fixes for VASP runs, including the "TOO FEW BANDS",
+   "TRIPLE PRODUCT", "DENTET" and "BRIONS" errors.
+3. VaspJob now includes the auto_npar and auto_gamma options, which
+   automatically optimizes the NPAR setting to be sqrt(number of cores) as
+   per the VASP recommendation for DFT runs and tries to search for a
+   gamma-only compiled version of VASP for gamma 1x1x1 runs.
 
 :doc:`Older versions </changelog>`
 
