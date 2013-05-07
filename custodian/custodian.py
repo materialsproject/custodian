@@ -149,8 +149,8 @@ class Custodian(object):
                 # handlers fix the problems detected by monitors
                 # if an error has been found, not all handlers need to run
                 if error:
-                    remaining_handlers = filter(lambda x: not x.is_monitor, 
-                                                handlers)
+                    remaining_handlers = filter(lambda x: not x.is_monitor,
+                                                self.handlers)
                 else:
                     remaining_handlers = self.handlers
                 for h in remaining_handlers:
