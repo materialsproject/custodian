@@ -142,21 +142,18 @@ class Custodian(object):
                                         logging.error(str(d))
                                         run_log[-1]["corrections"].append(d)
                                         error = True
-                                        break
                     else:
                         p.wait()
 
-                # If there are no errors *during* the run, we now check for
-                # errors *after* the run using handlers that are not monitors.
-                if not error:
-                    for h in self.handlers:
-                        if h.check():
-                            total_errors += 1
-                            d = h.correct()
-                            logging.error(str(d))
-                            run_log[-1]["corrections"].append(d)
-                            error = True
-                            break
+                # Check for all errors again, since in some cases non-monitor 
+                # handlers fix the problems detected by monitors
+                for h in self.handlers:
+                    if h.check():
+                        total_errors += 1
+                        d = h.correct()
+                        logging.error(str(d))
+                        run_log[-1]["corrections"].append(d)
+                        error = True
 
                 if self.log_file is not None:
                     #Log the corrections to a json file.

@@ -160,14 +160,16 @@ class MeshSymmetryErrorHandler(ErrorHandler, MSONable):
     and if the run has converged, no error is recorded.
     """
 
-    def __init__(self, output_filename="vasp.out"):
+    def __init__(self, output_filename="vasp.out", 
+                 output_vasprun="vasprun.xml"):
         self.output_filename = output_filename
+        self.output_vasprun = output_vasprun
 
     def check(self):
         msg = "Reciprocal lattice and k-lattice belong to different class of" \
               " lattices."
         try:
-            v = Vasprun(self.output_filename)
+            v = Vasprun(self.output_vasprun)
             if v.converged:
                 return False
         except:
