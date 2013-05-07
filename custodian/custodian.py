@@ -145,9 +145,15 @@ class Custodian(object):
                     else:
                         p.wait()
 
-                # Check for all errors again, since in some cases non-monitor 
+                # Check for errors again, since in some cases non-monitor
                 # handlers fix the problems detected by monitors
-                for h in self.handlers:
+                # if an error has been found, not all handlers need to run
+                if error:
+                    remaining_handlers = filter(lambda x: not x.is_monitor, 
+                                                handlers)
+                else:
+                    remaining_handlers = self.handlers
+                for h in remaining_handlers:
                     if h.check():
                         total_errors += 1
                         d = h.correct()
