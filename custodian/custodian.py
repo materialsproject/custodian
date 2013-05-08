@@ -106,6 +106,18 @@ class Custodian(object):
         run_log = []
         total_errors = 0
         unrecoverable = False
+
+        def do_check(handlers, terminate_func=None):
+            corrections = []
+            for h in handlers:
+                if h.check():
+                    if terminate_func is not None:
+                        terminate_func()
+                    d = h.correct()
+                    logging.error(str(d))
+                    corrections.append(d)
+            return corrections
+
         for i, job in enumerate(self.jobs):
             run_log.append({"job": job.to_dict, "corrections": []})
             for attempt in xrange(self.max_errors):
@@ -121,7 +133,7 @@ class Custodian(object):
                 p = job.run()
                 # Check for errors using the error handlers and perform
                 # corrections.
-                error = False
+                has_error = False
 
                 # While the job is running, we use the handlers that are
                 # monitors to monitor the job.
@@ -134,32 +146,30 @@ class Custodian(object):
                             if p.poll() is not None:
                                 break
                             if n % self.monitor_freq == 0:
-                                for h in self.monitors:
-                                    if h.check():
-                                        p.terminate()
-                                        total_errors += 1
-                                        d = h.correct()
-                                        logging.error(str(d))
-                                        run_log[-1]["corrections"].append(d)
-                                        error = True
+                                corrections = do_check(
+                                    self.monitors, terminate_func=p.terminate)
+                                if len(corrections) > 0:
+                                    has_error = True
+                                    total_errors += len(corrections)
+                                    run_log[-1]["corrections"].extend(
+                                        corrections)
                     else:
                         p.wait()
 
                 # Check for errors again, since in some cases non-monitor
                 # handlers fix the problems detected by monitors
                 # if an error has been found, not all handlers need to run
-                if error:
+                if has_error:
                     remaining_handlers = filter(lambda x: not x.is_monitor,
                                                 self.handlers)
                 else:
                     remaining_handlers = self.handlers
-                for h in remaining_handlers:
-                    if h.check():
-                        total_errors += 1
-                        d = h.correct()
-                        logging.error(str(d))
-                        run_log[-1]["corrections"].append(d)
-                        error = True
+
+                corrections = do_check(remaining_handlers)
+                if len(corrections) > 0:
+                    has_error = True
+                    total_errors += len(corrections)
+                    run_log[-1]["corrections"].extend(corrections)
 
                 if self.log_file is not None:
                     #Log the corrections to a json file.
@@ -169,11 +179,11 @@ class Custodian(object):
 
                 # If there are no errors detected, perform postprocessing and
                 # exit.
-                if not error:
+                if not has_error:
                     job.postprocess()
                     break
                 elif run_log[-1]["corrections"][-1]["actions"] is None:
-                    #There is an error. Check if it is unrecoverable.
+                    # Check if there has been an unrecoverable error.
                     logging.info("Unrecoverable error.")
                     unrecoverable = True
                     break
