@@ -148,9 +148,9 @@ class VaspErrorHandler(ErrorHandler, MSONable):
                 "@class": self.__class__.__name__,
                 "output_filename": self.output_filename}
 
-    @staticmethod
-    def from_dict(d):
-        return VaspErrorHandler(d["output_filename"])
+    @classmethod
+    def from_dict(cls, d):
+        return cls(d["output_filename"])
 
 
 class MeshSymmetryErrorHandler(ErrorHandler, MSONable):
@@ -160,7 +160,7 @@ class MeshSymmetryErrorHandler(ErrorHandler, MSONable):
     and if the run has converged, no error is recorded.
     """
 
-    def __init__(self, output_filename="vasp.out", 
+    def __init__(self, output_filename="vasp.out",
                  output_vasprun="vasprun.xml"):
         self.output_filename = output_filename
         self.output_vasprun = output_vasprun
@@ -210,11 +210,13 @@ class MeshSymmetryErrorHandler(ErrorHandler, MSONable):
     def to_dict(self):
         return {"@module": self.__class__.__module__,
                 "@class": self.__class__.__name__,
-                "output_filename": self.output_filename}
+                "output_filename": self.output_filename,
+                "output_vasprun": self.output_vasprun}
 
-    @staticmethod
-    def from_dict(d):
-        return MeshSymmetryErrorHandler(d["output_filename"])
+    @classmethod
+    def from_dict(cls, d):
+        return cls(output_filename=d["output_filename"],
+                   output_vasprun=d["output_vasprun"])
 
 
 class UnconvergedErrorHandler(ErrorHandler, MSONable):
@@ -268,9 +270,9 @@ class UnconvergedErrorHandler(ErrorHandler, MSONable):
                 "@class": self.__class__.__name__,
                 "output_filename": self.output_filename}
 
-    @staticmethod
-    def from_dict(d):
-        return UnconvergedErrorHandler(d["output_filename"])
+    @classmethod
+    def from_dict(cls, d):
+        return cls(d["output_filename"])
 
 
 class FrozenJobErrorHandler(ErrorHandler):
@@ -316,10 +318,9 @@ class FrozenJobErrorHandler(ErrorHandler):
                 "output_filename": self.output_filename,
                 "timeout": self.timeout}
 
-    @staticmethod
-    def from_dict(d):
-        return FrozenJobErrorHandler(d["output_filename"],
-                                     timeout=d["timeout"])
+    @classmethod
+    def from_dict(cls, d):
+        return cls(d["output_filename"], timeout=d["timeout"])
 
 
 class NonConvergingErrorHandler(ErrorHandler, MSONable):
@@ -356,9 +357,9 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
                 "@class": self.__class__.__name__,
                 "output_filename": self.output_filename}
 
-    @staticmethod
-    def from_dict(d):
-        return NonConvergingErrorHandler(d["output_filename"])
+    @classmethod
+    def from_dict(cls, d):
+        return cls(d["output_filename"])
 
 
 def backup():

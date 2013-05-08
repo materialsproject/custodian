@@ -238,8 +238,8 @@ class ErrorHandler(object):
         """
         pass
 
-    @staticmethod
-    def from_dict(d):
+    @classmethod
+    def from_dict(cls, d):
         """
         This simply raises a NotImplementedError to force subclasses to
         implement this static method. Abstract static methods are not
@@ -296,8 +296,8 @@ class Job(object):
         """
         pass
 
-    @staticmethod
-    def from_dict(d):
+    @classmethod
+    def from_dict(cls, d):
         """
         This simply raises a NotImplementedError to force subclasses to
         implement this static method. Abstract static methods are not
