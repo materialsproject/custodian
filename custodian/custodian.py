@@ -177,11 +177,14 @@ class Custodian(object):
                     logging.info("Unrecoverable error.")
                     unrecoverable = True
                     break
-
-            if unrecoverable:
+                elif total_errors >= self.max_errors:
+                    logging.info("Max errors reached.")
+                    break
+                    
+            if unrecoverable or total_errors >= self.max_errors:
                 break
 
-        if total_errors == self.max_errors:
+        if total_errors >= self.max_errors:
             logging.info("Max {} errors reached. Exited"
                          .format(self.max_errors))
         else:
