@@ -245,11 +245,10 @@ class ErrorHandler(object):
     @abstractmethod
     def from_dict(cls, d):
         """
-        This simply raises a NotImplementedError to force subclasses to
-        implement this class method.
+        This method should return the ErrorHandler from a dict representation
+        of the object given by the to_dict property.
         """
-        raise NotImplementedError("ErrorHandler objects must implement a "
-                                  "from_dict static method.")
+        pass
 
 
 class Job(object):
@@ -303,9 +302,7 @@ class Job(object):
     @abstractmethod
     def from_dict(cls, d):
         """
-        This simply raises a NotImplementedError to force subclasses to
-        implement this static method. Abstract static methods are not
-        implemented until Python 3+.
+        This method should return the Job from a dict representation of the
+        object given by the to_dict property.
         """
-        raise NotImplementedError("Job objects must implement a from_dict"
-                                  "static method.")
+        pass
