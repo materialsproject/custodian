@@ -83,7 +83,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
                             "action": {"_set": {"SYMPREC": 1e-8}}})
         if "brmix" in self.errors:
             actions.append({"dict": "INCAR",
-                            "action": {"_set": {"IMIX": 1}}})
+                            "action": {"_set": {"ISYM": 0}}})
         if "subspacematrix" in self.errors or "rspher" in self.errors or \
                 "real_optlay" in self.errors:
             actions.append({"dict": "INCAR",

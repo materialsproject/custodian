@@ -180,7 +180,7 @@ class Custodian(object):
                 elif total_errors >= self.max_errors:
                     logging.info("Max errors reached.")
                     break
-                    
+
             if unrecoverable or total_errors >= self.max_errors:
                 break
 
