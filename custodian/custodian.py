@@ -65,7 +65,8 @@ class Custodian(object):
     """
 
     def __init__(self, handlers, jobs, max_errors=1, polling_time_step=10,
-                 monitor_freq=30, log_file="custodian.json"):
+                 monitor_freq=30, log_file="custodian.json",
+                 skip_over_errors=False):
         """
         Args:
             handlers:
@@ -86,6 +87,14 @@ class Custodian(object):
             log_file:
                 Log file to log all jobs and corrections to. Defaults
                 to custodian.json. Set to None for no logging.
+            skip_over_errors:
+                If set to True, custodian will skip over error handlers that
+                failed (raised an Exception of some sort). Otherwise,
+                custodian will simply exit on unrecoverable errors.
+                The former will lead to potentially more robust performance,
+                but may make it difficult to improve handlers. The latter
+                will allow one to catch potentially bad error handler
+                implementations. Defaults to False.
         """
         self.max_errors = max_errors
         self.jobs = jobs
@@ -94,6 +103,7 @@ class Custodian(object):
         self.polling_time_step = polling_time_step
         self.monitor_freq = monitor_freq
         self.log_file = log_file
+        self.skip_over_errors = skip_over_errors
 
     def run(self):
         """
@@ -110,12 +120,20 @@ class Custodian(object):
         def do_check(handlers, terminate_func=None):
             corrections = []
             for h in handlers:
-                if h.check():
-                    if terminate_func is not None:
-                        terminate_func()
-                    d = h.correct()
-                    logging.error(str(d))
-                    corrections.append(d)
+                try:
+                    if h.check():
+                        if terminate_func is not None:
+                            terminate_func()
+                        d = h.correct()
+                        logging.error(str(d))
+                        corrections.append(d)
+                except Exception as ex:
+                    if not self.skip_over_errors:
+                        raise RuntimeError(ex)
+                    else:
+                        corrections.append(
+                            {"errors": ["Bad handler " + str(h)],
+                             "actions": []})
             return corrections
 
         for i, job in enumerate(self.jobs):
