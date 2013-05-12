@@ -86,7 +86,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ['too_few_bands'])
         self.assertEqual(d["actions"],
-                         [{'action': {'_set': {'NBANDS': 547}},
+                         [{'action': {'_set': {'NBANDS': 501}},
                            'dict': 'INCAR'}])
         os.remove("error.1.tar.gz")
         shutil.move("INCAR.orig", "INCAR")
