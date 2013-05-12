@@ -43,18 +43,18 @@ class VaspJob(Job, MSONable):
      can be a complex processing of inputs etc. with initialization.
     """
 
-    def __init__(self, vasp_command, output_file="vasp.out", suffix="",
+    def __init__(self, vasp_cmd, output_file="vasp.out", suffix="",
                  final=True, gzipped=False, backup=True,
                  default_vasp_input_set=MITVaspInputSet(), auto_npar=True,
                  auto_gamma=True, settings_override=None,
-                 gamma_vasp_command=None):
+                 gamma_vasp_cmd=None):
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
         of the static constructors.
 
         Args:
-            vasp_command:
+            vasp_cmd:
                 Command to run vasp as a list of args. For example,
                 if you are using mpirun, it can be something like
                 ["mpirun", "pvasp.5.2.11"]
@@ -92,7 +92,7 @@ class VaspJob(Job, MSONable):
                 ".gamma" appended to the name of the VASP executable (
                 typical setup in many systems). If so, run the gamma optimized
                 version of VASP instead of regular VASP. You can also
-                specify the gamma vasp command using the gamma_vasp_command
+                specify the gamma vasp command using the gamma_vasp_cmd
                 argument if the command is named differently.
             settings_override:
                 An ansible style list of dict to override changes. For example,
@@ -102,13 +102,13 @@ class VaspJob(Job, MSONable):
                     [{"dict": "INCAR", "action": {"_set": {"ISTART": 1}}},
                      {"filename": "CONTCAR",
                       "action": {"_file_copy": {"dest": "POSCAR"}}}]
-            gamma_vasp_command:
+            gamma_vasp_cmd:
                 Command for gamma vasp version when auto_gamma is True.
                 Should follow the list style of subprocess. Defaults to
                 None, which means ".gamma" is added to the last argument of
-                the standard vasp_command.
+                the standard vasp_cmd.
         """
-        self.vasp_command = vasp_command
+        self.vasp_cmd = vasp_cmd
         self.output_file = output_file
         self.final = final
         self.backup = backup
@@ -118,7 +118,7 @@ class VaspJob(Job, MSONable):
         self.settings_override = settings_override
         self.auto_npar = auto_npar
         self.auto_gamma = auto_gamma
-        self.gamma_vasp_command = gamma_vasp_command
+        self.gamma_vasp_cmd = gamma_vasp_cmd
 
     def setup(self):
         files = os.listdir(".")
@@ -171,14 +171,14 @@ class VaspJob(Job, MSONable):
                 vi[f].write_file(f)
 
     def run(self):
-        cmd = list(self.vasp_command)
+        cmd = list(self.vasp_cmd)
         if self.auto_gamma:
             vi = VaspInput.from_directory(".")
             kpts = vi["KPOINTS"]
             if kpts.style == "Gamma" and tuple(kpts.kpts[0]) == (1, 1, 1):
-                if self.gamma_vasp_command is not None and os.path.exists(
-                        self.gamma_vasp_command[-1]):
-                    cmd = self.gamma_vasp_command
+                if self.gamma_vasp_cmd is not None and os.path.exists(
+                        self.gamma_vasp_cmd[-1]):
+                    cmd = self.gamma_vasp_cmd
                 elif os.path.exists(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
 
@@ -201,13 +201,13 @@ class VaspJob(Job, MSONable):
         return "Vasp Job"
 
     @staticmethod
-    def double_relaxation_run(vasp_command, gzipped=True):
+    def double_relaxation_run(vasp_cmd, gzipped=True):
         """
         Returns a list of two jobs corresponding to an AFLOW style double
         relaxation run.
 
         Args:
-            vasp_command:
+            vasp_cmd:
                 Command to run vasp as a list of args. For example,
                 if you are using mpirun, it can be something like
                 ["mpirun", "pvasp.5.2.11"]
@@ -215,9 +215,9 @@ class VaspJob(Job, MSONable):
         Returns:
             List of two jobs corresponding to an AFLOW style run.
         """
-        return [VaspJob(vasp_command, final=False, suffix=".relax1"),
+        return [VaspJob(vasp_cmd, final=False, suffix=".relax1"),
                 VaspJob(
-                    vasp_command, final=True, backup=False,
+                    vasp_cmd, final=True, backup=False,
                     suffix=".relax2", gzipped=gzipped,
                     settings_override=[
                         {"dict": "INCAR",
@@ -227,7 +227,7 @@ class VaspJob(Job, MSONable):
 
     @property
     def to_dict(self):
-        d = dict(vasp_command=self.vasp_command,
+        d = dict(vasp_cmd=self.vasp_cmd,
                  output_file=self.output_file, suffix=self.suffix,
                  final=self.final, gzipped=self.gzipped, backup=self.backup,
                  default_vasp_input_set=self.default_vis.to_dict,
@@ -242,7 +242,7 @@ class VaspJob(Job, MSONable):
     def from_dict(d):
         vis = PMGJSONDecoder().process_decoded(d["default_vasp_input_set"])
         return VaspJob(
-            vasp_command=d["vasp_command"], output_file=d["output_file"],
+            vasp_cmd=d["vasp_cmd"], output_file=d["output_file"],
             suffix=d["suffix"], final=d["final"], gzipped=d["gzipped"],
             backup=d["backup"], default_vasp_input_set=vis,
             auto_npar=d['auto_npar'], auto_gamma=d['auto_gamma'],
