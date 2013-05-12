@@ -96,17 +96,17 @@ class VaspErrorHandler(ErrorHandler, MSONable):
             if "NBANDS" in vi["INCAR"]:
                 nbands = int(vi["INCAR"]["NBANDS"])
             else:
-                with open("OUTCAR", "r") as f:
+                with open("OUTCAR") as f:
                     for line in f:
                         if "NBANDS" in line:
                             try:
                                 d = line.split("=")
                                 nbands = int(d[-1].strip())
                                 break
-                            except:
+                            except (IndexError, ValueError):
                                 pass
             actions.append({"dict": "INCAR",
-                            "action": {"_set": {"NBANDS": int(1.2 * nbands)}}})
+                            "action": {"_set": {"NBANDS": int(1.1 * nbands)}}})
 
         if "triple_product" in self.errors:
             s = vi["POSCAR"].structure
