@@ -31,7 +31,7 @@ class VaspJobTest(unittest.TestCase):
         v = VaspJob("hello")
         v2 = VaspJob.from_dict(v.to_dict)
         self.assertEqual(type(v2), type(v))
-        self.assertEqual(v2.vasp_command, "hello")
+        self.assertEqual(v2.vasp_cmd, "hello")
 
     def test_setup(self):
         if "VASP_PSP_DIR" not in os.environ:
