@@ -46,7 +46,8 @@ class VaspJob(Job, MSONable):
     def __init__(self, vasp_command, output_file="vasp.out", suffix="",
                  final=True, gzipped=False, backup=True,
                  default_vasp_input_set=MITVaspInputSet(), auto_npar=True,
-                 auto_gamma=True, settings_override=None):
+                 auto_gamma=True, settings_override=None,
+                 gamma_vasp_command=None):
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -88,9 +89,11 @@ class VaspJob(Job, MSONable):
             auto_gamma:
                 Whether to automatically check if run is a Gamma 1x1x1 run,
                 and whether a Gamma optimized version of VASP exists with
-                ".gamma" appended to the name of the VASP executable. If so,
-                run the gamma optimized version of VASP instead of regular
-                VASP.
+                ".gamma" appended to the name of the VASP executable (
+                typical setup in many systems). If so, run the gamma optimized
+                version of VASP instead of regular VASP. You can also
+                specify the gamma vasp command using the gamma_vasp_command
+                argument if the command is named differently.
             settings_override:
                 An ansible style list of dict to override changes. For example,
                 to set ISTART=1 for subsequent runs and to copy the CONTCAR
@@ -99,6 +102,11 @@ class VaspJob(Job, MSONable):
                     [{"dict": "INCAR", "action": {"_set": {"ISTART": 1}}},
                      {"filename": "CONTCAR",
                       "action": {"_file_copy": {"dest": "POSCAR"}}}]
+            gamma_vasp_command:
+                Command for gamma vasp version when auto_gamma is True.
+                Should follow the list style of subprocess. Defaults to
+                None, which means ".gamma" is added to the last argument of
+                the standard vasp_command.
         """
         self.vasp_command = vasp_command
         self.output_file = output_file
@@ -110,6 +118,7 @@ class VaspJob(Job, MSONable):
         self.settings_override = settings_override
         self.auto_npar = auto_npar
         self.auto_gamma = auto_gamma
+        self.gamma_vasp_command = gamma_vasp_command
 
     def setup(self):
         files = os.listdir(".")
@@ -167,7 +176,10 @@ class VaspJob(Job, MSONable):
             vi = VaspInput.from_directory(".")
             kpts = vi["KPOINTS"]
             if kpts.style == "Gamma" and tuple(kpts.kpts[0]) == (1, 1, 1):
-                if os.path.exists(cmd[-1] + ".gamma"):
+                if self.gamma_vasp_command is not None and os.path.exists(
+                        self.gamma_vasp_command[-1]):
+                    cmd = self.gamma_vasp_command
+                elif os.path.exists(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
 
         with open(self.output_file, 'w') as f:
