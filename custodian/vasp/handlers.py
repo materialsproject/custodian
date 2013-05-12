@@ -53,7 +53,8 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         "too_few_bands": ["TOO FEW BANDS"],
         "triple_product": ["ERROR: the triple product of the basis vectors"],
         "rot_matrix": ["Found some non-integer element in rotation matrix"],
-        "brions": ["BRIONS problems: POTIM should be increased"]
+        "brions": ["BRIONS problems: POTIM should be increased"],
+        "pricel": ["internal error in subroutine PRICEL"]
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -115,13 +116,14 @@ class VaspErrorHandler(ErrorHandler, MSONable):
                             "action": {"_set": {"structure": new_s.to_dict}},
                             "transformation": trans.to_dict})
 
-        if "rot_matrix" in self.errors:
+        if "rot_matrix" in self.errors or "pricel" in self.errors:
             s = vi["POSCAR"].structure
             trans = PerturbStructureTransformation(0.05)
             new_s = trans.apply_transformation(s)
             actions.append({"dict": "POSCAR",
                             "action": {"_set": {"structure": new_s.to_dict}},
                             "transformation": trans.to_dict})
+
         if "brions" in self.errors:
             potim = vi["INCAR"].get("POTIM", 0.5) + 0.1
             actions.append({"dict": "INCAR",
