@@ -232,7 +232,8 @@ class VaspJob(Job, MSONable):
                  final=self.final, gzipped=self.gzipped, backup=self.backup,
                  default_vasp_input_set=self.default_vis.to_dict,
                  auto_npar=self.auto_npar, auto_gamma=self.auto_gamma,
-                 settings_override=self.settings_override
+                 settings_override=self.settings_override,
+                 gamma_vasp_cmd=self.gamma_vasp_cmd
                  )
         d["@module"] = self.__class__.__module__
         d["@class"] = self.__class__.__name__
@@ -246,7 +247,8 @@ class VaspJob(Job, MSONable):
             suffix=d["suffix"], final=d["final"], gzipped=d["gzipped"],
             backup=d["backup"], default_vasp_input_set=vis,
             auto_npar=d['auto_npar'], auto_gamma=d['auto_gamma'],
-            settings_override=d["settings_override"])
+            settings_override=d["settings_override"],
+            gamma_vasp_cmd=d["gamma_vasp_cmd"])
 
 
 def gzip_directory(path):
