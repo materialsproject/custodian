@@ -18,6 +18,12 @@ error, and potentially restart the job if necessary.
 Change log
 ==========
 
+0.4.1
+-----
+1. Added hanlding of PRICEL error in VASP.
+2. Speed and robustness improvements.
+3. BRIONS error now handled by changing ISYM.
+
 0.4.0
 -----
 1. Many VASP handlers are now consolidated into a single VaspErrorHandler.
