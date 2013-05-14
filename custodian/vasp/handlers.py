@@ -336,10 +336,13 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
     def check(self):
         vi = VaspInput.from_directory(".")
         nelm = vi["INCAR"].get("NELM", 60)
-        oszicar = Oszicar(self.output_filename)
-        esteps = oszicar.ionic_steps
-        if len(esteps) > 10:
-            return all([len(e) == nelm for e in esteps[-11:-1]])
+        try:
+            oszicar = Oszicar(self.output_filename)
+            esteps = oszicar.ionic_steps
+            if len(esteps) > 10:
+                return all([len(e) == nelm for e in esteps[-11:-1]])
+        except:
+            pass
         return False
 
     def correct(self):

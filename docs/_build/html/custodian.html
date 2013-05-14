@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian Package &mdash; custodian 0.4.0 documentation</title>
+    <title>custodian Package &mdash; custodian 0.4.1 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.0',
+        VERSION:     '0.4.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.4.0 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.4.1 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.4.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.4.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -64,7 +64,7 @@ given a set of error handlers, and the abstract base classes for the
 ErrorHandlers and Jobs.</p>
 <dl class="class">
 <dt id="custodian.custodian.Custodian">
-<em class="property">class </em><tt class="descname">Custodian</tt><big>(</big><em>handlers</em>, <em>jobs</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em>, <em>log_file='custodian.json'</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descname">Custodian</tt><big>(</big><em>handlers</em>, <em>jobs</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em>, <em>log_file='custodian.json'</em>, <em>skip_over_errors=False</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>The Custodian class is the manager for a list of jobs given a list of
 error handlers. The way it works is as follows:</p>
@@ -100,6 +100,14 @@ i.e., 5 minutes.</dd>
 <dt>log_file:</dt>
 <dd>Log file to log all jobs and corrections to. Defaults
 to custodian.json. Set to None for no logging.</dd>
+<dt>skip_over_errors:</dt>
+<dd>If set to True, custodian will skip over error handlers that
+failed (raised an Exception of some sort). Otherwise,
+custodian will simply exit on unrecoverable errors.
+The former will lead to potentially more robust performance,
+but may make it difficult to improve handlers. The latter
+will allow one to catch potentially bad error handler
+implementations. Defaults to False.</dd>
 </dl>
 </dd>
 </dl>
@@ -140,12 +148,11 @@ the errors and actions taken. E.g.
 If this is an unfixable error, actions should be set to None.</p>
 </dd></dl>
 
-<dl class="staticmethod">
+<dl class="classmethod">
 <dt id="custodian.custodian.ErrorHandler.from_dict">
-<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>This simply raises a NotImplementedError to force subclasses to
-implement this static method. Abstract static methods are not
-implemented until Python 3+.</p>
+<em class="property">classmethod </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method should return the ErrorHandler from a dict representation
+of the object given by the to_dict property.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -174,12 +181,11 @@ method.</p>
 <em class="property">class </em><tt class="descname">Job</tt><a class="reference internal" href="_modules/custodian/custodian.html#Job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>Abstract base class defining the interface for a Job.</p>
-<dl class="staticmethod">
+<dl class="classmethod">
 <dt id="custodian.custodian.Job.from_dict">
-<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Job.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.from_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>This simply raises a NotImplementedError to force subclasses to
-implement this static method. Abstract static methods are not
-implemented until Python 3+.</p>
+<em class="property">classmethod </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Job.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method should return the Job from a dict representation of the
+object given by the to_dict property.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -290,7 +296,7 @@ method.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.4.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.4.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

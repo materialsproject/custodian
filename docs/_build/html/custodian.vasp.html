@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>vasp Package &mdash; custodian 0.4.0 documentation</title>
+    <title>vasp Package &mdash; custodian 0.4.1 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.0',
+        VERSION:     '0.4.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.4.0 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.4.1 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.4.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.4.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -79,9 +79,9 @@ in timeout seconds. Perturbs structure and restarts</p>
 <tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="staticmethod">
+<dl class="classmethod">
 <dt id="custodian.vasp.handlers.FrozenJobErrorHandler.from_dict">
-<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -98,7 +98,7 @@ in timeout seconds. Perturbs structure and restarts</p>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler">
-<em class="property">class </em><tt class="descname">MeshSymmetryErrorHandler</tt><big>(</big><em>output_filename='vasp.out'</em><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descname">MeshSymmetryErrorHandler</tt><big>(</big><em>output_filename='vasp.out'</em>, <em>output_vasprun='vasprun.xml'</em><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">pymatgen.serializers.json_coders.MSONable</span></tt></p>
 <p>Corrects the mesh symmetry error in VASP. This error is sometimes
 non-fatal. So this error handler only checks at the end of the run,
@@ -113,9 +113,9 @@ and if the run has converged, no error is recorded.</p>
 <tt class="descname">correct</tt><big>(</big><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="staticmethod">
+<dl class="classmethod">
 <dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler.from_dict">
-<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -146,9 +146,9 @@ last 10 ionic steps. If so, kill the job.</p>
 <tt class="descname">correct</tt><big>(</big><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="staticmethod">
+<dl class="classmethod">
 <dt id="custodian.vasp.handlers.NonConvergingErrorHandler.from_dict">
-<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -178,9 +178,9 @@ last 10 ionic steps. If so, kill the job.</p>
 <tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="staticmethod">
+<dl class="classmethod">
 <dt id="custodian.vasp.handlers.UnconvergedErrorHandler.from_dict">
-<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -211,12 +211,12 @@ last 10 ionic steps. If so, kill the job.</p>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.error_msgs">
-<tt class="descname">error_msgs</tt><em class="property"> = {'too_few_bands': ['TOO FEW BANDS'], 'real_optlay': ['REAL_OPTLAY: internal error'], 'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'rspher': ['ERROR RSPHER'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values'], 'dentet': ['DENTET'], 'triple_product': ['ERROR: the triple product of the basis vectors'], 'brions': ['BRIONS problems: POTIM should be increased'], 'brmix': ['BRMIX: very serious problems'], 'incorrect_shift': ['Could not get correct shifts'], 'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'rot_matrix': ['Found some non-integer element in rotation matrix'], 'tetirr': ['Routine TETIRR needs special values']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">error_msgs</tt><em class="property"> = {'too_few_bands': ['TOO FEW BANDS'], 'pricel': ['internal error in subroutine PRICEL'], 'real_optlay': ['REAL_OPTLAY: internal error'], 'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'rspher': ['ERROR RSPHER'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values'], 'dentet': ['DENTET'], 'triple_product': ['ERROR: the triple product of the basis vectors'], 'brions': ['BRIONS problems: POTIM should be increased'], 'brmix': ['BRMIX: very serious problems'], 'incorrect_shift': ['Could not get correct shifts'], 'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'rot_matrix': ['Found some non-integer element in rotation matrix'], 'tetirr': ['Routine TETIRR needs special values']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="staticmethod">
+<dl class="classmethod">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.from_dict">
-<em class="property">static </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -242,7 +242,7 @@ last 10 ionic steps. If so, kill the job.</p>
 <p>This module implements basic kinds of jobs for VASP runs.</p>
 <dl class="class">
 <dt>
-<tt class="descname">VaspJob(vasp_command, output_file='vasp.out', suffix='', final=True, gzipped=False, backup=True, default_vasp_input_set=MIT</tt></dt>
+<tt class="descname">VaspJob(vasp_cmd, output_file='vasp.out', suffix='', final=True, gzipped=False, backup=True, default_vasp_input_set=MIT</tt></dt>
 <dt>
 <tt class="descname"></tt></dt>
 <dt>
@@ -482,7 +482,7 @@ last 10 ionic steps. If so, kill the job.</p>
 <dt>
 <tt class="descname">Mo = Mo_pv</tt></dt>
 <dt>
-<tt class="descname">, auto_npar=True, auto_gamma=True, settings_override=None)</tt></dt>
+<tt class="descname">, auto_npar=True, auto_gamma=True, settings_override=None, gamma_vasp_cmd=None)</tt></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Job</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">pymatgen.serializers.json_coders.MSONable</span></tt></p>
 <dl class="docutils">
 <dt>A basic vasp job. Just runs whatever is in the directory. But conceivably</dt>
@@ -494,7 +494,7 @@ of the static constructors.</p>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt>vasp_command:</dt>
+<dt>vasp_cmd:</dt>
 <dd>Command to run vasp as a list of args. For example,
 if you are using mpirun, it can be something like
 [&#8220;mpirun&#8221;, &#8220;pvasp.5.2.11&#8221;]</dd>
@@ -529,9 +529,11 @@ True. Set to False for HF, GW and RPA calculations.</dd>
 <dt>auto_gamma:</dt>
 <dd>Whether to automatically check if run is a Gamma 1x1x1 run,
 and whether a Gamma optimized version of VASP exists with
-&#8221;.gamma&#8221; appended to the name of the VASP executable. If so,
-run the gamma optimized version of VASP instead of regular
-VASP.</dd>
+&#8221;.gamma&#8221; appended to the name of the VASP executable (
+typical setup in many systems). If so, run the gamma optimized
+version of VASP instead of regular VASP. You can also
+specify the gamma vasp command using the gamma_vasp_cmd
+argument if the command is named differently.</dd>
 <dt>settings_override:</dt>
 <dd><p class="first">An ansible style list of dict to override changes. For example,
 to set ISTART=1 for subsequent runs and to copy the CONTCAR
@@ -542,18 +544,23 @@ to the POSCAR, you will provide:</p>
 </pre></div>
 </div>
 </dd>
+<dt>gamma_vasp_cmd:</dt>
+<dd>Command for gamma vasp version when auto_gamma is True.
+Should follow the list style of subprocess. Defaults to
+None, which means &#8221;.gamma&#8221; is added to the last argument of
+the standard vasp_cmd.</dd>
 </dl>
 </dd>
 </dl>
 <dl class="staticmethod">
 <dt id="custodian.vasp.jobs.VaspJob.double_relaxation_run">
-<em class="property">static </em><tt class="descclassname">VaspJob.</tt><tt class="descname">double_relaxation_run</tt><big>(</big><em>vasp_command</em>, <em>gzipped=True</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.double_relaxation_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.double_relaxation_run" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><tt class="descclassname">VaspJob.</tt><tt class="descname">double_relaxation_run</tt><big>(</big><em>vasp_cmd</em>, <em>gzipped=True</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.double_relaxation_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.double_relaxation_run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of two jobs corresponding to an AFLOW style double
 relaxation run.</p>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt>vasp_command:</dt>
+<dt>vasp_cmd:</dt>
 <dd>Command to run vasp as a list of args. For example,
 if you are using mpirun, it can be something like
 [&#8220;mpirun&#8221;, &#8220;pvasp.5.2.11&#8221;]</dd>
@@ -660,7 +667,7 @@ if you are using mpirun, it can be something like
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.4.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.4.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
