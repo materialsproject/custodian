@@ -34,6 +34,10 @@ from custodian.ansible.actions import FileActions, DictActions
 
 
 class VaspErrorHandler(ErrorHandler, MSONable):
+    """
+    Master VaspErrorHandler class that handles a number of common errors
+    that occur during VASP runs.
+    """
 
     error_msgs = {
         "tet": ["Tetrahedron method fails for NKPT<4",
