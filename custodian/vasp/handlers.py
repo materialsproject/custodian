@@ -130,7 +130,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
                             "transformation": trans.to_dict})
 
         if "brions" in self.errors:
-            potim = vi["INCAR"].get("POTIM", 0.5) + 0.1
+            potim = float(vi["INCAR"].get("POTIM", 0.5)) + 0.1
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"POTIM": potim}}})
         m = Modder()
