@@ -129,7 +129,7 @@ class Custodian(object):
                         corrections.append(d)
                 except Exception as ex:
                     if not self.skip_over_errors:
-                        raise RuntimeError(ex)
+                        raise
                     else:
                         corrections.append(
                             {"errors": ["Bad handler " + str(h)],
