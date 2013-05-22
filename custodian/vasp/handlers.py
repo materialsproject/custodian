@@ -170,9 +170,12 @@ class MeshSymmetryErrorHandler(ErrorHandler, MSONable):
     def check(self):
         msg = "Reciprocal lattice and k-lattice belong to different class of" \
               " lattices."
-        v = Vasprun(self.output_vasprun)
-        if v.converged:
-            return False
+        try:
+            v = Vasprun(self.output_vasprun)
+            if v.converged:
+                return False
+        except:
+            pass
         with open(self.output_filename, "r") as f:
             for line in f:
                 l = line.strip()
