@@ -58,7 +58,8 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         "triple_product": ["ERROR: the triple product of the basis vectors"],
         "rot_matrix": ["Found some non-integer element in rotation matrix"],
         "brions": ["BRIONS problems: POTIM should be increased"],
-        "pricel": ["internal error in subroutine PRICEL"]
+        "pricel": ["internal error in subroutine PRICEL"],
+        "zpotrf": ["LAPACK: Routine ZPOTRF failed"]
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -86,7 +87,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         if "inv_rot_mat" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"SYMPREC": 1e-8}}})
-        if "brmix" in self.errors:
+        if "brmix" in self.errors or "zpotrf" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ISYM": 0}}})
         if "subspacematrix" in self.errors or "rspher" in self.errors or \
