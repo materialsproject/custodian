@@ -234,7 +234,10 @@ class UnconvergedErrorHandler(ErrorHandler, MSONable):
         self.output_filename = output_filename
 
     def check(self):
-        v = Vasprun(self.output_filename)
+        try:
+            v = Vasprun(self.output_filename)
+        except:
+            return False
         if not v.converged:
             return True
         return False
