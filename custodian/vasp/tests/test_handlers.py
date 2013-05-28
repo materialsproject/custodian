@@ -50,7 +50,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ['rot_matrix'])
         self.assertEqual(set([a["dict"] for a in d["actions"]]),
-                         set(["POSCAR"]))
+                         set(["POSCAR", "INCAR"]))
 
         h = VaspErrorHandler("vasp.real_optlay")
         h.check()

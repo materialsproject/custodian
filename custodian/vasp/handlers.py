@@ -77,7 +77,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         return len(self.errors) > 0
 
     def correct(self):
-        backup()
+        backup(self.output_filename)
         actions = []
         vi = VaspInput.from_directory(".")
 
@@ -191,7 +191,7 @@ class MeshSymmetryErrorHandler(ErrorHandler, MSONable):
         return False
 
     def correct(self):
-        backup()
+        backup(self.output_filename)
         vi = VaspInput.from_directory(".")
         m = reduce(operator.mul, vi["KPOINTS"].kpts[0])
         m = max(int(round(m ** (1 / 3))), 1)
@@ -300,7 +300,7 @@ class FrozenJobErrorHandler(ErrorHandler):
             return True
 
     def correct(self):
-        backup()
+        backup(self.output_filename)
         p = Poscar.from_file("POSCAR")
         s = p.structure
         trans = PerturbStructureTransformation(0.05)
@@ -374,13 +374,14 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
         return cls(d["output_filename"])
 
 
-def backup():
+def backup(outfile="vasp.out"):
     error_num = max([0] + [int(f.split(".")[1])
                            for f in glob.glob("error.*.tar.gz")])
     filename = "error.{}.tar.gz".format(error_num + 1)
     logging.info("Backing up run to {}.".format(filename))
     tar = tarfile.open(filename, "w:gz")
-    for f in os.listdir("."):
-        if not (f.startswith("error") and f.endswith(".tar.gz")):
+    vaspfiles = ["INCAR", "KPOINTS", "POSCAR", "OUTCAR", outfile, "vasprun.xml"]
+    for f in vaspfiles:
+        if os.path.exists(f):
             tar.add(f)
     tar.close()
