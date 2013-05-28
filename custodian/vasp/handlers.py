@@ -128,6 +128,8 @@ class VaspErrorHandler(ErrorHandler, MSONable):
             actions.append({"dict": "POSCAR",
                             "action": {"_set": {"structure": new_s.to_dict}},
                             "transformation": trans.to_dict})
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"SYMPREC": 1e-8}}})
 
         if "brions" in self.errors:
             potim = float(vi["INCAR"].get("POTIM", 0.5)) + 0.1
