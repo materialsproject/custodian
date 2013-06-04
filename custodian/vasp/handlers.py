@@ -59,7 +59,8 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         "rot_matrix": ["Found some non-integer element in rotation matrix"],
         "brions": ["BRIONS problems: POTIM should be increased"],
         "pricel": ["internal error in subroutine PRICEL"],
-        "zpotrf": ["LAPACK: Routine ZPOTRF failed"]
+        "zpotrf": ["LAPACK: Routine ZPOTRF failed"],
+        "amin": ["One of the lattice vectors is very long (>50 A), but AMIN"]
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -97,6 +98,9 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         if "tetirr" in self.errors or "incorrect_shift" in self.errors:
             actions.append({"dict": "KPOINTS",
                             "action": {"_set": {"generation_style": "Gamma"}}})
+        if "amin" in self.errors:
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"AMIN": "0.01"}}})
         if "too_few_bands" in self.errors:
             if "NBANDS" in vi["INCAR"]:
                 nbands = int(vi["INCAR"]["NBANDS"])
