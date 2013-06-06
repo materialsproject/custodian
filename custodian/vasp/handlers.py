@@ -288,6 +288,65 @@ class UnconvergedErrorHandler(ErrorHandler, MSONable):
         return cls(d["output_filename"])
 
 
+class PotimErrorHandler(ErrorHandler, MSONable):
+    """
+    Check if a run has excessively large positive energy changes. 
+    This is typically caused by too large a POTIM. Runs typically 
+    end up crashing with some other error (e.g. BRMIX) as the geometry
+    gets progressively worse.
+    """
+    def __init__(self, input_filename="POSCAR", 
+                 output_filename="OSZICAR", dE_threshold=5):
+        self.input_filename = input_filename
+        self.output_filename = output_filename
+        self.dE_threshold = dE_threshold
+        
+    def check(self):
+        try:
+            oszicar = Oszicar(self.output_filename)
+            n = len(Poscar.from_file(self.input_filename).structure)
+            max_dE = max([s['dE'] for s in oszicar.ionic_steps]) / n
+            if max_dE > self.dE_threshold:
+                return True
+        except:
+            return False
+    
+    def correct(self):
+        backup()
+        vi = VaspInput.from_directory(".")
+        potim = float(vi["INCAR"].get("POTIM", 0.5)) * 0.5
+        actions = [{"dict": "INCAR",
+                    "action": {"_set": {"POTIM": potim}}}]
+        m = Modder()
+        modified = []
+        for a in actions:
+            modified.append(a["dict"])
+            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+        for f in modified:
+            vi[f].write_file(f)
+        return {"errors": ["POTIM"], "actions": actions}
+    
+    def __str__(self):
+        return "Large positive energy change (POTIM)"
+
+    @property
+    def is_monitor(self):
+        return True
+
+    @property
+    def to_dict(self):
+        return {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__,
+                "input_filename": self.input_filename,
+                "output_filename": self.output_filename,
+                "dE_threshold": self.dE_threshold}
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(d["input_filename"], d["output_filename"],
+                   d["dE_threshold"])
+    
+    
 class FrozenJobErrorHandler(ErrorHandler):
 
     def __init__(self, output_filename="vasp.out", timeout=3600):
