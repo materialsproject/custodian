@@ -305,7 +305,7 @@ class PotimErrorHandler(ErrorHandler, MSONable):
         try:
             oszicar = Oszicar(self.output_filename)
             n = len(Poscar.from_file(self.input_filename).structure)
-            max_dE = max([s['dE'] for s in oszicar.ionic_steps]) / n
+            max_dE = max([s['dE'] for s in oszicar.ionic_steps[1:]]) / n
             if max_dE > self.dE_threshold:
                 return True
         except:
