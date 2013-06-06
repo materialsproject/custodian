@@ -296,7 +296,7 @@ class PotimErrorHandler(ErrorHandler, MSONable):
     gets progressively worse.
     """
     def __init__(self, input_filename="POSCAR", 
-                 output_filename="OSZICAR", dE_threshold=5):
+                 output_filename="OSZICAR", dE_threshold=1):
         self.input_filename = input_filename
         self.output_filename = output_filename
         self.dE_threshold = dE_threshold
