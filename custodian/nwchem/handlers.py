@@ -44,20 +44,21 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
         for e in self.errors:
             if e == "autoz error":
                 #Hackish solution for autoz error.
-                with open("temp.nw", "w") as fout, \
-                        open(self.input_file) as fin:
-                    for l in fin:
+                with open(self.input_file) as f:
+                    lines = []
+                    for l in f:
                         if l.lower().strip().startswith("geometry"):
-                            fout.write("{} noautoz\n".format(l.strip()))
+                            lines.append("{} noautoz\n".format(l.strip()))
                         else:
-                            fout.write(l)
-                shutil.move("temp.nw", self.input_file)
+                            lines.append(l)
+
+                with open(self.input_file, "w") as fout:
+                    fout.write("".join(lines))
                 actions.append("Set noautoz to geometry")
             else:
                 # For unimplemented errors, this should just cause the job to
                 # die.
                 return {"errors": self.errors, "actions": None}
-        time.sleep(10)
         return {"errors": self.errors, "actions": actions}
 
     @property
