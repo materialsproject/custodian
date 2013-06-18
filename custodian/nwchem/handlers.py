@@ -22,13 +22,14 @@ from pymatgen.io.nwchemio import NwOutput
 
 class NwchemErrorHandler(ErrorHandler, MSONable):
     """
-    Error handler for Gaussian Jobs.
+    Error handler for Nwchem Jobs.
     """
 
-    def __init__(self, output_filename="gau.out"):
+    def __init__(self, output_filename="mol.nwout"):
         self.output_filename = output_filename
 
     def check(self):
+        # Checks output file for errors.
         out = NwOutput(self.output_filename)
         self.errors = []
         self.input_file = out.job_info['input']
@@ -37,6 +38,7 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
         return len(self.errors) > 0
 
     def correct(self):
+        #Right now, only fixes autoz error.
         actions = []
         for e in self.errors:
             if e == "autoz error":
