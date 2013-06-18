@@ -22,7 +22,7 @@ from custodian.nwchem.jobs import NwchemJob
 
 
 if __name__ == "__main__":
-    job = NwchemJob(nwchem_cmd=[sys.argv[1]], input_file=sys.argv[2],
+    job = NwchemJob(nwchem_cmd=sys.argv[1].split(), input_file=sys.argv[2],
                     output_file=sys.argv[3])
     c = Custodian([NwchemErrorHandler(output_filename=sys.argv[3])], [job])
     c.run()
