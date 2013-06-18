@@ -14,6 +14,7 @@ __status__ = "Beta"
 __date__ = "5/20/13"
 
 import shutil
+import time
 
 from custodian.custodian import ErrorHandler
 from pymatgen.serializers.json_coders import MSONable
@@ -56,6 +57,7 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
                 # For unimplemented errors, this should just cause the job to
                 # die.
                 return {"errors": self.errors, "actions": None}
+        time.sleep(10)
         return {"errors": self.errors, "actions": actions}
 
     @property
