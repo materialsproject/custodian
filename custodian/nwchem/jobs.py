@@ -117,26 +117,3 @@ def gzip_directory(path):
                 f_out.writelines(f_in)
             os.remove(f)
 
-if __name__ == "__main__":
-    from pymatgen import Molecule
-    from custodian.custodian import Custodian
-    from rubicon.nwchem.handlers import NwchemErrorHandler
-    from rubicon.io.nwchemio_set import JCESRDeltaSCFInputSet
-
-    mol = Molecule(["F"], [[0, 0, 0]])
-    jis = JCESRDeltaSCFInputSet()
-    jis.write_input(mol, "F.nw")
-
-    cmd = os.path.join(os.environ["HOME"], "nwchem-6.3", "bin", "MACX",
-                       "nwchem")
-
-    job = NwchemJob(nwchem_cmd=[cmd], input_file="F.nw",
-                    output_file="F.nwout")
-    c = Custodian([NwchemErrorHandler()], [job])
-    c.run()
-
-    #cleanup
-    import glob
-    for f in glob.glob("F.*") + glob.glob("F1.*"):
-        os.remove(f)
-    os.remove("custodian.json")

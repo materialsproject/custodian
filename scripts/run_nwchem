@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+
+"""
+Basic script to run nwchem job.
+"""
+
+from __future__ import division
+
+__author__ = "shyuepingong"
+__version__ = "0.1"
+__maintainer__ = "Shyue Ping Ong"
+__email__ = "shyuep@gmail.com"
+__status__ = "Beta"
+__date__ = "6/18/13"
+
+
+import sys
+
+from custodian.custodian import Custodian
+from custodian.nwchem.handlers import NwchemErrorHandler
+from custodian.nwchem.jobs import NwchemJob
+
+
+if __name__ == "__main__":
+    job = NwchemJob(nwchem_cmd=[sys.argv[1]], input_file=sys.argv[2],
+                    output_file=sys.argv[3])
+    c = Custodian([NwchemErrorHandler()], [job])
+    c.run()
