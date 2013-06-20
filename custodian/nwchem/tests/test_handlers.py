@@ -34,6 +34,11 @@ class NwchemErrorHandlerTest(unittest.TestCase):
         h.check()
         h.correct()
         shutil.move("C1N1Cl1_1.nw.orig", "C1N1Cl1_1.nw")
+        shutil.copy("Li1_1.nw", "Li1_1.nw.orig")
+        h = NwchemErrorHandler(output_filename="Li1_1.nwout")
+        h.check()
+        h.correct()
+        shutil.move("Li1_1.nw.orig", "Li1_1.nw")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 """
-TODO: Change the module doc.
+This module implements error handlers for Nwchem runs. Currently tested only
+for B3LYP DFT jobs.
 """
 
 from __future__ import division
@@ -13,12 +14,11 @@ __email__ = "shyuep@gmail.com"
 __status__ = "Beta"
 __date__ = "5/20/13"
 
-import shutil
-import time
 
 from custodian.custodian import ErrorHandler
 from pymatgen.serializers.json_coders import MSONable
-from pymatgen.io.nwchemio import NwOutput
+from pymatgen.io.nwchemio import NwOutput, NwInput
+from custodian.ansible.intepreter import Modder
 
 
 class NwchemErrorHandler(ErrorHandler, MSONable):
@@ -62,7 +62,6 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
                     lambda l: "{} noautoz\n".format(l.strip()))
                 actions.append("Set noautoz to geometry.")
             elif e == "Bad convergence":
-                #Hackish solution for bad convergence error. Set cgmin.
                 self._mod_input(
                     lambda l: l.lower().strip() == "dft",
                     lambda l: "{}\n cgmin\n".format(l.strip()))

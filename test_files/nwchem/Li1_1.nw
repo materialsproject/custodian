@@ -1,0 +1,37 @@
+start Li1
+geometry units angstroms
+ Li 0.0 0.0 0.0
+end
+
+title "Li1 dft energy"
+charge 0
+basis
+ Li library "6-31++g**"
+end
+dft
+ xc b3lyp
+ mult 2
+end
+task dft energy
+
+title "Li1 dft energy"
+charge 1
+basis
+ Li library "6-31++g**"
+end
+dft
+ xc b3lyp
+ mult 1
+end
+task dft energy
+
+title "Li1 dft energy"
+charge -1
+basis
+ Li library "6-31++g**"
+end
+dft
+ xc b3lyp
+ mult 1
+end
+task dft energy
