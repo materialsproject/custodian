@@ -66,7 +66,7 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
             elif e == "Bad convergence":
                 nwi = NwInput.from_file(self.input_file)
                 nwi.tasks[self.ntasks - 1].theory_directives["cgmin"] = ""
-                action = {"_set": {"tasks": nwi.tasks}}
+                action = {"_set": {"tasks": [t.to_dict for t in nwi.tasks]}}
                 nwi.write_file(self.input_file)
                 actions.append(action)
             else:
