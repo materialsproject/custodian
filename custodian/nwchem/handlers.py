@@ -65,7 +65,12 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
                 actions.append("Set noautoz to geometry.")
             elif e == "Bad convergence":
                 nwi = NwInput.from_file(self.input_file)
-                nwi.tasks[self.ntasks - 1].theory_directives["cgmin"] = ""
+                t = nwi.tasks[self.ntasks - 1]
+                t.theory_directives["cgmin"] = ""
+                if t.operation == "optimize":
+                    for t in nwi.tasks:
+                        if t.operation.startswith("freq"):
+                            t.theory_directives["nocgmin"]
                 action = {"_set": {"tasks": [t.to_dict for t in nwi.tasks]}}
                 nwi.write_file(self.input_file)
                 actions.append(action)
