@@ -28,5 +28,5 @@ if __name__ == "__main__":
     job = NwchemJob(nwchem_cmd=sys.argv[1].split(), input_file=sys.argv[2],
                     output_file=sys.argv[3])
     c = Custodian([NwchemErrorHandler(output_filename=sys.argv[3])], [job],
-                  max_errors=10)
+                  max_errors=3)
     c.run()
