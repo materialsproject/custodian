@@ -23,7 +23,7 @@ from pymatgen.io.nwchemio import NwOutput
 
 class NwchemErrorHandler(ErrorHandler, MSONable):
     """
-    Error handler for Nwchem Jobs.
+    Error handler for Nwchem Jobs. Currently tested only for B3LYP DFT jobs.
     """
 
     def __init__(self, output_filename="mol.nwout"):
@@ -39,23 +39,34 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
         self.errors = list(set(self.errors))
         return len(self.errors) > 0
 
+    def _mod_input(self, search_string_func, mod_string_func):
+        with open(self.input_file) as f:
+            lines = []
+            for l in f:
+                if search_string_func(l):
+                    lines.append(mod_string_func(l))
+                else:
+                    lines.append(l)
+
+        with open(self.input_file, "w") as fout:
+            fout.write("".join(lines))
+
     def correct(self):
         #Right now, only fixes autoz error.
         actions = []
-        for e in set(self.errors):
+        for e in self.errors:
             if e == "autoz error":
                 #Hackish solution for autoz error.
-                with open(self.input_file) as f:
-                    lines = []
-                    for l in f:
-                        if l.lower().strip().startswith("geometry"):
-                            lines.append("{} noautoz\n".format(l.strip()))
-                        else:
-                            lines.append(l)
-
-                with open(self.input_file, "w") as fout:
-                    fout.write("".join(lines))
-                actions.append("Set noautoz to geometry")
+                self._mod_input(
+                    lambda l: l.lower().strip().startswith("geometry"),
+                    lambda l: "{} noautoz\n".format(l.strip()))
+                actions.append("Set noautoz to geometry.")
+            elif e == "Bad convergence":
+                #Hackish solution for bad convergence error. Set cgmin.
+                self._mod_input(
+                    lambda l: l.lower().strip() == "dft",
+                    lambda l: "{}\n cgmin\n".format(l.strip()))
+                actions.append("Set cgmin.")
             else:
                 # For unimplemented errors, this should just cause the job to
                 # die.
