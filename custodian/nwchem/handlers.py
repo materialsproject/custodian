@@ -66,6 +66,8 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
             elif e == "Bad convergence":
                 nwi = NwInput.from_file(self.input_file)
                 t = nwi.tasks[self.ntasks - 1]
+                if "cgmin" in t.theory_directives:
+                    return {"errors": self.errors, "actions": None}
                 t.theory_directives["cgmin"] = ""
                 if t.operation == "optimize":
                     for t in nwi.tasks:
