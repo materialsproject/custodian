@@ -15,6 +15,7 @@ __date__ = "6/18/13"
 
 
 import sys
+import logging
 
 from custodian.custodian import Custodian
 from custodian.nwchem.handlers import NwchemErrorHandler
@@ -22,7 +23,10 @@ from custodian.nwchem.jobs import NwchemJob
 
 
 if __name__ == "__main__":
+    FORMAT = '%(asctime)s %(message)s'
+    logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
     job = NwchemJob(nwchem_cmd=sys.argv[1].split(), input_file=sys.argv[2],
                     output_file=sys.argv[3])
-    c = Custodian([NwchemErrorHandler(output_filename=sys.argv[3])], [job])
+    c = Custodian([NwchemErrorHandler(output_filename=sys.argv[3])], [job],
+                  max_errors=10)
     c.run()

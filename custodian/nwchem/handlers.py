@@ -36,12 +36,13 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
         self.input_file = out.job_info['input']
         if out.data[-1]["has_error"]:
             self.errors.extend(out.data[-1]["errors"])
+        self.errors = list(set(self.errors))
         return len(self.errors) > 0
 
     def correct(self):
         #Right now, only fixes autoz error.
         actions = []
-        for e in self.errors:
+        for e in set(self.errors):
             if e == "autoz error":
                 #Hackish solution for autoz error.
                 with open(self.input_file) as f:
