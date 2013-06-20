@@ -70,7 +70,7 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
                 if t.operation == "optimize":
                     for t in nwi.tasks:
                         if t.operation.startswith("freq"):
-                            t.theory_directives["nocgmin"]
+                            t.theory_directives["nocgmin"] = ""
                 action = {"_set": {"tasks": [t.to_dict for t in nwi.tasks]}}
                 nwi.write_file(self.input_file)
                 actions.append(action)
