@@ -55,16 +55,14 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
 
     def correct(self):
         actions = []
-
+        nwi = NwInput.from_file(self.input_file)
         for e in self.errors:
             if e == "autoz error":
-                #Hackish solution for autoz error.
-                self._mod_input(
-                    lambda l: l.lower().strip().startswith("geometry"),
-                    lambda l: "{} noautoz\n".format(l.strip()))
-                actions.append("Set noautoz to geometry.")
+                action = {"_set": {"geometry_options": ["units",
+                                                        "angstroms",
+                                                        "noautoz"]}}
+                actions.append(action)
             elif e == "Bad convergence":
-                nwi = NwInput.from_file(self.input_file)
                 t = nwi.tasks[self.ntasks - 1]
                 if "cgmin" in t.theory_directives:
                     return {"errors": self.errors, "actions": None}
@@ -74,13 +72,16 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
                         if t.operation.startswith("freq"):
                             t.theory_directives["nocgmin"] = ""
                 action = {"_set": {"tasks": [t.to_dict for t in nwi.tasks]}}
-                nwi.write_file(self.input_file)
                 actions.append(action)
             else:
                 # For unimplemented errors, this should just cause the job to
                 # die.
                 return {"errors": self.errors, "actions": None}
 
+        m = Modder()
+        for action in actions:
+            nwi = m.modify_object(action, nwi)
+        nwi.write_file(self.input_file)
         return {"errors": self.errors, "actions": actions}
 
     @property
