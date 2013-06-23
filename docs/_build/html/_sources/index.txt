@@ -18,6 +18,11 @@ error, and potentially restart the job if necessary.
 Change log
 ==========
 
+0.4.2
+-----
+1. Rudimentary support for Nwchem error handling (by Shyue Ping Ong).
+2. Improved VASP error handling (by Steve Dacek and Will Richards).
+
 0.4.1
 -----
 1. Added hanlding of PRICEL error in VASP.

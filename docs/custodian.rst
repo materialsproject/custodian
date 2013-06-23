@@ -23,5 +23,6 @@ Subpackages
 .. toctree::
 
     custodian.ansible
+    custodian.nwchem
     custodian.vasp
 

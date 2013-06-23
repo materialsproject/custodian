@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>vasp Package &mdash; custodian 0.4.1 documentation</title>
+    <title>vasp Package &mdash; custodian 0.4.2 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.1',
+        VERSION:     '0.4.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.4.1 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.4.2 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.4.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -164,6 +164,41 @@ last 10 ionic steps. If so, kill the job.</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="custodian.vasp.handlers.PotimErrorHandler">
+<em class="property">class </em><tt class="descname">PotimErrorHandler</tt><big>(</big><em>input_filename='POSCAR'</em>, <em>output_filename='OSZICAR'</em>, <em>dE_threshold=1</em><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">pymatgen.serializers.json_coders.MSONable</span></tt></p>
+<p>Check if a run has excessively large positive energy changes. 
+This is typically caused by too large a POTIM. Runs typically 
+end up crashing with some other error (e.g. BRMIX) as the geometry
+gets progressively worse.</p>
+<dl class="method">
+<dt id="custodian.vasp.handlers.PotimErrorHandler.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.handlers.PotimErrorHandler.correct">
+<tt class="descname">correct</tt><big>(</big><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="custodian.vasp.handlers.PotimErrorHandler.from_dict">
+<em class="property">classmethod </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.PotimErrorHandler.is_monitor">
+<tt class="descname">is_monitor</tt><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.PotimErrorHandler.to_dict">
+<tt class="descname">to_dict</tt><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="custodian.vasp.handlers.UnconvergedErrorHandler">
 <em class="property">class </em><tt class="descname">UnconvergedErrorHandler</tt><big>(</big><em>output_filename='vasprun.xml'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">pymatgen.serializers.json_coders.MSONable</span></tt></p>
@@ -199,6 +234,8 @@ last 10 ionic steps. If so, kill the job.</p>
 <dt id="custodian.vasp.handlers.VaspErrorHandler">
 <em class="property">class </em><tt class="descname">VaspErrorHandler</tt><big>(</big><em>output_filename='vasp.out'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">pymatgen.serializers.json_coders.MSONable</span></tt></p>
+<p>Master VaspErrorHandler class that handles a number of common errors
+that occur during VASP runs.</p>
 <dl class="method">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.check">
 <tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.check" title="Permalink to this definition">¶</a></dt>
@@ -211,7 +248,7 @@ last 10 ionic steps. If so, kill the job.</p>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.error_msgs">
-<tt class="descname">error_msgs</tt><em class="property"> = {'too_few_bands': ['TOO FEW BANDS'], 'pricel': ['internal error in subroutine PRICEL'], 'real_optlay': ['REAL_OPTLAY: internal error'], 'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'rspher': ['ERROR RSPHER'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values'], 'dentet': ['DENTET'], 'triple_product': ['ERROR: the triple product of the basis vectors'], 'brions': ['BRIONS problems: POTIM should be increased'], 'brmix': ['BRMIX: very serious problems'], 'incorrect_shift': ['Could not get correct shifts'], 'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'rot_matrix': ['Found some non-integer element in rotation matrix'], 'tetirr': ['Routine TETIRR needs special values']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">error_msgs</tt><em class="property"> = {'too_few_bands': ['TOO FEW BANDS'], 'triple_product': ['ERROR: the triple product of the basis vectors'], 'amin': ['One of the lattice vectors is very long (&gt;50 A), but AMIN'], 'pricel': ['internal error in subroutine PRICEL'], 'zpotrf': ['LAPACK: Routine ZPOTRF failed'], 'brmix': ['BRMIX: very serious problems'], 'real_optlay': ['REAL_OPTLAY: internal error'], 'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'dentet': ['DENTET'], 'incorrect_shift': ['Could not get correct shifts'], 'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'rspher': ['ERROR RSPHER'], 'rot_matrix': ['Found some non-integer element in rotation matrix'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values'], 'tetirr': ['Routine TETIRR needs special values'], 'brions': ['BRIONS problems: POTIM should be increased']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="classmethod">
@@ -233,7 +270,7 @@ last 10 ionic steps. If so, kill the job.</p>
 
 <dl class="function">
 <dt id="custodian.vasp.handlers.backup">
-<tt class="descname">backup</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.backup" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">backup</tt><big>(</big><em>outfile='vasp.out'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.backup" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -667,7 +704,7 @@ if you are using mpirun, it can be something like
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.4.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

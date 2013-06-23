@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Index &mdash; custodian 0.4.1 documentation</title>
+    <title>Index &mdash; custodian 0.4.2 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.1',
+        VERSION:     '0.4.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.4.1 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.4.2 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.4.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -90,9 +90,15 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.backup">backup() (in module custodian.vasp.handlers)</a>
+  <dt><a href="custodian.nwchem.html#custodian.nwchem.handlers.backup">backup() (in module custodian.nwchem.handlers)</a>
   </dt>
 
+      <dd><dl>
+        
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.backup">(in module custodian.vasp.handlers)</a>
+  </dt>
+
+      </dl></dd>
   </dl></td>
 </tr></table>
 
@@ -114,6 +120,14 @@
 
         
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.NonConvergingErrorHandler.check">(NonConvergingErrorHandler method)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.nwchem.html#custodian.nwchem.handlers.NwchemErrorHandler.check">(NwchemErrorHandler method)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.check">(PotimErrorHandler method)</a>
   </dt>
 
         
@@ -143,6 +157,14 @@
   </dt>
 
         
+  <dt><a href="custodian.nwchem.html#custodian.nwchem.handlers.NwchemErrorHandler.correct">(NwchemErrorHandler method)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.correct">(PotimErrorHandler method)</a>
+  </dt>
+
+        
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.UnconvergedErrorHandler.correct">(UnconvergedErrorHandler method)</a>
   </dt>
 
@@ -163,14 +185,26 @@
   <dt><a href="custodian.ansible.html#module-custodian.ansible.actions">custodian.ansible.actions (module)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="custodian.ansible.html#module-custodian.ansible.intepreter">custodian.ansible.intepreter (module)</a>
   </dt>
 
       
   <dt><a href="custodian.html#module-custodian.custodian">custodian.custodian (module)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="custodian.nwchem.html#module-custodian.nwchem">custodian.nwchem (module)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.nwchem.html#module-custodian.nwchem.handlers">custodian.nwchem.handlers (module)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.nwchem.html#module-custodian.nwchem.jobs">custodian.nwchem.jobs (module)</a>
   </dt>
 
       
@@ -251,11 +285,19 @@
 
       <dd><dl>
         
+  <dt><a href="custodian.nwchem.html#custodian.nwchem.jobs.NwchemJob.from_dict">(NwchemJob static method)</a>
+  </dt>
+
+        
   <dt><a href="custodian.vasp.html#custodian.vasp.jobs.VaspJob.from_dict">(VaspJob static method)</a>
   </dt>
 
         
   <dt><a href="custodian.html#custodian.custodian.Job.from_dict">(custodian.custodian.Job class method)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.nwchem.html#custodian.nwchem.handlers.NwchemErrorHandler.from_dict">(custodian.nwchem.handlers.NwchemErrorHandler class method)</a>
   </dt>
 
         
@@ -268,6 +310,10 @@
 
         
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.NonConvergingErrorHandler.from_dict">(custodian.vasp.handlers.NonConvergingErrorHandler class method)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.from_dict">(custodian.vasp.handlers.PotimErrorHandler class method)</a>
   </dt>
 
         
@@ -296,9 +342,15 @@
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="custodian.vasp.html#custodian.vasp.jobs.gzip_directory">gzip_directory() (in module custodian.vasp.jobs)</a>
+  <dt><a href="custodian.nwchem.html#custodian.nwchem.jobs.gzip_directory">gzip_directory() (in module custodian.nwchem.jobs)</a>
   </dt>
 
+      <dd><dl>
+        
+  <dt><a href="custodian.vasp.html#custodian.vasp.jobs.gzip_directory">(in module custodian.vasp.jobs)</a>
+  </dt>
+
+      </dl></dd>
   </dl></td>
 </tr></table>
 
@@ -326,6 +378,14 @@
 
         
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.NonConvergingErrorHandler.is_monitor">(NonConvergingErrorHandler attribute)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.nwchem.html#custodian.nwchem.handlers.NwchemErrorHandler.is_monitor">(NwchemErrorHandler attribute)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.is_monitor">(PotimErrorHandler attribute)</a>
   </dt>
 
         
@@ -383,14 +443,26 @@
 
       <dd><dl>
         
+  <dt><a href="custodian.nwchem.html#custodian.nwchem.jobs.NwchemJob.name">(NwchemJob attribute)</a>
+  </dt>
+
+        
   <dt><a href="custodian.vasp.html#custodian.vasp.jobs.VaspJob.name">(VaspJob attribute)</a>
   </dt>
 
       </dl></dd>
+      
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.NonConvergingErrorHandler">NonConvergingErrorHandler (class in custodian.vasp.handlers)</a>
+  </dt>
+
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.NonConvergingErrorHandler">NonConvergingErrorHandler (class in custodian.vasp.handlers)</a>
+  <dt><a href="custodian.nwchem.html#custodian.nwchem.handlers.NwchemErrorHandler">NwchemErrorHandler (class in custodian.nwchem.handlers)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.nwchem.html#custodian.nwchem.jobs.NwchemJob">NwchemJob (class in custodian.nwchem.jobs)</a>
   </dt>
 
   </dl></td>
@@ -409,10 +481,18 @@
 
       <dd><dl>
         
+  <dt><a href="custodian.nwchem.html#custodian.nwchem.jobs.NwchemJob.postprocess">(NwchemJob method)</a>
+  </dt>
+
+        
   <dt><a href="custodian.vasp.html#custodian.vasp.jobs.VaspJob.postprocess">(VaspJob method)</a>
   </dt>
 
       </dl></dd>
+      
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler">PotimErrorHandler (class in custodian.vasp.handlers)</a>
+  </dt>
+
       
   <dt><a href="custodian.ansible.html#custodian.ansible.actions.DictActions.pull">pull() (DictActions static method)</a>
   </dt>
@@ -453,6 +533,10 @@
   </dt>
 
         
+  <dt><a href="custodian.nwchem.html#custodian.nwchem.jobs.NwchemJob.run">(NwchemJob method)</a>
+  </dt>
+
+        
   <dt><a href="custodian.vasp.html#custodian.vasp.jobs.VaspJob.run">(VaspJob method)</a>
   </dt>
 
@@ -474,6 +558,10 @@
   </dt>
 
       <dd><dl>
+        
+  <dt><a href="custodian.nwchem.html#custodian.nwchem.jobs.NwchemJob.setup">(NwchemJob method)</a>
+  </dt>
+
         
   <dt><a href="custodian.vasp.html#custodian.vasp.jobs.VaspJob.setup">(VaspJob method)</a>
   </dt>
@@ -504,6 +592,18 @@
 
         
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.NonConvergingErrorHandler.to_dict">(NonConvergingErrorHandler attribute)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.nwchem.html#custodian.nwchem.handlers.NwchemErrorHandler.to_dict">(NwchemErrorHandler attribute)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.nwchem.html#custodian.nwchem.jobs.NwchemJob.to_dict">(NwchemJob attribute)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.to_dict">(PotimErrorHandler attribute)</a>
   </dt>
 
         
@@ -584,7 +684,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.4.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

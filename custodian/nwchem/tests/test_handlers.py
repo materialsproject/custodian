@@ -17,6 +17,7 @@ __date__ = "6/18/13"
 import unittest
 import os
 import shutil
+import glob
 
 from custodian.nwchem.handlers import NwchemErrorHandler
 
@@ -39,7 +40,8 @@ class NwchemErrorHandlerTest(unittest.TestCase):
         h.check()
         h.correct()
         shutil.move("Li1_1.nw.orig", "Li1_1.nw")
-
+        for f in glob.glob("error.*.tar.gz"):
+            os.remove(f)
 
 if __name__ == "__main__":
     unittest.main()
