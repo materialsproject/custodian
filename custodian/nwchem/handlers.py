@@ -72,11 +72,10 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
                     nwi.tasks.pop(self.ntasks - 1)
                 else:
                     t.theory_directives["cgmin"] = ""
-                    if t.operation == "optimize":
-                        for t in nwi.tasks:
-                            if t.operation.startswith("freq"):
-                                #You cannot calculate hessian with cgmin.
-                                t.theory_directives["nocgmin"] = ""
+                for t in nwi.tasks:
+                    if t.operation.startswith("freq"):
+                        #You cannot calculate hessian with cgmin.
+                        t.theory_directives["nocgmin"] = ""
                 action = {"_set": {"tasks": [t.to_dict for t in nwi.tasks]}}
                 actions.append(action)
             else:
