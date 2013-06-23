@@ -14,6 +14,9 @@ __email__ = "shyuep@gmail.com"
 __status__ = "Beta"
 __date__ = "5/20/13"
 
+import glob
+import logging
+import tarfile
 
 from custodian.custodian import ErrorHandler
 from pymatgen.serializers.json_coders import MSONable
@@ -54,6 +57,7 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
             fout.write("".join(lines))
 
     def correct(self):
+        backup()
         actions = []
         nwi = NwInput.from_file(self.input_file)
         for e in self.errors:
@@ -65,12 +69,14 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
             elif e == "Bad convergence":
                 t = nwi.tasks[self.ntasks - 1]
                 if "cgmin" in t.theory_directives:
-                    return {"errors": self.errors, "actions": None}
-                t.theory_directives["cgmin"] = ""
-                if t.operation == "optimize":
-                    for t in nwi.tasks:
-                        if t.operation.startswith("freq"):
-                            t.theory_directives["nocgmin"] = ""
+                    nwi.tasks.pop(self.ntasks - 1)
+                else:
+                    t.theory_directives["cgmin"] = ""
+                    if t.operation == "optimize":
+                        for t in nwi.tasks:
+                            if t.operation.startswith("freq"):
+                                #You cannot calculate hessian with cgmin.
+                                t.theory_directives["nocgmin"] = ""
                 action = {"_set": {"tasks": [t.to_dict for t in nwi.tasks]}}
                 actions.append(action)
             else:
@@ -101,3 +107,13 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
     def from_dict(cls, d):
         return cls(d["output_filename"])
 
+
+def backup():
+    error_num = max([0] + [int(f.split(".")[1])
+                           for f in glob.glob("error.*.tar.gz")])
+    filename = "error.{}.tar.gz".format(error_num + 1)
+    logging.info("Backing up run to {}.".format(filename))
+    tar = tarfile.open(filename, "w:gz")
+    for f in glob.glob("*.nw*"):
+        tar.add(f)
+    tar.close()
