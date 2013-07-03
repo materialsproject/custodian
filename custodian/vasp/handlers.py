@@ -398,11 +398,13 @@ class FrozenJobErrorHandler(ErrorHandler):
 class NonConvergingErrorHandler(ErrorHandler, MSONable):
     """
     Check if a run is hitting the maximum number of electronic steps at the
-    last nionic_steps ionic steps (default=10). If so, kill the job.
+    last nionic_steps ionic steps (default=10). If so, change ALGO from Fast to 
+    Normal or kill the job.
     """
-    def __init__(self, output_filename="OSZICAR", nionic_steps=10):
+    def __init__(self, output_filename="OSZICAR", nionic_steps=10, change_algo=False):
         self.output_filename = output_filename
         self.nionic_steps = nionic_steps
+        self.change_algo = change_algo
 
     def check(self):
         vi = VaspInput.from_directory(".")
@@ -417,8 +419,25 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
         return False
 
     def correct(self):
+        #if change_algo is True, change ALGO = Fast to Normal if ALGO is Fast, else
+        #kill the job
+        vi = VaspInput.from_directory(".")
+        algo = vi["INCAR"].get("ALGO", "Normal")
+        if self.change_algo and algo == "Fast":
+            backup()
+            actions = [{"dict": "INCAR",
+                        "action": {"_set": {"ALGO": "Normal"}}}]
+            m = Modder()
+            modified = []
+            for a in actions:
+                modified.append(a["dict"])
+                vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+            for f in modified:
+                vi[f].write_file(f)
+            return {"errors": ["Non-converging job"], "actions": actions}
         #Unfixable error. Just return None for actions.
-        return {"errors": ["Non-converging job"], "actions": None}
+        else:
+            return {"errors": ["Non-converging job"], "actions": None}
 
     def __str__(self):
         return "Run not converging."
