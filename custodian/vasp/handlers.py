@@ -398,10 +398,11 @@ class FrozenJobErrorHandler(ErrorHandler):
 class NonConvergingErrorHandler(ErrorHandler, MSONable):
     """
     Check if a run is hitting the maximum number of electronic steps at the
-    last 10 ionic steps. If so, kill the job.
+    last nionic_steps ionic steps (default=10). If so, kill the job.
     """
-    def __init__(self, output_filename="OSZICAR"):
+    def __init__(self, output_filename="OSZICAR", nionic_steps=10):
         self.output_filename = output_filename
+        self.nionic_steps = nionic_steps
 
     def check(self):
         vi = VaspInput.from_directory(".")
@@ -409,7 +410,7 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
         try:
             oszicar = Oszicar(self.output_filename)
             esteps = oszicar.ionic_steps
-            if len(esteps) > 10:
+            if len(esteps) > self.nionic_steps:
                 return all([len(e) == nelm for e in esteps[-11:-1]])
         except:
             pass
