@@ -413,7 +413,7 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
             oszicar = Oszicar(self.output_filename)
             esteps = oszicar.ionic_steps
             if len(esteps) > self.nionic_steps:
-                return all([len(e) == nelm for e in esteps[-11:-1]])
+                return all([len(e) == nelm for e in esteps[-(self.nionic_steps+1):-1]])
         except:
             pass
         return False
@@ -450,11 +450,15 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
     def to_dict(self):
         return {"@module": self.__class__.__module__,
                 "@class": self.__class__.__name__,
-                "output_filename": self.output_filename}
+                "output_filename": self.output_filename,
+                "nionic_steps": self.nionic_steps,
+                "change_algo": self.change_algo}
 
     @classmethod
     def from_dict(cls, d):
-        return cls(d["output_filename"])
+        return cls(output_filename=d["output_filename"],
+                   nionic_steps=d["nionic_steps"],
+                   change_algo=d["change_algo"])
 
 
 def backup(outfile="vasp.out"):
