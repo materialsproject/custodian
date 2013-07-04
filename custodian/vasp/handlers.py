@@ -411,7 +411,7 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
         nelm = vi["INCAR"].get("NELM", 60)
         try:
             oszicar = Oszicar(self.output_filename)
-            esteps = oszicar.ionic_steps
+            esteps = oszicar.electronic_steps
             if len(esteps) > self.nionic_steps:
                 return all([len(e) == nelm for e in esteps[-(self.nionic_steps+1):-1]])
         except:
