@@ -398,26 +398,46 @@ class FrozenJobErrorHandler(ErrorHandler):
 class NonConvergingErrorHandler(ErrorHandler, MSONable):
     """
     Check if a run is hitting the maximum number of electronic steps at the
-    last 10 ionic steps. If so, kill the job.
+    last nionic_steps ionic steps (default=10). If so, change ALGO from Fast to 
+    Normal or kill the job.
     """
-    def __init__(self, output_filename="OSZICAR"):
+    def __init__(self, output_filename="OSZICAR", nionic_steps=10, change_algo=False):
         self.output_filename = output_filename
+        self.nionic_steps = nionic_steps
+        self.change_algo = change_algo
 
     def check(self):
         vi = VaspInput.from_directory(".")
         nelm = vi["INCAR"].get("NELM", 60)
         try:
             oszicar = Oszicar(self.output_filename)
-            esteps = oszicar.ionic_steps
-            if len(esteps) > 10:
-                return all([len(e) == nelm for e in esteps[-11:-1]])
+            esteps = oszicar.electronic_steps
+            if len(esteps) > self.nionic_steps:
+                return all([len(e) == nelm for e in esteps[-(self.nionic_steps+1):-1]])
         except:
             pass
         return False
 
     def correct(self):
+        #if change_algo is True, change ALGO = Fast to Normal if ALGO is Fast, else
+        #kill the job
+        vi = VaspInput.from_directory(".")
+        algo = vi["INCAR"].get("ALGO", "Normal")
+        if self.change_algo and algo == "Fast":
+            backup()
+            actions = [{"dict": "INCAR",
+                        "action": {"_set": {"ALGO": "Normal"}}}]
+            m = Modder()
+            modified = []
+            for a in actions:
+                modified.append(a["dict"])
+                vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+            for f in modified:
+                vi[f].write_file(f)
+            return {"errors": ["Non-converging job"], "actions": actions}
         #Unfixable error. Just return None for actions.
-        return {"errors": ["Non-converging job"], "actions": None}
+        else:
+            return {"errors": ["Non-converging job"], "actions": None}
 
     def __str__(self):
         return "Run not converging."
@@ -430,11 +450,15 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
     def to_dict(self):
         return {"@module": self.__class__.__module__,
                 "@class": self.__class__.__name__,
-                "output_filename": self.output_filename}
+                "output_filename": self.output_filename,
+                "nionic_steps": self.nionic_steps,
+                "change_algo": self.change_algo}
 
     @classmethod
     def from_dict(cls, d):
-        return cls(d["output_filename"])
+        return cls(output_filename=d["output_filename"],
+                   nionic_steps=d["nionic_steps"],
+                   change_algo=d["change_algo"])
 
 
 def backup(outfile="vasp.out"):
