@@ -8,7 +8,7 @@ by modifying the input files.
 
 from __future__ import division
 
-__author__ = "Shyue Ping Ong"
+__author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
 __email__ = "shyuep@gmail.com"
@@ -401,7 +401,8 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
     last nionic_steps ionic steps (default=10). If so, change ALGO from Fast to 
     Normal or kill the job.
     """
-    def __init__(self, output_filename="OSZICAR", nionic_steps=10, change_algo=False):
+    def __init__(self, output_filename="OSZICAR", nionic_steps=10,
+                 change_algo=False):
         self.output_filename = output_filename
         self.nionic_steps = nionic_steps
         self.change_algo = change_algo
@@ -457,8 +458,8 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
     @classmethod
     def from_dict(cls, d):
         return cls(output_filename=d["output_filename"],
-                   nionic_steps=d["nionic_steps"],
-                   change_algo=d["change_algo"])
+                   nionic_steps=d.get("nionic_steps", 10),
+                   change_algo=d.get("change_algo", False))
 
 
 def backup(outfile="vasp.out"):
