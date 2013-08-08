@@ -457,9 +457,12 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
 
     @classmethod
     def from_dict(cls, d):
-        return cls(output_filename=d["output_filename"],
-                   nionic_steps=d.get("nionic_steps", 10),
-                   change_algo=d.get("change_algo", False))
+        if "nionic_steps" in d:
+            return cls(output_filename=d["output_filename"],
+                       nionic_steps=d.get("nionic_steps", 10),
+                       change_algo=d.get("change_algo", False))
+        else:
+            return cls(output_filename=d["output_filename"])
 
 
 def backup(outfile="vasp.out"):
