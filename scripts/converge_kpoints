@@ -18,7 +18,7 @@ import logging
 
 from custodian.custodian import Custodian
 from custodian.vasp.handlers import VaspErrorHandler, \
-    UnconvergedErrorHandler, PoscarErrorHandler
+    UnconvergedErrorHandler
 from custodian.vasp.jobs import VaspJob
 from pymatgen.io.vaspio.vasp_input import VaspInput
 from pymatgen.io.vaspio.vasp_output import Vasprun
@@ -60,8 +60,7 @@ def get_runs(vasp_command, target=1e-3, max_steps=10):
 
 
 def do_run(args):
-    handlers = [VaspErrorHandler(), UnconvergedErrorHandler(),
-                PoscarErrorHandler()]
+    handlers = [VaspErrorHandler(), UnconvergedErrorHandler()]
     c = Custodian(handlers, get_runs(vasp_command=args.command.split(),
                                      target=args.target,
                                      max_steps=args.max_steps),
