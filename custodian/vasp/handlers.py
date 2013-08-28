@@ -58,7 +58,8 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         "brions": ["BRIONS problems: POTIM should be increased"],
         "pricel": ["internal error in subroutine PRICEL"],
         "zpotrf": ["LAPACK: Routine ZPOTRF failed"],
-        "amin": ["One of the lattice vectors is very long (>50 A), but AMIN"]
+        "amin": ["One of the lattice vectors is very long (>50 A), but AMIN"],
+        "zbrent": ["ZBRENT: fatal internal in brackting"]
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -138,6 +139,11 @@ class VaspErrorHandler(ErrorHandler, MSONable):
             potim = float(vi["INCAR"].get("POTIM", 0.5)) + 0.1
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"POTIM": potim}}})
+
+        if "zbrent" in self.errors:
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"IBRION": 1}}})
+
         m = Modder()
         modified = []
         for a in actions:
