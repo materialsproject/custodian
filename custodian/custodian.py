@@ -20,6 +20,8 @@ import subprocess
 import time
 from abc import ABCMeta, abstractmethod, abstractproperty
 import json
+import glob
+import tarfile
 
 
 class Custodian(object):
@@ -334,3 +336,26 @@ class Job(object):
         object given by the to_dict property.
         """
         pass
+
+
+def backup(filenames, prefix="error"):
+    """
+    Backup files to a tar.gz file. Used, for example, in backing up the
+    files of an errored run before performing corrections.
+
+    Args:
+        filenames:
+            List of files to backup. Supports wildcards, e.g., *.*.
+        prefix:
+            prefix to the files. Defaults to error, which means a series of
+            error.1.tar.gz, error.2.tar.gz, ... will be generated.
+    """
+    num = max([0] + [int(f.split(".")[1])
+                     for f in glob.glob("{}.*.tar.gz".format(prefix))])
+    filename = "{}.{}.tar.gz".format(prefix, num + 1)
+    logging.info("Backing up run to {}.".format(filename))
+    tar = tarfile.open(filename, "w:gz")
+    for fname in filenames:
+        for f in glob.glob(fname):
+            tar.add(f)
+    tar.close()

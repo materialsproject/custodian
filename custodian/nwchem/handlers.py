@@ -14,11 +14,9 @@ __email__ = "shyuep@gmail.com"
 __status__ = "Beta"
 __date__ = "5/20/13"
 
-import glob
-import logging
-import tarfile
 
-from custodian.custodian import ErrorHandler
+
+from custodian.custodian import ErrorHandler, backup
 from pymatgen.serializers.json_coders import MSONable
 from pymatgen.io.nwchemio import NwOutput, NwInput
 from custodian.ansible.intepreter import Modder
@@ -57,7 +55,7 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
             fout.write("".join(lines))
 
     def correct(self):
-        backup()
+        backup("*.nw*")
         actions = []
         nwi = NwInput.from_file(self.input_file)
         for e in self.errors:
@@ -106,13 +104,3 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
     def from_dict(cls, d):
         return cls(d["output_filename"])
 
-
-def backup():
-    error_num = max([0] + [int(f.split(".")[1])
-                           for f in glob.glob("error.*.tar.gz")])
-    filename = "error.{}.tar.gz".format(error_num + 1)
-    logging.info("Backing up run to {}.".format(filename))
-    tar = tarfile.open(filename, "w:gz")
-    for f in glob.glob("*.nw*"):
-        tar.add(f)
-    tar.close()
