@@ -18,26 +18,10 @@ error, and potentially restart the job if necessary.
 Change log
 ==========
 
-0.4.2
+0.4.3
 -----
-1. Rudimentary support for Nwchem error handling (by Shyue Ping Ong).
-2. Improved VASP error handling (by Steve Dacek and Will Richards).
-
-0.4.1
------
-1. Added hanlding of PRICEL error in VASP.
-2. Speed and robustness improvements.
-3. BRIONS error now handled by changing ISYM.
-
-0.4.0
------
-1. Many VASP handlers are now consolidated into a single VaspErrorHandler.
-2. Many more fixes for VASP runs, including the "TOO FEW BANDS",
-   "TRIPLE PRODUCT", "DENTET" and "BRIONS" errors.
-3. VaspJob now includes the auto_npar and auto_gamma options, which
-   automatically optimizes the NPAR setting to be sqrt(number of cores) as
-   per the VASP recommendation for DFT runs and tries to search for a
-   gamma-only compiled version of VASP for gamma 1x1x1 runs.
+1. Added handling for ZBRENT error for VASP.
+2. Minor refactoring to consolidate backup and gzip directory methods.
 
 :doc:`Older versions </changelog>`
 
@@ -377,6 +361,6 @@ follows::
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
 
-.. _`pymatgen's documentation`: http://pythonhosted.org/pymatgen
+.. _`pymatgen's documentation`: http://pymatgen.org
 .. _`Materials Project`: https://www.materialsproject.org
 .. _`pymatgen`: https://pypi.python.org/pypi/pymatgen

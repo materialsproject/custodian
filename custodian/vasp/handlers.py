@@ -85,22 +85,28 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         if "tet" in self.errors or "dentet" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ISMEAR": 0}}})
+
         if "inv_rot_mat" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"SYMPREC": 1e-8}}})
+
         if "brmix" in self.errors or "zpotrf" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ISYM": 0}}})
+
         if "subspacematrix" in self.errors or "rspher" in self.errors or \
                 "real_optlay" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"LREAL": False}}})
+
         if "tetirr" in self.errors or "incorrect_shift" in self.errors:
             actions.append({"dict": "KPOINTS",
                             "action": {"_set": {"generation_style": "Gamma"}}})
+
         if "amin" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"AMIN": "0.01"}}})
+
         if "too_few_bands" in self.errors:
             if "NBANDS" in vi["INCAR"]:
                 nbands = int(vi["INCAR"]["NBANDS"])

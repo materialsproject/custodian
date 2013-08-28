@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>vasp Package &mdash; custodian 0.4.2 documentation</title>
+    <title>vasp Package &mdash; custodian 0.4.3 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.2',
+        VERSION:     '0.4.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.4.2 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.4.3 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.4.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.4.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -56,7 +56,7 @@
 <h1>vasp Package<a class="headerlink" href="#vasp-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
 <h2><tt class="xref py py-mod docutils literal"><span class="pre">vasp</span></tt> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-custodian.vasp"></span><p>TODO: Change the module doc.</p>
+<span class="target" id="module-custodian.vasp"></span><p>This package implements various VASP Jobs and Error Handlers.</p>
 </div>
 <div class="section" id="module-custodian.vasp.handlers">
 <span id="handlers-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">handlers</span></tt> Module<a class="headerlink" href="#module-custodian.vasp.handlers" title="Permalink to this headline">¶</a></h2>
@@ -132,10 +132,11 @@ and if the run has converged, no error is recorded.</p>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.NonConvergingErrorHandler">
-<em class="property">class </em><tt class="descname">NonConvergingErrorHandler</tt><big>(</big><em>output_filename='OSZICAR'</em><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descname">NonConvergingErrorHandler</tt><big>(</big><em>output_filename='OSZICAR'</em>, <em>nionic_steps=10</em>, <em>change_algo=False</em><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">pymatgen.serializers.json_coders.MSONable</span></tt></p>
 <p>Check if a run is hitting the maximum number of electronic steps at the
-last 10 ionic steps. If so, kill the job.</p>
+last nionic_steps ionic steps (default=10). If so, change ALGO from Fast to
+Normal or kill the job.</p>
 <dl class="method">
 <dt id="custodian.vasp.handlers.NonConvergingErrorHandler.check">
 <tt class="descname">check</tt><big>(</big><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.check" title="Permalink to this definition">¶</a></dt>
@@ -167,8 +168,8 @@ last 10 ionic steps. If so, kill the job.</p>
 <dt id="custodian.vasp.handlers.PotimErrorHandler">
 <em class="property">class </em><tt class="descname">PotimErrorHandler</tt><big>(</big><em>input_filename='POSCAR'</em>, <em>output_filename='OSZICAR'</em>, <em>dE_threshold=1</em><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">pymatgen.serializers.json_coders.MSONable</span></tt></p>
-<p>Check if a run has excessively large positive energy changes. 
-This is typically caused by too large a POTIM. Runs typically 
+<p>Check if a run has excessively large positive energy changes.
+This is typically caused by too large a POTIM. Runs typically
 end up crashing with some other error (e.g. BRMIX) as the geometry
 gets progressively worse.</p>
 <dl class="method">
@@ -248,7 +249,7 @@ that occur during VASP runs.</p>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.error_msgs">
-<tt class="descname">error_msgs</tt><em class="property"> = {'too_few_bands': ['TOO FEW BANDS'], 'triple_product': ['ERROR: the triple product of the basis vectors'], 'amin': ['One of the lattice vectors is very long (&gt;50 A), but AMIN'], 'pricel': ['internal error in subroutine PRICEL'], 'zpotrf': ['LAPACK: Routine ZPOTRF failed'], 'brmix': ['BRMIX: very serious problems'], 'real_optlay': ['REAL_OPTLAY: internal error'], 'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'dentet': ['DENTET'], 'incorrect_shift': ['Could not get correct shifts'], 'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'rspher': ['ERROR RSPHER'], 'rot_matrix': ['Found some non-integer element in rotation matrix'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values'], 'tetirr': ['Routine TETIRR needs special values'], 'brions': ['BRIONS problems: POTIM should be increased']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">error_msgs</tt><em class="property"> = {'too_few_bands': ['TOO FEW BANDS'], 'triple_product': ['ERROR: the triple product of the basis vectors'], 'amin': ['One of the lattice vectors is very long (&gt;50 A), but AMIN'], 'pricel': ['internal error in subroutine PRICEL'], 'zpotrf': ['LAPACK: Routine ZPOTRF failed'], 'brmix': ['BRMIX: very serious problems'], 'real_optlay': ['REAL_OPTLAY: internal error'], 'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'dentet': ['DENTET'], 'incorrect_shift': ['Could not get correct shifts'], 'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'rspher': ['ERROR RSPHER'], 'rot_matrix': ['Found some non-integer element in rotation matrix'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values'], 'zbrent': ['ZBRENT: fatal internal in brackting'], 'tetirr': ['Routine TETIRR needs special values'], 'brions': ['BRIONS problems: POTIM should be increased']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="classmethod">
@@ -267,11 +268,6 @@ that occur during VASP runs.</p>
 <dd></dd></dl>
 
 </dd></dl>
-
-<dl class="function">
-<dt id="custodian.vasp.handlers.backup">
-<tt class="descname">backup</tt><big>(</big><em>outfile='vasp.out'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.backup" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </div>
 <div class="section" id="module-custodian.vasp.jobs">
@@ -608,9 +604,9 @@ if you are using mpirun, it can be something like
 </dl>
 </dd></dl>
 
-<dl class="staticmethod">
+<dl class="classmethod">
 <dt id="custodian.vasp.jobs.VaspJob.from_dict">
-<em class="property">static </em><tt class="descclassname">VaspJob.</tt><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.from_dict" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><tt class="descclassname">VaspJob.</tt><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.from_dict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -638,20 +634,6 @@ if you are using mpirun, it can be something like
 <tt class="descclassname">VaspJob.</tt><tt class="descname">to_dict</tt><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.to_dict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-</dd></dl>
-
-<dl class="function">
-<dt id="custodian.vasp.jobs.gzip_directory">
-<tt class="descname">gzip_directory</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#gzip_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.gzip_directory" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gzips all files in a directory.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt>path:</dt>
-<dd>Path to directory.</dd>
-</dl>
-</dd>
-</dl>
 </dd></dl>
 
 </div>
@@ -704,7 +686,7 @@ if you are using mpirun, it can be something like
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.4.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.4.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Change log &mdash; custodian 0.4.2 documentation</title>
+    <title>Change log &mdash; custodian 0.4.3 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.2',
+        VERSION:     '0.4.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.4.2 documentation" href="#" />
+    <link rel="top" title="custodian 0.4.3 documentation" href="#" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.4.2 documentation</a> &raquo;</li> 
+        <li><a href="#">custodian 0.4.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -69,30 +69,10 @@ error, and potentially restart the job if necessary.</p>
 <div class="section" id="change-log">
 <h1>Change log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
-<h2>0.4.2<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>0.4.3<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li>Rudimentary support for Nwchem error handling (by Shyue Ping Ong).</li>
-<li>Improved VASP error handling (by Steve Dacek and Will Richards).</li>
-</ol>
-</div>
-<div class="section" id="id2">
-<h2>0.4.1<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li>Added hanlding of PRICEL error in VASP.</li>
-<li>Speed and robustness improvements.</li>
-<li>BRIONS error now handled by changing ISYM.</li>
-</ol>
-</div>
-<div class="section" id="id3">
-<h2>0.4.0<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li>Many VASP handlers are now consolidated into a single VaspErrorHandler.</li>
-<li>Many more fixes for VASP runs, including the &#8220;TOO FEW BANDS&#8221;,
-&#8220;TRIPLE PRODUCT&#8221;, &#8220;DENTET&#8221; and &#8220;BRIONS&#8221; errors.</li>
-<li>VaspJob now includes the auto_npar and auto_gamma options, which
-automatically optimizes the NPAR setting to be sqrt(number of cores) as
-per the VASP recommendation for DFT runs and tries to search for a
-gamma-only compiled version of VASP for gamma 1x1x1 runs.</li>
+<li>Added handling for ZBRENT error for VASP.</li>
+<li>Minor refactoring to consolidate backup and gzip directory methods.</li>
 </ol>
 <p><a class="reference internal" href="changelog.html"><em>Older versions</em></a></p>
 </div>
@@ -110,7 +90,7 @@ install custodian on any system is to use easy_install or pip, as follows:</p>
 <div class="highlight-python"><pre>pip install custodian</pre>
 </div>
 <p>Some plugins (e.g., vasp management) require additional setup (please see
-<a class="reference external" href="http://pythonhosted.org/pymatgen">pymatgen&#8217;s documentation</a>).</p>
+<a class="reference external" href="http://pymatgen.org">pymatgen&#8217;s documentation</a>).</p>
 </div>
 <div class="section" id="developmental-version">
 <h2>Developmental version<a class="headerlink" href="#developmental-version" title="Permalink to this headline">¶</a></h2>
@@ -136,7 +116,7 @@ cloning the source, you can type:</p>
 Please install using:</p>
 <div class="highlight-python"><pre>pip install pymatgen</pre>
 </div>
-<p>For more information, please consult <a class="reference external" href="http://pythonhosted.org/pymatgen">pymatgen&#8217;s documentation</a>.</p>
+<p>For more information, please consult <a class="reference external" href="http://pymatgen.org">pymatgen&#8217;s documentation</a>.</p>
 </li>
 <li><p class="first">nose - For complete unittesting.</p>
 </li>
@@ -148,7 +128,7 @@ Please install using:</p>
 <p>The main class in the workflow is known as Custodian, which manages a series
 of jobs with a list of error handlers. The general workflow for Custodian is
 presented in the figure below.</p>
-<div class="align-center figure align-center">
+<div class="align-center figure">
 <a class="reference internal image-reference" href="_images/Custodian.png"><img alt="Custodian workflow" src="_images/Custodian.png" style="width: 500px;" /></a>
 <p class="caption">Overview of the Custodian workflow.</p>
 </div>
@@ -409,9 +389,7 @@ DEALINGS IN THE SOFTWARE.</pre>
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Change log</a><ul>
-<li><a class="reference internal" href="#id1">0.4.2</a></li>
-<li><a class="reference internal" href="#id2">0.4.1</a></li>
-<li><a class="reference internal" href="#id3">0.4.0</a></li>
+<li><a class="reference internal" href="#id1">0.4.3</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#getting-custodian">Getting custodian</a><ul>
@@ -464,7 +442,7 @@ DEALINGS IN THE SOFTWARE.</pre>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.4.2 documentation</a> &raquo;</li> 
+        <li><a href="#">custodian 0.4.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
