@@ -2,8 +2,9 @@
 
 """
 This module implements the main Custodian class, which manages a list of jobs
-given a set of error handlers, and the abstract base classes for the
-ErrorHandlers and Jobs.
+given a set of error handlers, the abstract base classes for the
+ErrorHandlers and Jobs, and some helper functions for backing up or
+compressing files in a directory.
 """
 
 from __future__ import division
@@ -12,7 +13,7 @@ __author__ = "Shyue Ping Ong, William Davidson Richards"
 __copyright__ = "Copyright 2012, The Materials Project"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
-__email__ = "shyue@mit.edu"
+__email__ = "shyuep@gmail.com"
 __date__ = "May 3, 2013"
 
 import logging

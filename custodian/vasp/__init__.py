@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-TODO: Change the module doc.
+This package implements various VASP Jobs and Error Handlers.
 """
 
 from __future__ import division

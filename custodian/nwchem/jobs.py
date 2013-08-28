@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-This module implements basic kinds of jobs for Gaussian runs.
+This module implements basic kinds of jobs for Nwchem runs.
 """
 
 from __future__ import division
@@ -15,7 +15,6 @@ __date__ = "5/20/13"
 
 
 import subprocess
-import os
 import shutil
 
 from pymatgen.util.io_utils import zopen
@@ -84,8 +83,8 @@ class NwchemJob(Job, MSONable):
         d["@class"] = self.__class__.__name__
         return d
 
-    @staticmethod
-    def from_dict(d):
+    @classmethod
+    def from_dict(cls, d):
         return NwchemJob(
             nwchem_cmd=d["nwchem_cmd"], input_file=d["input_file"],
             output_file=d["output_file"], gzipped=d["gzipped"],
