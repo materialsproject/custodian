@@ -18,10 +18,12 @@ __date__ = "May 3, 2013"
 import logging
 import subprocess
 import time
-from abc import ABCMeta, abstractmethod, abstractproperty
 import json
 import glob
 import tarfile
+import os
+from abc import ABCMeta, abstractmethod, abstractproperty
+
 
 
 class Custodian(object):
@@ -359,3 +361,20 @@ def backup(filenames, prefix="error"):
         for f in glob.glob(fname):
             tar.add(f)
     tar.close()
+
+
+def gzip_dir(path):
+    """
+    Gzips all files in a directory. Used, for instance, to compress all
+    files at the end of a run.
+
+    Args:
+        path:
+            Path to directory.
+    """
+    for f in os.listdir(path):
+        if not f.endswith("gz"):
+            with zopen(f, 'rb') as f_in, \
+                    zopen('{}.gz'.format(f), 'wb') as f_out:
+                f_out.writelines(f_in)
+            os.remove(f)

@@ -15,7 +15,6 @@ __status__ = "Beta"
 __date__ = "5/20/13"
 
 
-
 from custodian.custodian import ErrorHandler, backup
 from pymatgen.serializers.json_coders import MSONable
 from pymatgen.io.nwchemio import NwOutput, NwInput

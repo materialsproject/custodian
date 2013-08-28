@@ -19,7 +19,6 @@ import os
 import shutil
 import math
 
-from pymatgen.util.io_utils import zopen
 from pymatgen.io.vaspio.vasp_input import VaspInput
 from pymatgen.io.smartio import read_structure
 from pymatgen.io.vaspio_set import MITVaspInputSet
@@ -27,7 +26,7 @@ from pymatgen.serializers.json_coders import MSONable, PMGJSONDecoder
 
 from custodian.ansible.intepreter import Modder
 from custodian.ansible.actions import FileActions, DictActions
-from custodian.custodian import Job
+from custodian.custodian import Job, gzip_dir
 
 
 VASP_INPUT_FILES = {"INCAR", "POSCAR", "POTCAR", "KPOINTS"}
@@ -194,7 +193,7 @@ class VaspJob(Job, MSONable):
                     shutil.copy(f, "{}{}".format(f, self.suffix))
 
         if self.gzipped:
-            gzip_directory(".")
+            gzip_dir(".")
 
     @property
     def name(self):
@@ -239,8 +238,8 @@ class VaspJob(Job, MSONable):
         d["@class"] = self.__class__.__name__
         return d
 
-    @staticmethod
-    def from_dict(d):
+    @classmethod
+    def from_dict(cls, d):
         vis = PMGJSONDecoder().process_decoded(d["default_vasp_input_set"])
         return VaspJob(
             vasp_cmd=d["vasp_cmd"], output_file=d["output_file"],
@@ -249,19 +248,3 @@ class VaspJob(Job, MSONable):
             auto_npar=d['auto_npar'], auto_gamma=d['auto_gamma'],
             settings_override=d["settings_override"],
             gamma_vasp_cmd=d["gamma_vasp_cmd"])
-
-
-def gzip_directory(path):
-    """
-    Gzips all files in a directory.
-
-    Args:
-        path:
-            Path to directory.
-    """
-    for f in os.listdir(path):
-        if not f.endswith("gz"):
-            with zopen(f, 'rb') as f_in, \
-                    zopen('{}.gz'.format(f), 'wb') as f_out:
-                f_out.writelines(f_in)
-            os.remove(f)

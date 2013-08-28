@@ -8,7 +8,8 @@ by modifying the input files.
 
 from __future__ import division
 
-__author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen"
+__author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, " \
+             "Wei Chen"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
 __email__ = "shyuep@gmail.com"
