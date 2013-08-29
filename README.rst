@@ -34,7 +34,7 @@ or::
     pip install custodian
 
 Some plugins (e.g., vasp management) require additional setup (please see
-`pymatgen's documentation <http://pythonhosted.org/pymatgen/>`_).
+`pymatgen's documentation <http://pymatgen.org/>`_).
 
 Developmental version
 ---------------------
@@ -61,7 +61,8 @@ Optional dependencies
 
 Optional libraries that are required if you need certain features:
 
-1. pymatgen 2.6.2+: To use the plugin for VASP. Please install using::
+1. pymatgen 2.6.2+: To use the plugins for VASP and NwChem. Please install
+   using::
 
     pip install pymatgen
 
