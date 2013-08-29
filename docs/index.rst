@@ -69,7 +69,8 @@ Optional dependencies
 
 Optional libraries that are required if you need certain features:
 
-1. Python Materials Genomics (`pymatgen`_) 2.6.2+: To use the plugin for VASP.
+1. Python Materials Genomics (`pymatgen`_) 2.6.2+: To use the plugin for
+   VASP and NwChem.
    Please install using::
 
     pip install pymatgen
