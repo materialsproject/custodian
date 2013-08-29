@@ -13,7 +13,11 @@ The specific use case for custodian is for long running jobs, with potentially
 random errors. For example, there may be a script that takes several days to
 run on a server, with a 1% chance of some IO error causing the job to fail.
 Using custodian, one can develop a mechanism to gracefully recover from the
-error, and potentially restart the job if necessary.
+error, and restart the job with modified parameters if necessary.
+
+The current version of Custodian also comes with two sub-packages for error
+handling for Vienna Ab Initio Simulation Package (VASP) and NwChem
+calculations.
 
 Change log
 ==========
@@ -70,8 +74,7 @@ Optional dependencies
 Optional libraries that are required if you need certain features:
 
 1. Python Materials Genomics (`pymatgen`_) 2.6.2+: To use the plugin for
-   VASP and NwChem.
-   Please install using::
+   VASP and NwChem. Please install using::
 
     pip install pymatgen
 
@@ -93,7 +96,7 @@ presented in the figure below.
 
     Overview of the Custodian workflow.
 
-The Custodian class takes in two general inputs - a **sequence of Jobs** and
+The Custodian class takes in two general inputs - a **list of Jobs** and
 a **list of ErrorHandlers**. **Jobs** should be subclasses of the
 :class:`custodian.custodian.Job` abstract base class and **ErrorHandlers**
 should be subclasses of the :class:`custodian.custodian.ErrorHandler` abstract
@@ -312,6 +315,12 @@ insufficient KPOINTS to use ISMEAR = -5.
 Using custodian, you can even setup potentially indefinite jobs,
 e.g. kpoints convergence jobs with a target energy convergence. Please see the
 converge_kpoints script in the scripts for an example.
+
+.. versionadded:: 0.4.3
+
+    A new package for dealing with NwChem calculations has been added.
+    NwChem is an open-source code for performing computational chemistry
+    calculations.
 
 API/Reference Docs
 ==================

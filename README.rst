@@ -15,7 +15,11 @@ The specific use case for custodian is for long running jobs, with potentially
 random errors. For example, there may be a script that takes several days to
 run on a server, with a 1% chance of some IO error causing the job to fail.
 Using custodian, one can develop a mechanism to gracefully recover from the
-error, and potentially restart the job if necessary.
+error, and restart the job with modified parameters if necessary.
+
+The current version of Custodian also comes with two sub-packages for error
+handling for Vienna Ab Initio Simulation Package (VASP) and NwChem
+calculations.
 
 Getting custodian
 =================

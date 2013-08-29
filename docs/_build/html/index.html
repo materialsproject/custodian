@@ -65,7 +65,10 @@ jobs that would be impossible to deal with on a case-by-case basis.</p>
 random errors. For example, there may be a script that takes several days to
 run on a server, with a 1% chance of some IO error causing the job to fail.
 Using custodian, one can develop a mechanism to gracefully recover from the
-error, and potentially restart the job if necessary.</p>
+error, and restart the job with modified parameters if necessary.</p>
+<p>The current version of Custodian also comes with two sub-packages for error
+handling for Vienna Ab Initio Simulation Package (VASP) and NwChem
+calculations.</p>
 <div class="section" id="change-log">
 <h1>Change log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
@@ -112,8 +115,8 @@ cloning the source, you can type:</p>
 <h2>Optional dependencies<a class="headerlink" href="#optional-dependencies" title="Permalink to this headline">¶</a></h2>
 <p>Optional libraries that are required if you need certain features:</p>
 <ol class="arabic">
-<li><p class="first">Python Materials Genomics (<a class="reference external" href="https://pypi.python.org/pypi/pymatgen">pymatgen</a>) 2.6.2+: To use the plugin for VASP.
-Please install using:</p>
+<li><p class="first">Python Materials Genomics (<a class="reference external" href="https://pypi.python.org/pypi/pymatgen">pymatgen</a>) 2.6.2+: To use the plugin for
+VASP and NwChem. Please install using:</p>
 <div class="highlight-python"><pre>pip install pymatgen</pre>
 </div>
 <p>For more information, please consult <a class="reference external" href="http://pymatgen.org">pymatgen&#8217;s documentation</a>.</p>
@@ -132,7 +135,7 @@ presented in the figure below.</p>
 <a class="reference internal image-reference" href="_images/Custodian.png"><img alt="Custodian workflow" src="_images/Custodian.png" style="width: 500px;" /></a>
 <p class="caption">Overview of the Custodian workflow.</p>
 </div>
-<p>The Custodian class takes in two general inputs - a <strong>sequence of Jobs</strong> and
+<p>The Custodian class takes in two general inputs - a <strong>list of Jobs</strong> and
 a <strong>list of ErrorHandlers</strong>. <strong>Jobs</strong> should be subclasses of the
 <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Job</span></tt></a> abstract base class and <strong>ErrorHandlers</strong>
 should be subclasses of the <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a> abstract
@@ -333,6 +336,11 @@ insufficient KPOINTS to use ISMEAR = -5.</p>
 <p>Using custodian, you can even setup potentially indefinite jobs,
 e.g. kpoints convergence jobs with a target energy convergence. Please see the
 converge_kpoints script in the scripts for an example.</p>
+<div class="versionadded">
+<p><span>New in version 0.4.3: </span>A new package for dealing with NwChem calculations has been added.
+NwChem is an open-source code for performing computational chemistry
+calculations.</p>
+</div>
 </div>
 </div>
 <div class="section" id="api-reference-docs">
