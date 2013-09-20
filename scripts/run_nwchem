@@ -14,7 +14,6 @@ __status__ = "Beta"
 __date__ = "6/18/13"
 
 
-import sys
 import logging
 
 from custodian.custodian import Custodian
@@ -22,11 +21,41 @@ from custodian.nwchem.handlers import NwchemErrorHandler
 from custodian.nwchem.jobs import NwchemJob
 
 
-if __name__ == "__main__":
+def do_run(args):
     FORMAT = '%(asctime)s %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
-    job = NwchemJob(nwchem_cmd=sys.argv[1].split(), input_file=sys.argv[2],
-                    output_file=sys.argv[3])
-    c = Custodian([NwchemErrorHandler(output_filename=sys.argv[3])], [job],
+    job = NwchemJob(nwchem_cmd=args.command.split(),
+                    input_file=args.infile,
+                    output_file=args.outfile)
+    c = Custodian([NwchemErrorHandler(output_filename=args.outfile)], [job],
                   max_errors=5)
     c.run()
+
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="""
+    run_nwchem is a master script to perform various kinds of Nwchem runs.
+    """,
+                                     epilog="""
+    Author: Shyue Ping Ong
+    Version: {}
+    Last updated: {}""".format(__version__, __date__))
+
+    parser.add_argument(
+        "-c", "--command", dest="command", nargs="?",
+        default="nwchem", type=str,
+        help="Nwchem command. Defaults to nwchem. If you are using mpirun, "
+             "set this to something like \"mpirun nwchem\".")
+
+    parser.add_argument(
+        "-i", "--infile", dest="infile", nargs="?", default="mol.nw",
+        type=str, help="Input filename.")
+
+    parser.add_argument(
+        "-o", "--output", dest="outfile", nargs="?", default="mol.nwout",
+        type=str, help="Output filename."
+    )
+
+    args = parser.parse_args()
+    do_run(args)
