@@ -24,7 +24,7 @@ import glob
 import tarfile
 import os
 from abc import ABCMeta, abstractmethod, abstractproperty
-
+from gzip import GzipFile
 
 
 class Custodian(object):
@@ -375,7 +375,7 @@ def gzip_dir(path):
     """
     for f in os.listdir(path):
         if not f.endswith("gz"):
-            with zopen(f, 'rb') as f_in, \
-                    zopen('{}.gz'.format(f), 'wb') as f_out:
+            with open(f, 'rb') as f_in, \
+                    GzipFile('{}.gz'.format(f), 'wb') as f_out:
                 f_out.writelines(f_in)
             os.remove(f)
