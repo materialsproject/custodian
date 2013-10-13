@@ -1,3 +1,4 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -6,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp.handlers &mdash; custodian 0.4.3 documentation</title>
+    <title>custodian.vasp.handlers &mdash; custodian 0.4.5 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.4.3',
+        VERSION:     '0.4.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +25,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.4.3 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.4.5 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +45,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.4.3 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.4.5 documentation</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -65,7 +66,8 @@
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;Shyue Ping Ong&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;Shyue Ping Ong, William Davidson Richards, Anubhav Jain, &quot;</span> \
+             <span class="s">&quot;Wei Chen&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;0.1&quot;</span>
 <span class="n">__maintainer__</span> <span class="o">=</span> <span class="s">&quot;Shyue Ping Ong&quot;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s">&quot;shyuep@gmail.com&quot;</span>
@@ -73,24 +75,25 @@
 <span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;2/4/13&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">tarfile</span>
 <span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">operator</span>
 
-<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">ErrorHandler</span>
+<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">ErrorHandler</span><span class="p">,</span> <span class="n">backup</span>
 <span class="kn">from</span> <span class="nn">pymatgen.io.vaspio.vasp_input</span> <span class="kn">import</span> <span class="n">Poscar</span><span class="p">,</span> <span class="n">VaspInput</span>
 <span class="kn">from</span> <span class="nn">pymatgen.transformations.standard_transformations</span> <span class="kn">import</span> \
     <span class="n">PerturbStructureTransformation</span><span class="p">,</span> <span class="n">SupercellTransformation</span>
 <span class="kn">from</span> <span class="nn">pymatgen.serializers.json_coders</span> <span class="kn">import</span> <span class="n">MSONable</span>
 
-<span class="kn">from</span> <span class="nn">pymatgen.io.vaspio.vasp_output</span> <span class="kn">import</span> <span class="n">Vasprun</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vaspio.vasp_output</span> <span class="kn">import</span> <span class="n">Vasprun</span><span class="p">,</span> <span class="n">Oszicar</span>
 <span class="kn">from</span> <span class="nn">custodian.ansible.intepreter</span> <span class="kn">import</span> <span class="n">Modder</span>
 <span class="kn">from</span> <span class="nn">custodian.ansible.actions</span> <span class="kn">import</span> <span class="n">FileActions</span><span class="p">,</span> <span class="n">DictActions</span>
 
 
 <div class="viewcode-block" id="VaspErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">VaspErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">,</span> <span class="n">MSONable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Master VaspErrorHandler class that handles a number of common errors</span>
+<span class="sd">    that occur during VASP runs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">error_msgs</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s">&quot;tet&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Tetrahedron method fails for NKPT&lt;4&quot;</span><span class="p">,</span>
@@ -100,12 +103,21 @@
         <span class="s">&quot;inv_rot_mat&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;inverse of rotation matrix was not found (increase &quot;</span>
                         <span class="s">&quot;SYMPREC)&quot;</span><span class="p">],</span>
         <span class="s">&quot;brmix&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;BRMIX: very serious problems&quot;</span><span class="p">],</span>
-        <span class="s">&quot;rspher&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;ERROR RSPHER&quot;</span><span class="p">],</span>
-        <span class="s">&quot;subspacematrix&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;WARNING: Sub-Space-Matrix is not hermitian in DAV&quot;</span><span class="p">],</span>
+        <span class="s">&quot;subspacematrix&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;WARNING: Sub-Space-Matrix is not hermitian in &quot;</span>
+                           <span class="s">&quot;DAV&quot;</span><span class="p">],</span>
         <span class="s">&quot;tetirr&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Routine TETIRR needs special values&quot;</span><span class="p">],</span>
         <span class="s">&quot;incorrect_shift&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Could not get correct shifts&quot;</span><span class="p">],</span>
-        <span class="s">&quot;mesh_symmetry&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Reciprocal lattice and k-lattice belong to &quot;</span>
-                          <span class="s">&quot;different class of lattices.&quot;</span><span class="p">]</span>
+        <span class="s">&quot;real_optlay&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;REAL_OPTLAY: internal error&quot;</span><span class="p">],</span>
+        <span class="s">&quot;rspher&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;ERROR RSPHER&quot;</span><span class="p">],</span>
+        <span class="s">&quot;dentet&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;DENTET&quot;</span><span class="p">],</span>
+        <span class="s">&quot;too_few_bands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;TOO FEW BANDS&quot;</span><span class="p">],</span>
+        <span class="s">&quot;triple_product&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;ERROR: the triple product of the basis vectors&quot;</span><span class="p">],</span>
+        <span class="s">&quot;rot_matrix&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Found some non-integer element in rotation matrix&quot;</span><span class="p">],</span>
+        <span class="s">&quot;brions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;BRIONS problems: POTIM should be increased&quot;</span><span class="p">],</span>
+        <span class="s">&quot;pricel&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;internal error in subroutine PRICEL&quot;</span><span class="p">],</span>
+        <span class="s">&quot;zpotrf&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;LAPACK: Routine ZPOTRF failed&quot;</span><span class="p">],</span>
+        <span class="s">&quot;amin&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;One of the lattice vectors is very long (&gt;50 A), but AMIN&quot;</span><span class="p">],</span>
+        <span class="s">&quot;zbrent&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;ZBRENT: fatal internal in brackting&quot;</span><span class="p">]</span>
     <span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="o">=</span><span class="s">&quot;vasp.out&quot;</span><span class="p">):</span>
@@ -118,37 +130,84 @@
                 <span class="n">l</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                 <span class="k">for</span> <span class="n">err</span><span class="p">,</span> <span class="n">msgs</span> <span class="ow">in</span> <span class="n">VaspErrorHandler</span><span class="o">.</span><span class="n">error_msgs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">msgs</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
 </div>
 <div class="viewcode-block" id="VaspErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">backup</span><span class="p">()</span>
+        <span class="n">backup</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">,</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">,</span> <span class="s">&quot;OUTCAR&quot;</span><span class="p">,</span>
+                <span class="s">&quot;vasprun.xml&quot;</span><span class="p">])</span>
         <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="s">&quot;tet&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;dict&#39;</span><span class="p">:</span> <span class="s">&#39;INCAR&#39;</span><span class="p">,</span>
-                            <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;_set&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;ISMEAR&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}})</span>
+        <span class="k">if</span> <span class="s">&quot;tet&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="ow">or</span> <span class="s">&quot;dentet&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
+                            <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;ISMEAR&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}})</span>
+
         <span class="k">if</span> <span class="s">&quot;inv_rot_mat&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;dict&#39;</span><span class="p">:</span> <span class="s">&#39;INCAR&#39;</span><span class="p">,</span>
-                            <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;_set&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;SYMPREC&#39;</span><span class="p">:</span> <span class="mf">1e-8</span><span class="p">}}})</span>
-        <span class="k">if</span> <span class="s">&quot;brmix&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;dict&#39;</span><span class="p">:</span> <span class="s">&#39;INCAR&#39;</span><span class="p">,</span>
-                            <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;_set&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;IMIX&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}})</span>
-        <span class="k">if</span> <span class="s">&quot;subspacematrix&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="ow">or</span> <span class="s">&quot;rspher&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;dict&#39;</span><span class="p">:</span> <span class="s">&#39;INCAR&#39;</span><span class="p">,</span>
-                            <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;_set&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;LREAL&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}}})</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
+                            <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;SYMPREC&quot;</span><span class="p">:</span> <span class="mf">1e-8</span><span class="p">}}})</span>
+
+        <span class="k">if</span> <span class="s">&quot;brmix&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="ow">or</span> <span class="s">&quot;zpotrf&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
+                            <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;ISYM&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}})</span>
+
+        <span class="k">if</span> <span class="s">&quot;subspacematrix&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="ow">or</span> <span class="s">&quot;rspher&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="ow">or</span> \
+                <span class="s">&quot;real_optlay&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
+                            <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;LREAL&quot;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}}})</span>
+
         <span class="k">if</span> <span class="s">&quot;tetirr&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="ow">or</span> <span class="s">&quot;incorrect_shift&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;dict&#39;</span><span class="p">:</span> <span class="s">&#39;KPOINTS&#39;</span><span class="p">,</span>
-                            <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;_set&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;generation_style&#39;</span><span class="p">:</span> <span class="s">&quot;Gamma&quot;</span><span class="p">}}})</span>
-        <span class="k">if</span> <span class="s">&quot;mesh_symmetry&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="n">m</span> <span class="o">=</span> <span class="nb">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">mul</span><span class="p">,</span> <span class="n">vi</span><span class="p">[</span><span class="s">&quot;KPOINTS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">m</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">m</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))),</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">vi</span><span class="p">[</span><span class="s">&quot;KPOINTS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;m&quot;</span><span class="p">):</span>
-                <span class="n">m</span> <span class="o">+=</span> <span class="n">m</span> <span class="o">%</span> <span class="mi">2</span>
-            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;dict&#39;</span><span class="p">:</span> <span class="s">&#39;KPOINTS&#39;</span><span class="p">,</span>
-                            <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;_set&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;kpoints&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="n">m</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">]}}})</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;KPOINTS&quot;</span><span class="p">,</span>
+                            <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;generation_style&quot;</span><span class="p">:</span> <span class="s">&quot;Gamma&quot;</span><span class="p">}}})</span>
+
+        <span class="k">if</span> <span class="s">&quot;amin&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
+                            <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;AMIN&quot;</span><span class="p">:</span> <span class="s">&quot;0.01&quot;</span><span class="p">}}})</span>
+
+        <span class="k">if</span> <span class="s">&quot;too_few_bands&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&quot;NBANDS&quot;</span> <span class="ow">in</span> <span class="n">vi</span><span class="p">[</span><span class="s">&quot;INCAR&quot;</span><span class="p">]:</span>
+                <span class="n">nbands</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vi</span><span class="p">[</span><span class="s">&quot;INCAR&quot;</span><span class="p">][</span><span class="s">&quot;NBANDS&quot;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;OUTCAR&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="s">&quot;NBANDS&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">d</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;=&quot;</span><span class="p">)</span>
+                                <span class="n">nbands</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+                                <span class="k">break</span>
+                            <span class="k">except</span> <span class="p">(</span><span class="ne">IndexError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+                                <span class="k">pass</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
+                            <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;NBANDS&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1.1</span> <span class="o">*</span> <span class="n">nbands</span><span class="p">)}}})</span>
+
+        <span class="k">if</span> <span class="s">&quot;triple_product&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">vi</span><span class="p">[</span><span class="s">&quot;POSCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">structure</span>
+            <span class="n">trans</span> <span class="o">=</span> <span class="n">SupercellTransformation</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
+            <span class="n">new_s</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">apply_transformation</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">,</span>
+                            <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;structure&quot;</span><span class="p">:</span> <span class="n">new_s</span><span class="o">.</span><span class="n">to_dict</span><span class="p">}},</span>
+                            <span class="s">&quot;transformation&quot;</span><span class="p">:</span> <span class="n">trans</span><span class="o">.</span><span class="n">to_dict</span><span class="p">})</span>
+
+        <span class="k">if</span> <span class="s">&quot;rot_matrix&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="ow">or</span> <span class="s">&quot;pricel&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">vi</span><span class="p">[</span><span class="s">&quot;POSCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">structure</span>
+            <span class="n">trans</span> <span class="o">=</span> <span class="n">PerturbStructureTransformation</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
+            <span class="n">new_s</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">apply_transformation</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">,</span>
+                            <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;structure&quot;</span><span class="p">:</span> <span class="n">new_s</span><span class="o">.</span><span class="n">to_dict</span><span class="p">}},</span>
+                            <span class="s">&quot;transformation&quot;</span><span class="p">:</span> <span class="n">trans</span><span class="o">.</span><span class="n">to_dict</span><span class="p">})</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
+                            <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;SYMPREC&quot;</span><span class="p">:</span> <span class="mf">1e-8</span><span class="p">}}})</span>
+
+        <span class="k">if</span> <span class="s">&quot;brions&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">potim</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vi</span><span class="p">[</span><span class="s">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;POTIM&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span> <span class="o">+</span> <span class="mf">0.1</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
+                            <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;POTIM&quot;</span><span class="p">:</span> <span class="n">potim</span><span class="p">}}})</span>
+
+        <span class="k">if</span> <span class="s">&quot;zbrent&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
+                            <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;IBRION&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}})</span>
+
         <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">()</span>
         <span class="n">modified</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
@@ -160,10 +219,10 @@
 </div>
     <span class="nd">@property</span>
 <div class="viewcode-block" id="VaspErrorHandler.is_monitor"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler.is_monitor">[docs]</a>    <span class="k">def</span> <span class="nf">is_monitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">True</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&quot;Vasp error&quot;</span>
+        <span class="k">return</span> <span class="s">&quot;VaspErrorHandler&quot;</span>
 
     <span class="nd">@property</span>
 <div class="viewcode-block" id="VaspErrorHandler.to_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -171,34 +230,49 @@
                 <span class="s">&quot;@class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
                 <span class="s">&quot;output_filename&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">}</span>
 </div>
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="VaspErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">VaspErrorHandler</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_filename&quot;</span><span class="p">])</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="VaspErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_filename&quot;</span><span class="p">])</span>
 
 </div></div>
-<div class="viewcode-block" id="DentetErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.DentetErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">DentetErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+<div class="viewcode-block" id="MeshSymmetryErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.MeshSymmetryErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">MeshSymmetryErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">,</span> <span class="n">MSONable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Corrects the mesh symmetry error in VASP. This error is sometimes</span>
+<span class="sd">    non-fatal. So this error handler only checks at the end of the run,</span>
+<span class="sd">    and if the run has converged, no error is recorded.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s">&#39;vasp.out&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Detects an error when the output file has not been updated</span>
-<span class="sd">        in timeout seconds. Perturbs structure and restarts</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span> <span class="o">=</span> <span class="n">output_file</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="o">=</span><span class="s">&quot;vasp.out&quot;</span><span class="p">,</span>
+                 <span class="n">output_vasprun</span><span class="o">=</span><span class="s">&quot;vasprun.xml&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span> <span class="o">=</span> <span class="n">output_filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_vasprun</span> <span class="o">=</span> <span class="n">output_vasprun</span>
 
-<div class="viewcode-block" id="DentetErrorHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.DentetErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MeshSymmetryErrorHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.MeshSymmetryErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;Reciprocal lattice and k-lattice belong to different class of&quot;</span> \
+              <span class="s">&quot; lattices.&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">Vasprun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_vasprun</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">converged</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">l</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&quot;DENTET&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
                     <span class="k">return</span> <span class="bp">True</span>
         <span class="k">return</span> <span class="bp">False</span>
 </div>
-<div class="viewcode-block" id="DentetErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.DentetErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">backup</span><span class="p">()</span>
-        <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
+<div class="viewcode-block" id="MeshSymmetryErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.MeshSymmetryErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">backup</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">,</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">,</span> <span class="s">&quot;OUTCAR&quot;</span><span class="p">,</span>
+                <span class="s">&quot;vasprun.xml&quot;</span><span class="p">])</span>
         <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
-        <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;dict&#39;</span><span class="p">:</span> <span class="s">&#39;INCAR&#39;</span><span class="p">,</span>
-                        <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;_set&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;ISMEAR&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}})</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="nb">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">mul</span><span class="p">,</span> <span class="n">vi</span><span class="p">[</span><span class="s">&quot;KPOINTS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">m</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">vi</span><span class="p">[</span><span class="s">&quot;KPOINTS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;m&quot;</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">+=</span> <span class="n">m</span> <span class="o">%</span> <span class="mi">2</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;KPOINTS&quot;</span><span class="p">,</span>
+                    <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;kpoints&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="n">m</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">]}}}]</span>
         <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">()</span>
         <span class="n">modified</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
@@ -206,21 +280,26 @@
             <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]])</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">modified</span><span class="p">:</span>
             <span class="n">vi</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;dentet&quot;</span><span class="p">],</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;mesh_symmetry&quot;</span><span class="p">],</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 </div>
     <span class="nd">@property</span>
-<div class="viewcode-block" id="DentetErrorHandler.is_monitor"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.DentetErrorHandler.is_monitor">[docs]</a>    <span class="k">def</span> <span class="nf">is_monitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">True</span>
+<div class="viewcode-block" id="MeshSymmetryErrorHandler.is_monitor"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.MeshSymmetryErrorHandler.is_monitor">[docs]</a>    <span class="k">def</span> <span class="nf">is_monitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">False</span>
 </div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;MeshSymmetryErrorHandler&quot;</span>
+
     <span class="nd">@property</span>
-<div class="viewcode-block" id="DentetErrorHandler.to_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.DentetErrorHandler.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MeshSymmetryErrorHandler.to_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.MeshSymmetryErrorHandler.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;@module&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span>
                 <span class="s">&quot;@class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
-                <span class="s">&quot;output_filename&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">}</span>
+                <span class="s">&quot;output_filename&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">,</span>
+                <span class="s">&quot;output_vasprun&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_vasprun</span><span class="p">}</span>
 </div>
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="DentetErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.DentetErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">DentetErrorHandler</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_filename&quot;</span><span class="p">])</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="MeshSymmetryErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.MeshSymmetryErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">output_filename</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_filename&quot;</span><span class="p">],</span>
+                   <span class="n">output_vasprun</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_vasprun&quot;</span><span class="p">])</span>
 
 </div></div>
 <div class="viewcode-block" id="UnconvergedErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.UnconvergedErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">UnconvergedErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">,</span> <span class="n">MSONable</span><span class="p">):</span>
@@ -233,13 +312,14 @@
 <div class="viewcode-block" id="UnconvergedErrorHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.UnconvergedErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">Vasprun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">converged</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">True</span>
         <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">converged</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">False</span>
 </div>
 <div class="viewcode-block" id="UnconvergedErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.UnconvergedErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">backup</span><span class="p">()</span>
+        <span class="n">backup</span><span class="p">([</span><span class="s">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">,</span> <span class="s">&quot;OUTCAR&quot;</span><span class="p">,</span> <span class="s">&quot;vasprun.xml&quot;</span><span class="p">])</span>
         <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&quot;file&quot;</span><span class="p">:</span> <span class="s">&quot;CONTCAR&quot;</span><span class="p">,</span>
                     <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;dest&quot;</span><span class="p">:</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">}}},</span>
                    <span class="p">{</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
@@ -273,108 +353,74 @@
                 <span class="s">&quot;@class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
                 <span class="s">&quot;output_filename&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">}</span>
 </div>
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="UnconvergedErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.UnconvergedErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">UnconvergedErrorHandler</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_filename&quot;</span><span class="p">])</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="UnconvergedErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.UnconvergedErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_filename&quot;</span><span class="p">])</span>
 
 </div></div>
-<div class="viewcode-block" id="PoscarErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PoscarErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">PoscarErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">,</span> <span class="n">MSONable</span><span class="p">):</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="o">=</span><span class="s">&quot;vasp.out&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="PotimErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">PotimErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">,</span> <span class="n">MSONable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if a run has excessively large positive energy changes.</span>
+<span class="sd">    This is typically caused by too large a POTIM. Runs typically</span>
+<span class="sd">    end up crashing with some other error (e.g. BRMIX) as the geometry</span>
+<span class="sd">    gets progressively worse.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_filename</span><span class="o">=</span><span class="s">&quot;POSCAR&quot;</span><span class="p">,</span>
+                 <span class="n">output_filename</span><span class="o">=</span><span class="s">&quot;OSZICAR&quot;</span><span class="p">,</span> <span class="n">dE_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_filename</span> <span class="o">=</span> <span class="n">input_filename</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span> <span class="o">=</span> <span class="n">output_filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dE_threshold</span> <span class="o">=</span> <span class="n">dE_threshold</span>
 
-<div class="viewcode-block" id="PoscarErrorHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PoscarErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">):</span>
-                <span class="n">l</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;Found some non-integer element in rotation &quot;</span>
-                                <span class="s">&quot;matrix&quot;</span><span class="p">):</span>
-                    <span class="k">return</span> <span class="bp">True</span>
-        <span class="k">return</span> <span class="bp">False</span>
+<div class="viewcode-block" id="PotimErrorHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">oszicar</span> <span class="o">=</span> <span class="n">Oszicar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Poscar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_filename</span><span class="p">)</span><span class="o">.</span><span class="n">structure</span><span class="p">)</span>
+            <span class="n">max_dE</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">s</span><span class="p">[</span><span class="s">&#39;dE&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">oszicar</span><span class="o">.</span><span class="n">ionic_steps</span><span class="p">[</span><span class="mi">1</span><span class="p">:]])</span> <span class="o">/</span> <span class="n">n</span>
+            <span class="k">if</span> <span class="n">max_dE</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">dE_threshold</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
 </div>
-<div class="viewcode-block" id="PoscarErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PoscarErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">backup</span><span class="p">()</span>
-        <span class="n">p</span> <span class="o">=</span> <span class="n">Poscar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s">&quot;POSCAR&quot;</span><span class="p">)</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">structure</span>
-        <span class="n">trans</span> <span class="o">=</span> <span class="n">PerturbStructureTransformation</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
-        <span class="n">new_s</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">apply_transformation</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-        <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&#39;dict&#39;</span><span class="p">:</span> <span class="s">&#39;POSCAR&#39;</span><span class="p">,</span>
-                    <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;_set&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;structure&#39;</span><span class="p">:</span> <span class="n">new_s</span><span class="o">.</span><span class="n">to_dict</span><span class="p">}}}]</span>
-        <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">()</span>
+<div class="viewcode-block" id="PotimErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">backup</span><span class="p">([</span><span class="s">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">,</span> <span class="s">&quot;OUTCAR&quot;</span><span class="p">,</span>
+                <span class="s">&quot;vasprun.xml&quot;</span><span class="p">])</span>
         <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">potim</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vi</span><span class="p">[</span><span class="s">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;POTIM&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span> <span class="o">*</span> <span class="mf">0.5</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
+                    <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;POTIM&quot;</span><span class="p">:</span> <span class="n">potim</span><span class="p">}}}]</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">()</span>
+        <span class="n">modified</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
+            <span class="n">modified</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">])</span>
             <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]])</span>
-        <span class="n">vi</span><span class="p">[</span><span class="s">&quot;POSCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="s">&quot;POSCAR&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">modified</span><span class="p">:</span>
+            <span class="n">vi</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;POTIM&quot;</span><span class="p">],</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Large positive energy change (POTIM)&quot;</span>
 
-        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Rotation matrix&quot;</span><span class="p">],</span>
-                <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="PotimErrorHandler.is_monitor"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.is_monitor">[docs]</a>    <span class="k">def</span> <span class="nf">is_monitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
 </div>
     <span class="nd">@property</span>
-<div class="viewcode-block" id="PoscarErrorHandler.is_monitor"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PoscarErrorHandler.is_monitor">[docs]</a>    <span class="k">def</span> <span class="nf">is_monitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">False</span>
-</div>
-    <span class="nd">@property</span>
-<div class="viewcode-block" id="PoscarErrorHandler.to_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PoscarErrorHandler.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PotimErrorHandler.to_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;@module&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span>
                 <span class="s">&quot;@class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
-                <span class="s">&quot;output_filename&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">}</span>
+                <span class="s">&quot;input_filename&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_filename</span><span class="p">,</span>
+                <span class="s">&quot;output_filename&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">,</span>
+                <span class="s">&quot;dE_threshold&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dE_threshold</span><span class="p">}</span>
 </div>
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="PoscarErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PoscarErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">PoscarErrorHandler</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_filename&quot;</span><span class="p">])</span>
-
-</div></div>
-<div class="viewcode-block" id="TripleProductErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.TripleProductErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">TripleProductErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">,</span> <span class="n">MSONable</span><span class="p">):</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="o">=</span><span class="s">&quot;vasp.out&quot;</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span> <span class="o">=</span> <span class="n">output_filename</span>
-
-<div class="viewcode-block" id="TripleProductErrorHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.TripleProductErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">):</span>
-                <span class="n">l</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;ERROR: the triple product of the &quot;</span>
-                                <span class="s">&quot;basis vectors&quot;</span><span class="p">):</span>
-                    <span class="k">return</span> <span class="bp">True</span>
-        <span class="k">return</span> <span class="bp">False</span>
-</div>
-<div class="viewcode-block" id="TripleProductErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.TripleProductErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">backup</span><span class="p">()</span>
-        <span class="n">p</span> <span class="o">=</span> <span class="n">Poscar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s">&quot;POSCAR&quot;</span><span class="p">)</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">structure</span>
-        <span class="n">trans</span> <span class="o">=</span> <span class="n">SupercellTransformation</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)))</span>
-        <span class="n">new_s</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">apply_transformation</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-        <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&#39;dict&#39;</span><span class="p">:</span> <span class="s">&#39;POSCAR&#39;</span><span class="p">,</span>
-                    <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;_set&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;structure&#39;</span><span class="p">:</span> <span class="n">new_s</span><span class="o">.</span><span class="n">to_dict</span><span class="p">}}}]</span>
-        <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">()</span>
-        <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
-            <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]])</span>
-        <span class="n">vi</span><span class="p">[</span><span class="s">&quot;POSCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="s">&quot;POSCAR&quot;</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Triple product&quot;</span><span class="p">],</span>
-                <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
-</div>
-    <span class="nd">@property</span>
-<div class="viewcode-block" id="TripleProductErrorHandler.is_monitor"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.TripleProductErrorHandler.is_monitor">[docs]</a>    <span class="k">def</span> <span class="nf">is_monitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">False</span>
-</div>
-    <span class="nd">@property</span>
-<div class="viewcode-block" id="TripleProductErrorHandler.to_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.TripleProductErrorHandler.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;@module&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span>
-                <span class="s">&quot;@class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
-                <span class="s">&quot;output_filename&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">}</span>
-</div>
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="TripleProductErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.TripleProductErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">TripleProductErrorHandler</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_filename&quot;</span><span class="p">])</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="PotimErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;input_filename&quot;</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="s">&quot;output_filename&quot;</span><span class="p">],</span>
+                   <span class="n">d</span><span class="p">[</span><span class="s">&quot;dE_threshold&quot;</span><span class="p">])</span>
 
 </div></div>
 <div class="viewcode-block" id="FrozenJobErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.FrozenJobErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">FrozenJobErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="o">=</span><span class="s">&#39;vasp.out&#39;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">3600</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="o">=</span><span class="s">&quot;vasp.out&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">3600</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Detects an error when the output file has not been updated</span>
 <span class="sd">        in timeout seconds. Perturbs structure and restarts</span>
@@ -388,21 +434,22 @@
             <span class="k">return</span> <span class="bp">True</span>
 </div>
 <div class="viewcode-block" id="FrozenJobErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.FrozenJobErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">backup</span><span class="p">()</span>
+        <span class="n">backup</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">,</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">,</span> <span class="s">&quot;OUTCAR&quot;</span><span class="p">,</span>
+                <span class="s">&quot;vasprun.xml&quot;</span><span class="p">])</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">Poscar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s">&quot;POSCAR&quot;</span><span class="p">)</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">structure</span>
         <span class="n">trans</span> <span class="o">=</span> <span class="n">PerturbStructureTransformation</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
         <span class="n">new_s</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">apply_transformation</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-        <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&#39;dict&#39;</span><span class="p">:</span> <span class="s">&#39;POSCAR&#39;</span><span class="p">,</span>
-                    <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;_set&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;structure&#39;</span><span class="p">:</span> <span class="n">new_s</span><span class="o">.</span><span class="n">to_dict</span><span class="p">}}}]</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">,</span>
+                    <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;structure&quot;</span><span class="p">:</span> <span class="n">new_s</span><span class="o">.</span><span class="n">to_dict</span><span class="p">}},</span>
+                    <span class="s">&quot;transformation&quot;</span><span class="p">:</span> <span class="n">trans</span><span class="o">.</span><span class="n">to_dict</span><span class="p">}]</span>
         <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">()</span>
         <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
             <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]])</span>
         <span class="n">vi</span><span class="p">[</span><span class="s">&quot;POSCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="s">&quot;POSCAR&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Frozen job&quot;</span><span class="p">],</span>
-                <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Frozen job&quot;</span><span class="p">],</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 </div>
     <span class="nd">@property</span>
 <div class="viewcode-block" id="FrozenJobErrorHandler.is_monitor"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.FrozenJobErrorHandler.is_monitor">[docs]</a>    <span class="k">def</span> <span class="nf">is_monitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -415,24 +462,80 @@
                 <span class="s">&quot;output_filename&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">,</span>
                 <span class="s">&quot;timeout&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">}</span>
 </div>
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="FrozenJobErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.FrozenJobErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">FrozenJobErrorHandler</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_filename&quot;</span><span class="p">],</span>
-                                     <span class="n">timeout</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;timeout&quot;</span><span class="p">])</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="FrozenJobErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.FrozenJobErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_filename&quot;</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;timeout&quot;</span><span class="p">])</span>
 
 </div></div>
-<div class="viewcode-block" id="backup"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.backup">[docs]</a><span class="k">def</span> <span class="nf">backup</span><span class="p">():</span>
-    <span class="n">error_num</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s">&quot;error.*.tar.gz&quot;</span><span class="p">):</span>
-        <span class="n">toks</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
-        <span class="n">error_num</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">error_num</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">toks</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-    <span class="n">filename</span> <span class="o">=</span> <span class="s">&quot;error.{}.tar.gz&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">error_num</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Backing up run to {}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
-    <span class="n">tar</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;w:gz&quot;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;error&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&quot;.tar.gz&quot;</span><span class="p">)):</span>
-            <span class="n">tar</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-    <span class="n">tar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+<div class="viewcode-block" id="NonConvergingErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.NonConvergingErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">NonConvergingErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">,</span> <span class="n">MSONable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if a run is hitting the maximum number of electronic steps at the</span>
+<span class="sd">    last nionic_steps ionic steps (default=10). If so, change ALGO from Fast to</span>
+<span class="sd">    Normal or kill the job.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="o">=</span><span class="s">&quot;OSZICAR&quot;</span><span class="p">,</span> <span class="n">nionic_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                 <span class="n">change_algo</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span> <span class="o">=</span> <span class="n">output_filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nionic_steps</span> <span class="o">=</span> <span class="n">nionic_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">change_algo</span> <span class="o">=</span> <span class="n">change_algo</span>
+
+<div class="viewcode-block" id="NonConvergingErrorHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.NonConvergingErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">nelm</span> <span class="o">=</span> <span class="n">vi</span><span class="p">[</span><span class="s">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;NELM&quot;</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">oszicar</span> <span class="o">=</span> <span class="n">Oszicar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">)</span>
+            <span class="n">esteps</span> <span class="o">=</span> <span class="n">oszicar</span><span class="o">.</span><span class="n">electronic_steps</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">esteps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">nionic_steps</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">all</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">==</span> <span class="n">nelm</span>
+                            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">esteps</span><span class="p">[</span><span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nionic_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="NonConvergingErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.NonConvergingErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># if change_algo is True, change ALGO = Fast to Normal if ALGO is</span>
+        <span class="c"># Fast, else kill the job</span>
+        <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">algo</span> <span class="o">=</span> <span class="n">vi</span><span class="p">[</span><span class="s">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;ALGO&quot;</span><span class="p">,</span> <span class="s">&quot;Normal&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">change_algo</span> <span class="ow">and</span> <span class="n">algo</span> <span class="o">==</span> <span class="s">&quot;Fast&quot;</span><span class="p">:</span>
+            <span class="n">backup</span><span class="p">([</span><span class="s">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">,</span> <span class="s">&quot;OUTCAR&quot;</span><span class="p">,</span> <span class="s">&quot;vasprun.xml&quot;</span><span class="p">])</span>
+            <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
+                        <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s">&quot;Normal&quot;</span><span class="p">}}}]</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">()</span>
+            <span class="n">modified</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
+                <span class="n">modified</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">])</span>
+                <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]])</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">modified</span><span class="p">:</span>
+                <span class="n">vi</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Non-converging job&quot;</span><span class="p">],</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+        <span class="c">#Unfixable error. Just return None for actions.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Non-converging job&quot;</span><span class="p">],</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Run not converging.&quot;</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="NonConvergingErrorHandler.is_monitor"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.NonConvergingErrorHandler.is_monitor">[docs]</a>    <span class="k">def</span> <span class="nf">is_monitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="NonConvergingErrorHandler.to_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.NonConvergingErrorHandler.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;@module&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span>
+                <span class="s">&quot;@class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                <span class="s">&quot;output_filename&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">,</span>
+                <span class="s">&quot;nionic_steps&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nionic_steps</span><span class="p">,</span>
+                <span class="s">&quot;change_algo&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">change_algo</span><span class="p">}</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="NonConvergingErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.NonConvergingErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s">&quot;nionic_steps&quot;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">output_filename</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_filename&quot;</span><span class="p">],</span>
+                       <span class="n">nionic_steps</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;nionic_steps&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+                       <span class="n">change_algo</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;change_algo&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">output_filename</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_filename&quot;</span><span class="p">])</span></div></div>
 </pre></div>
 
           </div>
@@ -466,14 +569,14 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.4.3 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.4.5 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
