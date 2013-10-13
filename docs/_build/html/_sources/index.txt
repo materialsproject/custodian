@@ -22,6 +22,12 @@ calculations.
 Change log
 ==========
 
+0.4.5
+-----
+1. Fix gzip of output.
+
+:doc:`Older vers
+
 0.4.3
 -----
 1. Added handling for ZBRENT error for VASP.

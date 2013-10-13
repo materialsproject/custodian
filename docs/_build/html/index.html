@@ -1,3 +1,4 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -6,15 +7,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Change log &mdash; custodian 0.4.3 documentation</title>
+    <title>Change log &mdash; custodian 0.4.5 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.4.3',
+        URL_ROOT:    '',
+        VERSION:     '0.4.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +25,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.4.3 documentation" href="#" />
+    <link rel="top" title="custodian 0.4.5 documentation" href="#" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +44,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.4.3 documentation</a> &raquo;</li> 
+        <li><a href="#">custodian 0.4.5 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -72,7 +73,14 @@ calculations.</p>
 <div class="section" id="change-log">
 <h1>Change log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
-<h2>0.4.3<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>0.4.5<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Fix gzip of output.</li>
+</ol>
+<p>:doc:<a href="#id2"><span class="problematic" id="id3">`</span></a>Older vers</p>
+</div>
+<div class="section" id="id4">
+<h2>0.4.3<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li>Added handling for ZBRENT error for VASP.</li>
 <li>Minor refactoring to consolidate backup and gzip directory methods.</li>
@@ -132,7 +140,7 @@ VASP and NwChem. Please install using:</p>
 of jobs with a list of error handlers. The general workflow for Custodian is
 presented in the figure below.</p>
 <div class="align-center figure">
-<a class="reference internal image-reference" href="_images/Custodian.png"><img alt="Custodian workflow" src="_images/Custodian.png" style="width: 500px;" /></a>
+<img alt="Custodian workflow" src="_images/Custodian.png" style="width: 500px;" />
 <p class="caption">Overview of the Custodian workflow.</p>
 </div>
 <p>The Custodian class takes in two general inputs - a <strong>list of Jobs</strong> and
@@ -336,11 +344,8 @@ insufficient KPOINTS to use ISMEAR = -5.</p>
 <p>Using custodian, you can even setup potentially indefinite jobs,
 e.g. kpoints convergence jobs with a target energy convergence. Please see the
 converge_kpoints script in the scripts for an example.</p>
-<div class="versionadded">
-<p><span>New in version 0.4.3: </span>A new package for dealing with NwChem calculations has been added.
-NwChem is an open-source code for performing computational chemistry
-calculations.</p>
-</div>
+<p class="versionadded">
+<span class="versionmodified">New in version 0.4.3.</span></p>
 </div>
 </div>
 <div class="section" id="api-reference-docs">
@@ -397,7 +402,8 @@ DEALINGS IN THE SOFTWARE.</pre>
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Change log</a><ul>
-<li><a class="reference internal" href="#id1">0.4.3</a></li>
+<li><a class="reference internal" href="#id1">0.4.5</a></li>
+<li><a class="reference internal" href="#id4">0.4.3</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#getting-custodian">Getting custodian</a><ul>
@@ -450,13 +456,13 @@ DEALINGS IN THE SOFTWARE.</pre>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.4.3 documentation</a> &raquo;</li> 
+        <li><a href="#">custodian 0.4.5 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
