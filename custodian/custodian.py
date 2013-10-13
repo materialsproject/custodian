@@ -18,6 +18,7 @@ __date__ = "May 3, 2013"
 
 import logging
 import subprocess
+import datetime
 import time
 import json
 import glob
@@ -121,7 +122,8 @@ class Custodian(object):
         run_log = []
         total_errors = 0
         unrecoverable = False
-
+        start = datetime.datetime.now()
+        logging.info("Run started at {}.".format(start))
         def do_check(handlers, terminate_func=None):
             corrections = []
             for h in handlers:
@@ -216,12 +218,13 @@ class Custodian(object):
 
             if unrecoverable or total_errors >= self.max_errors:
                 break
-
+        end = datetime.datetime.now()
+        logging.info("Run ended at {}.".format(end))
+        run_time = end - start
         if total_errors >= self.max_errors:
-            logging.info("Max {} errors reached. Exited"
+            logging.info("Max {} errors reached. Exited..."
                          .format(self.max_errors))
-        else:
-            logging.info("Run completed")
+        logging.info("Run completed. Total time taken = {}.".format(run_time))
         return run_log
 
 
