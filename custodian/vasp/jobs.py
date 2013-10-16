@@ -47,7 +47,7 @@ class VaspJob(Job, MSONable):
                  final=True, gzipped=False, backup=True,
                  default_vasp_input_set=MITVaspInputSet(), auto_npar=True,
                  auto_gamma=True, settings_override=None,
-                 gamma_vasp_cmd=None, use_scratch=None):
+                 gamma_vasp_cmd=None, scratch_dir=None):
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -107,11 +107,11 @@ class VaspJob(Job, MSONable):
                 Should follow the list style of subprocess. Defaults to
                 None, which means ".gamma" is added to the last argument of
                 the standard vasp_cmd.
-            use_scratch:
+            scratch_dir:
                 If this is set, the files are copied to a temporary
                 directory in a scratch space for calculation. This is
                 useful in some cluster setups where a scratch partition has
-                a much faster IO. To use this, set use_scratch = root of
+                a much faster IO. To use this, set scratch_dir = root of
                 directory you want to use for runs. There is no need to
                 provide unique directory names; we will use python's
                 tempdir creation mechanisms. If this is None (the default),
@@ -128,7 +128,7 @@ class VaspJob(Job, MSONable):
         self.auto_npar = auto_npar
         self.auto_gamma = auto_gamma
         self.gamma_vasp_cmd = gamma_vasp_cmd
-        self.use_scratch = use_scratch
+        self.scratch_dir = scratch_dir
 
     def setup(self):
         files = os.listdir(".")
@@ -181,9 +181,9 @@ class VaspJob(Job, MSONable):
                 vi[f].write_file(f)
 
     def run(self):
-        if self.use_scratch is not None:
+        if self.scratch_dir is not None:
             cwd = os.getcwd()
-            tempdir = tempfile.mkdtemp(dir=self.use_scratch)
+            tempdir = tempfile.mkdtemp(dir=self.scratch_dir)
             for f in os.listdir("."):
                 shutil.copy(f, tempdir)
             os.chdir(tempdir)
@@ -203,7 +203,7 @@ class VaspJob(Job, MSONable):
             p = subprocess.Popen(cmd, stdout=f)
             p.communicate()
 
-        if self.use_scratch is not None:
+        if self.scratch_dir is not None:
             for f in os.listdir("."):
                 shutil.copy(f, cwd)
             shutil.rmtree(tempdir)
@@ -260,7 +260,7 @@ class VaspJob(Job, MSONable):
                  auto_npar=self.auto_npar, auto_gamma=self.auto_gamma,
                  settings_override=self.settings_override,
                  gamma_vasp_cmd=self.gamma_vasp_cmd,
-                 use_scratch=self.use_scratch
+                 scratch_dir=self.scratch_dir
                  )
         d["@module"] = self.__class__.__module__
         d["@class"] = self.__class__.__name__
@@ -276,4 +276,4 @@ class VaspJob(Job, MSONable):
             auto_npar=d['auto_npar'], auto_gamma=d['auto_gamma'],
             settings_override=d["settings_override"],
             gamma_vasp_cmd=d["gamma_vasp_cmd"],
-            use_scratch=d.get("use_scratch"))
+            scratch_dir=d.get("scratch_dir"))
