@@ -93,7 +93,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-s", "--scratch", dest="scratch", nargs="?",
         default=None, type=str,
-        help="Scratch directory to perform run in.")
+        help="Scratch directory to perform run in. Specify the root scratch "
+             "directory as the code will automatically create a temporary "
+             "subdirectory to run the job.")
 
     parser.add_argument(
         "-ks", "--kpoint-static", dest="static_kpoint", nargs="?",

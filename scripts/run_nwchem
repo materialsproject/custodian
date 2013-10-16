@@ -28,7 +28,7 @@ def do_run(args):
                     input_file=args.infile,
                     output_file=args.outfile)
     c = Custodian([NwchemErrorHandler(output_filename=args.outfile)], [job],
-                  max_errors=5)
+                  max_errors=5, scratch_dir=args.scratch)
     c.run()
 
 
@@ -47,6 +47,13 @@ if __name__ == "__main__":
         default="nwchem", type=str,
         help="Nwchem command. Defaults to nwchem. If you are using mpirun, "
              "set this to something like \"mpirun nwchem\".")
+
+    parser.add_argument(
+        "-s", "--scratch", dest="scratch", nargs="?",
+        default=None, type=str,
+        help="Scratch directory to perform run in. Specify the root scratch "
+             "directory as the code will automatically create a temporary "
+             "subdirectory to run the job.")
 
     parser.add_argument(
         "-i", "--infile", dest="infile", nargs="?", default="mol.nw",
