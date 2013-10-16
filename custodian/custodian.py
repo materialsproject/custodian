@@ -104,14 +104,15 @@ class Custodian(object):
                 will allow one to catch potentially bad error handler
                 implementations. Defaults to False.
             scratch_dir:
-                If this is set, the files are copied to a temporary
-                directory in a scratch space for calculation. This is
-                useful in some cluster setups where a scratch partition has
-                a much faster IO. To use this, set scratch_dir = root of
-                directory you want to use for runs. There is no need to
-                provide unique directory names; we will use python's
-                tempdir creation mechanisms. If this is None (the default),
-                the run is performed in the current directory.
+                If this is set, any files in the current directory are copied
+                to a temporary directory in a scratch space first before any
+                jobs are performed. This is useful in some setups where a
+                scratch partition has much faster IO. To use this, set
+                scratch_dir=root of directory you want to use for runs.
+                There is no need to provide unique directory names; we will
+                use python's tempfile creation mechanisms. If this is
+                None (the default), the run is performed in the current
+                working directory.
         """
         self.max_errors = max_errors
         self.jobs = jobs
