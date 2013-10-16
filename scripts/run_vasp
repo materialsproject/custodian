@@ -62,9 +62,9 @@ def do_run(args):
 
         jobs.append(VaspJob(vasp_command, final=final, suffix=suffix,
                             backup=backup, settings_override=settings,
-                            gzipped=gzip, scratch_dir=args.scratch))
+                            gzipped=gzip))
 
-    c = Custodian(handlers, jobs, max_errors=10)
+    c = Custodian(handlers, jobs, max_errors=10, scratch_dir=args.scratch)
     c.run()
 
 

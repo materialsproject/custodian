@@ -24,6 +24,8 @@ import json
 import glob
 import tarfile
 import os
+import tempfile
+import shutil
 from abc import ABCMeta, abstractmethod, abstractproperty
 from gzip import GzipFile
 
@@ -72,7 +74,7 @@ class Custodian(object):
 
     def __init__(self, handlers, jobs, max_errors=1, polling_time_step=10,
                  monitor_freq=30, log_file="custodian.json",
-                 skip_over_errors=False):
+                 skip_over_errors=False, scratch_dir=None):
         """
         Args:
             handlers:
@@ -101,6 +103,15 @@ class Custodian(object):
                 but may make it difficult to improve handlers. The latter
                 will allow one to catch potentially bad error handler
                 implementations. Defaults to False.
+            scratch_dir:
+                If this is set, the files are copied to a temporary
+                directory in a scratch space for calculation. This is
+                useful in some cluster setups where a scratch partition has
+                a much faster IO. To use this, set scratch_dir = root of
+                directory you want to use for runs. There is no need to
+                provide unique directory names; we will use python's
+                tempdir creation mechanisms. If this is None (the default),
+                the run is performed in the current directory.
         """
         self.max_errors = max_errors
         self.jobs = jobs
@@ -110,6 +121,7 @@ class Custodian(object):
         self.monitor_freq = monitor_freq
         self.log_file = log_file
         self.skip_over_errors = skip_over_errors
+        self.scratch_dir = scratch_dir
 
     def run(self):
         """
@@ -119,6 +131,13 @@ class Custodian(object):
             All errors encountered as a list of list.
             [[error_dicts for job 1], [error_dicts for job 2], ....]
         """
+        if self.scratch_dir is not None:
+            cwd = os.getcwd()
+            tempdir = tempfile.mkdtemp(dir=self.scratch_dir)
+            for f in os.listdir("."):
+                shutil.copy(f, tempdir)
+            os.chdir(tempdir)
+
         run_log = []
         total_errors = 0
         unrecoverable = False
@@ -225,6 +244,12 @@ class Custodian(object):
             logging.info("Max {} errors reached. Exited..."
                          .format(self.max_errors))
         logging.info("Run completed. Total time taken = {}.".format(run_time))
+
+        if self.scratch_dir is not None:
+            for f in os.listdir("."):
+                shutil.copy(f, cwd)
+            shutil.rmtree(tempdir)
+            os.chdir(cwd)
         return run_log
 
 
