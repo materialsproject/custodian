@@ -184,7 +184,8 @@ class VaspJob(Job, MSONable):
         if self.use_scratch is not None:
             cwd = os.getcwd()
             tempdir = tempfile.mkdtemp(dir=self.use_scratch)
-            shutil.copytree(".", tempdir)
+            for f in os.listdir("."):
+                shutil.copy(f, tempdir)
             os.chdir(tempdir)
 
         cmd = list(self.vasp_cmd)
@@ -202,7 +203,8 @@ class VaspJob(Job, MSONable):
             status = subprocess.Popen(cmd, stdout=f)
 
         if self.use_scratch is not None:
-            shutil.copytree(tempdir, cwd)
+            for f in os.listdir("."):
+                shutil.copy(f, cwd)
             shutil.rmtree(tempdir)
             os.chdir(cwd)
 
