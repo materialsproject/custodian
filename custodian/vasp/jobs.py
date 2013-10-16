@@ -200,7 +200,8 @@ class VaspJob(Job, MSONable):
                     cmd[-1] += ".gamma"
 
         with open(self.output_file, 'w') as f:
-            status = subprocess.Popen(cmd, stdout=f)
+            p = subprocess.Popen(cmd, stdout=f)
+            p.communicate()
 
         if self.use_scratch is not None:
             for f in os.listdir("."):
@@ -208,7 +209,7 @@ class VaspJob(Job, MSONable):
             shutil.rmtree(tempdir)
             os.chdir(cwd)
 
-        return status
+        return p
 
     def postprocess(self):
         for f in VASP_OUTPUT_FILES + [self.output_file]:
