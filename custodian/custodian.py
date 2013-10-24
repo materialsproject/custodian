@@ -74,7 +74,8 @@ class Custodian(object):
 
     def __init__(self, handlers, jobs, max_errors=1, polling_time_step=10,
                  monitor_freq=30, log_file="custodian.json",
-                 skip_over_errors=False, scratch_dir=None):
+                 skip_over_errors=False, scratch_dir=None,
+                 gzipped_output=False):
         """
         Args:
             handlers:
@@ -113,6 +114,9 @@ class Custodian(object):
                 use python's tempfile creation mechanisms. If this is
                 None (the default), the run is performed in the current
                 working directory.
+            gzipped_output:
+                Whether to gzip the final output to save space. Defaults to
+                False.
         """
         self.max_errors = max_errors
         self.jobs = jobs
@@ -123,6 +127,7 @@ class Custodian(object):
         self.log_file = log_file
         self.skip_over_errors = skip_over_errors
         self.scratch_dir = scratch_dir
+        self.gzipped_output = gzipped_output
 
     def run(self):
         """
@@ -245,6 +250,9 @@ class Custodian(object):
             logging.info("Max {} errors reached. Exited..."
                          .format(self.max_errors))
         logging.info("Run completed. Total time taken = {}.".format(run_time))
+
+        if self.gzipped_output:
+            gzip_dir(".")
 
         if self.scratch_dir is not None:
             for f in os.listdir("."):

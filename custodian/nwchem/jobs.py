@@ -43,7 +43,9 @@ class NwchemJob(Job, MSONable):
                 the input files will be copied with a ".orig" appended.
                 Defaults to True.
             gzipped:
-                Whether to gzip the final output. Defaults to False.
+                Deprecated. Please use the Custodian class's gzipped_output
+                option instead. Whether to gzip the final output. Defaults to
+                False.
             settings_override:
                 An ansible style list of dict to override changes.
                 #TODO: Not implemented yet.

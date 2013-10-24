@@ -22,13 +22,14 @@ from custodian.nwchem.jobs import NwchemJob
 
 
 def do_run(args):
-    FORMAT = '%(asctime)s %(message)s'
-    logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
+    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO,
+                        filename="run.log")
     job = NwchemJob(nwchem_cmd=args.command.split(),
                     input_file=args.infile,
                     output_file=args.outfile)
     c = Custodian([NwchemErrorHandler(output_filename=args.outfile)], [job],
-                  max_errors=5, scratch_dir=args.scratch)
+                  max_errors=5, scratch_dir=args.scratch,
+                  gzipped_output=args.gzipped)
     c.run()
 
 
@@ -62,6 +63,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "-o", "--output", dest="outfile", nargs="?", default="mol.nwout",
         type=str, help="Output filename."
+    )
+
+    parser.add_argument(
+        "-z", "--gzip", dest="gzip", action="store_true",
+        help="Add this option to gzip the final output. Do not gzip if you "
+             "are going to perform an additional static run."
     )
 
     args = parser.parse_args()

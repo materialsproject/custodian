@@ -72,7 +72,9 @@ class VaspJob(Job, MSONable):
                 the INCAR, KPOINTS, POSCAR and POTCAR will be copied with a
                 ".orig" appended. Defaults to True.
             gzipped:
-                Whether to gzip the final output. Defaults to False.
+                Deprecated. Please use the Custodian class's gzipped_output
+                option instead. Whether to gzip the final output. Defaults to
+                False.
             default_vasp_input_set:
                 Species the default input set to use for directories that do
                 not contain full set of VASP input files. For example,
