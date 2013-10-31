@@ -6,7 +6,7 @@ Created on Jun 1, 2012
 
 from __future__ import division
 
-__author__ = "Shyue Ping Ong"
+__author__ = "Shyue Ping Ong, Stephen Dacek"
 __copyright__ = "Copyright 2012, The Materials Project"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
@@ -87,6 +87,20 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["errors"], ['too_few_bands'])
         self.assertEqual(d["actions"],
                          [{'action': {'_set': {'NBANDS': 501}},
+                           'dict': 'INCAR'}])
+        os.remove("error.1.tar.gz")
+        shutil.move("INCAR.orig", "INCAR")
+        os.chdir(test_dir)
+
+    def test_aliasing(self):
+        os.chdir(os.path.join(test_dir, "too_few_bands"))
+        shutil.copy("INCAR", "INCAR.orig")
+        h = VaspErrorHandler("OUTCAR")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ['aliasing'])
+        self.assertEqual(d["actions"],
+                         [{'action': {'_set': {'NGX': 34}},
                            'dict': 'INCAR'}])
         os.remove("error.1.tar.gz")
         shutil.move("INCAR.orig", "INCAR")

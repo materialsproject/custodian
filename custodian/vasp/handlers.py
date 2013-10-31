@@ -9,7 +9,7 @@ by modifying the input files.
 from __future__ import division
 
 __author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, " \
-             "Wei Chen"
+             "Wei Chen, Stephen Dacek"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
 __email__ = "shyuep@gmail.com"
@@ -59,7 +59,8 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         "pricel": ["internal error in subroutine PRICEL"],
         "zpotrf": ["LAPACK: Routine ZPOTRF failed"],
         "amin": ["One of the lattice vectors is very long (>50 A), but AMIN"],
-        "zbrent": ["ZBRENT: fatal internal in brackting"]
+        "zbrent": ["ZBRENT: fatal internal in brackting"],
+        "aliasing": ['WARNING: aliasing errors must be expected set']
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -95,7 +96,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
                             "action": {"_set": {"ISYM": 0}}})
 
         if "subspacematrix" in self.errors or "rspher" in self.errors or \
-                "real_optlay" in self.errors:
+                        "real_optlay" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"LREAL": False}}})
 
@@ -106,22 +107,6 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         if "amin" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"AMIN": "0.01"}}})
-
-        if "too_few_bands" in self.errors:
-            if "NBANDS" in vi["INCAR"]:
-                nbands = int(vi["INCAR"]["NBANDS"])
-            else:
-                with open("OUTCAR") as f:
-                    for line in f:
-                        if "NBANDS" in line:
-                            try:
-                                d = line.split("=")
-                                nbands = int(d[-1].strip())
-                                break
-                            except (IndexError, ValueError):
-                                pass
-            actions.append({"dict": "INCAR",
-                            "action": {"_set": {"NBANDS": int(1.1 * nbands)}}})
 
         if "triple_product" in self.errors:
             s = vi["POSCAR"].structure
@@ -149,6 +134,43 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         if "zbrent" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"IBRION": 1}}})
+
+        if "too_few_bands" in self.errors:
+            if "NBANDS" in vi["INCAR"]:
+                nbands = int(vi["INCAR"]["NBANDS"])
+            else:
+                with open("OUTCAR") as f:
+                    for line in f:
+                        if "NBANDS" in line:
+                            try:
+                                d = line.split("=")
+                                nbands = int(d[-1].strip())
+                                break
+                            except (IndexError, ValueError):
+                                pass
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"NBANDS": int(1.1 * nbands)}}})
+
+        if "aliasing" in self.errors:
+            with open("OUTCAR") as f:
+                grid_adjusted = False
+                changes_dict = {}
+                for line in f:
+                    if "aliasing errors" in line:
+                        try:
+                            grid_vector = line.split(" NG", 1)[1]
+                            value = [int(s) for s in grid_vector.split(" ")
+                                     if s.isdigit()][0]
+
+                            changes_dict["NG" + grid_vector[0]] = value
+                            grid_adjusted = True
+                        except (IndexError, ValueError):
+                            pass
+                    #Ensure that all NGX, NGY, NGZ have been checked
+                    if grid_adjusted and 'NGZ' in line:
+                        actions.append({"dict": "INCAR",
+                                        "action": {"_set": changes_dict}})
+                        break
 
         m = Modder()
         modified = []
@@ -248,6 +270,7 @@ class UnconvergedErrorHandler(ErrorHandler, MSONable):
     """
     Check if a run is converged. Switches to ALGO = Normal.
     """
+
     def __init__(self, output_filename="vasprun.xml"):
         self.output_filename = output_filename
 
@@ -307,6 +330,7 @@ class PotimErrorHandler(ErrorHandler, MSONable):
     end up crashing with some other error (e.g. BRMIX) as the geometry
     gets progressively worse.
     """
+
     def __init__(self, input_filename="POSCAR",
                  output_filename="OSZICAR", dE_threshold=1):
         self.input_filename = input_filename
@@ -361,7 +385,6 @@ class PotimErrorHandler(ErrorHandler, MSONable):
 
 
 class FrozenJobErrorHandler(ErrorHandler):
-
     def __init__(self, output_filename="vasp.out", timeout=3600):
         """
         Detects an error when the output file has not been updated
@@ -415,6 +438,7 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
     last nionic_steps ionic steps (default=10). If so, change ALGO from Fast to
     Normal or kill the job.
     """
+
     def __init__(self, output_filename="OSZICAR", nionic_steps=10,
                  change_algo=False):
         self.output_filename = output_filename
@@ -429,7 +453,7 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
             esteps = oszicar.electronic_steps
             if len(esteps) > self.nionic_steps:
                 return all([len(e) == nelm
-                            for e in esteps[-(self.nionic_steps+1):-1]])
+                            for e in esteps[-(self.nionic_steps + 1):-1]])
         except:
             pass
         return False
