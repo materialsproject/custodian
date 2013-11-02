@@ -38,6 +38,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         shutil.copy("POSCAR", "POSCAR.orig")
 
     def test_check_correct(self):
+        print os.getcwd()
         h = VaspErrorHandler("vasp.teterror")
         h.check()
         d = h.correct()
@@ -50,7 +51,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ['rot_matrix'])
         self.assertEqual(set([a["dict"] for a in d["actions"]]),
-                         set(["POSCAR", "INCAR"]))
+                         {"POSCAR", "INCAR"})
 
         h = VaspErrorHandler("vasp.real_optlay")
         h.check()
@@ -90,8 +91,10 @@ class VaspErrorHandlerTest(unittest.TestCase):
                            'dict': 'INCAR'}])
         os.remove("error.1.tar.gz")
         shutil.move("INCAR.orig", "INCAR")
+        os.chdir(test_dir)
 
     def test_aliasing(self):
+        os.chdir(os.path.join(test_dir, "aliasing"))
         shutil.copy("INCAR", "INCAR.orig")
         h = VaspErrorHandler("vasp.aliasing")
         h.check()
@@ -100,6 +103,10 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["actions"],
                          [{'action': {'_set': {'NGX': 34}},
                            'dict': 'INCAR'}])
+
+        os.remove("error.1.tar.gz")
+        shutil.move("INCAR.orig", "INCAR")
+        os.chdir(test_dir)
 
     def test_rot_matrix(self):
         if "VASP_PSP_DIR" not in os.environ:
