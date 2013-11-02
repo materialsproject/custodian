@@ -90,20 +90,16 @@ class VaspErrorHandlerTest(unittest.TestCase):
                            'dict': 'INCAR'}])
         os.remove("error.1.tar.gz")
         shutil.move("INCAR.orig", "INCAR")
-        os.chdir(test_dir)
 
     def test_aliasing(self):
-        os.chdir(os.path.join(test_dir, "too_few_bands"))
         shutil.copy("INCAR", "INCAR.orig")
-        h = VaspErrorHandler("OUTCAR")
+        h = VaspErrorHandler("vasp.aliasing")
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ['aliasing'])
         self.assertEqual(d["actions"],
                          [{'action': {'_set': {'NGX': 34}},
                            'dict': 'INCAR'}])
-        os.remove("error.1.tar.gz")
-        shutil.move("INCAR.orig", "INCAR")
 
     def test_rot_matrix(self):
         if "VASP_PSP_DIR" not in os.environ:

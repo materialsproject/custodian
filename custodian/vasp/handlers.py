@@ -60,7 +60,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         "zpotrf": ["LAPACK: Routine ZPOTRF failed"],
         "amin": ["One of the lattice vectors is very long (>50 A), but AMIN"],
         "zbrent": ["ZBRENT: fatal internal in brackting"],
-        "aliasing": ['WARNING: aliasing errors must be expected set']
+        "aliasing": ["WARNING: small aliasing (wrap around) errors must be expected"]
     }
 
     def __init__(self, output_filename="vasp.out"):
