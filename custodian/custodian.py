@@ -259,6 +259,7 @@ class Custodian(object):
                 shutil.copy(f, cwd)
             shutil.rmtree(tempdir)
             os.chdir(cwd)
+
         return run_log
 
 
