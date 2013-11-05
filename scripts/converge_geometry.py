@@ -87,7 +87,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="""
     converge_geometry performs a geometry optimization. What this script will do
-    is to run a particular VASP relaxation run with repeatedly until the geometry
+    is run a particular VASP relaxation repeatedly until the geometry
     is converged within the first ionic step. This is a common practice for
     converging molecular geometries in VASP, especially in situations where
     the geometry needs to be precise: such as frequency calculations.
