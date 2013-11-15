@@ -186,7 +186,6 @@ class VaspJob(Job, MSONable):
 
         with open(self.output_file, 'w') as f:
             p = subprocess.Popen(cmd, stdout=f)
-            p.communicate()
 
         return p
 
