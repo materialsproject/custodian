@@ -156,7 +156,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"NBANDS": int(1.1 * nbands)}}})
 
-        m = Modder()
+        m = Modder(actions=[DictActions, FileActions])
         modified = []
         for a in actions:
             if "dict" in a:
