@@ -94,6 +94,8 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         if "brmix" in self.errors or "zpotrf" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ISYM": 0}}})
+            # Based on VASP forum's recommendation, you should delete the
+            # CHGCAR and WAVECAR when dealing with these errors.
             actions.append({"file": "CHGCAR",
                             "action": {"_file_delete": {'mode': "actual"}}})
             actions.append({"file": "WAVECAR",
