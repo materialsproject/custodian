@@ -206,7 +206,11 @@ class FileActions(object):
                              "'mode'.")
         for k, v in settings.items():
             if k == "mode" and v == "actual":
-                os.remove(filename)
+                try:
+                    os.remove(filename)
+                except OSError:
+                    #Skip file not found error.
+                    pass
             elif k == "mode" and v == "simulated":
                 print "Simulated removal of {}".format(filename)
 

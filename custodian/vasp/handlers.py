@@ -94,6 +94,10 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         if "brmix" in self.errors or "zpotrf" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ISYM": 0}}})
+            actions.append({"file": "CHGCAR",
+                            "action": {"_file_delete": {'mode': "actual"}}})
+            actions.append({"file": "WAVECAR",
+                            "action": {"_file_delete": {'mode': "actual"}}})
 
         if "subspacematrix" in self.errors or "rspher" in self.errors or \
                         "real_optlay" in self.errors:
