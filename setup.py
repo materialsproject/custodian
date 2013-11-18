@@ -12,7 +12,7 @@ with open("README.rst") as f:
 setup(
     name="custodian",
     packages=find_packages(),
-    version="0.5.0",
+    version="0.5.2",
     install_requires=[],
     extras_require={"vasp, nwchem": ["pymatgen>=2.7.5"]},
     package_data={},
