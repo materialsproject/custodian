@@ -159,8 +159,11 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         m = Modder()
         modified = []
         for a in actions:
-            modified.append(a["dict"])
-            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+            if "dict" in a:
+                modified.append(a["dict"])
+                vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+            elif "file" in a:
+                m.modify(a["action"], a["file"])
         for f in modified:
             vi[f].write_file(f)
         return {"errors": list(self.errors), "actions": actions}
