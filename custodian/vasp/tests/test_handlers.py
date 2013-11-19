@@ -19,8 +19,7 @@ import glob
 import shutil
 
 from custodian.vasp.handlers import VaspErrorHandler, \
-    UnconvergedErrorHandler, MeshSymmetryErrorHandler, \
-    AliasingErrorHandler
+    UnconvergedErrorHandler, MeshSymmetryErrorHandler
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
@@ -61,6 +60,21 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["actions"],
                          [{'action': {'_set': {'LREAL': False}},
                            'dict': 'INCAR'}])
+
+    def test_aliasing(self):
+        os.chdir(os.path.join(test_dir, "aliasing"))
+        shutil.copy("INCAR", "INCAR.orig")
+        h = VaspErrorHandler("vasp.aliasing")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ['aliasing'])
+        self.assertEqual(d["actions"],
+                         [{'action': {'_set': {'NGX': 34}},
+                           'dict': 'INCAR'}])
+
+        os.remove("error.1.tar.gz")
+        shutil.move("INCAR.orig", "INCAR")
+        os.chdir(test_dir)
 
     def test_mesh_symmetry(self):
         h = MeshSymmetryErrorHandler("vasp.classrotmat")
@@ -150,43 +164,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         h2 = UnconvergedErrorHandler.from_dict(h.to_dict)
         self.assertEqual(type(h2), UnconvergedErrorHandler)
         self.assertEqual(h2.output_filename, "random_name.xml")
-
-
-class AliasingErrorHandlerTest(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
-        os.chdir(test_dir)
-        shutil.copy("INCAR", "INCAR.orig")
-        shutil.copy("KPOINTS", "KPOINTS.orig")
-        shutil.copy("POSCAR", "POSCAR.orig")
-
-    def test_aliasing(self):
-        os.chdir(os.path.join(test_dir, "aliasing"))
-        shutil.copy("INCAR", "INCAR.orig")
-        h = AliasingErrorHandler("vasp.aliasing")
-        h.check()
-        d = h.correct()
-        self.assertEqual(d["errors"], ['aliasing'])
-        self.assertEqual(d["actions"],
-                         [{'action': {'_set': {'NGX': 34}},
-                           'dict': 'INCAR'}])
-
-        os.remove("error.1.tar.gz")
-        shutil.move("INCAR.orig", "INCAR")
-        os.chdir(test_dir)
-
-
-    @classmethod
-    def tearDownClass(cls):
-        os.chdir(test_dir)
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("KPOINTS.orig", "KPOINTS")
-        shutil.move("POSCAR.orig", "POSCAR")
-        for f in glob.glob("error.*.tar.gz"):
-            os.remove(f)
 
 
 if __name__ == "__main__":

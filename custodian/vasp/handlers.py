@@ -157,12 +157,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"NBANDS": int(1.1 * nbands)}}})
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-        m = Modder(actions=[DictActions, FileActions])
-=======
-=======
->>>>>>> parent of 3686770... move aliasing error to its own handler
+
         if "aliasing" in self.errors:
             with open("OUTCAR") as f:
                 grid_adjusted = False
@@ -184,8 +179,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
                                         "action": {"_set": changes_dict}})
                         break
 
-        m = Modder()
->>>>>>> parent of 3686770... move aliasing error to its own handler
+        m = Modder(actions=[DictActions, FileActions])
         modified = []
         for a in actions:
             if "dict" in a:
