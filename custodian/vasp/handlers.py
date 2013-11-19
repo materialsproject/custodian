@@ -59,7 +59,8 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         "pricel": ["internal error in subroutine PRICEL"],
         "zpotrf": ["LAPACK: Routine ZPOTRF failed"],
         "amin": ["One of the lattice vectors is very long (>50 A), but AMIN"],
-        "zbrent": ["ZBRENT: fatal internal in brackting"]
+        "zbrent": ["ZBRENT: fatal internal in brackting"],
+        "aliasing": ["WARNING: small aliasing (wrap around) errors must be expected"]
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -156,7 +157,32 @@ class VaspErrorHandler(ErrorHandler, MSONable):
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"NBANDS": int(1.1 * nbands)}}})
 
+<<<<<<< HEAD
         m = Modder(actions=[DictActions, FileActions])
+=======
+        if "aliasing" in self.errors:
+            with open("OUTCAR") as f:
+                grid_adjusted = False
+                changes_dict = {}
+                for line in f:
+                    if "aliasing errors" in line:
+                        try:
+                            grid_vector = line.split(" NG", 1)[1]
+                            value = [int(s) for s in grid_vector.split(" ")
+                                     if s.isdigit()][0]
+
+                            changes_dict["NG" + grid_vector[0]] = value
+                            grid_adjusted = True
+                        except (IndexError, ValueError):
+                            pass
+                    #Ensure that all NGX, NGY, NGZ have been checked
+                    if grid_adjusted and 'NGZ' in line:
+                        actions.append({"dict": "INCAR",
+                                        "action": {"_set": changes_dict}})
+                        break
+
+        m = Modder()
+>>>>>>> parent of 3686770... move aliasing error to its own handler
         modified = []
         for a in actions:
             if "dict" in a:
@@ -417,85 +443,6 @@ class FrozenJobErrorHandler(ErrorHandler):
     @classmethod
     def from_dict(cls, d):
         return cls(d["output_filename"], timeout=d["timeout"])
-
-
-class AliasingErrorHandler(ErrorHandler, MSONable):
-    """
-    Check if the current grid settings will cause aliasing errors.
-    If errors are expected, adjust the grid to the parameters
-    recommended in the OUTCAR
-    """
-
-    def __init__(self, output_filename="vasp.out"):
-        self.output_filename = output_filename
-
-    def check(self):
-        msg = "WARNING: small aliasing (wrap around) errors must be expected"
-        try:
-            v = Vasprun(self.output_filename)
-            if v.converged:
-                return False
-        except:
-            pass
-        with open(self.output_filename, "r") as f:
-            for line in f:
-                l = line.strip()
-                if l.find(msg) != -1:
-                    return True
-        return False
-
-    def correct(self):
-        backup([self.output_filename, "INCAR", "KPOINTS", "POSCAR", "OUTCAR",
-                "vasprun.xml"])
-        actions = []
-        vi = VaspInput.from_directory(".")
-
-        with open("OUTCAR") as f:
-            grid_adjusted = False
-            changes_dict = {}
-            for line in f:
-                print line
-                if "aliasing errors" in line:
-                    try:
-                        grid_vector = line.split(" NG", 1)[1]
-                        value = [int(s) for s in grid_vector.split(" ")
-                                 if s.isdigit()][0]
-
-                        changes_dict["NG" + grid_vector[0]] = value
-                        grid_adjusted = True
-                    except (IndexError, ValueError):
-                        pass
-                #Ensure that all NGX, NGY, NGZ have been checked
-                if grid_adjusted and 'NGZ' in line:
-                    actions.append({"dict": "INCAR",
-                                    "action": {"_set": changes_dict}})
-                    break
-
-        m = Modder()
-        modified = []
-        for a in actions:
-            modified.append(a["dict"])
-            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
-        for f in modified:
-            vi[f].write_file(f)
-        return {"errors": ["aliasing"], "actions": actions}
-
-    @property
-    def is_monitor(self):
-        return True
-
-    def __str__(self):
-        return "AliasingErrorHandler"
-
-    @property
-    def to_dict(self):
-        return {"@module": self.__class__.__module__,
-                "@class": self.__class__.__name__,
-                "output_filename": self.output_filename}
-
-    @classmethod
-    def from_dict(cls, d):
-        return cls(d["output_filename"])
 
 
 class NonConvergingErrorHandler(ErrorHandler, MSONable):
