@@ -158,8 +158,11 @@ class VaspErrorHandler(ErrorHandler, MSONable):
                             "action": {"_set": {"NBANDS": int(1.1 * nbands)}}})
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         m = Modder(actions=[DictActions, FileActions])
 =======
+=======
+>>>>>>> parent of 3686770... move aliasing error to its own handler
         if "aliasing" in self.errors:
             with open("OUTCAR") as f:
                 grid_adjusted = False
