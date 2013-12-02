@@ -157,7 +157,6 @@ class VaspErrorHandler(ErrorHandler, MSONable):
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"NBANDS": int(1.1 * nbands)}}})
 
-
         if "aliasing" in self.errors:
             with open("OUTCAR") as f:
                 grid_adjusted = False

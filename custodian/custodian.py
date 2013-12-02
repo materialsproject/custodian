@@ -143,6 +143,7 @@ class Custodian(object):
             for f in os.listdir("."):
                 shutil.copy(f, tempdir)
             os.chdir(tempdir)
+            logging.info("Using scratch directory {}.".format(tempdir))
 
         run_log = []
         total_errors = 0
