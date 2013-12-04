@@ -17,7 +17,7 @@ __author__ = "Xiaohui Qu"
 __version__ = "0.1"
 __maintainer__ = "Xiaohui Qu"
 __email__ = "xhqu1981@gmail.com"
-__status__ = "alpha"
+__status__ = "Alpha"
 __date__ = "12/03/13"
 
 
