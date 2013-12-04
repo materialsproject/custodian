@@ -6,8 +6,11 @@ This module implements basic kinds of jobs for QChem runs.
 
 from __future__ import division
 import os
+from pymatgen import zopen
 from pymatgen.serializers.json_coders import MSONable
 import shutil
+import copy
+import subprocess
 from custodian.custodian import Job
 
 __author__ = "Xiaohui Qu"
@@ -80,3 +83,14 @@ class QchemJob(Job, MSONable):
                 shutil.copy(self.qclog_file,
                             "{}.{}.orig".format(self.qclog_file, i))
 
+    def run(self):
+        cmd = copy.deepcopy(self.qchem_cmd)
+        cmd += [self.input_file, self.output_file]
+        if self.chk_file:
+            cmd.append(self.chk_file)
+        if self.qclog_file:
+            with zopen(self.qclog_file, "w") as filelog:
+                returncode = subprocess.call(cmd, stdout=self.qclog_file)
+        else:
+            returncode = subprocess.call(cmd)
+        return returncode
