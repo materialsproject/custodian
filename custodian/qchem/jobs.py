@@ -21,14 +21,14 @@ __status__ = "alpha"
 __date__ = "12/03/13"
 
 
-
 class QchemJob(Job, MSONable):
     """
     A basis QChem Job.
     """
+
     def __init__(self, qchem_cmd, input_file="mol.qcinp",
                  output_file="mol.qcout", chk_file=None, qclog_file=None,
-                 suffix="", gzipped=False, backup=True):
+                 gzipped=False, backup=True):
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -48,8 +48,6 @@ class QchemJob(Job, MSONable):
             qclog_file:
                 Name of the file to redirect the standard output to. None means
                 not to record the standard output. Defaults to None.
-            suffix:
-                A suffix to be appended to the final output.
             gzipped:
                 Whether to gzip the final output. Defaults to False.
             backup:
@@ -62,7 +60,6 @@ class QchemJob(Job, MSONable):
         self.output_file = output_file
         self.chk_file = chk_file
         self.qclog_file = qclog_file
-        self.suffix = suffix
         self.gzipped = gzipped
         self.backup = backup
 
@@ -90,7 +87,48 @@ class QchemJob(Job, MSONable):
             cmd.append(self.chk_file)
         if self.qclog_file:
             with zopen(self.qclog_file, "w") as filelog:
-                returncode = subprocess.call(cmd, stdout=self.qclog_file)
+                returncode = subprocess.call(cmd, stdout=filelog)
         else:
             returncode = subprocess.call(cmd)
         return returncode
+
+    def postprocess(self):
+        if self.gzipped:
+            gzip_directory(".")
+
+    @property
+    def name(self):
+        return "QChem Job"
+
+    @property
+    def to_dict(self):
+        d = dict(qchem_cmd=self.qchem_cmd, input_file=self.input_file,
+                 output_file=self.output_file, chk_file=self.chk_file,
+                 qclog_file=self.qclog_file, gzipped=self.gzipped,
+                 backup=self.backup)
+        d["@module"] = self.__class__.__module__
+        d["@class"] = self.__class__.__name__
+        return d
+
+    @staticmethod
+    def from_dict(cls, d):
+        return QchemJob(qchem_cmd=d["qchem_cmd"], input_file=d["input_file"],
+                        output_file=d["output_file"], chk_file=d["chk_file"],
+                        qclog_file=d["qclog_file"], gzipped=d["gzipped"],
+                        backup=d["backup"])
+
+
+def gzip_directory(path):
+    """
+    Gzips all files in a directory.
+
+    Args:
+        path:
+            Path to directory.
+    """
+    for f in os.listdir(path):
+        if not f.endswith("gz"):
+            with zopen(f, 'rb') as f_in, \
+                    zopen('{}.gz'.format(f), 'wb') as f_out:
+                f_out.writelines(f_in)
+            os.remove(f)
