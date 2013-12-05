@@ -80,6 +80,8 @@ class QChemErrorHandler(ErrorHandler, MSONable):
                     actions.append(act)
                 else:
                     return {"errors": self.errors, "actions": None}
+            elif e == "Geometry optimization failed":
+                pass
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "actions": actions}
 
@@ -146,6 +148,14 @@ class QChemErrorHandler(ErrorHandler, MSONable):
                 self.fix_step.set_scf_initial_guess("gwh")
             else:
                 raise ValueError("fix method " + method + "is not supported")
+            strategy_text = "<SCF Fix Strategy>"
+            strategy_text += json.dumps(strategy, indent=4, sort_keys=TRue)
+            strategy_text += "</SCF Fix Strategy>"
+            if len(old_strategy_text) > 0:
+                comments = scf_pattern.sub(strategy_text, comments)
+            else:
+                comments = strategy_text
+            self.fix_step.params["comments"] = comments
             return method
 
     def backup(self):
