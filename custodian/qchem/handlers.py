@@ -12,7 +12,7 @@ import logging
 import os
 import re
 import tarfile
-from pymatgen.io.qchemio import QcOutput, QcBatchInput
+from pymatgen.io.qchemio import QcOutput, QcBatchInput, QcInput
 from pymatgen.serializers.json_coders import MSONable
 from custodian.custodian import ErrorHandler
 
@@ -22,6 +22,7 @@ __maintainer__ = "Xiaohui Qu"
 __email__ = "xhqu1981@gmail.com"
 __status__ = "Alpha"
 __date__ = "12/04/13"
+
 
 class QChemErrorHandler(ErrorHandler, MSONable):
     """
@@ -55,13 +56,18 @@ class QChemErrorHandler(ErrorHandler, MSONable):
         self.rca_gdm_thresh = rca_gdm_thresh
         self.scf_max_cycles = scf_max_cycles
         self.geom_max_cycles = geom_max_cycles
+        self.outdata = None
+        self.qcinp = None
+        self.error_step_id = None
+        self.errors = None
+        self.fix_step = None
 
     def check(self):
         # Checks output file for errors.
         self.outdata = QcOutput(self.output_file).data
         self.qcinp = QcBatchInput.from_file(self.input_file)
         self.error_step_id = None
-        self.erros = None
+        self.errors = None
         self.fix_step = None
         for i, od in self.outdata:
             if od["has_error"]:
@@ -79,7 +85,7 @@ class QChemErrorHandler(ErrorHandler, MSONable):
                 self.fix_step.disable_symmetry()
                 actions.append("disable symmetry")
             elif e == "Bad SCF convergence":
-                act = self.fix_scf()
+                act = self.fix_scf
                 if act:
                     actions.append(act)
                 else:
@@ -136,6 +142,7 @@ class QChemErrorHandler(ErrorHandler, MSONable):
                                        "gwh+gdm"]
                 strategy["current_method_id"] = 0
 
+        # noinspection PyTypeChecker
         if strategy == "reset":
             self.fix_step.set_scf_algorithm_and_iterations(
                 algorithm="diis", iterations=self.scf_max_cycles)
@@ -152,6 +159,7 @@ class QChemErrorHandler(ErrorHandler, MSONable):
         elif strategy["current_method_id"] > len(strategy["methods"])-1:
             return None
         else:
+            # noinspection PyTypeChecker
             method = strategy["methods"][strategy["current_method_id"]]
             if method == "rca_diis":
                 self.fix_step.set_scf_algorithm_and_iterations(
@@ -206,7 +214,7 @@ class QChemErrorHandler(ErrorHandler, MSONable):
             strategy = dict()
             strategy["methods"] = ["GDIIS", "CartCoords"]
             strategy["current_method_id"] = 0
-        if strategy["current_method_id"] > len(strategy["methods"]) -1:
+        if strategy["current_method_id"] > len(strategy["methods"]) - 1:
             return None
         else:
             method = strategy["methods"][strategy["current_method_id"]]
@@ -240,17 +248,50 @@ class QChemErrorHandler(ErrorHandler, MSONable):
             self.fix_step.params["comments"] = comments
             return method
 
-
-            
-
     def backup(self):
         error_num = max([0] + [int(f.split(".")[1])
                                for f in glob.glob("error.*.tar.gz")])
         filename = "error.{}.tar.gz".format(error_num + 1)
         logging.info("Backing up run to {}.".format(filename))
         tar = tarfile.open(filename, "w:gz")
-        bak_list = [self.input_file, self.output_file] + self.ex_backup_list
+        bak_list = [self.input_file, self.output_file] + \
+            list(self.ex_backup_list)
         for f in bak_list:
             if os.path.exists(f):
                 tar.add(f)
         tar.close()
+
+    @property
+    def is_monitor(self):
+        return False
+
+    @property
+    def to_dict(self):
+        return {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__,
+                "input_file": self.input_file,
+                "output_file": self.output_file,
+                "ex_backup_list": self.ex_backup_list,
+                "rca_gdm_thresh": self.rca_gdm_thresh,
+                "scf_max_cycles": self.scf_max_cycles,
+                "geom_max_cycles": self.geom_max_cycles,
+                "outdata": self.outdata,
+                "qcinp": self.qcinp.to_dict,
+                "error_step_id": self.error_step_id,
+                "errors": self.errors,
+                "fix_step": self.fix_step.to_dict}
+
+    @classmethod
+    def from_dict(cls, d):
+        h = QChemErrorHandler(input_file=d["input_file"],
+                              output_file=d["output_file"],
+                              ex_backup_list=d["ex_backup_list"],
+                              rca_gdm_thresh=d["rca_gdm_thresh"],
+                              scf_max_cycles=d["scf_max_cycles"],
+                              geom_max_cycles=d["geom_max_cycles"])
+        h.outdata = d["outdata"]
+        h.qcinp = QcBatchInput.from_dict(d["qcinp"])
+        h.error_step_id = d["error_step_id"]
+        h.errors = d["errors"]
+        h.fix_step = QcInput.from_dict(d["fix_step"])
+        return h
