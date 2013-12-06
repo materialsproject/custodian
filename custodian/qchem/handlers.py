@@ -90,6 +90,23 @@ class QChemErrorHandler(ErrorHandler, MSONable):
                     actions.append(act)
                 else:
                     return {"errors": self.errors, "actions": None}
+            elif e == "NAN values":
+                self.fix_step.set_dft_grid(128, 302)
+                actions.append("use tighter grid")
+            elif e == "Molecular charge is not found":
+                if "autoz error" in self.errors:
+                    continue
+                if "Bad SCF convergence" in self.errors:
+                    continue
+                else:
+                    return {"errors": self.errors, "actions": None}
+            elif e == "Molecular spin multipilicity is not found":
+                if "autoz error" in self.errors:
+                    continue
+                else:
+                    return {"errors": self.errors, "actions": None}
+            else:
+                return {"errors": self.errors, "actions": None}
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "actions": actions}
 
