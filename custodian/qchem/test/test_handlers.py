@@ -144,9 +144,28 @@ class QChemErrorHandlerTest(TestCase):
         has_error = h.check()
         self.assertFalse(has_error)
 
+    def test_scf_reset(self):
+        shutil.copyfile(os.path.join(test_dir, "hf_rca_tried_1.inp"),
+                        os.path.join(scr_dir, "hf_scf_reset.inp"))
+        shutil.copyfile(os.path.join(test_dir, "hf_scf_reset.out"),
+                        os.path.join(scr_dir, "hf_scf_reset.out"))
+        h = QChemErrorHandler(input_file="hf_scf_reset.inp",
+                              output_file="hf_scf_reset.out")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Bad SCF convergence'],
+                             'actions': ['reset']})
+        with open(os.path.join(test_dir, "hf_scf_reset.inp")) as f:
+            ref = f.read()
+        with open(os.path.join(scr_dir, "hf_scf_reset.inp")) as f:
+            ans = f.read()
+        self.assertEqual(ref, ans)
+
 
     def tearDown(self):
         shutil.rmtree(scr_dir)
+        pass
 
 
 
