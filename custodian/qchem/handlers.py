@@ -85,7 +85,7 @@ class QChemErrorHandler(ErrorHandler, MSONable):
                 self.fix_step.disable_symmetry()
                 actions.append("disable symmetry")
             elif e == "Bad SCF convergence":
-                act = self.fix_scf
+                act = self.fix_scf()
                 if act:
                     actions.append(act)
                 else:

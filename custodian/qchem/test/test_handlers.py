@@ -36,8 +36,8 @@ class QChemErrorHandlerTest(TestCase):
         h = QChemErrorHandler(input_file="hf_rca.inp",
                               output_file="hf_rca.out")
         has_error = h.check()
+        self.assertTrue(has_error)
         d = h.correct()
-        print has_error
         print d
 
 
