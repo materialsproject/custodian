@@ -82,8 +82,11 @@ class QChemErrorHandler(ErrorHandler, MSONable):
         actions = []
         for e in self.errors:
             if e == "autoz error":
-                self.fix_step.disable_symmetry()
-                actions.append("disable symmetry")
+                if "sym_ignore" not in self.fix_step.params["rem"]:
+                    self.fix_step.disable_symmetry()
+                    actions.append("disable symmetry")
+                else:
+                    return {"errors": self.errors, "actions": None}
             elif e == "Bad SCF convergence":
                 act = self.fix_scf()
                 if act:
@@ -97,8 +100,11 @@ class QChemErrorHandler(ErrorHandler, MSONable):
                 else:
                     return {"errors": self.errors, "actions": None}
             elif e == "NAN values":
-                self.fix_step.set_dft_grid(128, 302)
-                actions.append("use tighter grid")
+                if "xc_grid" not in self.fix_step.params["rem"]:
+                    self.fix_step.set_dft_grid(128, 302)
+                    actions.append("use tighter grid")
+                else:
+                    return {"errors": self.errors, "actions": None}
             elif e == "Molecular charge is not found":
                 if "autoz error" in self.errors:
                     continue
