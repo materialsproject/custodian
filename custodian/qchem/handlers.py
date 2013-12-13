@@ -69,7 +69,7 @@ class QChemErrorHandler(ErrorHandler, MSONable):
         self.error_step_id = None
         self.errors = None
         self.fix_step = None
-        for i, od in self.outdata:
+        for i, od in enumerate(self.outdata):
             if od["has_error"]:
                 self.error_step_id = i
                 self.fix_step = self.qcinp.jobs[i]
