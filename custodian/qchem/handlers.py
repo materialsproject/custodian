@@ -209,8 +209,9 @@ class QChemErrorHandler(ErrorHandler, MSONable):
     def fix_geom_opt(self):
         comments = self.fix_step.params.get("comments", "")
         geom_pattern = re.compile(r"<Geom Opt Fix Strategy>(.*)"
-                                  r"</Geom Opt Fix Strategy>")
-        old_strategy_text = re.findall(geom_pattern, comments, re.DOTALL)
+                                  r"</Geom Opt Fix Strategy>",
+                                  flags=re.DOTALL)
+        old_strategy_text = re.findall(geom_pattern, comments)
 
         if len(old_strategy_text) > 0:
             old_strategy_text = old_strategy_text[0]
