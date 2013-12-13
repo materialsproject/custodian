@@ -162,6 +162,109 @@ class QChemErrorHandlerTest(TestCase):
             ans = f.read()
         self.assertEqual(ref, ans)
 
+    def test_scf_gdm(self):
+        shutil.copyfile(os.path.join(test_dir, "hf_gdm.inp"),
+                        os.path.join(scr_dir, "hf_gdm.inp"))
+        shutil.copyfile(os.path.join(test_dir, "hf_gdm.out"),
+                        os.path.join(scr_dir, "hf_gdm.out"))
+        h = QChemErrorHandler(input_file="hf_gdm.inp",
+                              output_file="hf_gdm.out")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Molecular charge is not found'],
+                             'actions': ['diis_gdm']})
+        with open(os.path.join(test_dir, "hf_gdm_tried_1.inp")) as f:
+            ref = f.read()
+        with open(os.path.join(scr_dir, "hf_gdm.inp")) as f:
+            ans = f.read()
+        self.assertEqual(ref, ans)
+
+        shutil.copyfile(os.path.join(test_dir, "hf_gdm_tried_1.inp"),
+                        os.path.join(scr_dir, "hf_gdm_tried_1.inp"))
+        shutil.copyfile(os.path.join(test_dir, "hf_gdm.out"),
+                        os.path.join(scr_dir, "hf_gdm.out"))
+        h = QChemErrorHandler(input_file="hf_gdm_tried_1.inp",
+                              output_file="hf_gdm.out")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Molecular charge is not found'],
+                             'actions': ['gwh']})
+        with open(os.path.join(test_dir, "hf_gdm_tried_2.inp")) as f:
+            ref = f.read()
+        with open(os.path.join(scr_dir, "hf_gdm_tried_1.inp")) as f:
+            ans = f.read()
+        self.assertEqual(ref, ans)
+
+        shutil.copyfile(os.path.join(test_dir, "hf_gdm_tried_2.inp"),
+                        os.path.join(scr_dir, "hf_gdm_tried_2.inp"))
+        shutil.copyfile(os.path.join(test_dir, "hf_gdm.out"),
+                        os.path.join(scr_dir, "hf_gdm.out"))
+        h = QChemErrorHandler(input_file="hf_gdm_tried_2.inp",
+                              output_file="hf_gdm.out")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Molecular charge is not found'],
+                             'actions': ['rca']})
+        with open(os.path.join(test_dir, "hf_gdm_tried_3.inp")) as f:
+            ref = f.read()
+        with open(os.path.join(scr_dir, "hf_gdm_tried_2.inp")) as f:
+            ans = f.read()
+        self.assertEqual(ref, ans)
+
+        shutil.copyfile(os.path.join(test_dir, "hf_gdm_tried_3.inp"),
+                        os.path.join(scr_dir, "hf_gdm_tried_3.inp"))
+        shutil.copyfile(os.path.join(test_dir, "hf_gdm.out"),
+                        os.path.join(scr_dir, "hf_gdm.out"))
+        h = QChemErrorHandler(input_file="hf_gdm_tried_3.inp",
+                              output_file="hf_gdm.out")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Molecular charge is not found'],
+                             'actions': ['gdm']})
+        with open(os.path.join(test_dir, "hf_gdm_tried_4.inp")) as f:
+            ref = f.read()
+        with open(os.path.join(scr_dir, "hf_gdm_tried_3.inp")) as f:
+            ans = f.read()
+        self.assertEqual(ref, ans)
+
+        shutil.copyfile(os.path.join(test_dir, "hf_gdm_tried_4.inp"),
+                        os.path.join(scr_dir, "hf_gdm_tried_4.inp"))
+        shutil.copyfile(os.path.join(test_dir, "hf_gdm.out"),
+                        os.path.join(scr_dir, "hf_gdm.out"))
+        h = QChemErrorHandler(input_file="hf_gdm_tried_4.inp",
+                              output_file="hf_gdm.out")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Molecular charge is not found'],
+                             'actions': ['core+gdm']})
+        with open(os.path.join(test_dir, "hf_gdm_tried_5.inp")) as f:
+            ref = f.read()
+        with open(os.path.join(scr_dir, "hf_gdm_tried_4.inp")) as f:
+            ans = f.read()
+        self.assertEqual(ref, ans)
+
+        shutil.copyfile(os.path.join(test_dir, "hf_gdm_tried_5.inp"),
+                        os.path.join(scr_dir, "hf_gdm_tried_5.inp"))
+        shutil.copyfile(os.path.join(test_dir, "hf_gdm.out"),
+                        os.path.join(scr_dir, "hf_gdm.out"))
+        h = QChemErrorHandler(input_file="hf_gdm_tried_5.inp",
+                              output_file="hf_gdm.out")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Molecular charge is not found'],
+                             'actions': None})
 
     def tearDown(self):
         shutil.rmtree(scr_dir)
