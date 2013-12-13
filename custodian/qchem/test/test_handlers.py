@@ -38,12 +38,38 @@ class QChemErrorHandlerTest(TestCase):
         has_error = h.check()
         self.assertTrue(has_error)
         d = h.correct()
-        print d
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Molecular charge is not found'],
+                             'actions': ['rca_diis']})
+        with open(os.path.join(test_dir, "hf_rca_tried_1.inp")) as f:
+            ref = f.read()
+        with open(os.path.join(scr_dir, "hf_rca.inp")) as f:
+            ans = f.read()
+        self.assertEqual(ref, ans)
+
+        shutil.copyfile(os.path.join(test_dir, "hf_rca_tried_1.inp"),
+                        os.path.join(scr_dir, "hf_rca_tried_1.inp"))
+        shutil.copyfile(os.path.join(test_dir, "hf_rca.out"),
+                        os.path.join(scr_dir, "hf_rca.out"))
+        h = QChemErrorHandler(input_file="hf_rca_tried_1.inp",
+                              output_file="hf_rca.out")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Molecular charge is not found'],
+                             'actions': ['gwh']})
+        with open(os.path.join(test_dir, "hf_rca_tried_2.inp")) as f:
+            ref = f.read()
+        with open(os.path.join(scr_dir, "hf_rca_tried_1.inp")) as f:
+            ans = f.read()
+        self.assertEqual(ref, ans)
 
 
 
     def tearDown(self):
-        shutil.rmtree(scr_dir)
+        #shutil.rmtree(scr_dir)
+        pass
 
 
 
