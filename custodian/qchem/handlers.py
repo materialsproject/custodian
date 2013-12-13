@@ -118,8 +118,9 @@ class QChemErrorHandler(ErrorHandler, MSONable):
 
     def fix_scf(self):
         comments = self.fix_step.params.get("comments", "")
-        scf_pattern = re.compile(r"<SCF Fix Strategy>(.*)</SCF Fix Strategy>")
-        old_strategy_text = re.findall(scf_pattern, comments, re.DOTALL)
+        scf_pattern = re.compile(r"<SCF Fix Strategy>(.*)</SCF Fix "
+                                 r"Strategy>", flags=re.DOTALL)
+        old_strategy_text = re.findall(scf_pattern, comments)
 
         if len(old_strategy_text) > 0:
             old_strategy_text = old_strategy_text[0]
