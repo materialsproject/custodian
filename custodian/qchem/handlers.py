@@ -136,17 +136,19 @@ class QChemErrorHandler(ErrorHandler, MSONable):
             scf_iters = od["scf_iteration_energies"][-1]
             if scf_iters[-1][1] >= self.rca_gdm_thresh:
                 strategy["methods"] = ["rca_diis", "gwh", "gdm", "rca",
-                                       "gwh+rca"]
+                                       "core+rca"]
                 strategy["current_method_id"] = 0
             else:
                 strategy["methods"] = ["diis_gdm", "gwh", "rca", "gdm",
-                                       "gwh+gdm"]
+                                       "core+gdm"]
                 strategy["current_method_id"] = 0
 
         # noinspection PyTypeChecker
         if strategy == "reset":
             self.fix_step.set_scf_algorithm_and_iterations(
                 algorithm="diis", iterations=self.scf_max_cycles)
+            if "scf_guess" in self.fix_step.params["rem"]:
+                self.fix_step.set_scf_initial_guess("sad")
             self.fix_step.mol = od["molecules"][-1]
             if self.fix_step.charge is None:
                 self.fix_step.charge = self.fix_step.mol.charge
@@ -175,17 +177,17 @@ class QChemErrorHandler(ErrorHandler, MSONable):
             elif method == "rca":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="rca", iterations=self.scf_max_cycles)
-            elif method == "gwh+rca":
+            elif method == "core+rca":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="rca", iterations=self.scf_max_cycles)
-                self.fix_step.set_scf_initial_guess("gwh")
+                self.fix_step.set_scf_initial_guess("core")
             elif method == "diis_gdm":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="diis_gdm", iterations=self.scf_max_cycles)
-            elif method == "gwh+gdm":
+            elif method == "core+gdm":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="gdm", iterations=self.scf_max_cycles)
-                self.fix_step.set_scf_initial_guess("gwh")
+                self.fix_step.set_scf_initial_guess("core")
             else:
                 raise ValueError("fix method " + method + "is not supported")
             strategy_text = "<SCF Fix Strategy>"
