@@ -240,6 +240,7 @@ class QChemErrorHandler(ErrorHandler, MSONable):
             elif method == "CartCoords":
                 self.fix_step.set_geom_opt_coords_type("cartesian")
                 self.fix_step.set_geom_max_iterations(self.geom_max_cycles)
+                self.fix_step.set_geom_opt_use_gdiis(0)
                 self.fix_step.mol = od["molecules"][-1]
                 if self.fix_step.charge is None:
                     self.fix_step.charge = self.fix_step.mol.charge
