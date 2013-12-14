@@ -6,7 +6,7 @@ Created on Jun 1, 2012
 
 from __future__ import division
 
-__author__ = "Shyue Ping Ong"
+__author__ = "Shyue Ping Ong, Stephen Dacek"
 __copyright__ = "Copyright 2012, The Materials Project"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
@@ -26,6 +26,11 @@ test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
                         'test_files')
 
 
+def clean_dir():
+    for f in glob.glob("error.*.tar.gz"):
+        os.remove(f)
+
+
 class VaspErrorHandlerTest(unittest.TestCase):
 
     @classmethod
@@ -36,6 +41,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         shutil.copy("INCAR", "INCAR.orig")
         shutil.copy("KPOINTS", "KPOINTS.orig")
         shutil.copy("POSCAR", "POSCAR.orig")
+        shutil.copy("CHGCAR", "CHGCAR.orig")
 
     def test_check_correct(self):
         h = VaspErrorHandler("vasp.teterror")
@@ -50,7 +56,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ['rot_matrix'])
         self.assertEqual(set([a["dict"] for a in d["actions"]]),
-                         set(["POSCAR", "INCAR"]))
+                         {"POSCAR", "INCAR"})
 
         h = VaspErrorHandler("vasp.real_optlay")
         h.check()
@@ -59,6 +65,21 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["actions"],
                          [{'action': {'_set': {'LREAL': False}},
                            'dict': 'INCAR'}])
+
+    def test_aliasing(self):
+        os.chdir(os.path.join(test_dir, "aliasing"))
+        shutil.copy("INCAR", "INCAR.orig")
+        h = VaspErrorHandler("vasp.aliasing")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ['aliasing'])
+        self.assertEqual(d["actions"],
+                         [{'action': {'_set': {'NGX': 34}},
+                           'dict': 'INCAR'}])
+
+        clean_dir()
+        shutil.move("INCAR.orig", "INCAR")
+        os.chdir(test_dir)
 
     def test_mesh_symmetry(self):
         h = MeshSymmetryErrorHandler("vasp.classrotmat")
@@ -78,6 +99,13 @@ class VaspErrorHandlerTest(unittest.TestCase):
                          [{'action': {'_set': {'ISMEAR': 0}},
                            'dict': 'INCAR'}])
 
+    def test_brmix(self):
+        h = VaspErrorHandler("vasp.brmix")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ['brmix'])
+        self.assertFalse(os.path.exists("CHGCAR"))
+
     def test_too_few_bands(self):
         os.chdir(os.path.join(test_dir, "too_few_bands"))
         shutil.copy("INCAR", "INCAR.orig")
@@ -88,8 +116,9 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["actions"],
                          [{'action': {'_set': {'NBANDS': 501}},
                            'dict': 'INCAR'}])
-        os.remove("error.1.tar.gz")
+        clean_dir()
         shutil.move("INCAR.orig", "INCAR")
+        os.chdir(test_dir)
 
     def test_rot_matrix(self):
         if "VASP_PSP_DIR" not in os.environ:
@@ -117,8 +146,8 @@ class VaspErrorHandlerTest(unittest.TestCase):
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("KPOINTS.orig", "KPOINTS")
         shutil.move("POSCAR.orig", "POSCAR")
-        for f in glob.glob("error.*.tar.gz"):
-            os.remove(f)
+        shutil.move("CHGCAR.orig", "CHGCAR")
+        clean_dir()
 
 
 class UnconvergedErrorHandlerTest(unittest.TestCase):

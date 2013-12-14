@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-This is a master vasp running script to perform variuos combinations of VASP
+This is a master vasp running script to perform various combinations of VASP
 runs.
 """
 
@@ -58,13 +58,11 @@ def do_run(args):
                 {"filename": "CONTCAR",
                  "action": {"_file_copy": {"dest": "POSCAR"}}}]
 
-        gzip = True if args.gzip and final else False
-
         jobs.append(VaspJob(vasp_command, final=final, suffix=suffix,
-                            backup=backup, settings_override=settings,
-                            gzipped=gzip))
+                            backup=backup, settings_override=settings))
 
-    c = Custodian(handlers, jobs, max_errors=10)
+    c = Custodian(handlers, jobs, max_errors=10, scratch_dir=args.scratch,
+                  gzipped_output=args.gzip)
     c.run()
 
 
@@ -89,6 +87,13 @@ if __name__ == "__main__":
         help="Add this option to gzip the final output. Do not gzip if you "
              "are going to perform an additional static run."
     )
+
+    parser.add_argument(
+        "-s", "--scratch", dest="scratch", nargs="?",
+        default=None, type=str,
+        help="Scratch directory to perform run in. Specify the root scratch "
+             "directory as the code will automatically create a temporary "
+             "subdirectory to run the job.")
 
     parser.add_argument(
         "-ks", "--kpoint-static", dest="static_kpoint", nargs="?",

@@ -1,6 +1,27 @@
 Change Log
 ==========
 
+0.4.2
+-----
+1. Rudimentary support for Nwchem error handling (by Shyue Ping Ong).
+2. Improved VASP error handling (by Steve Dacek and Will Richards).
+
+0.4.1
+-----
+1. Added hanlding of PRICEL error in VASP.
+2. Speed and robustness improvements.
+3. BRIONS error now handled by changing ISYM.
+
+0.4.0
+-----
+1. Many VASP handlers are now consolidated into a single VaspErrorHandler.
+2. Many more fixes for VASP runs, including the "TOO FEW BANDS",
+   "TRIPLE PRODUCT", "DENTET" and "BRIONS" errors.
+3. VaspJob now includes the auto_npar and auto_gamma options, which
+   automatically optimizes the NPAR setting to be sqrt(number of cores) as
+   per the VASP recommendation for DFT runs and tries to search for a
+   gamma-only compiled version of VASP for gamma 1x1x1 runs.
+
 0.3.5
 -----
 1. Bug fix for incorrect shift error handler in VASP.

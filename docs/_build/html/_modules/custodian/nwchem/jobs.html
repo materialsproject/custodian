@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.nwchem.jobs &mdash; custodian 0.4.2 documentation</title>
+    <title>custodian.nwchem.jobs &mdash; custodian 0.5.1 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.4.2',
+        VERSION:     '0.5.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.4.2 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.5.1 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.4.2 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.5.1 documentation</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -58,7 +58,7 @@
 <span class="c">#!/usr/bin/env python</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This module implements basic kinds of jobs for Gaussian runs.</span>
+<span class="sd">This module implements basic kinds of jobs for Nwchem runs.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
@@ -72,54 +72,46 @@
 
 
 <span class="kn">import</span> <span class="nn">subprocess</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 
 <span class="kn">from</span> <span class="nn">pymatgen.util.io_utils</span> <span class="kn">import</span> <span class="n">zopen</span>
 <span class="kn">from</span> <span class="nn">pymatgen.serializers.json_coders</span> <span class="kn">import</span> <span class="n">MSONable</span>
 
-<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">Job</span>
+<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">Job</span><span class="p">,</span> <span class="n">gzip_dir</span>
 
 
 <div class="viewcode-block" id="NwchemJob"><a class="viewcode-back" href="../../../custodian.nwchem.html#custodian.nwchem.jobs.NwchemJob">[docs]</a><span class="k">class</span> <span class="nc">NwchemJob</span><span class="p">(</span><span class="n">Job</span><span class="p">,</span> <span class="n">MSONable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A basic Gaussian job. Just runs whatever is in the directory. But</span>
-<span class="sd">    conceivably can be a complex processing of inputs etc. with initialization.</span>
+<span class="sd">    A basic Nwchem job.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nwchem_cmd</span><span class="p">,</span> <span class="n">input_file</span><span class="o">=</span><span class="s">&quot;mol.nw&quot;</span><span class="p">,</span>
-                 <span class="n">output_file</span><span class="o">=</span><span class="s">&quot;mol.nwout&quot;</span><span class="p">,</span>
-                 <span class="n">suffix</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">gzipped</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                 <span class="n">settings_override</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                 <span class="n">output_file</span><span class="o">=</span><span class="s">&quot;mol.nwout&quot;</span><span class="p">,</span> <span class="n">gzipped</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">backup</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">settings_override</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This constructor is necessarily complex due to the need for</span>
-<span class="sd">        flexibility. For standard kinds of runs, it&#39;s often better to use one</span>
-<span class="sd">        of the static constructors.</span>
-
 <span class="sd">        Args:</span>
 <span class="sd">            nwchem_cmd:</span>
 <span class="sd">                Command to run Nwchem as a list of args. For example,</span>
 <span class="sd">                [&quot;nwchem&quot;].</span>
 <span class="sd">            output_file:</span>
 <span class="sd">                Name of file to direct standard out to.</span>
-<span class="sd">            suffix:</span>
-<span class="sd">                A suffix to be appended to the final output.</span>
 <span class="sd">            backup:</span>
 <span class="sd">                Boolean whether to backup the initial input files. If True,</span>
 <span class="sd">                the input files will be copied with a &quot;.orig&quot; appended.</span>
 <span class="sd">                Defaults to True.</span>
 <span class="sd">            gzipped:</span>
-<span class="sd">                Whether to gzip the final output. Defaults to False.</span>
+<span class="sd">                Deprecated. Please use the Custodian class&#39;s gzipped_output</span>
+<span class="sd">                option instead. Whether to gzip the final output. Defaults to</span>
+<span class="sd">                False.</span>
 <span class="sd">            settings_override:</span>
 <span class="sd">                An ansible style list of dict to override changes.</span>
-<span class="sd">                TODO: Not implemented yet.</span>
+<span class="sd">                #TODO: Not implemented yet.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nwchem_cmd</span> <span class="o">=</span> <span class="n">nwchem_cmd</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_file</span> <span class="o">=</span> <span class="n">input_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span> <span class="o">=</span> <span class="n">output_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">backup</span> <span class="o">=</span> <span class="n">backup</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gzipped</span> <span class="o">=</span> <span class="n">gzipped</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span> <span class="o">=</span> <span class="n">suffix</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings_override</span> <span class="o">=</span> <span class="n">settings_override</span>
 
 <div class="viewcode-block" id="NwchemJob.setup"><a class="viewcode-back" href="../../../custodian.nwchem.html#custodian.nwchem.jobs.NwchemJob.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -133,7 +125,7 @@
 </div>
 <div class="viewcode-block" id="NwchemJob.postprocess"><a class="viewcode-back" href="../../../custodian.nwchem.html#custodian.nwchem.jobs.NwchemJob.postprocess">[docs]</a>    <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gzipped</span><span class="p">:</span>
-            <span class="n">gzip_directory</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
+            <span class="n">gzip_dir</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
 </div>
     <span class="nd">@property</span>
 <div class="viewcode-block" id="NwchemJob.name"><a class="viewcode-back" href="../../../custodian.nwchem.html#custodian.nwchem.jobs.NwchemJob.name">[docs]</a>    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -142,7 +134,7 @@
     <span class="nd">@property</span>
 <div class="viewcode-block" id="NwchemJob.to_dict"><a class="viewcode-back" href="../../../custodian.nwchem.html#custodian.nwchem.jobs.NwchemJob.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">nwchem_cmd</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nwchem_cmd</span><span class="p">,</span> <span class="n">input_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span>
-                 <span class="n">output_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="p">,</span>
+                 <span class="n">output_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span>
                  <span class="n">gzipped</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gzipped</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">backup</span><span class="p">,</span>
                  <span class="n">settings_override</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings_override</span>
                  <span class="p">)</span>
@@ -150,30 +142,13 @@
         <span class="n">d</span><span class="p">[</span><span class="s">&quot;@class&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
         <span class="k">return</span> <span class="n">d</span>
 </div>
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="NwchemJob.from_dict"><a class="viewcode-back" href="../../../custodian.nwchem.html#custodian.nwchem.jobs.NwchemJob.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="NwchemJob.from_dict"><a class="viewcode-back" href="../../../custodian.nwchem.html#custodian.nwchem.jobs.NwchemJob.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">NwchemJob</span><span class="p">(</span>
             <span class="n">nwchem_cmd</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;nwchem_cmd&quot;</span><span class="p">],</span> <span class="n">input_file</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;input_file&quot;</span><span class="p">],</span>
-            <span class="n">output_file</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_file&quot;</span><span class="p">],</span>
-            <span class="n">suffix</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;suffix&quot;</span><span class="p">],</span> <span class="n">gzipped</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;gzipped&quot;</span><span class="p">],</span> <span class="n">backup</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;backup&quot;</span><span class="p">],</span>
-            <span class="n">settings_override</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;settings_override&quot;</span><span class="p">])</span>
-
-</div></div>
-<div class="viewcode-block" id="gzip_directory"><a class="viewcode-back" href="../../../custodian.nwchem.html#custodian.nwchem.jobs.gzip_directory">[docs]</a><span class="k">def</span> <span class="nf">gzip_directory</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Gzips all files in a directory.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        path:</span>
-<span class="sd">            Path to directory.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&quot;gz&quot;</span><span class="p">):</span>
-            <span class="k">with</span> <span class="n">zopen</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_in</span><span class="p">,</span> \
-                    <span class="n">zopen</span><span class="p">(</span><span class="s">&#39;{}.gz&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">),</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_out</span><span class="p">:</span>
-                <span class="n">f_out</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">f_in</span><span class="p">)</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-</pre></div></div>
+            <span class="n">output_file</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_file&quot;</span><span class="p">],</span> <span class="n">gzipped</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;gzipped&quot;</span><span class="p">],</span>
+            <span class="n">backup</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;backup&quot;</span><span class="p">],</span> <span class="n">settings_override</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;settings_override&quot;</span><span class="p">])</span></div></div>
+</pre></div>
 
           </div>
         </div>
@@ -206,7 +181,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.4.2 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.5.1 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>

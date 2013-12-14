@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian Package &mdash; custodian 0.4.2 documentation</title>
+    <title>custodian Package &mdash; custodian 0.5.1 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.2',
+        VERSION:     '0.5.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.4.2 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.5.1 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.4.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.5.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -60,11 +60,12 @@
 <div class="section" id="module-custodian.custodian">
 <span id="custodian-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">custodian</span></tt> Module<a class="headerlink" href="#module-custodian.custodian" title="Permalink to this headline">¶</a></h2>
 <p>This module implements the main Custodian class, which manages a list of jobs
-given a set of error handlers, and the abstract base classes for the
-ErrorHandlers and Jobs.</p>
+given a set of error handlers, the abstract base classes for the
+ErrorHandlers and Jobs, and some helper functions for backing up or
+compressing files in a directory.</p>
 <dl class="class">
 <dt id="custodian.custodian.Custodian">
-<em class="property">class </em><tt class="descname">Custodian</tt><big>(</big><em>handlers</em>, <em>jobs</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em>, <em>log_file='custodian.json'</em>, <em>skip_over_errors=False</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descname">Custodian</tt><big>(</big><em>handlers</em>, <em>jobs</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em>, <em>log_file='custodian.json'</em>, <em>skip_over_errors=False</em>, <em>scratch_dir=None</em>, <em>gzipped_output=False</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>The Custodian class is the manager for a list of jobs given a list of
 error handlers. The way it works is as follows:</p>
@@ -108,6 +109,19 @@ The former will lead to potentially more robust performance,
 but may make it difficult to improve handlers. The latter
 will allow one to catch potentially bad error handler
 implementations. Defaults to False.</dd>
+<dt>scratch_dir:</dt>
+<dd>If this is set, any files in the current directory are copied
+to a temporary directory in a scratch space first before any
+jobs are performed. This is useful in some setups where a
+scratch partition has much faster IO. To use this, set
+scratch_dir=root of directory you want to use for runs.
+There is no need to provide unique directory names; we will
+use python&#8217;s tempfile creation mechanisms. If this is
+None (the default), the run is performed in the current
+working directory.</dd>
+<dt>gzipped_output:</dt>
+<dd>Whether to gzip the final output to save space. Defaults to
+False.</dd>
 </dl>
 </dd>
 </dl>
@@ -226,6 +240,39 @@ method.</p>
 
 </dd></dl>
 
+<dl class="function">
+<dt id="custodian.custodian.backup">
+<tt class="descname">backup</tt><big>(</big><em>filenames</em>, <em>prefix='error'</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.backup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backup files to a tar.gz file. Used, for example, in backing up the
+files of an errored run before performing corrections.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>filenames:</dt>
+<dd>List of files to backup. Supports wildcards, e.g., <em>.</em>.</dd>
+<dt>prefix:</dt>
+<dd>prefix to the files. Defaults to error, which means a series of
+error.1.tar.gz, error.2.tar.gz, ... will be generated.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="custodian.custodian.gzip_dir">
+<tt class="descname">gzip_dir</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#gzip_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.gzip_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gzips all files in a directory. Used, for instance, to compress all
+files at the end of a run.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>path:</dt>
+<dd>Path to directory.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="subpackages">
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
@@ -302,7 +349,7 @@ method.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.4.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.5.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

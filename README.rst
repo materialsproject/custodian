@@ -15,7 +15,11 @@ The specific use case for custodian is for long running jobs, with potentially
 random errors. For example, there may be a script that takes several days to
 run on a server, with a 1% chance of some IO error causing the job to fail.
 Using custodian, one can develop a mechanism to gracefully recover from the
-error, and potentially restart the job if necessary.
+error, and restart the job with modified parameters if necessary.
+
+The current version of Custodian also comes with two sub-packages for error
+handling for Vienna Ab Initio Simulation Package (VASP) and NwChem
+calculations.
 
 Getting custodian
 =================
@@ -34,7 +38,7 @@ or::
     pip install custodian
 
 Some plugins (e.g., vasp management) require additional setup (please see
-`pymatgen's documentation <http://pythonhosted.org/pymatgen/>`_).
+`pymatgen's documentation <http://pymatgen.org/>`_).
 
 Developmental version
 ---------------------
@@ -61,7 +65,8 @@ Optional dependencies
 
 Optional libraries that are required if you need certain features:
 
-1. pymatgen 2.6.2+: To use the plugin for VASP. Please install using::
+1. pymatgen 2.6.2+: To use the plugins for VASP and NwChem. Please install
+   using::
 
     pip install pymatgen
 

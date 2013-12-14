@@ -2,8 +2,9 @@
 
 """
 This module implements the main Custodian class, which manages a list of jobs
-given a set of error handlers, and the abstract base classes for the
-ErrorHandlers and Jobs.
+given a set of error handlers, the abstract base classes for the
+ErrorHandlers and Jobs, and some helper functions for backing up or
+compressing files in a directory.
 """
 
 from __future__ import division
@@ -12,14 +13,21 @@ __author__ = "Shyue Ping Ong, William Davidson Richards"
 __copyright__ = "Copyright 2012, The Materials Project"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
-__email__ = "shyue@mit.edu"
+__email__ = "shyuep@gmail.com"
 __date__ = "May 3, 2013"
 
 import logging
 import subprocess
+import datetime
 import time
-from abc import ABCMeta, abstractmethod, abstractproperty
 import json
+import glob
+import tarfile
+import os
+import tempfile
+import shutil
+from abc import ABCMeta, abstractmethod, abstractproperty
+from gzip import GzipFile
 
 
 class Custodian(object):
@@ -66,7 +74,8 @@ class Custodian(object):
 
     def __init__(self, handlers, jobs, max_errors=1, polling_time_step=10,
                  monitor_freq=30, log_file="custodian.json",
-                 skip_over_errors=False):
+                 skip_over_errors=False, scratch_dir=None,
+                 gzipped_output=False):
         """
         Args:
             handlers:
@@ -95,6 +104,19 @@ class Custodian(object):
                 but may make it difficult to improve handlers. The latter
                 will allow one to catch potentially bad error handler
                 implementations. Defaults to False.
+            scratch_dir:
+                If this is set, any files in the current directory are copied
+                to a temporary directory in a scratch space first before any
+                jobs are performed. This is useful in some setups where a
+                scratch partition has much faster IO. To use this, set
+                scratch_dir=root of directory you want to use for runs.
+                There is no need to provide unique directory names; we will
+                use python's tempfile creation mechanisms. If this is
+                None (the default), the run is performed in the current
+                working directory.
+            gzipped_output:
+                Whether to gzip the final output to save space. Defaults to
+                False.
         """
         self.max_errors = max_errors
         self.jobs = jobs
@@ -104,6 +126,8 @@ class Custodian(object):
         self.monitor_freq = monitor_freq
         self.log_file = log_file
         self.skip_over_errors = skip_over_errors
+        self.scratch_dir = scratch_dir
+        self.gzipped_output = gzipped_output
 
     def run(self):
         """
@@ -113,10 +137,19 @@ class Custodian(object):
             All errors encountered as a list of list.
             [[error_dicts for job 1], [error_dicts for job 2], ....]
         """
+        if self.scratch_dir is not None:
+            cwd = os.getcwd()
+            tempdir = tempfile.mkdtemp(dir=self.scratch_dir)
+            for f in os.listdir("."):
+                shutil.copy(f, tempdir)
+            os.chdir(tempdir)
+            logging.info("Using scratch directory {}.".format(tempdir))
+
         run_log = []
         total_errors = 0
         unrecoverable = False
-
+        start = datetime.datetime.now()
+        logging.info("Run started at {}.".format(start))
         def do_check(handlers, terminate_func=None):
             corrections = []
             for h in handlers:
@@ -211,12 +244,23 @@ class Custodian(object):
 
             if unrecoverable or total_errors >= self.max_errors:
                 break
-
+        end = datetime.datetime.now()
+        logging.info("Run ended at {}.".format(end))
+        run_time = end - start
         if total_errors >= self.max_errors:
-            logging.info("Max {} errors reached. Exited"
+            logging.info("Max {} errors reached. Exited..."
                          .format(self.max_errors))
-        else:
-            logging.info("Run completed")
+        logging.info("Run completed. Total time taken = {}.".format(run_time))
+
+        if self.gzipped_output:
+            gzip_dir(".")
+
+        if self.scratch_dir is not None:
+            for f in os.listdir("."):
+                shutil.copy(f, cwd)
+            shutil.rmtree(tempdir)
+            os.chdir(cwd)
+
         return run_log
 
 
@@ -334,3 +378,43 @@ class Job(object):
         object given by the to_dict property.
         """
         pass
+
+
+def backup(filenames, prefix="error"):
+    """
+    Backup files to a tar.gz file. Used, for example, in backing up the
+    files of an errored run before performing corrections.
+
+    Args:
+        filenames:
+            List of files to backup. Supports wildcards, e.g., *.*.
+        prefix:
+            prefix to the files. Defaults to error, which means a series of
+            error.1.tar.gz, error.2.tar.gz, ... will be generated.
+    """
+    num = max([0] + [int(f.split(".")[1])
+                     for f in glob.glob("{}.*.tar.gz".format(prefix))])
+    filename = "{}.{}.tar.gz".format(prefix, num + 1)
+    logging.info("Backing up run to {}.".format(filename))
+    tar = tarfile.open(filename, "w:gz")
+    for fname in filenames:
+        for f in glob.glob(fname):
+            tar.add(f)
+    tar.close()
+
+
+def gzip_dir(path):
+    """
+    Gzips all files in a directory. Used, for instance, to compress all
+    files at the end of a run.
+
+    Args:
+        path:
+            Path to directory.
+    """
+    for f in os.listdir(path):
+        if not f.endswith("gz"):
+            with open(f, 'rb') as f_in, \
+                    GzipFile('{}.gz'.format(f), 'wb') as f_out:
+                f_out.writelines(f_in)
+            os.remove(f)

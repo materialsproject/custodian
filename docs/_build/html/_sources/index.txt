@@ -13,31 +13,31 @@ The specific use case for custodian is for long running jobs, with potentially
 random errors. For example, there may be a script that takes several days to
 run on a server, with a 1% chance of some IO error causing the job to fail.
 Using custodian, one can develop a mechanism to gracefully recover from the
-error, and potentially restart the job if necessary.
+error, and restart the job with modified parameters if necessary.
+
+The current version of Custodian also comes with two sub-packages for error
+handling for Vienna Ab Initio Simulation Package (VASP) and NwChem
+calculations.
 
 Change log
 ==========
 
-0.4.2
+0.5.0
 -----
-1. Rudimentary support for Nwchem error handling (by Shyue Ping Ong).
-2. Improved VASP error handling (by Steve Dacek and Will Richards).
+1. Added scratch_dir option to Custodian class as well as run_vasp and
+   run_nwchem scripts. Many supercomputing clusters have a scratch space
+   which have significantly faster IO. This option provides a transparent way
+   to specify the jobs to be performed in the scratch. Especially useful for
+   jobs which have significant file IO.
 
-0.4.1
+0.4.5
 -----
-1. Added hanlding of PRICEL error in VASP.
-2. Speed and robustness improvements.
-3. BRIONS error now handled by changing ISYM.
+1. Fix gzip of output.
 
-0.4.0
+0.4.3
 -----
-1. Many VASP handlers are now consolidated into a single VaspErrorHandler.
-2. Many more fixes for VASP runs, including the "TOO FEW BANDS",
-   "TRIPLE PRODUCT", "DENTET" and "BRIONS" errors.
-3. VaspJob now includes the auto_npar and auto_gamma options, which
-   automatically optimizes the NPAR setting to be sqrt(number of cores) as
-   per the VASP recommendation for DFT runs and tries to search for a
-   gamma-only compiled version of VASP for gamma 1x1x1 runs.
+1. Added handling for ZBRENT error for VASP.
+2. Minor refactoring to consolidate backup and gzip directory methods.
 
 :doc:`Older versions </changelog>`
 
@@ -85,8 +85,8 @@ Optional dependencies
 
 Optional libraries that are required if you need certain features:
 
-1. Python Materials Genomics (`pymatgen`_) 2.6.2+: To use the plugin for VASP.
-   Please install using::
+1. Python Materials Genomics (`pymatgen`_) 2.6.2+: To use the plugin for
+   VASP and NwChem. Please install using::
 
     pip install pymatgen
 
@@ -108,7 +108,7 @@ presented in the figure below.
 
     Overview of the Custodian workflow.
 
-The Custodian class takes in two general inputs - a **sequence of Jobs** and
+The Custodian class takes in two general inputs - a **list of Jobs** and
 a **list of ErrorHandlers**. **Jobs** should be subclasses of the
 :class:`custodian.custodian.Job` abstract base class and **ErrorHandlers**
 should be subclasses of the :class:`custodian.custodian.ErrorHandler` abstract
@@ -328,6 +328,12 @@ Using custodian, you can even setup potentially indefinite jobs,
 e.g. kpoints convergence jobs with a target energy convergence. Please see the
 converge_kpoints script in the scripts for an example.
 
+.. versionadded:: 0.4.3
+
+    A new package for dealing with NwChem calculations has been added.
+    NwChem is an open-source code for performing computational chemistry
+    calculations.
+
 API/Reference Docs
 ==================
 
@@ -377,6 +383,6 @@ follows::
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
 
-.. _`pymatgen's documentation`: http://pythonhosted.org/pymatgen
+.. _`pymatgen's documentation`: http://pymatgen.org
 .. _`Materials Project`: https://www.materialsproject.org
 .. _`pymatgen`: https://pypi.python.org/pypi/pymatgen

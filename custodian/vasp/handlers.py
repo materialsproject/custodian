@@ -8,7 +8,8 @@ by modifying the input files.
 
 from __future__ import division
 
-__author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen"
+__author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, " \
+             "Wei Chen, Stephen Dacek"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
 __email__ = "shyuep@gmail.com"
@@ -16,13 +17,10 @@ __status__ = "Beta"
 __date__ = "2/4/13"
 
 import os
-import logging
-import tarfile
 import time
-import glob
 import operator
 
-from custodian.custodian import ErrorHandler
+from custodian.custodian import ErrorHandler, backup
 from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput
 from pymatgen.transformations.standard_transformations import \
     PerturbStructureTransformation, SupercellTransformation
@@ -60,7 +58,9 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         "brions": ["BRIONS problems: POTIM should be increased"],
         "pricel": ["internal error in subroutine PRICEL"],
         "zpotrf": ["LAPACK: Routine ZPOTRF failed"],
-        "amin": ["One of the lattice vectors is very long (>50 A), but AMIN"]
+        "amin": ["One of the lattice vectors is very long (>50 A), but AMIN"],
+        "zbrent": ["ZBRENT: fatal internal in brackting"],
+        "aliasing": ["WARNING: small aliasing (wrap around) errors must be expected"]
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -78,44 +78,41 @@ class VaspErrorHandler(ErrorHandler, MSONable):
         return len(self.errors) > 0
 
     def correct(self):
-        backup(self.output_filename)
+        backup([self.output_filename, "INCAR", "KPOINTS", "POSCAR", "OUTCAR",
+                "vasprun.xml"])
         actions = []
         vi = VaspInput.from_directory(".")
 
         if "tet" in self.errors or "dentet" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ISMEAR": 0}}})
+
         if "inv_rot_mat" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"SYMPREC": 1e-8}}})
+
         if "brmix" in self.errors or "zpotrf" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ISYM": 0}}})
+            # Based on VASP forum's recommendation, you should delete the
+            # CHGCAR and WAVECAR when dealing with these errors.
+            actions.append({"file": "CHGCAR",
+                            "action": {"_file_delete": {'mode': "actual"}}})
+            actions.append({"file": "WAVECAR",
+                            "action": {"_file_delete": {'mode': "actual"}}})
+
         if "subspacematrix" in self.errors or "rspher" in self.errors or \
-                "real_optlay" in self.errors:
+                        "real_optlay" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"LREAL": False}}})
+
         if "tetirr" in self.errors or "incorrect_shift" in self.errors:
             actions.append({"dict": "KPOINTS",
                             "action": {"_set": {"generation_style": "Gamma"}}})
+
         if "amin" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"AMIN": "0.01"}}})
-        if "too_few_bands" in self.errors:
-            if "NBANDS" in vi["INCAR"]:
-                nbands = int(vi["INCAR"]["NBANDS"])
-            else:
-                with open("OUTCAR") as f:
-                    for line in f:
-                        if "NBANDS" in line:
-                            try:
-                                d = line.split("=")
-                                nbands = int(d[-1].strip())
-                                break
-                            except (IndexError, ValueError):
-                                pass
-            actions.append({"dict": "INCAR",
-                            "action": {"_set": {"NBANDS": int(1.1 * nbands)}}})
 
         if "triple_product" in self.errors:
             s = vi["POSCAR"].structure
@@ -139,11 +136,56 @@ class VaspErrorHandler(ErrorHandler, MSONable):
             potim = float(vi["INCAR"].get("POTIM", 0.5)) + 0.1
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"POTIM": potim}}})
-        m = Modder()
+
+        if "zbrent" in self.errors:
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"IBRION": 1}}})
+
+        if "too_few_bands" in self.errors:
+            if "NBANDS" in vi["INCAR"]:
+                nbands = int(vi["INCAR"]["NBANDS"])
+            else:
+                with open("OUTCAR") as f:
+                    for line in f:
+                        if "NBANDS" in line:
+                            try:
+                                d = line.split("=")
+                                nbands = int(d[-1].strip())
+                                break
+                            except (IndexError, ValueError):
+                                pass
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"NBANDS": int(1.1 * nbands)}}})
+
+        if "aliasing" in self.errors:
+            with open("OUTCAR") as f:
+                grid_adjusted = False
+                changes_dict = {}
+                for line in f:
+                    if "aliasing errors" in line:
+                        try:
+                            grid_vector = line.split(" NG", 1)[1]
+                            value = [int(s) for s in grid_vector.split(" ")
+                                     if s.isdigit()][0]
+
+                            changes_dict["NG" + grid_vector[0]] = value
+                            grid_adjusted = True
+                        except (IndexError, ValueError):
+                            pass
+                    #Ensure that all NGX, NGY, NGZ have been checked
+                    if grid_adjusted and 'NGZ' in line:
+                        actions.append({"dict": "INCAR",
+                                        "action": {"_set": changes_dict}})
+                        break
+
+        m = Modder(actions=[DictActions, FileActions])
         modified = []
         for a in actions:
-            modified.append(a["dict"])
-            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+            if "dict" in a:
+                modified.append(a["dict"])
+                vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+            elif "file" in a:
+                m.modify(a["action"], a["file"])
         for f in modified:
             vi[f].write_file(f)
         return {"errors": list(self.errors), "actions": actions}
@@ -195,7 +237,8 @@ class MeshSymmetryErrorHandler(ErrorHandler, MSONable):
         return False
 
     def correct(self):
-        backup(self.output_filename)
+        backup([self.output_filename, "INCAR", "KPOINTS", "POSCAR", "OUTCAR",
+                "vasprun.xml"])
         vi = VaspInput.from_directory(".")
         m = reduce(operator.mul, vi["KPOINTS"].kpts[0])
         m = max(int(round(m ** (1 / 3))), 1)
@@ -236,6 +279,7 @@ class UnconvergedErrorHandler(ErrorHandler, MSONable):
     """
     Check if a run is converged. Switches to ALGO = Normal.
     """
+
     def __init__(self, output_filename="vasprun.xml"):
         self.output_filename = output_filename
 
@@ -249,7 +293,7 @@ class UnconvergedErrorHandler(ErrorHandler, MSONable):
         return False
 
     def correct(self):
-        backup()
+        backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
         actions = [{"file": "CONTCAR",
                     "action": {"_file_copy": {"dest": "POSCAR"}}},
                    {"dict": "INCAR",
@@ -290,17 +334,18 @@ class UnconvergedErrorHandler(ErrorHandler, MSONable):
 
 class PotimErrorHandler(ErrorHandler, MSONable):
     """
-    Check if a run has excessively large positive energy changes. 
-    This is typically caused by too large a POTIM. Runs typically 
+    Check if a run has excessively large positive energy changes.
+    This is typically caused by too large a POTIM. Runs typically
     end up crashing with some other error (e.g. BRMIX) as the geometry
     gets progressively worse.
     """
-    def __init__(self, input_filename="POSCAR", 
+
+    def __init__(self, input_filename="POSCAR",
                  output_filename="OSZICAR", dE_threshold=1):
         self.input_filename = input_filename
         self.output_filename = output_filename
         self.dE_threshold = dE_threshold
-        
+
     def check(self):
         try:
             oszicar = Oszicar(self.output_filename)
@@ -310,9 +355,10 @@ class PotimErrorHandler(ErrorHandler, MSONable):
                 return True
         except:
             return False
-    
+
     def correct(self):
-        backup()
+        backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR",
+                "vasprun.xml"])
         vi = VaspInput.from_directory(".")
         potim = float(vi["INCAR"].get("POTIM", 0.5)) * 0.5
         actions = [{"dict": "INCAR",
@@ -325,7 +371,7 @@ class PotimErrorHandler(ErrorHandler, MSONable):
         for f in modified:
             vi[f].write_file(f)
         return {"errors": ["POTIM"], "actions": actions}
-    
+
     def __str__(self):
         return "Large positive energy change (POTIM)"
 
@@ -345,10 +391,9 @@ class PotimErrorHandler(ErrorHandler, MSONable):
     def from_dict(cls, d):
         return cls(d["input_filename"], d["output_filename"],
                    d["dE_threshold"])
-    
-    
-class FrozenJobErrorHandler(ErrorHandler):
 
+
+class FrozenJobErrorHandler(ErrorHandler):
     def __init__(self, output_filename="vasp.out", timeout=3600):
         """
         Detects an error when the output file has not been updated
@@ -363,7 +408,8 @@ class FrozenJobErrorHandler(ErrorHandler):
             return True
 
     def correct(self):
-        backup(self.output_filename)
+        backup([self.output_filename, "INCAR", "KPOINTS", "POSCAR", "OUTCAR",
+                "vasprun.xml"])
         p = Poscar.from_file("POSCAR")
         s = p.structure
         trans = PerturbStructureTransformation(0.05)
@@ -398,9 +444,10 @@ class FrozenJobErrorHandler(ErrorHandler):
 class NonConvergingErrorHandler(ErrorHandler, MSONable):
     """
     Check if a run is hitting the maximum number of electronic steps at the
-    last nionic_steps ionic steps (default=10). If so, change ALGO from Fast to 
+    last nionic_steps ionic steps (default=10). If so, change ALGO from Fast to
     Normal or kill the job.
     """
+
     def __init__(self, output_filename="OSZICAR", nionic_steps=10,
                  change_algo=False):
         self.output_filename = output_filename
@@ -414,18 +461,19 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
             oszicar = Oszicar(self.output_filename)
             esteps = oszicar.electronic_steps
             if len(esteps) > self.nionic_steps:
-                return all([len(e) == nelm for e in esteps[-(self.nionic_steps+1):-1]])
+                return all([len(e) == nelm
+                            for e in esteps[-(self.nionic_steps + 1):-1]])
         except:
             pass
         return False
 
     def correct(self):
-        #if change_algo is True, change ALGO = Fast to Normal if ALGO is Fast, else
-        #kill the job
+        # if change_algo is True, change ALGO = Fast to Normal if ALGO is
+        # Fast, else kill the job
         vi = VaspInput.from_directory(".")
         algo = vi["INCAR"].get("ALGO", "Normal")
         if self.change_algo and algo == "Fast":
-            backup()
+            backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
             actions = [{"dict": "INCAR",
                         "action": {"_set": {"ALGO": "Normal"}}}]
             m = Modder()
@@ -457,19 +505,9 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
 
     @classmethod
     def from_dict(cls, d):
-        return cls(output_filename=d["output_filename"],
-                   nionic_steps=d.get("nionic_steps", 10),
-                   change_algo=d.get("change_algo", False))
-
-
-def backup(outfile="vasp.out"):
-    error_num = max([0] + [int(f.split(".")[1])
-                           for f in glob.glob("error.*.tar.gz")])
-    filename = "error.{}.tar.gz".format(error_num + 1)
-    logging.info("Backing up run to {}.".format(filename))
-    tar = tarfile.open(filename, "w:gz")
-    vaspfiles = ["INCAR", "KPOINTS", "POSCAR", "OUTCAR", outfile, "vasprun.xml"]
-    for f in vaspfiles:
-        if os.path.exists(f):
-            tar.add(f)
-    tar.close()
+        if "nionic_steps" in d:
+            return cls(output_filename=d["output_filename"],
+                       nionic_steps=d.get("nionic_steps", 10),
+                       change_algo=d.get("change_algo", False))
+        else:
+            return cls(output_filename=d["output_filename"])
