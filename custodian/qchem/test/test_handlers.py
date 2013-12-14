@@ -345,6 +345,35 @@ class QChemErrorHandlerTest(TestCase):
                                         'Molecular charge is not found'],
                              'actions': None})
 
+    def test_NAN_error(self):
+        shutil.copyfile(os.path.join(test_dir,"thiane_nan.inp"),
+                        os.path.join(scr_dir, "thiane_nan.inp"))
+        shutil.copyfile(os.path.join(test_dir, "thiane_nan.out"),
+                        os.path.join(scr_dir, "thiane_nan.out"))
+        h = QChemErrorHandler(input_file="thiane_nan.inp",
+                              output_file="thiane_nan.out")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['NAN values'],
+                             'actions': ['use tighter grid']})
+        with open(os.path.join(test_dir, "thiane_nan_dense_grid.inp")) as f:
+            ref = f.read()
+        with open(os.path.join(scr_dir, "thiane_nan.inp")) as f:
+            ans = f.read()
+        self.assertEqual(ref, ans)
+        shutil.copyfile(os.path.join(test_dir,"thiane_nan_dense_grid.inp"),
+                        os.path.join(scr_dir, "thiane_nan_dense_grid.inp"))
+        shutil.copyfile(os.path.join(test_dir, "thiane_nan.out"),
+                        os.path.join(scr_dir, "thiane_nan.out"))
+        h = QChemErrorHandler(input_file="thiane_nan_dense_grid.inp",
+                              output_file="thiane_nan.out")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['NAN values'],
+                             'actions': None})
+
 
     def tearDown(self):
         shutil.rmtree(scr_dir)
