@@ -1,0 +1,32 @@
+$molecule
+0 1
+H       0.000000     0.000000    -0.862674
+F       0.000000     0.000000     0.043813
+$end
+
+$rem
+job_type = sp
+exchange = b3lyp
+basis = 6-31g*
+scf_max_cycles = 25
+$end
+
+
+@@@
+
+
+$molecule
+1 2
+read
+$end
+
+
+$rem
+job_type = sp
+exchange = b3lyp
+basis = 6-31g*
+$end
+
+
+
+

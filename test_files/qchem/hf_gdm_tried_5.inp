@@ -1,0 +1,30 @@
+$comments
+ <SCF Fix Strategy>{
+    "current_method_id": 4, 
+    "methods": [
+        "diis_gdm", 
+        "gwh", 
+        "rca", 
+        "gdm", 
+        "core+gdm"
+    ]
+}</SCF Fix Strategy>
+$end
+
+
+$molecule
+ 0  1
+ H           0.00000000        0.00000000       -0.86267400
+ F           0.00000000        0.00000000        0.04381300
+$end
+
+
+$rem
+         jobtype = opt
+        exchange = b3lyp
+           basis = 6-31g*
+  max_scf_cycles = 100
+   scf_algorithm = gdm
+       scf_guess = core
+$end
+
