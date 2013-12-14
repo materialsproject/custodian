@@ -9,8 +9,6 @@ import os
 import shutil
 from unittest import TestCase
 import unittest
-import sys
-from unittest.case import skip
 from custodian.qchem.handlers import QChemErrorHandler
 
 __author__ = "Xiaohui Qu"
@@ -19,9 +17,9 @@ __maintainer__ = "Xiaohui Qu"
 __email__ = "xqu@lbl.gov"
 __date__ = "Dec 6, 2013"
 
-
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
                         "test_files", "qchem")
+# noinspection PyUnresolvedReferences
 scr_dir = os.path.join(test_dir, "scr")
 
 
@@ -346,7 +344,7 @@ class QChemErrorHandlerTest(TestCase):
                              'actions': None})
 
     def test_NAN_error(self):
-        shutil.copyfile(os.path.join(test_dir,"thiane_nan.inp"),
+        shutil.copyfile(os.path.join(test_dir, "thiane_nan.inp"),
                         os.path.join(scr_dir, "thiane_nan.inp"))
         shutil.copyfile(os.path.join(test_dir, "thiane_nan.out"),
                         os.path.join(scr_dir, "thiane_nan.out"))
@@ -362,7 +360,7 @@ class QChemErrorHandlerTest(TestCase):
         with open(os.path.join(scr_dir, "thiane_nan.inp")) as f:
             ans = f.read()
         self.assertEqual(ref, ans)
-        shutil.copyfile(os.path.join(test_dir,"thiane_nan_dense_grid.inp"),
+        shutil.copyfile(os.path.join(test_dir, "thiane_nan_dense_grid.inp"),
                         os.path.join(scr_dir, "thiane_nan_dense_grid.inp"))
         shutil.copyfile(os.path.join(test_dir, "thiane_nan.out"),
                         os.path.join(scr_dir, "thiane_nan.out"))
@@ -374,12 +372,9 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(d, {'errors': ['NAN values'],
                              'actions': None})
 
-
     def tearDown(self):
         shutil.rmtree(scr_dir)
         pass
-
-
 
 
 if __name__ == "__main__":
