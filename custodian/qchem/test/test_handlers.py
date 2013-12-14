@@ -313,6 +313,38 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(d, {'errors': ['Geometry optimization failed'],
                              'actions': None})
 
+    def test_autoz_error(self):
+        shutil.copyfile(os.path.join(test_dir, "qunino_vinyl.qcinp"),
+                        os.path.join(scr_dir, "qunino_vinyl.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "qunino_vinyl.qcout"),
+                        os.path.join(scr_dir, "qunino_vinyl.qcout"))
+        h = QChemErrorHandler(input_file="qunino_vinyl.qcinp",
+                              output_file="qunino_vinyl.qcout")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['autoz error',
+                                        'Molecular charge is not found'],
+                             'actions': ['disable symmetry']})
+        with open(os.path.join(test_dir, "qunino_vinyl_nosymm.qcinp")) as f:
+            ref = f.read()
+        with open(os.path.join(scr_dir, "qunino_vinyl.qcinp")) as f:
+            ans = f.read()
+        self.assertEqual(ref, ans)
+
+        shutil.copyfile(os.path.join(test_dir, "qunino_vinyl_nosymm.qcinp"),
+                        os.path.join(scr_dir, "qunino_vinyl_nosymm.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "qunino_vinyl.qcout"),
+                        os.path.join(scr_dir, "qunino_vinyl.qcout"))
+        h = QChemErrorHandler(input_file="qunino_vinyl_nosymm.qcinp",
+                              output_file="qunino_vinyl.qcout")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['autoz error',
+                                        'Molecular charge is not found'],
+                             'actions': None})
+
 
     def tearDown(self):
         shutil.rmtree(scr_dir)
