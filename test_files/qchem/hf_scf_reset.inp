@@ -1,0 +1,20 @@
+$comments
+ 
+$end
+
+
+$molecule
+ 0  1
+ H           0.00000000        0.00000000       -0.82938100
+ F           0.00000000        0.00000000        0.10419100
+$end
+
+
+$rem
+         jobtype = opt
+        exchange = b3lyp
+           basis = 6-31g*
+  max_scf_cycles = 100
+   scf_algorithm = diis
+$end
+
