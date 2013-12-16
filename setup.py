@@ -12,9 +12,9 @@ with open("README.rst") as f:
 setup(
     name="custodian",
     packages=find_packages(),
-    version="0.5.2",
+    version="0.5.3",
     install_requires=[],
-    extras_require={"vasp, nwchem": ["pymatgen>=2.7.5"]},
+    extras_require={"vasp, nwchem": ["pymatgen>=2.8.9"]},
     package_data={},
     author="Shyue Ping Ong, William Davidson Richards",
     author_email="shyuep@gmail.com",

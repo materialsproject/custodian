@@ -18,7 +18,6 @@ import subprocess
 import os
 import shutil
 import math
-import tempfile
 
 from pymatgen.io.vaspio.vasp_input import VaspInput
 from pymatgen.io.smartio import read_structure
