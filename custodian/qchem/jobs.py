@@ -11,7 +11,7 @@ from pymatgen.serializers.json_coders import MSONable
 import shutil
 import copy
 import subprocess
-from custodian.custodian import Job
+from custodian.custodian import Job, gzip_dir
 
 __author__ = "Xiaohui Qu"
 __version__ = "0.1"
@@ -94,7 +94,7 @@ class QchemJob(Job, MSONable):
 
     def postprocess(self):
         if self.gzipped:
-            gzip_directory(".")
+            gzip_dir(".")
 
     @property
     def name(self):
@@ -116,19 +116,3 @@ class QchemJob(Job, MSONable):
                         output_file=d["output_file"], chk_file=d["chk_file"],
                         qclog_file=d["qclog_file"], gzipped=d["gzipped"],
                         backup=d["backup"])
-
-
-def gzip_directory(path):
-    """
-    Gzips all files in a directory.
-
-    Args:
-        path:
-            Path to directory.
-    """
-    for f in os.listdir(path):
-        if not f.endswith("gz"):
-            with zopen(f, 'rb') as f_in, \
-                    zopen('{}.gz'.format(f), 'wb') as f_out:
-                f_out.writelines(f_in)
-            os.remove(f)
