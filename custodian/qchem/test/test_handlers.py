@@ -321,8 +321,8 @@ class QChemErrorHandlerTest(TestCase):
         has_error = h.check()
         self.assertTrue(has_error)
         d = h.correct()
-        self.assertEqual(d, {'errors': ['autoz error',
-                                        'Molecular charge is not found'],
+        self.assertEqual(d, {'errors': ['Molecular charge is not found',
+                                        'autoz error'],
                              'actions': ['disable symmetry']})
         with open(os.path.join(test_dir, "qunino_vinyl_nosymm.qcinp")) as f:
             ref = f.read()
@@ -339,8 +339,8 @@ class QChemErrorHandlerTest(TestCase):
         has_error = h.check()
         self.assertTrue(has_error)
         d = h.correct()
-        self.assertEqual(d, {'errors': ['autoz error',
-                                        'Molecular charge is not found'],
+        self.assertEqual(d, {'errors': ['Molecular charge is not found',
+                                        'autoz error'],
                              'actions': None})
 
     def test_NAN_error(self):
@@ -371,6 +371,24 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d, {'errors': ['NAN values'],
                              'actions': None})
+
+        shutil.copyfile(os.path.join(test_dir, "h2o_nan.qcinp"),
+                        os.path.join(scr_dir, "h2o_nan.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "h2o_nan.qcout"),
+                        os.path.join(scr_dir, "h2o_nan.qcout"))
+        h = QChemErrorHandler(input_file="h2o_nan.qcinp",
+                              output_file="h2o_nan.qcout")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['NAN values'],
+                             'actions': ['use tighter grid']})
+        with open(os.path.join(test_dir, "h2o_nan_dense_grid.qcinp")) as f:
+            ref = f.read()
+        with open(os.path.join(scr_dir, "h2o_nan.qcinp")) as f:
+            ans = f.read()
+        self.assertEqual(ref, ans)
+
 
     def tearDown(self):
         shutil.rmtree(scr_dir)

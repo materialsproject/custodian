@@ -73,7 +73,7 @@ class QChemErrorHandler(ErrorHandler, MSONable):
             if od["has_error"]:
                 self.error_step_id = i
                 self.fix_step = self.qcinp.jobs[i]
-                self.errors = od["errors"]
+                self.errors = sorted(list(set(od["errors"])))
                 return True
         return False
 
