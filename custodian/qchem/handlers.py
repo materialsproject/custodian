@@ -12,7 +12,7 @@ import logging
 import os
 import re
 import tarfile
-from pymatgen.io.qchemio import QcOutput, QcBatchInput, QcInput
+from pymatgen.io.qchemio import QcOutput, QcInput, QcTask
 from pymatgen.serializers.json_coders import MSONable
 from custodian.custodian import ErrorHandler
 
@@ -65,7 +65,7 @@ class QChemErrorHandler(ErrorHandler, MSONable):
     def check(self):
         # Checks output file for errors.
         self.outdata = QcOutput(self.output_file).data
-        self.qcinp = QcBatchInput.from_file(self.input_file)
+        self.qcinp = QcInput.from_file(self.input_file)
         self.error_step_id = None
         self.errors = None
         self.fix_step = None
@@ -301,8 +301,8 @@ class QChemErrorHandler(ErrorHandler, MSONable):
                               scf_max_cycles=d["scf_max_cycles"],
                               geom_max_cycles=d["geom_max_cycles"])
         h.outdata = d["outdata"]
-        h.qcinp = QcBatchInput.from_dict(d["qcinp"])
+        h.qcinp = QcInput.from_dict(d["qcinp"])
         h.error_step_id = d["error_step_id"]
         h.errors = d["errors"]
-        h.fix_step = QcInput.from_dict(d["fix_step"])
+        h.fix_step = QcTask.from_dict(d["fix_step"])
         return h
