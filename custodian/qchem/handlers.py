@@ -31,7 +31,7 @@ class QChemErrorHandler(ErrorHandler, MSONable):
     """
     def __init__(self, input_file="mol.qcinp", output_file="mol.qcout",
                  ex_backup_list=(), rca_gdm_thresh=1.0E-3,
-                 scf_max_cycles=100, geom_max_cycles=100):
+                 scf_max_cycles=200, geom_max_cycles=200):
         """
         Args:
             input_file:
@@ -141,12 +141,12 @@ class QChemErrorHandler(ErrorHandler, MSONable):
             strategy = dict()
             scf_iters = od["scf_iteration_energies"][-1]
             if scf_iters[-1][1] >= self.rca_gdm_thresh:
-                strategy["methods"] = ["rca_diis", "gwh", "gdm", "rca",
-                                       "core+rca"]
+                strategy["methods"] = ["increase_iter", "rca_diis", "gwh",
+                                       "gdm", "rca", "core+rca"]
                 strategy["current_method_id"] = 0
             else:
-                strategy["methods"] = ["diis_gdm", "gwh", "rca", "gdm",
-                                       "core+gdm"]
+                strategy["methods"] = ["increase_iter", "diis_gdm", "gwh",
+                                       "rca", "gdm", "core+gdm"]
                 strategy["current_method_id"] = 0
 
         # noinspection PyTypeChecker
@@ -170,9 +170,14 @@ class QChemErrorHandler(ErrorHandler, MSONable):
         else:
             # noinspection PyTypeChecker
             method = strategy["methods"][strategy["current_method_id"]]
-            if method == "rca_diis":
+            if method == "increase_iter":
+                self.fix_step.set_scf_algorithm_and_iterations(
+                    algorithm="diis", iterations=self.scf_max_cycles)
+                self.fix_step.set_scf_initial_guess("sad")
+            elif method == "rca_diis":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="rca_diis", iterations=self.scf_max_cycles)
+                self.fix_step.set_scf_initial_guess("sad")
             elif method == "gwh":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="diis", iterations=self.scf_max_cycles)
@@ -180,9 +185,11 @@ class QChemErrorHandler(ErrorHandler, MSONable):
             elif method == "gdm":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="gdm", iterations=self.scf_max_cycles)
+                self.fix_step.set_scf_initial_guess("sad")
             elif method == "rca":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="rca", iterations=self.scf_max_cycles)
+                self.fix_step.set_scf_initial_guess("sad")
             elif method == "core+rca":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="rca", iterations=self.scf_max_cycles)
@@ -190,12 +197,14 @@ class QChemErrorHandler(ErrorHandler, MSONable):
             elif method == "diis_gdm":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="diis_gdm", iterations=self.scf_max_cycles)
+                self.fix_step.set_scf_initial_guess("sad")
             elif method == "core+gdm":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="gdm", iterations=self.scf_max_cycles)
+                self.fix_step.set_scf_initial_guess("sad")
                 self.fix_step.set_scf_initial_guess("core")
             else:
-                raise ValueError("fix method " + method + "is not supported")
+                raise ValueError("fix method " + method + " is not supported")
             strategy_text = "<SCF Fix Strategy>"
             strategy_text += json.dumps(strategy, indent=4, sort_keys=True)
             strategy_text += "</SCF Fix Strategy>"

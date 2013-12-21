@@ -1,6 +1,6 @@
 $comments
  <SCF Fix Strategy>{
-    "current_method_id": 4, 
+    "current_method_id": 0, 
     "methods": [
         "increase_iter", 
         "diis_gdm", 
@@ -25,7 +25,7 @@ $rem
         exchange = b3lyp
            basis = 6-31g*
   max_scf_cycles = 200
-   scf_algorithm = gdm
+   scf_algorithm = diis
        scf_guess = sad
 $end
 

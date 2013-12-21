@@ -20,7 +20,7 @@ $rem
               jobtype = opt
              exchange = b3lyp
                 basis = 6-31+g*
-  geom_opt_max_cycles = 100
+  geom_opt_max_cycles = 200
     geom_opt_max_diis = 5
 $end
 

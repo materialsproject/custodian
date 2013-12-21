@@ -1,7 +1,8 @@
 $comments
  <SCF Fix Strategy>{
-    "current_method_id": 0, 
+    "current_method_id": 1, 
     "methods": [
+        "increase_iter", 
         "rca_diis", 
         "gwh", 
         "gdm", 
@@ -23,7 +24,8 @@ $rem
          jobtype = opt
         exchange = b3lyp
            basis = 6-31g*
-  max_scf_cycles = 100
+  max_scf_cycles = 200
    scf_algorithm = rca_diis
+       scf_guess = sad
 $end
 

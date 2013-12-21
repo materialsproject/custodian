@@ -14,7 +14,8 @@ $rem
          jobtype = opt
         exchange = b3lyp
            basis = 6-31g*
-  max_scf_cycles = 100
+  max_scf_cycles = 200
    scf_algorithm = diis
+       scf_guess = sad
 $end
 
