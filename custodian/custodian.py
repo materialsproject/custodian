@@ -137,8 +137,9 @@ class Custodian(object):
             All errors encountered as a list of list.
             [[error_dicts for job 1], [error_dicts for job 2], ....]
         """
+        cwd = os.getcwd()
+
         if self.scratch_dir is not None:
-            cwd = os.getcwd()
             tempdir = tempfile.mkdtemp(dir=self.scratch_dir)
             for f in os.listdir("."):
                 shutil.copy(f, tempdir)
@@ -150,26 +151,13 @@ class Custodian(object):
         unrecoverable = False
         start = datetime.datetime.now()
         logging.info("Run started at {}.".format(start))
-        def do_check(handlers, terminate_func=None):
-            corrections = []
-            for h in handlers:
-                try:
-                    if h.check():
-                        if terminate_func is not None:
-                            terminate_func()
-                        d = h.correct()
-                        logging.error(str(d))
-                        corrections.append(d)
-                except Exception as ex:
-                    if not self.skip_over_errors:
-                        raise
-                    else:
-                        corrections.append(
-                            {"errors": ["Bad handler " + str(h)],
-                             "actions": []})
-            return corrections
 
         for i, job in enumerate(self.jobs):
+            chk_fname = "custodian.chk.{}.tar.gz".format(i)
+            if os.path.exists(chk_fname):
+                t = tarfile.open(chk_fname)
+                t.extractall()
+                continue
             run_log.append({"job": job.to_dict, "corrections": []})
             for attempt in xrange(self.max_errors):
                 logging.info(
@@ -198,7 +186,8 @@ class Custodian(object):
                                 break
                             if n % self.monitor_freq == 0:
                                 corrections = do_check(
-                                    self.monitors, terminate_func=p.terminate)
+                                    self.monitors, terminate_func=p.terminate,
+                                    skip_over_errors=self.skip_over_errors)
                                 if len(corrections) > 0:
                                     has_error = True
                                     total_errors += len(corrections)
@@ -216,7 +205,8 @@ class Custodian(object):
                 else:
                     remaining_handlers = self.handlers
 
-                corrections = do_check(remaining_handlers)
+                corrections = do_check(remaining_handlers,
+                                       skip_over_errors=self.skip_over_errors)
                 if len(corrections) > 0:
                     has_error = True
                     total_errors += len(corrections)
@@ -244,6 +234,13 @@ class Custodian(object):
 
             if unrecoverable or total_errors >= self.max_errors:
                 break
+
+            # Checkpoint after each job so that we can recover from last
+            # point.
+            name = shutil.make_archive(
+                os.path.join(cwd, "custodian.chk.{}".format(i)))
+            logging.info("Checkpoint written to {}".format(name))
+
         end = datetime.datetime.now()
         logging.info("Run ended at {}.".format(end))
         run_time = end - start
@@ -262,6 +259,26 @@ class Custodian(object):
             os.chdir(cwd)
 
         return run_log
+
+
+def do_check(handlers, terminate_func=None, skip_over_errors=False):
+    corrections = []
+    for h in handlers:
+        try:
+            if h.check():
+                if terminate_func is not None:
+                    terminate_func()
+                d = h.correct()
+                logging.error(str(d))
+                corrections.append(d)
+        except Exception as ex:
+            if not skip_over_errors:
+                raise
+            else:
+                corrections.append(
+                    {"errors": ["Bad handler " + str(h)],
+                     "actions": []})
+        return corrections
 
 
 class ErrorHandler(object):
