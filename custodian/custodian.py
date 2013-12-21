@@ -238,7 +238,7 @@ class Custodian(object):
             # Checkpoint after each job so that we can recover from last
             # point.
             name = shutil.make_archive(
-                os.path.join(cwd, "custodian.chk.{}".format(i)))
+                os.path.join(cwd, "custodian.chk.{}".format(i)), "gztar")
             logging.info("Checkpoint written to {}".format(name))
 
         end = datetime.datetime.now()
