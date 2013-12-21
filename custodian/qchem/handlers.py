@@ -231,13 +231,21 @@ class QChemErrorHandler(ErrorHandler, MSONable):
             strategy["current_method_id"] += 1
         else:
             strategy = dict()
-            strategy["methods"] = ["GDIIS", "CartCoords"]
+            strategy["methods"] = ["increase_iter", "GDIIS", "CartCoords"]
             strategy["current_method_id"] = 0
         if strategy["current_method_id"] > len(strategy["methods"]) - 1:
             return None
         else:
             method = strategy["methods"][strategy["current_method_id"]]
-            if method == "GDIIS":
+            if method == "increase_iter":
+                self.fix_step.set_geom_max_iterations(self.geom_max_cycles)
+                self.fix_step.mol = od["molecules"][-1]
+                if self.fix_step.charge is None:
+                    self.fix_step.charge = self.fix_step.mol.charge
+                if self.fix_step.spin_multiplicity is None:
+                    self.fix_step.spin_multiplicity = \
+                        self.fix_step.mol.spin_multiplicity
+            elif method == "GDIIS":
                 self.fix_step.set_geom_opt_use_gdiis(subspace_size=5)
                 self.fix_step.set_geom_max_iterations(self.geom_max_cycles)
                 self.fix_step.mol = od["molecules"][-1]

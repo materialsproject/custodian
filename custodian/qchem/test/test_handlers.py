@@ -310,10 +310,27 @@ class QChemErrorHandlerTest(TestCase):
         self.assertTrue(has_error)
         d = h.correct()
         self.assertEqual(d, {'errors': ['Geometry optimization failed'],
+                             'actions': ['increase_iter']})
+        with open(os.path.join(test_dir, "hf_opt_failed_tried_0.qcinp")) as f:
+            ref = f.read()
+        with open(os.path.join(scr_dir, "hf_opt_failed.qcinp")) as f:
+            ans = f.read()
+        self.assertEqual(ref, ans)
+
+        shutil.copyfile(os.path.join(test_dir, "hf_opt_failed_tried_0.qcinp"),
+                        os.path.join(scr_dir, "hf_opt_failed_tried_0.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "hf_opt_failed.qcout"),
+                        os.path.join(scr_dir, "hf_opt_failed.qcout"))
+        h = QChemErrorHandler(input_file="hf_opt_failed_tried_0.qcinp",
+                              output_file="hf_opt_failed.qcout")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Geometry optimization failed'],
                              'actions': ['GDIIS']})
         with open(os.path.join(test_dir, "hf_opt_failed_tried_1.qcinp")) as f:
             ref = f.read()
-        with open(os.path.join(scr_dir, "hf_opt_failed.qcinp")) as f:
+        with open(os.path.join(scr_dir, "hf_opt_failed_tried_0.qcinp")) as f:
             ans = f.read()
         self.assertEqual(ref, ans)
 

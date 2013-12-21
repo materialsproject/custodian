@@ -1,7 +1,8 @@
 $comments
  <Geom Opt Fix Strategy>{
-    "current_method_id": 0, 
+    "current_method_id": 1, 
     "methods": [
+        "increase_iter", 
         "GDIIS", 
         "CartCoords"
     ]
