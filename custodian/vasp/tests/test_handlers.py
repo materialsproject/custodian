@@ -29,6 +29,8 @@ test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
 def clean_dir():
     for f in glob.glob("error.*.tar.gz"):
         os.remove(f)
+    for f in glob.glob("custodian.chk.*.tar.gz"):
+        os.remove(f)
 
 
 class VaspErrorHandlerTest(unittest.TestCase):
