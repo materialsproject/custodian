@@ -185,7 +185,7 @@ class Custodian(object):
                             if p.poll() is not None:
                                 break
                             if n % self.monitor_freq == 0:
-                                corrections = do_check(
+                                corrections = _do_check(
                                     self.monitors, terminate_func=p.terminate,
                                     skip_over_errors=self.skip_over_errors)
                                 if len(corrections) > 0:
@@ -205,7 +205,7 @@ class Custodian(object):
                 else:
                     remaining_handlers = self.handlers
 
-                corrections = do_check(remaining_handlers,
+                corrections = _do_check(remaining_handlers,
                                        skip_over_errors=self.skip_over_errors)
                 if len(corrections) > 0:
                     has_error = True
@@ -261,7 +261,7 @@ class Custodian(object):
         return run_log
 
 
-def do_check(handlers, terminate_func=None, skip_over_errors=False):
+def _do_check(handlers, terminate_func=None, skip_over_errors=False):
     corrections = []
     for h in handlers:
         try:
