@@ -242,6 +242,10 @@ class VaspJob(Job, MSONable):
         d["@class"] = self.__class__.__name__
         return d
 
+    @property
+    def is_terminating(self):
+        return False
+
     @classmethod
     def from_dict(cls, d):
         vis = PMGJSONDecoder().process_decoded(d["default_vasp_input_set"])

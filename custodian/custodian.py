@@ -298,7 +298,7 @@ def _do_check(handlers, terminate_func=None, skip_over_errors=False):
     for h in handlers:
         try:
             if h.check():
-                if terminate_func is not None:
+                if terminate_func is not None and h.is_terminating:
                     terminate_func()
                 d = h.correct()
                 logging.error(str(d))
@@ -352,6 +352,15 @@ class ErrorHandler(object):
         that occur early in the run but do not cause immediate failure.
         """
         return False
+
+    @property
+    def is_terminating(self):
+        """
+        Whether this handler terminates a job upon error detection. Defaults
+        to True. Set to False for non-terminating errors, i.e., errors that
+        can be recovered from without terminating a job.
+        """
+        return True
 
     @abstractproperty
     def to_dict(self):
