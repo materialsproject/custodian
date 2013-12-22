@@ -156,7 +156,7 @@ class Custodian(object):
         logging.info("Run started at {}.".format(start))
 
         for i, job in enumerate(self.jobs):
-            chk_fname = "custodian.chk.{}.tar.gz".format(i)
+            chk_fname = os.path.join(cwd, "custodian.chk.{}.tar.gz".format(i))
             if self.checkpoint and os.path.exists(chk_fname):
                 logging.info("Loading from checkpoint file {}..."
                              .format(chk_fname))
@@ -213,8 +213,9 @@ class Custodian(object):
                 else:
                     remaining_handlers = self.handlers
 
-                corrections = _do_check(remaining_handlers,
-                                       skip_over_errors=self.skip_over_errors)
+                corrections = _do_check(
+                    remaining_handlers,
+                    skip_over_errors=self.skip_over_errors)
                 if len(corrections) > 0:
                     has_error = True
                     total_errors += len(corrections)
@@ -245,11 +246,16 @@ class Custodian(object):
             # Checkpoint after each job so that we can recover from last
             # point and remove old checkpoints
             if self.checkpoint:
-                if i > 0:
-                    os.remove("custodian.chk.{}.tar.gz".format(i - 1))
-                name = shutil.make_archive(
-                    os.path.join(cwd, "custodian.chk.{}".format(i)), "gztar")
-                logging.info("Checkpoint written to {}".format(name))
+                try:
+                    if i > 0:
+                        os.remove(os.path.join(cwd, "custodian.chk.{}.tar.gz"
+                                               .format(i - 1)))
+                    name = shutil.make_archive(
+                        os.path.join(cwd, "custodian.chk.{}".format(i)),
+                        "gztar")
+                    logging.info("Checkpoint written to {}".format(name))
+                except Exception as ex:
+                    logging.info("Checkpointing failed")
 
         end = datetime.datetime.now()
         logging.info("Run ended at {}.".format(end))
@@ -260,7 +266,7 @@ class Custodian(object):
         elif not unrecoverable:
             if self.checkpoint:
                 #Cleanup checkpoint files if run is successful.
-                os.remove("custodian.chk.{}.tar.gz".format(i))
+                os.remove(os.path.join(cwd, "custodian.chk.{}.tar.gz".format(i)))
 
         logging.info("Run completed. Total time taken = {}.".format(run_time))
 
