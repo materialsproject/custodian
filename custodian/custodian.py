@@ -29,6 +29,8 @@ import shutil
 from abc import ABCMeta, abstractmethod, abstractproperty
 from gzip import GzipFile
 
+pjoin = os.path.join
+
 
 class Custodian(object):
     """
@@ -71,6 +73,7 @@ class Custodian(object):
         30, this means that Custodian uses the monitors to check for errors
         every 30 x 10 = 300 seconds, i.e., 5 minutes.
     """
+    LOG_FILE = "custodian.json"
 
     def __init__(self, handlers, jobs, max_errors=1, polling_time_step=10,
                  monitor_freq=30, log_file="custodian.json",
@@ -126,11 +129,35 @@ class Custodian(object):
         self.monitors = filter(lambda x: x.is_monitor, handlers)
         self.polling_time_step = polling_time_step
         self.monitor_freq = monitor_freq
-        self.log_file = "custodian.json"
         self.skip_over_errors = skip_over_errors
         self.scratch_dir = scratch_dir
         self.gzipped_output = gzipped_output
         self.checkpoint = checkpoint
+
+    @staticmethod
+    def _load_checkpoint(fname):
+        logging.info("Loading from checkpoint file {}...".format(fname))
+        t = tarfile.open(fname)
+        t.extractall()
+        #Log the corrections to a json file.
+        with open(Custodian.LOG_FILE, "r") as f:
+            run_log = json.load(f)
+        return run_log
+
+    @staticmethod
+    def _delete_checkpoints(cwd):
+        for f in glob(pjoin(cwd, "custodian.chk.*.tar.gz")):
+            os.remove(f)
+
+    @staticmethod
+    def _save_checkpoint(cwd, index):
+        try:
+            Custodian._delete_checkpoints(cwd)
+            name = shutil.make_archive(
+                pjoin(cwd, "custodian.chk.{}".format(index)), "gztar")
+            logging.info("Checkpoint written to {}".format(name))
+        except Exception as ex:
+            logging.info("Checkpointing failed")
 
     def run(self):
         """
@@ -154,18 +181,11 @@ class Custodian(object):
         unrecoverable = False
         start = datetime.datetime.now()
         logging.info("Run started at {}.".format(start))
-        pjoin = os.path.join
-
+        
         for i, job in enumerate(self.jobs):
             chk_fname = pjoin(cwd, "custodian.chk.{}.tar.gz".format(i))
             if self.checkpoint and os.path.exists(chk_fname):
-                logging.info("Loading from checkpoint file {}..."
-                             .format(chk_fname))
-                t = tarfile.open(chk_fname)
-                t.extractall()
-                #Log the corrections to a json file.
-                with open(self.log_file, "r") as f:
-                    run_log = json.load(f)
+                run_log = Custodian._load_checkpoint(chk_fname)
                 continue
             run_log.append({"job": job.to_dict, "corrections": []})
             for attempt in xrange(self.max_errors):
@@ -223,8 +243,8 @@ class Custodian(object):
                     run_log[-1]["corrections"].extend(corrections)
 
                 #Log the corrections to a json file.
-                with open(self.log_file, "w") as f:
-                    logging.info("Logging to {}...".format(self.log_file))
+                with open(Custodian.LOG_FILE, "w") as f:
+                    logging.info("Logging to {}...".format(Custodian.LOG_FILE))
                     json.dump(run_log, f, indent=4)
 
                 # If there are no errors detected, perform postprocessing and
@@ -247,15 +267,7 @@ class Custodian(object):
             # Checkpoint after each job so that we can recover from last
             # point and remove old checkpoints
             if self.checkpoint:
-                try:
-                    if i > 0:
-                        os.remove(pjoin(cwd, "custodian.chk.{}.tar.gz"
-                                          .format(i - 1)))
-                    name = shutil.make_archive(
-                        pjoin(cwd, "custodian.chk.{}".format(i)), "gztar")
-                    logging.info("Checkpoint written to {}".format(name))
-                except Exception as ex:
-                    logging.info("Checkpointing failed")
+                Custodian._save_checkpoint(cwd, i)
 
         end = datetime.datetime.now()
         logging.info("Run ended at {}.".format(end))
@@ -264,10 +276,8 @@ class Custodian(object):
             logging.info("Max {} errors reached. Exited..."
                          .format(self.max_errors))
         elif not unrecoverable:
-            if self.checkpoint:
-                #Cleanup checkpoint files if run is successful.
-                for f in glob(pjoin(cwd, "custodian.chk.*.tar.gz")):
-                    os.remove(f)
+            #Cleanup checkpoint files (if any) if run is successful.
+            Custodian._delete_checkpoints(cwd)
 
         logging.info("Run completed. Total time taken = {}.".format(run_time))
 
