@@ -310,7 +310,7 @@ def _do_check(handlers, terminate_func=None, skip_over_errors=False):
                 corrections.append(
                     {"errors": ["Bad handler " + str(h)],
                      "actions": []})
-        return corrections
+    return corrections
 
 
 class ErrorHandler(object):

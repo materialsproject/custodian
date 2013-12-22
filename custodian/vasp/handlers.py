@@ -538,10 +538,6 @@ class PBSWalltimeHandler(ErrorHandler):
                 time_per_step = total_secs / nsteps
             except:
                 time_per_step = 0
-            import logging
-            logging.info("Wall time = {} s\n".format(wall_time))
-            logging.info("Run time = {} s\n".format(run_time))
-            logging.info("Time per step = {} s\n".format(time_per_step))
 
             # If the remaining time is less than average time for 3 ionic
             # steps.
