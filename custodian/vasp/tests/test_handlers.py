@@ -33,7 +33,6 @@ def clean_dir():
         os.remove(f)
     for f in glob.glob("custodian.chk.*.tar.gz"):
         os.remove(f)
-    os.chdir(cwd)
 
 
 class VaspErrorHandlerTest(unittest.TestCase):
@@ -153,9 +152,16 @@ class VaspErrorHandlerTest(unittest.TestCase):
         shutil.move("POSCAR.orig", "POSCAR")
         shutil.move("CHGCAR.orig", "CHGCAR")
         clean_dir()
+        os.chdir(cwd)
 
 
 class UnconvergedErrorHandlerTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        if "VASP_PSP_DIR" not in os.environ:
+            os.environ["VASP_PSP_DIR"] = test_dir
+        os.chdir(test_dir)
 
     def test_check_correct(self):
         if "VASP_PSP_DIR" not in os.environ:
@@ -181,6 +187,10 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         h2 = UnconvergedErrorHandler.from_dict(h.to_dict)
         self.assertEqual(type(h2), UnconvergedErrorHandler)
         self.assertEqual(h2.output_filename, "random_name.xml")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cwd)
 
 
 class PBSWalltimeHandlerTest(unittest.TestCase):
