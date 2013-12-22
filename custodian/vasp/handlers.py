@@ -550,7 +550,7 @@ class PBSWalltimeHandler(ErrorHandler):
         m = Modder(actions=[FileActions])
         for a in actions:
             m.modify(a["action"], a["file"])
-        return {"errors": ["Walltime reached"], "actions": actions}
+        return {"errors": ["Walltime reached"], "actions": None}
 
     def __str__(self):
         return "PBSWalltimeHandler."
