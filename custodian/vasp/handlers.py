@@ -528,7 +528,7 @@ class PBSWalltimeHandler(ErrorHandler):
         if self.start_time is None:
             self.start_time = datetime.datetime.now()
         if "PBS_WALLTIME" in os.environ:
-            walltime = int(os.environ["PBS_WALLTIME"])
+            wall_time = int(os.environ["PBS_WALLTIME"])
             run_time = datetime.datetime.now() - self.start_time
             total_secs = run_time.seconds + run_time.days * 3600 * 24
             try:
@@ -538,10 +538,13 @@ class PBSWalltimeHandler(ErrorHandler):
                 time_per_step = total_secs / nsteps
             except:
                 time_per_step = 0
+            print "Wall time = {} s".format(wall_time)
+            print "Run time = {} s".format(run_time)
+            print "Time per step = {} s".format(time_per_step)
 
             # If the remaining time is less than average time for 3 ionic
             # steps.
-            if walltime - total_secs < time_per_step * 3:
+            if wall_time - total_secs < time_per_step * 3:
                 return True
         return False
 
