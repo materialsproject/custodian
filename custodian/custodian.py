@@ -21,7 +21,7 @@ import subprocess
 import datetime
 import time
 import json
-import glob
+from glob import glob
 import tarfile
 import os
 import tempfile
@@ -154,9 +154,10 @@ class Custodian(object):
         unrecoverable = False
         start = datetime.datetime.now()
         logging.info("Run started at {}.".format(start))
+        pjoin = os.path.join
 
         for i, job in enumerate(self.jobs):
-            chk_fname = os.path.join(cwd, "custodian.chk.{}.tar.gz".format(i))
+            chk_fname = pjoin(cwd, "custodian.chk.{}.tar.gz".format(i))
             if self.checkpoint and os.path.exists(chk_fname):
                 logging.info("Loading from checkpoint file {}..."
                              .format(chk_fname))
@@ -248,11 +249,10 @@ class Custodian(object):
             if self.checkpoint:
                 try:
                     if i > 0:
-                        os.remove(os.path.join(cwd, "custodian.chk.{}.tar.gz"
-                                               .format(i - 1)))
+                        os.remove(pjoin(cwd, "custodian.chk.{}.tar.gz"
+                                          .format(i - 1)))
                     name = shutil.make_archive(
-                        os.path.join(cwd, "custodian.chk.{}".format(i)),
-                        "gztar")
+                        pjoin(cwd, "custodian.chk.{}".format(i)), "gztar")
                     logging.info("Checkpoint written to {}".format(name))
                 except Exception as ex:
                     logging.info("Checkpointing failed")
@@ -266,7 +266,8 @@ class Custodian(object):
         elif not unrecoverable:
             if self.checkpoint:
                 #Cleanup checkpoint files if run is successful.
-                os.remove(os.path.join(cwd, "custodian.chk.{}.tar.gz".format(i)))
+                for f in glob(pjoin(cwd, "custodian.chk.*.tar.gz")):
+                    os.remove(f)
 
         logging.info("Run completed. Total time taken = {}.".format(run_time))
 
@@ -431,12 +432,12 @@ def backup(filenames, prefix="error"):
             error.1.tar.gz, error.2.tar.gz, ... will be generated.
     """
     num = max([0] + [int(f.split(".")[1])
-                     for f in glob.glob("{}.*.tar.gz".format(prefix))])
+                     for f in glob("{}.*.tar.gz".format(prefix))])
     filename = "{}.{}.tar.gz".format(prefix, num + 1)
     logging.info("Backing up run to {}.".format(filename))
     tar = tarfile.open(filename, "w:gz")
     for fname in filenames:
-        for f in glob.glob(fname):
+        for f in glob(fname):
             tar.add(f)
     tar.close()
 

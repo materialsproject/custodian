@@ -12,12 +12,13 @@ with open("README.rst") as f:
 setup(
     name="custodian",
     packages=find_packages(),
-    version="0.5.3",
+    version="0.5.4",
     install_requires=[],
     extras_require={"vasp, nwchem": ["pymatgen>=2.8.9"]},
     package_data={},
-    author="Shyue Ping Ong, William Davidson Richards",
-    author_email="shyuep@gmail.com",
+    author="Shyue Ping Ong, William Davidson Richards, Stephen Dacek, "
+           "Xiaohui Qu",
+    author_email="ongsp@ucsd.edu",
     maintainer="Shyue Ping Ong",
     url="https://github.com/materialsproject/custodian",
     license="MIT",
