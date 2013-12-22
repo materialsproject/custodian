@@ -25,12 +25,15 @@ from custodian.vasp.handlers import VaspErrorHandler, \
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
                         'test_files')
 
+cwd = os.getcwd()
+
 
 def clean_dir():
     for f in glob.glob("error.*.tar.gz"):
         os.remove(f)
     for f in glob.glob("custodian.chk.*.tar.gz"):
         os.remove(f)
+    os.chdir(cwd)
 
 
 class VaspErrorHandlerTest(unittest.TestCase):
@@ -184,6 +187,7 @@ class PBSWalltimeHandlerTest(unittest.TestCase):
 
     def test_correct(self):
         h = PBSWalltimeHandler()
+        os.chdir(cwd)
         h.correct()
         with open("STOPCAR") as f:
             content = f.read()
