@@ -516,8 +516,9 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
 
 class PBSWalltimeHandler(ErrorHandler):
     """
-    Check if a run is nearing the walltime of a PBS queuing. If so, write a
-    STOPCAR with LSTOP=.True.. The PBS_WALLTIME must be in the environment.
+    Check if a run is nearing the walltime of a PBS queuing system. If so,
+    write a STOPCAR with LSTOP=.True.. The PBS_WALLTIME must be in the
+    environment.
     """
 
     def __init__(self):
@@ -538,7 +539,8 @@ class PBSWalltimeHandler(ErrorHandler):
             except:
                 time_per_step = 0
 
-            # If the remaining time is less than time for 3 ionic s
+            # If the remaining time is less than average time for 3 ionic
+            # steps.
             if walltime - total_secs < time_per_step * 3:
                 return True
         return False
