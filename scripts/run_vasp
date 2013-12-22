@@ -18,8 +18,9 @@ import logging
 import sys
 
 from custodian.custodian import Custodian
-from custodian.vasp.handlers import VaspErrorHandler, UnconvergedErrorHandler, \
-    MeshSymmetryErrorHandler, NonConvergingErrorHandler, PotimErrorHandler
+from custodian.vasp.handlers import VaspErrorHandler, \
+    UnconvergedErrorHandler, MeshSymmetryErrorHandler, \
+    NonConvergingErrorHandler, PotimErrorHandler, PBSWalltimeHandler
 from custodian.vasp.jobs import VaspJob
 from pymatgen.io.vaspio.vasp_input import VaspInput
 
@@ -29,7 +30,7 @@ def do_run(args):
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
     handlers = [VaspErrorHandler(), MeshSymmetryErrorHandler(),
                 UnconvergedErrorHandler(), NonConvergingErrorHandler(),
-                PotimErrorHandler()]
+                PotimErrorHandler(), PBSWalltimeHandler()]
     vasp_command = args.command.split()
     jobs = []
     njobs = len(args.jobs)

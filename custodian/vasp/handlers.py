@@ -18,6 +18,7 @@ __date__ = "2/4/13"
 
 import os
 import time
+import datetime
 import operator
 
 from custodian.custodian import ErrorHandler, backup
@@ -489,7 +490,7 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
             return {"errors": ["Non-converging job"], "actions": None}
 
     def __str__(self):
-        return "Run not converging."
+        return "NonConvergingErrorHandler"
 
     @property
     def is_monitor(self):
@@ -511,3 +512,58 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
                        change_algo=d.get("change_algo", False))
         else:
             return cls(output_filename=d["output_filename"])
+
+
+class PBSWalltimeHandler(ErrorHandler):
+    """
+    Check if a run is nearing the walltime of a PBS queuing. If so, write a
+    STOPCAR with LSTOP=.True.. The PBS_WALLTIME must be in the environment.
+    """
+
+    def __init__(self):
+        self.start_time = None
+
+    def check(self):
+        if self.start_time is None:
+            self.start_time = datetime.datetime.now()
+        if "PBS_WALLTIME" in os.environ:
+            walltime = int(os.environ["PBS_WALLTIME"])
+            run_time = datetime.datetime.now() - self.start_time
+            total_secs = run_time.seconds + run_time.days * 3600 * 24
+            try:
+                #Intelligently determine time per ionic step.
+                o = Oszicar("OSZICAR")
+                nsteps = len(o.ionic_steps)
+                time_per_step = total_secs / nsteps
+            except:
+                time_per_step = 0
+
+            # If the remaining time is less than time for 3 ionic s
+            if walltime - total_secs < time_per_step * 3:
+                return True
+        return False
+
+    def correct(self):
+        #Write STOPCAR
+        actions = [{"file": "STOPCAR",
+                    "action": {"_file_create": {'content': "LSTOP = .TRUE."}}}]
+        m = Modder(actions=[FileActions])
+        for a in actions:
+            m.modify(a["action"], a["file"])
+        return {"errors": ["Walltime reached"], "actions": actions}
+
+    def __str__(self):
+        return "PBSWalltimeHandler."
+
+    @property
+    def is_monitor(self):
+        return True
+
+    @property
+    def to_dict(self):
+        return {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__}
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls()

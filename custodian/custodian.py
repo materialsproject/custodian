@@ -69,7 +69,7 @@ class Custodian(object):
     .. attribute: monitor_freq
 
         The number of polling steps before monitoring occurs. For example,
-        if you have a polling_time_step of 10seconds and a monitor_freq of
+        if you have a polling_time_step of 10 seconds and a monitor_freq of
         30, this means that Custodian uses the monitors to check for errors
         every 30 x 10 = 300 seconds, i.e., 5 minutes.
     """
@@ -181,7 +181,7 @@ class Custodian(object):
         unrecoverable = False
         start = datetime.datetime.now()
         logging.info("Run started at {}.".format(start))
-        
+
         for i, job in enumerate(self.jobs):
             chk_fname = pjoin(cwd, "custodian.chk.{}.tar.gz".format(i))
             if self.checkpoint and os.path.exists(chk_fname):

@@ -19,7 +19,7 @@ import glob
 import shutil
 
 from custodian.vasp.handlers import VaspErrorHandler, \
-    UnconvergedErrorHandler, MeshSymmetryErrorHandler
+    UnconvergedErrorHandler, MeshSymmetryErrorHandler, PBSWalltimeHandler
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
@@ -178,6 +178,17 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         h2 = UnconvergedErrorHandler.from_dict(h.to_dict)
         self.assertEqual(type(h2), UnconvergedErrorHandler)
         self.assertEqual(h2.output_filename, "random_name.xml")
+
+
+class PBSWalltimeHandlerTest(unittest.TestCase):
+
+    def test_correct(self):
+        h = PBSWalltimeHandler()
+        h.correct()
+        with open("STOPCAR") as f:
+            content = f.read()
+            self.assertEqual(content, "LSTOP = .TRUE.")
+        os.remove("STOPCAR")
 
 
 if __name__ == "__main__":
