@@ -522,11 +522,9 @@ class PBSWalltimeHandler(ErrorHandler):
     """
 
     def __init__(self):
-        self.start_time = None
+        self.start_time = datetime.datetime.now()
 
     def check(self):
-        if self.start_time is None:
-            self.start_time = datetime.datetime.now()
         if "PBS_WALLTIME" in os.environ:
             wall_time = int(os.environ["PBS_WALLTIME"])
             run_time = datetime.datetime.now() - self.start_time
@@ -536,7 +534,7 @@ class PBSWalltimeHandler(ErrorHandler):
                 o = Oszicar("OSZICAR")
                 nsteps = len(o.ionic_steps)
                 time_per_step = total_secs / nsteps
-            except:
+            except Exception as ex:
                 time_per_step = 0
 
             # If the remaining time is less than average time for 3 ionic
@@ -552,7 +550,7 @@ class PBSWalltimeHandler(ErrorHandler):
         m = Modder(actions=[FileActions])
         for a in actions:
             m.modify(a["action"], a["file"])
-        return {"errors": ["Walltime reached"], "actions": None}
+        return {"errors": ["Walltime reached"], "actions": actions}
 
     def __str__(self):
         return "PBSWalltimeHandler."
