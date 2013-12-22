@@ -550,6 +550,8 @@ class PBSWalltimeHandler(ErrorHandler):
         m = Modder(actions=[FileActions])
         for a in actions:
             m.modify(a["action"], a["file"])
+        # Actions is being returned as None so that the job will stop after
+        # STOPCAR is written.
         return {"errors": ["Walltime reached"], "actions": None}
 
     def __str__(self):
@@ -558,6 +560,12 @@ class PBSWalltimeHandler(ErrorHandler):
     @property
     def is_monitor(self):
         return True
+
+    @property
+    def is_terminating(self):
+        # The PBS handler should not terminate as we want VASP to terminate
+        # itself naturally with the STOPCAR.
+        return False
 
     @property
     def to_dict(self):
