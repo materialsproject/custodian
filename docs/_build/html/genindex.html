@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Index &mdash; custodian 0.5.1 documentation</title>
+    <title>Index &mdash; custodian 0.6.0 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.5.1',
+        VERSION:     '0.6.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.5.1 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.6.0 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.5.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.6.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -66,9 +66,11 @@
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#J"><strong>J</strong></a>
+ | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
  | <a href="#P"><strong>P</strong></a>
+ | <a href="#Q"><strong>Q</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
@@ -93,6 +95,12 @@
   <dt><a href="custodian.html#custodian.custodian.backup">backup() (in module custodian.custodian)</a>
   </dt>
 
+      <dd><dl>
+        
+  <dt><a href="custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.backup">(QChemErrorHandler method)</a>
+  </dt>
+
+      </dl></dd>
   </dl></td>
 </tr></table>
 
@@ -121,7 +129,15 @@
   </dt>
 
         
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PBSWalltimeHandler.check">(PBSWalltimeHandler method)</a>
+  </dt>
+
+        
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.check">(PotimErrorHandler method)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.check">(QChemErrorHandler method)</a>
   </dt>
 
         
@@ -155,7 +171,15 @@
   </dt>
 
         
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PBSWalltimeHandler.correct">(PBSWalltimeHandler method)</a>
+  </dt>
+
+        
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.correct">(PotimErrorHandler method)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.correct">(QChemErrorHandler method)</a>
   </dt>
 
         
@@ -172,7 +196,11 @@
   </dt>
 
       
-  <dt><a href="custodian.html#module-custodian.__init__">custodian.__init__ (module)</a>
+  <dt><a href="custodian.html#module-custodian">custodian (module)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.ansible.html#module-custodian.ansible">custodian.ansible (module)</a>
   </dt>
 
       
@@ -187,8 +215,6 @@
   <dt><a href="custodian.html#module-custodian.custodian">custodian.custodian (module)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="custodian.nwchem.html#module-custodian.nwchem">custodian.nwchem (module)</a>
   </dt>
@@ -197,8 +223,30 @@
   <dt><a href="custodian.nwchem.html#module-custodian.nwchem.handlers">custodian.nwchem.handlers (module)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="custodian.nwchem.html#module-custodian.nwchem.jobs">custodian.nwchem.jobs (module)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.qchem.html#module-custodian.qchem">custodian.qchem (module)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.qchem.html#module-custodian.qchem.handlers">custodian.qchem.handlers (module)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.qchem.html#module-custodian.qchem.jobs">custodian.qchem.jobs (module)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.qchem.test.html#module-custodian.qchem.test">custodian.qchem.test (module)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.qchem.test.html#module-custodian.qchem.test.test_handlers">custodian.qchem.test.test_handlers (module)</a>
   </dt>
 
       
@@ -267,10 +315,18 @@
   <dt><a href="custodian.ansible.html#custodian.ansible.actions.FileActions.file_move">file_move() (FileActions static method)</a>
   </dt>
 
+      
+  <dt><a href="custodian.ansible.html#custodian.ansible.actions.FileActions">FileActions (class in custodian.ansible.actions)</a>
+  </dt>
+
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="custodian.ansible.html#custodian.ansible.actions.FileActions">FileActions (class in custodian.ansible.actions)</a>
+  <dt><a href="custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_geom_opt">fix_geom_opt() (QChemErrorHandler method)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_scf">fix_scf() (QChemErrorHandler method)</a>
   </dt>
 
       
@@ -278,6 +334,10 @@
   </dt>
 
       <dd><dl>
+        
+  <dt><a href="custodian.qchem.html#custodian.qchem.jobs.QchemJob.from_dict">(QchemJob static method)</a>
+  </dt>
+
         
   <dt><a href="custodian.html#custodian.custodian.Job.from_dict">(custodian.custodian.Job class method)</a>
   </dt>
@@ -291,6 +351,10 @@
   </dt>
 
         
+  <dt><a href="custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.from_dict">(custodian.qchem.handlers.QChemErrorHandler class method)</a>
+  </dt>
+
+        
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.FrozenJobErrorHandler.from_dict">(custodian.vasp.handlers.FrozenJobErrorHandler class method)</a>
   </dt>
 
@@ -300,6 +364,10 @@
 
         
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.NonConvergingErrorHandler.from_dict">(custodian.vasp.handlers.NonConvergingErrorHandler class method)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PBSWalltimeHandler.from_dict">(custodian.vasp.handlers.PBSWalltimeHandler class method)</a>
   </dt>
 
         
@@ -349,8 +417,6 @@
   <dt><a href="custodian.ansible.html#custodian.ansible.actions.DictActions.inc">inc() (DictActions static method)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="custodian.html#custodian.custodian.ErrorHandler.is_monitor">is_monitor (ErrorHandler attribute)</a>
   </dt>
@@ -373,7 +439,15 @@
   </dt>
 
         
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PBSWalltimeHandler.is_monitor">(PBSWalltimeHandler attribute)</a>
+  </dt>
+
+        
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.is_monitor">(PotimErrorHandler attribute)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.is_monitor">(QChemErrorHandler attribute)</a>
   </dt>
 
         
@@ -386,6 +460,22 @@
 
       </dl></dd>
   </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="custodian.html#custodian.custodian.ErrorHandler.is_terminating">is_terminating (ErrorHandler attribute)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PBSWalltimeHandler.is_terminating">(PBSWalltimeHandler attribute)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.vasp.html#custodian.vasp.jobs.VaspJob.is_terminating">(VaspJob attribute)</a>
+  </dt>
+
+      </dl></dd>
+  </dl></td>
 </tr></table>
 
 <h2 id="J">J</h2>
@@ -393,6 +483,16 @@
   <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="custodian.html#custodian.custodian.Job">Job (class in custodian.custodian)</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="custodian.html#custodian.custodian.Custodian.LOG_FILE">LOG_FILE (Custodian attribute)</a>
   </dt>
 
   </dl></td>
@@ -435,6 +535,10 @@
   </dt>
 
         
+  <dt><a href="custodian.qchem.html#custodian.qchem.jobs.QchemJob.name">(QchemJob attribute)</a>
+  </dt>
+
+        
   <dt><a href="custodian.vasp.html#custodian.vasp.jobs.VaspJob.name">(VaspJob attribute)</a>
   </dt>
 
@@ -460,6 +564,10 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PBSWalltimeHandler">PBSWalltimeHandler (class in custodian.vasp.handlers)</a>
+  </dt>
+
+      
   <dt><a href="custodian.ansible.html#custodian.ansible.actions.DictActions.pop">pop() (DictActions static method)</a>
   </dt>
 
@@ -473,6 +581,10 @@
   </dt>
 
         
+  <dt><a href="custodian.qchem.html#custodian.qchem.jobs.QchemJob.postprocess">(QchemJob method)</a>
+  </dt>
+
+        
   <dt><a href="custodian.vasp.html#custodian.vasp.jobs.VaspJob.postprocess">(VaspJob method)</a>
   </dt>
 
@@ -481,12 +593,12 @@
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler">PotimErrorHandler (class in custodian.vasp.handlers)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="custodian.ansible.html#custodian.ansible.actions.DictActions.pull">pull() (DictActions static method)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="custodian.ansible.html#custodian.ansible.actions.DictActions.pull_all">pull_all() (DictActions static method)</a>
   </dt>
@@ -497,6 +609,26 @@
 
       
   <dt><a href="custodian.ansible.html#custodian.ansible.actions.DictActions.push_all">push_all() (DictActions static method)</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="Q">Q</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler">QChemErrorHandler (class in custodian.qchem.handlers)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.qchem.test.html#custodian.qchem.test.test_handlers.QChemErrorHandlerTest">QChemErrorHandlerTest (class in custodian.qchem.test.test_handlers)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="custodian.qchem.html#custodian.qchem.jobs.QchemJob">QchemJob (class in custodian.qchem.jobs)</a>
   </dt>
 
   </dl></td>
@@ -525,6 +657,10 @@
   </dt>
 
         
+  <dt><a href="custodian.qchem.html#custodian.qchem.jobs.QchemJob.run">(QchemJob method)</a>
+  </dt>
+
+        
   <dt><a href="custodian.vasp.html#custodian.vasp.jobs.VaspJob.run">(VaspJob method)</a>
   </dt>
 
@@ -539,8 +675,6 @@
   <dt><a href="custodian.ansible.html#custodian.ansible.actions.DictActions.set">set() (DictActions static method)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="custodian.html#custodian.custodian.Job.setup">setup() (Job method)</a>
   </dt>
@@ -550,6 +684,18 @@
   <dt><a href="custodian.nwchem.html#custodian.nwchem.jobs.NwchemJob.setup">(NwchemJob method)</a>
   </dt>
 
+      </dl></dd>
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="custodian.qchem.test.html#custodian.qchem.test.test_handlers.QChemErrorHandlerTest.setUp">setUp() (QChemErrorHandlerTest method)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.qchem.html#custodian.qchem.jobs.QchemJob.setup">setup() (QchemJob method)</a>
+  </dt>
+
+      <dd><dl>
         
   <dt><a href="custodian.vasp.html#custodian.vasp.jobs.VaspJob.setup">(VaspJob method)</a>
   </dt>
@@ -561,6 +707,40 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="custodian.qchem.test.html#custodian.qchem.test.test_handlers.QChemErrorHandlerTest.tearDown">tearDown() (QChemErrorHandlerTest method)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.qchem.test.html#custodian.qchem.test.test_handlers.QChemErrorHandlerTest.test_autoz_error">test_autoz_error() (QChemErrorHandlerTest method)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.qchem.test.html#custodian.qchem.test.test_handlers.QChemErrorHandlerTest.test_NAN_error">test_NAN_error() (QChemErrorHandlerTest method)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.qchem.test.html#custodian.qchem.test.test_handlers.QChemErrorHandlerTest.test_no_error">test_no_error() (QChemErrorHandlerTest method)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.qchem.test.html#custodian.qchem.test.test_handlers.QChemErrorHandlerTest.test_opt_failed">test_opt_failed() (QChemErrorHandlerTest method)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="custodian.qchem.test.html#custodian.qchem.test.test_handlers.QChemErrorHandlerTest.test_scf_gdm">test_scf_gdm() (QChemErrorHandlerTest method)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.qchem.test.html#custodian.qchem.test.test_handlers.QChemErrorHandlerTest.test_scf_rca">test_scf_rca() (QChemErrorHandlerTest method)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.qchem.test.html#custodian.qchem.test.test_handlers.QChemErrorHandlerTest.test_scf_reset">test_scf_reset() (QChemErrorHandlerTest method)</a>
+  </dt>
+
       
   <dt><a href="custodian.html#custodian.custodian.ErrorHandler.to_dict">to_dict (ErrorHandler attribute)</a>
   </dt>
@@ -591,7 +771,19 @@
   </dt>
 
         
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PBSWalltimeHandler.to_dict">(PBSWalltimeHandler attribute)</a>
+  </dt>
+
+        
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.to_dict">(PotimErrorHandler attribute)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.to_dict">(QChemErrorHandler attribute)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.qchem.html#custodian.qchem.jobs.QchemJob.to_dict">(QchemJob attribute)</a>
   </dt>
 
         
@@ -672,13 +864,13 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.5.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.6.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

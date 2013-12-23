@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>vasp Package &mdash; custodian 0.5.1 documentation</title>
+    <title>custodian.vasp package &mdash; custodian 0.6.0 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.5.1',
+        VERSION:     '0.6.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.5.1 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.6.0 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.5.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.6.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -52,14 +52,20 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="vasp-package">
-<h1>vasp Package<a class="headerlink" href="#vasp-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="id1">
-<h2><tt class="xref py py-mod docutils literal"><span class="pre">vasp</span></tt> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-custodian.vasp"></span><p>This package implements various VASP Jobs and Error Handlers.</p>
+  <div class="section" id="custodian-vasp-package">
+<h1>custodian.vasp package<a class="headerlink" href="#custodian-vasp-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-custodian.vasp.handlers">
-<span id="handlers-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">handlers</span></tt> Module<a class="headerlink" href="#module-custodian.vasp.handlers" title="Permalink to this headline">¶</a></h2>
+<span id="custodian-vasp-handlers-module"></span><h2>custodian.vasp.handlers module<a class="headerlink" href="#module-custodian.vasp.handlers" title="Permalink to this headline">¶</a></h2>
 <p>This module implements specific error handlers for VASP runs. These handlers
 tries to detect common errors in vasp runs and attempt to fix them on the fly
 by modifying the input files.</p>
@@ -160,6 +166,45 @@ Normal or kill the job.</p>
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.NonConvergingErrorHandler.to_dict">
 <tt class="descname">to_dict</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#NonConvergingErrorHandler.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="custodian.vasp.handlers.PBSWalltimeHandler">
+<em class="property">class </em><tt class="descname">PBSWalltimeHandler</tt><a class="headerlink" href="#custodian.vasp.handlers.PBSWalltimeHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<p>Check if a run is nearing the walltime of a PBS queuing system. If so,
+write a STOPCAR with LSTOP=.True.. The PBS_WALLTIME must be in the
+environment.</p>
+<dl class="method">
+<dt id="custodian.vasp.handlers.PBSWalltimeHandler.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.PBSWalltimeHandler.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.handlers.PBSWalltimeHandler.correct">
+<tt class="descname">correct</tt><big>(</big><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.PBSWalltimeHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="custodian.vasp.handlers.PBSWalltimeHandler.from_dict">
+<em class="property">classmethod </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="headerlink" href="#custodian.vasp.handlers.PBSWalltimeHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.PBSWalltimeHandler.is_monitor">
+<tt class="descname">is_monitor</tt><a class="headerlink" href="#custodian.vasp.handlers.PBSWalltimeHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.PBSWalltimeHandler.is_terminating">
+<tt class="descname">is_terminating</tt><a class="headerlink" href="#custodian.vasp.handlers.PBSWalltimeHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.PBSWalltimeHandler.to_dict">
+<tt class="descname">to_dict</tt><a class="headerlink" href="#custodian.vasp.handlers.PBSWalltimeHandler.to_dict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -271,7 +316,7 @@ that occur during VASP runs.</p>
 
 </div>
 <div class="section" id="module-custodian.vasp.jobs">
-<span id="jobs-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">jobs</span></tt> Module<a class="headerlink" href="#module-custodian.vasp.jobs" title="Permalink to this headline">¶</a></h2>
+<span id="custodian-vasp-jobs-module"></span><h2>custodian.vasp.jobs module<a class="headerlink" href="#module-custodian.vasp.jobs" title="Permalink to this headline">¶</a></h2>
 <p>This module implements basic kinds of jobs for VASP runs.</p>
 <dl class="class">
 <dt>
@@ -612,6 +657,11 @@ if you are using mpirun, it can be something like
 <dd></dd></dl>
 
 <dl class="attribute">
+<dt id="custodian.vasp.jobs.VaspJob.is_terminating">
+<tt class="descclassname">VaspJob.</tt><tt class="descname">is_terminating</tt><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.is_terminating" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="custodian.vasp.jobs.VaspJob.name">
 <tt class="descclassname">VaspJob.</tt><tt class="descname">name</tt><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -639,6 +689,10 @@ if you are using mpirun, it can be something like
 </dd></dl>
 
 </div>
+<div class="section" id="module-custodian.vasp">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-custodian.vasp" title="Permalink to this headline">¶</a></h2>
+<p>This package implements various VASP Jobs and Error Handlers.</p>
+</div>
 </div>
 
 
@@ -649,10 +703,14 @@ if you are using mpirun, it can be something like
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">vasp Package</a><ul>
-<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">vasp</span></tt> Package</a></li>
-<li><a class="reference internal" href="#module-custodian.vasp.handlers"><tt class="docutils literal"><span class="pre">handlers</span></tt> Module</a></li>
-<li><a class="reference internal" href="#module-custodian.vasp.jobs"><tt class="docutils literal"><span class="pre">jobs</span></tt> Module</a></li>
+<li><a class="reference internal" href="#">custodian.vasp package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-custodian.vasp.handlers">custodian.vasp.handlers module</a></li>
+<li><a class="reference internal" href="#module-custodian.vasp.jobs">custodian.vasp.jobs module</a></li>
+<li><a class="reference internal" href="#module-custodian.vasp">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -688,13 +746,13 @@ if you are using mpirun, it can be something like
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.5.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.6.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

@@ -22,6 +22,12 @@ calculations.
 Change log
 ==========
 
+0.6.0
+-----
+1. Checkpointing implemented for Custodian.
+2. Added PBSWalltimeHandler to handle wall times for PBS Vasp Jobs.
+3. Qchem error handlers and jobs.
+
 0.5.0
 -----
 1. Added scratch_dir option to Custodian class as well as run_vasp and

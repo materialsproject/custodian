@@ -1,27 +1,36 @@
-nwchem Package
-==============
+custodian.nwchem package
+========================
 
-:mod:`nwchem` Package
----------------------
+Subpackages
+-----------
 
-.. automodule:: custodian.nwchem
-    :members:
-    :undoc-members:
-    :show-inheritance:
+.. toctree::
 
-:mod:`handlers` Module
-----------------------
+
+Submodules
+----------
+
+custodian.nwchem.handlers module
+--------------------------------
 
 .. automodule:: custodian.nwchem.handlers
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`jobs` Module
-------------------
+custodian.nwchem.jobs module
+----------------------------
 
 .. automodule:: custodian.nwchem.jobs
     :members:
     :undoc-members:
     :show-inheritance:
 
+
+Module contents
+---------------
+
+.. automodule:: custodian.nwchem
+    :members:
+    :undoc-members:
+    :show-inheritance:

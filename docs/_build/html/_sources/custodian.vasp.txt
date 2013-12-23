@@ -1,27 +1,36 @@
-vasp Package
-============
+custodian.vasp package
+======================
 
-:mod:`vasp` Package
--------------------
+Subpackages
+-----------
 
-.. automodule:: custodian.vasp
-    :members:
-    :undoc-members:
-    :show-inheritance:
+.. toctree::
 
-:mod:`handlers` Module
-----------------------
+
+Submodules
+----------
+
+custodian.vasp.handlers module
+------------------------------
 
 .. automodule:: custodian.vasp.handlers
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`jobs` Module
-------------------
+custodian.vasp.jobs module
+--------------------------
 
 .. automodule:: custodian.vasp.jobs
     :members:
     :undoc-members:
     :show-inheritance:
 
+
+Module contents
+---------------
+
+.. automodule:: custodian.vasp
+    :members:
+    :undoc-members:
+    :show-inheritance:

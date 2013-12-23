@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Change log &mdash; custodian 0.5.1 documentation</title>
+    <title>Change log &mdash; custodian 0.6.0 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.5.1',
+        VERSION:     '0.6.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.5.1 documentation" href="#" />
+    <link rel="top" title="custodian 0.6.0 documentation" href="#" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.5.1 documentation</a> &raquo;</li> 
+        <li><a href="#">custodian 0.6.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -72,7 +72,15 @@ calculations.</p>
 <div class="section" id="change-log">
 <h1>Change log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
-<h2>0.5.0<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>0.6.0<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Checkpointing implemented for Custodian.</li>
+<li>Added PBSWalltimeHandler to handle wall times for PBS Vasp Jobs.</li>
+<li>Qchem error handlers and jobs.</li>
+</ol>
+</div>
+<div class="section" id="id2">
+<h2>0.5.0<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li>Added scratch_dir option to Custodian class as well as run_vasp and
 run_nwchem scripts. Many supercomputing clusters have a scratch space
@@ -81,14 +89,14 @@ to specify the jobs to be performed in the scratch. Especially useful for
 jobs which have significant file IO.</li>
 </ol>
 </div>
-<div class="section" id="id2">
-<h2>0.4.5<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id3">
+<h2>0.4.5<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li>Fix gzip of output.</li>
 </ol>
 </div>
-<div class="section" id="id3">
-<h2>0.4.3<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id4">
+<h2>0.4.3<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li>Added handling for ZBRENT error for VASP.</li>
 <li>Minor refactoring to consolidate backup and gzip directory methods.</li>
@@ -353,7 +361,7 @@ insufficient KPOINTS to use ISMEAR = -5.</p>
 e.g. kpoints convergence jobs with a target energy convergence. Please see the
 converge_kpoints script in the scripts for an example.</p>
 <div class="versionadded">
-<p><span>New in version 0.4.3: </span>A new package for dealing with NwChem calculations has been added.
+<p><span class="versionmodified">New in version 0.4.3: </span>A new package for dealing with NwChem calculations has been added.
 NwChem is an open-source code for performing computational chemistry
 calculations.</p>
 </div>
@@ -413,9 +421,10 @@ DEALINGS IN THE SOFTWARE.</pre>
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Change log</a><ul>
-<li><a class="reference internal" href="#id1">0.5.0</a></li>
-<li><a class="reference internal" href="#id2">0.4.5</a></li>
-<li><a class="reference internal" href="#id3">0.4.3</a></li>
+<li><a class="reference internal" href="#id1">0.6.0</a></li>
+<li><a class="reference internal" href="#id2">0.5.0</a></li>
+<li><a class="reference internal" href="#id3">0.4.5</a></li>
+<li><a class="reference internal" href="#id4">0.4.3</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#getting-custodian">Getting custodian</a><ul>
@@ -468,13 +477,13 @@ DEALINGS IN THE SOFTWARE.</pre>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.5.1 documentation</a> &raquo;</li> 
+        <li><a href="#">custodian 0.6.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

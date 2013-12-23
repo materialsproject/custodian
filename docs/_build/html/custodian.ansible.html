@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ansible Package &mdash; custodian 0.5.1 documentation</title>
+    <title>custodian.ansible package &mdash; custodian 0.6.0 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.5.1',
+        VERSION:     '0.6.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.5.1 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.6.0 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.5.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.6.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -52,10 +52,20 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="ansible-package">
-<h1>ansible Package<a class="headerlink" href="#ansible-package" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="custodian-ansible-package">
+<h1>custodian.ansible package<a class="headerlink" href="#custodian-ansible-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
 <div class="section" id="module-custodian.ansible.actions">
-<span id="actions-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">actions</span></tt> Module<a class="headerlink" href="#module-custodian.ansible.actions" title="Permalink to this headline">¶</a></h2>
+<span id="custodian-ansible-actions-module"></span><h2>custodian.ansible.actions module<a class="headerlink" href="#module-custodian.ansible.actions" title="Permalink to this headline">¶</a></h2>
 <p>This module defines various classes of supported actions. All actions are
 implemented as static methods, but are defined using classes (as opposed to
 modules) so that a set of well-defined actions can be namespaced easily.</p>
@@ -81,6 +91,7 @@ _rename</div></blockquote>
 using the mongo {&#8220;a.b&#8221;:1} notation. This is because mongo does not allow
 keys with &#8221;.&#8221; to be inserted. Instead, nested dict modification is
 supported using a special &#8220;-&gt;&#8221; keyword, e.g. {&#8220;a-&gt;b&#8221;: 1}</p>
+<p>x.__init__(...) initializes x; see help(type(x)) for signature</p>
 <dl class="staticmethod">
 <dt id="custodian.ansible.actions.DictActions.add_to_set">
 <em class="property">static </em><tt class="descname">add_to_set</tt><big>(</big><em>input_dict</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.add_to_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.add_to_set" title="Permalink to this definition">¶</a></dt>
@@ -140,6 +151,7 @@ supported using a special &#8220;-&gt;&#8221; keyword, e.g. {&#8220;a-&gt;b&#822
 <p>Class of supported file actions. For FileActions, the modder class takes in
 a filename as a string. The filename should preferably be a full path to
 avoid ambiguity.</p>
+<p>x.__init__(...) initializes x; see help(type(x)) for signature</p>
 <dl class="staticmethod">
 <dt id="custodian.ansible.actions.FileActions.file_copy">
 <em class="property">static </em><tt class="descname">file_copy</tt><big>(</big><em>filename</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_copy" title="Permalink to this definition">¶</a></dt>
@@ -214,7 +226,7 @@ the action without performing it.</dd>
 
 </div>
 <div class="section" id="module-custodian.ansible.intepreter">
-<span id="intepreter-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">intepreter</span></tt> Module<a class="headerlink" href="#module-custodian.ansible.intepreter" title="Permalink to this headline">¶</a></h2>
+<span id="custodian-ansible-intepreter-module"></span><h2>custodian.ansible.intepreter module<a class="headerlink" href="#module-custodian.ansible.intepreter" title="Permalink to this headline">¶</a></h2>
 <p>This module implements a Modder class that performs modifications on objects
 using support actions.</p>
 <dl class="class">
@@ -237,19 +249,17 @@ pymatpro.ansible.actions.</p>
 &#8216;World&#8217;
 &gt;&gt;&gt; d[&#8216;Hello&#8217;]
 &#8216;Universe&#8217;</p>
+<p>Args:
+actions:</p>
+<blockquote>
+<div>A sequence of supported actions. Default is None, which means
+only DictActions are supported.</div></blockquote>
 <dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt>actions:</dt>
-<dd>A sequence of supported actions. Default is None, which means
-only DictActions are supported.</dd>
 <dt>strict:</dt>
 <dd>Boolean indicating whether to use strict mode. In non-strict
 mode, unsupported actions are simply ignored without any
 errors raised. In strict mode, if an unsupported action is
 supplied, a ValueError is raised. Defaults to True.</dd>
-</dl>
-</dd>
 </dl>
 <dl class="method">
 <dt id="custodian.ansible.intepreter.Modder.modify">
@@ -290,6 +300,9 @@ file.</dd>
 </dd></dl>
 
 </div>
+<div class="section" id="module-custodian.ansible">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-custodian.ansible" title="Permalink to this headline">¶</a></h2>
+</div>
 </div>
 
 
@@ -300,9 +313,14 @@ file.</dd>
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">ansible Package</a><ul>
-<li><a class="reference internal" href="#module-custodian.ansible.actions"><tt class="docutils literal"><span class="pre">actions</span></tt> Module</a></li>
-<li><a class="reference internal" href="#module-custodian.ansible.intepreter"><tt class="docutils literal"><span class="pre">intepreter</span></tt> Module</a></li>
+<li><a class="reference internal" href="#">custodian.ansible package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-custodian.ansible.actions">custodian.ansible.actions module</a></li>
+<li><a class="reference internal" href="#module-custodian.ansible.intepreter">custodian.ansible.intepreter module</a></li>
+<li><a class="reference internal" href="#module-custodian.ansible">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -338,13 +356,13 @@ file.</dd>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.5.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.6.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

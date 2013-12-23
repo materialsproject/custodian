@@ -1,19 +1,36 @@
-ansible Package
-===============
+custodian.ansible package
+=========================
 
-:mod:`actions` Module
----------------------
+Subpackages
+-----------
+
+.. toctree::
+
+
+Submodules
+----------
+
+custodian.ansible.actions module
+--------------------------------
 
 .. automodule:: custodian.ansible.actions
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`intepreter` Module
-------------------------
+custodian.ansible.intepreter module
+-----------------------------------
 
 .. automodule:: custodian.ansible.intepreter
     :members:
     :undoc-members:
     :show-inheritance:
 
+
+Module contents
+---------------
+
+.. automodule:: custodian.ansible
+    :members:
+    :undoc-members:
+    :show-inheritance:
