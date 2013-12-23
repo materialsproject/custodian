@@ -135,14 +135,21 @@ class Custodian(object):
         self.checkpoint = checkpoint
 
     @staticmethod
-    def _load_checkpoint(fname):
-        logging.info("Loading from checkpoint file {}...".format(fname))
-        t = tarfile.open(fname)
-        t.extractall()
-        #Log the corrections to a json file.
-        with open(Custodian.LOG_FILE, "r") as f:
-            run_log = json.load(f)
-        return run_log
+    def _load_checkpoint(cwd):
+        restart = -1
+        run_log = []
+        for chkpt in glob(pjoin(cwd, "custodian.chk.*.tar.gz")):
+            jobno = int(chkpt.split(".")[-3])
+            if jobno > restart:
+                restart = jobno
+                logging.info("Loading from checkpoint file {}...".format(
+                    chkpt))
+                t = tarfile.open(chkpt)
+                t.extractall()
+                #Log the corrections to a json file.
+                with open(Custodian.LOG_FILE, "r") as f:
+                    run_log = json.load(f)
+        return restart, run_log
 
     @staticmethod
     def _delete_checkpoints(cwd):
@@ -176,16 +183,19 @@ class Custodian(object):
             os.chdir(tempdir)
             logging.info("Using scratch directory {}.".format(tempdir))
 
-        run_log = []
         total_errors = 0
         unrecoverable = False
         start = datetime.datetime.now()
         logging.info("Run started at {}.".format(start))
 
+        if self.checkpoint:
+            restart, run_log = Custodian._load_checkpoint(cwd)
+        else:
+            restart, run_log = -1, []
+
         for i, job in enumerate(self.jobs):
-            chk_fname = pjoin(cwd, "custodian.chk.{}.tar.gz".format(i))
-            if self.checkpoint and os.path.exists(chk_fname):
-                run_log = Custodian._load_checkpoint(chk_fname)
+            if i <= restart:
+                #Skip all jobs until the restart point.
                 continue
             run_log.append({"job": job.to_dict, "corrections": []})
             for attempt in xrange(self.max_errors):
