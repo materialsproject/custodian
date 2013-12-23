@@ -65,8 +65,8 @@ Optional dependencies
 
 Optional libraries that are required if you need certain features:
 
-1. pymatgen 2.6.2+: To use the plugins for VASP and NwChem. Please install
-   using::
+1. pymatgen 2.8.10+: To use the plugins for VASP, NwChem and Qchem. Please
+   install using::
 
     pip install pymatgen
 
