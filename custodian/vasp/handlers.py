@@ -66,6 +66,7 @@ class VaspErrorHandler(ErrorHandler, MSONable):
 
     def __init__(self, output_filename="vasp.out"):
         self.output_filename = output_filename
+        self.errors = set()
 
     def check(self):
         self.errors = set()
