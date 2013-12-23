@@ -29,7 +29,7 @@ def do_run(args):
                     output_file=args.outfile)
     c = Custodian([NwchemErrorHandler(output_filename=args.outfile)], [job],
                   max_errors=5, scratch_dir=args.scratch,
-                  gzipped_output=args.gzipped)
+                  gzipped_output=args.gzipped, checkpoint=True)
     c.run()
 
 

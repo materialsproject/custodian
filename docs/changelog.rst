@@ -1,6 +1,23 @@
 Change Log
 ==========
 
+0.5.0
+-----
+1. Added scratch_dir option to Custodian class as well as run_vasp and
+   run_nwchem scripts. Many supercomputing clusters have a scratch space
+   which have significantly faster IO. This option provides a transparent way
+   to specify the jobs to be performed in the scratch. Especially useful for
+   jobs which have significant file IO.
+
+0.4.5
+-----
+1. Fix gzip of output.
+
+0.4.3
+-----
+1. Added handling for ZBRENT error for VASP.
+2. Minor refactoring to consolidate backup and gzip directory methods.
+
 0.4.2
 -----
 1. Rudimentary support for Nwchem error handling (by Shyue Ping Ong).

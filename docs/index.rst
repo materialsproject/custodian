@@ -6,7 +6,7 @@ for different applications.
 
 Error recovery is an important aspect of many *high-throughput* projects that
 generate data on a large scale. When you are running on the order of hundreds
-of thousands of jobs, even an error-rate of 1% would mean thousands of errored
+of thousands of jobs, even an error rate of 1% would mean thousands of errored
 jobs that would be impossible to deal with on a case-by-case basis.
 
 The specific use case for custodian is for long running jobs, with potentially
@@ -16,34 +16,26 @@ Using custodian, one can develop a mechanism to gracefully recover from the
 error, and restart the job with modified parameters if necessary.
 
 The current version of Custodian also comes with two sub-packages for error
-handling for Vienna Ab Initio Simulation Package (VASP) and NwChem
+handling for Vienna Ab Initio Simulation Package (VASP), NwChem and QChem
 calculations.
 
 Change log
 ==========
 
+0.6.1
+-----
+1. Bug fix release to address minor issue with checkpointing.
+2. Checkpointing is now turned off by default.
+
 0.6.0
 -----
-1. Checkpointing implemented for Custodian.
+1. Checkpointing implemented for Custodian. Custodian can now checkpoint all
+   files in the current working directory after every successful job. If the
+   job is resubmitted, it will restore files and start from the last
+   checkpoint. Particularly useful for multi-job runs.
 2. Added PBSWalltimeHandler to handle wall times for PBS Vasp Jobs.
 3. Qchem error handlers and jobs.
 
-0.5.0
------
-1. Added scratch_dir option to Custodian class as well as run_vasp and
-   run_nwchem scripts. Many supercomputing clusters have a scratch space
-   which have significantly faster IO. This option provides a transparent way
-   to specify the jobs to be performed in the scratch. Especially useful for
-   jobs which have significant file IO.
-
-0.4.5
------
-1. Fix gzip of output.
-
-0.4.3
------
-1. Added handling for ZBRENT error for VASP.
-2. Minor refactoring to consolidate backup and gzip directory methods.
 
 :doc:`Older versions </changelog>`
 
@@ -91,8 +83,8 @@ Optional dependencies
 
 Optional libraries that are required if you need certain features:
 
-1. Python Materials Genomics (`pymatgen`_) 2.6.2+: To use the plugin for
-   VASP and NwChem. Please install using::
+1. Python Materials Genomics (`pymatgen`_) 2.8.10+: To use the plugin for
+   VASP, NwChem and Qchem. Please install using::
 
     pip install pymatgen
 

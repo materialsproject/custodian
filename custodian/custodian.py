@@ -78,7 +78,7 @@ class Custodian(object):
     def __init__(self, handlers, jobs, max_errors=1, polling_time_step=10,
                  monitor_freq=30, log_file="custodian.json",
                  skip_over_errors=False, scratch_dir=None,
-                 gzipped_output=False, checkpoint=True):
+                 gzipped_output=False, checkpoint=False):
         """
         Args:
             handlers:
@@ -121,7 +121,9 @@ class Custodian(object):
                 Whether to gzip the final output to save space. Defaults to
                 False.
             checkpoint:
-                Whether to checkpoint after each Job. Defaults to True.
+                Whether to checkpoint after each successful Job.
+                Checkpoints are stored as custodian.chk.#.tar.gz
+                files. Defaults to False.
         """
         self.max_errors = max_errors
         self.jobs = jobs
