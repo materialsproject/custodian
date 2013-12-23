@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian package &mdash; custodian 0.6.0 documentation</title>
+    <title>custodian package &mdash; custodian 0.6.1 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.6.0',
+        VERSION:     '0.6.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.6.0 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.6.1 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.6.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.6.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -118,7 +118,7 @@ ErrorHandlers and Jobs, and some helper functions for backing up or
 compressing files in a directory.</p>
 <dl class="class">
 <dt id="custodian.custodian.Custodian">
-<em class="property">class </em><tt class="descname">Custodian</tt><big>(</big><em>handlers</em>, <em>jobs</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em>, <em>log_file='custodian.json'</em>, <em>skip_over_errors=False</em>, <em>scratch_dir=None</em>, <em>gzipped_output=False</em>, <em>checkpoint=True</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descname">Custodian</tt><big>(</big><em>handlers</em>, <em>jobs</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em>, <em>log_file='custodian.json'</em>, <em>skip_over_errors=False</em>, <em>scratch_dir=None</em>, <em>gzipped_output=False</em>, <em>checkpoint=False</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>The Custodian class is the manager for a list of jobs given a list of
 error handlers. The way it works is as follows:</p>
@@ -176,7 +176,9 @@ working directory.</dd>
 <dd>Whether to gzip the final output to save space. Defaults to
 False.</dd>
 <dt>checkpoint:</dt>
-<dd>Whether to checkpoint after each Job. Defaults to True.</dd>
+<dd>Whether to checkpoint after each successful Job.
+Checkpoints are stored as custodian.chk.#.tar.gz
+files. Defaults to False.</dd>
 </dl>
 <dl class="attribute">
 <dt id="custodian.custodian.Custodian.LOG_FILE">
@@ -397,7 +399,7 @@ files at the end of a run.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.6.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.6.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

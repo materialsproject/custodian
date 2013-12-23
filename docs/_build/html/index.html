@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Change log &mdash; custodian 0.6.0 documentation</title>
+    <title>Change log &mdash; custodian 0.6.1 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.6.0',
+        VERSION:     '0.6.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.6.0 documentation" href="#" />
+    <link rel="top" title="custodian 0.6.1 documentation" href="#" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.6.0 documentation</a> &raquo;</li> 
+        <li><a href="#">custodian 0.6.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -59,7 +59,7 @@ plugin framework that allows you to develop specific job management workflows
 for different applications.</p>
 <p>Error recovery is an important aspect of many <em>high-throughput</em> projects that
 generate data on a large scale. When you are running on the order of hundreds
-of thousands of jobs, even an error-rate of 1% would mean thousands of errored
+of thousands of jobs, even an error rate of 1% would mean thousands of errored
 jobs that would be impossible to deal with on a case-by-case basis.</p>
 <p>The specific use case for custodian is for long running jobs, with potentially
 random errors. For example, there may be a script that takes several days to
@@ -67,39 +67,26 @@ run on a server, with a 1% chance of some IO error causing the job to fail.
 Using custodian, one can develop a mechanism to gracefully recover from the
 error, and restart the job with modified parameters if necessary.</p>
 <p>The current version of Custodian also comes with two sub-packages for error
-handling for Vienna Ab Initio Simulation Package (VASP) and NwChem
+handling for Vienna Ab Initio Simulation Package (VASP), NwChem and QChem
 calculations.</p>
 <div class="section" id="change-log">
 <h1>Change log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
-<h2>0.6.0<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>0.6.1<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li>Checkpointing implemented for Custodian.</li>
-<li>Added PBSWalltimeHandler to handle wall times for PBS Vasp Jobs.</li>
-<li>Qchem error handlers and jobs.</li>
+<li>Bug fix release to address minor issue with checkpointing.</li>
+<li>Checkpointing is now turned off by default.</li>
 </ol>
 </div>
 <div class="section" id="id2">
-<h2>0.5.0<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<h2>0.6.0<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li>Added scratch_dir option to Custodian class as well as run_vasp and
-run_nwchem scripts. Many supercomputing clusters have a scratch space
-which have significantly faster IO. This option provides a transparent way
-to specify the jobs to be performed in the scratch. Especially useful for
-jobs which have significant file IO.</li>
-</ol>
-</div>
-<div class="section" id="id3">
-<h2>0.4.5<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li>Fix gzip of output.</li>
-</ol>
-</div>
-<div class="section" id="id4">
-<h2>0.4.3<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li>Added handling for ZBRENT error for VASP.</li>
-<li>Minor refactoring to consolidate backup and gzip directory methods.</li>
+<li>Checkpointing implemented for Custodian. Custodian can now checkpoint all
+files in the current working directory after every successful job. If the
+job is resubmitted, it will restore files and start from the last
+checkpoint. Particularly useful for multi-job runs.</li>
+<li>Added PBSWalltimeHandler to handle wall times for PBS Vasp Jobs.</li>
+<li>Qchem error handlers and jobs.</li>
 </ol>
 <p><a class="reference internal" href="changelog.html"><em>Older versions</em></a></p>
 </div>
@@ -139,8 +126,8 @@ cloning the source, you can type:</p>
 <h2>Optional dependencies<a class="headerlink" href="#optional-dependencies" title="Permalink to this headline">¶</a></h2>
 <p>Optional libraries that are required if you need certain features:</p>
 <ol class="arabic">
-<li><p class="first">Python Materials Genomics (<a class="reference external" href="https://pypi.python.org/pypi/pymatgen">pymatgen</a>) 2.6.2+: To use the plugin for
-VASP and NwChem. Please install using:</p>
+<li><p class="first">Python Materials Genomics (<a class="reference external" href="https://pypi.python.org/pypi/pymatgen">pymatgen</a>) 2.8.10+: To use the plugin for
+VASP, NwChem and Qchem. Please install using:</p>
 <div class="highlight-python"><pre>pip install pymatgen</pre>
 </div>
 <p>For more information, please consult <a class="reference external" href="http://pymatgen.org">pymatgen&#8217;s documentation</a>.</p>
@@ -421,10 +408,8 @@ DEALINGS IN THE SOFTWARE.</pre>
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Change log</a><ul>
-<li><a class="reference internal" href="#id1">0.6.0</a></li>
-<li><a class="reference internal" href="#id2">0.5.0</a></li>
-<li><a class="reference internal" href="#id3">0.4.5</a></li>
-<li><a class="reference internal" href="#id4">0.4.3</a></li>
+<li><a class="reference internal" href="#id1">0.6.1</a></li>
+<li><a class="reference internal" href="#id2">0.6.0</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#getting-custodian">Getting custodian</a><ul>
@@ -477,7 +462,7 @@ DEALINGS IN THE SOFTWARE.</pre>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.6.0 documentation</a> &raquo;</li> 
+        <li><a href="#">custodian 0.6.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
