@@ -14,7 +14,7 @@ setup(
     packages=find_packages(),
     version="0.6.0",
     install_requires=[],
-    extras_require={"vasp, nwchem": ["pymatgen>=2.8.9"]},
+    extras_require={"vasp, nwchem": ["pymatgen>=2.8.10"]},
     package_data={},
     author="Shyue Ping Ong, William Davidson Richards, Stephen Dacek, "
            "Xiaohui Qu",
