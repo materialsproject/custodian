@@ -282,12 +282,6 @@ class Custodian(object):
         end = datetime.datetime.now()
         logging.info("Run ended at {}.".format(end))
         run_time = end - start
-        if total_errors >= self.max_errors:
-            logging.info("Max {} errors reached. Exited..."
-                         .format(self.max_errors))
-        elif not unrecoverable:
-            #Cleanup checkpoint files (if any) if run is successful.
-            Custodian._delete_checkpoints(cwd)
 
         logging.info("Run completed. Total time taken = {}.".format(run_time))
 
@@ -299,6 +293,13 @@ class Custodian(object):
                 shutil.copy(f, cwd)
             shutil.rmtree(tempdir)
             os.chdir(cwd)
+
+        if total_errors >= self.max_errors:
+            logging.info("Max {} errors reached. Exited..."
+                         .format(self.max_errors))
+        elif not unrecoverable:
+            #Cleanup checkpoint files (if any) if run is successful.
+            Custodian._delete_checkpoints(cwd)
 
         return run_log
 
