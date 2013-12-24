@@ -10,7 +10,7 @@ from __future__ import division
 __author__ = "Shyue Ping Ong"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
-__email__ = "shyuep@gmail.com"
+__email__ = "ongsp@ucsd.edu"
 __status__ = "Beta"
 __date__ = "5/20/13"
 
