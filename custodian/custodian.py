@@ -467,11 +467,10 @@ def backup(filenames, prefix="error"):
                      for f in glob("{}.*.tar.gz".format(prefix))])
     filename = "{}.{}.tar.gz".format(prefix, num + 1)
     logging.info("Backing up run to {}.".format(filename))
-    tar = tarfile.open(filename, "w:gz")
-    for fname in filenames:
-        for f in glob(fname):
-            tar.add(f)
-    tar.close()
+    with tarfile.open(filename, "w:gz") as tar:
+        for fname in filenames:
+            for f in glob(fname):
+                tar.add(f)
 
 
 def gzip_dir(path):

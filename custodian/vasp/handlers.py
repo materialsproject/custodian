@@ -12,7 +12,7 @@ __author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, " \
              "Wei Chen, Stephen Dacek"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
-__email__ = "shyuep@gmail.com"
+__email__ = "ongsp@ucsd.edu"
 __status__ = "Beta"
 __date__ = "2/4/13"
 
@@ -518,8 +518,9 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
 class PBSWalltimeHandler(ErrorHandler):
     """
     Check if a run is nearing the walltime of a PBS queuing system. If so,
-    write a STOPCAR with LSTOP=.True.. The PBS_WALLTIME must be in the
-    environment.
+    write a STOPCAR with LSTOP=.True.. The PBS_WALLTIME variable must be in
+    the environment (usually the case for PBS systems like most
+    supercomputing centers).
     """
 
     def __init__(self):
@@ -551,12 +552,12 @@ class PBSWalltimeHandler(ErrorHandler):
         m = Modder(actions=[FileActions])
         for a in actions:
             m.modify(a["action"], a["file"])
-        # Actions is being returned as None so that the job will stop after
-        # STOPCAR is written.
+        # Actions is being returned as None so that custodian will stop after
+        # STOPCAR is written. We do not want subsequent jobs to proceed.
         return {"errors": ["Walltime reached"], "actions": None}
 
     def __str__(self):
-        return "PBSWalltimeHandler."
+        return "PBSWalltimeHandler"
 
     @property
     def is_monitor(self):
