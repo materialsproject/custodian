@@ -74,6 +74,7 @@ class Custodian(object):
         every 30 x 10 = 300 seconds, i.e., 5 minutes.
     """
     LOG_FILE = "custodian.json"
+    SCR_LINK = "scratch_link"
 
     def __init__(self, handlers, jobs, max_errors=1, polling_time_step=10,
                  monitor_freq=30, log_file="custodian.json",
@@ -114,9 +115,12 @@ class Custodian(object):
                 scratch partition has much faster IO. To use this, set
                 scratch_dir=root of directory you want to use for runs.
                 There is no need to provide unique directory names; we will
-                use python's tempfile creation mechanisms. If this is
-                None (the default), the run is performed in the current
-                working directory.
+                use python's tempfile creation mechanisms. A symbolic link
+                is created during the course of the run in the working
+                directory called "scratch_link" as users may want to
+                sometimes check the output during the course of a run. If
+                this is None (the default), the run is performed in the
+                current working directory.
             gzipped_output:
                 Whether to gzip the final output to save space. Defaults to
                 False.
@@ -182,8 +186,12 @@ class Custodian(object):
             tempdir = tempfile.mkdtemp(dir=self.scratch_dir)
             for f in os.listdir("."):
                 shutil.copy(f, tempdir)
+            os.symlink(tempdir, Custodian.SCR_LINK)
             os.chdir(tempdir)
-            logging.info("Using scratch directory {}.".format(tempdir))
+            logging.info(
+                "Using scratch directory {} and created symbolic "
+                "link called {} in working directory".format(
+                    tempdir, Custodian.SCR_LINK))
 
         total_errors = 0
         unrecoverable = False
@@ -295,6 +303,7 @@ class Custodian(object):
                 shutil.copy(f, cwd)
             shutil.rmtree(tempdir)
             os.chdir(cwd)
+            os.remove(Custodian.SCR_LINK)
 
         if total_errors >= self.max_errors:
             logging.info("Max {} errors reached. Exited..."
