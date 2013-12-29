@@ -540,8 +540,10 @@ class PBSWalltimeHandler(ErrorHandler):
                 time_per_step = 0
 
             # If the remaining time is less than average time for 3 ionic
-            # steps.
-            if wall_time - total_secs < time_per_step * 3:
+            # steps or 300 seconds (last 5 minutes, which is the
+            # default monitoring frequency).
+            time_left = wall_time - total_secs
+            if time_left < max(time_per_step * 3, 300):
                 return True
         return False
 
