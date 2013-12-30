@@ -486,16 +486,25 @@ def gzip_dir(path):
 
 
 class ScratchDir(object):
+    """
+    Creates a with context manager that automatically handles creation of
+    temporary directories in the scratch space and cleanup when done.
+    """
 
     SCR_LINK = "scratch_link"
 
-    def __init__(self, dirname):
-        self.dirname = dirname
+    def __init__(self, rootpath):
+        """
+        Args:
+            rootpath:
+                The path in which to create temp subdirectories.
+        """
+        self.rootpath = rootpath
         self.cwd = os.getcwd()
 
     def __enter__(self):
-        if self.dirname is not None:
-            tempdir = tempfile.mkdtemp(dir=self.dirname)
+        if self.rootpath is not None:
+            tempdir = tempfile.mkdtemp(dir=self.rootpath)
             for f in os.listdir("."):
                 shutil.copy(f, tempdir)
             os.symlink(tempdir, ScratchDir.SCR_LINK)
@@ -506,9 +515,9 @@ class ScratchDir(object):
                     tempdir, ScratchDir.SCR_LINK))
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.dirname is not None:
+        if self.rootpath is not None:
             for f in os.listdir("."):
                 shutil.copy(f, self.cwd)
-            shutil.rmtree(self.dirname)
+            shutil.rmtree(self.rootpath)
             os.chdir(self.cwd)
             os.remove(ScratchDir.SCR_LINK)
