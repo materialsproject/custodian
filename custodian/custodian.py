@@ -74,7 +74,6 @@ class Custodian(object):
         every 30 x 10 = 300 seconds, i.e., 5 minutes.
     """
     LOG_FILE = "custodian.json"
-    SCR_LINK = "scratch_link"
 
     def __init__(self, handlers, jobs, max_errors=1, polling_time_step=10,
                  monitor_freq=30, log_file="custodian.json",
@@ -182,135 +181,122 @@ class Custodian(object):
         """
         cwd = os.getcwd()
 
-        if self.scratch_dir is not None:
-            tempdir = tempfile.mkdtemp(dir=self.scratch_dir)
-            for f in os.listdir("."):
-                shutil.copy(f, tempdir)
-            os.symlink(tempdir, Custodian.SCR_LINK)
-            os.chdir(tempdir)
-            logging.info(
-                "Using scratch directory {} and created symbolic "
-                "link called {} in working directory".format(
-                    tempdir, Custodian.SCR_LINK))
+        with ScratchDir(self.scratch_dir):
 
-        total_errors = 0
-        unrecoverable = False
-        start = datetime.datetime.now()
-        logging.info("Run started at {}.".format(start))
+            total_errors = 0
+            unrecoverable = False
+            start = datetime.datetime.now()
+            logging.info("Run started at {}.".format(start))
 
-        if self.checkpoint:
-            restart, run_log = Custodian._load_checkpoint(cwd)
-        else:
-            restart, run_log = -1, []
-
-        for i, job in enumerate(self.jobs):
-            if i <= restart:
-                #Skip all jobs until the restart point.
-                continue
-            run_log.append({"job": job.to_dict, "corrections": []})
-            for attempt in xrange(self.max_errors):
-                logging.info(
-                    "Starting job no. {} ({}) attempt no. {}. Errors thus far"
-                    " = {}.".format(i + 1, job.name, attempt + 1,
-                                    total_errors))
-
-                # If this is the start of the job, do the setup.
-                if not run_log[-1]["corrections"]:
-                    job.setup()
-
-                p = job.run()
-                # Check for errors using the error handlers and perform
-                # corrections.
-                has_error = False
-
-                # While the job is running, we use the handlers that are
-                # monitors to monitor the job.
-                if isinstance(p, subprocess.Popen):
-                    if self.monitors:
-                        n = 0
-                        while True:
-                            n += 1
-                            time.sleep(self.polling_time_step)
-                            if p.poll() is not None:
-                                break
-                            if n % self.monitor_freq == 0:
-                                corrections = _do_check(
-                                    self.monitors, terminate_func=p.terminate,
-                                    skip_over_errors=self.skip_over_errors)
-                                if len(corrections) > 0:
-                                    has_error = True
-                                    total_errors += len(corrections)
-                                    run_log[-1]["corrections"].extend(
-                                        corrections)
-                    else:
-                        p.wait()
-
-                # Check for errors again, since in some cases non-monitor
-                # handlers fix the problems detected by monitors
-                # if an error has been found, not all handlers need to run
-                if has_error:
-                    remaining_handlers = filter(lambda x: not x.is_monitor,
-                                                self.handlers)
-                else:
-                    remaining_handlers = self.handlers
-
-                corrections = _do_check(
-                    remaining_handlers,
-                    skip_over_errors=self.skip_over_errors)
-                if len(corrections) > 0:
-                    has_error = True
-                    total_errors += len(corrections)
-                    run_log[-1]["corrections"].extend(corrections)
-
-                #Log the corrections to a json file.
-                with open(Custodian.LOG_FILE, "w") as f:
-                    logging.info("Logging to {}...".format(Custodian.LOG_FILE))
-                    json.dump(run_log, f, indent=4)
-
-                # If there are no errors detected, perform postprocessing and
-                # exit.
-                if not has_error:
-                    job.postprocess()
-                    break
-                elif run_log[-1]["corrections"][-1]["actions"] is None:
-                    # Check if there has been an unrecoverable error.
-                    logging.info("Unrecoverable error.")
-                    unrecoverable = True
-                    break
-                elif total_errors >= self.max_errors:
-                    logging.info("Max errors reached.")
-                    break
-
-            if unrecoverable or total_errors >= self.max_errors:
-                break
-
-            # Checkpoint after each job so that we can recover from last
-            # point and remove old checkpoints
             if self.checkpoint:
-                Custodian._save_checkpoint(cwd, i)
+                restart, run_log = Custodian._load_checkpoint(cwd)
+            else:
+                restart, run_log = -1, []
 
-        end = datetime.datetime.now()
-        logging.info("Run ended at {}.".format(end))
-        run_time = end - start
+            for i, job in enumerate(self.jobs):
+                if i <= restart:
+                    #Skip all jobs until the restart point.
+                    continue
+                run_log.append({"job": job.to_dict, "corrections": []})
+                for attempt in xrange(self.max_errors):
+                    logging.info(
+                        "Starting job no. {} ({}) attempt no. {}. Errors "
+                        "thus far = {}.".format(
+                            i + 1, job.name, attempt + 1, total_errors))
 
-        logging.info("Run completed. Total time taken = {}.".format(run_time))
+                    # If this is the start of the job, do the setup.
+                    if not run_log[-1]["corrections"]:
+                        job.setup()
 
-        if self.gzipped_output:
-            gzip_dir(".")
+                    p = job.run()
+                    # Check for errors using the error handlers and perform
+                    # corrections.
+                    has_error = False
 
-        if self.scratch_dir is not None:
-            for f in os.listdir("."):
-                shutil.copy(f, cwd)
-            shutil.rmtree(tempdir)
-            os.chdir(cwd)
-            os.remove(Custodian.SCR_LINK)
+                    # While the job is running, we use the handlers that are
+                    # monitors to monitor the job.
+                    if isinstance(p, subprocess.Popen):
+                        if self.monitors:
+                            n = 0
+                            while True:
+                                n += 1
+                                time.sleep(self.polling_time_step)
+                                if p.poll() is not None:
+                                    break
+                                if n % self.monitor_freq == 0:
+                                    corrections = _do_check(
+                                        self.monitors,
+                                        terminate_func=p.terminate,
+                                        skip_over_errors=self.skip_over_errors)
+                                    if len(corrections) > 0:
+                                        has_error = True
+                                        total_errors += len(corrections)
+                                        run_log[-1]["corrections"].extend(
+                                            corrections)
+                        else:
+                            p.wait()
 
-        if total_errors >= self.max_errors:
-            logging.info("Max {} errors reached. Exited..."
-                         .format(self.max_errors))
-        elif not unrecoverable:
-            #Cleanup checkpoint files (if any) if run is successful.
-            Custodian._delete_checkpoints(cwd)
+                    # Check for errors again, since in some cases non-monitor
+                    # handlers fix the problems detected by monitors
+                    # if an error has been found, not all handlers need to run
+                    if has_error:
+                        remaining_handlers = filter(lambda x: not x.is_monitor,
+                                                    self.handlers)
+                    else:
+                        remaining_handlers = self.handlers
+
+                    corrections = _do_check(
+                        remaining_handlers,
+                        skip_over_errors=self.skip_over_errors)
+                    if len(corrections) > 0:
+                        has_error = True
+                        total_errors += len(corrections)
+                        run_log[-1]["corrections"].extend(corrections)
+
+                    #Log the corrections to a json file.
+                    with open(Custodian.LOG_FILE, "w") as f:
+                        logging.info("Logging to {}...".format(
+                            Custodian.LOG_FILE))
+                        json.dump(run_log, f, indent=4)
+
+                    # If there are no errors detected, perform
+                    # postprocessing and exit.
+                    if not has_error:
+                        job.postprocess()
+                        break
+                    elif run_log[-1]["corrections"][-1]["actions"] is None:
+                        # Check if there has been an unrecoverable error.
+                        logging.info("Unrecoverable error.")
+                        unrecoverable = True
+                        break
+                    elif total_errors >= self.max_errors:
+                        logging.info("Max errors reached.")
+                        break
+
+                if unrecoverable or total_errors >= self.max_errors:
+                    break
+
+                # Checkpoint after each job so that we can recover from last
+                # point and remove old checkpoints
+                if self.checkpoint:
+                    Custodian._save_checkpoint(cwd, i)
+
+            end = datetime.datetime.now()
+            logging.info("Run ended at {}.".format(end))
+            run_time = end - start
+
+            logging.info("Run completed. Total time taken = {}."
+                         .format(run_time))
+
+            if self.gzipped_output:
+                gzip_dir(".")
+
+            if total_errors >= self.max_errors:
+                logging.info("Max {} errors reached. Exited..."
+                             .format(self.max_errors))
+            elif not unrecoverable:
+                #Cleanup checkpoint files (if any) if run is successful.
+                Custodian._delete_checkpoints(cwd)
 
         return run_log
 
@@ -497,3 +483,32 @@ def gzip_dir(path):
                     GzipFile('{}.gz'.format(f), 'wb') as f_out:
                 f_out.writelines(f_in)
             os.remove(f)
+
+
+class ScratchDir(object):
+
+    SCR_LINK = "scratch_link"
+
+    def __init__(self, dirname):
+        self.dirname = dirname
+        self.cwd = os.getcwd()
+
+    def __enter__(self):
+        if self.dirname is not None:
+            tempdir = tempfile.mkdtemp(dir=self.dirname)
+            for f in os.listdir("."):
+                shutil.copy(f, tempdir)
+            os.symlink(tempdir, ScratchDir.SCR_LINK)
+            os.chdir(tempdir)
+            logging.info(
+                "Using scratch directory {} and created symbolic "
+                "link called {} in working directory".format(
+                    tempdir, ScratchDir.SCR_LINK))
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.dirname is not None:
+            for f in os.listdir("."):
+                shutil.copy(f, self.cwd)
+            shutil.rmtree(self.dirname)
+            os.chdir(self.cwd)
+            os.remove(ScratchDir.SCR_LINK)
