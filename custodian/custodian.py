@@ -509,6 +509,7 @@ class ScratchDir(object):
                 shutil.copy(f, tempdir)
             os.symlink(tempdir, ScratchDir.SCR_LINK)
             os.chdir(tempdir)
+            self.tempdir = tempdir
             logging.info(
                 "Using scratch directory {} and created symbolic "
                 "link called {} in working directory".format(
@@ -518,6 +519,6 @@ class ScratchDir(object):
         if self.rootpath is not None:
             for f in os.listdir("."):
                 shutil.copy(f, self.cwd)
-            shutil.rmtree(self.rootpath)
+            shutil.rmtree(self.tempdir)
             os.chdir(self.cwd)
             os.remove(ScratchDir.SCR_LINK)
