@@ -503,20 +503,28 @@ class ScratchDir(object):
         self.cwd = os.getcwd()
 
     def __enter__(self):
-        if self.rootpath is not None:
+        tempdir = self.cwd
+        if self.rootpath is not None and os.path.abspath(self.rootpath) != \
+                self.cwd:
             tempdir = tempfile.mkdtemp(dir=self.rootpath)
+            self.tempdir = os.path.abspath(tempdir)
+            print self.tempdir
             for f in os.listdir("."):
-                shutil.copy(f, tempdir)
+                if os.path.isfile(f):
+                    shutil.copy(f, tempdir)
+                elif os.path.isdir(f):
+                    shutil.copytree(f, os.path.join(tempdir, f))
             os.symlink(tempdir, ScratchDir.SCR_LINK)
             os.chdir(tempdir)
-            self.tempdir = tempdir
             logging.info(
                 "Using scratch directory {} and created symbolic "
                 "link called {} in working directory".format(
                     tempdir, ScratchDir.SCR_LINK))
+        return tempdir
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.rootpath is not None:
+        if self.rootpath is not None and os.path.abspath(self.rootpath) != \
+                self.cwd:
             for f in os.listdir("."):
                 shutil.copy(f, self.cwd)
             shutil.rmtree(self.tempdir)

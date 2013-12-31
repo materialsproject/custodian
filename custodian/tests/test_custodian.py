@@ -15,9 +15,10 @@ __date__ = "Jun 1, 2012"
 
 import unittest
 import random
-from custodian.custodian import Job, ErrorHandler, Custodian
+from custodian.custodian import Job, ErrorHandler, Custodian, ScratchDir
 import os
 import glob
+import tempfile
 
 
 class ExampleJob(Job):
@@ -130,6 +131,21 @@ class CustodianTest(unittest.TestCase):
         for f in glob.glob("custodian.*.tar.gz"):
             os.remove(f)
         os.remove("custodian.json")
+
+
+class ScratchDirTest(unittest.TestCase):
+
+    def test_with(self):
+        scratch = tempfile.gettempdir()
+        with ScratchDir(scratch) as d:
+            with open("text", "w") as f:
+                f.write("write")
+            files = os.listdir(d)
+            self.assertIn("text", files)
+
+        #Make sure the tempdir is deleted.
+        self.assertFalse(os.path.exists(d))
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
