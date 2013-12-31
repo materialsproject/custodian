@@ -106,6 +106,7 @@ class ExampleHandler2(ErrorHandler):
 class CustodianTest(unittest.TestCase):
 
     def setUp(self):
+        self.cwd = os.getcwd()
         os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
     def test_run(self):
@@ -131,9 +132,14 @@ class CustodianTest(unittest.TestCase):
         for f in glob.glob("custodian.*.tar.gz"):
             os.remove(f)
         os.remove("custodian.json")
+        os.chdir(self.cwd)
 
 
 class ScratchDirTest(unittest.TestCase):
+
+    def setUp(self):
+        self.cwd = os.getcwd()
+        os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
     def test_with(self):
         scratch = tempfile.gettempdir()
@@ -142,10 +148,12 @@ class ScratchDirTest(unittest.TestCase):
                 f.write("write")
             files = os.listdir(d)
             self.assertIn("text", files)
-
+        os.remove("text")
         #Make sure the tempdir is deleted.
         self.assertFalse(os.path.exists(d))
 
+    def tearDown(self):
+        os.chdir(self.cwd)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
