@@ -508,7 +508,6 @@ class ScratchDir(object):
                 self.cwd:
             tempdir = tempfile.mkdtemp(dir=self.rootpath)
             self.tempdir = os.path.abspath(tempdir)
-            print self.tempdir
             for f in os.listdir("."):
                 if os.path.isfile(f):
                     shutil.copy(f, tempdir)
