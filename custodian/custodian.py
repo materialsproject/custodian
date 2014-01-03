@@ -485,6 +485,18 @@ def gzip_dir(path):
             os.remove(f)
 
 
+def recursive_copy(src, dst):
+    for parent, subdir, files in os.walk(src):
+        parent = os.path.relpath(parent)
+        realdst = dst if parent == "." else os.path.join(dst, parent)
+        try:
+            os.makedirs(realdst)
+        except Exception as ex:
+            pass
+        for f in files:
+            shutil.copy(os.path.join(parent, f), realdst)
+
+
 class ScratchDir(object):
     """
     Creates a with context manager that automatically handles creation of
@@ -508,11 +520,7 @@ class ScratchDir(object):
                 self.cwd:
             tempdir = tempfile.mkdtemp(dir=self.rootpath)
             self.tempdir = os.path.abspath(tempdir)
-            for f in os.listdir("."):
-                if os.path.isfile(f):
-                    shutil.copy(f, tempdir)
-                elif os.path.isdir(f):
-                    shutil.copytree(f, os.path.join(tempdir, f))
+            recursive_copy(".", tempdir)
             os.symlink(tempdir, ScratchDir.SCR_LINK)
             os.chdir(tempdir)
             logging.info(
@@ -524,8 +532,7 @@ class ScratchDir(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.rootpath is not None and os.path.abspath(self.rootpath) != \
                 self.cwd:
-            for f in os.listdir("."):
-                shutil.copy(f, self.cwd)
+            recursive_copy(".", self.cwd)
             shutil.rmtree(self.tempdir)
             os.chdir(self.cwd)
             os.remove(ScratchDir.SCR_LINK)
