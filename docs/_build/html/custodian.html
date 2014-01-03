@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian package &mdash; custodian 0.6.1 documentation</title>
+    <title>custodian package &mdash; custodian 0.6.2 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.6.1',
+        VERSION:     '0.6.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.6.1 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.6.2 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.6.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.6.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -79,13 +79,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="custodian.qchem.html">custodian.qchem package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="custodian.qchem.html#subpackages">Subpackages</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="custodian.qchem.test.html">custodian.qchem.test package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="custodian.qchem.test.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="custodian.qchem.test.html#module-custodian.qchem.test.test_handlers">custodian.qchem.test.test_handlers module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="custodian.qchem.test.html#module-custodian.qchem.test">Module contents</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="custodian.qchem.html#subpackages">Subpackages</a><ul class="simple">
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="custodian.qchem.html#submodules">Submodules</a></li>
@@ -169,9 +163,12 @@ jobs are performed. This is useful in some setups where a
 scratch partition has much faster IO. To use this, set
 scratch_dir=root of directory you want to use for runs.
 There is no need to provide unique directory names; we will
-use python&#8217;s tempfile creation mechanisms. If this is
-None (the default), the run is performed in the current
-working directory.</dd>
+use python&#8217;s tempfile creation mechanisms. A symbolic link
+is created during the course of the run in the working
+directory called &#8220;scratch_link&#8221; as users may want to
+sometimes check the output during the course of a run. If
+this is None (the default), the run is performed in the
+current working directory.</dd>
 <dt>gzipped_output:</dt>
 <dd>Whether to gzip the final output to save space. Defaults to
 False.</dd>
@@ -310,6 +307,23 @@ method.</p>
 
 </dd></dl>
 
+<dl class="class">
+<dt id="custodian.custodian.ScratchDir">
+<em class="property">class </em><tt class="descname">ScratchDir</tt><big>(</big><em>rootpath</em><big>)</big><a class="headerlink" href="#custodian.custodian.ScratchDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Creates a with context manager that automatically handles creation of
+temporary directories in the scratch space and cleanup when done.</p>
+<p>Args:
+rootpath:</p>
+<blockquote>
+<div>The path in which to create temp subdirectories.</div></blockquote>
+<dl class="attribute">
+<dt id="custodian.custodian.ScratchDir.SCR_LINK">
+<tt class="descname">SCR_LINK</tt><em class="property"> = 'scratch_link'</em><a class="headerlink" href="#custodian.custodian.ScratchDir.SCR_LINK" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="function">
 <dt id="custodian.custodian.backup">
 <tt class="descname">backup</tt><big>(</big><em>filenames</em>, <em>prefix='error'</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.backup" title="Permalink to this definition">¶</a></dt>
@@ -338,6 +352,24 @@ files at the end of a run.</p>
 <dd><dl class="first last docutils">
 <dt>path:</dt>
 <dd>Path to directory.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="custodian.custodian.recursive_copy">
+<tt class="descname">recursive_copy</tt><big>(</big><em>src</em>, <em>dst</em><big>)</big><a class="headerlink" href="#custodian.custodian.recursive_copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implements a recursive copy function similar to Unix&#8217;s &#8220;cp -r&#8221; command.
+Surprisingly, python does not have a real equivalent. shutil.copytree
+only works if the destination directory is not present.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>src:</dt>
+<dd>Source folder to copy.</dd>
+<dt>dst:</dt>
+<dd>Destination folder.</dd>
 </dl>
 </dd>
 </dl>
@@ -399,7 +431,7 @@ files at the end of a run.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.6.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.6.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

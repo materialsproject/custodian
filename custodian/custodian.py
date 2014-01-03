@@ -486,6 +486,17 @@ def gzip_dir(path):
 
 
 def recursive_copy(src, dst):
+    """
+    Implements a recursive copy function similar to Unix's "cp -r" command.
+    Surprisingly, python does not have a real equivalent. shutil.copytree
+    only works if the destination directory is not present.
+
+    Args:
+        src:
+            Source folder to copy.
+        dst:
+            Destination folder.
+    """
     for parent, subdir, files in os.walk(src):
         parent = os.path.relpath(parent)
         realdst = dst if parent == "." else os.path.join(dst, parent)

@@ -22,6 +22,11 @@ calculations.
 Change log
 ==========
 
+0.6.2
+-----
+1. Bug fix release to support sub dirs in run folder when using scratch.
+2. Improve handling of walltime in PBSWalltimeHander.
+
 0.6.1
 -----
 1. Bug fix release to address minor issue with checkpointing.

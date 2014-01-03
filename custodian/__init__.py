@@ -1,5 +1,5 @@
 __author__ = "Shyue Ping Ong"
-__date__ = "Dec 23 2013"
-__version__ = "0.6.1"
+__date__ = "Jan 3 2013"
+__version__ = "0.6.2"
 
 from custodian import Custodian
