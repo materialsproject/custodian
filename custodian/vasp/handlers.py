@@ -25,14 +25,13 @@ from custodian.custodian import ErrorHandler, backup
 from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput
 from pymatgen.transformations.standard_transformations import \
     PerturbStructureTransformation, SupercellTransformation
-from pymatgen.serializers.json_coders import MSONable
 
 from pymatgen.io.vaspio.vasp_output import Vasprun, Oszicar
 from custodian.ansible.intepreter import Modder
 from custodian.ansible.actions import FileActions, DictActions
 
 
-class VaspErrorHandler(ErrorHandler, MSONable):
+class VaspErrorHandler(ErrorHandler):
     """
     Master VaspErrorHandler class that handles a number of common errors
     that occur during VASP runs.
@@ -197,18 +196,8 @@ class VaspErrorHandler(ErrorHandler, MSONable):
     def __str__(self):
         return "VaspErrorHandler"
 
-    @property
-    def to_dict(self):
-        return {"@module": self.__class__.__module__,
-                "@class": self.__class__.__name__,
-                "output_filename": self.output_filename}
 
-    @classmethod
-    def from_dict(cls, d):
-        return cls(d["output_filename"])
-
-
-class MeshSymmetryErrorHandler(ErrorHandler, MSONable):
+class MeshSymmetryErrorHandler(ErrorHandler):
     """
     Corrects the mesh symmetry error in VASP. This error is sometimes
     non-fatal. So this error handler only checks at the end of the run,
@@ -259,20 +248,8 @@ class MeshSymmetryErrorHandler(ErrorHandler, MSONable):
     def __str__(self):
         return "MeshSymmetryErrorHandler"
 
-    @property
-    def to_dict(self):
-        return {"@module": self.__class__.__module__,
-                "@class": self.__class__.__name__,
-                "output_filename": self.output_filename,
-                "output_vasprun": self.output_vasprun}
 
-    @classmethod
-    def from_dict(cls, d):
-        return cls(output_filename=d["output_filename"],
-                   output_vasprun=d["output_vasprun"])
-
-
-class UnconvergedErrorHandler(ErrorHandler, MSONable):
+class UnconvergedErrorHandler(ErrorHandler):
     """
     Check if a run is converged. Switches to ALGO = Normal.
     """
@@ -315,18 +292,8 @@ class UnconvergedErrorHandler(ErrorHandler, MSONable):
     def __str__(self):
         return self.__name__
 
-    @property
-    def to_dict(self):
-        return {"@module": self.__class__.__module__,
-                "@class": self.__class__.__name__,
-                "output_filename": self.output_filename}
 
-    @classmethod
-    def from_dict(cls, d):
-        return cls(d["output_filename"])
-
-
-class PotimErrorHandler(ErrorHandler, MSONable):
+class PotimErrorHandler(ErrorHandler):
     """
     Check if a run has excessively large positive energy changes.
     This is typically caused by too large a POTIM. Runs typically
@@ -370,19 +337,6 @@ class PotimErrorHandler(ErrorHandler, MSONable):
     def __str__(self):
         return "Large positive energy change (POTIM)"
 
-    @property
-    def to_dict(self):
-        return {"@module": self.__class__.__module__,
-                "@class": self.__class__.__name__,
-                "input_filename": self.input_filename,
-                "output_filename": self.output_filename,
-                "dE_threshold": self.dE_threshold}
-
-    @classmethod
-    def from_dict(cls, d):
-        return cls(d["input_filename"], d["output_filename"],
-                   d["dE_threshold"])
-
 
 class FrozenJobErrorHandler(ErrorHandler):
 
@@ -419,19 +373,8 @@ class FrozenJobErrorHandler(ErrorHandler):
 
         return {"errors": ["Frozen job"], "actions": actions}
 
-    @property
-    def to_dict(self):
-        return {"@module": self.__class__.__module__,
-                "@class": self.__class__.__name__,
-                "output_filename": self.output_filename,
-                "timeout": self.timeout}
 
-    @classmethod
-    def from_dict(cls, d):
-        return cls(d["output_filename"], timeout=d["timeout"])
-
-
-class NonConvergingErrorHandler(ErrorHandler, MSONable):
+class NonConvergingErrorHandler(ErrorHandler):
     """
     Check if a run is hitting the maximum number of electronic steps at the
     last nionic_steps ionic steps (default=10). If so, change ALGO from Fast to
@@ -481,23 +424,6 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
 
     def __str__(self):
         return "NonConvergingErrorHandler"
-
-    @property
-    def to_dict(self):
-        return {"@module": self.__class__.__module__,
-                "@class": self.__class__.__name__,
-                "output_filename": self.output_filename,
-                "nionic_steps": self.nionic_steps,
-                "change_algo": self.change_algo}
-
-    @classmethod
-    def from_dict(cls, d):
-        if "nionic_steps" in d:
-            return cls(output_filename=d["output_filename"],
-                       nionic_steps=d.get("nionic_steps", 10),
-                       change_algo=d.get("change_algo", False))
-        else:
-            return cls(output_filename=d["output_filename"])
 
 
 class PBSWalltimeHandler(ErrorHandler):
@@ -550,12 +476,3 @@ class PBSWalltimeHandler(ErrorHandler):
 
     def __str__(self):
         return "PBSWalltimeHandler"
-
-    @property
-    def to_dict(self):
-        return {"@module": self.__class__.__module__,
-                "@class": self.__class__.__name__}
-
-    @classmethod
-    def from_dict(cls, d):
-        return cls()

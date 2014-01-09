@@ -17,6 +17,7 @@ __email__ = "shyuep@gmail.com"
 __date__ = "May 3, 2013"
 
 import logging
+import inspect
 import subprocess
 import datetime
 import time
@@ -321,11 +322,40 @@ def _do_check(handlers, terminate_func=None, skip_over_errors=False):
     return corrections
 
 
-class ErrorHandler(object):
+class JSONSerializableMeta(type):
+
+    def __init__(cls, name, bases, dct):
+        if "__init__" in dct:
+            cls._initargs = inspect.getargspec(dct["__init__"]).args
+        super(JSONSerializableMeta, cls).__init__(name, bases, dct)
+
+
+class JSONSerializable(object):
+    __metaclass__ = JSONSerializableMeta
+
+    @property
+    def to_dict(self):
+        d = {"@module": self.__class__.__module__,
+             "@class": self.__class__.__name__}
+        for c in self._initargs:
+            if c != "self":
+                d[c] = self.__getattribute__(c)
+        return d
+
+    @classmethod
+    def from_dict(cls, d):
+        """
+        This method should return the ErrorHandler from a dict representation
+        of the object given by the to_dict property.
+        """
+        kwargs = {k: v for k, v in d.items() if k in cls._initargs}
+        return cls(**kwargs)
+
+
+class ErrorHandler(JSONSerializable):
     """
     Abstract base class defining the interface for an ErrorHandler.
     """
-    __metaclass__ = ABCMeta
 
     """
     This property indicates whether the error handler is a monitor,
@@ -366,30 +396,11 @@ class ErrorHandler(object):
         """
         pass
 
-    @abstractproperty
-    def to_dict(self):
-        """
-        This method should return a JSON serializable dict describing the
-        ErrorHandler, and can be deserialized using the from_dict static
-        method.
-        """
-        pass
 
-    @classmethod
-    @abstractmethod
-    def from_dict(cls, d):
-        """
-        This method should return the ErrorHandler from a dict representation
-        of the object given by the to_dict property.
-        """
-        pass
-
-
-class Job(object):
+class Job(JSONSerializable):
     """
     Abstract base class defining the interface for a Job.
     """
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def setup(self):
@@ -420,24 +431,6 @@ class Job(object):
     def name(self):
         """
         A nice string name for the job.
-        """
-        pass
-
-    @abstractproperty
-    def to_dict(self):
-        """
-        This method should return a JSON serializable dict describing the
-        Job, and can be deserialized using the from_dict static
-        method.
-        """
-        pass
-
-    @classmethod
-    @abstractmethod
-    def from_dict(cls, d):
-        """
-        This method should return the Job from a dict representation of the
-        object given by the to_dict property.
         """
         pass
 

@@ -18,12 +18,11 @@ import subprocess
 import shutil
 
 from pymatgen.util.io_utils import zopen
-from pymatgen.serializers.json_coders import MSONable
 
 from custodian.custodian import Job, gzip_dir
 
 
-class NwchemJob(Job, MSONable):
+class NwchemJob(Job):
     """
     A basic Nwchem job.
     """
@@ -73,21 +72,3 @@ class NwchemJob(Job, MSONable):
     @property
     def name(self):
         return "Nwchem Job"
-
-    @property
-    def to_dict(self):
-        d = dict(nwchem_cmd=self.nwchem_cmd, input_file=self.input_file,
-                 output_file=self.output_file,
-                 gzipped=self.gzipped, backup=self.backup,
-                 settings_override=self.settings_override
-                 )
-        d["@module"] = self.__class__.__module__
-        d["@class"] = self.__class__.__name__
-        return d
-
-    @classmethod
-    def from_dict(cls, d):
-        return NwchemJob(
-            nwchem_cmd=d["nwchem_cmd"], input_file=d["input_file"],
-            output_file=d["output_file"], gzipped=d["gzipped"],
-            backup=d["backup"], settings_override=d["settings_override"])

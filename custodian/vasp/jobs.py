@@ -36,7 +36,7 @@ VASP_OUTPUT_FILES = ['DOSCAR', 'INCAR', 'KPOINTS', 'POSCAR', 'PROCAR',
                      'WAVECAR', 'CONTCAR', 'IBZKPT', 'OUTCAR']
 
 
-class VaspJob(Job, MSONable):
+class VaspJob(Job):
     """
     A basic vasp job. Just runs whatever is in the directory. But conceivably
      can be a complex processing of inputs etc. with initialization.

@@ -44,10 +44,6 @@ class ExampleJob(Job):
     def name(self):
         return "ExampleJob{}".format(self.jobid)
 
-    @property
-    def to_dict(self):
-        return {"jobid": self.jobid}
-
     @staticmethod
     def from_dict(d):
         return ExampleJob(d["jobid"])
@@ -64,14 +60,6 @@ class ExampleHandler(ErrorHandler):
     def correct(self):
         self.params["initial"] += 1
         return {"errors": "total < 50", "actions": "increment by 1"}
-
-    @property
-    def is_monitor(self):
-        return False
-
-    @property
-    def to_dict(self):
-        return {}
 
     @staticmethod
     def from_dict(d):
@@ -92,14 +80,6 @@ class ExampleHandler2(ErrorHandler):
     def correct(self):
         return {"errors": "errored", "actions": None}
 
-    @property
-    def is_monitor(self):
-        return False
-
-    @property
-    def to_dict(self):
-        return {}
-
     @staticmethod
     def from_dict(d):
         return ExampleHandler()
@@ -119,6 +99,7 @@ class CustodianTest(unittest.TestCase):
                       max_errors=njobs, log_file=None)
         output = c.run()
         self.assertEqual(len(output), njobs)
+        print ExampleHandler(params).to_dict
 
     def test_unrecoverable(self):
         njobs = 100

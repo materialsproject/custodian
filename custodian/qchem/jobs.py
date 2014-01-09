@@ -7,7 +7,6 @@ This module implements basic kinds of jobs for QChem runs.
 from __future__ import division
 import os
 from pymatgen import zopen
-from pymatgen.serializers.json_coders import MSONable
 import shutil
 import copy
 import subprocess
@@ -21,7 +20,7 @@ __status__ = "Alpha"
 __date__ = "12/03/13"
 
 
-class QchemJob(Job, MSONable):
+class QchemJob(Job):
     """
     A basis QChem Job.
     """
@@ -99,20 +98,3 @@ class QchemJob(Job, MSONable):
     @property
     def name(self):
         return "QChem Job"
-
-    @property
-    def to_dict(self):
-        d = dict(qchem_cmd=self.qchem_cmd, input_file=self.input_file,
-                 output_file=self.output_file, chk_file=self.chk_file,
-                 qclog_file=self.qclog_file, gzipped=self.gzipped,
-                 backup=self.backup)
-        d["@module"] = self.__class__.__module__
-        d["@class"] = self.__class__.__name__
-        return d
-
-    @staticmethod
-    def from_dict(cls, d):
-        return QchemJob(qchem_cmd=d["qchem_cmd"], input_file=d["input_file"],
-                        output_file=d["output_file"], chk_file=d["chk_file"],
-                        qclog_file=d["qclog_file"], gzipped=d["gzipped"],
-                        backup=d["backup"])
