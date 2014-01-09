@@ -327,6 +327,23 @@ class ErrorHandler(object):
     """
     __metaclass__ = ABCMeta
 
+    """
+    This property indicates whether the error handler is a monitor,
+    i.e., a handler that monitors a job as it is running. If a
+    monitor-type handler notices an error, the job will be sent a
+    termination signal, the error is then corrected,
+    and then the job is restarted. This is useful for catching errors
+    that occur early in the run but do not cause immediate failure.
+    """
+    is_monitor = False
+
+    """
+    Whether this handler terminates a job upon error detection. Defaults
+    to True. Set to False for non-terminating errors, i.e., errors that
+    can be recovered from without terminating a job.
+    """
+    is_terminating = True
+
     @abstractmethod
     def check(self):
         """
@@ -348,27 +365,6 @@ class ErrorHandler(object):
         If this is an unfixable error, actions should be set to None.
         """
         pass
-
-    @abstractproperty
-    def is_monitor(self):
-        """
-        This property indicates whether the error handler is a monitor,
-        i.e., a handler that monitors a job as it is running. If a
-        monitor-type handler notices an error, the job will be sent a
-        termination signal, the error is then corrected,
-        and then the job is restarted. This is useful for catching errors
-        that occur early in the run but do not cause immediate failure.
-        """
-        return False
-
-    @property
-    def is_terminating(self):
-        """
-        Whether this handler terminates a job upon error detection. Defaults
-        to True. Set to False for non-terminating errors, i.e., errors that
-        can be recovered from without terminating a job.
-        """
-        return True
 
     @abstractproperty
     def to_dict(self):

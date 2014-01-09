@@ -290,10 +290,6 @@ class QChemErrorHandler(ErrorHandler, MSONable):
         tar.close()
 
     @property
-    def is_monitor(self):
-        return False
-
-    @property
     def to_dict(self):
         return {"@module": self.__class__.__module__,
                 "@class": self.__class__.__name__,

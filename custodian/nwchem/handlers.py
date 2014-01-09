@@ -86,10 +86,6 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
         nwi.write_file(self.input_file)
         return {"errors": self.errors, "actions": actions}
 
-    @property
-    def is_monitor(self):
-        return False
-
     def __str__(self):
         return "NwchemErrorHandler"
 

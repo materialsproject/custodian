@@ -38,6 +38,8 @@ class VaspErrorHandler(ErrorHandler, MSONable):
     that occur during VASP runs.
     """
 
+    is_monitor = True
+
     error_msgs = {
         "tet": ["Tetrahedron method fails for NKPT<4",
                 "Fatal error detecting k-mesh",
@@ -192,10 +194,6 @@ class VaspErrorHandler(ErrorHandler, MSONable):
             vi[f].write_file(f)
         return {"errors": list(self.errors), "actions": actions}
 
-    @property
-    def is_monitor(self):
-        return True
-
     def __str__(self):
         return "VaspErrorHandler"
 
@@ -216,6 +214,7 @@ class MeshSymmetryErrorHandler(ErrorHandler, MSONable):
     non-fatal. So this error handler only checks at the end of the run,
     and if the run has converged, no error is recorded.
     """
+    is_monitor = False
 
     def __init__(self, output_filename="vasp.out",
                  output_vasprun="vasprun.xml"):
@@ -257,10 +256,6 @@ class MeshSymmetryErrorHandler(ErrorHandler, MSONable):
             vi[f].write_file(f)
         return {"errors": ["mesh_symmetry"], "actions": actions}
 
-    @property
-    def is_monitor(self):
-        return False
-
     def __str__(self):
         return "MeshSymmetryErrorHandler"
 
@@ -281,6 +276,7 @@ class UnconvergedErrorHandler(ErrorHandler, MSONable):
     """
     Check if a run is converged. Switches to ALGO = Normal.
     """
+    is_monitor = False
 
     def __init__(self, output_filename="vasprun.xml"):
         self.output_filename = output_filename
@@ -317,11 +313,7 @@ class UnconvergedErrorHandler(ErrorHandler, MSONable):
         return {"errors": ["Unconverged"], "actions": actions}
 
     def __str__(self):
-        return "Run unconverged."
-
-    @property
-    def is_monitor(self):
-        return False
+        return self.__name__
 
     @property
     def to_dict(self):
@@ -341,6 +333,7 @@ class PotimErrorHandler(ErrorHandler, MSONable):
     end up crashing with some other error (e.g. BRMIX) as the geometry
     gets progressively worse.
     """
+    is_monitor = True
 
     def __init__(self, input_filename="POSCAR",
                  output_filename="OSZICAR", dE_threshold=1):
@@ -378,10 +371,6 @@ class PotimErrorHandler(ErrorHandler, MSONable):
         return "Large positive energy change (POTIM)"
 
     @property
-    def is_monitor(self):
-        return True
-
-    @property
     def to_dict(self):
         return {"@module": self.__class__.__module__,
                 "@class": self.__class__.__name__,
@@ -396,6 +385,9 @@ class PotimErrorHandler(ErrorHandler, MSONable):
 
 
 class FrozenJobErrorHandler(ErrorHandler):
+
+    is_monitor = True
+
     def __init__(self, output_filename="vasp.out", timeout=3600):
         """
         Detects an error when the output file has not been updated
@@ -428,10 +420,6 @@ class FrozenJobErrorHandler(ErrorHandler):
         return {"errors": ["Frozen job"], "actions": actions}
 
     @property
-    def is_monitor(self):
-        return True
-
-    @property
     def to_dict(self):
         return {"@module": self.__class__.__module__,
                 "@class": self.__class__.__name__,
@@ -449,6 +437,7 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
     last nionic_steps ionic steps (default=10). If so, change ALGO from Fast to
     Normal or kill the job.
     """
+    is_monitor = True
 
     def __init__(self, output_filename="OSZICAR", nionic_steps=10,
                  change_algo=False):
@@ -494,10 +483,6 @@ class NonConvergingErrorHandler(ErrorHandler, MSONable):
         return "NonConvergingErrorHandler"
 
     @property
-    def is_monitor(self):
-        return True
-
-    @property
     def to_dict(self):
         return {"@module": self.__class__.__module__,
                 "@class": self.__class__.__name__,
@@ -522,6 +507,11 @@ class PBSWalltimeHandler(ErrorHandler):
     the environment (usually the case for PBS systems like most
     supercomputing centers).
     """
+    is_monitor = True
+
+    # The PBS handler should not terminate as we want VASP to terminate
+    # itself naturally with the STOPCAR.
+    is_terminating = False
 
     def __init__(self):
         self.start_time = datetime.datetime.now()
@@ -560,16 +550,6 @@ class PBSWalltimeHandler(ErrorHandler):
 
     def __str__(self):
         return "PBSWalltimeHandler"
-
-    @property
-    def is_monitor(self):
-        return True
-
-    @property
-    def is_terminating(self):
-        # The PBS handler should not terminate as we want VASP to terminate
-        # itself naturally with the STOPCAR.
-        return False
 
     @property
     def to_dict(self):
