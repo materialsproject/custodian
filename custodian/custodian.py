@@ -322,24 +322,20 @@ def _do_check(handlers, terminate_func=None, skip_over_errors=False):
     return corrections
 
 
-class JSONSerializableMeta(type):
-
-    def __init__(cls, name, bases, dct):
-        if "__init__" in dct:
-            cls._initargs = inspect.getargspec(dct["__init__"]).args
-        super(JSONSerializableMeta, cls).__init__(name, bases, dct)
-
-
 class JSONSerializable(object):
-    __metaclass__ = JSONSerializableMeta
+    __metaclass__ = ABCMeta
 
     @property
     def to_dict(self):
         d = {"@module": self.__class__.__module__,
              "@class": self.__class__.__name__}
-        for c in self._initargs:
-            if c != "self":
-                d[c] = self.__getattribute__(c)
+        if hasattr(self, "__init__"):
+            for c in inspect.getargspec(self.__init__).args:
+                if c != "self":
+                    a = self.__getattribute__(c)
+                    if hasattr(a, "to_dict"):
+                        a = a.to_dict
+                    d[c] = a
         return d
 
     @classmethod
@@ -348,7 +344,8 @@ class JSONSerializable(object):
         This method should return the ErrorHandler from a dict representation
         of the object given by the to_dict property.
         """
-        kwargs = {k: v for k, v in d.items() if k in cls._initargs}
+        kwargs = {k: v for k, v in d.items()
+                  if k in inspect.getargspec(cls.__init__).args}
         return cls(**kwargs)
 
 
