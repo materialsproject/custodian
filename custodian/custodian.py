@@ -323,7 +323,6 @@ def _do_check(handlers, terminate_func=None, skip_over_errors=False):
 
 
 class JSONSerializable(object):
-    __metaclass__ = ABCMeta
 
     @property
     def to_dict(self):
@@ -353,7 +352,8 @@ class ErrorHandler(JSONSerializable):
     """
     Abstract base class defining the interface for an ErrorHandler.
     """
-
+    __metaclass__ = ABCMeta
+    
     """
     This property indicates whether the error handler is a monitor,
     i.e., a handler that monitors a job as it is running. If a
@@ -398,6 +398,7 @@ class Job(JSONSerializable):
     """
     Abstract base class defining the interface for a Job.
     """
+    __metaclass__ = ABCMeta
 
     @abstractmethod
     def setup(self):
