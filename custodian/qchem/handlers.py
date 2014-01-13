@@ -13,7 +13,6 @@ import os
 import re
 import tarfile
 from pymatgen.io.qchemio import QcOutput, QcInput, QcTask
-from pymatgen.serializers.json_coders import MSONable
 from custodian.custodian import ErrorHandler
 
 __author__ = "Xiaohui Qu"

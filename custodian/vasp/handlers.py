@@ -21,7 +21,8 @@ import time
 import datetime
 import operator
 
-from custodian.custodian import ErrorHandler, backup
+from custodian.custodian import ErrorHandler
+from custodian.utils import backup
 from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput
 from pymatgen.transformations.standard_transformations import \
     PerturbStructureTransformation, SupercellTransformation

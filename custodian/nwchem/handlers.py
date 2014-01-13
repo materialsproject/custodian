@@ -15,7 +15,8 @@ __status__ = "Beta"
 __date__ = "5/20/13"
 
 
-from custodian.custodian import ErrorHandler, backup
+from custodian.custodian import ErrorHandler
+from custodian.utils import backup
 from pymatgen.io.nwchemio import NwOutput, NwInput
 from custodian.ansible.intepreter import Modder
 

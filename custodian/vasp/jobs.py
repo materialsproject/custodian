@@ -22,7 +22,7 @@ import math
 from pymatgen.io.vaspio.vasp_input import VaspInput
 from pymatgen.io.smartio import read_structure
 from pymatgen.io.vaspio_set import MITVaspInputSet
-from pymatgen.serializers.json_coders import MSONable, PMGJSONDecoder
+from pymatgen.serializers.json_coders import PMGJSONDecoder
 
 from custodian.ansible.intepreter import Modder
 from custodian.ansible.actions import FileActions, DictActions
