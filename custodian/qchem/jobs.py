@@ -94,7 +94,3 @@ class QchemJob(Job):
     def postprocess(self):
         if self.gzipped:
             gzip_dir(".")
-
-    @property
-    def name(self):
-        return "QChem Job"

@@ -424,10 +424,10 @@ class Job(JSONSerializable):
         """
         pass
 
-    @abstractproperty
+    @property
     def name(self):
         """
         A nice string name for the job.
         """
-        pass
+        return self.__class__.__name__
 

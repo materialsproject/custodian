@@ -199,10 +199,6 @@ class VaspJob(Job):
         if self.gzipped:
             gzip_dir(".")
 
-    @property
-    def name(self):
-        return "Vasp Job"
-
     @staticmethod
     def double_relaxation_run(vasp_cmd, gzipped=True):
         """

@@ -68,7 +68,4 @@ class NwchemJob(Job):
     def postprocess(self):
         if self.gzipped:
             gzip_dir(".")
-
-    @property
-    def name(self):
-        return "Nwchem Job"
+            
