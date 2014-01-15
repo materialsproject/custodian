@@ -26,7 +26,7 @@ from glob import glob
 import tarfile
 import os
 import shutil
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 from .utils import ScratchDir, gzip_dir
 
 pjoin = os.path.join

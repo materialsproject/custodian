@@ -68,4 +68,3 @@ class NwchemJob(Job):
     def postprocess(self):
         if self.gzipped:
             gzip_dir(".")
-            
