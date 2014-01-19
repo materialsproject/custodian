@@ -440,7 +440,21 @@ class PBSWalltimeHandler(ErrorHandler):
     # itself naturally with the STOPCAR.
     is_terminating = False
 
-    def __init__(self):
+    def __init__(self, buffer_time=300):
+        """
+        Args:
+            buffer_time:
+                The min amount of buffer time in secs at the end that the
+                STOPCAR will be written. The STOPCAR is written when
+                the time remaining is < the higher of 3 x the
+                average time for each ionic step and the buffer time.
+                Defaults to 300 secs, which is the default polling time of
+                Custodian. This is typically sufficient for the current
+                ionic step to complete. But if other operations are being
+                performed after the run has stopped, the buffer time may
+                need to be increased accordingly.
+        """
+        self.buffer_time = buffer_time
         self.start_time = datetime.datetime.now()
 
     def check(self):
@@ -457,10 +471,9 @@ class PBSWalltimeHandler(ErrorHandler):
                 time_per_step = 0
 
             # If the remaining time is less than average time for 3 ionic
-            # steps or 300 seconds (last 5 minutes, which is the
-            # default monitoring frequency).
+            # steps or buffer_time.
             time_left = wall_time - total_secs
-            if time_left < max(time_per_step * 3, 300):
+            if time_left < max(time_per_step * 3, self.buffer_time):
                 return True
         return False
 
