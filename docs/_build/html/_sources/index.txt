@@ -22,6 +22,12 @@ calculations.
 Change log
 ==========
 
+0.6.3
+-----
+1. Added buffer time option in PBSWalltimeHandler.
+2. Improved Qchem jobs and handlers (Xiaohui Qu).
+3. Vastly improved API docs.
+
 0.6.2
 -----
 1. Bug fix release to support sub dirs in run folder when using scratch.
