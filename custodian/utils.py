@@ -28,11 +28,10 @@ def backup(filenames, prefix="error"):
     files of an errored run before performing corrections.
 
     Args:
-        filenames:
-            List of files to backup. Supports wildcards, e.g., *.*.
-        prefix:
-            prefix to the files. Defaults to error, which means a series of
-            error.1.tar.gz, error.2.tar.gz, ... will be generated.
+        filenames ([str]): List of files to backup. Supports wildcards, e.g.,
+            *.*.
+        prefix (str): prefix to the files. Defaults to error, which means a
+            series of error.1.tar.gz, error.2.tar.gz, ... will be generated.
     """
     num = max([0] + [int(f.split(".")[1])
                      for f in glob("{}.*.tar.gz".format(prefix))])
@@ -50,8 +49,7 @@ def gzip_dir(path):
     files at the end of a run.
 
     Args:
-        path:
-            Path to directory.
+        path (str): Path to directory.
     """
     for f in os.listdir(path):
         if not f.endswith("gz"):
@@ -68,10 +66,8 @@ def recursive_copy(src, dst):
     only works if the destination directory is not present.
 
     Args:
-        src:
-            Source folder to copy.
-        dst:
-            Destination folder.
+        src (str): Source folder to copy.
+        dst (str): Destination folder.
     """
     for parent, subdir, files in os.walk(src):
         parent = os.path.relpath(parent)
@@ -94,8 +90,16 @@ class ScratchDir(object):
 
     def __init__(self, rootpath):
         """
+        Initializes scratch directory given a **root** path. There is no need
+        to try to create unique directory names. The code will generate a
+        temporary sub directory in the rootpath. The way to use this is using a
+        with context manager. Example::
+
+            with ScratchDir("/scratch"):
+                do_something()
+
         Args:
-            rootpath:
+            rootpath (str):
                 The path in which to create temp subdirectories.
         """
         self.rootpath = rootpath

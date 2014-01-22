@@ -67,6 +67,15 @@ class VaspErrorHandler(ErrorHandler):
     }
 
     def __init__(self, output_filename="vasp.out"):
+        """
+        Initializes the handler with the output file to check.
+
+        Args:
+            output_filename (str): This is the file where the stdout for vasp
+                is being redirected. The error messages that are checked are
+                present in the stdout. Defaults to "vasp.out", which is the
+                default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
+        """
         self.output_filename = output_filename
         self.errors = set()
 
@@ -208,6 +217,17 @@ class MeshSymmetryErrorHandler(ErrorHandler):
 
     def __init__(self, output_filename="vasp.out",
                  output_vasprun="vasprun.xml"):
+        """
+        Initializes the handler with the output files to check.
+
+        Args:
+            output_filename (str): This is the file where the stdout for vasp
+                is being redirected. The error messages that are checked are
+                present in the stdout. Defaults to "vasp.out", which is the
+                default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
+            output_vasprun (str): Filename for the vasprun.xml file. Change
+                this only if it is different from the default (unlikely).
+        """
         self.output_filename = output_filename
         self.output_vasprun = output_vasprun
 
@@ -257,6 +277,13 @@ class UnconvergedErrorHandler(ErrorHandler):
     is_monitor = False
 
     def __init__(self, output_filename="vasprun.xml"):
+        """
+        Initializes the handler with the output file to check.
+
+        Args:
+            output_vasprun (str): Filename for the vasprun.xml file. Change
+                this only if it is different from the default (unlikely).
+        """
         self.output_filename = output_filename
 
     def check(self):
@@ -305,6 +332,17 @@ class PotimErrorHandler(ErrorHandler):
 
     def __init__(self, input_filename="POSCAR",
                  output_filename="OSZICAR", dE_threshold=1):
+        """
+        Initializes the handler with the input and output files to check.
+
+        Args:
+            input_filename (str): This is the POSCAR file that the run
+                started from. Defaults to "POSCAR". Change
+                this only if it is different from the default (unlikely).
+            output_filename (str): This is the OSZICAR file. Change
+                this only if it is different from the default (unlikely).
+            dE_threshold (float): The threshold energy change. Defaults to 1eV.
+        """
         self.input_filename = input_filename
         self.output_filename = output_filename
         self.dE_threshold = dE_threshold
@@ -340,13 +378,25 @@ class PotimErrorHandler(ErrorHandler):
 
 
 class FrozenJobErrorHandler(ErrorHandler):
+    """
+    Detects an error when the output file has not been updated
+    in timeout seconds. Perturbs structure and restarts.
+    """
 
     is_monitor = True
 
     def __init__(self, output_filename="vasp.out", timeout=3600):
         """
-        Detects an error when the output file has not been updated
-        in timeout seconds. Perturbs structure and restarts
+        Initializes the handler with the output file to check.
+
+        Args:
+            output_filename (str): This is the file where the stdout for vasp
+                is being redirected. The error messages that are checked are
+                present in the stdout. Defaults to "vasp.out", which is the
+                default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
+            timeout (int): The time in seconds between checks where if there
+                is no activity on the output file, the run is considered
+                frozen. Defaults to 3600 seconds, i.e., 1 hour.
         """
         self.output_filename = output_filename
         self.timeout = timeout
@@ -385,6 +435,18 @@ class NonConvergingErrorHandler(ErrorHandler):
 
     def __init__(self, output_filename="OSZICAR", nionic_steps=10,
                  change_algo=False):
+        """
+        Initializes the handler with the output file to check.
+
+        Args:
+            output_filename (str): This is the OSZICAR file. Change
+                this only if it is different from the default (unlikely).
+            nionic_steps (int): The threshold number of ionic steps that
+                needs to hit the maximum number of electronic steps for the
+                run to be considered non-converging.
+            change_algo (bool): Whether to attempt to correct the job by
+                changing the ALGO from Fast to Normal.
+        """
         self.output_filename = output_filename
         self.nionic_steps = nionic_steps
         self.change_algo = change_algo
@@ -442,17 +504,18 @@ class PBSWalltimeHandler(ErrorHandler):
 
     def __init__(self, buffer_time=300):
         """
+        Initializes the handler with a buffer time.
+
         Args:
-            buffer_time:
-                The min amount of buffer time in secs at the end that the
-                STOPCAR will be written. The STOPCAR is written when
-                the time remaining is < the higher of 3 x the
-                average time for each ionic step and the buffer time.
-                Defaults to 300 secs, which is the default polling time of
-                Custodian. This is typically sufficient for the current
-                ionic step to complete. But if other operations are being
-                performed after the run has stopped, the buffer time may
-                need to be increased accordingly.
+            buffer_time (int): The min amount of buffer time in secs at the
+                end that the STOPCAR will be written. The STOPCAR is written
+                when the time remaining is < the higher of 3 x the average
+                time for each ionic step and the buffer time. Defaults to
+                300 secs, which is the default polling time of Custodian.
+                This is typically sufficient for the current ionic step to
+                complete. But if other operations are being performed after
+                the run has stopped, the buffer time may need to be increased
+                accordingly.
         """
         self.buffer_time = buffer_time
         self.start_time = datetime.datetime.now()

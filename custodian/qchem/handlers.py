@@ -32,22 +32,19 @@ class QChemErrorHandler(ErrorHandler):
                  ex_backup_list=(), rca_gdm_thresh=1.0E-3,
                  scf_max_cycles=200, geom_max_cycles=200):
         """
+        Initializes the error handler from a set of input and output files.
+
         Args:
-            input_file:
-                Name of the QChem input file.
-            output_file:
-                Name of the QChem output file.
-            ex_backup_list:
-                List of the files to backup in addition to input and output
-                file. (List of str)
-            rca_gdm_thresh:
-                The threshold for the prior scf algorithm. If last deltaE is
-                larger than the threshold try RCA_DIIS first, else,
-                try DIIS_GDM first.
-            scf_max_cycles:
-                The max iterations to set to fix SCF failure.
-            geom_max_cycles:
-                The max iterations to set to fix geometry optimization failure.
+            input_file (str): Name of the QChem input file.
+            output_file (str): Name of the QChem output file.
+            ex_backup_list ([str]): List of the files to backup in addition
+                to input and output file.
+            rca_gdm_thresh (float): The threshold for the prior scf algorithm.
+                If last deltaE is larger than the threshold try RCA_DIIS
+                first, else, try DIIS_GDM first.
+            scf_max_cycles (int): The max iterations to set to fix SCF failure.
+            geom_max_cycles (int): The max iterations to set to fix geometry
+                optimization failure.
         """
         self.input_file = input_file
         self.output_file = output_file

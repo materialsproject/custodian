@@ -22,7 +22,7 @@ __date__ = "12/03/13"
 
 class QchemJob(Job):
     """
-    A basis QChem Job.
+    A basic QChem Job.
     """
 
     def __init__(self, qchem_cmd, input_file="mol.qcinp",
@@ -34,23 +34,17 @@ class QchemJob(Job):
         of the static constructors.
 
         Args:
-            qchem_cmd:
-                Command to run QChem as a list args (without input/output file
-                name). For example: ["qchem", "-np", "24"]
-            input_file:
-                Name of the QChem input file.
-            output_file:
-                Name of the QChem output file.
-            chk_file:
-                Name of the QChem check point file. None means no checkpoint
-                point file. Defaults to None.
-            qclog_file:
-                Name of the file to redirect the standard output to. None means
-                not to record the standard output. Defaults to None.
-            gzipped:
-                Whether to gzip the final output. Defaults to False.
-            backup:
-                Boolean whether to backup the initial input files. If True,
+            qchem_cmd ([str]): Command to run QChem as a list args (without
+                input/output file name). For example: ["qchem", "-np", "24"]
+            input_file (str): Name of the QChem input file.
+            output_file (str): Name of the QChem output file.
+            chk_file (str): Name of the QChem check point file. None means no
+                checkpoint point file. Defaults to None.
+            qclog_file (str): Name of the file to redirect the standard output
+                to. None means not to record the standard output. Defaults to
+                None.
+            gzipped (bool): Whether to gzip the final output. Defaults to False.
+            backup (bool): Whether to backup the initial input files. If True,
                 the input files will be copied with a ".orig" appended.
                 Defaults to True.
         """

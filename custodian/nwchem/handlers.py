@@ -28,6 +28,16 @@ class NwchemErrorHandler(ErrorHandler):
     """
 
     def __init__(self, output_filename="mol.nwout"):
+        """
+        Initializes with an output file name.
+
+        Args:
+            output_filename (str): This is the file where the stdout for nwchem
+                is being redirected. The error messages that are checked are
+                present in the stdout. Defaults to "mol.nwout", which is the
+                default redirect used by :class:`custodian.nwchem.jobs
+                .NwchemJob`.
+        """
         self.output_filename = output_filename
 
     def check(self):

@@ -22,6 +22,14 @@ custodian.custodian module
     :undoc-members:
     :show-inheritance:
 
+custodian.utils module
+----------------------
+
+.. automodule:: custodian.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

@@ -3,8 +3,7 @@
 """
 This module implements the main Custodian class, which manages a list of jobs
 given a set of error handlers, the abstract base classes for the
-ErrorHandlers and Jobs, and some helper functions for backing up or
-compressing files in a directory.
+ErrorHandlers and Jobs.
 """
 
 from __future__ import division
@@ -80,53 +79,48 @@ class Custodian(object):
                  skip_over_errors=False, scratch_dir=None,
                  gzipped_output=False, checkpoint=False):
         """
+        Initializes a Custodian from a list of jobs and error handler.s
+
         Args:
-            handlers:
-                Error handlers. In order of priority of fixing.
-            jobs:
-                List of Jobs to be run sequentially.
-            max_errors:
-                Maximum number of errors allowed before exiting.
-            polling_time_step:
-                The length of time in seconds between steps in which a
-                job is checked for completion. Defaults to 10 seconds.
-            monitor_freq:
-                The number of polling steps before monitoring occurs. For
-                example, if you have a polling_time_step of 10seconds and a
-                monitor_freq of 30, this means that Custodian uses the
-                monitors to check for errors every 30 x 10 = 300 seconds,
+            handlers ([ErrorHandler]): Error handlers. In order of priority of
+                fixing.
+            jobs ([Job]): List of Jobs to be run sequentially.
+            max_errors (int): Maximum number of errors allowed before exiting.
+                Defaults to 1.
+            polling_time_step (int): The length of time in seconds between steps
+                in which a job is checked for completion. Defaults to 10 secs.
+            monitor_freq (int): The number of polling steps before monitoring
+                occurs. For example, if you have a polling_time_step of 10
+                seconds and a monitor_freq of 30, this means that Custodian uses
+                the monitors to check for errors every 30 x 10 = 300 seconds,
                 i.e., 5 minutes.
-            log_file:
-                Deprecated. Custodian now always logs to a custodian.json
-                file.
-            skip_over_errors:
-                If set to True, custodian will skip over error handlers that
-                failed (raised an Exception of some sort). Otherwise,
-                custodian will simply exit on unrecoverable errors.
+            log_file (str): Deprecated. Custodian now always logs to a
+                custodian.json file.
+            skip_over_errors (bool): If set to True, custodian will skip over
+                error handlers that failed (raised an Exception of some sort).
+                Otherwise, custodian will simply exit on unrecoverable errors.
                 The former will lead to potentially more robust performance,
                 but may make it difficult to improve handlers. The latter
                 will allow one to catch potentially bad error handler
                 implementations. Defaults to False.
-            scratch_dir:
-                If this is set, any files in the current directory are copied
-                to a temporary directory in a scratch space first before any
-                jobs are performed. This is useful in some setups where a
-                scratch partition has much faster IO. To use this, set
-                scratch_dir=root of directory you want to use for runs.
-                There is no need to provide unique directory names; we will
-                use python's tempfile creation mechanisms. A symbolic link
-                is created during the course of the run in the working
-                directory called "scratch_link" as users may want to
-                sometimes check the output during the course of a run. If
-                this is None (the default), the run is performed in the
-                current working directory.
-            gzipped_output:
-                Whether to gzip the final output to save space. Defaults to
-                False.
-            checkpoint:
-                Whether to checkpoint after each successful Job.
-                Checkpoints are stored as custodian.chk.#.tar.gz
-                files. Defaults to False.
+            scratch_dir (str): If this is set, any files in the current
+                directory are copied to a temporary directory in a scratch
+                space first before any jobs are performed, and moved back to
+                the current directory upon completion of all jobs. This is
+                useful in some setups where a scratch partition has much
+                faster IO. To use this, set scratch_dir=root of directory you
+                want to use for runs. There is no need to provide unique
+                directory names; we will use python's tempfile creation
+                mechanisms. A symbolic link is created during the course of
+                the run in the working directory called "scratch_link" as
+                users may want to sometimes check the output during the
+                course of a run. If this is None (the default), the run is
+                performed in the current working directory.
+            gzipped_output (bool): Whether to gzip the final output to save
+                space. Defaults to False.
+            checkpoint (bool):  Whether to checkpoint after each successful Job.
+                Checkpoints are stored as custodian.chk.#.tar.gz files. Defaults
+                to False.
         """
         self.max_errors = max_errors
         self.jobs = jobs
@@ -373,8 +367,10 @@ class ErrorHandler(JSONSerializable):
     @abstractmethod
     def check(self):
         """
-        This method is called at the end of a job. Returns a boolean value
-        indicating if errors are detected.
+        This method is called at the end of a job.
+
+        Returns:
+            (bool) Indicating if errors are detected.
         """
         pass
 
@@ -385,10 +381,11 @@ class ErrorHandler(JSONSerializable):
         It should perform any corrective measures relating to the detected
         error.
 
-        This method should return a JSON serializable dict that describes
-        the errors and actions taken. E.g.
-        {"errors": list_of_errors, "actions": list_of_actions_taken}.
-        If this is an unfixable error, actions should be set to None.
+        Returns:
+            (dict) JSON serializable dict that describes the errors and
+            actions taken. E.g.
+            {"errors": list_of_errors, "actions": list_of_actions_taken}.
+            If this is an unfixable error, actions should be set to None.
         """
         pass
 

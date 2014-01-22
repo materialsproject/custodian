@@ -64,7 +64,6 @@
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">pymatgen</span> <span class="kn">import</span> <span class="n">zopen</span>
-<span class="kn">from</span> <span class="nn">pymatgen.serializers.json_coders</span> <span class="kn">import</span> <span class="n">MSONable</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
@@ -78,9 +77,9 @@
 <span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;12/03/13&quot;</span>
 
 
-<div class="viewcode-block" id="QchemJob"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.jobs.QchemJob">[docs]</a><span class="k">class</span> <span class="nc">QchemJob</span><span class="p">(</span><span class="n">Job</span><span class="p">,</span> <span class="n">MSONable</span><span class="p">):</span>
+<div class="viewcode-block" id="QchemJob"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.jobs.QchemJob">[docs]</a><span class="k">class</span> <span class="nc">QchemJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A basis QChem Job.</span>
+<span class="sd">    A basic QChem Job.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qchem_cmd</span><span class="p">,</span> <span class="n">input_file</span><span class="o">=</span><span class="s">&quot;mol.qcinp&quot;</span><span class="p">,</span>
@@ -92,23 +91,17 @@
 <span class="sd">        of the static constructors.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            qchem_cmd:</span>
-<span class="sd">                Command to run QChem as a list args (without input/output file</span>
-<span class="sd">                name). For example: [&quot;qchem&quot;, &quot;-np&quot;, &quot;24&quot;]</span>
-<span class="sd">            input_file:</span>
-<span class="sd">                Name of the QChem input file.</span>
-<span class="sd">            output_file:</span>
-<span class="sd">                Name of the QChem output file.</span>
-<span class="sd">            chk_file:</span>
-<span class="sd">                Name of the QChem check point file. None means no checkpoint</span>
-<span class="sd">                point file. Defaults to None.</span>
-<span class="sd">            qclog_file:</span>
-<span class="sd">                Name of the file to redirect the standard output to. None means</span>
-<span class="sd">                not to record the standard output. Defaults to None.</span>
-<span class="sd">            gzipped:</span>
-<span class="sd">                Whether to gzip the final output. Defaults to False.</span>
-<span class="sd">            backup:</span>
-<span class="sd">                Boolean whether to backup the initial input files. If True,</span>
+<span class="sd">            qchem_cmd ([str]): Command to run QChem as a list args (without</span>
+<span class="sd">                input/output file name). For example: [&quot;qchem&quot;, &quot;-np&quot;, &quot;24&quot;]</span>
+<span class="sd">            input_file (str): Name of the QChem input file.</span>
+<span class="sd">            output_file (str): Name of the QChem output file.</span>
+<span class="sd">            chk_file (str): Name of the QChem check point file. None means no</span>
+<span class="sd">                checkpoint point file. Defaults to None.</span>
+<span class="sd">            qclog_file (str): Name of the file to redirect the standard output</span>
+<span class="sd">                to. None means not to record the standard output. Defaults to</span>
+<span class="sd">                None.</span>
+<span class="sd">            gzipped (bool): Whether to gzip the final output. Defaults to False.</span>
+<span class="sd">            backup (bool): Whether to backup the initial input files. If True,</span>
 <span class="sd">                the input files will be copied with a &quot;.orig&quot; appended.</span>
 <span class="sd">                Defaults to True.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -151,28 +144,7 @@
 </div>
 <div class="viewcode-block" id="QchemJob.postprocess"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.jobs.QchemJob.postprocess">[docs]</a>    <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gzipped</span><span class="p">:</span>
-            <span class="n">gzip_dir</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
-</div>
-    <span class="nd">@property</span>
-<div class="viewcode-block" id="QchemJob.name"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.jobs.QchemJob.name">[docs]</a>    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&quot;QChem Job&quot;</span>
-</div>
-    <span class="nd">@property</span>
-<div class="viewcode-block" id="QchemJob.to_dict"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.jobs.QchemJob.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">qchem_cmd</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">qchem_cmd</span><span class="p">,</span> <span class="n">input_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span>
-                 <span class="n">output_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="n">chk_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chk_file</span><span class="p">,</span>
-                 <span class="n">qclog_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">qclog_file</span><span class="p">,</span> <span class="n">gzipped</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gzipped</span><span class="p">,</span>
-                 <span class="n">backup</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">backup</span><span class="p">)</span>
-        <span class="n">d</span><span class="p">[</span><span class="s">&quot;@module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span>
-        <span class="n">d</span><span class="p">[</span><span class="s">&quot;@class&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
-        <span class="k">return</span> <span class="n">d</span>
-</div>
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="QchemJob.from_dict"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.jobs.QchemJob.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">QchemJob</span><span class="p">(</span><span class="n">qchem_cmd</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;qchem_cmd&quot;</span><span class="p">],</span> <span class="n">input_file</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;input_file&quot;</span><span class="p">],</span>
-                        <span class="n">output_file</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_file&quot;</span><span class="p">],</span> <span class="n">chk_file</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;chk_file&quot;</span><span class="p">],</span>
-                        <span class="n">qclog_file</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;qclog_file&quot;</span><span class="p">],</span> <span class="n">gzipped</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;gzipped&quot;</span><span class="p">],</span>
-                        <span class="n">backup</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;backup&quot;</span><span class="p">])</span></div></div>
+            <span class="n">gzip_dir</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>
@@ -213,7 +185,7 @@
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

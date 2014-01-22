@@ -158,10 +158,8 @@ class FileActions(object):
         Creates a file.
 
         Args:
-            filename:
-                Filename.
-            settings:
-                Must be {"content": actual_content}
+            filename (str): Filename.
+            settings (dict): Must be {"content": actual_content}
         """
         if len(settings) != 1:
             raise ValueError("Settings must only contain one item with key "
@@ -177,10 +175,8 @@ class FileActions(object):
         Moves a file. {'_file_move': {'dest': 'new_file_name'}}
 
         Args:
-            filename:
-                Filename.
-            settings:
-                Must be {"dest": path of new file}
+            filename (str): Filename.
+            settings (dict): Must be {"dest": path of new file}
         """
         if len(settings) != 1:
             raise ValueError("Settings must only contain one item with key "
@@ -195,11 +191,9 @@ class FileActions(object):
         Deletes a file. {'_file_delete': {'mode': "actual"}}
 
         Args:
-            filename:
-                Filename.
-            settings:
-                Must be {"mode": actual/simulated}. Simulated mode only prints
-                the action without performing it.
+            filename (str): Filename.
+            settings (dict): Must be {"mode": actual/simulated}. Simulated
+                mode only prints the action without performing it.
         """
         if len(settings) != 1:
             raise ValueError("Settings must only contain one item with key "
@@ -220,10 +214,8 @@ class FileActions(object):
         Copies a file. {'_file_copy': {'dest': 'new_file_name'}}
 
         Args:
-            filename:
-                Filename.
-            settings:
-                Must be {"dest": path of new file}
+            filename (str): Filename.
+            settings (dict): Must be {"dest": path of new file}
         """
         for k, v in settings.items():
             if k.startswith("dest"):

@@ -91,7 +91,6 @@ _rename</div></blockquote>
 using the mongo {&#8220;a.b&#8221;:1} notation. This is because mongo does not allow
 keys with &#8221;.&#8221; to be inserted. Instead, nested dict modification is
 supported using a special &#8220;-&gt;&#8221; keyword, e.g. {&#8220;a-&gt;b&#8221;: 1}</p>
-<p>x.__init__(...) initializes x; see help(type(x)) for signature</p>
 <dl class="staticmethod">
 <dt id="custodian.ansible.actions.DictActions.add_to_set">
 <em class="property">static </em><tt class="descname">add_to_set</tt><big>(</big><em>input_dict</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.add_to_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.add_to_set" title="Permalink to this definition">¶</a></dt>
@@ -151,70 +150,85 @@ supported using a special &#8220;-&gt;&#8221; keyword, e.g. {&#8220;a-&gt;b&#822
 <p>Class of supported file actions. For FileActions, the modder class takes in
 a filename as a string. The filename should preferably be a full path to
 avoid ambiguity.</p>
-<p>x.__init__(...) initializes x; see help(type(x)) for signature</p>
 <dl class="staticmethod">
 <dt id="custodian.ansible.actions.FileActions.file_copy">
 <em class="property">static </em><tt class="descname">file_copy</tt><big>(</big><em>filename</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Copies a file. {&#8216;_file_copy&#8217;: {&#8216;dest&#8217;: &#8216;new_file_name&#8217;}}</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt>filename:</dt>
-<dd>Filename.</dd>
-<dt>settings:</dt>
-<dd>Must be {&#8220;dest&#8221;: path of new file}</dd>
-</dl>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> (<em>str</em>) &#8211;
+Filename.</li>
+<li><strong>settings</strong> (<em>dict</em>) &#8211;
+Must be {&#8220;dest&#8221;: path of new file}</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="custodian.ansible.actions.FileActions.file_create">
 <em class="property">static </em><tt class="descname">file_create</tt><big>(</big><em>filename</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_create" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a file.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt>filename:</dt>
-<dd>Filename.</dd>
-<dt>settings:</dt>
-<dd>Must be {&#8220;content&#8221;: actual_content}</dd>
-</dl>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> (<em>str</em>) &#8211;
+Filename.</li>
+<li><strong>settings</strong> (<em>dict</em>) &#8211;
+Must be {&#8220;content&#8221;: actual_content}</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="custodian.ansible.actions.FileActions.file_delete">
 <em class="property">static </em><tt class="descname">file_delete</tt><big>(</big><em>filename</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_delete" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deletes a file. {&#8216;_file_delete&#8217;: {&#8216;mode&#8217;: &#8220;actual&#8221;}}</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt>filename:</dt>
-<dd>Filename.</dd>
-<dt>settings:</dt>
-<dd>Must be {&#8220;mode&#8221;: actual/simulated}. Simulated mode only prints
-the action without performing it.</dd>
-</dl>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> (<em>str</em>) &#8211;
+Filename.</li>
+<li><strong>settings</strong> (<em>dict</em>) &#8211;
+Must be {&#8220;mode&#8221;: actual/simulated}. Simulated
+mode only prints the action without performing it.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="custodian.ansible.actions.FileActions.file_move">
 <em class="property">static </em><tt class="descname">file_move</tt><big>(</big><em>filename</em>, <em>settings</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_move"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_move" title="Permalink to this definition">¶</a></dt>
 <dd><p>Moves a file. {&#8216;_file_move&#8217;: {&#8216;dest&#8217;: &#8216;new_file_name&#8217;}}</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt>filename:</dt>
-<dd>Filename.</dd>
-<dt>settings:</dt>
-<dd>Must be {&#8220;dest&#8221;: path of new file}</dd>
-</dl>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> (<em>str</em>) &#8211;
+Filename.</li>
+<li><strong>settings</strong> (<em>dict</em>) &#8211;
+Must be {&#8220;dest&#8221;: path of new file}</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -249,52 +263,70 @@ pymatpro.ansible.actions.</p>
 &#8216;World&#8217;
 &gt;&gt;&gt; d[&#8216;Hello&#8217;]
 &#8216;Universe&#8217;</p>
-<p>Args:
-actions:</p>
-<blockquote>
-<div>A sequence of supported actions. Default is None, which means
-only DictActions are supported.</div></blockquote>
-<dl class="docutils">
-<dt>strict:</dt>
-<dd>Boolean indicating whether to use strict mode. In non-strict
+<p>Initializes a Modder from a list of supported actions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>actions</strong> (<em>[Action]</em>) &#8211;
+A sequence of supported actions. See
+<a class="reference internal" href="#module-custodian.ansible.actions" title="custodian.ansible.actions"><tt class="xref py py-mod docutils literal"><span class="pre">custodian.ansible.actions</span></tt></a>. Default is None,
+which means only DictActions are supported.</li>
+<li><strong>strict</strong> (<em>bool</em>) &#8211;
+Indicating whether to use strict mode. In non-strict
 mode, unsupported actions are simply ignored without any
 errors raised. In strict mode, if an unsupported action is
-supplied, a ValueError is raised. Defaults to True.</dd>
-</dl>
+supplied, a ValueError is raised. Defaults to True.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="custodian.ansible.intepreter.Modder.modify">
 <tt class="descname">modify</tt><big>(</big><em>modification</em>, <em>obj</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/intepreter.html#Modder.modify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.intepreter.Modder.modify" title="Permalink to this definition">¶</a></dt>
 <dd><p>Note that modify makes actual in-place modifications. It does not
 return a copy.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt>modification:</dt>
-<dd>Modification must be {action_keyword : settings}</dd>
-<dt>obj:</dt>
-<dd>Object to modify depending on actions. For example, for
-DictActions, obj will be a dict to be modified. For
-FileActions, obj will be a string with a full pathname to a
-file.</dd>
-</dl>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>modification</strong> (<em>dict</em>) &#8211;
+Modification must be {action_keyword :
+settings}. E.g., {&#8216;_set&#8217;: {&#8216;Hello&#8217;:&#8217;Universe&#8217;, &#8216;Bye&#8217;: &#8216;World&#8217;}}</li>
+<li><strong>obj</strong> (<em>dict/str/object</em>) &#8211;
+Object to modify depending on actions. For
+example, for DictActions, obj will be a dict to be modified.
+For FileActions, obj will be a string with a full pathname to a
+file.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.ansible.intepreter.Modder.modify_object">
 <tt class="descname">modify_object</tt><big>(</big><em>modification</em>, <em>obj</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/intepreter.html#Modder.modify_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.intepreter.Modder.modify_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Modify an object that supports pymatgen&#8217;s to_dict and from_dict API.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt>modification:</dt>
-<dd>Modification must be {action_keyword : settings}</dd>
-<dt>obj:</dt>
-<dd>Object to modify</dd>
-</dl>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>modification</strong> (<em>dict</em>) &#8211;
+Modification must be {action_keyword :
+settings}. E.g., {&#8216;_set&#8217;: {&#8216;Hello&#8217;:&#8217;Universe&#8217;, &#8216;Bye&#8217;: &#8216;World&#8217;}}</li>
+<li><strong>obj</strong> (<em>object</em>) &#8211;
+Object to modify</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -321,9 +353,7 @@ stored at each step).</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">custodian.ansible package</a><ul>
-<li><a class="reference internal" href="#subpackages">Subpackages</a><ul>
-</ul>
-</li>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-custodian.ansible.actions">custodian.ansible.actions module</a></li>
 <li><a class="reference internal" href="#module-custodian.ansible.intepreter">custodian.ansible.intepreter module</a></li>
@@ -369,7 +399,7 @@ stored at each step).</p>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
