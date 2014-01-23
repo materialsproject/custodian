@@ -24,6 +24,7 @@ from pymatgen.io.vaspio.vasp_input import VaspInput
 from pymatgen.io.smartio import read_structure
 from pymatgen.io.vaspio_set import MITVaspInputSet
 from pymatgen.serializers.json_coders import PMGJSONDecoder
+from pymatgen.util.io_utils import which
 
 from custodian.ansible.intepreter import Modder
 from custodian.ansible.actions import FileActions, DictActions
@@ -178,10 +179,10 @@ class VaspJob(Job):
             vi = VaspInput.from_directory(".")
             kpts = vi["KPOINTS"]
             if kpts.style == "Gamma" and tuple(kpts.kpts[0]) == (1, 1, 1):
-                if self.gamma_vasp_cmd is not None and os.path.exists(
+                if self.gamma_vasp_cmd is not None and which(
                         self.gamma_vasp_cmd[-1]):
                     cmd = self.gamma_vasp_cmd
-                elif os.path.exists(cmd[-1] + ".gamma"):
+                elif which(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
         logging.info("Running {}".format(" ".join(cmd)))
         with open(self.output_file, 'w') as f:
