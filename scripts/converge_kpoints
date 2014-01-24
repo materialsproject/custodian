@@ -28,12 +28,15 @@ FORMAT = '%(asctime)s %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
 
 
-def get_runs(vasp_command, target=1e-3, max_steps=10):
+def get_runs(vasp_command, target=1e-3, max_steps=10, mode="linear"):
     energy = 0
     vinput = VaspInput.from_directory(".")
     kpoints = vinput["KPOINTS"].kpts[0]
     for i in xrange(max_steps):
-        m = [k * (i + 1) for k in kpoints]
+        if mode == "linear":
+            m = [k * (i + 1) for k in kpoints]
+        else:
+            m = [k + 1 for k in kpoints]
         if i == 0:
             settings = None
             backup = True
@@ -62,7 +65,7 @@ def get_runs(vasp_command, target=1e-3, max_steps=10):
 def do_run(args):
     handlers = [VaspErrorHandler(), UnconvergedErrorHandler()]
     c = Custodian(handlers, get_runs(vasp_command=args.command.split(),
-                                     target=args.target,
+                                     target=args.target, mode=args.mode,
                                      max_steps=args.max_steps),
                   max_errors=10)
     c.run()
@@ -90,6 +93,16 @@ if __name__ == "__main__":
         default="pvasp", type=str,
         help="VASP command. Defaults to pvasp. If you are using mpirun, "
              "set this to something like \"mpirun pvasp\".")
+
+    parser.add_argument(
+        "-i", "--increment_mode", dest="mode", nargs="?",
+        default="linear", type=str, choices=["linear", "inc"],
+        help="Mode for increasing kpoints. In linear mode, multiples of "
+             "the existing kpoints are done. E.g., 2x4x2 -> 4x8x4 -> 6x12x6. "
+             "In inc mode, all KPOINTS are incremented by 1 at each stage, "
+             "i.e., 2x4x2 -> 3x5x3 ->4x6x4. Note that the latter mode does "
+             "not preserve KPOINTS symmetry, though it is probably less "
+             "expensive.")
 
     parser.add_argument(
         "-m", "--max_steps", dest="max_steps", nargs="?",
