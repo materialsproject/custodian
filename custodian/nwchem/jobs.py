@@ -17,9 +17,10 @@ __date__ = "5/20/13"
 import subprocess
 import shutil
 
-from pymatgen.util.io_utils import zopen
+from monty.io import zopen
 
-from custodian.custodian import Job, gzip_dir
+from custodian.custodian import Job
+from monty.shutil import gzip_dir
 
 
 class NwchemJob(Job):

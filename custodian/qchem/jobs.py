@@ -6,7 +6,7 @@ This module implements basic kinds of jobs for QChem runs.
 
 from __future__ import division
 import os
-from pymatgen import zopen
+from monty.io import zopen
 import shutil
 import copy
 import subprocess

@@ -24,7 +24,7 @@ from pymatgen.io.vaspio.vasp_input import VaspInput
 from pymatgen.io.smartio import read_structure
 from pymatgen.io.vaspio_set import MITVaspInputSet
 from pymatgen.serializers.json_coders import PMGJSONDecoder
-from pymatgen.util.io_utils import which
+from monty.os.path import which
 
 from custodian.ansible.intepreter import Modder
 from custodian.ansible.actions import FileActions, DictActions
