@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Change log &mdash; custodian 0.6.3 documentation</title>
+    <title>Change log &mdash; custodian 0.7.0 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.6.3',
+        VERSION:     '0.7.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.6.3 documentation" href="#" />
+    <link rel="top" title="custodian 0.7.0 documentation" href="#" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.6.3 documentation</a> &raquo;</li> 
+        <li><a href="#">custodian 0.7.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -71,37 +71,23 @@ handling for Vienna Ab Initio Simulation Package (VASP), NwChem and QChem
 calculations.</p>
 <div class="section" id="change-log">
 <h1>Change log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="id1">
-<h2>0.6.3<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="v0-7-0">
+<h2>v0.7.0<a class="headerlink" href="#v0-7-0" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li>Added buffer time option in PBSWalltimeHandler.</li>
-<li>Improved Qchem jobs and handlers (Xiaohui Qu).</li>
-<li>Vastly improved API docs.</li>
-</ol>
-</div>
-<div class="section" id="id2">
-<h2>0.6.2<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li>Bug fix release to support sub dirs in run folder when using scratch.</li>
-<li>Improve handling of walltime in PBSWalltimeHander.</li>
-</ol>
-</div>
-<div class="section" id="id3">
-<h2>0.6.1<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li>Bug fix release to address minor issue with checkpointing.</li>
-<li>Checkpointing is now turned off by default.</li>
-</ol>
-</div>
-<div class="section" id="id4">
-<h2>0.6.0<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li>Checkpointing implemented for Custodian. Custodian can now checkpoint all
-files in the current working directory after every successful job. If the
-job is resubmitted, it will restore files and start from the last
-checkpoint. Particularly useful for multi-job runs.</li>
-<li>Added PBSWalltimeHandler to handle wall times for PBS Vasp Jobs.</li>
-<li>Qchem error handlers and jobs.</li>
+<li><a href="#id1"><span class="problematic" id="id2">**</span></a>Backwards incompatible with v0.6.3. Refactoring to move commonly used
+Python utility functions to <a class="reference external" href="https://pypi.python.org/pypi/monty">Monty package</a>, which is now a depedency
+for custodian.</li>
+<li>Custodian now requires pymatgen &gt;= 2.9.0 for VASP, Qchem and Nwchem jobs
+and handlers.</li>
+<li>converge_kpoints script now has increment mode.</li>
+<li>ErrorHandlers now have a new API, where the class variables &#8220;is_monitor&#8221;
+and &#8220;is_terminating&#8221; are provided to indicate if a particular handler
+runs in the background during a Job and whether a handler should
+terminate the job. Some errors may not be critical or may need to wait
+for some other event to terminate a job. For example,
+a particular error may require a flag to be set to request a job to
+terminate gracefully once it finishes its current task. The handler to
+set the flag should not terminate the job.</li>
 </ol>
 <p><a class="reference internal" href="changelog.html"><em>Older versions</em></a></p>
 </div>
@@ -429,10 +415,7 @@ DEALINGS IN THE SOFTWARE.
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Change log</a><ul>
-<li><a class="reference internal" href="#id1">0.6.3</a></li>
-<li><a class="reference internal" href="#id2">0.6.2</a></li>
-<li><a class="reference internal" href="#id3">0.6.1</a></li>
-<li><a class="reference internal" href="#id4">0.6.0</a></li>
+<li><a class="reference internal" href="#v0-7-0">v0.7.0</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#getting-custodian">Getting custodian</a><ul>
@@ -485,7 +468,7 @@ DEALINGS IN THE SOFTWARE.
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.6.3 documentation</a> &raquo;</li> 
+        <li><a href="#">custodian 0.7.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

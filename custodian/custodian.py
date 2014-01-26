@@ -317,6 +317,10 @@ def _do_check(handlers, terminate_func=None, skip_over_errors=False):
 
 
 class JSONSerializable(object):
+    """
+    Base class to be inherited to provide useful standard json serialization
+    and deserialization protocols based on init args.
+    """
 
     @property
     def to_dict(self):
@@ -348,22 +352,28 @@ class ErrorHandler(JSONSerializable):
     """
     __metaclass__ = ABCMeta
 
+    is_monitor = False
     """
-    This property indicates whether the error handler is a monitor,
+    This class roperty indicates whether the error handler is a monitor,
     i.e., a handler that monitors a job as it is running. If a
     monitor-type handler notices an error, the job will be sent a
     termination signal, the error is then corrected,
     and then the job is restarted. This is useful for catching errors
     that occur early in the run but do not cause immediate failure.
     """
-    is_monitor = False
 
-    """
-    Whether this handler terminates a job upon error detection. Defaults
-    to True. Set to False for non-terminating errors, i.e., errors that
-    can be recovered from without terminating a job.
-    """
     is_terminating = True
+    """
+    Whether this handler terminates a job upon error detection. By
+    default, this is True, which means that the current Job will be
+    terminated upon error detection, corrections applied,
+    and restarted. In some instances, some errors may not need the job to be
+    terminated or may need to wait for some other event to terminate a job.
+    For example, a particular error may require a flag to be set to request
+    a job to terminate gracefully once it finishes its current task. The
+    handler to set the flag should be classified as is_terminating = False to
+    not terminate the job.
+    """
 
     @abstractmethod
     def check(self):
@@ -409,7 +419,7 @@ class Job(JSONSerializable):
     def run(self):
         """
         This method perform the actual work for the job. If parallel error
-        checking is desired, this must return a Popen process.
+        checking (monitoring) is desired, this must return a Popen process.
         """
         pass
 

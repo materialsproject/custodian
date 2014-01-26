@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian package &mdash; custodian 0.6.3 documentation</title>
+    <title>custodian package &mdash; custodian 0.7.0 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.6.3',
+        VERSION:     '0.7.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.6.3 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.7.0 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.6.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -249,15 +249,27 @@ If this is an unfixable error, actions should be set to None.</td>
 <dl class="attribute">
 <dt id="custodian.custodian.ErrorHandler.is_monitor">
 <tt class="descname">is_monitor</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Whether this handler terminates a job upon error detection. Defaults
-to True. Set to False for non-terminating errors, i.e., errors that
-can be recovered from without terminating a job.</p>
+<dd><p>This class roperty indicates whether the error handler is a monitor,
+i.e., a handler that monitors a job as it is running. If a
+monitor-type handler notices an error, the job will be sent a
+termination signal, the error is then corrected,
+and then the job is restarted. This is useful for catching errors
+that occur early in the run but do not cause immediate failure.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.custodian.ErrorHandler.is_terminating">
 <tt class="descname">is_terminating</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Whether this handler terminates a job upon error detection. By
+default, this is True, which means that the current Job will be
+terminated upon error detection, corrections applied,
+and restarted. In some instances, some errors may not need the job to be
+terminated or may need to wait for some other event to terminate a job.
+For example, a particular error may require a flag to be set to request
+a job to terminate gracefully once it finishes its current task. The
+handler to set the flag should be classified as is_terminating = False to
+not terminate the job.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -265,6 +277,8 @@ can be recovered from without terminating a job.</p>
 <dt id="custodian.custodian.JSONSerializable">
 <em class="property">class </em><tt class="descname">JSONSerializable</tt><a class="reference internal" href="_modules/custodian/custodian.html#JSONSerializable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.JSONSerializable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Base class to be inherited to provide useful standard json serialization
+and deserialization protocols based on init args.</p>
 <dl class="classmethod">
 <dt id="custodian.custodian.JSONSerializable.from_dict">
 <em class="property">classmethod </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#JSONSerializable.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.JSONSerializable.from_dict" title="Permalink to this definition">¶</a></dt>
@@ -302,7 +316,7 @@ etc.</p>
 <dt id="custodian.custodian.Job.run">
 <tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Job.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method perform the actual work for the job. If parallel error
-checking is desired, this must return a Popen process.</p>
+checking (monitoring) is desired, this must return a Popen process.</p>
 </dd></dl>
 
 <dl class="method">
@@ -318,37 +332,6 @@ pre-processing.</p>
 <div class="section" id="module-custodian.utils">
 <span id="custodian-utils-module"></span><h2>custodian.utils module<a class="headerlink" href="#module-custodian.utils" title="Permalink to this headline">¶</a></h2>
 <p>Utility function and classes.</p>
-<dl class="class">
-<dt id="custodian.utils.ScratchDir">
-<em class="property">class </em><tt class="descname">ScratchDir</tt><big>(</big><em>rootpath</em><big>)</big><a class="reference internal" href="_modules/custodian/utils.html#ScratchDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.utils.ScratchDir" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
-<p>Creates a with context manager that automatically handles creation of
-temporary directories in the scratch space and cleanup when done.</p>
-<p>Initializes scratch directory given a <strong>root</strong> path. There is no need
-to try to create unique directory names. The code will generate a
-temporary sub directory in the rootpath. The way to use this is using a
-with context manager. Example:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">with</span> <span class="n">ScratchDir</span><span class="p">(</span><span class="s">&quot;/scratch&quot;</span><span class="p">):</span>
-    <span class="n">do_something</span><span class="p">()</span>
-</pre></div>
-</div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>rootpath</strong> (<em>str</em>) &#8211;</p>
-<p class="last">The path in which to create temp subdirectories.</p>
-</td>
-</tr>
-</tbody>
-</table>
-<dl class="attribute">
-<dt id="custodian.utils.ScratchDir.SCR_LINK">
-<tt class="descname">SCR_LINK</tt><em class="property"> = 'scratch_link'</em><a class="headerlink" href="#custodian.utils.ScratchDir.SCR_LINK" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 <dl class="function">
 <dt id="custodian.utils.backup">
 <tt class="descname">backup</tt><big>(</big><em>filenames</em>, <em>prefix='error'</em><big>)</big><a class="reference internal" href="_modules/custodian/utils.html#backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.utils.backup" title="Permalink to this definition">¶</a></dt>
@@ -365,44 +348,6 @@ List of files to backup. Supports wildcards, e.g.,
 <li><strong>prefix</strong> (<em>str</em>) &#8211;
 prefix to the files. Defaults to error, which means a
 series of error.1.tar.gz, error.2.tar.gz, ... will be generated.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="custodian.utils.gzip_dir">
-<tt class="descname">gzip_dir</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/custodian/utils.html#gzip_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.utils.gzip_dir" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gzips all files in a directory. Used, for instance, to compress all
-files at the end of a run.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<em>str</em>) &#8211;
-Path to directory.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="custodian.utils.recursive_copy">
-<tt class="descname">recursive_copy</tt><big>(</big><em>src</em>, <em>dst</em><big>)</big><a class="reference internal" href="_modules/custodian/utils.html#recursive_copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.utils.recursive_copy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Implements a recursive copy function similar to Unix&#8217;s &#8220;cp -r&#8221; command.
-Surprisingly, python does not have a real equivalent. shutil.copytree
-only works if the destination directory is not present.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>src</strong> (<em>str</em>) &#8211;
-Source folder to copy.</li>
-<li><strong>dst</strong> (<em>str</em>) &#8211;
-Destination folder.</li>
 </ul>
 </td>
 </tr>
@@ -465,7 +410,7 @@ Destination folder.</li>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.6.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

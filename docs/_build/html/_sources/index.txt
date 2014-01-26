@@ -22,31 +22,23 @@ calculations.
 Change log
 ==========
 
-0.6.3
------
-1. Added buffer time option in PBSWalltimeHandler.
-2. Improved Qchem jobs and handlers (Xiaohui Qu).
-3. Vastly improved API docs.
-
-0.6.2
------
-1. Bug fix release to support sub dirs in run folder when using scratch.
-2. Improve handling of walltime in PBSWalltimeHander.
-
-0.6.1
------
-1. Bug fix release to address minor issue with checkpointing.
-2. Checkpointing is now turned off by default.
-
-0.6.0
------
-1. Checkpointing implemented for Custodian. Custodian can now checkpoint all
-   files in the current working directory after every successful job. If the
-   job is resubmitted, it will restore files and start from the last
-   checkpoint. Particularly useful for multi-job runs.
-2. Added PBSWalltimeHandler to handle wall times for PBS Vasp Jobs.
-3. Qchem error handlers and jobs.
-
+v0.7.0
+------
+1. **Backwards incompatible with v0.6.3. Refactoring to move commonly used
+   Python utility functions to `Monty package <https://pypi.python
+   .org/pypi/monty>`_, which is now a depedency
+   for custodian.
+2. Custodian now requires pymatgen >= 2.9.0 for VASP, Qchem and Nwchem jobs
+   and handlers.
+3. converge_kpoints script now has increment mode.
+4. ErrorHandlers now have a new API, where the class variables "is_monitor"
+   and "is_terminating" are provided to indicate if a particular handler
+   runs in the background during a Job and whether a handler should
+   terminate the job. Some errors may not be critical or may need to wait
+   for some other event to terminate a job. For example,
+   a particular error may require a flag to be set to request a job to
+   terminate gracefully once it finishes its current task. The handler to
+   set the flag should not terminate the job.
 
 :doc:`Older versions </changelog>`
 

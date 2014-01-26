@@ -1,6 +1,31 @@
 Change Log
 ==========
 
+0.6.3
+-----
+1. Added buffer time option in PBSWalltimeHandler.
+2. Improved Qchem jobs and handlers (Xiaohui Qu).
+3. Vastly improved API docs.
+
+0.6.2
+-----
+1. Bug fix release to support sub dirs in run folder when using scratch.
+2. Improve handling of walltime in PBSWalltimeHander.
+
+0.6.1
+-----
+1. Bug fix release to address minor issue with checkpointing.
+2. Checkpointing is now turned off by default.
+
+0.6.0
+-----
+1. Checkpointing implemented for Custodian. Custodian can now checkpoint all
+   files in the current working directory after every successful job. If the
+   job is resubmitted, it will restore files and start from the last
+   checkpoint. Particularly useful for multi-job runs.
+2. Added PBSWalltimeHandler to handle wall times for PBS Vasp Jobs.
+3. Qchem error handlers and jobs.
+
 0.5.0
 -----
 1. Added scratch_dir option to Custodian class as well as run_vasp and
