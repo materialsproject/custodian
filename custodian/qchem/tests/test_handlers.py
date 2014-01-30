@@ -9,6 +9,8 @@ import os
 import shutil
 from unittest import TestCase
 import unittest
+from pkg_resources import parse_version
+import pymatgen
 from custodian.qchem.handlers import QChemErrorHandler
 
 __author__ = "Xiaohui Qu"
@@ -441,6 +443,10 @@ class QChemErrorHandlerTest(TestCase):
             ans = f.read()
         self.assertEqual(ref, ans)
 
+    @unittest.skipIf(parse_version(pymatgen.__version__) <=
+                     parse_version('2.9.0'),
+                     "No input text error parsing is a feature after "
+                     "version 2.9.0")
     def test_no_input_text(self):
         shutil.copyfile(os.path.join(test_dir, "no_reading.qcinp"),
                         os.path.join(scr_dir, "no_reading.qcinp"))
@@ -461,6 +467,10 @@ class QChemErrorHandlerTest(TestCase):
             ans = f.read()
         self.assertEqual(ref, ans)
 
+    @unittest.skipIf(parse_version(pymatgen.__version__) <=
+                     parse_version('2.9.0'),
+                     "Exit code 134 error parsing is a feature after "
+                     "version 2.9.0")
     def test_exit_code_134(self):
         shutil.copyfile(os.path.join(test_dir, "exit_code_134.qcinp"),
                         os.path.join(scr_dir, "exit_code_134.qcinp"))
