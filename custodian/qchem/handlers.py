@@ -101,10 +101,29 @@ class QChemErrorHandler(ErrorHandler):
                     actions.append("use tighter grid")
                 else:
                     return {"errors": self.errors, "actions": None}
+            elif e == "No input text":
+                if "sym_ignore" not in self.fix_step.params["rem"]:
+                    self.fix_step.disable_symmetry()
+                    actions.append("disable symmetry")
+                else:
+                    return {"errors": self.errors, "actions": None}
+            elif e == "Exit Code 134":
+                if "No input text" in self.errors:
+                    continue
+                else:
+                    if "thresh" not in self.fix_step.params["rem"]:
+                        self.fix_step.set_integral_threshold(thresh=12)
+                        actions.append("use tight integral threshold")
+                    else:
+                        return {"errors": self.errors, "actions": None}
             elif e == "Molecular charge is not found":
                 if "autoz error" in self.errors:
                     continue
-                if "Bad SCF convergence" in self.errors:
+                elif "Bad SCF convergence" in self.errors:
+                    continue
+                elif "Exit Code 134" in self.errors:
+                    continue
+                elif "No input text" in self.errors:
                     continue
                 else:
                     return {"errors": self.errors, "actions": None}

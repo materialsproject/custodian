@@ -441,6 +441,25 @@ class QChemErrorHandlerTest(TestCase):
             ans = f.read()
         self.assertEqual(ref, ans)
 
+    def test_no_input_text(self):
+        shutil.copyfile(os.path.join(test_dir, "no_reading.qcinp"),
+                        os.path.join(scr_dir, "no_reading.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "no_reading.qcout"),
+                        os.path.join(scr_dir, "no_reading.qcout"))
+        h = QChemErrorHandler(input_file="no_reading.qcinp",
+                              output_file="no_reading.qcout")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Exit Code 134',
+                                        'Molecular charge is not found',
+                                        'No input text'],
+                             'actions': ['disable symmetry']})
+        with open(os.path.join(test_dir, "no_reading_nosymm.qcinp")) as f:
+            ref = f.read()
+        with open(os.path.join(scr_dir, "no_reading.qcinp")) as f:
+            ans = f.read()
+        self.assertEqual(ref, ans)
 
     def tearDown(self):
         shutil.rmtree(scr_dir)
