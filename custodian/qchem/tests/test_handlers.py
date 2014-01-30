@@ -461,6 +461,26 @@ class QChemErrorHandlerTest(TestCase):
             ans = f.read()
         self.assertEqual(ref, ans)
 
+    def test_exit_code_134(self):
+        shutil.copyfile(os.path.join(test_dir, "exit_code_134.qcinp"),
+                        os.path.join(scr_dir, "exit_code_134.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "exit_code_134.qcout"),
+                        os.path.join(scr_dir, "exit_code_134.qcout"))
+        h = QChemErrorHandler(input_file="exit_code_134.qcinp",
+                              output_file="exit_code_134.qcout")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Exit Code 134',
+                                        'Molecular charge is not found'],
+                             'actions': ['use tight integral threshold']})
+        with open(os.path.join(test_dir, "exit_code_134_tight_thresh.qcinp"))\
+                as f:
+            ref = f.read()
+        with open(os.path.join(scr_dir, "exit_code_134.qcinp")) as f:
+            ans = f.read()
+        self.assertEqual(ref, ans)
+
     def tearDown(self):
         shutil.rmtree(scr_dir)
         pass
