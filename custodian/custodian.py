@@ -180,7 +180,8 @@ class Custodian(object):
             total_errors = 0
             unrecoverable = False
             start = datetime.datetime.now()
-            logging.info("Run started at {}.".format(start))
+            logging.info("Run started at {} in {}.".format(start,
+                                                           self.scratch_dir))
 
             if self.checkpoint:
                 restart, run_log = Custodian._load_checkpoint(cwd)
