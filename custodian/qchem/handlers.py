@@ -76,64 +76,64 @@ class QChemErrorHandler(ErrorHandler):
     def correct(self):
         self.backup()
         actions = []
-        for e in self.errors:
-            if e == "autoz error":
-                if "sym_ignore" not in self.fix_step.params["rem"]:
-                    self.fix_step.disable_symmetry()
-                    actions.append("disable symmetry")
-                else:
-                    return {"errors": self.errors, "actions": None}
-            elif e == "Bad SCF convergence":
-                act = self.fix_scf()
-                if act:
-                    actions.append(act)
-                else:
-                    return {"errors": self.errors, "actions": None}
-            elif e == "Geometry optimization failed":
-                act = self.fix_geom_opt()
-                if act:
-                    actions.append(act)
-                else:
-                    return {"errors": self.errors, "actions": None}
-            elif e == "NAN values":
-                if "xc_grid" not in self.fix_step.params["rem"]:
-                    self.fix_step.set_dft_grid(128, 302)
-                    actions.append("use tighter grid")
-                else:
-                    return {"errors": self.errors, "actions": None}
-            elif e == "No input text":
-                if "sym_ignore" not in self.fix_step.params["rem"]:
-                    self.fix_step.disable_symmetry()
-                    actions.append("disable symmetry")
-                else:
-                    return {"errors": self.errors, "actions": None}
-            elif e == "Exit Code 134":
-                if "No input text" in self.errors:
-                    continue
-                else:
-                    if "thresh" not in self.fix_step.params["rem"]:
-                        self.fix_step.set_integral_threshold(thresh=12)
-                        actions.append("use tight integral threshold")
-                    else:
-                        return {"errors": self.errors, "actions": None}
-            elif e == "Molecular charge is not found":
-                if "autoz error" in self.errors:
-                    continue
-                elif "Bad SCF convergence" in self.errors:
-                    continue
-                elif "Exit Code 134" in self.errors:
-                    continue
-                elif "No input text" in self.errors:
-                    continue
-                else:
-                    return {"errors": self.errors, "actions": None}
-            elif e == "Molecular spin multipilicity is not found":
-                if "autoz error" in self.errors:
-                    continue
-                else:
-                    return {"errors": self.errors, "actions": None}
+
+        error_rankings = ("autoz error",
+                          "No input text",
+                          "Bad SCF convergence",
+                          "Geometry optimization failed",
+                          "NAN values",
+                          "Exit Code 134",
+                          "Molecular charge is not found",
+                          "Molecular spin multipilicity is not found"
+                          )
+        e = self.errors[0]
+        for prio_error in error_rankings:
+            if prio_error in self.errors:
+                e = prio_error
+                break
+
+        if e == "autoz error":
+            if "sym_ignore" not in self.fix_step.params["rem"]:
+                self.fix_step.disable_symmetry()
+                actions.append("disable symmetry")
             else:
                 return {"errors": self.errors, "actions": None}
+        elif e == "Bad SCF convergence":
+            act = self.fix_scf()
+            if act:
+                actions.append(act)
+            else:
+                return {"errors": self.errors, "actions": None}
+        elif e == "Geometry optimization failed":
+            act = self.fix_geom_opt()
+            if act:
+                actions.append(act)
+            else:
+                return {"errors": self.errors, "actions": None}
+        elif e == "NAN values":
+            if "xc_grid" not in self.fix_step.params["rem"]:
+                self.fix_step.set_dft_grid(128, 302)
+                actions.append("use tighter grid")
+            else:
+                return {"errors": self.errors, "actions": None}
+        elif e == "No input text":
+            if "sym_ignore" not in self.fix_step.params["rem"]:
+                self.fix_step.disable_symmetry()
+                actions.append("disable symmetry")
+            else:
+                return {"errors": self.errors, "actions": None}
+        elif e == "Exit Code 134":
+            if "thresh" not in self.fix_step.params["rem"]:
+                self.fix_step.set_integral_threshold(thresh=12)
+                actions.append("use tight integral threshold")
+            else:
+                return {"errors": self.errors, "actions": None}
+        elif e == "Molecular charge is not found":
+            return {"errors": self.errors, "actions": None}
+        elif e == "Molecular spin multipilicity is not found":
+            return {"errors": self.errors, "actions": None}
+        else:
+            return {"errors": self.errors, "actions": None}
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "actions": actions}
 
