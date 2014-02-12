@@ -60,7 +60,7 @@ Finally everything over in PARseQInput
 --------------------------------------------------------------
 User input:
 --------------------------------------------------------------
-$comments
+$comment
 <SCF Fix Strategy>{
 "current_method_id": 0,
 "methods": [

@@ -138,7 +138,7 @@ class QChemErrorHandler(ErrorHandler):
         return {"errors": self.errors, "actions": actions}
 
     def fix_scf(self):
-        comments = self.fix_step.params.get("comments", "")
+        comments = self.fix_step.params.get("comment", "")
         scf_pattern = re.compile(r"<SCF Fix Strategy>(.*)</SCF Fix "
                                  r"Strategy>", flags=re.DOTALL)
         old_strategy_text = re.findall(scf_pattern, comments)
@@ -178,7 +178,7 @@ class QChemErrorHandler(ErrorHandler):
                     self.fix_step.mol.spin_multiplicity
             if len(old_strategy_text) > 0:
                 comments = scf_pattern.sub("", comments)
-                self.fix_step.params["comments"] = comments
+                self.fix_step.params["comment"] = comments
             return "reset"
         elif strategy["current_method_id"] > len(strategy["methods"])-1:
             return None
@@ -227,11 +227,11 @@ class QChemErrorHandler(ErrorHandler):
                 comments = scf_pattern.sub(strategy_text, comments)
             else:
                 comments = strategy_text
-            self.fix_step.params["comments"] = comments
+            self.fix_step.params["comment"] = comments
             return method
 
     def fix_geom_opt(self):
-        comments = self.fix_step.params.get("comments", "")
+        comments = self.fix_step.params.get("comment", "")
         geom_pattern = re.compile(r"<Geom Opt Fix Strategy>(.*)"
                                   r"</Geom Opt Fix Strategy>",
                                   flags=re.DOTALL)
@@ -288,7 +288,7 @@ class QChemErrorHandler(ErrorHandler):
                 comments = geom_pattern.sub(strategy_text, comments)
             else:
                 comments = strategy_text
-            self.fix_step.params["comments"] = comments
+            self.fix_step.params["comment"] = comments
             return method
 
     def backup(self):
