@@ -81,9 +81,9 @@ class QChemErrorHandler(ErrorHandler):
 
         error_rankings = ("autoz error",
                           "No input text",
+                          "NAN values",
                           "Bad SCF convergence",
                           "Geometry optimization failed",
-                          "NAN values",
                           "Exit Code 134",
                           "Molecular charge is not found",
                           "Molecular spin multipilicity is not found"
@@ -172,6 +172,17 @@ class QChemErrorHandler(ErrorHandler):
             strategy["current_method_id"] += 1
         else:
             strategy = dict()
+            if len(od["scf_iteration_energies"]) == 0 \
+                    or len(od["scf_iteration_energies"][-1]) == 0:
+                if 'Exit Code 134' in self.errors:
+                    # SCF not started
+                    if "thresh" not in self.fix_step.params["rem"]:
+                        self.fix_step.set_integral_threshold(thresh=12)
+                        return "use tight integral threshold"
+                    else:
+                        return None
+                else:
+                    return None
             scf_iters = od["scf_iteration_energies"][-1]
             if scf_iters[-1][1] >= self.rca_gdm_thresh:
                 strategy["methods"] = ["increase_iter", "rca_diis", "gwh",

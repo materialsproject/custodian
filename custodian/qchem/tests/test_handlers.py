@@ -45,6 +45,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertTrue(has_error)
         d = h.correct()
         self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
                                         'Molecular charge is not found'],
                              'actions': ['increase_iter']})
         with open(os.path.join(test_dir, "hf_rca_tried_0.inp")) as f:
@@ -63,6 +64,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertTrue(has_error)
         d = h.correct()
         self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
                                         'Molecular charge is not found'],
                              'actions': ['rca_diis']})
         with open(os.path.join(test_dir, "hf_rca_tried_1.inp")) as f:
@@ -81,6 +83,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertTrue(has_error)
         d = h.correct()
         self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
                                         'Molecular charge is not found'],
                              'actions': ['gwh']})
         with open(os.path.join(test_dir, "hf_rca_tried_2.inp")) as f:
@@ -99,6 +102,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertTrue(has_error)
         d = h.correct()
         self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
                                         'Molecular charge is not found'],
                              'actions': ['gdm']})
         with open(os.path.join(test_dir, "hf_rca_tried_3.inp")) as f:
@@ -117,6 +121,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertTrue(has_error)
         d = h.correct()
         self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
                                         'Molecular charge is not found'],
                              'actions': ['rca']})
         with open(os.path.join(test_dir, "hf_rca_tried_4.inp")) as f:
@@ -135,6 +140,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertTrue(has_error)
         d = h.correct()
         self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
                                         'Molecular charge is not found'],
                              'actions': ['core+rca']})
         with open(os.path.join(test_dir, "hf_rca_tried_5.inp")) as f:
@@ -153,6 +159,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertTrue(has_error)
         d = h.correct()
         self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
                                         'Molecular charge is not found'],
                              'actions': None})
 
@@ -176,7 +183,8 @@ class QChemErrorHandlerTest(TestCase):
         has_error = h.check()
         self.assertTrue(has_error)
         d = h.correct()
-        self.assertEqual(d, {'errors': ['Bad SCF convergence'],
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed'],
                              'actions': ['reset']})
         with open(os.path.join(test_dir, "hf_scf_reset.inp")) as f:
             ref = f.read()
@@ -195,6 +203,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertTrue(has_error)
         d = h.correct()
         self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
                                         'Molecular charge is not found'],
                              'actions': ['increase_iter']})
         with open(os.path.join(test_dir, "hf_gdm_tried_0.inp")) as f:
@@ -212,6 +221,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertTrue(has_error)
         d = h.correct()
         self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
                                         'Molecular charge is not found'],
                              'actions': ['diis_gdm']})
         with open(os.path.join(test_dir, "hf_gdm_tried_1.inp")) as f:
@@ -230,6 +240,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertTrue(has_error)
         d = h.correct()
         self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
                                         'Molecular charge is not found'],
                              'actions': ['gwh']})
         with open(os.path.join(test_dir, "hf_gdm_tried_2.inp")) as f:
@@ -248,6 +259,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertTrue(has_error)
         d = h.correct()
         self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
                                         'Molecular charge is not found'],
                              'actions': ['rca']})
         with open(os.path.join(test_dir, "hf_gdm_tried_3.inp")) as f:
@@ -266,6 +278,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertTrue(has_error)
         d = h.correct()
         self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
                                         'Molecular charge is not found'],
                              'actions': ['gdm']})
         with open(os.path.join(test_dir, "hf_gdm_tried_4.inp")) as f:
@@ -284,6 +297,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertTrue(has_error)
         d = h.correct()
         self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
                                         'Molecular charge is not found'],
                              'actions': ['core+gdm']})
         with open(os.path.join(test_dir, "hf_gdm_tried_5.inp")) as f:
@@ -302,6 +316,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertTrue(has_error)
         d = h.correct()
         self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
                                         'Molecular charge is not found'],
                              'actions': None})
 
@@ -379,7 +394,9 @@ class QChemErrorHandlerTest(TestCase):
         has_error = h.check()
         self.assertTrue(has_error)
         d = h.correct()
-        self.assertEqual(d, {'errors': ['Molecular charge is not found',
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
+                                        'Molecular charge is not found',
                                         'autoz error'],
                              'actions': ['disable symmetry']})
         with open(os.path.join(test_dir, "qunino_vinyl_nosymm.qcinp")) as f:
@@ -397,7 +414,9 @@ class QChemErrorHandlerTest(TestCase):
         has_error = h.check()
         self.assertTrue(has_error)
         d = h.correct()
-        self.assertEqual(d, {'errors': ['Molecular charge is not found',
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
+                                        'Molecular charge is not found',
                                         'autoz error'],
                              'actions': None})
 
@@ -457,7 +476,8 @@ class QChemErrorHandlerTest(TestCase):
         has_error = h.check()
         self.assertTrue(has_error)
         d = h.correct()
-        self.assertEqual(d, {'errors': ['Exit Code 134',
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Exit Code 134',
                                         'Molecular charge is not found',
                                         'No input text'],
                              'actions': ['disable symmetry']})
@@ -477,7 +497,8 @@ class QChemErrorHandlerTest(TestCase):
         has_error = h.check()
         self.assertTrue(has_error)
         d = h.correct()
-        self.assertEqual(d, {'errors': ['Exit Code 134',
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Exit Code 134',
                                         'Molecular charge is not found'],
                              'actions': ['use tight integral threshold']})
         with open(os.path.join(test_dir, "exit_code_134_tight_thresh.qcinp"))\
