@@ -27,7 +27,7 @@ class QchemJob(Job):
 
     def __init__(self, qchem_cmd, input_file="mol.qcinp",
                  output_file="mol.qcout", chk_file=None, qclog_file=None,
-                 gzipped=False, backup=True):
+                 gzipped=False, backup=True, alt_cmd=None):
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -47,14 +47,40 @@ class QchemJob(Job):
             backup (bool): Whether to backup the initial input files. If True,
                 the input files will be copied with a ".orig" appended.
                 Defaults to True.
+            alt_cmd (dict of list): Alternate commands.
+                For example: {"openmp": ["qchem", "-seq", "-nt", "24"]
+                              "half_nodes": ["qchem", "-np", "12"]}
         """
-        self.qchem_cmd = qchem_cmd
+        self.qchem_cmd = copy.deepcopy(qchem_cmd)
         self.input_file = input_file
         self.output_file = output_file
         self.chk_file = chk_file
         self.qclog_file = qclog_file
         self.gzipped = gzipped
         self.backup = backup
+        self.current_command = self.qchem_cmd
+        self.current_command_name = "general"
+        self.alt_cmd = copy.deepcopy(alt_cmd)
+
+    def select_command(self, cmd_name):
+        """
+        Set the command to run QChem by name. "general" set to the default one.
+
+        Returns:
+            True: success
+            False: failed
+        """
+        available_commands = ["general"]
+        if self.alt_cmd:
+            available_commands.extend(self.alt_cmd.keys())
+        if cmd_name not in available_commands:
+            return False
+        if cmd_name == "general":
+            self.current_command = self.qchem_cmd
+        else:
+            self.current_command = self.alt_cmd[cmd_name]
+        self.current_command_name = cmd_name
+        return True
 
     def setup(self):
         if self.backup:
@@ -74,7 +100,7 @@ class QchemJob(Job):
                             "{}.{}.orig".format(self.qclog_file, i))
 
     def run(self):
-        cmd = copy.deepcopy(self.qchem_cmd)
+        cmd = copy.deepcopy(self.current_command)
         cmd += [self.input_file, self.output_file]
         if self.chk_file:
             cmd.append(self.chk_file)

@@ -30,7 +30,7 @@ class QChemErrorHandler(ErrorHandler):
     """
     def __init__(self, input_file="mol.qcinp", output_file="mol.qcout",
                  ex_backup_list=(), rca_gdm_thresh=1.0E-3,
-                 scf_max_cycles=200, geom_max_cycles=200):
+                 scf_max_cycles=200, geom_max_cycles=200, qchem_job=None):
         """
         Initializes the error handler from a set of input and output files.
 
@@ -45,6 +45,7 @@ class QChemErrorHandler(ErrorHandler):
             scf_max_cycles (int): The max iterations to set to fix SCF failure.
             geom_max_cycles (int): The max iterations to set to fix geometry
                 optimization failure.
+            qchem_job (QchemJob): the managing object to run qchem.
         """
         self.input_file = input_file
         self.output_file = output_file
@@ -57,6 +58,7 @@ class QChemErrorHandler(ErrorHandler):
         self.error_step_id = None
         self.errors = None
         self.fix_step = None
+        self.qchem_job = qchem_job
 
     def check(self):
         # Checks output file for errors.
@@ -123,9 +125,9 @@ class QChemErrorHandler(ErrorHandler):
             else:
                 return {"errors": self.errors, "actions": None}
         elif e == "Exit Code 134":
-            if "thresh" not in self.fix_step.params["rem"]:
-                self.fix_step.set_integral_threshold(thresh=12)
-                actions.append("use tight integral threshold")
+            act = self.fix_error_code_134()
+            if act:
+                actions.append(act)
             else:
                 return {"errors": self.errors, "actions": None}
         elif e == "Molecular charge is not found":
@@ -136,6 +138,22 @@ class QChemErrorHandler(ErrorHandler):
             return {"errors": self.errors, "actions": None}
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "actions": actions}
+
+    def fix_error_code_134(self):
+        if self.fix_step.params["rem"]["jobtype"] == "freq":
+            if self.qchem_job.current_command_name != "half_nodes":
+                self.qchem_job.select_command("half_nodes")
+                return "half_nodes"
+            else:
+                return None
+        elif "thresh" not in self.fix_step.params["rem"]:
+            self.fix_step.set_integral_threshold(thresh=12)
+            return "use tight integral threshold"
+        elif self.qchem_job.current_command_name != "openmp":
+            self.qchem_job.select_command("openmp")
+            return "openmp"
+        else:
+            return None
 
     def fix_scf(self):
         comments = self.fix_step.params.get("comment", "")
