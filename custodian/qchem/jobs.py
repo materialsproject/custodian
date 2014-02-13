@@ -49,7 +49,7 @@ class QchemJob(Job):
                 Defaults to True.
             alt_cmd (dict of list): Alternate commands.
                 For example: {"openmp": ["qchem", "-seq", "-nt", "24"]
-                              "half_nodes": ["qchem", "-np", "12"]}
+                              "half_cpus": ["qchem", "-np", "12"]}
         """
         self.qchem_cmd = copy.deepcopy(qchem_cmd)
         self.input_file = input_file

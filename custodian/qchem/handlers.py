@@ -141,9 +141,9 @@ class QChemErrorHandler(ErrorHandler):
 
     def fix_error_code_134(self):
         if self.fix_step.params["rem"]["jobtype"] == "freq":
-            if self.qchem_job.current_command_name != "half_nodes":
-                self.qchem_job.select_command("half_nodes")
-                return "half_nodes"
+            if self.qchem_job.current_command_name != "half_cpus":
+                self.qchem_job.select_command("half_cpus")
+                return "half_cpus"
             else:
                 return None
         elif "thresh" not in self.fix_step.params["rem"]:
