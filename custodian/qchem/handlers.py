@@ -151,6 +151,7 @@ class QChemErrorHandler(ErrorHandler):
             return "use tight integral threshold"
         elif self.qchem_job.current_command_name != "openmp":
             self.qchem_job.select_command("openmp")
+            self.fix_step.set_memory(total=28000, static=3000)
             return "openmp"
         else:
             return None
