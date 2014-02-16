@@ -146,6 +146,7 @@ class QChemErrorHandler(ErrorHandler):
         elif self.fix_step.params["rem"]["jobtype"] == "freq":
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus")
+                self.fix_step.set_memory(total=2200)
                 return "half_cpus"
             else:
                 return None
