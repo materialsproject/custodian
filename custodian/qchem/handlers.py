@@ -140,15 +140,15 @@ class QChemErrorHandler(ErrorHandler):
         return {"errors": self.errors, "actions": actions}
 
     def fix_error_code_134(self):
-        if self.fix_step.params["rem"]["jobtype"] == "freq":
+        if "thresh" not in self.fix_step.params["rem"]:
+            self.fix_step.set_integral_threshold(thresh=12)
+            return "use tight integral threshold"
+        elif self.fix_step.params["rem"]["jobtype"] == "freq":
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus")
                 return "half_cpus"
             else:
                 return None
-        elif "thresh" not in self.fix_step.params["rem"]:
-            self.fix_step.set_integral_threshold(thresh=12)
-            return "use tight integral threshold"
         elif self.qchem_job.current_command_name != "openmp":
             self.qchem_job.select_command("openmp")
             self.fix_step.set_memory(total=28000, static=3000)
