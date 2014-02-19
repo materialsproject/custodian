@@ -178,11 +178,7 @@ class QChemErrorHandler(ErrorHandler):
                     or len(od["scf_iteration_energies"][-1]) == 0:
                 if 'Exit Code 134' in self.errors:
                     # SCF not started
-                    if "thresh" not in self.fix_step.params["rem"]:
-                        self.fix_step.set_integral_threshold(thresh=12)
-                        return "use tight integral threshold"
-                    else:
-                        return None
+                    return self.fix_error_code_134()
                 else:
                     return None
             scf_iters = od["scf_iteration_energies"][-1]
