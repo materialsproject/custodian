@@ -253,7 +253,7 @@ class QChemErrorHandler(ErrorHandler):
             if len(old_strategy_text) > 0:
                 comments = scf_pattern.sub(strategy_text, comments)
             else:
-                comments = strategy_text
+                comments += "\n" + strategy_text
             self.fix_step.params["comment"] = comments
             return method
 
@@ -314,7 +314,7 @@ class QChemErrorHandler(ErrorHandler):
             if len(old_strategy_text) > 0:
                 comments = geom_pattern.sub(strategy_text, comments)
             else:
-                comments = strategy_text
+                comments += "\n" + strategy_text
             self.fix_step.params["comment"] = comments
             return method
 
