@@ -64,12 +64,13 @@ class QchemJob(Job):
         self._set_qchem_memory()
         self.alt_cmd = copy.deepcopy(alt_cmd)
 
-    def _set_qchem_memory(self):
-        self.qcinp = QcInput.from_file(self.input_file)
+    def _set_qchem_memory(self, qcinp=None):
+        if not qcinp:
+            qcinp = QcInput.from_file(self.input_file)
         if "PBS_JOBID" in os.environ:
             if "hopque" in os.environ["PBS_JOBID"]:
                 # on Hopper
-                for j in self.qcinp.jobs:
+                for j in qcinp.jobs:
                     if self.current_command_name == "general":
                         j.set_memory(total=1100, static=100)
                     elif self.current_command_name == "half_cpus":
@@ -78,18 +79,21 @@ class QchemJob(Job):
                         j.set_memory(total=28000, static=3000)
             elif "edique" in os.environ["PBS_JOBID"]:
                 # on Edison
-                for j in self.qcinp.jobs:
+                for j in qcinp.jobs:
                     if self.current_command_name == "general":
                         j.set_memory(total=2500, static=100)
                     elif self.current_command_name == "half_cpus":
                         j.set_memory(total=5000, static=200)
                     elif self.current_command_name == "openmp":
                         j.set_memory(total=60000, static=5000)
-        self.qcinp.write_file(self.input_file)
+        qcinp.write_file(self.input_file)
 
-    def select_command(self, cmd_name):
+    def select_command(self, cmd_name, qcinp=None):
         """
         Set the command to run QChem by name. "general" set to the default one.
+            Args:
+                cmd_name: the command name to change to.
+                qcinp: the QcInput object to operate on.
 
         Returns:
             True: success
@@ -105,7 +109,7 @@ class QchemJob(Job):
         else:
             self.current_command = self.alt_cmd[cmd_name]
         self.current_command_name = cmd_name
-        self._set_qchem_memory()
+        self._set_qchem_memory(qcinp)
         return True
 
     def setup(self):
