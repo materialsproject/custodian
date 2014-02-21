@@ -10,6 +10,7 @@ from monty.io import zopen
 import shutil
 import copy
 import subprocess
+from pymatgen.io.qchemio import QcInput
 from custodian.custodian import Job, gzip_dir
 
 __author__ = "Xiaohui Qu"
@@ -60,7 +61,31 @@ class QchemJob(Job):
         self.backup = backup
         self.current_command = self.qchem_cmd
         self.current_command_name = "general"
+        self._set_qchem_memory()
         self.alt_cmd = copy.deepcopy(alt_cmd)
+
+    def _set_qchem_memory(self):
+        self.qcinp = QcInput.from_file(self.input_file)
+        if "PBS_JOBID" in os.environ:
+            if "hopque" in os.environ["PBS_JOBID"]:
+                # on Hopper
+                for j in self.qcinp.jobs:
+                    if self.current_command_name == "general":
+                        j.set_memory(total=1100, static=100)
+                    elif self.current_command_name == "half_cpus":
+                        j.set_memory(total=2200, static=100)
+                    elif self.current_command_name == "openmp":
+                        j.set_memory(total=28000, static=3000)
+            elif "edique" in os.environ["PBS_JOBID"]:
+                # on Edison
+                for j in self.qcinp.jobs:
+                    if self.current_command_name == "general":
+                        j.set_memory(total=2500, static=100)
+                    elif self.current_command_name == "half_cpus":
+                        j.set_memory(total=5000, static=200)
+                    elif self.current_command_name == "openmp":
+                        j.set_memory(total=60000, static=5000)
+        self.qcinp.write_file(self.input_file)
 
     def select_command(self, cmd_name):
         """
@@ -80,6 +105,7 @@ class QchemJob(Job):
         else:
             self.current_command = self.alt_cmd[cmd_name]
         self.current_command_name = cmd_name
+        self._set_qchem_memory()
         return True
 
     def setup(self):
