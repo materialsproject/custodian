@@ -52,7 +52,7 @@ class QchemJob(Job):
             alt_cmd (dict of list): Alternate commands.
                 For example: {"openmp": ["qchem", "-seq", "-nt", "24"]
                               "half_cpus": ["qchem", "-np", "12"]}
-            large_static_mem: use extra large static memory
+            large_static_mem: use ultra large static memory
         """
         self.qchem_cmd = copy.deepcopy(qchem_cmd)
         self.input_file = input_file
