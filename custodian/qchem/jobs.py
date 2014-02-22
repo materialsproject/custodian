@@ -63,9 +63,9 @@ class QchemJob(Job):
         self.backup = backup
         self.current_command = self.qchem_cmd
         self.current_command_name = "general"
+        self.large_static_mem = large_static_mem
         self._set_qchem_memory()
         self.alt_cmd = copy.deepcopy(alt_cmd)
-        self.large_static_mem = large_static_mem
 
     def _set_qchem_memory(self, qcinp=None):
         if not qcinp:
