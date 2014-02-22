@@ -157,7 +157,8 @@ class QChemErrorHandler(ErrorHandler):
         if "thresh" not in self.fix_step.params["rem"]:
             self.fix_step.set_integral_threshold(thresh=12)
             return "use tight integral threshold"
-        elif self.fix_step.params["rem"]["jobtype"] == "freq":
+        elif self.fix_step.params["rem"]["jobtype"] == "freq" or\
+                self.fix_step.params["rem"]["exchange"] == "pbe":
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
@@ -170,20 +171,28 @@ class QChemErrorHandler(ErrorHandler):
             return None
 
     def fix_insufficient_static_memory(self):
-        if self.fix_step.params["rem"]["jobtype"] == "freq":
+        if self.fix_step.params["rem"]["jobtype"] == "freq" or\
+                self.fix_step.params["rem"]["exchange"] == "pbe":
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
+            elif not self.qchem_job.large_static_mem:
+                self.qchem_job.large_static_mem = True
+                self.qchem_job.select_command("half_cpus", self.qcinp)
             else:
                 return None
         elif self.qchem_job.current_command_name != "openmp":
             self.qchem_job.select_command("openmp", self.qcinp)
             return "openmp"
+        elif not self.qchem_job.large_static_mem:
+            self.qchem_job.large_static_mem = True
+            self.qchem_job.select_command("openmp", self.qcinp)
         else:
             return None
 
     def fix_error_killed(self):
-        if self.fix_step.params["rem"]["jobtype"] == "freq":
+        if self.fix_step.params["rem"]["jobtype"] == "freq" or\
+                self.fix_step.params["rem"]["exchange"] == "pbe":
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"

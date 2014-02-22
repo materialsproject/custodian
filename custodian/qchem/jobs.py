@@ -28,7 +28,8 @@ class QchemJob(Job):
 
     def __init__(self, qchem_cmd, input_file="mol.qcinp",
                  output_file="mol.qcout", chk_file=None, qclog_file=None,
-                 gzipped=False, backup=True, alt_cmd=None):
+                 gzipped=False, backup=True, alt_cmd=None,
+                 large_static_mem=False):
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -51,6 +52,7 @@ class QchemJob(Job):
             alt_cmd (dict of list): Alternate commands.
                 For example: {"openmp": ["qchem", "-seq", "-nt", "24"]
                               "half_cpus": ["qchem", "-np", "12"]}
+            large_static_mem: use extra large static memory
         """
         self.qchem_cmd = copy.deepcopy(qchem_cmd)
         self.input_file = input_file
@@ -63,6 +65,7 @@ class QchemJob(Job):
         self.current_command_name = "general"
         self._set_qchem_memory()
         self.alt_cmd = copy.deepcopy(alt_cmd)
+        self.large_static_mem = large_static_mem
 
     def _set_qchem_memory(self, qcinp=None):
         if not qcinp:
@@ -72,20 +75,38 @@ class QchemJob(Job):
                 # on Hopper
                 for j in qcinp.jobs:
                     if self.current_command_name == "general":
-                        j.set_memory(total=1100, static=100)
+                        if self.large_static_mem:
+                            j.set_memory(total=1100, static=300)
+                        else:
+                            j.set_memory(total=1100, static=100)
                     elif self.current_command_name == "half_cpus":
-                        j.set_memory(total=2200, static=100)
+                        if self.large_static_mem:
+                            j.set_memory(total=2200, static=500)
+                        else:
+                            j.set_memory(total=2200, static=100)
                     elif self.current_command_name == "openmp":
-                        j.set_memory(total=28000, static=3000)
+                        if self.large_static_mem:
+                            j.set_memory(total=28000, static=10000)
+                        else:
+                            j.set_memory(total=28000, static=3000)
             elif "edique" in os.environ["PBS_JOBID"]:
                 # on Edison
                 for j in qcinp.jobs:
                     if self.current_command_name == "general":
-                        j.set_memory(total=2500, static=100)
+                        if self.large_static_mem:
+                            j.set_memory(total=2500, static=500)
+                        else:
+                            j.set_memory(total=2500, static=100)
                     elif self.current_command_name == "half_cpus":
-                        j.set_memory(total=5000, static=200)
+                        if self.large_static_mem:
+                            j.set_memory(total=5000, static=1000)
+                        else:
+                            j.set_memory(total=5000, static=200)
                     elif self.current_command_name == "openmp":
-                        j.set_memory(total=60000, static=5000)
+                        if self.large_static_mem:
+                            j.set_memory(total=60000, static=20000)
+                        else:
+                            j.set_memory(total=60000, static=5000)
         qcinp.write_file(self.input_file)
 
     def select_command(self, cmd_name, qcinp=None):
