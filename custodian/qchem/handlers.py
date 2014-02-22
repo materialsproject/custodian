@@ -82,6 +82,7 @@ class QChemErrorHandler(ErrorHandler):
         error_rankings = ("autoz error",
                           "No input text",
                           "Killed",
+                          "Insufficient static memory",
                           "NAN values",
                           "Bad SCF convergence",
                           "Geometry optimization failed",
@@ -137,6 +138,12 @@ class QChemErrorHandler(ErrorHandler):
                 actions.append(act)
             else:
                 return {"errors": self.errors, "actions": None}
+        elif e == "Insufficient static memory":
+            act = self.fix_insufficient_static_memory()
+            if act:
+                actions.append(act)
+            else:
+                return {"errors": self.errors, "actions": None}
         elif e == "Molecular charge is not found":
             return {"errors": self.errors, "actions": None}
         elif e == "Molecular spin multipilicity is not found":
@@ -151,6 +158,19 @@ class QChemErrorHandler(ErrorHandler):
             self.fix_step.set_integral_threshold(thresh=12)
             return "use tight integral threshold"
         elif self.fix_step.params["rem"]["jobtype"] == "freq":
+            if self.qchem_job.current_command_name != "half_cpus":
+                self.qchem_job.select_command("half_cpus", self.qcinp)
+                return "half_cpus"
+            else:
+                return None
+        elif self.qchem_job.current_command_name != "openmp":
+            self.qchem_job.select_command("openmp", self.qcinp)
+            return "openmp"
+        else:
+            return None
+
+    def fix_insufficient_static_memory(self):
+        if self.fix_step.params["rem"]["jobtype"] == "freq":
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
