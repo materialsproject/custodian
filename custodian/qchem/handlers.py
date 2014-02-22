@@ -213,9 +213,9 @@ class QChemErrorHandler(ErrorHandler):
         else:
             strategy = dict()
             if len(od["scf_iteration_energies"]) == 0 \
-                    or len(od["scf_iteration_energies"][-1]) == 0:
+                    or len(od["scf_iteration_energies"][-1]) <= 10:
                 if 'Exit Code 134' in self.errors:
-                    # SCF not started
+                    # immature termination of SCF
                     return self.fix_error_code_134()
                 else:
                     return None
@@ -306,6 +306,12 @@ class QChemErrorHandler(ErrorHandler):
             old_strategy_text = old_strategy_text[0]
 
         od = self.outdata[self.error_step_id]
+        if len(od["molecules"]) <= 10:
+            # immature termination of geometry optimization
+            if 'Exit Code 134' in self.errors:
+                return self.fix_error_code_134()
+            else:
+                return None
         if len(old_strategy_text) > 0:
             strategy = json.loads(old_strategy_text)
             strategy["current_method_id"] += 1
