@@ -178,7 +178,8 @@ class QChemErrorHandler(ErrorHandler):
                 return "half_cpus"
             elif not self.qchem_job.large_static_mem:
                 self.qchem_job.large_static_mem = True
-                self.qchem_job.select_command("half_cpus", self.qcinp)
+                # noinspection PyProtectedMember
+                self.qchem_job._set_qchem_memory(self.qcinp)
             else:
                 return None
         elif self.qchem_job.current_command_name != "openmp":
@@ -186,7 +187,8 @@ class QChemErrorHandler(ErrorHandler):
             return "openmp"
         elif not self.qchem_job.large_static_mem:
             self.qchem_job.large_static_mem = True
-            self.qchem_job.select_command("openmp", self.qcinp)
+            # noinspection PyProtectedMember
+            self.qchem_job._set_qchem_memory(self.qcinp)
         else:
             return None
 
