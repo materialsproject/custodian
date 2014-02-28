@@ -22,6 +22,11 @@ calculations.
 Change log
 ==========
 
+v0.7.1
+------
+1. Much improved qchem error handling (Xiaohui Qu).
+2. New Monty required version (>= 0.2.0).
+
 v0.7.0
 ------
 1. **Backwards incompatible with v0.6.3. Refactoring to move commonly used
