@@ -176,7 +176,9 @@ class Custodian(object):
         """
         cwd = os.getcwd()
 
-        with ScratchDir(self.scratch_dir, create_symbolic_link=True):
+        with ScratchDir(self.scratch_dir, create_symbolic_link=True,
+                        copy_to_current_on_exit=True,
+                        copy_from_current_on_enter=True):
             total_errors = 0
             unrecoverable = False
             start = datetime.datetime.now()
