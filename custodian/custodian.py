@@ -26,7 +26,7 @@ import tarfile
 import os
 import shutil
 from abc import ABCMeta, abstractmethod
-from monty.io import ScratchDir
+from monty.tempfile import ScratchDir
 from monty.shutil import gzip_dir
 
 pjoin = os.path.join
