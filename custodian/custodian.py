@@ -88,13 +88,14 @@ class Custodian(object):
             jobs ([Job]): List of Jobs to be run sequentially.
             max_errors (int): Maximum number of errors allowed before exiting.
                 Defaults to 1.
-            polling_time_step (int): The length of time in seconds between steps
-                in which a job is checked for completion. Defaults to 10 secs.
+            polling_time_step (int): The length of time in seconds between
+                steps in which a job is checked for completion. Defaults to
+                10 secs.
             monitor_freq (int): The number of polling steps before monitoring
                 occurs. For example, if you have a polling_time_step of 10
-                seconds and a monitor_freq of 30, this means that Custodian uses
-                the monitors to check for errors every 30 x 10 = 300 seconds,
-                i.e., 5 minutes.
+                seconds and a monitor_freq of 30, this means that Custodian
+                uses the monitors to check for errors every 30 x 10 = 300
+                seconds, i.e., 5 minutes.
             log_file (str): Deprecated. Custodian now always logs to a
                 custodian.json file.
             skip_over_errors (bool): If set to True, custodian will skip over
@@ -440,4 +441,3 @@ class Job(JSONSerializable):
         A nice string name for the job.
         """
         return self.__class__.__name__
-
