@@ -32,6 +32,9 @@ from monty.shutil import gzip_dir
 pjoin = os.path.join
 
 
+logger = logging.getLogger(__name__)
+
+
 class Custodian(object):
     """
     The Custodian class is the manager for a list of jobs given a list of
@@ -143,7 +146,7 @@ class Custodian(object):
             jobno = int(chkpt.split(".")[-3])
             if jobno > restart:
                 restart = jobno
-                logging.info("Loading from checkpoint file {}...".format(
+                logger.info("Loading from checkpoint file {}...".format(
                     chkpt))
                 t = tarfile.open(chkpt)
                 t.extractall()
@@ -163,9 +166,9 @@ class Custodian(object):
             Custodian._delete_checkpoints(cwd)
             name = shutil.make_archive(
                 pjoin(cwd, "custodian.chk.{}".format(index)), "gztar")
-            logging.info("Checkpoint written to {}".format(name))
+            logger.info("Checkpoint written to {}".format(name))
         except Exception as ex:
-            logging.info("Checkpointing failed")
+            logger.info("Checkpointing failed")
 
     def run(self):
         """
@@ -183,7 +186,7 @@ class Custodian(object):
             total_errors = 0
             unrecoverable = False
             start = datetime.datetime.now()
-            logging.info("Run started at {} in {}.".format(start,
+            logger.info("Run started at {} in {}.".format(start,
                                                            self.scratch_dir))
 
             if self.checkpoint:
@@ -197,7 +200,7 @@ class Custodian(object):
                     continue
                 run_log.append({"job": job.to_dict, "corrections": []})
                 for attempt in xrange(self.max_errors):
-                    logging.info(
+                    logger.info(
                         "Starting job no. {} ({}) attempt no. {}. Errors "
                         "thus far = {}.".format(
                             i + 1, job.name, attempt + 1, total_errors))
@@ -253,7 +256,7 @@ class Custodian(object):
 
                     #Log the corrections to a json file.
                     with open(Custodian.LOG_FILE, "w") as f:
-                        logging.info("Logging to {}...".format(
+                        logger.info("Logging to {}...".format(
                             Custodian.LOG_FILE))
                         json.dump(run_log, f, indent=4)
 
@@ -264,11 +267,11 @@ class Custodian(object):
                         break
                     elif run_log[-1]["corrections"][-1]["actions"] is None:
                         # Check if there has been an unrecoverable error.
-                        logging.info("Unrecoverable error.")
+                        logger.info("Unrecoverable error.")
                         unrecoverable = True
                         break
                     elif total_errors >= self.max_errors:
-                        logging.info("Max errors reached.")
+                        logger.info("Max errors reached.")
                         break
 
                 if unrecoverable or total_errors >= self.max_errors:
@@ -280,17 +283,17 @@ class Custodian(object):
                     Custodian._save_checkpoint(cwd, i)
 
             end = datetime.datetime.now()
-            logging.info("Run ended at {}.".format(end))
+            logger.info("Run ended at {}.".format(end))
             run_time = end - start
 
-            logging.info("Run completed. Total time taken = {}."
+            logger.info("Run completed. Total time taken = {}."
                          .format(run_time))
 
             if self.gzipped_output:
                 gzip_dir(".")
 
             if total_errors >= self.max_errors:
-                logging.info("Max {} errors reached. Exited..."
+                logger.info("Max {} errors reached. Exited..."
                              .format(self.max_errors))
             elif not unrecoverable:
                 #Cleanup checkpoint files (if any) if run is successful.
@@ -307,7 +310,7 @@ def _do_check(handlers, terminate_func=None, skip_over_errors=False):
                 if terminate_func is not None and h.is_terminating:
                     terminate_func()
                 d = h.correct()
-                logging.error(str(d))
+                logger.error(str(d))
                 corrections.append(d)
         except Exception as ex:
             if not skip_over_errors:
