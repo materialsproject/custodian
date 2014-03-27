@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Index &mdash; custodian 0.7.1 documentation</title>
+    <title>Index &mdash; custodian 0.7.2 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.1',
+        VERSION:     '0.7.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.1 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.7.2 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -76,6 +76,7 @@
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  
 </div>
 <h2 id="A">A</h2>
@@ -129,10 +130,6 @@
   </dt>
 
         
-  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PBSWalltimeHandler.check">(PBSWalltimeHandler method)</a>
-  </dt>
-
-        
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.check">(PotimErrorHandler method)</a>
   </dt>
 
@@ -146,6 +143,10 @@
 
         
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler.check">(VaspErrorHandler method)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.WalltimeHandler.check">(WalltimeHandler method)</a>
   </dt>
 
       </dl></dd>
@@ -171,10 +172,6 @@
   </dt>
 
         
-  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PBSWalltimeHandler.correct">(PBSWalltimeHandler method)</a>
-  </dt>
-
-        
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.correct">(PotimErrorHandler method)</a>
   </dt>
 
@@ -188,6 +185,10 @@
 
         
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler.correct">(VaspErrorHandler method)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.WalltimeHandler.correct">(WalltimeHandler method)</a>
   </dt>
 
       </dl></dd>
@@ -393,10 +394,6 @@
   </dt>
 
         
-  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PBSWalltimeHandler.is_monitor">(PBSWalltimeHandler attribute)</a>
-  </dt>
-
-        
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.is_monitor">(PotimErrorHandler attribute)</a>
   </dt>
 
@@ -408,6 +405,10 @@
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler.is_monitor">(VaspErrorHandler attribute)</a>
   </dt>
 
+        
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.WalltimeHandler.is_monitor">(WalltimeHandler attribute)</a>
+  </dt>
+
       </dl></dd>
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
@@ -417,7 +418,7 @@
 
       <dd><dl>
         
-  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PBSWalltimeHandler.is_terminating">(PBSWalltimeHandler attribute)</a>
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.WalltimeHandler.is_terminating">(WalltimeHandler attribute)</a>
   </dt>
 
       </dl></dd>
@@ -502,10 +503,6 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PBSWalltimeHandler">PBSWalltimeHandler (class in custodian.vasp.handlers)</a>
-  </dt>
-
-      
   <dt><a href="custodian.ansible.html#custodian.ansible.actions.DictActions.pop">pop() (DictActions static method)</a>
   </dt>
 
@@ -531,12 +528,12 @@
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler">PotimErrorHandler (class in custodian.vasp.handlers)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="custodian.ansible.html#custodian.ansible.actions.DictActions.pull">pull() (DictActions static method)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="custodian.ansible.html#custodian.ansible.actions.DictActions.pull_all">pull_all() (DictActions static method)</a>
   </dt>
@@ -682,6 +679,16 @@
   </dl></td>
 </tr></table>
 
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.WalltimeHandler">WalltimeHandler (class in custodian.vasp.handlers)</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
 
 
           </div>
@@ -718,13 +725,13 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

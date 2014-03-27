@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp.handlers &mdash; custodian 0.7.1 documentation</title>
+    <title>custodian.vasp.handlers &mdash; custodian 0.7.2 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.7.1',
+        VERSION:     '0.7.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.1 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.7.2 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.1 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.2 documentation</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -77,6 +77,8 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">operator</span>
+
+<span class="kn">from</span> <span class="nn">monty.dev</span> <span class="kn">import</span> <span class="n">deprecated</span>
 
 <span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">ErrorHandler</span>
 <span class="kn">from</span> <span class="nn">custodian.utils</span> <span class="kn">import</span> <span class="n">backup</span>
@@ -546,12 +548,14 @@
         <span class="k">return</span> <span class="s">&quot;NonConvergingErrorHandler&quot;</span>
 
 </div>
-<div class="viewcode-block" id="PBSWalltimeHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PBSWalltimeHandler">[docs]</a><span class="k">class</span> <span class="nc">PBSWalltimeHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+<div class="viewcode-block" id="WalltimeHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.WalltimeHandler">[docs]</a><span class="k">class</span> <span class="nc">WalltimeHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Check if a run is nearing the walltime of a PBS queuing system. If so,</span>
-<span class="sd">    write a STOPCAR with LSTOP=.True.. The PBS_WALLTIME variable must be in</span>
-<span class="sd">    the environment (usually the case for PBS systems like most</span>
-<span class="sd">    supercomputing centers).</span>
+<span class="sd">    Check if a run is nearing the walltime. If so, write a STOPCAR with</span>
+<span class="sd">    LSTOP=.True.. You can specify the walltime either in the init (which is</span>
+<span class="sd">    unfortunately necessary for SGE and SLURM systems,</span>
+<span class="sd">    or if you happen to be running on a PBS system and the PBS_WALLTIME</span>
+<span class="sd">    variable is in the run environment, the wall time will be automatically</span>
+<span class="sd">    determined if not set.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="bp">True</span>
 
@@ -559,11 +563,16 @@
     <span class="c"># itself naturally with the STOPCAR.</span>
     <span class="n">is_terminating</span> <span class="o">=</span> <span class="bp">False</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer_time</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wall_time</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">buffer_time</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes the handler with a buffer time.</span>
 
 <span class="sd">        Args:</span>
+<span class="sd">            wall_time (int): Total walltime in seconds. If this is None and</span>
+<span class="sd">                the job is running on a PBS system, the handler will attempt to</span>
+<span class="sd">                determine the walltime from the PBS_WALLTIME environment</span>
+<span class="sd">                variable. If the wall time cannot be determined or is not</span>
+<span class="sd">                set, this handler will have no effect.</span>
 <span class="sd">            buffer_time (int): The min amount of buffer time in secs at the</span>
 <span class="sd">                end that the STOPCAR will be written. The STOPCAR is written</span>
 <span class="sd">                when the time remaining is &lt; the higher of 3 x the average</span>
@@ -574,12 +583,17 @@
 <span class="sd">                the run has stopped, the buffer time may need to be increased</span>
 <span class="sd">                accordingly.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">wall_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wall_time</span> <span class="o">=</span> <span class="n">wall_time</span>
+        <span class="k">elif</span> <span class="s">&quot;PBS_WALLTIME&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wall_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_WALLTIME&quot;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wall_time</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">buffer_time</span> <span class="o">=</span> <span class="n">buffer_time</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
 
-<div class="viewcode-block" id="PBSWalltimeHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PBSWalltimeHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="s">&quot;PBS_WALLTIME&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
-            <span class="n">wall_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_WALLTIME&quot;</span><span class="p">])</span>
+<div class="viewcode-block" id="WalltimeHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.WalltimeHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wall_time</span><span class="p">:</span>
             <span class="n">run_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span>
             <span class="n">total_secs</span> <span class="o">=</span> <span class="n">run_time</span><span class="o">.</span><span class="n">seconds</span> <span class="o">+</span> <span class="n">run_time</span><span class="o">.</span><span class="n">days</span> <span class="o">*</span> <span class="mi">3600</span> <span class="o">*</span> <span class="mi">24</span>
             <span class="k">try</span><span class="p">:</span>
@@ -592,12 +606,12 @@
 
             <span class="c"># If the remaining time is less than average time for 3 ionic</span>
             <span class="c"># steps or buffer_time.</span>
-            <span class="n">time_left</span> <span class="o">=</span> <span class="n">wall_time</span> <span class="o">-</span> <span class="n">total_secs</span>
+            <span class="n">time_left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wall_time</span> <span class="o">-</span> <span class="n">total_secs</span>
             <span class="k">if</span> <span class="n">time_left</span> <span class="o">&lt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">time_per_step</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer_time</span><span class="p">):</span>
                 <span class="k">return</span> <span class="bp">True</span>
         <span class="k">return</span> <span class="bp">False</span>
 </div>
-<div class="viewcode-block" id="PBSWalltimeHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PBSWalltimeHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="WalltimeHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.WalltimeHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c">#Write STOPCAR</span>
         <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&quot;file&quot;</span><span class="p">:</span> <span class="s">&quot;STOPCAR&quot;</span><span class="p">,</span>
                     <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_file_create&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;content&#39;</span><span class="p">:</span> <span class="s">&quot;LSTOP = .TRUE.&quot;</span><span class="p">}}}]</span>
@@ -609,7 +623,12 @@
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Walltime reached&quot;</span><span class="p">],</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&quot;PBSWalltimeHandler&quot;</span></div>
+        <span class="k">return</span> <span class="s">&quot;WalltimeHandler&quot;</span>
+
+</div>
+<span class="nd">@deprecated</span><span class="p">(</span><span class="n">replacement</span><span class="o">=</span><span class="n">WalltimeHandler</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">PBSWalltimeHandler</span><span class="p">(</span><span class="n">WalltimeHandler</span><span class="p">):</span>
+    <span class="k">pass</span>
 </pre></div>
 
           </div>
@@ -643,14 +662,14 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.1 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.2 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

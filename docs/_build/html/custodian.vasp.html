@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp package &mdash; custodian 0.7.1 documentation</title>
+    <title>custodian.vasp package &mdash; custodian 0.7.2 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.1',
+        VERSION:     '0.7.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.1 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.7.2 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -201,54 +201,6 @@ changing the ALGO from Fast to Normal.</li>
 </dd></dl>
 
 <dl class="class">
-<dt id="custodian.vasp.handlers.PBSWalltimeHandler">
-<em class="property">class </em><tt class="descname">PBSWalltimeHandler</tt><big>(</big><em>buffer_time=300</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PBSWalltimeHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PBSWalltimeHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
-<p>Check if a run is nearing the walltime of a PBS queuing system. If so,
-write a STOPCAR with LSTOP=.True.. The PBS_WALLTIME variable must be in
-the environment (usually the case for PBS systems like most
-supercomputing centers).</p>
-<p>Initializes the handler with a buffer time.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>buffer_time</strong> (<em>int</em>) &#8211;
-The min amount of buffer time in secs at the
-end that the STOPCAR will be written. The STOPCAR is written
-when the time remaining is &lt; the higher of 3 x the average
-time for each ionic step and the buffer time. Defaults to
-300 secs, which is the default polling time of Custodian.
-This is typically sufficient for the current ionic step to
-complete. But if other operations are being performed after
-the run has stopped, the buffer time may need to be increased
-accordingly.</td>
-</tr>
-</tbody>
-</table>
-<dl class="method">
-<dt id="custodian.vasp.handlers.PBSWalltimeHandler.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PBSWalltimeHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PBSWalltimeHandler.check" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="custodian.vasp.handlers.PBSWalltimeHandler.correct">
-<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PBSWalltimeHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PBSWalltimeHandler.correct" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="custodian.vasp.handlers.PBSWalltimeHandler.is_monitor">
-<tt class="descname">is_monitor</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.PBSWalltimeHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="custodian.vasp.handlers.PBSWalltimeHandler.is_terminating">
-<tt class="descname">is_terminating</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.PBSWalltimeHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
 <dt id="custodian.vasp.handlers.PotimErrorHandler">
 <em class="property">class </em><tt class="descname">PotimErrorHandler</tt><big>(</big><em>input_filename='POSCAR'</em>, <em>output_filename='OSZICAR'</em>, <em>dE_threshold=1</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PotimErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
@@ -363,6 +315,65 @@ default redirect used by <tt class="xref py py-class docutils literal"><span cla
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.is_monitor">
 <tt class="descname">is_monitor</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="custodian.vasp.handlers.WalltimeHandler">
+<em class="property">class </em><tt class="descname">WalltimeHandler</tt><big>(</big><em>wall_time=None</em>, <em>buffer_time=300</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<p>Check if a run is nearing the walltime. If so, write a STOPCAR with
+LSTOP=.True.. You can specify the walltime either in the init (which is
+unfortunately necessary for SGE and SLURM systems,
+or if you happen to be running on a PBS system and the PBS_WALLTIME
+variable is in the run environment, the wall time will be automatically
+determined if not set.</p>
+<p>Initializes the handler with a buffer time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>wall_time</strong> (<em>int</em>) &#8211;
+Total walltime in seconds. If this is None and
+the job is running on a PBS system, the handler will attempt to
+determine the walltime from the PBS_WALLTIME environment
+variable. If the wall time cannot be determined or is not
+set, this handler will have no effect.</li>
+<li><strong>buffer_time</strong> (<em>int</em>) &#8211;
+The min amount of buffer time in secs at the
+end that the STOPCAR will be written. The STOPCAR is written
+when the time remaining is &lt; the higher of 3 x the average
+time for each ionic step and the buffer time. Defaults to
+300 secs, which is the default polling time of Custodian.
+This is typically sufficient for the current ionic step to
+complete. But if other operations are being performed after
+the run has stopped, the buffer time may need to be increased
+accordingly.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="custodian.vasp.handlers.WalltimeHandler.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.handlers.WalltimeHandler.correct">
+<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.WalltimeHandler.is_monitor">
+<tt class="descname">is_monitor</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.WalltimeHandler.is_terminating">
+<tt class="descname">is_terminating</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -815,13 +826,13 @@ and backing up.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

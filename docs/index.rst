@@ -22,6 +22,12 @@ calculations.
 Change log
 ==========
 
+v0.7.2
+------
+1. Improved WalltimeHandler (PBSWalltimeHandler is a subset and is now
+   deprecated).
+2. New monty required version (>= 0.2.2).
+
 v0.7.1
 ------
 1. Much improved qchem error handling (Xiaohui Qu).
