@@ -571,4 +571,6 @@ class WalltimeHandler(ErrorHandler):
 
 @deprecated(replacement=WalltimeHandler)
 class PBSWalltimeHandler(WalltimeHandler):
-    pass
+
+    def __init__(self, buffer_time=300):
+        WalltimeHandler.__init__(self, None, buffer_time=buffer_time)
