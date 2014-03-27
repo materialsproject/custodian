@@ -21,6 +21,8 @@ import time
 import datetime
 import operator
 
+from monty.dev import deprecated
+
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput
@@ -489,12 +491,14 @@ class NonConvergingErrorHandler(ErrorHandler):
         return "NonConvergingErrorHandler"
 
 
-class PBSWalltimeHandler(ErrorHandler):
+class WalltimeHandler(ErrorHandler):
     """
-    Check if a run is nearing the walltime of a PBS queuing system. If so,
-    write a STOPCAR with LSTOP=.True.. The PBS_WALLTIME variable must be in
-    the environment (usually the case for PBS systems like most
-    supercomputing centers).
+    Check if a run is nearing the walltime. If so, write a STOPCAR with
+    LSTOP=.True.. You can specify the walltime either in the init (which is
+    unfortunately necessary for SGE and SLURM systems,
+    or if you happen to be running on a PBS system and the PBS_WALLTIME
+    variable is in the run environment, the wall time will be automatically
+    determined if not set.
     """
     is_monitor = True
 
@@ -502,11 +506,16 @@ class PBSWalltimeHandler(ErrorHandler):
     # itself naturally with the STOPCAR.
     is_terminating = False
 
-    def __init__(self, buffer_time=300):
+    def __init__(self, wall_time=None, buffer_time=300):
         """
         Initializes the handler with a buffer time.
 
         Args:
+            wall_time (int): Total walltime in seconds. If this is None and
+                the job is running on a PBS system, the handler will attempt to
+                determine the walltime from the PBS_WALLTIME environment
+                variable. If the wall time cannot be determined or is not
+                set, this handler will have no effect.
             buffer_time (int): The min amount of buffer time in secs at the
                 end that the STOPCAR will be written. The STOPCAR is written
                 when the time remaining is < the higher of 3 x the average
@@ -517,12 +526,17 @@ class PBSWalltimeHandler(ErrorHandler):
                 the run has stopped, the buffer time may need to be increased
                 accordingly.
         """
+        if wall_time is not None:
+            self.wall_time = wall_time
+        elif "PBS_WALLTIME" in os.environ:
+            self.wall_time = int(os.environ["PBS_WALLTIME"])
+        else:
+            self.wall_time = None
         self.buffer_time = buffer_time
         self.start_time = datetime.datetime.now()
 
     def check(self):
-        if "PBS_WALLTIME" in os.environ:
-            wall_time = int(os.environ["PBS_WALLTIME"])
+        if self.wall_time:
             run_time = datetime.datetime.now() - self.start_time
             total_secs = run_time.seconds + run_time.days * 3600 * 24
             try:
@@ -535,7 +549,7 @@ class PBSWalltimeHandler(ErrorHandler):
 
             # If the remaining time is less than average time for 3 ionic
             # steps or buffer_time.
-            time_left = wall_time - total_secs
+            time_left = self.wall_time - total_secs
             if time_left < max(time_per_step * 3, self.buffer_time):
                 return True
         return False
@@ -552,4 +566,9 @@ class PBSWalltimeHandler(ErrorHandler):
         return {"errors": ["Walltime reached"], "actions": None}
 
     def __str__(self):
-        return "PBSWalltimeHandler"
+        return "WalltimeHandler"
+
+
+@deprecated(replacement=WalltimeHandler)
+class PBSWalltimeHandler(WalltimeHandler):
+    pass
