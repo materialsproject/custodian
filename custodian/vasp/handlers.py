@@ -121,7 +121,8 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"LREAL": False}}})
 
-        if "tetirr" in self.errors or "incorrect_shift" in self.errors:
+        if "tetirr" in self.errors or "incorrect_shift" in self.errors or \
+                    "rot_matrix" in self.errors:
             actions.append({"dict": "KPOINTS",
                             "action": {"_set": {"generation_style": "Gamma"}}})
 
@@ -136,16 +137,10 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "POSCAR",
                             "action": {"_set": {"structure": new_s.to_dict}},
                             "transformation": trans.to_dict})
-
-        if "rot_matrix" in self.errors or "pricel" in self.errors:
-            s = vi["POSCAR"].structure
-            trans = PerturbStructureTransformation(0.05)
-            new_s = trans.apply_transformation(s)
-            actions.append({"dict": "POSCAR",
-                            "action": {"_set": {"structure": new_s.to_dict}},
-                            "transformation": trans.to_dict})
+             
+        if "pricel" in self.errors:
             actions.append({"dict": "INCAR",
-                            "action": {"_set": {"SYMPREC": 1e-8}}})
+                            "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}})
 
         if "brions" in self.errors:
             potim = float(vi["INCAR"].get("POTIM", 0.5)) + 0.1

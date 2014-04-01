@@ -37,8 +37,7 @@ def clean_dir():
 
 class VaspErrorHandlerTest(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         if "VASP_PSP_DIR" not in os.environ:
             os.environ["VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
@@ -55,12 +54,12 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["actions"],
                          [{'action': {'_set': {'ISMEAR': 0}},
                            'dict': 'INCAR'}])
-        h = VaspErrorHandler("vasp.classrotmat")
+        h = VaspErrorHandler("vasp.sgrcon")
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ['rot_matrix'])
         self.assertEqual(set([a["dict"] for a in d["actions"]]),
-                         {"POSCAR", "INCAR"})
+                         {"KPOINTS"})
 
         h = VaspErrorHandler("vasp.real_optlay")
         h.check()
@@ -84,9 +83,9 @@ class VaspErrorHandlerTest(unittest.TestCase):
         clean_dir()
         shutil.move("INCAR.orig", "INCAR")
         os.chdir(test_dir)
-
+    
     def test_mesh_symmetry(self):
-        h = MeshSymmetryErrorHandler("vasp.classrotmat")
+        h = MeshSymmetryErrorHandler("vasp.ibzkpt")
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ['mesh_symmetry'])
@@ -123,20 +122,20 @@ class VaspErrorHandlerTest(unittest.TestCase):
         clean_dir()
         shutil.move("INCAR.orig", "INCAR")
         os.chdir(test_dir)
-
+    
     def test_rot_matrix(self):
         if "VASP_PSP_DIR" not in os.environ:
             os.environ["VASP_PSP_DIR"] = test_dir
         subdir = os.path.join(test_dir, "poscar_error")
         os.chdir(subdir)
-        shutil.copy("POSCAR", "POSCAR.orig")
+        shutil.copy("KPOINTS", "KPOINTS.orig")
         h = VaspErrorHandler()
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["rot_matrix"])
         os.remove(os.path.join(subdir, "error.1.tar.gz"))
-        shutil.copy("POSCAR.orig", "POSCAR")
-        os.remove("POSCAR.orig")
+        shutil.copy("KPOINTS.orig", "KPOINTS")
+        os.remove("KPOINTS.orig")
 
     def test_to_from_dict(self):
         h = VaspErrorHandler("random_name")
@@ -144,8 +143,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(type(h2), type(h))
         self.assertEqual(h2.output_filename, "random_name")
 
-    @classmethod
-    def tearDownClass(cls):
+    def tearDown(self):
         os.chdir(test_dir)
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("KPOINTS.orig", "KPOINTS")
