@@ -106,6 +106,9 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"SYMPREC": 1e-8}}})
 
+        if "brmix" in self.errors and "NELECT" in vi["INCAR"]:
+            #brmix error always shows up after DAV steps if NELECT is specified
+            self.errors.remove("brmix")
         if "brmix" in self.errors or "zpotrf" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ISYM": 0}}})

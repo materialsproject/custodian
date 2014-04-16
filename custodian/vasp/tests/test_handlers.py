@@ -109,6 +109,12 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["errors"], ['brmix'])
         self.assertFalse(os.path.exists("CHGCAR"))
 
+        shutil.copy("INCAR.nelect", "INCAR")
+        h = VaspErrorHandler("vasp.brmix")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], [])
+
     def test_too_few_bands(self):
         os.chdir(os.path.join(test_dir, "too_few_bands"))
         shutil.copy("INCAR", "INCAR.orig")
