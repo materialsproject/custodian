@@ -216,6 +216,14 @@ class QChemErrorHandler(ErrorHandler):
             old_strategy_text = old_strategy_text[0]
         od = self.outdata[self.error_step_id]
 
+        if len(od["scf_iteration_energies"]) == 0 \
+                or len(od["scf_iteration_energies"][-1]) <= 10:
+            if 'Exit Code 134' in self.errors:
+                # immature termination of SCF
+                return self.fix_error_code_134()
+            else:
+                return None
+
         if od["jobtype"] == "opt" and len(od["molecules"]) >= 2:
             strategy = "reset"
         elif len(old_strategy_text) > 0:
@@ -223,13 +231,6 @@ class QChemErrorHandler(ErrorHandler):
             strategy["current_method_id"] += 1
         else:
             strategy = dict()
-            if len(od["scf_iteration_energies"]) == 0 \
-                    or len(od["scf_iteration_energies"][-1]) <= 10:
-                if 'Exit Code 134' in self.errors:
-                    # immature termination of SCF
-                    return self.fix_error_code_134()
-                else:
-                    return None
             scf_iters = od["scf_iteration_energies"][-1]
             if scf_iters[-1][1] >= self.rca_gdm_thresh:
                 strategy["methods"] = ["increase_iter", "rca_diis", "gwh",

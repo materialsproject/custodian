@@ -11,7 +11,9 @@ from unittest import TestCase
 import unittest
 from pkg_resources import parse_version
 import pymatgen
+from pymatgen.io.qchemio import QcInput
 from custodian.qchem.handlers import QChemErrorHandler
+from custodian.qchem.jobs import QchemJob
 
 __author__ = "Xiaohui Qu"
 __version__ = "0.1"
@@ -507,6 +509,47 @@ class QChemErrorHandlerTest(TestCase):
         with open(os.path.join(scr_dir, "exit_code_134.qcinp")) as f:
             ans = f.read()
         self.assertEqual(ref, ans)
+
+    def test_exit_code_134_after_scf_fix(self):
+        shutil.copyfile(os.path.join(test_dir, "exit_134_after_scf_fix.qcinp"),
+                        os.path.join(scr_dir, "exit_134_after_scf_fix.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "exit_134_after_scf_fix.qcout"),
+                        os.path.join(scr_dir, "exit_134_after_scf_fix.qcout"))
+        h = QChemErrorHandler(input_file="exit_134_after_scf_fix.qcinp",
+                              output_file="exit_134_after_scf_fix.qcout")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Exit Code 134',
+                                        'Geometry optimization failed',
+                                        'Molecular charge is not found'],
+                             'actions': ['use tight integral threshold']})
+        with open(os.path.join(test_dir, "exit_134_after_scf_fix_tight_thresh.qcinp")) as f:
+            ref = f.read()
+        with open(os.path.join(scr_dir, "exit_134_after_scf_fix.qcinp")) as f:
+            ans = f.read()
+        self.assertEqual(ref, ans)
+        shutil.copyfile(os.path.join(test_dir, "exit_134_after_scf_fix_tight_thresh.qcinp"),
+                        os.path.join(scr_dir, "exit_134_after_scf_fix_tight_thresh.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "exit_134_after_scf_fix.qcout"),
+                        os.path.join(scr_dir, "exit_134_after_scf_fix.qcout"))
+        qchem_job = QchemJob(qchem_cmd="qchem -np 24",
+                             input_file="exit_134_after_scf_fix_tight_thresh.qcinp",
+                             output_file="exit_134_after_scf_fix.qcout",
+                             alt_cmd={"half_cpus": "qchem -np 12",
+                                      "openmp": "qchem -nt 24"})
+        h = QChemErrorHandler(input_file="exit_134_after_scf_fix_tight_thresh.qcinp",
+                              output_file="exit_134_after_scf_fix.qcout",
+                              qchem_job=qchem_job)
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Exit Code 134',
+                                        'Geometry optimization failed',
+                                        'Molecular charge is not found'],
+                             'actions': ['half_cpus']})
 
     def tearDown(self):
         shutil.rmtree(scr_dir)
