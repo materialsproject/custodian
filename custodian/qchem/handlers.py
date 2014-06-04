@@ -154,10 +154,15 @@ class QChemErrorHandler(ErrorHandler):
         return {"errors": self.errors, "actions": actions}
 
     def fix_error_code_134(self):
+        has_freq_job = False
+        for j in self.qcinp.jobs:
+            if j.params["rem"]["jobtype"] == "freq":
+                has_freq_job = True
+                break
         if "thresh" not in self.fix_step.params["rem"]:
             self.fix_step.set_integral_threshold(thresh=12)
             return "use tight integral threshold"
-        elif self.fix_step.params["rem"]["jobtype"] == "freq" or\
+        elif has_freq_job or\
                 self.fix_step.params["rem"]["exchange"] == "pbe":
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
