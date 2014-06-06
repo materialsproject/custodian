@@ -6,12 +6,14 @@ for B3LYP DFT jobs.
 """
 
 from __future__ import division
+import copy
 import glob
 import json
 import logging
 import os
 import re
 import tarfile
+from pymatgen.core.structure import Molecule
 from pymatgen.io.qchemio import QcOutput, QcInput, QcTask
 from custodian.custodian import ErrorHandler
 
@@ -252,12 +254,7 @@ class QChemErrorHandler(ErrorHandler):
                 algorithm="diis", iterations=self.scf_max_cycles)
             if "scf_guess" in self.fix_step.params["rem"]:
                 self.fix_step.set_scf_initial_guess("sad")
-            self.fix_step.mol = od["molecules"][-1]
-            if self.fix_step.charge is None:
-                self.fix_step.charge = self.fix_step.mol.charge
-            if self.fix_step.spin_multiplicity is None:
-                self.fix_step.spin_multiplicity = \
-                    self.fix_step.mol.spin_multiplicity
+            self.set_last_input_geom(od["molecules"][-1])
             if len(old_strategy_text) > 0:
                 comments = scf_pattern.sub("", comments)
                 self.fix_step.params["comment"] = comments
@@ -312,6 +309,12 @@ class QChemErrorHandler(ErrorHandler):
             self.fix_step.params["comment"] = comments
             return method
 
+    def set_last_input_geom(self, new_mol):
+        for i in range(self.error_step_id, -1, -1):
+            qctask = self.qcinp.jobs[i]
+            if isinstance(qctask.mol, Molecule):
+                qctask.mol = copy.deepcopy(new_mol)
+
     def fix_geom_opt(self):
         comments = self.fix_step.params.get("comment", "")
         geom_pattern = re.compile(r"<Geom Opt Fix Strategy>(.*)"
@@ -342,31 +345,16 @@ class QChemErrorHandler(ErrorHandler):
             method = strategy["methods"][strategy["current_method_id"]]
             if method == "increase_iter":
                 self.fix_step.set_geom_max_iterations(self.geom_max_cycles)
-                self.fix_step.mol = od["molecules"][-1]
-                if self.fix_step.charge is None:
-                    self.fix_step.charge = self.fix_step.mol.charge
-                if self.fix_step.spin_multiplicity is None:
-                    self.fix_step.spin_multiplicity = \
-                        self.fix_step.mol.spin_multiplicity
+                self.set_last_input_geom(od["molecules"][-1])
             elif method == "GDIIS":
                 self.fix_step.set_geom_opt_use_gdiis(subspace_size=5)
                 self.fix_step.set_geom_max_iterations(self.geom_max_cycles)
-                self.fix_step.mol = od["molecules"][-1]
-                if self.fix_step.charge is None:
-                    self.fix_step.charge = self.fix_step.mol.charge
-                if self.fix_step.spin_multiplicity is None:
-                    self.fix_step.spin_multiplicity = \
-                        self.fix_step.mol.spin_multiplicity
+                self.set_last_input_geom(od["molecules"][-1])
             elif method == "CartCoords":
                 self.fix_step.set_geom_opt_coords_type("cartesian")
                 self.fix_step.set_geom_max_iterations(self.geom_max_cycles)
                 self.fix_step.set_geom_opt_use_gdiis(0)
-                self.fix_step.mol = od["molecules"][-1]
-                if self.fix_step.charge is None:
-                    self.fix_step.charge = self.fix_step.mol.charge
-                if self.fix_step.spin_multiplicity is None:
-                    self.fix_step.spin_multiplicity = \
-                        self.fix_step.mol.spin_multiplicity
+                self.set_last_input_geom(od["molecules"][-1])
             else:
                 raise ValueError("fix method" + method + "is not supported")
             strategy_text = "<Geom Opt Fix Strategy>"

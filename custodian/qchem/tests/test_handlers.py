@@ -9,11 +9,13 @@ import os
 import shutil
 from unittest import TestCase
 import unittest
+
 from pkg_resources import parse_version
 import pymatgen
-from pymatgen.io.qchemio import QcInput
+
 from custodian.qchem.handlers import QChemErrorHandler
 from custodian.qchem.jobs import QchemJob
+
 
 __author__ = "Xiaohui Qu"
 __version__ = "0.1"
@@ -422,7 +424,7 @@ class QChemErrorHandlerTest(TestCase):
                                         'autoz error'],
                              'actions': None})
 
-    def test_NAN_error(self):
+    def test_nan_error(self):
         shutil.copyfile(os.path.join(test_dir, "thiane_nan.inp"),
                         os.path.join(scr_dir, "thiane_nan.inp"))
         shutil.copyfile(os.path.join(test_dir, "thiane_nan.out"),
@@ -550,6 +552,25 @@ class QChemErrorHandlerTest(TestCase):
                                         'Geometry optimization failed',
                                         'Molecular charge is not found'],
                              'actions': ['half_cpus']})
+
+    def test_ts_opt(self):
+        shutil.copyfile(os.path.join(test_dir, "ts_cf3_leave.qcinp"),
+                        os.path.join(scr_dir, "ts_cf3_leave.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "ts_cf3_leave.qcout"),
+                        os.path.join(scr_dir, "ts_cf3_leave.qcout"))
+        h = QChemErrorHandler(input_file="ts_cf3_leave.qcinp",
+                              output_file="ts_cf3_leave.qcout")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Exit Code 134',
+                                        'Geometry optimization failed'],
+                             'actions': ['increase_iter']})
+        with open(os.path.join(test_dir, "ts_cf3_leave_reset_first_step_mol.qcinp")) as f:
+            ref = f.read()
+        with open(os.path.join(scr_dir, "ts_cf3_leave.qcinp")) as f:
+            ans = f.read()
+        self.assertEqual(ref, ans)
 
     def tearDown(self):
         shutil.rmtree(scr_dir)
