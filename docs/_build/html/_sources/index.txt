@@ -22,6 +22,14 @@ calculations.
 Change log
 ==========
 
+v0.7.3
+------
+1. Improved backwards compatibility for WallTimeHandler.
+2. Improvements to VaspErrorHandler. No longer catches spurious BRMIX error
+   messages when NELECT is specified in INCAR, and pricel and rot_mat errors
+   are now fixed with symmetry precision and gamma centered KPOINTS instead.
+3. Improved Qchem error handler (Xiaohui Qu).
+
 v0.7.2
 ------
 1. Improved WalltimeHandler (PBSWalltimeHandler is a subset and is now

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian package &mdash; custodian 0.7.2 documentation</title>
+    <title>custodian package &mdash; custodian 0.7.3 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.2',
+        VERSION:     '0.7.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.2 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.7.3 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -132,37 +132,29 @@ corrective measures are taken and the particular job is rerun.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>handlers</strong> (<em>[ErrorHandler]</em>) &#8211;
-Error handlers. In order of priority of
+<li><strong>handlers</strong> (<em>[ErrorHandler]</em>) &#8211; Error handlers. In order of priority of
 fixing.</li>
-<li><strong>jobs</strong> (<em>[Job]</em>) &#8211;
-List of Jobs to be run sequentially.</li>
-<li><strong>max_errors</strong> (<em>int</em>) &#8211;
-Maximum number of errors allowed before exiting.
+<li><strong>jobs</strong> (<em>[Job]</em>) &#8211; List of Jobs to be run sequentially.</li>
+<li><strong>max_errors</strong> (<em>int</em>) &#8211; Maximum number of errors allowed before exiting.
 Defaults to 1.</li>
-<li><strong>polling_time_step</strong> (<em>int</em>) &#8211;
-The length of time in seconds between
+<li><strong>polling_time_step</strong> (<em>int</em>) &#8211; The length of time in seconds between
 steps in which a job is checked for completion. Defaults to
 10 secs.</li>
-<li><strong>monitor_freq</strong> (<em>int</em>) &#8211;
-The number of polling steps before monitoring
+<li><strong>monitor_freq</strong> (<em>int</em>) &#8211; The number of polling steps before monitoring
 occurs. For example, if you have a polling_time_step of 10
 seconds and a monitor_freq of 30, this means that Custodian
 uses the monitors to check for errors every 30 x 10 = 300
 seconds, i.e., 5 minutes.</li>
-<li><strong>log_file</strong> (<em>str</em>) &#8211;
-Deprecated. Custodian now always logs to a
+<li><strong>log_file</strong> (<em>str</em>) &#8211; Deprecated. Custodian now always logs to a
 custodian.json file.</li>
-<li><strong>skip_over_errors</strong> (<em>bool</em>) &#8211;
-If set to True, custodian will skip over
+<li><strong>skip_over_errors</strong> (<em>bool</em>) &#8211; If set to True, custodian will skip over
 error handlers that failed (raised an Exception of some sort).
 Otherwise, custodian will simply exit on unrecoverable errors.
 The former will lead to potentially more robust performance,
 but may make it difficult to improve handlers. The latter
 will allow one to catch potentially bad error handler
 implementations. Defaults to False.</li>
-<li><strong>scratch_dir</strong> (<em>str</em>) &#8211;
-If this is set, any files in the current
+<li><strong>scratch_dir</strong> (<em>str</em>) &#8211; If this is set, any files in the current
 directory are copied to a temporary directory in a scratch
 space first before any jobs are performed, and moved back to
 the current directory upon completion of all jobs. This is
@@ -175,11 +167,9 @@ the run in the working directory called &#8220;scratch_link&#8221; as
 users may want to sometimes check the output during the
 course of a run. If this is None (the default), the run is
 performed in the current working directory.</li>
-<li><strong>gzipped_output</strong> (<em>bool</em>) &#8211;
-Whether to gzip the final output to save
+<li><strong>gzipped_output</strong> (<em>bool</em>) &#8211; Whether to gzip the final output to save
 space. Defaults to False.</li>
-<li><strong>checkpoint</strong> (<em>bool</em>) &#8211;
-Whether to checkpoint after each successful Job.
+<li><strong>checkpoint</strong> (<em>bool</em>) &#8211; Whether to checkpoint after each successful Job.
 Checkpoints are stored as custodian.chk.#.tar.gz files. Defaults
 to False.</li>
 </ul>
@@ -343,11 +333,9 @@ files of an errored run before performing corrections.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>filenames</strong> (<em>[str]</em>) &#8211;
-List of files to backup. Supports wildcards, e.g.,
+<li><strong>filenames</strong> (<em>[str]</em>) &#8211; List of files to backup. Supports wildcards, e.g.,
 <em>.</em>.</li>
-<li><strong>prefix</strong> (<em>str</em>) &#8211;
-prefix to the files. Defaults to error, which means a
+<li><strong>prefix</strong> (<em>str</em>) &#8211; prefix to the files. Defaults to error, which means a
 series of error.1.tar.gz, error.2.tar.gz, ... will be generated.</li>
 </ul>
 </td>
@@ -411,12 +399,12 @@ series of error.1.tar.gz, error.2.tar.gz, ... will be generated.</li>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
-        &copy; Copyright 2013, Shyue Ping Ong.
+        &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.qchem.handlers &mdash; custodian 0.7.2 documentation</title>
+    <title>custodian.qchem.handlers &mdash; custodian 0.7.3 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.7.2',
+        VERSION:     '0.7.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.2 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.7.3 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.2 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.3 documentation</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -63,12 +63,14 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">tarfile</span>
+<span class="kn">from</span> <span class="nn">pymatgen.core.structure</span> <span class="kn">import</span> <span class="n">Molecule</span>
 <span class="kn">from</span> <span class="nn">pymatgen.io.qchemio</span> <span class="kn">import</span> <span class="n">QcOutput</span><span class="p">,</span> <span class="n">QcInput</span><span class="p">,</span> <span class="n">QcTask</span>
 <span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">ErrorHandler</span>
 
@@ -211,10 +213,15 @@
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 </div>
 <div class="viewcode-block" id="QChemErrorHandler.fix_error_code_134"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_error_code_134">[docs]</a>    <span class="k">def</span> <span class="nf">fix_error_code_134</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">has_freq_job</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">jobs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">j</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;freq&quot;</span><span class="p">:</span>
+                <span class="n">has_freq_job</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">break</span>
         <span class="k">if</span> <span class="s">&quot;thresh&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_integral_threshold</span><span class="p">(</span><span class="n">thresh</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
             <span class="k">return</span> <span class="s">&quot;use tight integral threshold&quot;</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;freq&quot;</span> <span class="ow">or</span>\
+        <span class="k">elif</span> <span class="n">has_freq_job</span> <span class="ow">or</span>\
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;exchange&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;pbe&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="s">&quot;half_cpus&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s">&quot;half_cpus&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
@@ -273,6 +280,14 @@
             <span class="n">old_strategy_text</span> <span class="o">=</span> <span class="n">old_strategy_text</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">od</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">error_step_id</span><span class="p">]</span>
 
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;scf_iteration_energies&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span> \
+                <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;scf_iteration_energies&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;Exit Code 134&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+                <span class="c"># immature termination of SCF</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_error_code_134</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span>
+
         <span class="k">if</span> <span class="n">od</span><span class="p">[</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;opt&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">strategy</span> <span class="o">=</span> <span class="s">&quot;reset&quot;</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_strategy_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -280,13 +295,6 @@
             <span class="n">strategy</span><span class="p">[</span><span class="s">&quot;current_method_id&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">strategy</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;scf_iteration_energies&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span> \
-                    <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;scf_iteration_energies&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
-                <span class="k">if</span> <span class="s">&#39;Exit Code 134&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-                    <span class="c"># immature termination of SCF</span>
-                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_error_code_134</span><span class="p">()</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="bp">None</span>
             <span class="n">scf_iters</span> <span class="o">=</span> <span class="n">od</span><span class="p">[</span><span class="s">&quot;scf_iteration_energies&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">scf_iters</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rca_gdm_thresh</span><span class="p">:</span>
                 <span class="n">strategy</span><span class="p">[</span><span class="s">&quot;methods&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;increase_iter&quot;</span><span class="p">,</span> <span class="s">&quot;rca_diis&quot;</span><span class="p">,</span> <span class="s">&quot;gwh&quot;</span><span class="p">,</span>
@@ -303,12 +311,7 @@
                 <span class="n">algorithm</span><span class="o">=</span><span class="s">&quot;diis&quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span><span class="p">)</span>
             <span class="k">if</span> <span class="s">&quot;scf_guess&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;sad&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">mol</span> <span class="o">=</span> <span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">charge</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">charge</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="o">=</span> \
-                    <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">spin_multiplicity</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_last_input_geom</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_strategy_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">comments</span> <span class="o">=</span> <span class="n">scf_pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">comments</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">comments</span>
@@ -363,6 +366,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">comments</span>
             <span class="k">return</span> <span class="n">method</span>
 </div>
+<div class="viewcode-block" id="QChemErrorHandler.set_last_input_geom"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.set_last_input_geom">[docs]</a>    <span class="k">def</span> <span class="nf">set_last_input_geom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_mol</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_step_id</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">qctask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">jobs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">qctask</span><span class="o">.</span><span class="n">mol</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">):</span>
+                <span class="n">qctask</span><span class="o">.</span><span class="n">mol</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">new_mol</span><span class="p">)</span>
+</div>
 <div class="viewcode-block" id="QChemErrorHandler.fix_geom_opt"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_geom_opt">[docs]</a>    <span class="k">def</span> <span class="nf">fix_geom_opt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">comments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;comment&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
         <span class="n">geom_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&quot;&lt;Geom Opt Fix Strategy&gt;(.*)&quot;</span>
@@ -393,31 +402,16 @@
             <span class="n">method</span> <span class="o">=</span> <span class="n">strategy</span><span class="p">[</span><span class="s">&quot;methods&quot;</span><span class="p">][</span><span class="n">strategy</span><span class="p">[</span><span class="s">&quot;current_method_id&quot;</span><span class="p">]]</span>
             <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&quot;increase_iter&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_geom_max_iterations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_max_cycles</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">mol</span> <span class="o">=</span> <span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">charge</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">charge</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="o">=</span> \
-                        <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">spin_multiplicity</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_last_input_geom</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&quot;GDIIS&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_geom_opt_use_gdiis</span><span class="p">(</span><span class="n">subspace_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_geom_max_iterations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_max_cycles</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">mol</span> <span class="o">=</span> <span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">charge</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">charge</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="o">=</span> \
-                        <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">spin_multiplicity</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_last_input_geom</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&quot;CartCoords&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_geom_opt_coords_type</span><span class="p">(</span><span class="s">&quot;cartesian&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_geom_max_iterations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_max_cycles</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_geom_opt_use_gdiis</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">mol</span> <span class="o">=</span> <span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">charge</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">charge</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="o">=</span> \
-                        <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">spin_multiplicity</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_last_input_geom</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;fix method&quot;</span> <span class="o">+</span> <span class="n">method</span> <span class="o">+</span> <span class="s">&quot;is not supported&quot;</span><span class="p">)</span>
             <span class="n">strategy_text</span> <span class="o">=</span> <span class="s">&quot;&lt;Geom Opt Fix Strategy&gt;&quot;</span>
@@ -506,13 +500,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.2 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.3 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
-        &copy; Copyright 2013, Shyue Ping Ong.
+        &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">

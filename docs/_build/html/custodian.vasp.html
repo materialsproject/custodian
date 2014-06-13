@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp package &mdash; custodian 0.7.2 documentation</title>
+    <title>custodian.vasp package &mdash; custodian 0.7.3 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.2',
+        VERSION:     '0.7.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.2 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.7.3 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -81,13 +81,11 @@ in timeout seconds. Perturbs structure and restarts.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>output_filename</strong> (<em>str</em>) &#8211;
-This is the file where the stdout for vasp
+<li><strong>output_filename</strong> (<em>str</em>) &#8211; This is the file where the stdout for vasp
 is being redirected. The error messages that are checked are
 present in the stdout. Defaults to &#8220;vasp.out&#8221;, which is the
 default redirect used by <tt class="xref py py-class docutils literal"><span class="pre">custodian.vasp.jobs.VaspJob</span></tt>.</li>
-<li><strong>timeout</strong> (<em>int</em>) &#8211;
-The time in seconds between checks where if there
+<li><strong>timeout</strong> (<em>int</em>) &#8211; The time in seconds between checks where if there
 is no activity on the output file, the run is considered
 frozen. Defaults to 3600 seconds, i.e., 1 hour.</li>
 </ul>
@@ -125,13 +123,11 @@ and if the run has converged, no error is recorded.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>output_filename</strong> (<em>str</em>) &#8211;
-This is the file where the stdout for vasp
+<li><strong>output_filename</strong> (<em>str</em>) &#8211; This is the file where the stdout for vasp
 is being redirected. The error messages that are checked are
 present in the stdout. Defaults to &#8220;vasp.out&#8221;, which is the
 default redirect used by <tt class="xref py py-class docutils literal"><span class="pre">custodian.vasp.jobs.VaspJob</span></tt>.</li>
-<li><strong>output_vasprun</strong> (<em>str</em>) &#8211;
-Filename for the vasprun.xml file. Change
+<li><strong>output_vasprun</strong> (<em>str</em>) &#8211; Filename for the vasprun.xml file. Change
 this only if it is different from the default (unlikely).</li>
 </ul>
 </td>
@@ -168,15 +164,12 @@ Normal or kill the job.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>output_filename</strong> (<em>str</em>) &#8211;
-This is the OSZICAR file. Change
+<li><strong>output_filename</strong> (<em>str</em>) &#8211; This is the OSZICAR file. Change
 this only if it is different from the default (unlikely).</li>
-<li><strong>nionic_steps</strong> (<em>int</em>) &#8211;
-The threshold number of ionic steps that
+<li><strong>nionic_steps</strong> (<em>int</em>) &#8211; The threshold number of ionic steps that
 needs to hit the maximum number of electronic steps for the
 run to be considered non-converging.</li>
-<li><strong>change_algo</strong> (<em>bool</em>) &#8211;
-Whether to attempt to correct the job by
+<li><strong>change_algo</strong> (<em>bool</em>) &#8211; Whether to attempt to correct the job by
 changing the ALGO from Fast to Normal.</li>
 </ul>
 </td>
@@ -214,15 +207,12 @@ gets progressively worse.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>input_filename</strong> (<em>str</em>) &#8211;
-This is the POSCAR file that the run
+<li><strong>input_filename</strong> (<em>str</em>) &#8211; This is the POSCAR file that the run
 started from. Defaults to &#8220;POSCAR&#8221;. Change
 this only if it is different from the default (unlikely).</li>
-<li><strong>output_filename</strong> (<em>str</em>) &#8211;
-This is the OSZICAR file. Change
+<li><strong>output_filename</strong> (<em>str</em>) &#8211; This is the OSZICAR file. Change
 this only if it is different from the default (unlikely).</li>
-<li><strong>dE_threshold</strong> (<em>float</em>) &#8211;
-The threshold energy change. Defaults to 1eV.</li>
+<li><strong>dE_threshold</strong> (<em>float</em>) &#8211; The threshold energy change. Defaults to 1eV.</li>
 </ul>
 </td>
 </tr>
@@ -255,8 +245,7 @@ The threshold energy change. Defaults to 1eV.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output_vasprun</strong> (<em>str</em>) &#8211;
-Filename for the vasprun.xml file. Change
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output_vasprun</strong> (<em>str</em>) &#8211; Filename for the vasprun.xml file. Change
 this only if it is different from the default (unlikely).</td>
 </tr>
 </tbody>
@@ -289,8 +278,7 @@ that occur during VASP runs.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output_filename</strong> (<em>str</em>) &#8211;
-This is the file where the stdout for vasp
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output_filename</strong> (<em>str</em>) &#8211; This is the file where the stdout for vasp
 is being redirected. The error messages that are checked are
 present in the stdout. Defaults to &#8220;vasp.out&#8221;, which is the
 default redirect used by <tt class="xref py py-class docutils literal"><span class="pre">custodian.vasp.jobs.VaspJob</span></tt>.</td>
@@ -335,14 +323,12 @@ determined if not set.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>wall_time</strong> (<em>int</em>) &#8211;
-Total walltime in seconds. If this is None and
+<li><strong>wall_time</strong> (<em>int</em>) &#8211; Total walltime in seconds. If this is None and
 the job is running on a PBS system, the handler will attempt to
 determine the walltime from the PBS_WALLTIME environment
 variable. If the wall time cannot be determined or is not
 set, this handler will have no effect.</li>
-<li><strong>buffer_time</strong> (<em>int</em>) &#8211;
-The min amount of buffer time in secs at the
+<li><strong>buffer_time</strong> (<em>int</em>) &#8211; The min amount of buffer time in secs at the
 end that the STOPCAR will be written. The STOPCAR is written
 when the time remaining is &lt; the higher of 3 x the average
 time for each ionic step and the buffer time. Defaults to
@@ -637,61 +623,42 @@ of the static constructors. The defaults are usually fine too.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last">
-<li><p class="first"><strong>vasp_cmd</strong> (<em>str</em>) &#8211;
-Command to run vasp as a list of args. For example,
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vasp_cmd</strong> (<em>str</em>) &#8211; Command to run vasp as a list of args. For example,
 if you are using mpirun, it can be something like
-[&#8220;mpirun&#8221;, &#8220;pvasp.5.2.11&#8221;]</p>
-</li>
-<li><p class="first"><strong>output_file</strong> (<em>str</em>) &#8211;
-Name of file to direct standard out to.
-Defaults to &#8220;vasp.out&#8221;.</p>
-</li>
-<li><p class="first"><strong>suffix</strong> (<em>str</em>) &#8211;
-A suffix to be appended to the final output. E.g.,
+[&#8220;mpirun&#8221;, &#8220;pvasp.5.2.11&#8221;]</li>
+<li><strong>output_file</strong> (<em>str</em>) &#8211; Name of file to direct standard out to.
+Defaults to &#8220;vasp.out&#8221;.</li>
+<li><strong>suffix</strong> (<em>str</em>) &#8211; A suffix to be appended to the final output. E.g.,
 to rename all VASP output from say vasp.out to
-vasp.out.relax1, provide &#8221;.relax1&#8221; as the suffix.</p>
-</li>
-<li><p class="first"><strong>final</strong> (<em>bool</em>) &#8211;
-Indicating whether this is the final vasp job in a
-series. Defaults to True.</p>
-</li>
-<li><p class="first"><strong>backup</strong> (<em>bool</em>) &#8211;
-Whether to backup the initial input files. If True,
+vasp.out.relax1, provide &#8221;.relax1&#8221; as the suffix.</li>
+<li><strong>final</strong> (<em>bool</em>) &#8211; Indicating whether this is the final vasp job in a
+series. Defaults to True.</li>
+<li><strong>backup</strong> (<em>bool</em>) &#8211; Whether to backup the initial input files. If True,
 the INCAR, KPOINTS, POSCAR and POTCAR will be copied with a
-&#8221;.orig&#8221; appended. Defaults to True.</p>
-</li>
-<li><p class="first"><strong>gzipped</strong> (<em>bool</em>) &#8211;
-Deprecated. Please use the Custodian class&#8217;s
-gzipped_output option instead.</p>
-</li>
-<li><p class="first"><strong>default_vasp_input_set</strong> (<em>VaspInputSet</em>) &#8211;
-Species the default input
+&#8221;.orig&#8221; appended. Defaults to True.</li>
+<li><strong>gzipped</strong> (<em>bool</em>) &#8211; Deprecated. Please use the Custodian class&#8217;s
+gzipped_output option instead.</li>
+<li><strong>default_vasp_input_set</strong> (<em>VaspInputSet</em>) &#8211; Species the default input
 set (see pymatgen&#8217;s documentation in pymatgen.io.vaspio_set to
 use for directories that do not contain full set of VASP
 input files. For example, if a directory contains only a
 POSCAR or a cif, the vasp input set will be used to generate
 the necessary input files for the run. If the directory already
 contain a full set of VASP input files,
-this input is ignored. Defaults to the MITVaspInputSet.</p>
-</li>
-<li><p class="first"><strong>auto_npar</strong> (<em>bool</em>) &#8211;
-Whether to automatically tune NPAR to be sqrt(
+this input is ignored. Defaults to the MITVaspInputSet.</li>
+<li><strong>auto_npar</strong> (<em>bool</em>) &#8211; Whether to automatically tune NPAR to be sqrt(
 number of cores) as recommended by VASP for DFT calculations.
 Generally, this results in significant speedups. Defaults to
-True. Set to False for HF, GW and RPA calculations.</p>
-</li>
-<li><p class="first"><strong>auto_gamma</strong> (<em>bool</em>) &#8211;
-Whether to automatically check if run is a
+True. Set to False for HF, GW and RPA calculations.</li>
+<li><strong>auto_gamma</strong> (<em>bool</em>) &#8211; Whether to automatically check if run is a
 Gamma 1x1x1 run, and whether a Gamma optimized version of
 VASP exists with &#8221;.gamma&#8221; appended to the name of the VASP
 executable (typical setup in many systems). If so, run the
 gamma optimized version of VASP instead of regular VASP. You
 can also specify the gamma vasp command using the
-gamma_vasp_cmd argument if the command is named differently.</p>
-</li>
-<li><p class="first"><strong>settings_override</strong> (<em>[dict]</em>) &#8211;
-An ansible style list of dict to
+gamma_vasp_cmd argument if the command is named differently.</li>
+<li><strong>settings_override</strong> (<em>[dict]</em>) &#8211; <p>An ansible style list of dict to
 override changes. For example, to set ISTART=1 for subsequent
 runs and to copy the CONTCAR to the POSCAR, you will provide:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="p">[{</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}},</span>
@@ -700,12 +667,10 @@ runs and to copy the CONTCAR to the POSCAR, you will provide:</p>
 </pre></div>
 </div>
 </li>
-<li><p class="first"><strong>gamma_vasp_cmd</strong> (<em>str</em>) &#8211;
-Command for gamma vasp version when
+<li><strong>gamma_vasp_cmd</strong> (<em>str</em>) &#8211; Command for gamma vasp version when
 auto_gamma is True. Should follow the list style of
 subprocess. Defaults to None, which means &#8221;.gamma&#8221; is added
-to the last argument of the standard vasp_cmd.</p>
-</li>
+to the last argument of the standard vasp_cmd.</li>
 </ul>
 </td>
 </tr>
@@ -720,8 +685,7 @@ relaxation run.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vasp_cmd</strong> (<em>str</em>) &#8211;
-Command to run vasp as a list of args. For example,
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vasp_cmd</strong> (<em>str</em>) &#8211; Command to run vasp as a list of args. For example,
 if you are using mpirun, it can be something like
 [&#8220;mpirun&#8221;, &#8220;pvasp.5.2.11&#8221;]</td>
 </tr>
@@ -826,12 +790,12 @@ and backing up.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
-        &copy; Copyright 2013, Shyue Ping Ong.
+        &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
