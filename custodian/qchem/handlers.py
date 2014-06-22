@@ -231,7 +231,8 @@ class QChemErrorHandler(ErrorHandler):
             else:
                 return None
 
-        if od["jobtype"] == "opt" and len(od["molecules"]) >= 2:
+        if (od["jobtype"] == "opt" or od["jobtype"] == "ts")\
+                and len(od["molecules"]) >= 2:
             strategy = "reset"
         elif len(old_strategy_text) > 0:
             strategy = json.loads(old_strategy_text)
@@ -252,8 +253,10 @@ class QChemErrorHandler(ErrorHandler):
         if strategy == "reset":
             self.fix_step.set_scf_algorithm_and_iterations(
                 algorithm="diis", iterations=self.scf_max_cycles)
-            if "scf_guess" in self.fix_step.params["rem"]:
-                self.fix_step.set_scf_initial_guess("sad")
+            if self.error_step_id > 0:
+                self.set_scf_initial_guess("read")
+            else:
+                self.set_scf_initial_guess("sad")
             self.set_last_input_geom(od["molecules"][-1])
             if len(old_strategy_text) > 0:
                 comments = scf_pattern.sub("", comments)
@@ -267,27 +270,27 @@ class QChemErrorHandler(ErrorHandler):
             if method == "increase_iter":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="diis", iterations=self.scf_max_cycles)
-                self.fix_step.set_scf_initial_guess("sad")
+                self.set_scf_initial_guess("sad")
             elif method == "rca_diis":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="rca_diis", iterations=self.scf_max_cycles)
-                self.fix_step.set_scf_initial_guess("sad")
+                self.set_scf_initial_guess("sad")
             elif method == "gwh":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="diis", iterations=self.scf_max_cycles)
-                self.fix_step.set_scf_initial_guess("gwh")
+                self.set_scf_initial_guess("gwh")
             elif method == "gdm":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="gdm", iterations=self.scf_max_cycles)
-                self.fix_step.set_scf_initial_guess("sad")
+                self.set_scf_initial_guess("sad")
             elif method == "rca":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="rca", iterations=self.scf_max_cycles)
-                self.fix_step.set_scf_initial_guess("sad")
+                self.set_scf_initial_guess("sad")
             elif method == "core+rca":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="rca", iterations=self.scf_max_cycles)
-                self.fix_step.set_scf_initial_guess("core")
+                self.set_scf_initial_guess("core")
             elif method == "diis_gdm":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="diis_gdm", iterations=self.scf_max_cycles)
@@ -295,8 +298,7 @@ class QChemErrorHandler(ErrorHandler):
             elif method == "core+gdm":
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="gdm", iterations=self.scf_max_cycles)
-                self.fix_step.set_scf_initial_guess("sad")
-                self.fix_step.set_scf_initial_guess("core")
+                self.set_scf_initial_guess("core")
             else:
                 raise ValueError("fix method " + method + " is not supported")
             strategy_text = "<SCF Fix Strategy>"
@@ -314,6 +316,11 @@ class QChemErrorHandler(ErrorHandler):
             qctask = self.qcinp.jobs[i]
             if isinstance(qctask.mol, Molecule):
                 qctask.mol = copy.deepcopy(new_mol)
+
+    def set_scf_initial_guess(self, guess="sad"):
+        if "scf_guess" not in self.fix_step.params["rem"] \
+                or self.fix_step.params["rem"]["scf_guess"] != "read":
+            self.fix_step.set_scf_initial_guess(guess)
 
     def fix_geom_opt(self):
         comments = self.fix_step.params.get("comment", "")
