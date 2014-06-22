@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.ansible package &mdash; custodian 0.7.2 documentation</title>
+    <title>custodian.ansible package &mdash; custodian 0.7.3 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.2',
+        VERSION:     '0.7.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.2 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.7.3 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -159,10 +159,8 @@ avoid ambiguity.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>filename</strong> (<em>str</em>) &#8211;
-Filename.</li>
-<li><strong>settings</strong> (<em>dict</em>) &#8211;
-Must be {&#8220;dest&#8221;: path of new file}</li>
+<li><strong>filename</strong> (<em>str</em>) &#8211; Filename.</li>
+<li><strong>settings</strong> (<em>dict</em>) &#8211; Must be {&#8220;dest&#8221;: path of new file}</li>
 </ul>
 </td>
 </tr>
@@ -179,10 +177,8 @@ Must be {&#8220;dest&#8221;: path of new file}</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>filename</strong> (<em>str</em>) &#8211;
-Filename.</li>
-<li><strong>settings</strong> (<em>dict</em>) &#8211;
-Must be {&#8220;content&#8221;: actual_content}</li>
+<li><strong>filename</strong> (<em>str</em>) &#8211; Filename.</li>
+<li><strong>settings</strong> (<em>dict</em>) &#8211; Must be {&#8220;content&#8221;: actual_content}</li>
 </ul>
 </td>
 </tr>
@@ -199,10 +195,8 @@ Must be {&#8220;content&#8221;: actual_content}</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>filename</strong> (<em>str</em>) &#8211;
-Filename.</li>
-<li><strong>settings</strong> (<em>dict</em>) &#8211;
-Must be {&#8220;mode&#8221;: actual/simulated}. Simulated
+<li><strong>filename</strong> (<em>str</em>) &#8211; Filename.</li>
+<li><strong>settings</strong> (<em>dict</em>) &#8211; Must be {&#8220;mode&#8221;: actual/simulated}. Simulated
 mode only prints the action without performing it.</li>
 </ul>
 </td>
@@ -220,10 +214,8 @@ mode only prints the action without performing it.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>filename</strong> (<em>str</em>) &#8211;
-Filename.</li>
-<li><strong>settings</strong> (<em>dict</em>) &#8211;
-Must be {&#8220;dest&#8221;: path of new file}</li>
+<li><strong>filename</strong> (<em>str</em>) &#8211; Filename.</li>
+<li><strong>settings</strong> (<em>dict</em>) &#8211; Must be {&#8220;dest&#8221;: path of new file}</li>
 </ul>
 </td>
 </tr>
@@ -269,12 +261,10 @@ pymatpro.ansible.actions.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>actions</strong> (<em>[Action]</em>) &#8211;
-A sequence of supported actions. See
+<li><strong>actions</strong> (<em>[Action]</em>) &#8211; A sequence of supported actions. See
 <a class="reference internal" href="#module-custodian.ansible.actions" title="custodian.ansible.actions"><tt class="xref py py-mod docutils literal"><span class="pre">custodian.ansible.actions</span></tt></a>. Default is None,
 which means only DictActions are supported.</li>
-<li><strong>strict</strong> (<em>bool</em>) &#8211;
-Indicating whether to use strict mode. In non-strict
+<li><strong>strict</strong> (<em>bool</em>) &#8211; Indicating whether to use strict mode. In non-strict
 mode, unsupported actions are simply ignored without any
 errors raised. In strict mode, if an unsupported action is
 supplied, a ValueError is raised. Defaults to True.</li>
@@ -293,11 +283,9 @@ return a copy.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>modification</strong> (<em>dict</em>) &#8211;
-Modification must be {action_keyword :
+<li><strong>modification</strong> (<em>dict</em>) &#8211; Modification must be {action_keyword :
 settings}. E.g., {&#8216;_set&#8217;: {&#8216;Hello&#8217;:&#8217;Universe&#8217;, &#8216;Bye&#8217;: &#8216;World&#8217;}}</li>
-<li><strong>obj</strong> (<em>dict/str/object</em>) &#8211;
-Object to modify depending on actions. For
+<li><strong>obj</strong> (<em>dict/str/object</em>) &#8211; Object to modify depending on actions. For
 example, for DictActions, obj will be a dict to be modified.
 For FileActions, obj will be a string with a full pathname to a
 file.</li>
@@ -317,11 +305,9 @@ file.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>modification</strong> (<em>dict</em>) &#8211;
-Modification must be {action_keyword :
+<li><strong>modification</strong> (<em>dict</em>) &#8211; Modification must be {action_keyword :
 settings}. E.g., {&#8216;_set&#8217;: {&#8216;Hello&#8217;:&#8217;Universe&#8217;, &#8216;Bye&#8217;: &#8216;World&#8217;}}</li>
-<li><strong>obj</strong> (<em>object</em>) &#8211;
-Object to modify</li>
+<li><strong>obj</strong> (<em>object</em>) &#8211; Object to modify</li>
 </ul>
 </td>
 </tr>
@@ -393,12 +379,12 @@ stored at each step).</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
-        &copy; Copyright 2013, Shyue Ping Ong.
+        &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">

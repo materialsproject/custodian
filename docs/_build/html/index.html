@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Change log &mdash; custodian 0.7.2 documentation</title>
+    <title>Change log &mdash; custodian 0.7.3 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.2',
+        VERSION:     '0.7.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.2 documentation" href="#" />
+    <link rel="top" title="custodian 0.7.3 documentation" href="#" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.7.2 documentation</a> &raquo;</li> 
+        <li><a href="#">custodian 0.7.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -71,6 +71,16 @@ handling for Vienna Ab Initio Simulation Package (VASP), NwChem and QChem
 calculations.</p>
 <div class="section" id="change-log">
 <h1>Change log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="v0-7-3">
+<h2>v0.7.3<a class="headerlink" href="#v0-7-3" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Improved backwards compatibility for WallTimeHandler.</li>
+<li>Improvements to VaspErrorHandler. No longer catches spurious BRMIX error
+messages when NELECT is specified in INCAR, and pricel and rot_mat errors
+are now fixed with symmetry precision and gamma centered KPOINTS instead.</li>
+<li>Improved Qchem error handler (Xiaohui Qu).</li>
+</ol>
+</div>
 <div class="section" id="v0-7-2">
 <h2>v0.7.2<a class="headerlink" href="#v0-7-2" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
@@ -430,6 +440,7 @@ DEALINGS IN THE SOFTWARE.
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Change log</a><ul>
+<li><a class="reference internal" href="#v0-7-3">v0.7.3</a></li>
 <li><a class="reference internal" href="#v0-7-2">v0.7.2</a></li>
 <li><a class="reference internal" href="#v0-7-1">v0.7.1</a></li>
 <li><a class="reference internal" href="#v0-7-0">v0.7.0</a></li>
@@ -485,12 +496,12 @@ DEALINGS IN THE SOFTWARE.
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.7.2 documentation</a> &raquo;</li> 
+        <li><a href="#">custodian 0.7.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
-        &copy; Copyright 2013, Shyue Ping Ong.
+        &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
