@@ -231,7 +231,7 @@ class QChemErrorHandler(ErrorHandler):
             else:
                 return None
 
-        if (od["jobtype"] == "opt" or od["jobtype"] == "ts")\
+        if od["jobtype"] in ["opt", "ts", "aimd"] \
                 and len(od["molecules"]) >= 2:
             strategy = "reset"
         elif len(old_strategy_text) > 0:
