@@ -18,16 +18,17 @@ import subprocess
 import os
 import shutil
 import math
+import logging
 
-from pymatgen.util.io_utils import zopen
 from pymatgen.io.vaspio.vasp_input import VaspInput
 from pymatgen.io.smartio import read_structure
 from pymatgen.io.vaspio_set import MITVaspInputSet
-from pymatgen.serializers.json_coders import MSONable, PMGJSONDecoder
+from pymatgen.serializers.json_coders import PMGJSONDecoder
+from monty.os.path import which
 
 from custodian.ansible.intepreter import Modder
 from custodian.ansible.actions import FileActions, DictActions
-from custodian.custodian import Job
+from custodian.custodian import Job, gzip_dir
 
 
 VASP_INPUT_FILES = {"INCAR", "POSCAR", "POTCAR", "KPOINTS"}
@@ -37,7 +38,7 @@ VASP_OUTPUT_FILES = ['DOSCAR', 'INCAR', 'KPOINTS', 'POSCAR', 'PROCAR',
                      'WAVECAR', 'CONTCAR', 'IBZKPT', 'OUTCAR']
 
 
-class VaspJob(Job, MSONable):
+class VaspJob(Job):
     """
     A basic vasp job. Just runs whatever is in the directory. But conceivably
      can be a complex processing of inputs etc. with initialization.
@@ -51,62 +52,54 @@ class VaspJob(Job, MSONable):
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
-        of the static constructors.
+        of the static constructors. The defaults are usually fine too.
 
         Args:
-            vasp_cmd:
-                Command to run vasp as a list of args. For example,
+            vasp_cmd (str): Command to run vasp as a list of args. For example,
                 if you are using mpirun, it can be something like
                 ["mpirun", "pvasp.5.2.11"]
-            output_file:
-                Name of file to direct standard out to. Defaults to vasp.out.
-            suffix:
-                A suffix to be appended to the final output. E.g.,
+            output_file (str): Name of file to direct standard out to.
+                Defaults to "vasp.out".
+            suffix (str): A suffix to be appended to the final output. E.g.,
                 to rename all VASP output from say vasp.out to
                 vasp.out.relax1, provide ".relax1" as the suffix.
-            final:
-                Boolean indicating whether this is the final vasp job in a
+            final (bool): Indicating whether this is the final vasp job in a
                 series. Defaults to True.
-            backup:
-                Boolean whether to backup the initial input files. If True,
+            backup (bool): Whether to backup the initial input files. If True,
                 the INCAR, KPOINTS, POSCAR and POTCAR will be copied with a
                 ".orig" appended. Defaults to True.
-            gzipped:
-                Whether to gzip the final output. Defaults to False.
-            default_vasp_input_set:
-                Species the default input set to use for directories that do
-                not contain full set of VASP input files. For example,
-                if a directory contains only a POSCAR or a cif,
-                the vasp input set will be used to generate the necessary
-                input files for the run. If the directory already
+            gzipped (bool): Deprecated. Please use the Custodian class's
+                gzipped_output option instead.
+            default_vasp_input_set (VaspInputSet): Species the default input
+                set (see pymatgen's documentation in pymatgen.io.vaspio_set to
+                use for directories that do not contain full set of VASP
+                input files. For example, if a directory contains only a
+                POSCAR or a cif, the vasp input set will be used to generate
+                the necessary input files for the run. If the directory already
                 contain a full set of VASP input files,
                 this input is ignored. Defaults to the MITVaspInputSet.
-            auto_npar:
-                Whether to automatically tune NPAR to be sqrt(number of
-                cores) as recommended by VASP for DFT calculations.
+            auto_npar (bool): Whether to automatically tune NPAR to be sqrt(
+                number of cores) as recommended by VASP for DFT calculations.
                 Generally, this results in significant speedups. Defaults to
                 True. Set to False for HF, GW and RPA calculations.
-            auto_gamma:
-                Whether to automatically check if run is a Gamma 1x1x1 run,
-                and whether a Gamma optimized version of VASP exists with
-                ".gamma" appended to the name of the VASP executable (
-                typical setup in many systems). If so, run the gamma optimized
-                version of VASP instead of regular VASP. You can also
-                specify the gamma vasp command using the gamma_vasp_cmd
-                argument if the command is named differently.
-            settings_override:
-                An ansible style list of dict to override changes. For example,
-                to set ISTART=1 for subsequent runs and to copy the CONTCAR
-                to the POSCAR, you will provide::
+            auto_gamma (bool): Whether to automatically check if run is a
+                Gamma 1x1x1 run, and whether a Gamma optimized version of
+                VASP exists with ".gamma" appended to the name of the VASP
+                executable (typical setup in many systems). If so, run the
+                gamma optimized version of VASP instead of regular VASP. You
+                can also specify the gamma vasp command using the
+                gamma_vasp_cmd argument if the command is named differently.
+            settings_override ([dict]): An ansible style list of dict to
+                override changes. For example, to set ISTART=1 for subsequent
+                runs and to copy the CONTCAR to the POSCAR, you will provide::
 
                     [{"dict": "INCAR", "action": {"_set": {"ISTART": 1}}},
                      {"filename": "CONTCAR",
                       "action": {"_file_copy": {"dest": "POSCAR"}}}]
-            gamma_vasp_cmd:
-                Command for gamma vasp version when auto_gamma is True.
-                Should follow the list style of subprocess. Defaults to
-                None, which means ".gamma" is added to the last argument of
-                the standard vasp_cmd.
+            gamma_vasp_cmd (str): Command for gamma vasp version when
+                auto_gamma is True. Should follow the list style of
+                subprocess. Defaults to None, which means ".gamma" is added
+                to the last argument of the standard vasp_cmd.
         """
         self.vasp_cmd = vasp_cmd
         self.output_file = output_file
@@ -121,6 +114,10 @@ class VaspJob(Job, MSONable):
         self.gamma_vasp_cmd = gamma_vasp_cmd
 
     def setup(self):
+        """
+        Performs initial setup for VaspJob, including overriding any settings
+        and backing up.
+        """
         files = os.listdir(".")
         num_structures = 0
         if not set(files).issuperset(VASP_INPUT_FILES):
@@ -171,21 +168,31 @@ class VaspJob(Job, MSONable):
                 vi[f].write_file(f)
 
     def run(self):
+        """
+        Perform the actual VASP run.
+
+        Returns:
+            (subprocess.Popen) Used for monitoring.
+        """
         cmd = list(self.vasp_cmd)
         if self.auto_gamma:
             vi = VaspInput.from_directory(".")
             kpts = vi["KPOINTS"]
             if kpts.style == "Gamma" and tuple(kpts.kpts[0]) == (1, 1, 1):
-                if self.gamma_vasp_cmd is not None and os.path.exists(
+                if self.gamma_vasp_cmd is not None and which(
                         self.gamma_vasp_cmd[-1]):
                     cmd = self.gamma_vasp_cmd
-                elif os.path.exists(cmd[-1] + ".gamma"):
+                elif which(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
-
+        logging.info("Running {}".format(" ".join(cmd)))
         with open(self.output_file, 'w') as f:
-            return subprocess.Popen(cmd, stdout=f)
+            p = subprocess.Popen(cmd, stdout=f)
+        return p
 
     def postprocess(self):
+        """
+        Postprocessing includes renaming and gzipping where necessary.
+        """
         for f in VASP_OUTPUT_FILES + [self.output_file]:
             if os.path.exists(f):
                 if self.final and self.suffix != "":
@@ -194,11 +201,7 @@ class VaspJob(Job, MSONable):
                     shutil.copy(f, "{}{}".format(f, self.suffix))
 
         if self.gzipped:
-            gzip_directory(".")
-
-    @property
-    def name(self):
-        return "Vasp Job"
+            gzip_dir(".")
 
     @staticmethod
     def double_relaxation_run(vasp_cmd, gzipped=True):
@@ -207,8 +210,7 @@ class VaspJob(Job, MSONable):
         relaxation run.
 
         Args:
-            vasp_cmd:
-                Command to run vasp as a list of args. For example,
+            vasp_cmd (str): Command to run vasp as a list of args. For example,
                 if you are using mpirun, it can be something like
                 ["mpirun", "pvasp.5.2.11"]
 
@@ -239,8 +241,8 @@ class VaspJob(Job, MSONable):
         d["@class"] = self.__class__.__name__
         return d
 
-    @staticmethod
-    def from_dict(d):
+    @classmethod
+    def from_dict(cls, d):
         vis = PMGJSONDecoder().process_decoded(d["default_vasp_input_set"])
         return VaspJob(
             vasp_cmd=d["vasp_cmd"], output_file=d["output_file"],
@@ -249,19 +251,3 @@ class VaspJob(Job, MSONable):
             auto_npar=d['auto_npar'], auto_gamma=d['auto_gamma'],
             settings_override=d["settings_override"],
             gamma_vasp_cmd=d["gamma_vasp_cmd"])
-
-
-def gzip_directory(path):
-    """
-    Gzips all files in a directory.
-
-    Args:
-        path:
-            Path to directory.
-    """
-    for f in os.listdir(path):
-        if not f.endswith("gz"):
-            with zopen(f, 'rb') as f_in, \
-                    zopen('{}.gz'.format(f), 'wb') as f_out:
-                f_out.writelines(f_in)
-            os.remove(f)

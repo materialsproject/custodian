@@ -11,7 +11,7 @@ __author__ = "Shyue Ping Ong"
 __copyright__ = "Copyright 2012, The Materials Project"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
-__email__ = "shyue@mit.edu"
+__email__ = "ongsp@ucsd.edu"
 __date__ = "Jun 1, 2012"
 
 
@@ -43,12 +43,13 @@ class Modder(object):
     """
     def __init__(self, actions=None, strict=True):
         """
+        Initializes a Modder from a list of supported actions.
+
         Args:
-            actions:
-                A sequence of supported actions. Default is None, which means
-                only DictActions are supported.
-            strict:
-                Boolean indicating whether to use strict mode. In non-strict
+            actions ([Action]): A sequence of supported actions. See
+                :mod:`custodian.ansible.actions`. Default is None,
+                which means only DictActions are supported.
+            strict (bool): Indicating whether to use strict mode. In non-strict
                 mode, unsupported actions are simply ignored without any
                 errors raised. In strict mode, if an unsupported action is
                 supplied, a ValueError is raised. Defaults to True.
@@ -68,12 +69,11 @@ class Modder(object):
         return a copy.
 
         Args:
-            modification:
-                Modification must be {action_keyword : settings}
-            obj:
-                Object to modify depending on actions. For example, for
-                DictActions, obj will be a dict to be modified. For
-                FileActions, obj will be a string with a full pathname to a
+            modification (dict): Modification must be {action_keyword :
+                settings}. E.g., {'_set': {'Hello':'Universe', 'Bye': 'World'}}
+            obj (dict/str/object): Object to modify depending on actions. For
+                example, for DictActions, obj will be a dict to be modified.
+                For FileActions, obj will be a string with a full pathname to a
                 file.
         """
         for action, settings in modification.items():
@@ -88,10 +88,9 @@ class Modder(object):
         Modify an object that supports pymatgen's to_dict and from_dict API.
 
         Args:
-            modification:
-                Modification must be {action_keyword : settings}
-            obj:
-                Object to modify
+            modification (dict): Modification must be {action_keyword :
+                settings}. E.g., {'_set': {'Hello':'Universe', 'Bye': 'World'}}
+            obj (object): Object to modify
         """
         d = obj.to_dict
         self.modify(modification, d)

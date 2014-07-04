@@ -1,5 +1,4 @@
-include *.rst LICENSE
-include distribute_setup.py
+include *.rst LICENSE ez_setup.py
 recursive-include custodian *.py
 recursive-include scripts *.py
 prune */*/tests

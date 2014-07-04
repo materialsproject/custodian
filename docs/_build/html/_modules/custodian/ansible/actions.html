@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.ansible.actions &mdash; custodian 0.4.2 documentation</title>
+    <title>custodian.ansible.actions &mdash; custodian 0.7.3 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.4.2',
+        VERSION:     '0.7.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.4.2 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.7.3 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.4.2 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.3 documentation</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -69,7 +69,7 @@
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright 2012, The Materials Project&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;0.1&quot;</span>
 <span class="n">__maintainer__</span> <span class="o">=</span> <span class="s">&quot;Shyue Ping Ong&quot;</span>
-<span class="n">__email__</span> <span class="o">=</span> <span class="s">&quot;shyue@mit.edu&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s">&quot;ongsp@ucsd.edu&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;Jun 2, 2012&quot;</span>
 
 
@@ -215,10 +215,8 @@
 <span class="sd">        Creates a file.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            filename:</span>
-<span class="sd">                Filename.</span>
-<span class="sd">            settings:</span>
-<span class="sd">                Must be {&quot;content&quot;: actual_content}</span>
+<span class="sd">            filename (str): Filename.</span>
+<span class="sd">            settings (dict): Must be {&quot;content&quot;: actual_content}</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Settings must only contain one item with key &quot;</span>
@@ -234,10 +232,8 @@
 <span class="sd">        Moves a file. {&#39;_file_move&#39;: {&#39;dest&#39;: &#39;new_file_name&#39;}}</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            filename:</span>
-<span class="sd">                Filename.</span>
-<span class="sd">            settings:</span>
-<span class="sd">                Must be {&quot;dest&quot;: path of new file}</span>
+<span class="sd">            filename (str): Filename.</span>
+<span class="sd">            settings (dict): Must be {&quot;dest&quot;: path of new file}</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Settings must only contain one item with key &quot;</span>
@@ -252,18 +248,20 @@
 <span class="sd">        Deletes a file. {&#39;_file_delete&#39;: {&#39;mode&#39;: &quot;actual&quot;}}</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            filename:</span>
-<span class="sd">                Filename.</span>
-<span class="sd">            settings:</span>
-<span class="sd">                Must be {&quot;mode&quot;: actual/simulated}. Simulated mode only prints</span>
-<span class="sd">                the action without performing it.</span>
+<span class="sd">            filename (str): Filename.</span>
+<span class="sd">            settings (dict): Must be {&quot;mode&quot;: actual/simulated}. Simulated</span>
+<span class="sd">                mode only prints the action without performing it.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Settings must only contain one item with key &quot;</span>
                              <span class="s">&quot;&#39;mode&#39;.&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s">&quot;mode&quot;</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&quot;actual&quot;</span><span class="p">:</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                    <span class="c">#Skip file not found error.</span>
+                    <span class="k">pass</span>
             <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s">&quot;mode&quot;</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&quot;simulated&quot;</span><span class="p">:</span>
                 <span class="k">print</span> <span class="s">&quot;Simulated removal of {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 </div>
@@ -273,10 +271,8 @@
 <span class="sd">        Copies a file. {&#39;_file_copy&#39;: {&#39;dest&#39;: &#39;new_file_name&#39;}}</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            filename:</span>
-<span class="sd">                Filename.</span>
-<span class="sd">            settings:</span>
-<span class="sd">                Must be {&quot;dest&quot;: path of new file}</span>
+<span class="sd">            filename (str): Filename.</span>
+<span class="sd">            settings (dict): Must be {&quot;dest&quot;: path of new file}</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;dest&quot;</span><span class="p">):</span>
@@ -314,14 +310,14 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.4.2 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.3 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
-        &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+        &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

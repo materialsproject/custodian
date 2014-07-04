@@ -1,21 +1,5 @@
-custodian Package
+custodian package
 =================
-
-:mod:`custodian` Package
-------------------------
-
-.. automodule:: custodian.__init__
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`custodian` Module
------------------------
-
-.. automodule:: custodian.custodian
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 Subpackages
 -----------
@@ -24,5 +8,33 @@ Subpackages
 
     custodian.ansible
     custodian.nwchem
+    custodian.qchem
     custodian.vasp
 
+Submodules
+----------
+
+custodian.custodian module
+--------------------------
+
+.. automodule:: custodian.custodian
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+custodian.utils module
+----------------------
+
+.. automodule:: custodian.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: custodian
+    :members:
+    :undoc-members:
+    :show-inheritance:

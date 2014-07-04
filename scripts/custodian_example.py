@@ -142,6 +142,8 @@ class ExampleHandler(ErrorHandler):
 
 
 if __name__ == "__main__":
+    import logging
+    logging.basicConfig(level=logging.INFO)
     njobs = 100
     params = {"initial": 0, "total": 0}
     c = Custodian([ExampleHandler(params)],

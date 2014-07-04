@@ -6,7 +6,6 @@
  scaLAPACK will be used
  LDA part: xc-table for Pade appr. of Perdew
  POSCAR, INCAR and KPOINTS ok, starting setup
- WARNING: small aliasing (wrap around) errors must be expected
  FFT: planning ...(           12 )
  WAVECAR not read
  WARNING: chargedensity file is incomplete

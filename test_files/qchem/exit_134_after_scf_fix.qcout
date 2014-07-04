@@ -1,0 +1,341 @@
+
+Running Job 1 of 1 mol.qcinp
+qchem mol.qcinp_33718.0 /scratch3/scratchdirs/xhqu/qc_scratch/qchem33718/ 24
+aprun -n 24 /global/project/projectdirs/jcesr/qchem/qc41/exe/qcprog.exe mol.qcinp_33718.0 /scratch3/scratchdirs/xhqu/qc_scratch/qchem33718/
+
+Process 0 of 24 is on nid01239 - thread support 0
+Process 1 of 24 is on nid01239 - thread support 0
+Process 2 of 24 is on nid01239 - thread support 0
+Process 4 of 24 is on nid01239 - thread support 0
+Process 3 of 24 is on nid01239 - thread support 0
+Process 5 of 24 is on nid01239 - thread support 0
+Process 6 of 24 is on nid01239 - thread support 0
+Process 23 of 24 is on nid01239 - thread support 0
+initial socket setup ...start 0 nproc 24 
+initial socket setup ...done 0 nproc 24 
+now start server 0 ... 
+                  Welcome to Q-Chem
+     A Quantum Leap Into The Future Of Chemistry
+
+ Y. Shao, L. Fusti-Molnar, Y. Jung, J. Kussmann, C. Ochsenfeld, S. T. Brown, 
+ A. T. B. Gilbert, L. V. Slipchenko, S. V. Levchenko, D. P. O'Neill, 
+ R. A. DiStasio Jr., R. C. Lochan, T. Wang, G. J. O. Beran, N. A. Besley, 
+ J. M. Herbert, C. Y. Lin, T. Van Voorhis, S. H. Chien, A. Sodt, R. P. Steele, 
+ V. A. Rassolov, P. E. Maslen, P. P. Korambath, R. D. Adamson, B. Austin, 
+ J. Baker, E. F. C. Byrd, H. Dachsel, R. J. Doerksen, A. Dreuw, B. D. Dunietz, 
+ A. D. Dutoi, T. R. Furlani, S. R. Gwaltney, A. Heyden, S. Hirata, C.-P. Hsu, 
+ G. Kedziora, R. Z. Khaliullin, P. Klunzinger, A. M. Lee, M. S. Lee, W. Liang, 
+ I. Lotan, N. Nair, B. Peters, E. I. Proynov, P. A. Pieniazek, Y. M. Rhee, 
+ J. Ritchie, E. Rosta, C. D. Sherrill, A. C. Simmonett, J. E. Subotnik, 
+ H. L. Woodcock III, W. Zhang, A. T. Bell, A. K. Chakraborty, D. M. Chipman, 
+ F. J. Keil, A. Warshel, W. J. Hehre, H. F. Schaefer III, J. Kong, 
+ A. I. Krylov, P. M. W. Gill, M. Head-Gordon
+
+ Additional authors for Version 3.1: 
+ Z. Gan, Y. Zhao, N. E. SchultzD. Truhlar, E. Epifanovsky, M. Oana
+
+ Additional authors for Version 3.2: 
+ R. Baer, B. R. Brooks, D. Casanova, J.-D. Chai, C.-L. Cheng, C. Cramer, 
+ D. Crittenden, A. Ghysels, G. Hawkins, E. G. Hohenstein, C. Kelley, 
+ W. Kurlancheek, D. Liotard, E. Livshits, P. Manohar, A. Marenich, 
+ D. Neuhauser, R. Olson, M. A. Rohrdanz, K. S. Thanthiriwatte, A. J. W. Thom, 
+ V. Vanovschi, C. F. Williams, Q. Wu, Z.-Q. You
+
+ Additional authors for Version 4.0: 
+ A. Aspuru-Guzik, Y. Bernard, C. Chang, J. Deng, A. Dreuw, M. Diedenhofen, 
+ R. G. Edgar, D. Ghosh, W. A. Goddard III, M. Goldey, L. D. Jacobson, 
+ M. Gordon, B. Kaduk, I. Kaliman, K. Khistyaev, R. King, A. Klamt, 
+ D. Kosenkov, T. Kus, D. Lambrecht, A. Landau, A. W. Lange, K. Lawler, F. Liu, 
+ J. Liu, R. Olivares-Amaya, S. P. Mao, J. Parkhill, N. Russ, M. Schmidt, 
+ N. Shenvi, D. Small, Y. C. Su, E. Sundstrom, L. Vogt, O. Vydrov, M. Watson, 
+ M. Wormit, X. Xu, S. Yeganeh, I. Y. Zhang, D. Zuev
+
+ Additional authors for Version 4.1: 
+ X. Feng, M. W. D. Hanson-Heine, P. Horn, H. Ji, A. Laurent, R. Peverati, 
+ N. Mardirossian, N. Sergueev, S. Sharada, P. Zimmerman
+
+
+ Q-Chem, Version 4.1, Q-Chem, Inc., Pittsburgh, PA (2013).
+
+ Intel X86 Linux Version 4.1.1
+
+ Q-chem begins on Thu May  1 00:13:39 2014  
+
+ Host: nid01281
+
+ Scratch files written to /scratch3/scratchdirs/xhqu/qc_scratch/qchem33718.0//
+ Nov1913 .. -1
+ Parallel job on  24  processors
+
+Processing $rem in /global/project/projectdirs/jcesr/qchem/qc41/config/preferences.
+ MEM_TOTAL  4000 
+Finally everything over in PARseQInput
+
+--------------------------------------------------------------
+User input:
+--------------------------------------------------------------
+$comment
+MgBPh42 singlet neutral PBE-D3/6-31+G* geometry optimization
+<SCF Fix Strategy>{
+"current_method_id": 1,
+"methods": [
+"increase_iter",
+"diis_gdm",
+"gwh",
+"rca",
+"gdm",
+"core+gdm"
+]
+}</SCF Fix Strategy>
+$end
+
+
+$molecule
+0  1
+Mg         -0.04010000        0.70730000        0.50790000
+B           4.40410000        0.31140000       -0.07770000
+B          -4.38660000       -0.39830000        0.13940000
+C           6.03650000        0.73160000        0.11150000
+C           6.70710000        0.72920000        1.35530000
+H           6.16760000        0.46370000        2.26860000
+C           8.06350000        1.06110000        1.47260000
+H           8.51880000        1.06490000        2.46090000
+C           8.80950000        1.38410000        0.33760000
+H           9.86610000        1.60990000        0.42110000
+C           8.17730000        1.41200000       -0.90980000
+H           8.73670000        1.65690000       -1.81170000
+C           6.81510000        1.11450000       -1.00850000
+H           6.34780000        1.15450000       -1.99530000
+C          -6.06560000       -0.36030000       -0.00980000
+C          -6.73650000       -0.36430000       -1.25000000
+H          -6.18500000       -0.50000000       -2.18140000
+C          -8.11980000       -0.15560000       -1.34910000
+H          -8.57540000       -0.12400000       -2.33810000
+C          -8.89060000        0.02150000       -0.19940000
+H          -9.95980000        0.18250000       -0.27180000
+C          -8.26610000       -0.00040000        1.05350000
+H          -8.84190000        0.12760000        1.97070000
+C          -6.88160000       -0.16190000        1.13380000
+H          -6.41900000       -0.09230000        2.12100000
+C           3.96270000       -0.53450000        1.28770000
+C           3.18520000       -0.11460000        2.38820000
+H           2.72750000        0.88290000        2.39630000
+C           3.08970000       -0.86640000        3.58540000
+H           2.42670000       -0.54100000        4.38810000
+C           3.86050000       -2.01180000        3.74650000
+H           3.82690000       -2.57370000        4.67700000
+C           4.63480000       -2.46550000        2.66690000
+H           5.24060000       -3.36280000        2.77720000
+C           4.62600000       -1.77540000        1.46480000
+H           5.19430000       -2.18620000        0.63960000
+C           4.25360000       -0.70690000       -1.38720000
+C           3.06380000       -0.99520000       -2.08500000
+H           2.13350000       -0.48670000       -1.82110000
+C           2.98530000       -1.92230000       -3.13470000
+H           2.02900000       -2.10840000       -3.61540000
+C           4.12540000       -2.61030000       -3.54300000
+H           4.05910000       -3.32840000       -4.35620000
+C           5.32570000       -2.36680000       -2.87500000
+H           6.21840000       -2.91030000       -3.17090000
+C           5.37470000       -1.44850000       -1.82710000
+H           6.33170000       -1.31500000       -1.33820000
+C           3.58800000        1.76990000       -0.22320000
+C           2.59500000        2.14620000       -1.15940000
+H           2.21470000        1.42270000       -1.87600000
+C           2.20480000        3.49240000       -1.36800000
+H           1.40890000        3.72140000       -2.07210000
+C           2.86000000        4.51850000       -0.70940000
+H           2.61190000        5.55740000       -0.91380000
+C           3.83540000        4.18440000        0.24330000
+H           4.37980000        4.97690000        0.75030000
+C           4.12170000        2.85720000        0.52580000
+H           4.86970000        2.64960000        1.28010000
+C          -3.73610000       -0.43430000       -1.39450000
+C          -3.75280000       -1.66220000       -2.10380000
+H          -3.89220000       -2.59180000       -1.56190000
+C          -3.60110000       -1.72350000       -3.48560000
+H          -3.63520000       -2.68510000       -3.99460000
+C          -3.35970000       -0.55750000       -4.22530000
+H          -3.17560000       -0.61170000       -5.29630000
+C          -3.26520000        0.66100000       -3.55620000
+H          -3.00350000        1.56950000       -4.09780000
+C          -3.48850000        0.71370000       -2.17330000
+H          -3.45300000        1.68470000       -1.68830000
+C          -3.86950000       -1.74150000        0.96270000
+C          -4.78880000       -2.44210000        1.77240000
+H          -5.76190000       -2.02100000        1.97140000
+C          -4.53850000       -3.70990000        2.27930000
+H          -5.31570000       -4.23350000        2.82770000
+C          -3.30200000       -4.32370000        2.06610000
+H          -3.09480000       -5.31520000        2.45530000
+C          -2.32970000       -3.64780000        1.33440000
+H          -1.35750000       -4.09960000        1.15120000
+C          -2.63410000       -2.39650000        0.77090000
+H          -1.88330000       -2.01720000        0.05920000
+C          -4.06330000        1.10260000        0.88600000
+C          -4.89270000        2.14830000        0.40650000
+H          -5.55230000        1.94460000       -0.42740000
+C          -4.99550000        3.37290000        1.03960000
+H          -5.74520000        4.08360000        0.70880000
+C          -4.15580000        3.68830000        2.11720000
+H          -4.23030000        4.65410000        2.60870000
+C          -3.23560000        2.74520000        2.55270000
+H          -2.54290000        2.98570000        3.35540000
+C          -3.23580000        1.45040000        1.98040000
+H          -2.65160000        0.67830000        2.50130000
+$end
+
+
+$rem
+jobtype = opt
+exchange = pbe
+basis = 6-31+g*
+correlation = pbe
+dft_d = empirical_grimme3
+dft_d3_3body = False
+dft_d3_rs6 = 1217
+dft_d3_s6 = 1000
+dft_d3_s8 = 722
+geom_opt_max_cycles = 200
+geom_opt_tol_displacement = 12000
+geom_opt_tol_energy = 1000
+geom_opt_tol_gradient = 300
+max_scf_cycles = 300
+mem_static = 100
+mem_total = 2500
+scf_algorithm = diis_gdm
+scf_guess = sad
+xc_grid = 000128000302
+$end
+
+--------------------------------------------------------------
+ ----------------------------------------------------
+       Standard Nuclear Orientation (Angstroms)
+    I     Atom         X            Y            Z
+ ----------------------------------------------------
+    1      Mg      0.004986    -0.733299     0.432339
+    2      B      -4.413135    -0.044064    -0.073373
+    3      B       4.403967     0.165875     0.131239
+    4      C      -6.065324    -0.391533     0.089813
+    5      C      -6.730082    -0.471057     1.334209
+    6      H      -6.173432    -0.323037     2.263671
+    7      C      -8.102134    -0.738835     1.431707
+    8      H      -8.553219    -0.811886     2.419247
+    9      C      -8.868953    -0.911798     0.277956
+   10      H      -9.935986    -1.087097     0.349165
+   11      C      -8.243944    -0.855205    -0.972093
+   12      H      -8.819295    -0.982756    -1.888079
+   13      C      -6.867910    -0.623701    -1.054383
+   14      H      -6.407229    -0.594979    -2.044682
+   15      C       6.077807     0.051571    -0.035907
+   16      C       6.743227     0.137098    -1.276117
+   17      H       6.196444     0.390243    -2.185522
+   18      C       8.112676    -0.135668    -1.406897
+   19      H       8.562125    -0.097756    -2.398486
+   20      C       8.876995    -0.462547    -0.286060
+   21      H       9.935522    -0.673466    -0.382936
+   22      C       8.259368    -0.526042     0.968828
+   23      H       8.830781    -0.771498     1.864609
+   24      C       6.886071    -0.298343     1.076437
+   25      H       6.424098    -0.436300     2.056720
+   26      C      -3.921022     0.643239     1.361945
+   27      C      -3.163464     0.079325     2.410767
+   28      H      -2.760911    -0.937697     2.320338
+   29      C      -3.022509     0.707754     3.672837
+   30      H      -2.375243     0.272245     4.435176
+   31      C      -3.728973     1.872635     3.948498
+   32      H      -3.661209     2.340976     4.927659
+   33      C      -4.481411     2.467988     2.923651
+   34      H      -5.036868     3.382165     3.123788
+   35      C      -4.514870     1.895721     1.661609
+   36      H      -5.062998     2.413139     0.884107
+   37      C      -4.212187     1.084385    -1.281925
+   38      C      -3.011063     1.372961    -1.959930
+   39      H      -2.108938     0.792183    -1.753671
+   40      C      -2.886007     2.389969    -2.917845
+   41      H      -1.922794     2.568951    -3.387315
+   42      C      -3.988357     3.174221    -3.248986
+   43      H      -3.886005     3.961677    -3.991140
+   44      C      -5.197631     2.933574    -2.596312
+   45      H      -6.060421     3.550150    -2.831451
+   46      C      -5.292758     1.923890    -1.639621
+   47      H      -6.253765     1.796453    -1.157004
+   48      C      -3.678483    -1.524099    -0.363541
+   49      C      -2.711071    -1.862869    -1.339998
+   50      H      -2.294530    -1.096183    -1.988289
+   51      C      -2.395785    -3.202275    -1.678541
+   52      H      -1.616252    -3.406024    -2.408246
+   53      C      -3.103564    -4.249389    -1.114163
+   54      H      -2.913361    -5.276058    -1.418173
+   55      C      -4.055645    -3.955085    -0.125432
+   56      H      -4.640602    -4.761585     0.309147
+   57      C      -4.267945    -2.647197     0.283949
+   58      H      -5.000629    -2.472075     1.061173
+   59      C       3.750606     0.382491    -1.386488
+   60      C       3.831675     1.669506    -1.976525
+   61      H       4.023697     2.534540    -1.350355
+   62      C       3.678324     1.869878    -3.344910
+   63      H       3.762977     2.872223    -3.760911
+   64      C       3.370792     0.794158    -4.189443
+   65      H       3.185878     0.959703    -5.248817
+   66      C       3.212402    -0.475492    -3.637838
+   67      H       2.899417    -1.312974    -4.260618
+   68      C       3.437720    -0.671288    -2.268185
+   69      H       3.351064    -1.680622    -1.876953
+   70      C       3.964132     1.450770     1.082550
+   71      C       4.923388     2.020607     1.946657
+   72      H       5.872777     1.530558     2.096198
+   73      C       4.744638     3.246192     2.573478
+   74      H       5.551349     3.672583     3.161990
+   75      C       3.542716     3.943364     2.430395
+   76      H       3.391463     4.903155     2.913516
+   77      C       2.532185     3.393534     1.646746
+   78      H       1.585431     3.912549     1.515831
+   79      C       2.765641     2.186804     0.964659
+   80      H       1.992555     1.917932     0.227005
+   81      C       4.001986    -1.379485     0.735316
+   82      C       4.771204    -2.418186     0.151606
+   83      H       5.437787    -2.172135    -0.665143
+   84      C       4.809348    -3.701139     0.665032
+   85      H       5.517848    -4.416664     0.261765
+   86      C       3.957755    -4.071639     1.715419
+   87      H       3.981243    -5.082364     2.112630
+   88      C       3.092102    -3.125839     2.246431
+   89      H       2.390340    -3.403719     3.028936
+   90      C       3.160868    -1.784446     1.799252
+   91      H       2.621693    -1.034884     2.396088
+ ----------------------------------------------------
+ Molecular Point Group                 C1    NOp =  1
+ Largest Abelian Subgroup              C1    NOp =  1
+ Nuclear Repulsion Energy =  5876.8067220506 hartrees
+ There are      175 alpha and      175 beta electrons
+ Requested basis set is 6-31+G(d)
+ There are 336 shells and 1053 basis functions
+
+Total QAlloc Memory Limit   2500 MB
+Mega-Array Size        98 MB
+MEM_STATIC part       100 MB
+ A cutoff of  1.0D-12 yielded  30475 shell pairs
+ There are    331598 function pairs
+ Smallest overlap matrix eigenvalue = 4.65E-07
+ Linear dependence detected in AO basis
+ Number of orthogonalized atomic orbitals = 1044
+ Maximum deviation from orthogonality = 2.345E-10
+
+  Scale SEOQF with 1.000000e-02/1.000000e-02/1.000000e-01
+
+ Standard Electronic Orientation quadrupole field applied
+ Nucleus-field energy     =    -0.0000001060 hartrees
+ Guess from superposition of atomic densities
+ Warning:  Energy on first SCF cycle will be non-variational
+ A restricted Kohn-Sham SCF calculation will be
+ performed using Pulay DIIS + Geometric Direct Minimization
+ Exchange:  PBE      Correlation:  PBE
+ Using Euler-Maclaurin-Lebedev (128,302) quadrature formula
+ SCF converges when RMS gradient is below 1.0E-08
+ Requested basis set is 6-31+G(d)
+ There are 336 shells and 1053 basis functions
+ A cutoff of  1.0D-12 yielded  30475 shell pairs
+ There are    331598 function pairs
+Application 4761642 exit codes: 134
+Application 4761642 resources: utime ~80s, stime ~47s, Rss ~485728, inblocks ~896285, outblocks ~11617874

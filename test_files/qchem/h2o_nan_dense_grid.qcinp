@@ -1,0 +1,20 @@
+$comment
+ H2 O1 B3LYP 6-31+G*cation Vibrational Frequency Analysis
+$end
+
+
+$molecule
+ 1  2
+ O           0.00000300       -0.11443000        0.00000000
+ H          -0.82841700        0.46753300        0.00000000
+ H           0.82845700        0.46748700        0.00000000
+$end
+
+
+$rem
+   jobtype = freq
+  exchange = b3lyp
+     basis = 6-31+g*
+   xc_grid = 000128000302
+$end
+

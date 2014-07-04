@@ -6,38 +6,58 @@ for different applications.
 
 Error recovery is an important aspect of many *high-throughput* projects that
 generate data on a large scale. When you are running on the order of hundreds
-of thousands of jobs, even an error-rate of 1% would mean thousands of errored
+of thousands of jobs, even an error rate of 1% would mean thousands of errored
 jobs that would be impossible to deal with on a case-by-case basis.
 
 The specific use case for custodian is for long running jobs, with potentially
 random errors. For example, there may be a script that takes several days to
 run on a server, with a 1% chance of some IO error causing the job to fail.
 Using custodian, one can develop a mechanism to gracefully recover from the
-error, and potentially restart the job if necessary.
+error, and restart the job with modified parameters if necessary.
+
+The current version of Custodian also comes with two sub-packages for error
+handling for Vienna Ab Initio Simulation Package (VASP), NwChem and QChem
+calculations.
 
 Change log
 ==========
 
-0.4.2
------
-1. Rudimentary support for Nwchem error handling (by Shyue Ping Ong).
-2. Improved VASP error handling (by Steve Dacek and Will Richards).
+v0.7.3
+------
+1. Improved backwards compatibility for WallTimeHandler.
+2. Improvements to VaspErrorHandler. No longer catches spurious BRMIX error
+   messages when NELECT is specified in INCAR, and pricel and rot_mat errors
+   are now fixed with symmetry precision and gamma centered KPOINTS instead.
+3. Improved Qchem error handler (Xiaohui Qu).
 
-0.4.1
------
-1. Added hanlding of PRICEL error in VASP.
-2. Speed and robustness improvements.
-3. BRIONS error now handled by changing ISYM.
+v0.7.2
+------
+1. Improved WalltimeHandler (PBSWalltimeHandler is a subset and is now
+   deprecated).
+2. New monty required version (>= 0.2.2).
 
-0.4.0
------
-1. Many VASP handlers are now consolidated into a single VaspErrorHandler.
-2. Many more fixes for VASP runs, including the "TOO FEW BANDS",
-   "TRIPLE PRODUCT", "DENTET" and "BRIONS" errors.
-3. VaspJob now includes the auto_npar and auto_gamma options, which
-   automatically optimizes the NPAR setting to be sqrt(number of cores) as
-   per the VASP recommendation for DFT runs and tries to search for a
-   gamma-only compiled version of VASP for gamma 1x1x1 runs.
+v0.7.1
+------
+1. Much improved qchem error handling (Xiaohui Qu).
+2. New Monty required version (>= 0.2.0).
+
+v0.7.0
+------
+1. **Backwards incompatible with v0.6.3. Refactoring to move commonly used
+   Python utility functions to `Monty package <https://pypi.python
+   .org/pypi/monty>`_, which is now a depedency
+   for custodian.
+2. Custodian now requires pymatgen >= 2.9.0 for VASP, Qchem and Nwchem jobs
+   and handlers.
+3. converge_kpoints script now has increment mode.
+4. ErrorHandlers now have a new API, where the class variables "is_monitor"
+   and "is_terminating" are provided to indicate if a particular handler
+   runs in the background during a Job and whether a handler should
+   terminate the job. Some errors may not be critical or may need to wait
+   for some other event to terminate a job. For example,
+   a particular error may require a flag to be set to request a job to
+   terminate gracefully once it finishes its current task. The handler to
+   set the flag should not terminate the job.
 
 :doc:`Older versions </changelog>`
 
@@ -85,8 +105,8 @@ Optional dependencies
 
 Optional libraries that are required if you need certain features:
 
-1. Python Materials Genomics (`pymatgen`_) 2.6.2+: To use the plugin for VASP.
-   Please install using::
+1. Python Materials Genomics (`pymatgen`_) 2.8.10+: To use the plugin for
+   VASP, NwChem and Qchem. Please install using::
 
     pip install pymatgen
 
@@ -108,7 +128,7 @@ presented in the figure below.
 
     Overview of the Custodian workflow.
 
-The Custodian class takes in two general inputs - a **sequence of Jobs** and
+The Custodian class takes in two general inputs - a **list of Jobs** and
 a **list of ErrorHandlers**. **Jobs** should be subclasses of the
 :class:`custodian.custodian.Job` abstract base class and **ErrorHandlers**
 should be subclasses of the :class:`custodian.custodian.ErrorHandler` abstract
@@ -328,6 +348,12 @@ Using custodian, you can even setup potentially indefinite jobs,
 e.g. kpoints convergence jobs with a target energy convergence. Please see the
 converge_kpoints script in the scripts for an example.
 
+.. versionadded:: 0.4.3
+
+    A new package for dealing with NwChem calculations has been added.
+    NwChem is an open-source code for performing computational chemistry
+    calculations.
+
 API/Reference Docs
 ==================
 
@@ -377,6 +403,6 @@ follows::
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
 
-.. _`pymatgen's documentation`: http://pythonhosted.org/pymatgen
+.. _`pymatgen's documentation`: http://pymatgen.org
 .. _`Materials Project`: https://www.materialsproject.org
 .. _`pymatgen`: https://pypi.python.org/pypi/pymatgen

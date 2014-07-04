@@ -1,6 +1,6 @@
 import os
 
-from distribute_setup import use_setuptools
+from ez_setup import use_setuptools
 use_setuptools()
 from setuptools import setup, find_packages
 
@@ -12,12 +12,13 @@ with open("README.rst") as f:
 setup(
     name="custodian",
     packages=find_packages(),
-    version="0.4.2",
-    install_requires=[],
-    extras_require={"vasp, nwchem": ["pymatgen>=2.7.5"]},
+    version="0.7.3",
+    install_requires=["monty>=0.2.2"],
+    extras_require={"vasp, nwchem, qchem": ["pymatgen>=2.9.0"]},
     package_data={},
-    author="Shyue Ping Ong, William Davidson Richards",
-    author_email="shyuep@gmail.com",
+    author="Shyue Ping Ong, William Davidson Richards, Stephen Dacek, "
+           "Xiaohui Qu",
+    author_email="ongsp@ucsd.edu",
     maintainer="Shyue Ping Ong",
     url="https://github.com/materialsproject/custodian",
     license="MIT",
@@ -30,7 +31,6 @@ setup(
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Topic :: Scientific/Engineering :: Information Analysis",
         "Topic :: Scientific/Engineering :: Physics",
         "Topic :: Scientific/Engineering :: Chemistry",
         "Topic :: Software Development :: Libraries :: Python Modules"

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Change Log &mdash; custodian 0.4.2 documentation</title>
+    <title>Change Log &mdash; custodian 0.7.3 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.2',
+        VERSION:     '0.7.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.4.2 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.7.3 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.4.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -55,7 +55,90 @@
   <div class="section" id="change-log">
 <h1>Change Log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
-<h2>0.3.5<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>0.6.3<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Added buffer time option in PBSWalltimeHandler.</li>
+<li>Improved Qchem jobs and handlers (Xiaohui Qu).</li>
+<li>Vastly improved API docs.</li>
+</ol>
+</div>
+<div class="section" id="id2">
+<h2>0.6.2<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Bug fix release to support sub dirs in run folder when using scratch.</li>
+<li>Improve handling of walltime in PBSWalltimeHander.</li>
+</ol>
+</div>
+<div class="section" id="id3">
+<h2>0.6.1<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Bug fix release to address minor issue with checkpointing.</li>
+<li>Checkpointing is now turned off by default.</li>
+</ol>
+</div>
+<div class="section" id="id4">
+<h2>0.6.0<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Checkpointing implemented for Custodian. Custodian can now checkpoint all
+files in the current working directory after every successful job. If the
+job is resubmitted, it will restore files and start from the last
+checkpoint. Particularly useful for multi-job runs.</li>
+<li>Added PBSWalltimeHandler to handle wall times for PBS Vasp Jobs.</li>
+<li>Qchem error handlers and jobs.</li>
+</ol>
+</div>
+<div class="section" id="id5">
+<h2>0.5.0<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Added scratch_dir option to Custodian class as well as run_vasp and
+run_nwchem scripts. Many supercomputing clusters have a scratch space
+which have significantly faster IO. This option provides a transparent way
+to specify the jobs to be performed in the scratch. Especially useful for
+jobs which have significant file IO.</li>
+</ol>
+</div>
+<div class="section" id="id6">
+<h2>0.4.5<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Fix gzip of output.</li>
+</ol>
+</div>
+<div class="section" id="id7">
+<h2>0.4.3<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Added handling for ZBRENT error for VASP.</li>
+<li>Minor refactoring to consolidate backup and gzip directory methods.</li>
+</ol>
+</div>
+<div class="section" id="id8">
+<h2>0.4.2<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Rudimentary support for Nwchem error handling (by Shyue Ping Ong).</li>
+<li>Improved VASP error handling (by Steve Dacek and Will Richards).</li>
+</ol>
+</div>
+<div class="section" id="id9">
+<h2>0.4.1<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Added hanlding of PRICEL error in VASP.</li>
+<li>Speed and robustness improvements.</li>
+<li>BRIONS error now handled by changing ISYM.</li>
+</ol>
+</div>
+<div class="section" id="id10">
+<h2>0.4.0<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Many VASP handlers are now consolidated into a single VaspErrorHandler.</li>
+<li>Many more fixes for VASP runs, including the &#8220;TOO FEW BANDS&#8221;,
+&#8220;TRIPLE PRODUCT&#8221;, &#8220;DENTET&#8221; and &#8220;BRIONS&#8221; errors.</li>
+<li>VaspJob now includes the auto_npar and auto_gamma options, which
+automatically optimizes the NPAR setting to be sqrt(number of cores) as
+per the VASP recommendation for DFT runs and tries to search for a
+gamma-only compiled version of VASP for gamma 1x1x1 runs.</li>
+</ol>
+</div>
+<div class="section" id="id11">
+<h2>0.3.5<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li>Bug fix for incorrect shift error handler in VASP.</li>
 <li>More robust fix for unconverged VASP runs (switching from ALGO fast to
@@ -63,22 +146,22 @@ normal).</li>
 <li>Expanded documentation.</li>
 </ol>
 </div>
-<div class="section" id="id2">
-<h2>0.3.4<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id12">
+<h2>0.3.4<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li>Added support for handlers that perform monitor a job as it is progressing
 and terminates it if necessary. Useful for correcting errors that come up
 by do not cause immediate job failures.</li>
 </ol>
 </div>
-<div class="section" id="id3">
-<h2>0.3.2<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id13">
+<h2>0.3.2<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li>Important bug fix for VaspJob and converge_kpoints script.</li>
 </ol>
 </div>
-<div class="section" id="id4">
-<h2>0.3.0<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id14">
+<h2>0.3.0<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li>Major update to custodian API. Custodian now perform more comprehensive
 logging in a file called custodian.json, which logs all jobs and
@@ -118,10 +201,20 @@ corrections performed.</li>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Change Log</a><ul>
-<li><a class="reference internal" href="#id1">0.3.5</a></li>
-<li><a class="reference internal" href="#id2">0.3.4</a></li>
-<li><a class="reference internal" href="#id3">0.3.2</a></li>
-<li><a class="reference internal" href="#id4">0.3.0</a></li>
+<li><a class="reference internal" href="#id1">0.6.3</a></li>
+<li><a class="reference internal" href="#id2">0.6.2</a></li>
+<li><a class="reference internal" href="#id3">0.6.1</a></li>
+<li><a class="reference internal" href="#id4">0.6.0</a></li>
+<li><a class="reference internal" href="#id5">0.5.0</a></li>
+<li><a class="reference internal" href="#id6">0.4.5</a></li>
+<li><a class="reference internal" href="#id7">0.4.3</a></li>
+<li><a class="reference internal" href="#id8">0.4.2</a></li>
+<li><a class="reference internal" href="#id9">0.4.1</a></li>
+<li><a class="reference internal" href="#id10">0.4.0</a></li>
+<li><a class="reference internal" href="#id11">0.3.5</a></li>
+<li><a class="reference internal" href="#id12">0.3.4</a></li>
+<li><a class="reference internal" href="#id13">0.3.2</a></li>
+<li><a class="reference internal" href="#id14">0.3.0</a></li>
 <li><a class="reference internal" href="#version-0-2-6">Version 0.2.6</a></li>
 <li><a class="reference internal" href="#version-0-2-5">Version 0.2.5</a></li>
 <li><a class="reference internal" href="#version-0-2-4">Version 0.2.4</a></li>
@@ -160,13 +253,13 @@ corrections performed.</li>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.4.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
-        &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+        &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

@@ -1,15 +1,10 @@
-#!/usr/bin/env python
-
 """
-TODO: Change the module doc.
+This package implements various VASP Jobs and Error Handlers.
 """
 
-from __future__ import division
-
-__author__ = "shyuepingong"
+__author__ = "Shyue Ping Ong"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
-__email__ = "shyuep@gmail.com"
-__status__ = "Beta"
+__email__ = "ongsp@ucsd.edu"
+__status__ = "Production"
 __date__ = "2/4/13"
-

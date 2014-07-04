@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Change log &mdash; custodian 0.4.2 documentation</title>
+    <title>Change log &mdash; custodian 0.7.3 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.2',
+        VERSION:     '0.7.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.4.2 documentation" href="#" />
+    <link rel="top" title="custodian 0.7.3 documentation" href="#" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.4.2 documentation</a> &raquo;</li> 
+        <li><a href="#">custodian 0.7.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -59,40 +59,60 @@ plugin framework that allows you to develop specific job management workflows
 for different applications.</p>
 <p>Error recovery is an important aspect of many <em>high-throughput</em> projects that
 generate data on a large scale. When you are running on the order of hundreds
-of thousands of jobs, even an error-rate of 1% would mean thousands of errored
+of thousands of jobs, even an error rate of 1% would mean thousands of errored
 jobs that would be impossible to deal with on a case-by-case basis.</p>
 <p>The specific use case for custodian is for long running jobs, with potentially
 random errors. For example, there may be a script that takes several days to
 run on a server, with a 1% chance of some IO error causing the job to fail.
 Using custodian, one can develop a mechanism to gracefully recover from the
-error, and potentially restart the job if necessary.</p>
+error, and restart the job with modified parameters if necessary.</p>
+<p>The current version of Custodian also comes with two sub-packages for error
+handling for Vienna Ab Initio Simulation Package (VASP), NwChem and QChem
+calculations.</p>
 <div class="section" id="change-log">
 <h1>Change log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="id1">
-<h2>0.4.2<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="v0-7-3">
+<h2>v0.7.3<a class="headerlink" href="#v0-7-3" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li>Rudimentary support for Nwchem error handling (by Shyue Ping Ong).</li>
-<li>Improved VASP error handling (by Steve Dacek and Will Richards).</li>
+<li>Improved backwards compatibility for WallTimeHandler.</li>
+<li>Improvements to VaspErrorHandler. No longer catches spurious BRMIX error
+messages when NELECT is specified in INCAR, and pricel and rot_mat errors
+are now fixed with symmetry precision and gamma centered KPOINTS instead.</li>
+<li>Improved Qchem error handler (Xiaohui Qu).</li>
 </ol>
 </div>
-<div class="section" id="id2">
-<h2>0.4.1<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="v0-7-2">
+<h2>v0.7.2<a class="headerlink" href="#v0-7-2" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li>Added hanlding of PRICEL error in VASP.</li>
-<li>Speed and robustness improvements.</li>
-<li>BRIONS error now handled by changing ISYM.</li>
+<li>Improved WalltimeHandler (PBSWalltimeHandler is a subset and is now
+deprecated).</li>
+<li>New monty required version (&gt;= 0.2.2).</li>
 </ol>
 </div>
-<div class="section" id="id3">
-<h2>0.4.0<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="v0-7-1">
+<h2>v0.7.1<a class="headerlink" href="#v0-7-1" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li>Many VASP handlers are now consolidated into a single VaspErrorHandler.</li>
-<li>Many more fixes for VASP runs, including the &#8220;TOO FEW BANDS&#8221;,
-&#8220;TRIPLE PRODUCT&#8221;, &#8220;DENTET&#8221; and &#8220;BRIONS&#8221; errors.</li>
-<li>VaspJob now includes the auto_npar and auto_gamma options, which
-automatically optimizes the NPAR setting to be sqrt(number of cores) as
-per the VASP recommendation for DFT runs and tries to search for a
-gamma-only compiled version of VASP for gamma 1x1x1 runs.</li>
+<li>Much improved qchem error handling (Xiaohui Qu).</li>
+<li>New Monty required version (&gt;= 0.2.0).</li>
+</ol>
+</div>
+<div class="section" id="v0-7-0">
+<h2>v0.7.0<a class="headerlink" href="#v0-7-0" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li><a href="#id1"><span class="problematic" id="id2">**</span></a>Backwards incompatible with v0.6.3. Refactoring to move commonly used
+Python utility functions to <a class="reference external" href="https://pypi.python.org/pypi/monty">Monty package</a>, which is now a depedency
+for custodian.</li>
+<li>Custodian now requires pymatgen &gt;= 2.9.0 for VASP, Qchem and Nwchem jobs
+and handlers.</li>
+<li>converge_kpoints script now has increment mode.</li>
+<li>ErrorHandlers now have a new API, where the class variables &#8220;is_monitor&#8221;
+and &#8220;is_terminating&#8221; are provided to indicate if a particular handler
+runs in the background during a Job and whether a handler should
+terminate the job. Some errors may not be critical or may need to wait
+for some other event to terminate a job. For example,
+a particular error may require a flag to be set to request a job to
+terminate gracefully once it finishes its current task. The handler to
+set the flag should not terminate the job.</li>
 </ol>
 <p><a class="reference internal" href="changelog.html"><em>Older versions</em></a></p>
 </div>
@@ -104,13 +124,15 @@ gamma-only compiled version of VASP for gamma 1x1x1 runs.</li>
 <p>The version at the Python Package Index (PyPI) is always the latest stable
 release that will be hopefully, be relatively bug-free. The easiest way to
 install custodian on any system is to use easy_install or pip, as follows:</p>
-<div class="highlight-python"><pre>easy_install custodian</pre>
+<div class="highlight-python"><div class="highlight"><pre>easy_install custodian
+</pre></div>
 </div>
 <p>or:</p>
-<div class="highlight-python"><pre>pip install custodian</pre>
+<div class="highlight-python"><div class="highlight"><pre>pip install custodian
+</pre></div>
 </div>
 <p>Some plugins (e.g., vasp management) require additional setup (please see
-<a class="reference external" href="http://pythonhosted.org/pymatgen">pymatgen&#8217;s documentation</a>).</p>
+<a class="reference external" href="http://pymatgen.org">pymatgen&#8217;s documentation</a>).</p>
 </div>
 <div class="section" id="developmental-version">
 <h2>Developmental version<a class="headerlink" href="#developmental-version" title="Permalink to this headline">¶</a></h2>
@@ -118,10 +140,12 @@ install custodian on any system is to use easy_install or pip, as follows:</p>
 version is likely to be more buggy, but may contain new features. The
 Github version include test files as well for complete unit testing. After
 cloning the source, you can type:</p>
-<div class="highlight-python"><pre>python setup.py install</pre>
+<div class="highlight-python"><div class="highlight"><pre>python setup.py install
+</pre></div>
 </div>
 <p>or to install the package in developmental mode:</p>
-<div class="highlight-python"><pre>python setup.py develop</pre>
+<div class="highlight-python"><div class="highlight"><pre>python setup.py develop
+</pre></div>
 </div>
 </div>
 </div>
@@ -132,11 +156,12 @@ cloning the source, you can type:</p>
 <h2>Optional dependencies<a class="headerlink" href="#optional-dependencies" title="Permalink to this headline">¶</a></h2>
 <p>Optional libraries that are required if you need certain features:</p>
 <ol class="arabic">
-<li><p class="first">Python Materials Genomics (<a class="reference external" href="https://pypi.python.org/pypi/pymatgen">pymatgen</a>) 2.6.2+: To use the plugin for VASP.
-Please install using:</p>
-<div class="highlight-python"><pre>pip install pymatgen</pre>
+<li><p class="first">Python Materials Genomics (<a class="reference external" href="https://pypi.python.org/pypi/pymatgen">pymatgen</a>) 2.8.10+: To use the plugin for
+VASP, NwChem and Qchem. Please install using:</p>
+<div class="highlight-python"><div class="highlight"><pre>pip install pymatgen
+</pre></div>
 </div>
-<p>For more information, please consult <a class="reference external" href="http://pythonhosted.org/pymatgen">pymatgen&#8217;s documentation</a>.</p>
+<p>For more information, please consult <a class="reference external" href="http://pymatgen.org">pymatgen&#8217;s documentation</a>.</p>
 </li>
 <li><p class="first">nose - For complete unittesting.</p>
 </li>
@@ -148,11 +173,11 @@ Please install using:</p>
 <p>The main class in the workflow is known as Custodian, which manages a series
 of jobs with a list of error handlers. The general workflow for Custodian is
 presented in the figure below.</p>
-<div class="align-center figure align-center">
+<div class="align-center figure">
 <a class="reference internal image-reference" href="_images/Custodian.png"><img alt="Custodian workflow" src="_images/Custodian.png" style="width: 500px;" /></a>
 <p class="caption">Overview of the Custodian workflow.</p>
 </div>
-<p>The Custodian class takes in two general inputs - a <strong>sequence of Jobs</strong> and
+<p>The Custodian class takes in two general inputs - a <strong>list of Jobs</strong> and
 a <strong>list of ErrorHandlers</strong>. <strong>Jobs</strong> should be subclasses of the
 <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Job</span></tt></a> abstract base class and <strong>ErrorHandlers</strong>
 should be subclasses of the <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a> abstract
@@ -353,6 +378,11 @@ insufficient KPOINTS to use ISMEAR = -5.</p>
 <p>Using custodian, you can even setup potentially indefinite jobs,
 e.g. kpoints convergence jobs with a target energy convergence. Please see the
 converge_kpoints script in the scripts for an example.</p>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.4.3: </span>A new package for dealing with NwChem calculations has been added.
+NwChem is an open-source code for performing computational chemistry
+calculations.</p>
+</div>
 </div>
 </div>
 <div class="section" id="api-reference-docs">
@@ -377,11 +407,11 @@ Materials Science, 2013, 68, 314–319. <a class="reference external" href="http
 <h1>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h1>
 <p>Custodian is released under the MIT License. The terms of the license are as
 follows:</p>
-<div class="highlight-python"><pre>The MIT License (MIT)
+<div class="highlight-python"><div class="highlight"><pre>The MIT License (MIT)
 Copyright (c) 2011-2012 MIT &amp; LBNL
 
 Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software")
+copy of this software and associated documentation files (the &quot;Software&quot;)
 , to deal in the Software without restriction, including without limitation
 the rights to use, copy, modify, merge, publish, distribute, sublicense,
 and/or sell copies of the Software, and to permit persons to whom the
@@ -390,13 +420,14 @@ Software is furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.</pre>
+DEALINGS IN THE SOFTWARE.
+</pre></div>
 </div>
 </div>
 
@@ -409,9 +440,10 @@ DEALINGS IN THE SOFTWARE.</pre>
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Change log</a><ul>
-<li><a class="reference internal" href="#id1">0.4.2</a></li>
-<li><a class="reference internal" href="#id2">0.4.1</a></li>
-<li><a class="reference internal" href="#id3">0.4.0</a></li>
+<li><a class="reference internal" href="#v0-7-3">v0.7.3</a></li>
+<li><a class="reference internal" href="#v0-7-2">v0.7.2</a></li>
+<li><a class="reference internal" href="#v0-7-1">v0.7.1</a></li>
+<li><a class="reference internal" href="#v0-7-0">v0.7.0</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#getting-custodian">Getting custodian</a><ul>
@@ -464,13 +496,13 @@ DEALINGS IN THE SOFTWARE.</pre>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.4.2 documentation</a> &raquo;</li> 
+        <li><a href="#">custodian 0.7.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
-        &copy; Copyright 2013, Shyue Ping Ong.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+        &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

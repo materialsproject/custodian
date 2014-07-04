@@ -16,6 +16,8 @@ __date__ = "Jun 1, 2012"
 import unittest
 import random
 from custodian.custodian import Job, ErrorHandler, Custodian
+import os
+import glob
 
 
 class ExampleJob(Job):
@@ -35,12 +37,9 @@ class ExampleJob(Job):
     def postprocess(self):
         pass
 
+    @property
     def name(self):
         return "ExampleJob{}".format(self.jobid)
-
-    @property
-    def to_dict(self):
-        return {"jobid": self.jobid}
 
     @staticmethod
     def from_dict(d):
@@ -58,14 +57,6 @@ class ExampleHandler(ErrorHandler):
     def correct(self):
         self.params["initial"] += 1
         return {"errors": "total < 50", "actions": "increment by 1"}
-
-    @property
-    def is_monitor(self):
-        return False
-
-    @property
-    def to_dict(self):
-        return {}
 
     @staticmethod
     def from_dict(d):
@@ -86,20 +77,16 @@ class ExampleHandler2(ErrorHandler):
     def correct(self):
         return {"errors": "errored", "actions": None}
 
-    @property
-    def is_monitor(self):
-        return False
-
-    @property
-    def to_dict(self):
-        return {}
-
     @staticmethod
     def from_dict(d):
         return ExampleHandler()
 
 
 class CustodianTest(unittest.TestCase):
+
+    def setUp(self):
+        self.cwd = os.getcwd()
+        os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
     def test_run(self):
         njobs = 100
@@ -109,6 +96,7 @@ class CustodianTest(unittest.TestCase):
                       max_errors=njobs, log_file=None)
         output = c.run()
         self.assertEqual(len(output), njobs)
+        print ExampleHandler(params).to_dict
 
     def test_unrecoverable(self):
         njobs = 100
@@ -119,6 +107,13 @@ class CustodianTest(unittest.TestCase):
         output = c.run()
         #Because this is unrecoverable, there should only be one output.
         self.assertEqual(len(output), 1)
+
+    def tearDown(self):
+        for f in glob.glob("custodian.*.tar.gz"):
+            os.remove(f)
+        os.remove("custodian.json")
+        os.chdir(self.cwd)
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

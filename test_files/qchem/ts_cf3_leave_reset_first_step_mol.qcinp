@@ -1,0 +1,77 @@
+$molecule
+ 0  2
+ N          -0.41652800       -0.50095600        0.73968100
+ S           1.33767800       -0.76078000        0.70509700
+ O           1.72430600       -1.04266300        2.08711500
+ O           1.31668500       -1.98225300       -0.25411200
+ C           2.84322000        0.52647900       -0.07519200
+ F           4.04193200        0.00272900        0.18175300
+ F           2.72477100        1.71612500        0.51178100
+ F           2.66450600        0.63800200       -1.38765800
+ S          -1.08225000        0.26112300       -0.52991200
+ O          -1.58679100       -0.85292200       -1.44419900
+ O          -0.34965200        1.35822300       -1.15376800
+ C          -2.66239100        0.98840300        0.21791300
+ F          -3.40822200        1.47894500       -0.77425800
+ F          -3.34427900        0.03700200        0.86113400
+ F          -2.33597700        1.96193700        1.06409600
+ Mg         -0.63407200       -2.40046300       -0.45662300
+$end
+
+
+$rem
+     jobtype = freq
+    exchange = b3lyp
+       basis = 6-31+g*
+  mem_static = 100
+   mem_total = 2500
+$end
+
+
+@@@
+
+
+$comment
+ <Geom Opt Fix Strategy>{
+    "current_method_id": 0, 
+    "methods": [
+        "increase_iter", 
+        "GDIIS", 
+        "CartCoords"
+    ]
+}</Geom Opt Fix Strategy>
+$end
+
+
+$molecule
+ read
+$end
+
+
+$rem
+              jobtype = ts
+             exchange = b3lyp
+                basis = 6-31+g*
+     geom_opt_hessian = read
+  geom_opt_max_cycles = 200
+           mem_static = 100
+            mem_total = 2500
+$end
+
+
+@@@
+
+
+$molecule
+ read
+$end
+
+
+$rem
+     jobtype = freq
+    exchange = b3lyp
+       basis = 6-31+g*
+  mem_static = 100
+   mem_total = 2500
+$end
+
