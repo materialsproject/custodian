@@ -82,6 +82,7 @@ class VaspErrorHandler(ErrorHandler):
         self.errors = set()
 
     def check(self):
+	vi = VaspInput.from_directory(".")
         self.errors = set()
         with open(self.output_filename, "r") as f:
             for line in f:
@@ -89,6 +90,11 @@ class VaspErrorHandler(ErrorHandler):
                 for err, msgs in VaspErrorHandler.error_msgs.items():
                     for msg in msgs:
                         if l.find(msg) != -1:
+			    #this checks if we want to run a charged computation
+                            #(e.g., defects) if yes we don't want to kill it 
+                            #because there is a change in e- density (brmix error)
+                            if err == "brmix" and 'NELEC' in vi['INCAR']:
+                                continue
                             self.errors.add(err)
         return len(self.errors) > 0
 
