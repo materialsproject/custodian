@@ -19,7 +19,7 @@ import glob
 import shutil
 
 from custodian.vasp.handlers import VaspErrorHandler, \
-    UnconvergedErrorHandler, MeshSymmetryErrorHandler, PBSWalltimeHandler
+    UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
@@ -83,7 +83,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         clean_dir()
         shutil.move("INCAR.orig", "INCAR")
         os.chdir(test_dir)
-    
+
     def test_mesh_symmetry(self):
         h = MeshSymmetryErrorHandler("vasp.ibzkpt")
         h.check()
@@ -128,7 +128,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         clean_dir()
         shutil.move("INCAR.orig", "INCAR")
         os.chdir(test_dir)
-    
+
     def test_rot_matrix(self):
         if "VASP_PSP_DIR" not in os.environ:
             os.environ["VASP_PSP_DIR"] = test_dir
@@ -197,17 +197,17 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         os.chdir(cwd)
 
 
-class PBSWalltimeHandlerTest(unittest.TestCase):
+class WalltimeHandlerTest(unittest.TestCase):
 
     def test_correct(self):
-        h = PBSWalltimeHandler()
+        h = WalltimeHandler()
         os.chdir(cwd)
         h.correct()
         with open("STOPCAR") as f:
             content = f.read()
             self.assertEqual(content, "LSTOP = .TRUE.")
         os.remove("STOPCAR")
-
+        
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
