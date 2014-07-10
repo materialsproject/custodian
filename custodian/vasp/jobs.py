@@ -144,12 +144,18 @@ class VaspJob(Job):
                 #Only optimized NPAR for non-HF and non-RPA calculations.
                 if not (incar.get("LHFCALC") or incar.get("LRPA") or
                         incar.get("LEPSILON")):
-                    import multiprocessing
-                    ncores = multiprocessing.cpu_count()
-                    for npar in range(int(round(math.sqrt(ncores))), ncores):
-                        if ncores % npar == 0:
-                            incar["NPAR"] = npar
-                            break
+                    if incar.get("IBRION") in [5, 6, 7, 8]:
+                        # NPAR should not be set for Hessian matrix
+                        # calculations, whether in DFPT or otherwise.
+                        del incar["NPAR"]
+                    else:
+                        import multiprocessing
+                        ncores = multiprocessing.cpu_count()
+                        for npar in range(int(round(math.sqrt(ncores))),
+                                          ncores):
+                            if ncores % npar == 0:
+                                incar["NPAR"] = npar
+                                break
                     incar.write_file("INCAR")
             except:
                 pass
