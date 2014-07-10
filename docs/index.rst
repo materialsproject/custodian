@@ -22,6 +22,11 @@ calculations.
 Change log
 ==========
 
+v0.7.4
+------
+1. auto_npar option in VaspJob now properly handles Hessian calculations.
+
+
 v0.7.3
 ------
 1. Improved backwards compatibility for WallTimeHandler.
