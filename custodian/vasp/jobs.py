@@ -142,7 +142,8 @@ class VaspJob(Job):
                 vi = VaspInput.from_directory(".")
                 incar = vi["INCAR"]
                 #Only optimized NPAR for non-HF and non-RPA calculations.
-                if (not incar.get("LHFCALC")) and (not incar.get("LRPA")) and (not incar.get("LEPSILON")):
+                if not (incar.get("LHFCALC") or incar.get("LRPA") or
+                        incar.get("LEPSILON")):
                     import multiprocessing
                     ncores = multiprocessing.cpu_count()
                     for npar in range(int(round(math.sqrt(ncores))), ncores):
