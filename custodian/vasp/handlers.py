@@ -550,8 +550,8 @@ class WalltimeHandler(ErrorHandler):
         self.start_time = datetime.datetime.now()
         self.electronic_step_stop = electronic_step_stop
         self.electronic_steps_timings = [0]
-        self.previous_check_time = self.start_time
-        self.previous_check_nscf_steps = 0
+        self.prev_check_time = self.start_time
+        self.prev_check_nscf_steps = 0
 
     def check(self):
         if self.wall_time:
@@ -572,20 +572,19 @@ class WalltimeHandler(ErrorHandler):
                     if len(o.ionic_steps) == 0:
                         nsteps = 0
                     else:
-                        nsteps = sum([len(s) for s in
-                                      o.electronic_steps])
-                    if nsteps > self.previous_check_nscf_steps:
+                        nsteps = sum(map(len, o.electronic_steps))
+                    if nsteps > self.prev_check_nscf_steps:
                         steps_time = datetime.datetime.now() - \
-                            self.previous_check_time
+                            self.prev_check_time
                         steps_secs = steps_time.seconds + \
                             steps_time.days * 3600 * 24
                         step_timing = self.buffer_time * ceil(
                             (steps_secs /
-                             (nsteps - self.previous_check_nscf_steps)) /
+                             (nsteps - self.prev_check_nscf_steps)) /
                             self.buffer_time)
                         self.electronic_steps_timings.append(step_timing)
-                        self.previous_check_nscf_steps = nsteps
-                        self.previous_check_time = datetime.datetime.now()
+                        self.prev_check_nscf_steps = nsteps
+                        self.prev_check_time = datetime.datetime.now()
                     time_per_step = max(self.electronic_steps_timings)
                 except Exception as ex:
                     time_per_step = 0
