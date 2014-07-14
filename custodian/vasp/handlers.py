@@ -510,7 +510,7 @@ class WalltimeHandler(ErrorHandler):
     # itself naturally with the STOPCAR.
     is_terminating = False
 
-    def __init__(self, wall_time=None, buffer_time=300):
+    def __init__(self, wall_time=None, buffer_time=300, electronic_step_stop=False):
         """
         Initializes the handler with a buffer time.
 
@@ -529,6 +529,11 @@ class WalltimeHandler(ErrorHandler):
                 complete. But if other operations are being performed after
                 the run has stopped, the buffer time may need to be increased
                 accordingly.
+            electronic_step_stop (bool): Whether to check for electronic steps
+                instead of ionic steps (e.g. for static runs on large systems or
+                static HSE runs, ...). Be carefull that results such as density
+                or wavefunctions might not be converged at the electronic level.
+                Should be used with LWAVE = .True. to be useful.
         """
         if wall_time is not None:
             self.wall_time = wall_time
@@ -538,18 +543,40 @@ class WalltimeHandler(ErrorHandler):
             self.wall_time = None
         self.buffer_time = buffer_time
         self.start_time = datetime.datetime.now()
+        self.electronic_step_stop = electronic_step_stop
+        self.electronic_steps_timings = [0.0]
+        self.previous_check_time = self.start_time
+        self.previous_check_nscf_steps = 0
 
     def check(self):
         if self.wall_time:
             run_time = datetime.datetime.now() - self.start_time
             total_secs = run_time.seconds + run_time.days * 3600 * 24
-            try:
-                #Intelligently determine time per ionic step.
-                o = Oszicar("OSZICAR")
-                nsteps = len(o.ionic_steps)
-                time_per_step = total_secs / nsteps
-            except Exception as ex:
-                time_per_step = 0
+            if not self.electronic_step_stop:
+                try:
+                    #Intelligently determine time per ionic step.
+                    o = Oszicar("OSZICAR")
+                    nsteps = len(o.ionic_steps)
+                    time_per_step = total_secs / nsteps
+                except Exception as ex:
+                    time_per_step = 0
+            else:
+                try:
+                    #Intelligently determine approximate time per electronic step.
+                    o = Oszicar("OSZICAR")
+                    if len(o.ionic_steps) == 0:
+                        nsteps = 0
+                    else:
+                        nsteps = sum([len(ionic_step) for ionic_step in o.electronic_steps])
+                    if nsteps > self.previous_check_nscf_steps:
+                        steps_time = datetime.datetime.now() - self.previous_check_time
+                        steps_secs = steps_time.seconds + steps_time.days * 3600 * 24
+                        self.electronic_steps_timings.append(steps_secs / (nsteps - self.previous_check_nscf_steps))
+                        self.previous_check_nscf_steps = nsteps
+                        self.previous_check_time = datetime.datetime.now()
+                    time_per_step = max(self.electronic_steps_timings)
+                except Exception as ex:
+                    time_per_step = 0
 
             # If the remaining time is less than average time for 3 ionic
             # steps or buffer_time.
