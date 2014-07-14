@@ -559,7 +559,7 @@ class WalltimeHandler(ErrorHandler):
             total_secs = run_time.seconds + run_time.days * 3600 * 24
             if not self.electronic_step_stop:
                 try:
-                    #Intelligently determine time per ionic step.
+                    # Intelligently determine time per ionic step.
                     o = Oszicar("OSZICAR")
                     nsteps = len(o.ionic_steps)
                     time_per_step = total_secs / nsteps
@@ -567,7 +567,8 @@ class WalltimeHandler(ErrorHandler):
                     time_per_step = 0
             else:
                 try:
-                    #Intelligently determine approximate time per electronic step.
+                    # Intelligently determine approximate time per electronic
+                    # step.
                     o = Oszicar("OSZICAR")
                     if len(o.ionic_steps) == 0:
                         nsteps = 0
