@@ -23,6 +23,8 @@ import operator
 
 from monty.dev import deprecated
 
+from math import ceil
+
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput
@@ -544,7 +546,7 @@ class WalltimeHandler(ErrorHandler):
         self.buffer_time = buffer_time
         self.start_time = datetime.datetime.now()
         self.electronic_step_stop = electronic_step_stop
-        self.electronic_steps_timings = [0.0]
+        self.electronic_steps_timings = [0]
         self.previous_check_time = self.start_time
         self.previous_check_nscf_steps = 0
 
@@ -571,7 +573,10 @@ class WalltimeHandler(ErrorHandler):
                     if nsteps > self.previous_check_nscf_steps:
                         steps_time = datetime.datetime.now() - self.previous_check_time
                         steps_secs = steps_time.seconds + steps_time.days * 3600 * 24
-                        self.electronic_steps_timings.append(steps_secs / (nsteps - self.previous_check_nscf_steps))
+                        step_timing = self.buffer_time * ceil((steps_secs /
+                                                               (nsteps - self.previous_check_nscf_steps)) /
+                                                              self.buffer_time)
+                        self.electronic_steps_timings.append(step_timing)
                         self.previous_check_nscf_steps = nsteps
                         self.previous_check_time = datetime.datetime.now()
                     time_per_step = max(self.electronic_steps_timings)
