@@ -207,8 +207,15 @@ class WalltimeHandlerTest(unittest.TestCase):
             content = f.read()
             self.assertEqual(content, "LSTOP = .TRUE.")
         os.remove("STOPCAR")
-        
+
+        h = WalltimeHandler(electronic_step_stop=True)
+        os.chdir(cwd)
+        h.correct()
+        with open("STOPCAR") as f:
+            content = f.read()
+            self.assertEqual(content, "LABORT = .TRUE.")
+        os.remove("STOPCAR")
+
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

@@ -93,7 +93,7 @@ class VaspErrorHandler(ErrorHandler):
                     for msg in msgs:
                         if l.find(msg) != -1:
 			    #this checks if we want to run a charged computation
-                            #(e.g., defects) if yes we don't want to kill it 
+                            #(e.g., defects) if yes we don't want to kill it
                             #because there is a change in e- density (brmix error)
                             if err == "brmix" and 'NELEC' in vi['INCAR']:
                                 continue
@@ -148,7 +148,7 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "POSCAR",
                             "action": {"_set": {"structure": new_s.to_dict}},
                             "transformation": trans.to_dict})
-             
+
         if "pricel" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}})
@@ -512,7 +512,8 @@ class WalltimeHandler(ErrorHandler):
     # itself naturally with the STOPCAR.
     is_terminating = False
 
-    def __init__(self, wall_time=None, buffer_time=300, electronic_step_stop=False):
+    def __init__(self, wall_time=None, buffer_time=300,
+                 electronic_step_stop=False):
         """
         Initializes the handler with a buffer time.
 
@@ -533,9 +534,11 @@ class WalltimeHandler(ErrorHandler):
                 accordingly.
             electronic_step_stop (bool): Whether to check for electronic steps
                 instead of ionic steps (e.g. for static runs on large systems or
-                static HSE runs, ...). Be carefull that results such as density
+                static HSE runs, ...). Be careful that results such as density
                 or wavefunctions might not be converged at the electronic level.
-                Should be used with LWAVE = .True. to be useful.
+                Should be used with LWAVE = .True. to be useful. If this is
+                True, the STOPCAR is written with LABORT = .TRUE. instead of
+                LSTOP = .TRUE.
         """
         if wall_time is not None:
             self.wall_time = wall_time
@@ -569,13 +572,17 @@ class WalltimeHandler(ErrorHandler):
                     if len(o.ionic_steps) == 0:
                         nsteps = 0
                     else:
-                        nsteps = sum([len(ionic_step) for ionic_step in o.electronic_steps])
+                        nsteps = sum([len(s) for s in
+                                      o.electronic_steps])
                     if nsteps > self.previous_check_nscf_steps:
-                        steps_time = datetime.datetime.now() - self.previous_check_time
-                        steps_secs = steps_time.seconds + steps_time.days * 3600 * 24
-                        step_timing = self.buffer_time * ceil((steps_secs /
-                                                               (nsteps - self.previous_check_nscf_steps)) /
-                                                              self.buffer_time)
+                        steps_time = datetime.datetime.now() - \
+                            self.previous_check_time
+                        steps_secs = steps_time.seconds + \
+                            steps_time.days * 3600 * 24
+                        step_timing = self.buffer_time * ceil(
+                            (steps_secs /
+                             (nsteps - self.previous_check_nscf_steps)) /
+                            self.buffer_time)
                         self.electronic_steps_timings.append(step_timing)
                         self.previous_check_nscf_steps = nsteps
                         self.previous_check_time = datetime.datetime.now()
@@ -588,12 +595,16 @@ class WalltimeHandler(ErrorHandler):
             time_left = self.wall_time - total_secs
             if time_left < max(time_per_step * 3, self.buffer_time):
                 return True
+
         return False
 
     def correct(self):
+
+        content = "LSTOP = .TRUE." if not self.electronic_step_stop else \
+            "LABORT = .TRUE."
         #Write STOPCAR
         actions = [{"file": "STOPCAR",
-                    "action": {"_file_create": {'content': "LSTOP = .TRUE."}}}]
+                    "action": {"_file_create": {'content': content}}}]
         m = Modder(actions=[FileActions])
         for a in actions:
             m.modify(a["action"], a["file"])
