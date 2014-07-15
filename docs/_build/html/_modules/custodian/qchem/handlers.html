@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.qchem.handlers &mdash; custodian 0.7.3 documentation</title>
+    <title>custodian.qchem.handlers &mdash; custodian 0.7.4 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.7.3',
+        VERSION:     '0.7.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.3 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.7.4 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.3 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.4 documentation</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -288,7 +288,8 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">None</span>
 
-        <span class="k">if</span> <span class="n">od</span><span class="p">[</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;opt&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;opt&quot;</span> <span class="ow">or</span> <span class="n">od</span><span class="p">[</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;ts&quot;</span><span class="p">)</span>\
+                <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">strategy</span> <span class="o">=</span> <span class="s">&quot;reset&quot;</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_strategy_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">strategy</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">old_strategy_text</span><span class="p">)</span>
@@ -309,8 +310,10 @@
         <span class="k">if</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s">&quot;reset&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_algorithm_and_iterations</span><span class="p">(</span>
                 <span class="n">algorithm</span><span class="o">=</span><span class="s">&quot;diis&quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span><span class="p">)</span>
-            <span class="k">if</span> <span class="s">&quot;scf_guess&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">]:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;sad&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_step_id</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;read&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;sad&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_last_input_geom</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_strategy_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">comments</span> <span class="o">=</span> <span class="n">scf_pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">comments</span><span class="p">)</span>
@@ -324,27 +327,27 @@
             <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&quot;increase_iter&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_algorithm_and_iterations</span><span class="p">(</span>
                     <span class="n">algorithm</span><span class="o">=</span><span class="s">&quot;diis&quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;sad&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;sad&quot;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&quot;rca_diis&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_algorithm_and_iterations</span><span class="p">(</span>
                     <span class="n">algorithm</span><span class="o">=</span><span class="s">&quot;rca_diis&quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;sad&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;sad&quot;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&quot;gwh&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_algorithm_and_iterations</span><span class="p">(</span>
                     <span class="n">algorithm</span><span class="o">=</span><span class="s">&quot;diis&quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;gwh&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;gwh&quot;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&quot;gdm&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_algorithm_and_iterations</span><span class="p">(</span>
                     <span class="n">algorithm</span><span class="o">=</span><span class="s">&quot;gdm&quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;sad&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;sad&quot;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&quot;rca&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_algorithm_and_iterations</span><span class="p">(</span>
                     <span class="n">algorithm</span><span class="o">=</span><span class="s">&quot;rca&quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;sad&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;sad&quot;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&quot;core+rca&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_algorithm_and_iterations</span><span class="p">(</span>
                     <span class="n">algorithm</span><span class="o">=</span><span class="s">&quot;rca&quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;core&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;core&quot;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&quot;diis_gdm&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_algorithm_and_iterations</span><span class="p">(</span>
                     <span class="n">algorithm</span><span class="o">=</span><span class="s">&quot;diis_gdm&quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span><span class="p">)</span>
@@ -352,8 +355,7 @@
             <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&quot;core+gdm&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_algorithm_and_iterations</span><span class="p">(</span>
                     <span class="n">algorithm</span><span class="o">=</span><span class="s">&quot;gdm&quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;sad&quot;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;core&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;core&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;fix method &quot;</span> <span class="o">+</span> <span class="n">method</span> <span class="o">+</span> <span class="s">&quot; is not supported&quot;</span><span class="p">)</span>
             <span class="n">strategy_text</span> <span class="o">=</span> <span class="s">&quot;&lt;SCF Fix Strategy&gt;&quot;</span>
@@ -371,6 +373,12 @@
             <span class="n">qctask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">jobs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">qctask</span><span class="o">.</span><span class="n">mol</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">):</span>
                 <span class="n">qctask</span><span class="o">.</span><span class="n">mol</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">new_mol</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="QChemErrorHandler.set_scf_initial_guess"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.set_scf_initial_guess">[docs]</a>    <span class="k">def</span> <span class="nf">set_scf_initial_guess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guess</span><span class="o">=</span><span class="s">&quot;sad&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s">&quot;scf_guess&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">]</span> \
+                <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_step_id</span> <span class="o">==</span> <span class="mi">0</span> \
+                <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;scf_guess&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&quot;read&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="n">guess</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="QChemErrorHandler.fix_geom_opt"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_geom_opt">[docs]</a>    <span class="k">def</span> <span class="nf">fix_geom_opt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">comments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;comment&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
@@ -500,7 +508,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.3 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.4 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
