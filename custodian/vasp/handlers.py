@@ -338,8 +338,8 @@ class PotimErrorHandler(ErrorHandler):
     """
     is_monitor = True
 
-    def __init__(self, input_filename="POSCAR",
-                 output_filename="OSZICAR", dE_threshold=1):
+    def __init__(self, input_filename="POSCAR", output_filename="OSZICAR",
+                 dE_threshold=1):
         """
         Initializes the handler with the input and output files to check.
 
@@ -500,15 +500,14 @@ class NonConvergingErrorHandler(ErrorHandler):
 class WalltimeHandler(ErrorHandler):
     """
     Check if a run is nearing the walltime. If so, write a STOPCAR with
-    LSTOP=.True.. You can specify the walltime either in the init (which is
-    unfortunately necessary for SGE and SLURM systems,
-    or if you happen to be running on a PBS system and the PBS_WALLTIME
-    variable is in the run environment, the wall time will be automatically
-    determined if not set.
+    LSTOP or LABORT = .True.. You can specify the walltime either in the init (
+    which is unfortunately necessary for SGE and SLURM systems. If you happen
+    to be running on a PBS system and the PBS_WALLTIME variable is in the run
+    environment, the wall time will be automatically determined if not set.
     """
     is_monitor = True
 
-    # The PBS handler should not terminate as we want VASP to terminate
+    # The WalltimeHandler should not terminate as we want VASP to terminate
     # itself naturally with the STOPCAR.
     is_terminating = False
 
