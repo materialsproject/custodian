@@ -32,7 +32,7 @@ from pymatgen.transformations.standard_transformations import \
     PerturbStructureTransformation, SupercellTransformation
 
 from pymatgen.io.vaspio.vasp_output import Vasprun, Oszicar
-from custodian.ansible.intepreter import Modder
+from custodian.ansible.interpreter import Modder
 from custodian.ansible.actions import FileActions, DictActions
 
 

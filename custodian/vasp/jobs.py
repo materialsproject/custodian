@@ -26,7 +26,7 @@ from pymatgen.io.vaspio_set import MITVaspInputSet
 from pymatgen.serializers.json_coders import PMGJSONDecoder
 from monty.os.path import which
 
-from custodian.ansible.intepreter import Modder
+from custodian.ansible.interpreter import Modder
 from custodian.ansible.actions import FileActions, DictActions
 from custodian.custodian import Job, gzip_dir
 
