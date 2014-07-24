@@ -162,30 +162,31 @@ class VaspErrorHandlerTest(unittest.TestCase):
 
 class UnconvergedErrorHandlerTest(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(cls):
         if "VASP_PSP_DIR" not in os.environ:
             os.environ["VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
 
     def test_check_correct(self):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
         subdir = os.path.join(test_dir, "unconverged")
         os.chdir(subdir)
-        # h = UnconvergedErrorHandler("POTCAR")
-        # h.check()
-        # d = h.correct()
-        # self.assertEqual(d["errors"], ['Unconverged'])
-        # self.assertEqual(d["actions"],
-        #                  [{'file': 'CONTCAR',
-        #                    'action': {'_file_copy': {'dest': 'POSCAR'}}},
-        #                   {'dict': 'INCAR',
-        #                    'action': {'_set': {"ISTART": 1, "ALGO": "Normal",
-        #                                        "NELMDL": 6, "BMIX": 0.001,
-        #                                        "AMIX_MAG": 0.8,
-        #                                        "BMIX_MAG": 0.001}}}])
-        # os.remove(os.path.join(subdir, "error.1.tar.gz"))
+
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("KPOINTS", "KPOINTS.orig")
+        shutil.copy("POSCAR", "POSCAR.orig")
+        shutil.copy("CONTCAR", "CONTCAR.orig")
+
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ['Unconverged'])
+
+        os.remove(os.path.join(subdir, "error.1.tar.gz"))
+
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("KPOINTS.orig", "KPOINTS")
+        shutil.move("POSCAR.orig", "POSCAR")
+        shutil.move("CONTCAR.orig", "CONTCAR")
 
     def test_to_from_dict(self):
         h = UnconvergedErrorHandler("random_name.xml")
