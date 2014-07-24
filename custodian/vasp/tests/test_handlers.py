@@ -20,7 +20,9 @@ import shutil
 import datetime
 
 from custodian.vasp.handlers import VaspErrorHandler, \
-    UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler
+    UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler, \
+    MaxForceErrorHandler
+from pymatgen.io.vaspio import Incar, Poscar
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
@@ -196,6 +198,40 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        os.chdir(cwd)
+
+class MaxForceErrorHandlerTest(unittest.TestCase):
+
+    def setUp(self):
+        if "VASP_PSP_DIR" not in os.environ:
+            os.environ["VASP_PSP_DIR"] = test_dir
+        os.chdir(test_dir)
+
+    def test_check_correct(self):
+        #NOTE: the vasprun here has had projected and partial eigenvalues removed
+        subdir = os.path.join(test_dir, "max_force")
+        os.chdir(subdir)
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("POSCAR", "POSCAR.orig")
+
+        h = MaxForceErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ['MaxForce'])
+
+        os.remove(os.path.join(subdir, "error.1.tar.gz"))
+        
+        incar = Incar.from_file('INCAR')
+        poscar = Poscar.from_file('POSCAR')
+        contcar = Poscar.from_file('CONTCAR')
+        
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("POSCAR.orig", "POSCAR")
+        
+        self.assertEqual(poscar.structure, contcar.structure)
+        self.assertAlmostEqual(incar['EDIFF'], 0.00075)
+
+    def tearDown(self):
         os.chdir(cwd)
 
 

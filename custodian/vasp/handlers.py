@@ -20,6 +20,7 @@ import os
 import time
 import datetime
 import operator
+import numpy as np
 
 from monty.dev import deprecated
 
@@ -324,6 +325,58 @@ class UnconvergedErrorHandler(ErrorHandler):
 
     def __str__(self):
         return self.__name__
+
+
+class MaxForceErrorHandler(ErrorHandler):
+    """
+    Checks that the desired force convergence has been achieved. Otherwise
+    restarts the run with smaller EDIFF. (This is necessary since energy 
+    and force convergence criteria cannot be set simultaneously)
+    """
+    is_monitor = False
+
+    def __init__(self, output_filename="vasprun.xml",
+                 max_force_threshold=0.5):
+        """
+        Args:
+            input_filename (str): name of the vasp INCAR file
+            output_filename (str): name to look for the vasprun
+            max_force_threshold (float): Threshold for max force for 
+                restarting the run. (typically should be set to the value
+                that the creator looks for)
+        """
+        self.output_filename = output_filename
+        self.max_force_threshold = max_force_threshold
+
+    def check(self):
+        try:
+            v = Vasprun(self.output_filename)
+            max_force = max([np.linalg.norm(a) for a 
+                             in v.ionic_steps[-1]["forces"]])
+            if max_force > self.max_force_threshold:
+                return True
+        except:
+            pass
+        return False
+
+    def correct(self):
+        backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR",
+                self.output_filename])
+        vi = VaspInput.from_directory(".")
+        ediff = float(vi["INCAR"].get("EDIFF", 1e-4))
+        actions = [{"file": "CONTCAR",
+                    "action": {"_file_copy": {"dest": "POSCAR"}}},
+                   {"dict": "INCAR",
+                    "action": {"_set": {"EDIFF": ediff*0.75}}}]
+        m = Modder(actions=[DictActions, FileActions])
+        for a in actions:
+            if "dict" in a:
+                vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+            elif "file" in a:
+                m.modify(a["action"], a["file"])
+        vi["INCAR"].write_file("INCAR")
+
+        return {"errors": ["MaxForce"], "actions": actions}
 
 
 class PotimErrorHandler(ErrorHandler):
