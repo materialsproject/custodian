@@ -28,7 +28,7 @@ from math import ceil
 
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
-from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput
+from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput, Incar
 from pymatgen.transformations.standard_transformations import \
     PerturbStructureTransformation, SupercellTransformation
 
@@ -85,7 +85,7 @@ class VaspErrorHandler(ErrorHandler):
         self.errors = set()
 
     def check(self):
-        vi = VaspInput.from_directory(".")
+        incar = Incar.from_file("INCAR")
         self.errors = set()
         with open(self.output_filename, "r") as f:
             for line in f:
@@ -96,7 +96,7 @@ class VaspErrorHandler(ErrorHandler):
                             #this checks if we want to run a charged computation
                             #(e.g., defects) if yes we don't want to kill it
                             #because there is a change in e- density (brmix error)
-                            if err == "brmix" and 'NELECT' in vi['INCAR']:
+                            if err == "brmix" and 'NELECT' in incar:
                                 continue
                             self.errors.add(err)
         return len(self.errors) > 0
