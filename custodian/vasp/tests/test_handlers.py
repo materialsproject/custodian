@@ -105,14 +105,14 @@ class VaspErrorHandlerTest(unittest.TestCase):
 
     def test_brmix(self):
         h = VaspErrorHandler("vasp.brmix")
-        h.check()
+        self.assertEqual(h.check(), True)
         d = h.correct()
         self.assertEqual(d["errors"], ['brmix'])
         self.assertFalse(os.path.exists("CHGCAR"))
 
         shutil.copy("INCAR.nelect", "INCAR")
         h = VaspErrorHandler("vasp.brmix")
-        h.check()
+        self.assertEqual(h.check(), False)
         d = h.correct()
         self.assertEqual(d["errors"], [])
 
