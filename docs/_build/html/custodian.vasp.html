@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp package &mdash; custodian 0.7.3 documentation</title>
+    <title>custodian.vasp package &mdash; custodian 0.7.4 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.3',
+        VERSION:     '0.7.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.3 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.7.4 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -309,14 +309,13 @@ default redirect used by <tt class="xref py py-class docutils literal"><span cla
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.WalltimeHandler">
-<em class="property">class </em><tt class="descname">WalltimeHandler</tt><big>(</big><em>wall_time=None</em>, <em>buffer_time=300</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descname">WalltimeHandler</tt><big>(</big><em>wall_time=None</em>, <em>buffer_time=300</em>, <em>electronic_step_stop=False</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
 <p>Check if a run is nearing the walltime. If so, write a STOPCAR with
-LSTOP=.True.. You can specify the walltime either in the init (which is
-unfortunately necessary for SGE and SLURM systems,
-or if you happen to be running on a PBS system and the PBS_WALLTIME
-variable is in the run environment, the wall time will be automatically
-determined if not set.</p>
+LSTOP or LABORT = .True.. You can specify the walltime either in the init (
+which is unfortunately necessary for SGE and SLURM systems. If you happen
+to be running on a PBS system and the PBS_WALLTIME variable is in the run
+environment, the wall time will be automatically determined if not set.</p>
 <p>Initializes the handler with a buffer time.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -337,6 +336,13 @@ This is typically sufficient for the current ionic step to
 complete. But if other operations are being performed after
 the run has stopped, the buffer time may need to be increased
 accordingly.</li>
+<li><strong>electronic_step_stop</strong> (<em>bool</em>) &#8211; Whether to check for electronic steps
+instead of ionic steps (e.g. for static runs on large systems or
+static HSE runs, ...). Be careful that results such as density
+or wavefunctions might not be converged at the electronic level.
+Should be used with LWAVE = .True. to be useful. If this is
+True, the STOPCAR is written with LABORT = .TRUE. instead of
+LSTOP = .TRUE.</li>
 </ul>
 </td>
 </tr>
@@ -790,7 +796,7 @@ and backing up.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

@@ -17,9 +17,10 @@ import unittest
 import os
 import glob
 import shutil
+import datetime
 
 from custodian.vasp.handlers import VaspErrorHandler, \
-    UnconvergedErrorHandler, MeshSymmetryErrorHandler, PBSWalltimeHandler
+    UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
@@ -83,7 +84,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         clean_dir()
         shutil.move("INCAR.orig", "INCAR")
         os.chdir(test_dir)
-    
+
     def test_mesh_symmetry(self):
         h = MeshSymmetryErrorHandler("vasp.ibzkpt")
         h.check()
@@ -128,7 +129,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         clean_dir()
         shutil.move("INCAR.orig", "INCAR")
         os.chdir(test_dir)
-    
+
     def test_rot_matrix(self):
         if "VASP_PSP_DIR" not in os.environ:
             os.environ["VASP_PSP_DIR"] = test_dir
@@ -197,18 +198,53 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         os.chdir(cwd)
 
 
-class PBSWalltimeHandlerTest(unittest.TestCase):
+class WalltimeHandlerTest(unittest.TestCase):
 
-    def test_correct(self):
-        h = PBSWalltimeHandler()
-        os.chdir(cwd)
+    def setUp(self):
+        os.chdir(test_dir)
+
+    def test_check_and_correct(self):
+        # The test OSZICAR file has 60 ionic steps. Let's try a 1 hr wall
+        # time with a 1min buffer
+        h = WalltimeHandler(wall_time=3600, buffer_time=120)
+        self.assertFalse(h.check())
+
+        # This makes sure the check returns True when the time left is less
+        # than the buffer time.
+        h.start_time = datetime.datetime.now() - datetime.timedelta(minutes=59)
+        self.assertTrue(h.check())
+
+        # This makes sure the check returns True when the time left is less
+        # than 3 x the average time per ionic step. We have a 62 min wall
+        # time, a very short buffer time, but the start time was 62 mins ago
+        h = WalltimeHandler(wall_time=3720, buffer_time=10)
+        h.start_time = datetime.datetime.now() - datetime.timedelta(minutes=62)
+        self.assertTrue(h.check())
+
+        # Test that the STOPCAR is written correctly.
         h.correct()
         with open("STOPCAR") as f:
             content = f.read()
             self.assertEqual(content, "LSTOP = .TRUE.")
         os.remove("STOPCAR")
 
+        h = WalltimeHandler(wall_time=3600, buffer_time=120,
+                            electronic_step_stop=True)
+
+        self.assertFalse(h.check())
+        h.start_time = datetime.datetime.now() - datetime.timedelta(minutes=59)
+        self.assertTrue(h.check())
+
+        h.correct()
+        with open("STOPCAR") as f:
+            content = f.read()
+            self.assertEqual(content, "LABORT = .TRUE.")
+        os.remove("STOPCAR")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cwd)
+
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

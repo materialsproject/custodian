@@ -23,6 +23,8 @@ import operator
 
 from monty.dev import deprecated
 
+from math import ceil
+
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput
@@ -30,7 +32,7 @@ from pymatgen.transformations.standard_transformations import \
     PerturbStructureTransformation, SupercellTransformation
 
 from pymatgen.io.vaspio.vasp_output import Vasprun, Oszicar
-from custodian.ansible.intepreter import Modder
+from custodian.ansible.interpreter import Modder
 from custodian.ansible.actions import FileActions, DictActions
 
 
@@ -140,7 +142,7 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "POSCAR",
                             "action": {"_set": {"structure": new_s.to_dict}},
                             "transformation": trans.to_dict})
-             
+
         if "pricel" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}})
@@ -330,8 +332,8 @@ class PotimErrorHandler(ErrorHandler):
     """
     is_monitor = True
 
-    def __init__(self, input_filename="POSCAR",
-                 output_filename="OSZICAR", dE_threshold=1):
+    def __init__(self, input_filename="POSCAR", output_filename="OSZICAR",
+                 dE_threshold=1):
         """
         Initializes the handler with the input and output files to check.
 
@@ -492,19 +494,19 @@ class NonConvergingErrorHandler(ErrorHandler):
 class WalltimeHandler(ErrorHandler):
     """
     Check if a run is nearing the walltime. If so, write a STOPCAR with
-    LSTOP=.True.. You can specify the walltime either in the init (which is
-    unfortunately necessary for SGE and SLURM systems,
-    or if you happen to be running on a PBS system and the PBS_WALLTIME
-    variable is in the run environment, the wall time will be automatically
-    determined if not set.
+    LSTOP or LABORT = .True.. You can specify the walltime either in the init (
+    which is unfortunately necessary for SGE and SLURM systems. If you happen
+    to be running on a PBS system and the PBS_WALLTIME variable is in the run
+    environment, the wall time will be automatically determined if not set.
     """
     is_monitor = True
 
-    # The PBS handler should not terminate as we want VASP to terminate
+    # The WalltimeHandler should not terminate as we want VASP to terminate
     # itself naturally with the STOPCAR.
     is_terminating = False
 
-    def __init__(self, wall_time=None, buffer_time=300):
+    def __init__(self, wall_time=None, buffer_time=300,
+                 electronic_step_stop=False):
         """
         Initializes the handler with a buffer time.
 
@@ -523,6 +525,13 @@ class WalltimeHandler(ErrorHandler):
                 complete. But if other operations are being performed after
                 the run has stopped, the buffer time may need to be increased
                 accordingly.
+            electronic_step_stop (bool): Whether to check for electronic steps
+                instead of ionic steps (e.g. for static runs on large systems or
+                static HSE runs, ...). Be careful that results such as density
+                or wavefunctions might not be converged at the electronic level.
+                Should be used with LWAVE = .True. to be useful. If this is
+                True, the STOPCAR is written with LABORT = .TRUE. instead of
+                LSTOP = .TRUE.
         """
         if wall_time is not None:
             self.wall_time = wall_time
@@ -532,30 +541,63 @@ class WalltimeHandler(ErrorHandler):
             self.wall_time = None
         self.buffer_time = buffer_time
         self.start_time = datetime.datetime.now()
+        self.electronic_step_stop = electronic_step_stop
+        self.electronic_steps_timings = [0]
+        self.prev_check_time = self.start_time
+        self.prev_check_nscf_steps = 0
 
     def check(self):
         if self.wall_time:
             run_time = datetime.datetime.now() - self.start_time
             total_secs = run_time.seconds + run_time.days * 3600 * 24
-            try:
-                #Intelligently determine time per ionic step.
-                o = Oszicar("OSZICAR")
-                nsteps = len(o.ionic_steps)
-                time_per_step = total_secs / nsteps
-            except Exception as ex:
-                time_per_step = 0
+            if not self.electronic_step_stop:
+                try:
+                    # Intelligently determine time per ionic step.
+                    o = Oszicar("OSZICAR")
+                    nsteps = len(o.ionic_steps)
+                    time_per_step = total_secs / nsteps
+                except Exception as ex:
+                    time_per_step = 0
+            else:
+                try:
+                    # Intelligently determine approximate time per electronic
+                    # step.
+                    o = Oszicar("OSZICAR")
+                    if len(o.ionic_steps) == 0:
+                        nsteps = 0
+                    else:
+                        nsteps = sum(map(len, o.electronic_steps))
+                    if nsteps > self.prev_check_nscf_steps:
+                        steps_time = datetime.datetime.now() - \
+                            self.prev_check_time
+                        steps_secs = steps_time.seconds + \
+                            steps_time.days * 3600 * 24
+                        step_timing = self.buffer_time * ceil(
+                            (steps_secs /
+                             (nsteps - self.prev_check_nscf_steps)) /
+                            self.buffer_time)
+                        self.electronic_steps_timings.append(step_timing)
+                        self.prev_check_nscf_steps = nsteps
+                        self.prev_check_time = datetime.datetime.now()
+                    time_per_step = max(self.electronic_steps_timings)
+                except Exception as ex:
+                    time_per_step = 0
 
             # If the remaining time is less than average time for 3 ionic
             # steps or buffer_time.
             time_left = self.wall_time - total_secs
             if time_left < max(time_per_step * 3, self.buffer_time):
                 return True
+
         return False
 
     def correct(self):
+
+        content = "LSTOP = .TRUE." if not self.electronic_step_stop else \
+            "LABORT = .TRUE."
         #Write STOPCAR
         actions = [{"file": "STOPCAR",
-                    "action": {"_file_create": {'content': "LSTOP = .TRUE."}}}]
+                    "action": {"_file_create": {'content': content}}}]
         m = Modder(actions=[FileActions])
         for a in actions:
             m.modify(a["action"], a["file"])

@@ -26,7 +26,7 @@ from pymatgen.io.vaspio_set import MITVaspInputSet
 from pymatgen.serializers.json_coders import PMGJSONDecoder
 from monty.os.path import which
 
-from custodian.ansible.intepreter import Modder
+from custodian.ansible.interpreter import Modder
 from custodian.ansible.actions import FileActions, DictActions
 from custodian.custodian import Job, gzip_dir
 
@@ -142,13 +142,20 @@ class VaspJob(Job):
                 vi = VaspInput.from_directory(".")
                 incar = vi["INCAR"]
                 #Only optimized NPAR for non-HF and non-RPA calculations.
-                if (not incar.get("LHFCALC")) and (not incar.get("LRPA")) and (not incar.get("LEPSILON")):
-                    import multiprocessing
-                    ncores = multiprocessing.cpu_count()
-                    for npar in range(int(round(math.sqrt(ncores))), ncores):
-                        if ncores % npar == 0:
-                            incar["NPAR"] = npar
-                            break
+                if not (incar.get("LHFCALC") or incar.get("LRPA") or
+                        incar.get("LEPSILON")):
+                    if incar.get("IBRION") in [5, 6, 7, 8]:
+                        # NPAR should not be set for Hessian matrix
+                        # calculations, whether in DFPT or otherwise.
+                        del incar["NPAR"]
+                    else:
+                        import multiprocessing
+                        ncores = multiprocessing.cpu_count()
+                        for npar in range(int(round(math.sqrt(ncores))),
+                                          ncores):
+                            if ncores % npar == 0:
+                                incar["NPAR"] = npar
+                                break
                     incar.write_file("INCAR")
             except:
                 pass

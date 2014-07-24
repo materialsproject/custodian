@@ -22,6 +22,13 @@ calculations.
 Change log
 ==========
 
+v0.7.4
+------
+1. auto_npar option in VaspJob now properly handles Hessian calculations.
+2. WalltimeHandler now supports termination at electronic step (David
+   Waroquiers).
+3. Improved handling of BRMIX fixes.
+
 v0.7.3
 ------
 1. Improved backwards compatibility for WallTimeHandler.

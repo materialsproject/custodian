@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.custodian &mdash; custodian 0.7.3 documentation</title>
+    <title>custodian.custodian &mdash; custodian 0.7.4 documentation</title>
     
     <link rel="stylesheet" href="../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.7.3',
+        VERSION:     '0.7.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.3 documentation" href="../../index.html" />
+    <link rel="top" title="custodian 0.7.4 documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">custodian 0.7.3 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">custodian 0.7.4 documentation</a> &raquo;</li>
           <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -239,12 +239,12 @@
 
         <span class="k">with</span> <span class="n">ScratchDir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scratch_dir</span><span class="p">,</span> <span class="n">create_symbolic_link</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                         <span class="n">copy_to_current_on_exit</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                        <span class="n">copy_from_current_on_enter</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+                        <span class="n">copy_from_current_on_enter</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">temp_dir</span><span class="p">:</span>
             <span class="n">total_errors</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">unrecoverable</span> <span class="o">=</span> <span class="bp">False</span>
             <span class="n">start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Run started at {} in {}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">start</span><span class="p">,</span>
-                                                           <span class="bp">self</span><span class="o">.</span><span class="n">scratch_dir</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Run started at {} in {}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">start</span><span class="p">,</span> <span class="n">temp_dir</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span><span class="p">:</span>
                 <span class="n">restart</span><span class="p">,</span> <span class="n">run_log</span> <span class="o">=</span> <span class="n">Custodian</span><span class="o">.</span><span class="n">_load_checkpoint</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
@@ -534,7 +534,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">custodian 0.7.3 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">custodian 0.7.4 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
