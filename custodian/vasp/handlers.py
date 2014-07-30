@@ -308,7 +308,7 @@ class UnconvergedErrorHandler(ErrorHandler):
                    {"dict": "INCAR",
                     "action": {"_set": {"ISTART": 1,
                                         "ALGO": "Normal",
-                                        "NELMDL": 6,
+                                        "NELMDL": -6,
                                         "BMIX": 0.001,
                                         "AMIX_MAG": 0.8,
                                         "BMIX_MAG": 0.001}}}]
