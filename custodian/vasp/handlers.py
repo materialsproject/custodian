@@ -115,11 +115,26 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"SYMPREC": 1e-8}}})
 
-        if "brmix" in self.errors or "zpotrf" in self.errors:
+        if "brmix" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ISYM": 0}}})
             # Based on VASP forum's recommendation, you should delete the
-            # CHGCAR and WAVECAR when dealing with these errors.
+            # CHGCAR and WAVECAR when dealing with this error.
+            actions.append({"file": "CHGCAR",
+                            "action": {"_file_delete": {'mode': "actual"}}})
+            actions.append({"file": "WAVECAR",
+                            "action": {"_file_delete": {'mode': "actual"}}})
+
+        if "zpotrf" in self.errors:
+            #Based on VASP forum's recommendation, you should
+            #decrease POTIM with this error
+            potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
+
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"ISYM": 0, "POTIM": potim}}})
+            # Based on VASP forum's recommendation, you should delete the
+            # CHGCAR and WAVECAR when dealing with this error.
+
             actions.append({"file": "CHGCAR",
                             "action": {"_file_delete": {'mode': "actual"}}})
             actions.append({"file": "WAVECAR",
@@ -242,7 +257,9 @@ class MeshSymmetryErrorHandler(ErrorHandler):
               " lattices."
         try:
             v = Vasprun(self.output_vasprun)
-            if v.converged:
+            # According to VASP admins, you can disregard this error
+            # if symmetry is off
+            if v.converged or (not v.incar.get('ISYM', True)):
                 return False
         except:
             pass
@@ -295,10 +312,10 @@ class UnconvergedErrorHandler(ErrorHandler):
     def check(self):
         try:
             v = Vasprun(self.output_filename)
+            if not v.converged:
+                return True
         except:
-            return False
-        if not v.converged:
-            return True
+            pass
         return False
 
     def correct(self):
