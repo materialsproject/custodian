@@ -762,8 +762,17 @@ class StoppedRunHandler(ErrorHandler):
         name = shutil.make_archive(
             os.path.join(os.getcwd(), "vasp.chk.%d" % i), "gztar")
 
-        return {"errors": ["Checkpoint reached"],
-                "actions": ["Checkpointed %s." % name]}
+        actions = [{"file": "CONTCAR",
+                    "action": {"_file_copy": {"dest": "POSCAR"}}}]
+
+        m = Modder(actions=[FileActions])
+        for a in actions:
+            m.modify(a["action"], a["file"])
+
+        actions.append({"Checkpoint": name})
+
+        return {"errors": ["Stopped run."],
+                "actions": actions}
 
     def __str__(self):
         return "StoppedRunHandler"
