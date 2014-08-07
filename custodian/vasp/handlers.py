@@ -20,9 +20,12 @@ import os
 import time
 import datetime
 import operator
+import shutil
+
 import numpy as np
 
 from monty.dev import deprecated
+from monty.serialization import loadfn
 
 from math import ceil
 
@@ -687,3 +690,109 @@ class PBSWalltimeHandler(WalltimeHandler):
 
     def __init__(self, buffer_time=300):
         WalltimeHandler.__init__(self, None, buffer_time=buffer_time)
+
+
+class CheckpointHandler(ErrorHandler):
+    """
+    This is not an error handler per se, but rather a checkpointer. What this
+    does is that every X seconds, a STOPCAR and CHKPT will be written. This
+    forces VASP to stop at the end of the next ionic step. The files are then
+    copied into a subdir, and then the job is restarted. To use this proper,
+    max_errors in Custodian must be set to a very high value, and you
+    probably wouldn't want to use any standard VASP error handlers. The
+    checkpoint will be stored in subdirs chk_#. This should be used in
+    combiantion with the StoppedRunHandler.
+    """
+    is_monitor = True
+
+    # The CheckpointHandler should not terminate as we want VASP to terminate
+    # itself naturally with the STOPCAR.
+    is_terminating = False
+
+    def __init__(self, interval=3600):
+        """
+        Initializes the handler with an interval.
+
+        Args:
+            interval (int): Interval at which to checkpoint in seconds.
+            Defaults to 3600 (1 hr).
+        """
+        self.interval = interval
+        self.start_time = datetime.datetime.now()
+        self.chk_counter = 0
+
+    def check(self):
+        run_time = datetime.datetime.now() - self.start_time
+        total_secs = run_time.seconds + run_time.days * 3600 * 24
+        if total_secs > self.interval:
+            return True
+        return False
+
+    def correct(self):
+        content = "LSTOP = .TRUE."
+        chkpt_content = "Index: %d\nTime: \"%s\"" % (self.chk_counter,
+                                                     datetime.datetime.now())
+        self.chk_counter += 1
+
+        #Write STOPCAR
+        actions = [{"file": "STOPCAR",
+                    "action": {"_file_create": {'content': content}}},
+                   {"file": "chkpt.yaml",
+                    "action": {"_file_create": {'content': chkpt_content}}}]
+
+        m = Modder(actions=[FileActions])
+        for a in actions:
+            m.modify(a["action"], a["file"])
+
+        # Reset the clock.
+        self.start_time = datetime.datetime.now()
+
+        return {"errors": ["Checkpoint reached"], "actions": actions}
+
+    def __str__(self):
+        return "CheckpointHandler with interval %d" % self.interval
+
+
+class StoppedRunHandler(ErrorHandler):
+    """
+    This is not an error handler per se, but rather a checkpointer. What this
+    does is that every X seconds, a STOPCAR will be written. This forces VASP to
+    stop at the end of the next ionic step. The files are then copied into a
+    subdir, and then the job is restarted. To use this proper, max_errors in
+    Custodian must be set to a very high value, and you probably wouldn't
+    want to use any standard VASP error handlers. The checkpoint will be
+    stored in subdirs chk_#. This should be used in combiantion with the
+    StoppedRunHandler.
+    """
+    is_monitor = False
+
+    # The CheckpointHandler should not terminate as we want VASP to terminate
+    # itself naturally with the STOPCAR.
+    is_terminating = False
+
+    def __init__(self):
+        pass
+
+    def check(self):
+        return os.path.exists("chkpt.yaml")
+
+    def correct(self):
+        d = loadfn("chkpt.yaml")
+        i = d["Index"]
+        name = shutil.make_archive(
+            os.path.join(os.getcwd(), "vasp.chk.%d" % i), "gztar")
+
+        actions = [{"file": "CONTCAR",
+                    "action": {"_file_copy": {"dest": "POSCAR"}}}]
+
+        m = Modder(actions=[FileActions])
+        for a in actions:
+            m.modify(a["action"], a["file"])
+
+        actions.append({"Checkpoint": name})
+
+        return {"errors": ["Stopped run."],
+                "actions": actions}
+
+    def __str__(self):
+        return "StoppedRunHandler"

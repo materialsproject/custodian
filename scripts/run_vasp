@@ -18,19 +18,21 @@ import logging
 import sys
 
 from custodian.custodian import Custodian
-from custodian.vasp.handlers import VaspErrorHandler, \
-    UnconvergedErrorHandler, MeshSymmetryErrorHandler, \
-    NonConvergingErrorHandler, PotimErrorHandler
 from custodian.vasp.jobs import VaspJob
 from pymatgen.io.vaspio.vasp_input import VaspInput
+
+
+def load_class(mod, name):
+    mod = __import__(mod, globals(), locals(), [name], 0)
+    return getattr(mod, name)
 
 
 def do_run(args):
     FORMAT = '%(asctime)s %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
-    handlers = [VaspErrorHandler(), MeshSymmetryErrorHandler(),
-                UnconvergedErrorHandler(), NonConvergingErrorHandler(),
-                PotimErrorHandler()]
+    logging.info("Handlers used are %s" % args.handlers)
+    handlers = [load_class("custodian.vasp.handlers", n)() for n in
+                args.handlers]
     vasp_command = args.command.split()
     jobs = []
     njobs = len(args.jobs)
@@ -105,6 +107,16 @@ if __name__ == "__main__":
              "the static run will be done with a k-point grid of 4x6x6. This "
              "defaults to 1, i.e., static runs are performed with the same "
              "k-point grid as relaxation runs."
+    )
+
+    parser.add_argument(
+        "-hd", "--handlers", dest="handlers", nargs="+",
+        default=["VaspErrorHandler", "MeshSymmetryErrorHandler",
+                 "UnconvergedErrorHandler", "NonConvergingErrorHandler",
+                 "PotimErrorHandler"], type=str,
+        help="The ErrorHandlers to use specified as string class names. Note "
+             "that the error handlers will be initialized with no args, i.e.,"
+             "default args will be assumed."
     )
 
     parser.add_argument("jobs", metavar="jobs", type=str, nargs='+',
