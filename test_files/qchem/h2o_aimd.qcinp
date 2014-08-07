@@ -1,0 +1,21 @@
+$molecule
+   0  1
+   O   1.386977   0.011218   0.109098
+   H   1.748442   0.720970  -0.431026
+   H   1.741280  -0.793653  -0.281811
+   O  -1.511955  -0.009629  -0.120521
+   H  -0.558095   0.008225   0.047352
+   H  -1.910308   0.077777   0.749067
+$end
+
+$rem
+   JOBTYPE              aimd
+   AIMD_METHOD          bomd
+   EXCHANGE             b3lyp
+   BASIS                6-31g*
+   TIME_STEP            20        (20 a.u. = 0.48 fs) 
+   AIMD_STEPS           10
+   AIMD_INIT_VELOC      thermal
+   AIMD_TEMP            298
+   max_scf_cycles  10
+$end 

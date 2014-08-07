@@ -231,7 +231,7 @@ class QChemErrorHandler(ErrorHandler):
             else:
                 return None
 
-        if (od["jobtype"] == "opt" or od["jobtype"] == "ts")\
+        if od["jobtype"] in ["opt", "ts", "aimd"] \
                 and len(od["molecules"]) >= 2:
             strategy = "reset"
         elif len(old_strategy_text) > 0:
@@ -258,6 +258,11 @@ class QChemErrorHandler(ErrorHandler):
             else:
                 self.set_scf_initial_guess("sad")
             self.set_last_input_geom(od["molecules"][-1])
+            if od["jobtype"] == "aimd":
+                aimd_steps = self.fix_step.params["rem"]["aimd_steps"]
+                elapsed_steps = len(od["molecules"]) - 1
+                remaining_steps = aimd_steps - elapsed_steps + 1
+                self.fix_step.params["rem"]["aimd_steps"] = remaining_steps
             if len(old_strategy_text) > 0:
                 comments = scf_pattern.sub("", comments)
                 self.fix_step.params["comment"] = comments
