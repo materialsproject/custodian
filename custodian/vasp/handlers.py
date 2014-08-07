@@ -727,6 +727,9 @@ class CheckpointHandler(ErrorHandler):
         for a in actions:
             m.modify(a["action"], a["file"])
 
+        # Reset the clock.
+        self.start_time = datetime.datetime.now()
+
         return {"errors": ["Checkpoint reached"], "actions": actions}
 
     def __str__(self):
