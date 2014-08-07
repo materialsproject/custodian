@@ -30,6 +30,7 @@ def load_class(mod, name):
 def do_run(args):
     FORMAT = '%(asctime)s %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
+    logging.info("Handlers used are %s" % args.handlers)
     handlers = [load_class("custodian.vasp.handlers", n)() for n in
                 args.handlers]
     vasp_command = args.command.split()

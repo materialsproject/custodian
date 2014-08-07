@@ -730,7 +730,7 @@ class CheckpointHandler(ErrorHandler):
         return {"errors": ["Checkpoint reached"], "actions": actions}
 
     def __str__(self):
-        return "CheckpointHandler"
+        return "CheckpointHandler with interval %d" % self.interval
 
 
 class StoppedRunHandler(ErrorHandler):
