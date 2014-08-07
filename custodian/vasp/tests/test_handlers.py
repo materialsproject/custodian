@@ -17,9 +17,12 @@ import unittest
 import os
 import glob
 import shutil
+import datetime
 
 from custodian.vasp.handlers import VaspErrorHandler, \
-    UnconvergedErrorHandler, MeshSymmetryErrorHandler, PBSWalltimeHandler
+    UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler, \
+    MaxForceErrorHandler
+from pymatgen.io.vaspio import Incar, Poscar
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
@@ -83,7 +86,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         clean_dir()
         shutil.move("INCAR.orig", "INCAR")
         os.chdir(test_dir)
-    
+
     def test_mesh_symmetry(self):
         h = MeshSymmetryErrorHandler("vasp.ibzkpt")
         h.check()
@@ -104,14 +107,14 @@ class VaspErrorHandlerTest(unittest.TestCase):
 
     def test_brmix(self):
         h = VaspErrorHandler("vasp.brmix")
-        h.check()
+        self.assertEqual(h.check(), True)
         d = h.correct()
         self.assertEqual(d["errors"], ['brmix'])
         self.assertFalse(os.path.exists("CHGCAR"))
 
         shutil.copy("INCAR.nelect", "INCAR")
         h = VaspErrorHandler("vasp.brmix")
-        h.check()
+        self.assertEqual(h.check(), False)
         d = h.correct()
         self.assertEqual(d["errors"], [])
 
@@ -128,7 +131,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         clean_dir()
         shutil.move("INCAR.orig", "INCAR")
         os.chdir(test_dir)
-    
+
     def test_rot_matrix(self):
         if "VASP_PSP_DIR" not in os.environ:
             os.environ["VASP_PSP_DIR"] = test_dir
@@ -161,30 +164,31 @@ class VaspErrorHandlerTest(unittest.TestCase):
 
 class UnconvergedErrorHandlerTest(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(cls):
         if "VASP_PSP_DIR" not in os.environ:
             os.environ["VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
 
     def test_check_correct(self):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
         subdir = os.path.join(test_dir, "unconverged")
         os.chdir(subdir)
-        # h = UnconvergedErrorHandler("POTCAR")
-        # h.check()
-        # d = h.correct()
-        # self.assertEqual(d["errors"], ['Unconverged'])
-        # self.assertEqual(d["actions"],
-        #                  [{'file': 'CONTCAR',
-        #                    'action': {'_file_copy': {'dest': 'POSCAR'}}},
-        #                   {'dict': 'INCAR',
-        #                    'action': {'_set': {"ISTART": 1, "ALGO": "Normal",
-        #                                        "NELMDL": 6, "BMIX": 0.001,
-        #                                        "AMIX_MAG": 0.8,
-        #                                        "BMIX_MAG": 0.001}}}])
-        # os.remove(os.path.join(subdir, "error.1.tar.gz"))
+
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("KPOINTS", "KPOINTS.orig")
+        shutil.copy("POSCAR", "POSCAR.orig")
+        shutil.copy("CONTCAR", "CONTCAR.orig")
+
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ['Unconverged'])
+
+        os.remove(os.path.join(subdir, "error.1.tar.gz"))
+
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("KPOINTS.orig", "KPOINTS")
+        shutil.move("POSCAR.orig", "POSCAR")
+        shutil.move("CONTCAR.orig", "CONTCAR")
 
     def test_to_from_dict(self):
         h = UnconvergedErrorHandler("random_name.xml")
@@ -196,19 +200,88 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
     def tearDownClass(cls):
         os.chdir(cwd)
 
+class MaxForceErrorHandlerTest(unittest.TestCase):
 
-class PBSWalltimeHandlerTest(unittest.TestCase):
+    def setUp(self):
+        if "VASP_PSP_DIR" not in os.environ:
+            os.environ["VASP_PSP_DIR"] = test_dir
+        os.chdir(test_dir)
 
-    def test_correct(self):
-        h = PBSWalltimeHandler()
+    def test_check_correct(self):
+        #NOTE: the vasprun here has had projected and partial eigenvalues removed
+        subdir = os.path.join(test_dir, "max_force")
+        os.chdir(subdir)
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("POSCAR", "POSCAR.orig")
+
+        h = MaxForceErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ['MaxForce'])
+
+        os.remove(os.path.join(subdir, "error.1.tar.gz"))
+        
+        incar = Incar.from_file('INCAR')
+        poscar = Poscar.from_file('POSCAR')
+        contcar = Poscar.from_file('CONTCAR')
+        
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("POSCAR.orig", "POSCAR")
+        
+        self.assertEqual(poscar.structure, contcar.structure)
+        self.assertAlmostEqual(incar['EDIFF'], 0.00075)
+
+    def tearDown(self):
         os.chdir(cwd)
+
+
+class WalltimeHandlerTest(unittest.TestCase):
+
+    def setUp(self):
+        os.chdir(test_dir)
+
+    def test_check_and_correct(self):
+        # The test OSZICAR file has 60 ionic steps. Let's try a 1 hr wall
+        # time with a 1min buffer
+        h = WalltimeHandler(wall_time=3600, buffer_time=120)
+        self.assertFalse(h.check())
+
+        # This makes sure the check returns True when the time left is less
+        # than the buffer time.
+        h.start_time = datetime.datetime.now() - datetime.timedelta(minutes=59)
+        self.assertTrue(h.check())
+
+        # This makes sure the check returns True when the time left is less
+        # than 3 x the average time per ionic step. We have a 62 min wall
+        # time, a very short buffer time, but the start time was 62 mins ago
+        h = WalltimeHandler(wall_time=3720, buffer_time=10)
+        h.start_time = datetime.datetime.now() - datetime.timedelta(minutes=62)
+        self.assertTrue(h.check())
+
+        # Test that the STOPCAR is written correctly.
         h.correct()
         with open("STOPCAR") as f:
             content = f.read()
             self.assertEqual(content, "LSTOP = .TRUE.")
         os.remove("STOPCAR")
 
+        h = WalltimeHandler(wall_time=3600, buffer_time=120,
+                            electronic_step_stop=True)
+
+        self.assertFalse(h.check())
+        h.start_time = datetime.datetime.now() - datetime.timedelta(minutes=59)
+        self.assertTrue(h.check())
+
+        h.correct()
+        with open("STOPCAR") as f:
+            content = f.read()
+            self.assertEqual(content, "LABORT = .TRUE.")
+        os.remove("STOPCAR")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cwd)
+
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

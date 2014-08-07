@@ -18,7 +18,7 @@ __date__ = "5/20/13"
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from pymatgen.io.nwchemio import NwOutput, NwInput
-from custodian.ansible.intepreter import Modder
+from custodian.ansible.interpreter import Modder
 
 
 class NwchemErrorHandler(ErrorHandler):

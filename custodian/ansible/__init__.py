@@ -15,3 +15,7 @@ __maintainer__ = "Shyue Ping Ong"
 __email__ = "ongsp@ucsd.edu"
 __status__ = "Production"
 __date__ = "Feb 1 2013"
+
+
+from .interpreter import Modder
+from .actions import FileActions, DictActions

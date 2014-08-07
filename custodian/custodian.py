@@ -182,12 +182,12 @@ class Custodian(object):
 
         with ScratchDir(self.scratch_dir, create_symbolic_link=True,
                         copy_to_current_on_exit=True,
-                        copy_from_current_on_enter=True):
+                        copy_from_current_on_enter=True) as temp_dir:
             total_errors = 0
             unrecoverable = False
             start = datetime.datetime.now()
-            logger.info("Run started at {} in {}.".format(start,
-                                                           self.scratch_dir))
+            logger.info("Run started at {} in {}.".format(
+                start, temp_dir))
 
             if self.checkpoint:
                 restart, run_log = Custodian._load_checkpoint(cwd)

@@ -12,8 +12,8 @@ with open("README.rst") as f:
 setup(
     name="custodian",
     packages=find_packages(),
-    version="0.7.3",
-    install_requires=["monty>=0.2.2"],
+    version="0.7.4",
+    install_requires=["monty>=0.3.1"],
     extras_require={"vasp, nwchem, qchem": ["pymatgen>=2.9.0"]},
     package_data={},
     author="Shyue Ping Ong, William Davidson Richards, Stephen Dacek, "

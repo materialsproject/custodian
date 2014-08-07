@@ -1,2 +1,2 @@
 pymatgen>=2.9.0
-monty>=0.2.2
+monty>=0.3.1
