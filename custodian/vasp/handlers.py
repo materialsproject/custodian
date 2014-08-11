@@ -21,6 +21,7 @@ import time
 import datetime
 import operator
 import shutil
+import glob
 
 import numpy as np
 
@@ -351,7 +352,7 @@ class UnconvergedErrorHandler(ErrorHandler):
 class MaxForceErrorHandler(ErrorHandler):
     """
     Checks that the desired force convergence has been achieved. Otherwise
-    restarts the run with smaller EDIFF. (This is necessary since energy 
+    restarts the run with smaller EDIFF. (This is necessary since energy
     and force convergence criteria cannot be set simultaneously)
     """
     is_monitor = False
@@ -362,7 +363,7 @@ class MaxForceErrorHandler(ErrorHandler):
         Args:
             input_filename (str): name of the vasp INCAR file
             output_filename (str): name to look for the vasprun
-            max_force_threshold (float): Threshold for max force for 
+            max_force_threshold (float): Threshold for max force for
                 restarting the run. (typically should be set to the value
                 that the creator looks for)
         """
@@ -372,7 +373,7 @@ class MaxForceErrorHandler(ErrorHandler):
     def check(self):
         try:
             v = Vasprun(self.output_filename)
-            max_force = max([np.linalg.norm(a) for a 
+            max_force = max([np.linalg.norm(a) for a
                              in v.ionic_steps[-1]["forces"]])
             if max_force > self.max_force_threshold:
                 return True
@@ -797,3 +798,37 @@ class StoppedRunHandler(ErrorHandler):
 
     def __str__(self):
         return "StoppedRunHandler"
+
+
+class BadVasprunXMLHandler(ErrorHandler):
+    """
+    Handler to properly terminate a run when a bad vasprun.xml is found.
+    """
+
+    is_monitor = False
+
+    is_terminating = True
+
+    def __init__(self):
+        self.vasprunxml = None
+        pass
+
+    def check(self):
+        try:
+            self.vasprunxml = _get_vasprun()
+            v = Vasprun(self.vasprunxml)
+        except:
+            return True
+        return False
+
+    def correct(self):
+        return {"errors": ["Bad vasprun.xml in %s." % self.vasprunxml],
+                "actions": None}
+
+    def __str__(self):
+        return "BadVasprunXMLHandler"
+
+
+def _get_vasprun(path="."):
+    vaspruns = glob.glob(os.path.join(path, "vasprun.xml*"))
+    return sorted(vaspruns, reverse=True)[0] if vaspruns else None

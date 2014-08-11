@@ -292,9 +292,10 @@ class Custodian(object):
             if self.gzipped_output:
                 gzip_dir(".")
 
-            if total_errors >= self.max_errors:
-                logger.info("Max {} errors reached. Exited..."
-                             .format(self.max_errors))
+            if total_errors >= self.max_errors or unrecoverable:
+                raise RuntimeError("{} errors reached. Unrecoverable? {}. "
+                                   "Exited...".format(self.max_errors,
+                                                      unrecoverable))
             elif not unrecoverable:
                 #Cleanup checkpoint files (if any) if run is successful.
                 Custodian._delete_checkpoints(cwd)
