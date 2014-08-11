@@ -104,9 +104,7 @@ class CustodianTest(unittest.TestCase):
         c = Custodian([ExampleHandler2(params)],
                       [ExampleJob(i, params) for i in xrange(njobs)],
                       max_errors=njobs, log_file=None)
-        output = c.run()
-        #Because this is unrecoverable, there should only be one output.
-        self.assertEqual(len(output), 1)
+        self.assertRaises(RuntimeError, c.run)
 
     def tearDown(self):
         for f in glob.glob("custodian.*.tar.gz"):

@@ -21,7 +21,7 @@ import datetime
 
 from custodian.vasp.handlers import VaspErrorHandler, \
     UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler, \
-    MaxForceErrorHandler
+    MaxForceErrorHandler, BadVasprunXMLHandler
 from pymatgen.io.vaspio import Incar, Poscar
 
 
@@ -220,14 +220,14 @@ class MaxForceErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["errors"], ['MaxForce'])
 
         os.remove(os.path.join(subdir, "error.1.tar.gz"))
-        
+
         incar = Incar.from_file('INCAR')
         poscar = Poscar.from_file('POSCAR')
         contcar = Poscar.from_file('CONTCAR')
-        
+
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("POSCAR.orig", "POSCAR")
-        
+
         self.assertEqual(poscar.structure, contcar.structure)
         self.assertAlmostEqual(incar['EDIFF'], 0.00075)
 
@@ -282,6 +282,23 @@ class WalltimeHandlerTest(unittest.TestCase):
     def tearDownClass(cls):
         os.chdir(cwd)
 
+
+
+class BadVasprunXMLHandlerTest(unittest.TestCase):
+
+
+    def test_check_and_correct(self):
+        os.chdir(os.path.join(test_dir, "bad_vasprun"))
+        h = BadVasprunXMLHandler()
+        self.assertTrue(h.check())
+
+        #Unconverged still has a valid vasprun.
+        os.chdir(os.path.join(test_dir, "unconverged"))
+        self.assertFalse(h.check())
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cwd)
 
 if __name__ == "__main__":
     unittest.main()
