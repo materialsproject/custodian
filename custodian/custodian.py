@@ -265,8 +265,8 @@ class Custodian(object):
                     if not has_error:
                         job.postprocess()
                         break
-                    elif run_log[-1]["corrections"][-1]["actions"] is None:
-                        # Check if there has been an unrecoverable error.
+                    elif not filter(None, [x["actions"] for x in run_log[-1]["corrections"]]):
+                        # Check that no corrections were applied
                         logger.info("Unrecoverable error.")
                         unrecoverable = True
                         break
