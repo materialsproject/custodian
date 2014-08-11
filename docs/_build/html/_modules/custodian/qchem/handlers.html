@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.qchem.handlers &mdash; custodian 0.7.4 documentation</title>
+    <title>custodian.qchem.handlers &mdash; custodian 0.7.5 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.7.4',
+        VERSION:     '0.7.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.4 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.7.5 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.4 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.5 documentation</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -288,7 +288,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">None</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;opt&quot;</span> <span class="ow">or</span> <span class="n">od</span><span class="p">[</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;ts&quot;</span><span class="p">)</span>\
+        <span class="k">if</span> <span class="n">od</span><span class="p">[</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;opt&quot;</span><span class="p">,</span> <span class="s">&quot;ts&quot;</span><span class="p">,</span> <span class="s">&quot;aimd&quot;</span><span class="p">]</span> \
                 <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">strategy</span> <span class="o">=</span> <span class="s">&quot;reset&quot;</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_strategy_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -315,6 +315,11 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;sad&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_last_input_geom</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">od</span><span class="p">[</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;aimd&quot;</span><span class="p">:</span>
+                <span class="n">aimd_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;aimd_steps&quot;</span><span class="p">]</span>
+                <span class="n">elapsed_steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="n">remaining_steps</span> <span class="o">=</span> <span class="n">aimd_steps</span> <span class="o">-</span> <span class="n">elapsed_steps</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;aimd_steps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">remaining_steps</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_strategy_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">comments</span> <span class="o">=</span> <span class="n">scf_pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">comments</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">comments</span>
@@ -508,7 +513,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.4 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.5 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>

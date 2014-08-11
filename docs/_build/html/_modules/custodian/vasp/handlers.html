@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp.handlers &mdash; custodian 0.7.4 documentation</title>
+    <title>custodian.vasp.handlers &mdash; custodian 0.7.5 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.7.4',
+        VERSION:     '0.7.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.4 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.7.5 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.4 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.5 documentation</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -77,19 +77,24 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">monty.dev</span> <span class="kn">import</span> <span class="n">deprecated</span>
+<span class="kn">from</span> <span class="nn">monty.serialization</span> <span class="kn">import</span> <span class="n">loadfn</span>
 
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">ceil</span>
 
 <span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">ErrorHandler</span>
 <span class="kn">from</span> <span class="nn">custodian.utils</span> <span class="kn">import</span> <span class="n">backup</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.vaspio.vasp_input</span> <span class="kn">import</span> <span class="n">Poscar</span><span class="p">,</span> <span class="n">VaspInput</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vaspio.vasp_input</span> <span class="kn">import</span> <span class="n">Poscar</span><span class="p">,</span> <span class="n">VaspInput</span><span class="p">,</span> <span class="n">Incar</span>
 <span class="kn">from</span> <span class="nn">pymatgen.transformations.standard_transformations</span> <span class="kn">import</span> \
     <span class="n">PerturbStructureTransformation</span><span class="p">,</span> <span class="n">SupercellTransformation</span>
 
 <span class="kn">from</span> <span class="nn">pymatgen.io.vaspio.vasp_output</span> <span class="kn">import</span> <span class="n">Vasprun</span><span class="p">,</span> <span class="n">Oszicar</span>
-<span class="kn">from</span> <span class="nn">custodian.ansible.intepreter</span> <span class="kn">import</span> <span class="n">Modder</span>
+<span class="kn">from</span> <span class="nn">custodian.ansible.interpreter</span> <span class="kn">import</span> <span class="n">Modder</span>
 <span class="kn">from</span> <span class="nn">custodian.ansible.actions</span> <span class="kn">import</span> <span class="n">FileActions</span><span class="p">,</span> <span class="n">DictActions</span>
 
 
@@ -141,7 +146,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
 <div class="viewcode-block" id="VaspErrorHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-	<span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s">&quot;INCAR&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
@@ -149,10 +154,10 @@
                 <span class="k">for</span> <span class="n">err</span><span class="p">,</span> <span class="n">msgs</span> <span class="ow">in</span> <span class="n">VaspErrorHandler</span><span class="o">.</span><span class="n">error_msgs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">msgs</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-			    <span class="c">#this checks if we want to run a charged computation</span>
+                            <span class="c">#this checks if we want to run a charged computation</span>
                             <span class="c">#(e.g., defects) if yes we don&#39;t want to kill it</span>
                             <span class="c">#because there is a change in e- density (brmix error)</span>
-                            <span class="k">if</span> <span class="n">err</span> <span class="o">==</span> <span class="s">&quot;brmix&quot;</span> <span class="ow">and</span> <span class="s">&#39;NELEC&#39;</span> <span class="ow">in</span> <span class="n">vi</span><span class="p">[</span><span class="s">&#39;INCAR&#39;</span><span class="p">]:</span>
+                            <span class="k">if</span> <span class="n">err</span> <span class="o">==</span> <span class="s">&quot;brmix&quot;</span> <span class="ow">and</span> <span class="s">&#39;NELECT&#39;</span> <span class="ow">in</span> <span class="n">incar</span><span class="p">:</span>
                                 <span class="k">continue</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
@@ -171,14 +176,26 @@
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
                             <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;SYMPREC&quot;</span><span class="p">:</span> <span class="mf">1e-8</span><span class="p">}}})</span>
 
-        <span class="k">if</span> <span class="s">&quot;brmix&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="ow">and</span> <span class="s">&quot;NELECT&quot;</span> <span class="ow">in</span> <span class="n">vi</span><span class="p">[</span><span class="s">&quot;INCAR&quot;</span><span class="p">]:</span>
-            <span class="c">#brmix error always shows up after DAV steps if NELECT is specified</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&quot;brmix&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s">&quot;brmix&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="ow">or</span> <span class="s">&quot;zpotrf&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s">&quot;brmix&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
                             <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;ISYM&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}})</span>
             <span class="c"># Based on VASP forum&#39;s recommendation, you should delete the</span>
-            <span class="c"># CHGCAR and WAVECAR when dealing with these errors.</span>
+            <span class="c"># CHGCAR and WAVECAR when dealing with this error.</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;file&quot;</span><span class="p">:</span> <span class="s">&quot;CHGCAR&quot;</span><span class="p">,</span>
+                            <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_file_delete&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;mode&#39;</span><span class="p">:</span> <span class="s">&quot;actual&quot;</span><span class="p">}}})</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;file&quot;</span><span class="p">:</span> <span class="s">&quot;WAVECAR&quot;</span><span class="p">,</span>
+                            <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_file_delete&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;mode&#39;</span><span class="p">:</span> <span class="s">&quot;actual&quot;</span><span class="p">}}})</span>
+
+        <span class="k">if</span> <span class="s">&quot;zpotrf&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="c">#Based on VASP forum&#39;s recommendation, you should</span>
+            <span class="c">#decrease POTIM with this error</span>
+            <span class="n">potim</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vi</span><span class="p">[</span><span class="s">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;POTIM&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span>
+
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
+                            <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;ISYM&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;POTIM&quot;</span><span class="p">:</span> <span class="n">potim</span><span class="p">}}})</span>
+            <span class="c"># Based on VASP forum&#39;s recommendation, you should delete the</span>
+            <span class="c"># CHGCAR and WAVECAR when dealing with this error.</span>
+
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;file&quot;</span><span class="p">:</span> <span class="s">&quot;CHGCAR&quot;</span><span class="p">,</span>
                             <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_file_delete&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;mode&#39;</span><span class="p">:</span> <span class="s">&quot;actual&quot;</span><span class="p">}}})</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;file&quot;</span><span class="p">:</span> <span class="s">&quot;WAVECAR&quot;</span><span class="p">,</span>
@@ -301,15 +318,18 @@
               <span class="s">&quot; lattices.&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">Vasprun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_vasprun</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">converged</span><span class="p">:</span>
+            <span class="c"># According to VASP admins, you can disregard this error</span>
+            <span class="c"># if symmetry is off</span>
+            <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">converged</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;ISYM&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)):</span>
                 <span class="k">return</span> <span class="bp">False</span>
+            <span class="c"># do not apply if job was terminated (vasprun.xml cannot be read)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">l</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="bp">True</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">pass</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
-                <span class="n">l</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="bp">True</span>
         <span class="k">return</span> <span class="bp">False</span>
 </div>
 <div class="viewcode-block" id="MeshSymmetryErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.MeshSymmetryErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -354,10 +374,10 @@
 <div class="viewcode-block" id="UnconvergedErrorHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.UnconvergedErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">Vasprun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">converged</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">False</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">converged</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">pass</span>
         <span class="k">return</span> <span class="bp">False</span>
 </div>
 <div class="viewcode-block" id="UnconvergedErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.UnconvergedErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -367,7 +387,7 @@
                    <span class="p">{</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
                     <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
                                         <span class="s">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s">&quot;Normal&quot;</span><span class="p">,</span>
-                                        <span class="s">&quot;NELMDL&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+                                        <span class="s">&quot;NELMDL&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span>
                                         <span class="s">&quot;BMIX&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span>
                                         <span class="s">&quot;AMIX_MAG&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
                                         <span class="s">&quot;BMIX_MAG&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">}}}]</span>
@@ -386,6 +406,58 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__name__</span>
 
 </div>
+<div class="viewcode-block" id="MaxForceErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.MaxForceErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">MaxForceErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks that the desired force convergence has been achieved. Otherwise</span>
+<span class="sd">    restarts the run with smaller EDIFF. (This is necessary since energy</span>
+<span class="sd">    and force convergence criteria cannot be set simultaneously)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">is_monitor</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="o">=</span><span class="s">&quot;vasprun.xml&quot;</span><span class="p">,</span>
+                 <span class="n">max_force_threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            input_filename (str): name of the vasp INCAR file</span>
+<span class="sd">            output_filename (str): name to look for the vasprun</span>
+<span class="sd">            max_force_threshold (float): Threshold for max force for</span>
+<span class="sd">                restarting the run. (typically should be set to the value</span>
+<span class="sd">                that the creator looks for)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span> <span class="o">=</span> <span class="n">output_filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_force_threshold</span> <span class="o">=</span> <span class="n">max_force_threshold</span>
+
+<div class="viewcode-block" id="MaxForceErrorHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.MaxForceErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">Vasprun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">)</span>
+            <span class="n">max_force</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span>
+                             <span class="ow">in</span> <span class="n">v</span><span class="o">.</span><span class="n">ionic_steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&quot;forces&quot;</span><span class="p">]])</span>
+            <span class="k">if</span> <span class="n">max_force</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_force_threshold</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="MaxForceErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.MaxForceErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">backup</span><span class="p">([</span><span class="s">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">,</span> <span class="s">&quot;OUTCAR&quot;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">])</span>
+        <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">ediff</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vi</span><span class="p">[</span><span class="s">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;EDIFF&quot;</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">))</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&quot;file&quot;</span><span class="p">:</span> <span class="s">&quot;CONTCAR&quot;</span><span class="p">,</span>
+                    <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;dest&quot;</span><span class="p">:</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">}}},</span>
+                   <span class="p">{</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
+                    <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;EDIFF&quot;</span><span class="p">:</span> <span class="n">ediff</span><span class="o">*</span><span class="mf">0.75</span><span class="p">}}}]</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">(</span><span class="n">actions</span><span class="o">=</span><span class="p">[</span><span class="n">DictActions</span><span class="p">,</span> <span class="n">FileActions</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&quot;dict&quot;</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
+                <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]])</span>
+            <span class="k">elif</span> <span class="s">&quot;file&quot;</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
+                <span class="n">m</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="s">&quot;file&quot;</span><span class="p">])</span>
+        <span class="n">vi</span><span class="p">[</span><span class="s">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="s">&quot;INCAR&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;MaxForce&quot;</span><span class="p">],</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+
+</div></div>
 <div class="viewcode-block" id="PotimErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">PotimErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if a run has excessively large positive energy changes.</span>
@@ -677,6 +749,146 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer_time</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
         <span class="n">WalltimeHandler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">buffer_time</span><span class="o">=</span><span class="n">buffer_time</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="CheckpointHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.CheckpointHandler">[docs]</a><span class="k">class</span> <span class="nc">CheckpointHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is not an error handler per se, but rather a checkpointer. What this</span>
+<span class="sd">    does is that every X seconds, a STOPCAR and CHKPT will be written. This</span>
+<span class="sd">    forces VASP to stop at the end of the next ionic step. The files are then</span>
+<span class="sd">    copied into a subdir, and then the job is restarted. To use this proper,</span>
+<span class="sd">    max_errors in Custodian must be set to a very high value, and you</span>
+<span class="sd">    probably wouldn&#39;t want to use any standard VASP error handlers. The</span>
+<span class="sd">    checkpoint will be stored in subdirs chk_#. This should be used in</span>
+<span class="sd">    combiantion with the StoppedRunHandler.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">is_monitor</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="c"># The CheckpointHandler should not terminate as we want VASP to terminate</span>
+    <span class="c"># itself naturally with the STOPCAR.</span>
+    <span class="n">is_terminating</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">3600</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the handler with an interval.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            interval (int): Interval at which to checkpoint in seconds.</span>
+<span class="sd">            Defaults to 3600 (1 hr).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">=</span> <span class="n">interval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chk_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="CheckpointHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.CheckpointHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">run_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span>
+        <span class="n">total_secs</span> <span class="o">=</span> <span class="n">run_time</span><span class="o">.</span><span class="n">seconds</span> <span class="o">+</span> <span class="n">run_time</span><span class="o">.</span><span class="n">days</span> <span class="o">*</span> <span class="mi">3600</span> <span class="o">*</span> <span class="mi">24</span>
+        <span class="k">if</span> <span class="n">total_secs</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="CheckpointHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.CheckpointHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="s">&quot;LSTOP = .TRUE.&quot;</span>
+        <span class="n">chkpt_content</span> <span class="o">=</span> <span class="s">&quot;Index: </span><span class="si">%d</span><span class="se">\n</span><span class="s">Time: </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chk_counter</span><span class="p">,</span>
+                                                     <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chk_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c">#Write STOPCAR</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&quot;file&quot;</span><span class="p">:</span> <span class="s">&quot;STOPCAR&quot;</span><span class="p">,</span>
+                    <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_file_create&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;content&#39;</span><span class="p">:</span> <span class="n">content</span><span class="p">}}},</span>
+                   <span class="p">{</span><span class="s">&quot;file&quot;</span><span class="p">:</span> <span class="s">&quot;chkpt.yaml&quot;</span><span class="p">,</span>
+                    <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_file_create&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;content&#39;</span><span class="p">:</span> <span class="n">chkpt_content</span><span class="p">}}}]</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">(</span><span class="n">actions</span><span class="o">=</span><span class="p">[</span><span class="n">FileActions</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="s">&quot;file&quot;</span><span class="p">])</span>
+
+        <span class="c"># Reset the clock.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Checkpoint reached&quot;</span><span class="p">],</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;CheckpointHandler with interval </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span>
+
+</div>
+<div class="viewcode-block" id="StoppedRunHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.StoppedRunHandler">[docs]</a><span class="k">class</span> <span class="nc">StoppedRunHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is not an error handler per se, but rather a checkpointer. What this</span>
+<span class="sd">    does is that every X seconds, a STOPCAR will be written. This forces VASP to</span>
+<span class="sd">    stop at the end of the next ionic step. The files are then copied into a</span>
+<span class="sd">    subdir, and then the job is restarted. To use this proper, max_errors in</span>
+<span class="sd">    Custodian must be set to a very high value, and you probably wouldn&#39;t</span>
+<span class="sd">    want to use any standard VASP error handlers. The checkpoint will be</span>
+<span class="sd">    stored in subdirs chk_#. This should be used in combiantion with the</span>
+<span class="sd">    StoppedRunHandler.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">is_monitor</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="c"># The CheckpointHandler should not terminate as we want VASP to terminate</span>
+    <span class="c"># itself naturally with the STOPCAR.</span>
+    <span class="n">is_terminating</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="StoppedRunHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.StoppedRunHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s">&quot;chkpt.yaml&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="StoppedRunHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.StoppedRunHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">loadfn</span><span class="p">(</span><span class="s">&quot;chkpt.yaml&quot;</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s">&quot;Index&quot;</span><span class="p">]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">make_archive</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s">&quot;vasp.chk.</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">),</span> <span class="s">&quot;gztar&quot;</span><span class="p">)</span>
+
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&quot;file&quot;</span><span class="p">:</span> <span class="s">&quot;CONTCAR&quot;</span><span class="p">,</span>
+                    <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;dest&quot;</span><span class="p">:</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">}}}]</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">(</span><span class="n">actions</span><span class="o">=</span><span class="p">[</span><span class="n">FileActions</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="s">&quot;file&quot;</span><span class="p">])</span>
+
+        <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;Checkpoint&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">})</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Stopped run.&quot;</span><span class="p">],</span>
+                <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;StoppedRunHandler&quot;</span>
+
+</div>
+<div class="viewcode-block" id="BadVasprunXMLHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.BadVasprunXMLHandler">[docs]</a><span class="k">class</span> <span class="nc">BadVasprunXMLHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handler to properly terminate a run when a bad vasprun.xml is found.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">is_monitor</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="n">is_terminating</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vasprunxml</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="BadVasprunXMLHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.BadVasprunXMLHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vasprunxml</span> <span class="o">=</span> <span class="n">_get_vasprun</span><span class="p">()</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">Vasprun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vasprunxml</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="BadVasprunXMLHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.BadVasprunXMLHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Bad vasprun.xml in </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">vasprunxml</span><span class="p">],</span>
+                <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;BadVasprunXMLHandler&quot;</span>
+
+</div>
+<span class="k">def</span> <span class="nf">_get_vasprun</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s">&quot;.&quot;</span><span class="p">):</span>
+    <span class="n">vaspruns</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s">&quot;vasprun.xml*&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">vaspruns</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">vaspruns</span> <span class="k">else</span> <span class="bp">None</span>
 </pre></div>
 
           </div>
@@ -710,7 +922,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.4 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.5 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>

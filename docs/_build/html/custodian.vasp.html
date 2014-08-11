@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp package &mdash; custodian 0.7.4 documentation</title>
+    <title>custodian.vasp package &mdash; custodian 0.7.5 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.4',
+        VERSION:     '0.7.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.4 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.7.5 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.5 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -69,6 +69,76 @@
 <p>This module implements specific error handlers for VASP runs. These handlers
 tries to detect common errors in vasp runs and attempt to fix them on the fly
 by modifying the input files.</p>
+<dl class="class">
+<dt id="custodian.vasp.handlers.BadVasprunXMLHandler">
+<em class="property">class </em><tt class="descname">BadVasprunXMLHandler</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#BadVasprunXMLHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.BadVasprunXMLHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<p>Handler to properly terminate a run when a bad vasprun.xml is found.</p>
+<dl class="method">
+<dt id="custodian.vasp.handlers.BadVasprunXMLHandler.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#BadVasprunXMLHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.BadVasprunXMLHandler.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.handlers.BadVasprunXMLHandler.correct">
+<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#BadVasprunXMLHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.BadVasprunXMLHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.BadVasprunXMLHandler.is_monitor">
+<tt class="descname">is_monitor</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.BadVasprunXMLHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.BadVasprunXMLHandler.is_terminating">
+<tt class="descname">is_terminating</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.BadVasprunXMLHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="custodian.vasp.handlers.CheckpointHandler">
+<em class="property">class </em><tt class="descname">CheckpointHandler</tt><big>(</big><em>interval=3600</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#CheckpointHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<p>This is not an error handler per se, but rather a checkpointer. What this
+does is that every X seconds, a STOPCAR and CHKPT will be written. This
+forces VASP to stop at the end of the next ionic step. The files are then
+copied into a subdir, and then the job is restarted. To use this proper,
+max_errors in Custodian must be set to a very high value, and you
+probably wouldn&#8217;t want to use any standard VASP error handlers. The
+checkpoint will be stored in subdirs chk_#. This should be used in
+combiantion with the StoppedRunHandler.</p>
+<p>Initializes the handler with an interval.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>interval</strong> (<em>int</em>) &#8211; Interval at which to checkpoint in seconds.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="custodian.vasp.handlers.CheckpointHandler.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#CheckpointHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.handlers.CheckpointHandler.correct">
+<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#CheckpointHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.CheckpointHandler.is_monitor">
+<tt class="descname">is_monitor</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.CheckpointHandler.is_terminating">
+<tt class="descname">is_terminating</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="class">
 <dt id="custodian.vasp.handlers.FrozenJobErrorHandler">
 <em class="property">class </em><tt class="descname">FrozenJobErrorHandler</tt><big>(</big><em>output_filename='vasp.out'</em>, <em>timeout=3600</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler" title="Permalink to this definition">¶</a></dt>
@@ -106,6 +176,37 @@ frozen. Defaults to 3600 seconds, i.e., 1 hour.</li>
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.FrozenJobErrorHandler.is_monitor">
 <tt class="descname">is_monitor</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="custodian.vasp.handlers.MaxForceErrorHandler">
+<em class="property">class </em><tt class="descname">MaxForceErrorHandler</tt><big>(</big><em>output_filename='vasprun.xml'</em>, <em>max_force_threshold=0.5</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<p>Checks that the desired force convergence has been achieved. Otherwise
+restarts the run with smaller EDIFF. (This is necessary since energy
+and force convergence criteria cannot be set simultaneously)</p>
+<p>Args:
+input_filename (str): name of the vasp INCAR file
+output_filename (str): name to look for the vasprun
+max_force_threshold (float): Threshold for max force for</p>
+<blockquote>
+<div>restarting the run. (typically should be set to the value
+that the creator looks for)</div></blockquote>
+<dl class="method">
+<dt id="custodian.vasp.handlers.MaxForceErrorHandler.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.handlers.MaxForceErrorHandler.correct">
+<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.MaxForceErrorHandler.is_monitor">
+<tt class="descname">is_monitor</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -231,6 +332,40 @@ this only if it is different from the default (unlikely).</li>
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.PotimErrorHandler.is_monitor">
 <tt class="descname">is_monitor</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="custodian.vasp.handlers.StoppedRunHandler">
+<em class="property">class </em><tt class="descname">StoppedRunHandler</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StoppedRunHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<p>This is not an error handler per se, but rather a checkpointer. What this
+does is that every X seconds, a STOPCAR will be written. This forces VASP to
+stop at the end of the next ionic step. The files are then copied into a
+subdir, and then the job is restarted. To use this proper, max_errors in
+Custodian must be set to a very high value, and you probably wouldn&#8217;t
+want to use any standard VASP error handlers. The checkpoint will be
+stored in subdirs chk_#. This should be used in combiantion with the
+StoppedRunHandler.</p>
+<dl class="method">
+<dt id="custodian.vasp.handlers.StoppedRunHandler.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StoppedRunHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.handlers.StoppedRunHandler.correct">
+<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StoppedRunHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.StoppedRunHandler.is_monitor">
+<tt class="descname">is_monitor</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.StoppedRunHandler.is_terminating">
+<tt class="descname">is_terminating</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -384,49 +519,47 @@ LSTOP = .TRUE.</li>
 <dt>
 <tt class="descname">NELM = 100</tt></dt>
 <dt>
+<tt class="descname">PREC = Accurate</tt></dt>
+<dt>
 <tt class="descname">IBRION = 2</tt></dt>
 <dt>
-<tt class="descname">LDAUTYPE = 2</tt></dt>
+<tt class="descname">ENCUT = 520</tt></dt>
+<dt>
+<tt class="descname">ISMEAR = -5</tt></dt>
 <dt>
 <tt class="descname">LWAVE = False</tt></dt>
 <dt>
+<tt class="descname">LREAL = AUTO</tt></dt>
+<dt>
 <tt class="descname">SIGMA = 0.05</tt></dt>
 <dt>
-<tt class="descname">MAGMOM = {u'Ni': 2, u'Mn4+': 3, u'Co': 5, u'Ni3+': 1, u'Fe2+': 4, u'Mn': 5, u'Co3+': 0.6, u'Fe3+': 5, u'Ni4+': 0.6, u'Mn2+': 5, u'Fe': 5, u'W': 5, u'Mn3+': 4, u'Mo': 5, u'Cr': 5, u'V': 5, u'Fe4+': 4, u'Co4+': 1, u'Ta': 5}</tt></dt>
+<tt class="descname">MAGMOM = {'Ni': 2, 'V': 5, 'Ni3+': 1, 'Mo': 5, 'Mn': 5, 'Mn2+': 5, 'W': 5, 'Mn3+': 4, 'Ni4+': 0.6, 'Fe4+': 4, 'Ta': 5, 'Mn4+': 3, 'Co': 5, 'Fe2+': 4, 'Co3+': 0.6, 'Fe3+': 5, 'Fe': 5, 'Cr': 5, 'Co4+': 1}</tt></dt>
 <dt>
 <tt class="descname">NELMIN = 6</tt></dt>
 <dt>
-<tt class="descname">LDAUL = {u'S': {u'Mn': 2.5, u'Fe': 2}, u'O': {u'Ni': 2, u'Co': 2, u'Ag': 2, u'Mo': 2, u'Mn': 2, u'Re': 2, u'Fe': 2, u'W': 2, u'V': 2, u'Cr': 2, u'Nb': 2, u'Cu': 2, u'Ta': 2}, u'F': {u'Ni': 2, u'Co': 2, u'Ag': 2, u'Mo': 2, u'Mn': 2, u'Re': 2, u'Fe': 2, u'W': 2, u'V': 2, u'Cr': 2, u'Nb': 2, u'Cu': 2, u'Ta': 2}}</tt></dt>
+<tt class="descname">LDAU = True</tt></dt>
 <dt>
-<tt class="descname">LDAUJ = {u'S': {u'Mn': 0, u'Fe': 0}, u'O': {u'Ni': 0, u'Co': 0, u'Ag': 0, u'Mo': 0, u'Mn': 0, u'Re': 0, u'Fe': 0, u'W': 0, u'V': 0, u'Cr': 0, u'Nb': 0, u'Cu': 0, u'Ta': 0}, u'F': {u'Ni': 0, u'Co': 0, u'Ag': 0, u'Mo': 0, u'Mn': 0, u'Re': 0, u'Fe': 0, u'W': 0, u'V': 0, u'Cr': 0, u'Nb': 0, u'Cu': 0, u'Ta': 0}}</tt></dt>
+<tt class="descname">LDAUL = {'S': {'Mn': 2.5, 'Fe': 2}, 'O': {'Ni': 2, 'Co': 2, 'Ag': 2, 'Mo': 2, 'Mn': 2, 'Re': 2, 'Fe': 2, 'W': 2, 'V': 2, 'Cr': 2, 'Nb': 2, 'Cu': 2, 'Ta': 2}, 'F': {'Ni': 2, 'Co': 2, 'Ag': 2, 'Mo': 2, 'Mn': 2, 'Re': 2, 'Fe': 2, 'W': 2, 'V': 2, 'Cr': 2, 'Nb': 2, 'Cu': 2, 'Ta': 2}}</tt></dt>
 <dt>
-<tt class="descname">ENCUT = 520</tt></dt>
+<tt class="descname">LDAUJ = {'S': {'Mn': 0, 'Fe': 0}, 'O': {'Ni': 0, 'Co': 0, 'Ag': 0, 'Mo': 0, 'Mn': 0, 'Re': 0, 'Fe': 0, 'W': 0, 'V': 0, 'Cr': 0, 'Nb': 0, 'Cu': 0, 'Ta': 0}, 'F': {'Ni': 0, 'Co': 0, 'Ag': 0, 'Mo': 0, 'Mn': 0, 'Re': 0, 'Fe': 0, 'W': 0, 'V': 0, 'Cr': 0, 'Nb': 0, 'Cu': 0, 'Ta': 0}}</tt></dt>
+<dt>
+<tt class="descname">LDAUTYPE = 2</tt></dt>
 <dt>
 <tt class="descname">ISIF = 3</tt></dt>
 <dt>
 <tt class="descname">ICHARG = 1</tt></dt>
 <dt>
-<tt class="descname">LDAUU = {u'S': {u'Mn': 2.5, u'Fe': 1.9}, u'O': {u'Ni': 6, u'Co': 3.4, u'Ag': 1.5, u'Mo': 4.38, u'Mn': 3.9, u'Re': 2, u'Fe': 4.0, u'W': 4.0, u'V': 3.1, u'Cr': 3.5, u'Nb': 1.5, u'Cu': 4, u'Ta': 2}, u'F': {u'Ni': 6, u'Co': 3.4, u'Ag': 1.5, u'Mo': 4.38, u'Mn': 3.9, u'Re': 2, u'Fe': 4.0, u'W': 4.0, u'V': 3.1, u'Cr': 3.5, u'Nb': 1.5, u'Cu': 4, u'Ta': 2}}</tt></dt>
-<dt>
-<tt class="descname">EDIFF = 5e-05</tt></dt>
-<dt>
-<tt class="descname">NSW = 99</tt></dt>
-<dt>
-<tt class="descname">LREAL = AUTO</tt></dt>
-<dt>
-<tt class="descname">ISMEAR = -5</tt></dt>
-<dt>
-<tt class="descname">NPAR = 1</tt></dt>
-<dt>
-<tt class="descname">PREC = Accurate</tt></dt>
-<dt>
-<tt class="descname">LDAU = True</tt></dt>
-<dt>
 <tt class="descname">ALGO = FAST</tt></dt>
+<dt>
+<tt class="descname">LDAUU = {'S': {'Mn': 2.5, 'Fe': 1.9}, 'O': {'Ni': 6, 'Co': 3.4, 'Ag': 1.5, 'Mo': 4.38, 'Mn': 3.9, 'Re': 2, 'Fe': 4.0, 'W': 4.0, 'V': 3.1, 'Cr': 3.5, 'Nb': 1.5, 'Cu': 4, 'Ta': 2}, 'F': {'Ni': 6, 'Co': 3.4, 'Ag': 1.5, 'Mo': 4.38, 'Mn': 3.9, 'Re': 2, 'Fe': 4.0, 'W': 4.0, 'V': 3.1, 'Cr': 3.5, 'Nb': 1.5, 'Cu': 4, 'Ta': 2}}</tt></dt>
 <dt>
 <tt class="descname">ISPIN = 2</tt></dt>
 <dt>
+<tt class="descname">EDIFF = 5e-05</tt></dt>
+<dt>
 <tt class="descname">LORBIT = 11</tt></dt>
+<dt>
+<tt class="descname">NSW = 99</tt></dt>
 <dt>
 <tt class="descname"></tt></dt>
 <dt>
@@ -440,78 +573,6 @@ LSTOP = .TRUE.</li>
 <dt>
 <tt class="descname">Ru = Ru_pv</tt></dt>
 <dt>
-<tt class="descname">Re = Re</tt></dt>
-<dt>
-<tt class="descname">Rb = Rb_pv</tt></dt>
-<dt>
-<tt class="descname">Rh = Rh</tt></dt>
-<dt>
-<tt class="descname">Be = Be</tt></dt>
-<dt>
-<tt class="descname">Ba = Ba_sv</tt></dt>
-<dt>
-<tt class="descname">Bi = Bi</tt></dt>
-<dt>
-<tt class="descname">Br = Br</tt></dt>
-<dt>
-<tt class="descname">H = H</tt></dt>
-<dt>
-<tt class="descname">P = P</tt></dt>
-<dt>
-<tt class="descname">Os = Os</tt></dt>
-<dt>
-<tt class="descname">Ge = Ge</tt></dt>
-<dt>
-<tt class="descname">Gd = Gd</tt></dt>
-<dt>
-<tt class="descname">Ga = Ga</tt></dt>
-<dt>
-<tt class="descname">Pr = Pr</tt></dt>
-<dt>
-<tt class="descname">Pt = Pt</tt></dt>
-<dt>
-<tt class="descname">Pu = Pu</tt></dt>
-<dt>
-<tt class="descname">C = C</tt></dt>
-<dt>
-<tt class="descname">Pb = Pb</tt></dt>
-<dt>
-<tt class="descname">Pa = Pa</tt></dt>
-<dt>
-<tt class="descname">Pd = Pd</tt></dt>
-<dt>
-<tt class="descname">Cd = Cd</tt></dt>
-<dt>
-<tt class="descname">Pm = Pm</tt></dt>
-<dt>
-<tt class="descname">Ho = Ho_3</tt></dt>
-<dt>
-<tt class="descname">Hf = Hf</tt></dt>
-<dt>
-<tt class="descname">Hg = Hg</tt></dt>
-<dt>
-<tt class="descname">He = He</tt></dt>
-<dt>
-<tt class="descname">Mg = Mg</tt></dt>
-<dt>
-<tt class="descname">K = K_sv</tt></dt>
-<dt>
-<tt class="descname">Mn = Mn</tt></dt>
-<dt>
-<tt class="descname">O = O</tt></dt>
-<dt>
-<tt class="descname">S = S</tt></dt>
-<dt>
-<tt class="descname">W = W_pv</tt></dt>
-<dt>
-<tt class="descname">Zn = Zn</tt></dt>
-<dt>
-<tt class="descname">Eu = Eu</tt></dt>
-<dt>
-<tt class="descname">Zr = Zr</tt></dt>
-<dt>
-<tt class="descname">Er = Er_3</tt></dt>
-<dt>
 <tt class="descname">Ni = Ni</tt></dt>
 <dt>
 <tt class="descname">Na = Na</tt></dt>
@@ -522,19 +583,41 @@ LSTOP = .TRUE.</li>
 <dt>
 <tt class="descname">Ne = Ne</tt></dt>
 <dt>
+<tt class="descname">Re = Re</tt></dt>
+<dt>
+<tt class="descname">Rb = Rb_pv</tt></dt>
+<dt>
 <tt class="descname">Np = Np</tt></dt>
 <dt>
+<tt class="descname">Rh = Rh</tt></dt>
+<dt>
+<tt class="descname">Be = Be</tt></dt>
+<dt>
+<tt class="descname">Ba = Ba_sv</tt></dt>
+<dt>
+<tt class="descname">La = La</tt></dt>
+<dt>
+<tt class="descname">Bi = Bi</tt></dt>
+<dt>
 <tt class="descname">Fe = Fe</tt></dt>
+<dt>
+<tt class="descname">Br = Br</tt></dt>
 <dt>
 <tt class="descname">B = B</tt></dt>
 <dt>
 <tt class="descname">F = F</tt></dt>
 <dt>
-<tt class="descname">Sr = Sr_sv</tt></dt>
+<tt class="descname">H = H</tt></dt>
+<dt>
+<tt class="descname">Dy = Dy_3</tt></dt>
+<dt>
+<tt class="descname">Lu = Lu_3</tt></dt>
+<dt>
+<tt class="descname">Ac = Ac</tt></dt>
 <dt>
 <tt class="descname">N = N</tt></dt>
 <dt>
-<tt class="descname">Kr = Kr</tt></dt>
+<tt class="descname">P = P</tt></dt>
 <dt>
 <tt class="descname">Si = Si</tt></dt>
 <dt>
@@ -548,6 +631,8 @@ LSTOP = .TRUE.</li>
 <dt>
 <tt class="descname">Sb = Sb</tt></dt>
 <dt>
+<tt class="descname">Os = Os</tt></dt>
+<dt>
 <tt class="descname">Se = Se</tt></dt>
 <dt>
 <tt class="descname">Co = Co</tt></dt>
@@ -558,9 +643,13 @@ LSTOP = .TRUE.</li>
 <dt>
 <tt class="descname">Ce = Ce</tt></dt>
 <dt>
-<tt class="descname">Xe = Xe</tt></dt>
+<tt class="descname">Cd = Cd</tt></dt>
 <dt>
-<tt class="descname">Tm = Tm_3</tt></dt>
+<tt class="descname">Ge = Ge</tt></dt>
+<dt>
+<tt class="descname">Gd = Gd</tt></dt>
+<dt>
+<tt class="descname">Ga = Ga</tt></dt>
 <dt>
 <tt class="descname">Cs = Cs_sv</tt></dt>
 <dt>
@@ -568,39 +657,77 @@ LSTOP = .TRUE.</li>
 <dt>
 <tt class="descname">Cu = Cu</tt></dt>
 <dt>
-<tt class="descname">La = La</tt></dt>
-<dt>
-<tt class="descname">Li = Li</tt></dt>
-<dt>
-<tt class="descname">Tl = Tl</tt></dt>
-<dt>
-<tt class="descname">Lu = Lu_3</tt></dt>
+<tt class="descname">Pr = Pr</tt></dt>
 <dt>
 <tt class="descname">Th = Th</tt></dt>
 <dt>
+<tt class="descname">Pt = Pt</tt></dt>
+<dt>
+<tt class="descname">Pu = Pu</tt></dt>
+<dt>
+<tt class="descname">Mg = Mg</tt></dt>
+<dt>
+<tt class="descname">Li = Li</tt></dt>
+<dt>
+<tt class="descname">Pb = Pb</tt></dt>
+<dt>
+<tt class="descname">Tl = Tl</tt></dt>
+<dt>
+<tt class="descname">Pa = Pa</tt></dt>
+<dt>
+<tt class="descname">Pd = Pd</tt></dt>
+<dt>
 <tt class="descname">Ti = Ti</tt></dt>
 <dt>
-<tt class="descname">Te = Te</tt></dt>
+<tt class="descname">Xe = Xe</tt></dt>
 <dt>
 <tt class="descname">Tb = Tb_3</tt></dt>
 <dt>
 <tt class="descname">Tc = Tc</tt></dt>
 <dt>
-<tt class="descname">Ta = Ta</tt></dt>
+<tt class="descname">Pm = Pm</tt></dt>
+<dt>
+<tt class="descname">Te = Te</tt></dt>
 <dt>
 <tt class="descname">Yb = Yb</tt></dt>
 <dt>
-<tt class="descname">Dy = Dy_3</tt></dt>
+<tt class="descname">Ho = Ho_3</tt></dt>
+<dt>
+<tt class="descname">Sr = Sr_sv</tt></dt>
+<dt>
+<tt class="descname">Ta = Ta</tt></dt>
+<dt>
+<tt class="descname">Hf = Hf</tt></dt>
+<dt>
+<tt class="descname">Hg = Hg</tt></dt>
+<dt>
+<tt class="descname">He = He</tt></dt>
+<dt>
+<tt class="descname">C = C</tt></dt>
 <dt>
 <tt class="descname">I = I</tt></dt>
 <dt>
+<tt class="descname">K = K_sv</tt></dt>
+<dt>
+<tt class="descname">Mn = Mn</tt></dt>
+<dt>
+<tt class="descname">O = O</tt></dt>
+<dt>
+<tt class="descname">S = S</tt></dt>
+<dt>
 <tt class="descname">U = U</tt></dt>
+<dt>
+<tt class="descname">W = W_pv</tt></dt>
 <dt>
 <tt class="descname">Y = Y_sv</tt></dt>
 <dt>
-<tt class="descname">Ac = Ac</tt></dt>
+<tt class="descname">Mo = Mo_pv</tt></dt>
+<dt>
+<tt class="descname">Zn = Zn</tt></dt>
 <dt>
 <tt class="descname">Ag = Ag</tt></dt>
+<dt>
+<tt class="descname">Kr = Kr</tt></dt>
 <dt>
 <tt class="descname">Ir = Ir</tt></dt>
 <dt>
@@ -614,7 +741,13 @@ LSTOP = .TRUE.</li>
 <dt>
 <tt class="descname">In = In</tt></dt>
 <dt>
-<tt class="descname">Mo = Mo_pv</tt></dt>
+<tt class="descname">Eu = Eu</tt></dt>
+<dt>
+<tt class="descname">Tm = Tm_3</tt></dt>
+<dt>
+<tt class="descname">Zr = Zr</tt></dt>
+<dt>
+<tt class="descname">Er = Er_3</tt></dt>
 <dt>
 <tt class="descname">, auto_npar=True, auto_gamma=True, settings_override=None, gamma_vasp_cmd=None)</tt></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Job</span></tt></a></p>
@@ -796,7 +929,7 @@ and backing up.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.5 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

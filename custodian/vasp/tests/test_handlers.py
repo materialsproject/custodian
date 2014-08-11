@@ -286,7 +286,6 @@ class WalltimeHandlerTest(unittest.TestCase):
 
 class BadVasprunXMLHandlerTest(unittest.TestCase):
 
-
     def test_check_and_correct(self):
         os.chdir(os.path.join(test_dir, "bad_vasprun"))
         h = BadVasprunXMLHandler()

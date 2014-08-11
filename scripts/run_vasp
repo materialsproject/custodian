@@ -113,7 +113,7 @@ if __name__ == "__main__":
         "-hd", "--handlers", dest="handlers", nargs="+",
         default=["VaspErrorHandler", "MeshSymmetryErrorHandler",
                  "UnconvergedErrorHandler", "NonConvergingErrorHandler",
-                 "PotimErrorHandler"], type=str,
+                 "PotimErrorHandler", "BadVasprunXMLHandler"], type=str,
         help="The ErrorHandlers to use specified as string class names. Note "
              "that the error handlers will be initialized with no args, i.e.,"
              "default args will be assumed."

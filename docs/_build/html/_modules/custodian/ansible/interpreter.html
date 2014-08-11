@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.ansible.intepreter &mdash; custodian 0.7.5 documentation</title>
+    <title>custodian.ansible.interpreter &mdash; custodian 0.7.5 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -54,7 +54,7 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <h1>Source code for custodian.ansible.intepreter</h1><div class="highlight"><pre>
+  <h1>Source code for custodian.ansible.interpreter</h1><div class="highlight"><pre>
 <span class="c">#!/usr/bin/env python</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
@@ -77,7 +77,7 @@
 <span class="kn">from</span> <span class="nn">custodian.ansible.actions</span> <span class="kn">import</span> <span class="n">DictActions</span>
 
 
-<div class="viewcode-block" id="Modder"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.intepreter.Modder">[docs]</a><span class="k">class</span> <span class="nc">Modder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Modder"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.interpreter.Modder">[docs]</a><span class="k">class</span> <span class="nc">Modder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class to modify a dict/file/any object using a mongo-like language.</span>
 <span class="sd">    Keywords are mostly adopted from mongo&#39;s syntax, but instead of $, an</span>
@@ -120,7 +120,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">supported_actions</span><span class="p">[</span><span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">strict</span> <span class="o">=</span> <span class="n">strict</span>
 
-<div class="viewcode-block" id="Modder.modify"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.intepreter.Modder.modify">[docs]</a>    <span class="k">def</span> <span class="nf">modify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modification</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<div class="viewcode-block" id="Modder.modify"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.interpreter.Modder.modify">[docs]</a>    <span class="k">def</span> <span class="nf">modify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modification</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Note that modify makes actual in-place modifications. It does not</span>
 <span class="sd">        return a copy.</span>
@@ -140,7 +140,7 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;{} is not a supported action!&quot;</span>
                                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">action</span><span class="p">))</span>
 </div>
-<div class="viewcode-block" id="Modder.modify_object"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.intepreter.Modder.modify_object">[docs]</a>    <span class="k">def</span> <span class="nf">modify_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modification</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<div class="viewcode-block" id="Modder.modify_object"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.interpreter.Modder.modify_object">[docs]</a>    <span class="k">def</span> <span class="nf">modify_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modification</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Modify an object that supports pymatgen&#39;s to_dict and from_dict API.</span>
 

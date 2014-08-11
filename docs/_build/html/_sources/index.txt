@@ -22,6 +22,12 @@ calculations.
 Change log
 ==========
 
+v0.7.5
+------
+1. **Major** Custodian now exits with RuntimeError when max_errors or
+   unrecoverable_error is encountered.
+2. Added BadVasprunXMLHandler.
+
 v0.7.4
 ------
 1. auto_npar option in VaspJob now properly handles Hessian calculations.
