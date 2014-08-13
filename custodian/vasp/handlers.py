@@ -829,6 +829,55 @@ class BadVasprunXMLHandler(ErrorHandler):
         return "BadVasprunXMLHandler"
 
 
+class PositiveEnergyErrorHandler(ErrorHandler):
+    """
+    Check if a run has positive absolute energy.
+    If so, change ALGO from Fast to Normal or kill the job.
+    """
+    is_monitor = True
+
+    def __init__(self, output_filename="OSZICAR"):
+        """
+        Initializes the handler with the output file to check.
+
+        Args:
+            output_filename (str): This is the OSZICAR file. Change
+                this only if it is different from the default (unlikely).
+        """
+        self.output_filename = output_filename
+
+    def check(self):
+        try:
+            oszicar = Oszicar(self.output_filename)
+            if oszicar.final_energy > 0:
+                return True
+        except:
+            pass
+        return False
+
+    def correct(self):
+        # change ALGO = Fast to Normal if ALGO is !Normal
+        vi = VaspInput.from_directory(".")
+        algo = vi["INCAR"].get("ALGO", "Normal")
+        if algo.lower() not in ['normal', 'n']:
+            backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
+            actions = [{"dict": "INCAR",
+                        "action": {"_set": {"ALGO": "Normal"}}}]
+            m = Modder()
+            modified = []
+            for a in actions:
+                modified.append(a["dict"])
+                vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+            for f in modified:
+                vi[f].write_file(f)
+            return {"errors": ["Positive energy"], "actions": actions}
+        #Unfixable error. Just return None for actions.
+        else:
+            return {"errors": ["Positive energy"], "actions": None}
+
+    def __str__(self):
+        return "PositiveEnergyErrorHandler"
+
 def _get_vasprun(path="."):
     vaspruns = glob.glob(os.path.join(path, "vasprun.xml*"))
     return sorted(vaspruns, reverse=True)[0] if vaspruns else None

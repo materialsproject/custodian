@@ -21,7 +21,7 @@ import datetime
 
 from custodian.vasp.handlers import VaspErrorHandler, \
     UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler, \
-    MaxForceErrorHandler, BadVasprunXMLHandler
+    MaxForceErrorHandler, BadVasprunXMLHandler, PositiveEnergyErrorHandler
 from pymatgen.io.vaspio import Incar, Poscar
 
 
@@ -283,7 +283,6 @@ class WalltimeHandlerTest(unittest.TestCase):
         os.chdir(cwd)
 
 
-
 class BadVasprunXMLHandlerTest(unittest.TestCase):
 
     def test_check_and_correct(self):
@@ -298,6 +297,37 @@ class BadVasprunXMLHandlerTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         os.chdir(cwd)
+
+
+class PositiveEnergyHandlerTest(unittest.TestCase):
+
+    def setUp(cls):
+        os.chdir(test_dir)
+
+    def test_check_correct(self):
+        subdir = os.path.join(test_dir, "positive_energy")
+        os.chdir(subdir)
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("POSCAR", "POSCAR.orig")
+
+        h = PositiveEnergyErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ['Positive energy'])
+
+        os.remove(os.path.join(subdir, "error.1.tar.gz"))
+
+        incar = Incar.from_file('INCAR')
+
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("POSCAR.orig", "POSCAR")
+
+        self.assertEqual(incar['ALGO'], 'Normal')
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cwd)
+
 
 if __name__ == "__main__":
     unittest.main()
