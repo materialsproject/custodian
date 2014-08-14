@@ -313,7 +313,6 @@ def _do_check(handlers, terminate_func=None, skip_over_errors=False):
             if h.check():
                 terminal = h.is_terminating
                 if terminate_func is not None and h.is_terminating:
-                    terminal = True
                     terminate_func()
                 d = h.correct()
                 logger.error(str(d))
