@@ -79,7 +79,23 @@ class ExampleHandler2(ErrorHandler):
 
     @staticmethod
     def from_dict(d):
-        return ExampleHandler()
+        return ExampleHandler2()
+
+
+class ExampleHandler2b(ExampleHandler2):
+    """
+    This handler always result in an error. But is non-terminating. So no
+    runtime error.
+    """
+    is_terminating = False
+
+    def correct(self):
+        self.has_error = True
+        return {"errors": "error2", "actions": None}
+
+    @staticmethod
+    def from_dict(d):
+        return ExampleHandler2b()
 
 
 class CustodianTest(unittest.TestCase):
@@ -105,6 +121,12 @@ class CustodianTest(unittest.TestCase):
                       [ExampleJob(i, params) for i in xrange(njobs)],
                       max_errors=njobs, log_file=None)
         self.assertRaises(RuntimeError, c.run)
+        h = ExampleHandler2b(params)
+        c = Custodian([h],
+                      [ExampleJob(i, params) for i in xrange(njobs)],
+                      max_errors=njobs, log_file=None)
+        c.run()
+        self.assertTrue(h.has_error)
 
     def tearDown(self):
         for f in glob.glob("custodian.*.tar.gz"):
