@@ -75,7 +75,8 @@ class ExampleHandler2(ErrorHandler):
         return True
 
     def correct(self):
-        return {"errors": "errored", "actions": None}
+        self.has_error = True
+        return {"errors": "Unrecoverable error", "actions": None}
 
     @staticmethod
     def from_dict(d):
@@ -88,15 +89,6 @@ class ExampleHandler2b(ExampleHandler2):
     runtime error.
     """
     is_terminating = False
-
-    def correct(self):
-        self.has_error = True
-        return {"errors": "error2", "actions": None}
-
-    @staticmethod
-    def from_dict(d):
-        return ExampleHandler2b()
-
 
 class CustodianTest(unittest.TestCase):
 
@@ -117,10 +109,12 @@ class CustodianTest(unittest.TestCase):
     def test_unrecoverable(self):
         njobs = 100
         params = {"initial": 0, "total": 0}
-        c = Custodian([ExampleHandler2(params)],
+        h = ExampleHandler2(params)
+        c = Custodian([h],
                       [ExampleJob(i, params) for i in xrange(njobs)],
                       max_errors=njobs, log_file=None)
         self.assertRaises(RuntimeError, c.run)
+        self.assertTrue(h.has_error)
         h = ExampleHandler2b(params)
         c = Custodian([h],
                       [ExampleJob(i, params) for i in xrange(njobs)],
