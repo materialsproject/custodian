@@ -214,6 +214,8 @@ class VaspErrorHandler(ErrorHandler):
                     if grid_adjusted and 'NGZ' in line:
                         actions.append({"dict": "INCAR",
                                         "action": {"_set": changes_dict}})
+                        actions.append({"file": "CHGCAR",
+                            "action": {"_file_delete": {'mode': "actual"}}})
                         break
 
         m = Modder(actions=[DictActions, FileActions])
