@@ -82,6 +82,8 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["actions"],
                          [{'action': {'_set': {'NGX': 34}},
                            'dict': 'INCAR'}, {"file": "CHGCAR",
+                            "action": {"_file_delete": {'mode': "actual"}}},
+                          {"file": "WAVECAR",
                             "action": {"_file_delete": {'mode': "actual"}}}])
 
         clean_dir()

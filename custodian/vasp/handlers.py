@@ -212,10 +212,12 @@ class VaspErrorHandler(ErrorHandler):
                             pass
                     #Ensure that all NGX, NGY, NGZ have been checked
                     if grid_adjusted and 'NGZ' in line:
-                        actions.append({"dict": "INCAR",
-                                        "action": {"_set": changes_dict}})
-                        actions.append({"file": "CHGCAR",
-                            "action": {"_file_delete": {'mode': "actual"}}})
+                        actions.extend([{"dict": 
+                            "INCAR", "action": {"_set": changes_dict}},
+                            {"file": "CHGCAR", "action": 
+                             {"_file_delete": {'mode': "actual"}}},
+                            {"file": "WAVECAR","action": 
+                             {"_file_delete": {'mode': "actual"}}}])
                         break
 
         m = Modder(actions=[DictActions, FileActions])
