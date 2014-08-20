@@ -627,7 +627,7 @@ class WalltimeHandler(ErrorHandler):
     def check(self):
         if self.wall_time:
             run_time = datetime.datetime.now() - self.start_time
-            total_secs = run_time.seconds + run_time.days * 3600 * 24
+            total_secs = run_time.total_seconds()
             if not self.electronic_step_stop:
                 try:
                     # Intelligently determine time per ionic step.
@@ -648,8 +648,7 @@ class WalltimeHandler(ErrorHandler):
                     if nsteps > self.prev_check_nscf_steps:
                         steps_time = datetime.datetime.now() - \
                             self.prev_check_time
-                        steps_secs = steps_time.seconds + \
-                            steps_time.days * 3600 * 24
+                        steps_secs = steps_time.total_seconds()
                         step_timing = self.buffer_time * ceil(
                             (steps_secs /
                              (nsteps - self.prev_check_nscf_steps)) /
