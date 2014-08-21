@@ -328,7 +328,8 @@ class UnconvergedErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
-        backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
+        backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml", 
+                "vasp.out"])
         actions = [{"file": "CONTCAR",
                     "action": {"_file_copy": {"dest": "POSCAR"}}},
                    {"dict": "INCAR",
@@ -387,7 +388,7 @@ class MaxForceErrorHandler(ErrorHandler):
 
     def correct(self):
         backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR",
-                self.output_filename])
+                self.output_filename, "vasp.out"])
         vi = VaspInput.from_directory(".")
         ediff = float(vi["INCAR"].get("EDIFF", 1e-4))
         actions = [{"file": "CONTCAR",
@@ -554,7 +555,8 @@ class NonConvergingErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
         algo = vi["INCAR"].get("ALGO", "Normal")
         if self.change_algo and algo == "Fast":
-            backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
+            backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml",
+                    "vasp.out"])
             actions = [{"dict": "INCAR",
                         "action": {"_set": {"ALGO": "Normal"}}}]
             m = Modder()
