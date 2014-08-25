@@ -215,11 +215,14 @@ class VaspJob(Job):
                     shutil.copy(f, "{}{}".format(f, self.suffix))
 
         if self.copy_magmom and not self.final:
-            outcar = Outcar("OUTCAR")
-            magmom = [m['tot'] for m in outcar.magnetization]
-            incar = Incar.from_file("INCAR")
-            incar['MAGMOM'] = magmom
-            incar.write_file("INCAR")
+            try:
+                outcar = Outcar("OUTCAR")
+                magmom = [m['tot'] for m in outcar.magnetization]
+                incar = Incar.from_file("INCAR")
+                incar['MAGMOM'] = magmom
+                incar.write_file("INCAR")
+            except:
+                logging.error('MAGMOM copy from OUTCAR to INCAR failed')
 
         if self.gzipped:
             gzip_dir(".")
