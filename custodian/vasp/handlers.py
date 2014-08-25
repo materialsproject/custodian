@@ -363,7 +363,7 @@ class MaxForceErrorHandler(ErrorHandler):
     is_monitor = False
 
     def __init__(self, output_filename="vasprun.xml",
-                 max_force_threshold=0.5):
+                 max_force_threshold=0.25):
         """
         Args:
             input_filename (str): name of the vasp INCAR file
@@ -380,7 +380,7 @@ class MaxForceErrorHandler(ErrorHandler):
             v = Vasprun(self.output_filename)
             max_force = max([np.linalg.norm(a) for a
                              in v.ionic_steps[-1]["forces"]])
-            if max_force > self.max_force_threshold:
+            if max_force > self.max_force_threshold and v.converged is True:
                 return True
         except:
             pass
