@@ -20,7 +20,8 @@ import shutil
 import math
 import logging
 
-from pymatgen.io.vaspio.vasp_input import VaspInput
+from pymatgen.io.vaspio.vasp_input import VaspInput, Incar
+from pymatgen.io.vaspio.vasp_output import Outcar
 from pymatgen.io.smartio import read_structure
 from pymatgen.io.vaspio_set import MITVaspInputSet
 from pymatgen.serializers.json_coders import PMGJSONDecoder
@@ -48,7 +49,7 @@ class VaspJob(Job):
                  final=True, gzipped=False, backup=True,
                  default_vasp_input_set=MITVaspInputSet(), auto_npar=True,
                  auto_gamma=True, settings_override=None,
-                 gamma_vasp_cmd=None):
+                 gamma_vasp_cmd=None, copy_magmom=False):
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -100,6 +101,10 @@ class VaspJob(Job):
                 auto_gamma is True. Should follow the list style of
                 subprocess. Defaults to None, which means ".gamma" is added
                 to the last argument of the standard vasp_cmd.
+            copy_magmom (bool): Whether to copy the final magmom from the
+                OUTCAR to the next INCAR. Useful for multi-relaxation runs 
+                where the CHGCAR and WAVECAR are sometimes deleted (due to 
+                changes in fft grid, etc.). Only applies to non-final runs.
         """
         self.vasp_cmd = vasp_cmd
         self.output_file = output_file
@@ -112,6 +117,7 @@ class VaspJob(Job):
         self.auto_npar = auto_npar
         self.auto_gamma = auto_gamma
         self.gamma_vasp_cmd = gamma_vasp_cmd
+        self.copy_magmom = copy_magmom
 
     def setup(self):
         """
@@ -199,6 +205,7 @@ class VaspJob(Job):
     def postprocess(self):
         """
         Postprocessing includes renaming and gzipping where necessary.
+        Also copies the magmom to the incar if necessary
         """
         for f in VASP_OUTPUT_FILES + [self.output_file]:
             if os.path.exists(f):
@@ -206,6 +213,13 @@ class VaspJob(Job):
                     shutil.move(f, "{}{}".format(f, self.suffix))
                 elif self.suffix != "":
                     shutil.copy(f, "{}{}".format(f, self.suffix))
+
+        if self.copy_magmom and not self.final:
+            outcar = Outcar("OUTCAR")
+            magmom = [m['tot'] for m in outcar.magnetization]
+            incar = Incar.from_file("INCAR")
+            incar['MAGMOM'] = magmom
+            incar.write_file("INCAR")
 
         if self.gzipped:
             gzip_dir(".")
