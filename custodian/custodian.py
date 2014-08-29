@@ -291,7 +291,7 @@ class Custodian(object):
             run_time = end - start
 
             logger.info("Run completed. Total time taken = {}."
-                         .format(run_time))
+                        .format(run_time))
 
             if self.gzipped_output:
                 gzip_dir(".")
