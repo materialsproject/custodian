@@ -326,7 +326,7 @@ class QChemErrorHandler(ErrorHandler):
 
     def set_scf_initial_guess(self, guess="sad"):
         if "scf_guess" not in self.fix_step.params["rem"] \
-                or self.error_step_id == 0 \
+                or self.error_step_id > 0 \
                 or self.fix_step.params["rem"]["scf_guess"] != "read":
             self.fix_step.set_scf_initial_guess(guess)
 
