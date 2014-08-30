@@ -49,6 +49,25 @@ class VaspJobTest(unittest.TestCase):
         os.remove("POTCAR.orig")
         os.remove("POSCAR.orig")
 
+    def test_postprocess(self):
+        os.chdir(os.path.join(test_dir, 'postprocess'))
+        shutil.copy('INCAR', 'INCAR.backup')
+
+        v = VaspJob("hello", final=False, suffix=".test", copy_magmom=True)
+        v.postprocess()
+        incar = Incar.from_file("INCAR")
+        incar_prev = Incar.from_file("INCAR.test")
+
+        for f in ['INCAR', 'KPOINTS', 'CONTCAR', 'OSZICAR', 'OUTCAR',
+                  'POSCAR', 'vasprun.xml']:
+            self.assertTrue(os.path.isfile('{}.test'.format(f)))
+            os.remove('{}.test'.format(f))
+        shutil.move('INCAR.backup', 'INCAR')
+
+        self.assertAlmostEqual(incar['MAGMOM'], [3.007, 1.397, -0.189, -0.189])
+        self.assertAlmostEqual(incar_prev["MAGMOM"], [5, -5, 0.6, 0.6])
+
+
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

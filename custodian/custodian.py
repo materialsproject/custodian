@@ -267,7 +267,9 @@ class Custodian(object):
                     if not has_error:
                         job.postprocess()
                         break
-                    elif not filter(None, [x["actions"] for x in run_log[-1]["corrections"]]):
+                    elif not filter(
+                            None,
+                            [x["actions"] for x in run_log[-1]["corrections"]]):
                         # Check that no corrections were applied
                         logger.info("Unrecoverable error.")
                         unrecoverable = True
@@ -289,7 +291,7 @@ class Custodian(object):
             run_time = end - start
 
             logger.info("Run completed. Total time taken = {}."
-                         .format(run_time))
+                        .format(run_time))
 
             if self.gzipped_output:
                 gzip_dir(".")

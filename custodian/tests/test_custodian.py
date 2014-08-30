@@ -75,12 +75,20 @@ class ExampleHandler2(ErrorHandler):
         return True
 
     def correct(self):
-        return {"errors": "errored", "actions": None}
+        self.has_error = True
+        return {"errors": "Unrecoverable error", "actions": None}
 
     @staticmethod
     def from_dict(d):
-        return ExampleHandler()
+        return ExampleHandler2()
 
+
+class ExampleHandler2b(ExampleHandler2):
+    """
+    This handler always result in an error. But is non-terminating. So no
+    runtime error.
+    """
+    is_terminating = False
 
 class CustodianTest(unittest.TestCase):
 
@@ -101,10 +109,18 @@ class CustodianTest(unittest.TestCase):
     def test_unrecoverable(self):
         njobs = 100
         params = {"initial": 0, "total": 0}
-        c = Custodian([ExampleHandler2(params)],
+        h = ExampleHandler2(params)
+        c = Custodian([h],
                       [ExampleJob(i, params) for i in xrange(njobs)],
                       max_errors=njobs, log_file=None)
         self.assertRaises(RuntimeError, c.run)
+        self.assertTrue(h.has_error)
+        h = ExampleHandler2b(params)
+        c = Custodian([h],
+                      [ExampleJob(i, params) for i in xrange(njobs)],
+                      max_errors=njobs, log_file=None)
+        c.run()
+        self.assertTrue(h.has_error)
 
     def tearDown(self):
         for f in glob.glob("custodian.*.tar.gz"):

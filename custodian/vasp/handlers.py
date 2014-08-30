@@ -212,8 +212,12 @@ class VaspErrorHandler(ErrorHandler):
                             pass
                     #Ensure that all NGX, NGY, NGZ have been checked
                     if grid_adjusted and 'NGZ' in line:
-                        actions.append({"dict": "INCAR",
-                                        "action": {"_set": changes_dict}})
+                        actions.extend([{"dict": 
+                            "INCAR", "action": {"_set": changes_dict}},
+                            {"file": "CHGCAR", "action": 
+                             {"_file_delete": {'mode': "actual"}}},
+                            {"file": "WAVECAR","action": 
+                             {"_file_delete": {'mode': "actual"}}}])
                         break
 
         m = Modder(actions=[DictActions, FileActions])
@@ -324,7 +328,8 @@ class UnconvergedErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
-        backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
+        backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml", 
+                "vasp.out"])
         actions = [{"file": "CONTCAR",
                     "action": {"_file_copy": {"dest": "POSCAR"}}},
                    {"dict": "INCAR",
@@ -358,7 +363,7 @@ class MaxForceErrorHandler(ErrorHandler):
     is_monitor = False
 
     def __init__(self, output_filename="vasprun.xml",
-                 max_force_threshold=0.5):
+                 max_force_threshold=0.25):
         """
         Args:
             input_filename (str): name of the vasp INCAR file
@@ -375,7 +380,7 @@ class MaxForceErrorHandler(ErrorHandler):
             v = Vasprun(self.output_filename)
             max_force = max([np.linalg.norm(a) for a
                              in v.ionic_steps[-1]["forces"]])
-            if max_force > self.max_force_threshold:
+            if max_force > self.max_force_threshold and v.converged is True:
                 return True
         except:
             pass
@@ -383,7 +388,7 @@ class MaxForceErrorHandler(ErrorHandler):
 
     def correct(self):
         backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR",
-                self.output_filename])
+                self.output_filename, "vasp.out"])
         vi = VaspInput.from_directory(".")
         ediff = float(vi["INCAR"].get("EDIFF", 1e-4))
         actions = [{"file": "CONTCAR",
@@ -550,7 +555,8 @@ class NonConvergingErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
         algo = vi["INCAR"].get("ALGO", "Normal")
         if self.change_algo and algo == "Fast":
-            backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
+            backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml",
+                    "vasp.out"])
             actions = [{"dict": "INCAR",
                         "action": {"_set": {"ALGO": "Normal"}}}]
             m = Modder()
@@ -627,7 +633,7 @@ class WalltimeHandler(ErrorHandler):
     def check(self):
         if self.wall_time:
             run_time = datetime.datetime.now() - self.start_time
-            total_secs = run_time.seconds + run_time.days * 3600 * 24
+            total_secs = run_time.total_seconds()
             if not self.electronic_step_stop:
                 try:
                     # Intelligently determine time per ionic step.
@@ -648,8 +654,7 @@ class WalltimeHandler(ErrorHandler):
                     if nsteps > self.prev_check_nscf_steps:
                         steps_time = datetime.datetime.now() - \
                             self.prev_check_time
-                        steps_secs = steps_time.seconds + \
-                            steps_time.days * 3600 * 24
+                        steps_secs = steps_time.total_seconds()
                         step_timing = self.buffer_time * ceil(
                             (steps_secs /
                              (nsteps - self.prev_check_nscf_steps)) /
