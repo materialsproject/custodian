@@ -21,7 +21,7 @@ import datetime
 
 from custodian.vasp.handlers import VaspErrorHandler, \
     UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler, \
-    MaxForceErrorHandler, BadVasprunXMLHandler, PositiveEnergyErrorHandler
+    MaxForceErrorHandler, BadVasprunXMLHandler, PositiveEnergyErrorHandler, PotimErrorHandler
 from pymatgen.io.vaspio import Incar, Poscar
 
 
@@ -326,6 +326,40 @@ class PositiveEnergyHandlerTest(unittest.TestCase):
         shutil.move("POSCAR.orig", "POSCAR")
 
         self.assertEqual(incar['ALGO'], 'Normal')
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cwd)
+
+class PotimHandlerTest(unittest.TestCase):
+
+    def setUp(cls):
+        os.chdir(test_dir)
+
+    def test_check_correct(self):
+        subdir = os.path.join(test_dir, "potim")
+        os.chdir(subdir)
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("POSCAR", "POSCAR.orig")
+
+        incar = Incar.from_file('INCAR')
+        original_potim = incar['POTIM']
+
+        h = PotimErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ['POTIM'])
+
+        os.remove(os.path.join(subdir, "error.1.tar.gz"))
+
+        incar = Incar.from_file('INCAR')
+        new_potim = incar['POTIM']
+
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("POSCAR.orig", "POSCAR")
+
+        self.assertEqual(original_potim, new_potim)
+        self.assertEqual(incar['IBRION'], 3)
 
     @classmethod
     def tearDownClass(cls):
