@@ -22,6 +22,7 @@ import datetime
 import operator
 import shutil
 import glob
+import re
 
 import numpy as np
 
@@ -72,7 +73,9 @@ class VaspErrorHandler(ErrorHandler):
         "zpotrf": ["LAPACK: Routine ZPOTRF failed"],
         "amin": ["One of the lattice vectors is very long (>50 A), but AMIN"],
         "zbrent": ["ZBRENT: fatal internal in brackting"],
-        "aliasing": ["WARNING: small aliasing (wrap around) errors must be expected"]
+        "aliasing": ["WARNING: small aliasing (wrap around) errors must be expected"],
+        "aliasing_incar": ["Your FFT grids (NGX,NGY,NGZ) are not sufficient "
+                           "for an accurate"]
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -199,17 +202,12 @@ class VaspErrorHandler(ErrorHandler):
             with open("OUTCAR") as f:
                 grid_adjusted = False
                 changes_dict = {}
+                r = re.compile(".+aliasing errors.*(NG.)\s*to\s*(\d+)")
                 for line in f:
-                    if "aliasing errors" in line:
-                        try:
-                            grid_vector = line.split(" NG", 1)[1]
-                            value = [int(s) for s in grid_vector.split(" ")
-                                     if s.isdigit()][0]
-
-                            changes_dict["NG" + grid_vector[0]] = value
-                            grid_adjusted = True
-                        except (IndexError, ValueError):
-                            pass
+                    m = r.match(line)
+                    if m:
+                        changes_dict[m.group(1)] = int(m.group(2))
+                        grid_adjusted = True
                     #Ensure that all NGX, NGY, NGZ have been checked
                     if grid_adjusted and 'NGZ' in line:
                         actions.extend([{"dict": 
@@ -219,6 +217,16 @@ class VaspErrorHandler(ErrorHandler):
                             {"file": "WAVECAR","action": 
                              {"_file_delete": {'mode': "actual"}}}])
                         break
+
+        if "aliasing_incar" in self.errors:
+            #vasp seems to give different warnings depending on whether the
+            #aliasing error was caused by user supplied inputs
+            d = {k: 1 for k in ['NGX', 'NGY', 'NGZ'] if k in vi['INCAR'].keys()}
+            actions.extend([{"dict": "INCAR", "action": {"_unset": d}},
+                            {"file": "CHGCAR", "action": 
+                             {"_file_delete": {'mode': "actual"}}},
+                            {"file": "WAVECAR","action": 
+                             {"_file_delete": {'mode': "actual"}}}])
 
         m = Modder(actions=[DictActions, FileActions])
         modified = []
