@@ -454,9 +454,16 @@ class PotimErrorHandler(ErrorHandler):
         backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR",
                 "vasprun.xml"])
         vi = VaspInput.from_directory(".")
-        potim = float(vi["INCAR"].get("POTIM", 0.5)) * 0.5
-        actions = [{"dict": "INCAR",
-                    "action": {"_set": {"POTIM": potim}}}]
+        potim = float(vi["INCAR"].get("POTIM", 0.5))
+        ibrion = int(vi["INCAR"].get("IBRION", 0))
+        if potim < 0.2 and ibrion != 3:
+            actions = [{"dict": "INCAR",
+                        "action": {"_set": {"IBRION": 3,
+                                            "SMASS": 0.75}}}]
+        else:
+            actions = [{"dict": "INCAR",
+                        "action": {"_set": {"POTIM": potim * 0.5}}}]
+
         m = Modder()
         modified = []
         for a in actions:
