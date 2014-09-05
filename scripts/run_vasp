@@ -19,7 +19,7 @@ import sys
 
 from custodian.custodian import Custodian
 from custodian.vasp.jobs import VaspJob
-from pymatgen.io.vaspio.vasp_input import VaspInput
+from pymatgen.io.vaspio.vasp_input import VaspInput, Incar
 
 
 def load_class(mod, name):
@@ -34,35 +34,53 @@ def do_run(args):
     handlers = [load_class("custodian.vasp.handlers", n)() for n in
                 args.handlers]
     vasp_command = args.command.split()
+
+    #save initial INCAR for rampU runs
+    n_ramp_u = args.jobs.count('rampU')
+    ramps = 0
+    if n_ramp_u:
+        incar = Incar.from_file('INCAR')
+        ldauu = incar['LDAUU']
+        ldauj = incar['LDAUJ']
+
     jobs = []
+
     njobs = len(args.jobs)
     for i, job_type in enumerate(args.jobs):
-        if job_type not in ("relax", "static"):
+        if job_type not in ("relax", "static", "rampU"):
             print("Unsupported job type: {}".format(job_type))
             sys.exit(-1)
         final = False if i != njobs - 1 else True
         suffix = ".{}{}".format(job_type, i + 1)
-        settings = None
+        settings = []
         backup = True if i == 0 else False
+        copy_magmom = False
         if i > 0 and job_type != "static":
-            settings = [
+            settings.extend([
                 {"dict": "INCAR",
                  "action": {"_set": {"ISTART": 1}}},
                 {"filename": "CONTCAR",
-                 "action": {"_file_copy": {"dest": "POSCAR"}}}]
+                 "action": {"_file_copy": {"dest": "POSCAR"}}}])
         elif job_type == "static":
             vinput = VaspInput.from_directory(".")
             m = [i * args.static_kpoint for i in vinput["KPOINTS"].kpts[0]]
-            settings = [
-                {"dict": "INCAR",
+            settings.extend([{"dict": "INCAR",
                  "action": {"_set": {"ISTART": 1, "NSW": 0}}},
                 {'dict': 'KPOINTS',
                  'action': {'_set': {'kpoints': [m]}}},
                 {"filename": "CONTCAR",
-                 "action": {"_file_copy": {"dest": "POSCAR"}}}]
+                 "action": {"_file_copy": {"dest": "POSCAR"}}}])
+        if job_type == "rampU":
+            f = ramps / (n_ramp_u - 1)
+            settings.append({"dict": "INCAR",
+                 "action": {"_set": {"LDAUJ": [j * f for j in ldauj], 
+                                     "LDAUU": [u * f for u in ldauu]}}})
+            copy_magmom = True
+            ramps += 1
 
         jobs.append(VaspJob(vasp_command, final=final, suffix=suffix,
-                            backup=backup, settings_override=settings))
+                            backup=backup, settings_override=settings,
+                            copy_magmom=copy_magmom))
 
     c = Custodian(handlers, jobs, max_errors=10, scratch_dir=args.scratch,
                   gzipped_output=args.gzip, checkpoint=True)
@@ -113,7 +131,7 @@ if __name__ == "__main__":
         "-hd", "--handlers", dest="handlers", nargs="+",
         default=["VaspErrorHandler", "MeshSymmetryErrorHandler",
                  "UnconvergedErrorHandler", "NonConvergingErrorHandler",
-                 "PotimErrorHandler"], type=str,
+                 "PotimErrorHandler", "BadVasprunXMLHandler"], type=str,
         help="The ErrorHandlers to use specified as string class names. Note "
              "that the error handlers will be initialized with no args, i.e.,"
              "default args will be assumed."
@@ -121,9 +139,9 @@ if __name__ == "__main__":
 
     parser.add_argument("jobs", metavar="jobs", type=str, nargs='+',
                         default=["relax", "relax"],
-                        help="Jobs to execute. Only sequences of relax "
-                             "and static are supported at the moment. For "
-                             "example, \"relax relax static\" will run a "
+                        help="Jobs to execute. Only sequences of relax, "
+                             "static, and rampU are supported at the moment. "
+                             "For example, \"relax relax static\" will run a "
                              "double relaxation followed by a static run.")
 
     args = parser.parse_args()

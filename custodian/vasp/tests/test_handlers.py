@@ -21,7 +21,7 @@ import datetime
 
 from custodian.vasp.handlers import VaspErrorHandler, \
     UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler, \
-    MaxForceErrorHandler
+    MaxForceErrorHandler, BadVasprunXMLHandler, PositiveEnergyErrorHandler, PotimErrorHandler
 from pymatgen.io.vaspio import Incar, Poscar
 
 
@@ -78,14 +78,36 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h = VaspErrorHandler("vasp.aliasing")
         h.check()
         d = h.correct()
+        shutil.move("INCAR.orig", "INCAR")
+        clean_dir()
+        os.chdir(test_dir)
+
         self.assertEqual(d["errors"], ['aliasing'])
         self.assertEqual(d["actions"],
                          [{'action': {'_set': {'NGX': 34}},
-                           'dict': 'INCAR'}])
+                           'dict': 'INCAR'}, {"file": "CHGCAR",
+                            "action": {"_file_delete": {'mode': "actual"}}},
+                          {"file": "WAVECAR",
+                            "action": {"_file_delete": {'mode': "actual"}}}])
 
-        clean_dir()
+    def test_aliasing_incar(self):
+        os.chdir(os.path.join(test_dir, "aliasing"))
+        shutil.copy("INCAR", "INCAR.orig")
+        h = VaspErrorHandler("vasp.aliasing_incar")
+        h.check()
+        d = h.correct()
+        incar = Incar.from_file('INCAR')
         shutil.move("INCAR.orig", "INCAR")
+        clean_dir()
         os.chdir(test_dir)
+
+        self.assertEqual(d["errors"], ['aliasing_incar'])
+        self.assertEqual(d["actions"],
+                         [{'action': {'_unset': {'NGY':1, 'NGZ': 1}},
+                           'dict': 'INCAR'}, {"file": "CHGCAR",
+                            "action": {"_file_delete": {'mode': "actual"}}},
+                          {"file": "WAVECAR",
+                            "action": {"_file_delete": {'mode': "actual"}}}])
 
     def test_mesh_symmetry(self):
         h = MeshSymmetryErrorHandler("vasp.ibzkpt")
@@ -220,14 +242,14 @@ class MaxForceErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["errors"], ['MaxForce'])
 
         os.remove(os.path.join(subdir, "error.1.tar.gz"))
-        
+
         incar = Incar.from_file('INCAR')
         poscar = Poscar.from_file('POSCAR')
         contcar = Poscar.from_file('CONTCAR')
-        
+
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("POSCAR.orig", "POSCAR")
-        
+
         self.assertEqual(poscar.structure, contcar.structure)
         self.assertAlmostEqual(incar['EDIFF'], 0.00075)
 
@@ -277,6 +299,86 @@ class WalltimeHandlerTest(unittest.TestCase):
             content = f.read()
             self.assertEqual(content, "LABORT = .TRUE.")
         os.remove("STOPCAR")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cwd)
+
+
+class BadVasprunXMLHandlerTest(unittest.TestCase):
+
+    def test_check_and_correct(self):
+        os.chdir(os.path.join(test_dir, "bad_vasprun"))
+        h = BadVasprunXMLHandler()
+        self.assertTrue(h.check())
+
+        #Unconverged still has a valid vasprun.
+        os.chdir(os.path.join(test_dir, "unconverged"))
+        self.assertFalse(h.check())
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cwd)
+
+
+class PositiveEnergyHandlerTest(unittest.TestCase):
+
+    def setUp(cls):
+        os.chdir(test_dir)
+
+    def test_check_correct(self):
+        subdir = os.path.join(test_dir, "positive_energy")
+        os.chdir(subdir)
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("POSCAR", "POSCAR.orig")
+
+        h = PositiveEnergyErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ['Positive energy'])
+
+        os.remove(os.path.join(subdir, "error.1.tar.gz"))
+
+        incar = Incar.from_file('INCAR')
+
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("POSCAR.orig", "POSCAR")
+
+        self.assertEqual(incar['ALGO'], 'Normal')
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cwd)
+
+class PotimHandlerTest(unittest.TestCase):
+
+    def setUp(cls):
+        os.chdir(test_dir)
+
+    def test_check_correct(self):
+        subdir = os.path.join(test_dir, "potim")
+        os.chdir(subdir)
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("POSCAR", "POSCAR.orig")
+
+        incar = Incar.from_file('INCAR')
+        original_potim = incar['POTIM']
+
+        h = PotimErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ['POTIM'])
+
+        os.remove(os.path.join(subdir, "error.1.tar.gz"))
+
+        incar = Incar.from_file('INCAR')
+        new_potim = incar['POTIM']
+
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("POSCAR.orig", "POSCAR")
+
+        self.assertEqual(original_potim, new_potim)
+        self.assertEqual(incar['IBRION'], 3)
 
     @classmethod
     def tearDownClass(cls):

@@ -18,10 +18,10 @@ custodian.ansible.actions module
     :undoc-members:
     :show-inheritance:
 
-custodian.ansible.intepreter module
------------------------------------
+custodian.ansible.interpreter module
+------------------------------------
 
-.. automodule:: custodian.ansible.intepreter
+.. automodule:: custodian.ansible.interpreter
     :members:
     :undoc-members:
     :show-inheritance:

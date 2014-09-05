@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.ansible package &mdash; custodian 0.7.4 documentation</title>
+    <title>custodian.ansible package &mdash; custodian 0.7.5 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.4',
+        VERSION:     '0.7.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.4 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.7.5 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.5 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -231,13 +231,13 @@ mode only prints the action without performing it.</li>
 <dd></dd></dl>
 
 </div>
-<div class="section" id="module-custodian.ansible.intepreter">
-<span id="custodian-ansible-intepreter-module"></span><h2>custodian.ansible.intepreter module<a class="headerlink" href="#module-custodian.ansible.intepreter" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-custodian.ansible.interpreter">
+<span id="custodian-ansible-interpreter-module"></span><h2>custodian.ansible.interpreter module<a class="headerlink" href="#module-custodian.ansible.interpreter" title="Permalink to this headline">¶</a></h2>
 <p>This module implements a Modder class that performs modifications on objects
 using support actions.</p>
 <dl class="class">
-<dt id="custodian.ansible.intepreter.Modder">
-<em class="property">class </em><tt class="descname">Modder</tt><big>(</big><em>actions=None</em>, <em>strict=True</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/intepreter.html#Modder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.intepreter.Modder" title="Permalink to this definition">¶</a></dt>
+<dt id="custodian.ansible.interpreter.Modder">
+<em class="property">class </em><tt class="descname">Modder</tt><big>(</big><em>actions=None</em>, <em>strict=True</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/interpreter.html#Modder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.interpreter.Modder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>Class to modify a dict/file/any object using a mongo-like language.
 Keywords are mostly adopted from mongo&#8217;s syntax, but instead of $, an
@@ -274,8 +274,8 @@ supplied, a ValueError is raised. Defaults to True.</li>
 </tbody>
 </table>
 <dl class="method">
-<dt id="custodian.ansible.intepreter.Modder.modify">
-<tt class="descname">modify</tt><big>(</big><em>modification</em>, <em>obj</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/intepreter.html#Modder.modify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.intepreter.Modder.modify" title="Permalink to this definition">¶</a></dt>
+<dt id="custodian.ansible.interpreter.Modder.modify">
+<tt class="descname">modify</tt><big>(</big><em>modification</em>, <em>obj</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/interpreter.html#Modder.modify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.interpreter.Modder.modify" title="Permalink to this definition">¶</a></dt>
 <dd><p>Note that modify makes actual in-place modifications. It does not
 return a copy.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -297,8 +297,8 @@ file.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="custodian.ansible.intepreter.Modder.modify_object">
-<tt class="descname">modify_object</tt><big>(</big><em>modification</em>, <em>obj</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/intepreter.html#Modder.modify_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.intepreter.Modder.modify_object" title="Permalink to this definition">¶</a></dt>
+<dt id="custodian.ansible.interpreter.Modder.modify_object">
+<tt class="descname">modify_object</tt><big>(</big><em>modification</em>, <em>obj</em><big>)</big><a class="reference internal" href="_modules/custodian/ansible/interpreter.html#Modder.modify_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.interpreter.Modder.modify_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Modify an object that supports pymatgen&#8217;s to_dict and from_dict API.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -342,7 +342,7 @@ stored at each step).</p>
 <li><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-custodian.ansible.actions">custodian.ansible.actions module</a></li>
-<li><a class="reference internal" href="#module-custodian.ansible.intepreter">custodian.ansible.intepreter module</a></li>
+<li><a class="reference internal" href="#module-custodian.ansible.interpreter">custodian.ansible.interpreter module</a></li>
 <li><a class="reference internal" href="#module-custodian.ansible">Module contents</a></li>
 </ul>
 </li>
@@ -379,7 +379,7 @@ stored at each step).</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.5 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

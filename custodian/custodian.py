@@ -194,6 +194,8 @@ class Custodian(object):
             else:
                 restart, run_log = -1, []
 
+            terminal = False
+
             for i, job in enumerate(self.jobs):
                 if i <= restart:
                     #Skip all jobs until the restart point.
@@ -225,7 +227,7 @@ class Custodian(object):
                                 if p.poll() is not None:
                                     break
                                 if n % self.monitor_freq == 0:
-                                    corrections = _do_check(
+                                    corrections, terminal = _do_check(
                                         self.monitors,
                                         terminate_func=p.terminate,
                                         skip_over_errors=self.skip_over_errors)
@@ -246,7 +248,7 @@ class Custodian(object):
                     else:
                         remaining_handlers = self.handlers
 
-                    corrections = _do_check(
+                    corrections, terminal = _do_check(
                         remaining_handlers,
                         skip_over_errors=self.skip_over_errors)
                     if len(corrections) > 0:
@@ -265,8 +267,10 @@ class Custodian(object):
                     if not has_error:
                         job.postprocess()
                         break
-                    elif run_log[-1]["corrections"][-1]["actions"] is None:
-                        # Check if there has been an unrecoverable error.
+                    elif not filter(
+                            None,
+                            [x["actions"] for x in run_log[-1]["corrections"]]):
+                        # Check that no corrections were applied
                         logger.info("Unrecoverable error.")
                         unrecoverable = True
                         break
@@ -287,14 +291,15 @@ class Custodian(object):
             run_time = end - start
 
             logger.info("Run completed. Total time taken = {}."
-                         .format(run_time))
+                        .format(run_time))
 
             if self.gzipped_output:
                 gzip_dir(".")
 
-            if total_errors >= self.max_errors:
-                logger.info("Max {} errors reached. Exited..."
-                             .format(self.max_errors))
+            if terminal and (total_errors >= self.max_errors or unrecoverable):
+                raise RuntimeError("{} errors reached. Unrecoverable? {}. "
+                                   "Exited...".format(total_errors,
+                                                      unrecoverable))
             elif not unrecoverable:
                 #Cleanup checkpoint files (if any) if run is successful.
                 Custodian._delete_checkpoints(cwd)
@@ -304,9 +309,11 @@ class Custodian(object):
 
 def _do_check(handlers, terminate_func=None, skip_over_errors=False):
     corrections = []
+    terminal = False
     for h in handlers:
         try:
             if h.check():
+                terminal = h.is_terminating
                 if terminate_func is not None and h.is_terminating:
                     terminate_func()
                 d = h.correct()
@@ -319,7 +326,7 @@ def _do_check(handlers, terminate_func=None, skip_over_errors=False):
                 corrections.append(
                     {"errors": ["Bad handler " + str(h)],
                      "actions": []})
-    return corrections
+    return corrections, terminal
 
 
 class JSONSerializable(object):

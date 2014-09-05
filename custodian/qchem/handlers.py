@@ -155,17 +155,21 @@ class QChemErrorHandler(ErrorHandler):
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "actions": actions}
 
-    def fix_error_code_134(self):
-        has_freq_job = False
+    def is_openmp_compatible(self):
         for j in self.qcinp.jobs:
             if j.params["rem"]["jobtype"] == "freq":
-                has_freq_job = True
-                break
+                return False
+            if self.fix_step.params["rem"]["exchange"] in ["pbe", "b"]\
+                and self.fix_step.params["rem"]["correlation"] in ["pbe", "lyp"]:
+                return False
+        return True
+
+    def fix_error_code_134(self):
+
         if "thresh" not in self.fix_step.params["rem"]:
             self.fix_step.set_integral_threshold(thresh=12)
             return "use tight integral threshold"
-        elif has_freq_job or\
-                self.fix_step.params["rem"]["exchange"] == "pbe":
+        elif not self.is_openmp_compatible():
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
@@ -178,8 +182,7 @@ class QChemErrorHandler(ErrorHandler):
             return None
 
     def fix_insufficient_static_memory(self):
-        if self.fix_step.params["rem"]["jobtype"] == "freq" or\
-                self.fix_step.params["rem"]["exchange"] == "pbe":
+        if not self.is_openmp_compatible():
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
@@ -200,8 +203,7 @@ class QChemErrorHandler(ErrorHandler):
             return None
 
     def fix_error_killed(self):
-        if self.fix_step.params["rem"]["jobtype"] == "freq" or\
-                self.fix_step.params["rem"]["exchange"] == "pbe":
+        if not self.is_openmp_compatible():
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
@@ -324,7 +326,7 @@ class QChemErrorHandler(ErrorHandler):
 
     def set_scf_initial_guess(self, guess="sad"):
         if "scf_guess" not in self.fix_step.params["rem"] \
-                or self.error_step_id == 0 \
+                or self.error_step_id > 0 \
                 or self.fix_step.params["rem"]["scf_guess"] != "read":
             self.fix_step.set_scf_initial_guess(guess)
 

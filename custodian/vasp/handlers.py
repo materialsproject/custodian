@@ -21,6 +21,8 @@ import time
 import datetime
 import operator
 import shutil
+import glob
+import re
 
 import numpy as np
 
@@ -71,7 +73,9 @@ class VaspErrorHandler(ErrorHandler):
         "zpotrf": ["LAPACK: Routine ZPOTRF failed"],
         "amin": ["One of the lattice vectors is very long (>50 A), but AMIN"],
         "zbrent": ["ZBRENT: fatal internal in brackting"],
-        "aliasing": ["WARNING: small aliasing (wrap around) errors must be expected"]
+        "aliasing": ["WARNING: small aliasing (wrap around) errors must be expected"],
+        "aliasing_incar": ["Your FFT grids (NGX,NGY,NGZ) are not sufficient "
+                           "for an accurate"]
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -198,22 +202,31 @@ class VaspErrorHandler(ErrorHandler):
             with open("OUTCAR") as f:
                 grid_adjusted = False
                 changes_dict = {}
+                r = re.compile(".+aliasing errors.*(NG.)\s*to\s*(\d+)")
                 for line in f:
-                    if "aliasing errors" in line:
-                        try:
-                            grid_vector = line.split(" NG", 1)[1]
-                            value = [int(s) for s in grid_vector.split(" ")
-                                     if s.isdigit()][0]
-
-                            changes_dict["NG" + grid_vector[0]] = value
-                            grid_adjusted = True
-                        except (IndexError, ValueError):
-                            pass
+                    m = r.match(line)
+                    if m:
+                        changes_dict[m.group(1)] = int(m.group(2))
+                        grid_adjusted = True
                     #Ensure that all NGX, NGY, NGZ have been checked
                     if grid_adjusted and 'NGZ' in line:
-                        actions.append({"dict": "INCAR",
-                                        "action": {"_set": changes_dict}})
+                        actions.extend([{"dict": 
+                            "INCAR", "action": {"_set": changes_dict}},
+                            {"file": "CHGCAR", "action": 
+                             {"_file_delete": {'mode': "actual"}}},
+                            {"file": "WAVECAR","action": 
+                             {"_file_delete": {'mode': "actual"}}}])
                         break
+
+        if "aliasing_incar" in self.errors:
+            #vasp seems to give different warnings depending on whether the
+            #aliasing error was caused by user supplied inputs
+            d = {k: 1 for k in ['NGX', 'NGY', 'NGZ'] if k in vi['INCAR'].keys()}
+            actions.extend([{"dict": "INCAR", "action": {"_unset": d}},
+                            {"file": "CHGCAR", "action": 
+                             {"_file_delete": {'mode': "actual"}}},
+                            {"file": "WAVECAR","action": 
+                             {"_file_delete": {'mode': "actual"}}}])
 
         m = Modder(actions=[DictActions, FileActions])
         modified = []
@@ -323,7 +336,8 @@ class UnconvergedErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
-        backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
+        backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml", 
+                "vasp.out"])
         actions = [{"file": "CONTCAR",
                     "action": {"_file_copy": {"dest": "POSCAR"}}},
                    {"dict": "INCAR",
@@ -351,18 +365,18 @@ class UnconvergedErrorHandler(ErrorHandler):
 class MaxForceErrorHandler(ErrorHandler):
     """
     Checks that the desired force convergence has been achieved. Otherwise
-    restarts the run with smaller EDIFF. (This is necessary since energy 
+    restarts the run with smaller EDIFF. (This is necessary since energy
     and force convergence criteria cannot be set simultaneously)
     """
     is_monitor = False
 
     def __init__(self, output_filename="vasprun.xml",
-                 max_force_threshold=0.5):
+                 max_force_threshold=0.25):
         """
         Args:
             input_filename (str): name of the vasp INCAR file
             output_filename (str): name to look for the vasprun
-            max_force_threshold (float): Threshold for max force for 
+            max_force_threshold (float): Threshold for max force for
                 restarting the run. (typically should be set to the value
                 that the creator looks for)
         """
@@ -372,9 +386,9 @@ class MaxForceErrorHandler(ErrorHandler):
     def check(self):
         try:
             v = Vasprun(self.output_filename)
-            max_force = max([np.linalg.norm(a) for a 
+            max_force = max([np.linalg.norm(a) for a
                              in v.ionic_steps[-1]["forces"]])
-            if max_force > self.max_force_threshold:
+            if max_force > self.max_force_threshold and v.converged is True:
                 return True
         except:
             pass
@@ -382,7 +396,7 @@ class MaxForceErrorHandler(ErrorHandler):
 
     def correct(self):
         backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR",
-                self.output_filename])
+                self.output_filename, "vasp.out"])
         vi = VaspInput.from_directory(".")
         ediff = float(vi["INCAR"].get("EDIFF", 1e-4))
         actions = [{"file": "CONTCAR",
@@ -440,9 +454,16 @@ class PotimErrorHandler(ErrorHandler):
         backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR",
                 "vasprun.xml"])
         vi = VaspInput.from_directory(".")
-        potim = float(vi["INCAR"].get("POTIM", 0.5)) * 0.5
-        actions = [{"dict": "INCAR",
-                    "action": {"_set": {"POTIM": potim}}}]
+        potim = float(vi["INCAR"].get("POTIM", 0.5))
+        ibrion = int(vi["INCAR"].get("IBRION", 0))
+        if potim < 0.2 and ibrion != 3:
+            actions = [{"dict": "INCAR",
+                        "action": {"_set": {"IBRION": 3,
+                                            "SMASS": 0.75}}}]
+        else:
+            actions = [{"dict": "INCAR",
+                        "action": {"_set": {"POTIM": potim * 0.5}}}]
+
         m = Modder()
         modified = []
         for a in actions:
@@ -550,31 +571,11 @@ class NonConvergingErrorHandler(ErrorHandler):
         # parameters. If this error is caught again, then kil the job
         vi = VaspInput.from_directory(".")
         algo = vi["INCAR"].get("ALGO", "Normal")
-        amix = vi["INCAR"].get("AMIX", 0.4)
-        bmix = vi["INCAR"].get("BMIX", 1.0)
-        amin = vi["INCAR"].get("AMIN", 0.1)
-        actions = []
-        if self.change_algo:
-            if algo == "Fast":
-                backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
-                actions.append({"dict": "INCAR",
-                            "action": {"_set": {"ALGO": "Normal"}}})
-
-            elif amix > 0.1 and bmix > 0.01:
-                #try linear mixing
-                backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
-                actions.append({"dict": "INCAR",
-                            "action": {"_set": {"AMIX": 0.1, "BMIX": 0.01,
-                                                "ICHARG": 2}}})
-
-            elif bmix < 3.0 and amin > 0.01:
-                #Try increasing bmix
-                backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
-                actions.append({"dict": "INCAR",
-                            "action": {"_set": {"AMIN": 0.01, "BMIX": 3.0,
-                                                "ICHARG": 2}}})
-
-        if actions:
+        if self.change_algo and algo == "Fast":
+            backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml",
+                    "vasp.out"])
+            actions = [{"dict": "INCAR",
+                        "action": {"_set": {"ALGO": "Normal"}}}]
             m = Modder()
             modified = []
             for a in actions:
@@ -650,7 +651,7 @@ class WalltimeHandler(ErrorHandler):
     def check(self):
         if self.wall_time:
             run_time = datetime.datetime.now() - self.start_time
-            total_secs = run_time.seconds + run_time.days * 3600 * 24
+            total_secs = run_time.total_seconds()
             if not self.electronic_step_stop:
                 try:
                     # Intelligently determine time per ionic step.
@@ -671,8 +672,7 @@ class WalltimeHandler(ErrorHandler):
                     if nsteps > self.prev_check_nscf_steps:
                         steps_time = datetime.datetime.now() - \
                             self.prev_check_time
-                        steps_secs = steps_time.seconds + \
-                            steps_time.days * 3600 * 24
+                        steps_secs = steps_time.total_seconds()
                         step_timing = self.buffer_time * ceil(
                             (steps_secs /
                              (nsteps - self.prev_check_nscf_steps)) /
@@ -821,3 +821,86 @@ class StoppedRunHandler(ErrorHandler):
 
     def __str__(self):
         return "StoppedRunHandler"
+
+
+class BadVasprunXMLHandler(ErrorHandler):
+    """
+    Handler to properly terminate a run when a bad vasprun.xml is found.
+    """
+
+    is_monitor = False
+
+    is_terminating = True
+
+    def __init__(self):
+        self.vasprunxml = None
+        pass
+
+    def check(self):
+        try:
+            self.vasprunxml = _get_vasprun()
+            v = Vasprun(self.vasprunxml)
+        except:
+            return True
+        return False
+
+    def correct(self):
+        return {"errors": ["Bad vasprun.xml in %s." % self.vasprunxml],
+                "actions": None}
+
+    def __str__(self):
+        return "BadVasprunXMLHandler"
+
+
+class PositiveEnergyErrorHandler(ErrorHandler):
+    """
+    Check if a run has positive absolute energy.
+    If so, change ALGO from Fast to Normal or kill the job.
+    """
+    is_monitor = True
+
+    def __init__(self, output_filename="OSZICAR"):
+        """
+        Initializes the handler with the output file to check.
+
+        Args:
+            output_filename (str): This is the OSZICAR file. Change
+                this only if it is different from the default (unlikely).
+        """
+        self.output_filename = output_filename
+
+    def check(self):
+        try:
+            oszicar = Oszicar(self.output_filename)
+            if oszicar.final_energy > 0:
+                return True
+        except:
+            pass
+        return False
+
+    def correct(self):
+        # change ALGO = Fast to Normal if ALGO is !Normal
+        vi = VaspInput.from_directory(".")
+        algo = vi["INCAR"].get("ALGO", "Normal")
+        if algo.lower() not in ['normal', 'n']:
+            backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
+            actions = [{"dict": "INCAR",
+                        "action": {"_set": {"ALGO": "Normal"}}}]
+            m = Modder()
+            modified = []
+            for a in actions:
+                modified.append(a["dict"])
+                vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
+            for f in modified:
+                vi[f].write_file(f)
+            return {"errors": ["Positive energy"], "actions": actions}
+        #Unfixable error. Just return None for actions.
+        else:
+            return {"errors": ["Positive energy"], "actions": None}
+
+    def __str__(self):
+        return "PositiveEnergyErrorHandler"
+
+def _get_vasprun(path="."):
+    vaspruns = glob.glob(os.path.join(path, "vasprun.xml*"))
+    return sorted(vaspruns, reverse=True)[0] if vaspruns else None
