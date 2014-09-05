@@ -571,11 +571,31 @@ class NonConvergingErrorHandler(ErrorHandler):
         # parameters. If this error is caught again, then kil the job
         vi = VaspInput.from_directory(".")
         algo = vi["INCAR"].get("ALGO", "Normal")
-        if self.change_algo and algo == "Fast":
-            backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml",
-                    "vasp.out"])
-            actions = [{"dict": "INCAR",
-                        "action": {"_set": {"ALGO": "Normal"}}}]
+        amix = vi["INCAR"].get("AMIX", 0.4)
+        bmix = vi["INCAR"].get("BMIX", 1.0)
+        amin = vi["INCAR"].get("AMIN", 0.1)
+        actions = []
+        if self.change_algo:
+            if algo == "Fast":
+                backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
+                actions.append({"dict": "INCAR",
+                            "action": {"_set": {"ALGO": "Normal"}}})
+
+            elif amix > 0.1 and bmix > 0.01:
+                #try linear mixing
+                backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
+                actions.append({"dict": "INCAR",
+                            "action": {"_set": {"AMIX": 0.1, "BMIX": 0.01,
+                                                "ICHARG": 2}}})
+
+            elif bmix < 3.0 and amin > 0.01:
+                #Try increasing bmix
+                backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
+                actions.append({"dict": "INCAR",
+                            "action": {"_set": {"AMIN": 0.01, "BMIX": 3.0,
+                                                "ICHARG": 2}}})
+
+        if actions:
             m = Modder()
             modified = []
             for a in actions:
