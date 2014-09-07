@@ -82,7 +82,7 @@ def do_run(args):
                             backup=backup, settings_override=settings,
                             copy_magmom=copy_magmom))
 
-    c = Custodian(handlers, jobs, max_errors=10, scratch_dir=args.scratch,
+    c = Custodian(handlers, jobs, max_errors=args.max_errors, scratch_dir=args.scratch,
                   gzipped_output=args.gzip, checkpoint=True)
     c.run()
 
@@ -126,6 +126,11 @@ if __name__ == "__main__":
              "defaults to 1, i.e., static runs are performed with the same "
              "k-point grid as relaxation runs."
     )
+
+    parser.add_argument(
+        "-me",  "--max-errors", dest="max_errors", nargs="?",
+        default=10, type=int,
+        help="Maximum number of errors to allow before quitting")
 
     parser.add_argument(
         "-hd", "--handlers", dest="handlers", nargs="+",
