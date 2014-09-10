@@ -13,7 +13,7 @@ setup(
     name="custodian",
     packages=find_packages(),
     version="0.7.5",
-    install_requires=["monty>=0.3.6"],
+    install_requires=["monty>=0.4.1"],
     extras_require={"vasp, nwchem, qchem": ["pymatgen>=2.10.3"]},
     package_data={},
     author="Shyue Ping Ong, William Davidson Richards, Stephen Dacek, "
