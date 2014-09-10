@@ -24,7 +24,7 @@ from pymatgen.io.vaspio.vasp_input import VaspInput, Incar
 from pymatgen.io.vaspio.vasp_output import Outcar
 from pymatgen.io.smartio import read_structure
 from pymatgen.io.vaspio_set import MITVaspInputSet
-from pymatgen.serializers.json_coders import PMGJSONDecoder
+from monty.json import MontyDecoder
 from monty.os.path import which
 
 from custodian.ansible.interpreter import Modder
@@ -145,8 +145,7 @@ class VaspJob(Job):
 
         if self.auto_npar:
             try:
-                vi = VaspInput.from_directory(".")
-                incar = vi["INCAR"]
+                incar = Incar.from_file("INCAR")
                 #Only optimized NPAR for non-HF and non-RPA calculations.
                 if not (incar.get("LHFCALC") or incar.get("LRPA") or
                         incar.get("LEPSILON")):
@@ -267,7 +266,7 @@ class VaspJob(Job):
 
     @classmethod
     def from_dict(cls, d):
-        vis = PMGJSONDecoder().process_decoded(d["default_vasp_input_set"])
+        vis = MontyDecoder().process_decoded(d["default_vasp_input_set"])
         return VaspJob(
             vasp_cmd=d["vasp_cmd"], output_file=d["output_file"],
             suffix=d["suffix"], final=d["final"], gzipped=d["gzipped"],
