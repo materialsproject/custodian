@@ -7,6 +7,8 @@ ErrorHandlers and Jobs.
 """
 
 from __future__ import division
+import six
+from six.moves import filter
 
 __author__ = "Shyue Ping Ong, William Davidson Richards"
 __copyright__ = "Copyright 2012, The Materials Project"
@@ -201,7 +203,7 @@ class Custodian(object):
                     #Skip all jobs until the restart point.
                     continue
                 run_log.append({"job": job.to_dict, "corrections": []})
-                for attempt in xrange(self.max_errors):
+                for attempt in range(self.max_errors):
                     logger.info(
                         "Starting job no. {} ({}) attempt no. {}. Errors "
                         "thus far = {}.".format(
@@ -359,11 +361,10 @@ class JSONSerializable(object):
         return cls(**kwargs)
 
 
-class ErrorHandler(JSONSerializable):
+class ErrorHandler(six.with_metaclass(ABCMeta, JSONSerializable)):
     """
     Abstract base class defining the interface for an ErrorHandler.
     """
-    __metaclass__ = ABCMeta
 
     is_monitor = False
     """
@@ -414,11 +415,10 @@ class ErrorHandler(JSONSerializable):
         pass
 
 
-class Job(JSONSerializable):
+class Job(six.with_metaclass(ABCMeta, JSONSerializable)):
     """
     Abstract base class defining the interface for a Job.
     """
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def setup(self):

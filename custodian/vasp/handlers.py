@@ -7,6 +7,8 @@ by modifying the input files.
 """
 
 from __future__ import division
+from functools import reduce
+from six.moves import map
 
 __author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, " \
              "Wei Chen, Stephen Dacek"

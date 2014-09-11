@@ -5,6 +5,7 @@ Created on Jun 1, 2012
 """
 
 from __future__ import division
+from __future__ import print_function
 
 __author__ = "Shyue Ping Ong"
 __copyright__ = "Copyright 2012, The Materials Project"
@@ -100,24 +101,24 @@ class CustodianTest(unittest.TestCase):
         njobs = 100
         params = {"initial": 0, "total": 0}
         c = Custodian([ExampleHandler(params)],
-                      [ExampleJob(i, params) for i in xrange(njobs)],
+                      [ExampleJob(i, params) for i in range(njobs)],
                       max_errors=njobs, log_file=None)
         output = c.run()
         self.assertEqual(len(output), njobs)
-        print ExampleHandler(params).to_dict
+        print(ExampleHandler(params).to_dict)
 
     def test_unrecoverable(self):
         njobs = 100
         params = {"initial": 0, "total": 0}
         h = ExampleHandler2(params)
         c = Custodian([h],
-                      [ExampleJob(i, params) for i in xrange(njobs)],
+                      [ExampleJob(i, params) for i in range(njobs)],
                       max_errors=njobs, log_file=None)
         self.assertRaises(RuntimeError, c.run)
         self.assertTrue(h.has_error)
         h = ExampleHandler2b(params)
         c = Custodian([h],
-                      [ExampleJob(i, params) for i in xrange(njobs)],
+                      [ExampleJob(i, params) for i in range(njobs)],
                       max_errors=njobs, log_file=None)
         c.run()
         self.assertTrue(h.has_error)

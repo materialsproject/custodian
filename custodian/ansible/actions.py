@@ -7,6 +7,7 @@ modules) so that a set of well-defined actions can be namespaced easily.
 """
 
 from __future__ import division
+from __future__ import print_function
 
 __author__ = "Shyue Ping Ong"
 __copyright__ = "Copyright 2012, The Materials Project"
@@ -206,7 +207,7 @@ class FileActions(object):
                     #Skip file not found error.
                     pass
             elif k == "mode" and v == "simulated":
-                print "Simulated removal of {}".format(filename)
+                print("Simulated removal of {}".format(filename))
 
     @staticmethod
     def file_copy(filename, settings):
