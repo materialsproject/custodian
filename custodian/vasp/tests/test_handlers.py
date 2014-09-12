@@ -170,7 +170,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
 
     def test_to_from_dict(self):
         h = VaspErrorHandler("random_name")
-        h2 = VaspErrorHandler.from_dict(h.to_dict)
+        h2 = VaspErrorHandler.from_dict(h.as_dict())
         self.assertEqual(type(h2), type(h))
         self.assertEqual(h2.output_filename, "random_name")
 
@@ -214,7 +214,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
 
     def test_to_from_dict(self):
         h = UnconvergedErrorHandler("random_name.xml")
-        h2 = UnconvergedErrorHandler.from_dict(h.to_dict)
+        h2 = UnconvergedErrorHandler.from_dict(h.as_dict())
         self.assertEqual(type(h2), UnconvergedErrorHandler)
         self.assertEqual(h2.output_filename, "random_name.xml")
 

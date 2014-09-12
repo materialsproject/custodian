@@ -395,8 +395,7 @@ class QChemErrorHandler(ErrorHandler):
                 tar.add(f)
         tar.close()
 
-    @property
-    def to_dict(self):
+    def as_dict(self):
         return {"@module": self.__class__.__module__,
                 "@class": self.__class__.__name__,
                 "input_file": self.input_file,
@@ -406,10 +405,10 @@ class QChemErrorHandler(ErrorHandler):
                 "scf_max_cycles": self.scf_max_cycles,
                 "geom_max_cycles": self.geom_max_cycles,
                 "outdata": self.outdata,
-                "qcinp": self.qcinp.to_dict,
+                "qcinp": self.qcinp.as_dict(),
                 "error_step_id": self.error_step_id,
                 "errors": self.errors,
-                "fix_step": self.fix_step.to_dict}
+                "fix_step": self.fix_step.as_dict()}
 
     @classmethod
     def from_dict(cls, d):

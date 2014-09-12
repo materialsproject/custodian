@@ -250,12 +250,11 @@ class VaspJob(Job):
                         {"filename": "CONTCAR",
                          "action": {"_file_copy": {"dest": "POSCAR"}}}])]
 
-    @property
-    def to_dict(self):
+    def as_dict(self):
         d = dict(vasp_cmd=self.vasp_cmd,
                  output_file=self.output_file, suffix=self.suffix,
                  final=self.final, gzipped=self.gzipped, backup=self.backup,
-                 default_vasp_input_set=self.default_vis.to_dict,
+                 default_vasp_input_set=self.default_vis.as_dict(),
                  auto_npar=self.auto_npar, auto_gamma=self.auto_gamma,
                  settings_override=self.settings_override,
                  gamma_vasp_cmd=self.gamma_vasp_cmd

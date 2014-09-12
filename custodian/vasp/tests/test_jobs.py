@@ -29,7 +29,7 @@ class VaspJobTest(unittest.TestCase):
 
     def test_to_from_dict(self):
         v = VaspJob("hello")
-        v2 = VaspJob.from_dict(v.to_dict)
+        v2 = VaspJob.from_dict(v.as_dict())
         self.assertEqual(type(v2), type(v))
         self.assertEqual(v2.vasp_cmd, "hello")
 

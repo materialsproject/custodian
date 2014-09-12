@@ -85,14 +85,14 @@ class Modder(object):
 
     def modify_object(self, modification, obj):
         """
-        Modify an object that supports pymatgen's to_dict and from_dict API.
+        Modify an object that supports pymatgen's as_dict() and from_dict API.
 
         Args:
             modification (dict): Modification must be {action_keyword :
                 settings}. E.g., {'_set': {'Hello':'Universe', 'Bye': 'World'}}
             obj (object): Object to modify
         """
-        d = obj.to_dict
+        d = obj.as_dict()
         self.modify(modification, d)
         return obj.from_dict(d)
 

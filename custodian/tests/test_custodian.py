@@ -105,7 +105,7 @@ class CustodianTest(unittest.TestCase):
                       max_errors=njobs, log_file=None)
         output = c.run()
         self.assertEqual(len(output), njobs)
-        print(ExampleHandler(params).to_dict)
+        print(ExampleHandler(params).as_dict())
 
     def test_unrecoverable(self):
         njobs = 100

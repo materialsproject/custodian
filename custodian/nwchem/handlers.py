@@ -83,7 +83,7 @@ class NwchemErrorHandler(ErrorHandler):
                     if t.operation.startswith("freq"):
                         #You cannot calculate hessian with cgmin.
                         t.theory_directives["nocgmin"] = ""
-                action = {"_set": {"tasks": [t.to_dict for t in nwi.tasks]}}
+                action = {"_set": {"tasks": [t.as_dict() for t in nwi.tasks]}}
                 actions.append(action)
             else:
                 # For unimplemented errors, this should just cause the job to

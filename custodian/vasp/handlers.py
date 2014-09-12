@@ -168,8 +168,8 @@ class VaspErrorHandler(ErrorHandler):
             trans = SupercellTransformation(((1, 0, 0), (0, 0, 1), (0, 1, 0)))
             new_s = trans.apply_transformation(s)
             actions.append({"dict": "POSCAR",
-                            "action": {"_set": {"structure": new_s.to_dict}},
-                            "transformation": trans.to_dict})
+                            "action": {"_set": {"structure": new_s.as_dict()}},
+                            "transformation": trans.as_dict()})
 
         if "pricel" in self.errors:
             actions.append({"dict": "INCAR",
@@ -516,8 +516,8 @@ class FrozenJobErrorHandler(ErrorHandler):
         trans = PerturbStructureTransformation(0.05)
         new_s = trans.apply_transformation(s)
         actions = [{"dict": "POSCAR",
-                    "action": {"_set": {"structure": new_s.to_dict}},
-                    "transformation": trans.to_dict}]
+                    "action": {"_set": {"structure": new_s.as_dict()}},
+                    "transformation": trans.as_dict()}]
         m = Modder()
         vi = VaspInput.from_directory(".")
         for a in actions:

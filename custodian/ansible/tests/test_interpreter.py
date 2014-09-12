@@ -160,8 +160,7 @@ class MyObject():
     def __init__(self, a):
         self.b = {'a': a}
 
-    @property
-    def to_dict(self):
+    def as_dict(self):
         return {'b': {'a': self.b['a']}}
 
     @staticmethod
