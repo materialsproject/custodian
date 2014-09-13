@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.qchem.handlers &mdash; custodian 0.7.5 documentation</title>
+    <title>custodian.qchem.handlers &mdash; custodian 0.7.6 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.7.5',
+        VERSION:     '0.7.6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.5 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.7.6 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.5 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.6 documentation</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -212,17 +212,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 </div>
-<div class="viewcode-block" id="QChemErrorHandler.fix_error_code_134"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_error_code_134">[docs]</a>    <span class="k">def</span> <span class="nf">fix_error_code_134</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">has_freq_job</span> <span class="o">=</span> <span class="bp">False</span>
+<div class="viewcode-block" id="QChemErrorHandler.is_openmp_compatible"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.is_openmp_compatible">[docs]</a>    <span class="k">def</span> <span class="nf">is_openmp_compatible</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">jobs</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">j</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;freq&quot;</span><span class="p">:</span>
-                <span class="n">has_freq_job</span> <span class="o">=</span> <span class="bp">True</span>
-                <span class="k">break</span>
+                <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;exchange&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;pbe&quot;</span><span class="p">,</span> <span class="s">&quot;b&quot;</span><span class="p">]</span>\
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;correlation&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;pbe&quot;</span><span class="p">,</span> <span class="s">&quot;lyp&quot;</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="QChemErrorHandler.fix_error_code_134"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_error_code_134">[docs]</a>    <span class="k">def</span> <span class="nf">fix_error_code_134</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
         <span class="k">if</span> <span class="s">&quot;thresh&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_integral_threshold</span><span class="p">(</span><span class="n">thresh</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
             <span class="k">return</span> <span class="s">&quot;use tight integral threshold&quot;</span>
-        <span class="k">elif</span> <span class="n">has_freq_job</span> <span class="ow">or</span>\
-                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;exchange&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;pbe&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_openmp_compatible</span><span class="p">():</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="s">&quot;half_cpus&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s">&quot;half_cpus&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
                 <span class="k">return</span> <span class="s">&quot;half_cpus&quot;</span>
@@ -235,8 +239,7 @@
             <span class="k">return</span> <span class="bp">None</span>
 </div>
 <div class="viewcode-block" id="QChemErrorHandler.fix_insufficient_static_memory"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_insufficient_static_memory">[docs]</a>    <span class="k">def</span> <span class="nf">fix_insufficient_static_memory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;freq&quot;</span> <span class="ow">or</span>\
-                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;exchange&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;pbe&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_openmp_compatible</span><span class="p">():</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="s">&quot;half_cpus&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s">&quot;half_cpus&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
                 <span class="k">return</span> <span class="s">&quot;half_cpus&quot;</span>
@@ -257,8 +260,7 @@
             <span class="k">return</span> <span class="bp">None</span>
 </div>
 <div class="viewcode-block" id="QChemErrorHandler.fix_error_killed"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_error_killed">[docs]</a>    <span class="k">def</span> <span class="nf">fix_error_killed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;freq&quot;</span> <span class="ow">or</span>\
-                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;exchange&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;pbe&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_openmp_compatible</span><span class="p">():</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="s">&quot;half_cpus&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s">&quot;half_cpus&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
                 <span class="k">return</span> <span class="s">&quot;half_cpus&quot;</span>
@@ -381,7 +383,7 @@
 </div>
 <div class="viewcode-block" id="QChemErrorHandler.set_scf_initial_guess"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.set_scf_initial_guess">[docs]</a>    <span class="k">def</span> <span class="nf">set_scf_initial_guess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guess</span><span class="o">=</span><span class="s">&quot;sad&quot;</span><span class="p">):</span>
         <span class="k">if</span> <span class="s">&quot;scf_guess&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">]</span> \
-                <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_step_id</span> <span class="o">==</span> <span class="mi">0</span> \
+                <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_step_id</span> <span class="o">&gt;</span> <span class="mi">0</span> \
                 <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;scf_guess&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&quot;read&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="n">guess</span><span class="p">)</span>
 </div>
@@ -450,8 +452,7 @@
                 <span class="n">tar</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
         <span class="n">tar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </div>
-    <span class="nd">@property</span>
-<div class="viewcode-block" id="QChemErrorHandler.to_dict"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="QChemErrorHandler.as_dict"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.as_dict">[docs]</a>    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;@module&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span>
                 <span class="s">&quot;@class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
                 <span class="s">&quot;input_file&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span>
@@ -461,10 +462,10 @@
                 <span class="s">&quot;scf_max_cycles&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span><span class="p">,</span>
                 <span class="s">&quot;geom_max_cycles&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_max_cycles</span><span class="p">,</span>
                 <span class="s">&quot;outdata&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span><span class="p">,</span>
-                <span class="s">&quot;qcinp&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">to_dict</span><span class="p">,</span>
+                <span class="s">&quot;qcinp&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span>
                 <span class="s">&quot;error_step_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_step_id</span><span class="p">,</span>
                 <span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span>
-                <span class="s">&quot;fix_step&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">to_dict</span><span class="p">}</span>
+                <span class="s">&quot;fix_step&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()}</span>
 </div>
     <span class="nd">@classmethod</span>
 <div class="viewcode-block" id="QChemErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
@@ -513,14 +514,14 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.5 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.6 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

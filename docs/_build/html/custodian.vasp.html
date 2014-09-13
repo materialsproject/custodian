@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp package &mdash; custodian 0.7.5 documentation</title>
+    <title>custodian.vasp package &mdash; custodian 0.7.6 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.5',
+        VERSION:     '0.7.6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.5 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.7.6 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.5 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.6 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -182,7 +182,7 @@ frozen. Defaults to 3600 seconds, i.e., 1 hour.</li>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.MaxForceErrorHandler">
-<em class="property">class </em><tt class="descname">MaxForceErrorHandler</tt><big>(</big><em>output_filename='vasprun.xml'</em>, <em>max_force_threshold=0.5</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descname">MaxForceErrorHandler</tt><big>(</big><em>output_filename='vasprun.xml'</em>, <em>max_force_threshold=0.25</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
 <p>Checks that the desired force convergence has been achieved. Otherwise
 restarts the run with smaller EDIFF. (This is necessary since energy
@@ -290,6 +290,39 @@ changing the ALGO from Fast to Normal.</li>
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.NonConvergingErrorHandler.is_monitor">
 <tt class="descname">is_monitor</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="custodian.vasp.handlers.PositiveEnergyErrorHandler">
+<em class="property">class </em><tt class="descname">PositiveEnergyErrorHandler</tt><big>(</big><em>output_filename='OSZICAR'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PositiveEnergyErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<p>Check if a run has positive absolute energy.
+If so, change ALGO from Fast to Normal or kill the job.</p>
+<p>Initializes the handler with the output file to check.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output_filename</strong> (<em>str</em>) &#8211; This is the OSZICAR file. Change
+this only if it is different from the default (unlikely).</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="custodian.vasp.handlers.PositiveEnergyErrorHandler.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PositiveEnergyErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.handlers.PositiveEnergyErrorHandler.correct">
+<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PositiveEnergyErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.PositiveEnergyErrorHandler.is_monitor">
+<tt class="descname">is_monitor</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -432,7 +465,7 @@ default redirect used by <tt class="xref py py-class docutils literal"><span cla
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.error_msgs">
-<tt class="descname">error_msgs</tt><em class="property"> = {'too_few_bands': ['TOO FEW BANDS'], 'triple_product': ['ERROR: the triple product of the basis vectors'], 'amin': ['One of the lattice vectors is very long (&gt;50 A), but AMIN'], 'pricel': ['internal error in subroutine PRICEL'], 'zpotrf': ['LAPACK: Routine ZPOTRF failed'], 'aliasing': ['WARNING: small aliasing (wrap around) errors must be expected'], 'brmix': ['BRMIX: very serious problems'], 'real_optlay': ['REAL_OPTLAY: internal error'], 'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'dentet': ['DENTET'], 'incorrect_shift': ['Could not get correct shifts'], 'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'rspher': ['ERROR RSPHER'], 'rot_matrix': ['Found some non-integer element in rotation matrix'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values'], 'zbrent': ['ZBRENT: fatal internal in brackting'], 'tetirr': ['Routine TETIRR needs special values'], 'brions': ['BRIONS problems: POTIM should be increased']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">error_msgs</tt><em class="property"> = {'too_few_bands': ['TOO FEW BANDS'], 'triple_product': ['ERROR: the triple product of the basis vectors'], 'amin': ['One of the lattice vectors is very long (&gt;50 A), but AMIN'], 'pricel': ['internal error in subroutine PRICEL'], 'zpotrf': ['LAPACK: Routine ZPOTRF failed'], 'aliasing': ['WARNING: small aliasing (wrap around) errors must be expected'], 'brmix': ['BRMIX: very serious problems'], 'real_optlay': ['REAL_OPTLAY: internal error'], 'aliasing_incar': ['Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate'], 'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'dentet': ['DENTET'], 'incorrect_shift': ['Could not get correct shifts'], 'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'rspher': ['ERROR RSPHER'], 'rot_matrix': ['Found some non-integer element in rotation matrix'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values'], 'zbrent': ['ZBRENT: fatal internal in brackting'], 'tetirr': ['Routine TETIRR needs special values'], 'brions': ['BRIONS problems: POTIM should be increased']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -749,7 +782,7 @@ LSTOP = .TRUE.</li>
 <dt>
 <tt class="descname">Er = Er_3</tt></dt>
 <dt>
-<tt class="descname">, auto_npar=True, auto_gamma=True, settings_override=None, gamma_vasp_cmd=None)</tt></dt>
+<tt class="descname">, auto_npar=True, auto_gamma=True, settings_override=None, gamma_vasp_cmd=None, copy_magmom=False)</tt></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Job</span></tt></a></p>
 <dl class="docutils">
 <dt>A basic vasp job. Just runs whatever is in the directory. But conceivably</dt>
@@ -810,11 +843,20 @@ runs and to copy the CONTCAR to the POSCAR, you will provide:</p>
 auto_gamma is True. Should follow the list style of
 subprocess. Defaults to None, which means &#8221;.gamma&#8221; is added
 to the last argument of the standard vasp_cmd.</li>
+<li><strong>copy_magmom</strong> (<em>bool</em>) &#8211; Whether to copy the final magmom from the
+OUTCAR to the next INCAR. Useful for multi-relaxation runs
+where the CHGCAR and WAVECAR are sometimes deleted (due to
+changes in fft grid, etc.). Only applies to non-final runs.</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
+<dl class="method">
+<dt id="custodian.vasp.jobs.VaspJob.as_dict">
+<tt class="descclassname">VaspJob.</tt><tt class="descname">as_dict</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.as_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.as_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="staticmethod">
 <dt id="custodian.vasp.jobs.VaspJob.double_relaxation_run">
 <em class="property">static </em><tt class="descclassname">VaspJob.</tt><tt class="descname">double_relaxation_run</tt><big>(</big><em>vasp_cmd</em>, <em>gzipped=True</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.double_relaxation_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.double_relaxation_run" title="Permalink to this definition">¶</a></dt>
@@ -842,7 +884,8 @@ if you are using mpirun, it can be something like
 <dl class="method">
 <dt id="custodian.vasp.jobs.VaspJob.postprocess">
 <tt class="descclassname">VaspJob.</tt><tt class="descname">postprocess</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.postprocess" title="Permalink to this definition">¶</a></dt>
-<dd><p>Postprocessing includes renaming and gzipping where necessary.</p>
+<dd><p>Postprocessing includes renaming and gzipping where necessary.
+Also copies the magmom to the incar if necessary</p>
 </dd></dl>
 
 <dl class="method">
@@ -865,11 +908,6 @@ if you are using mpirun, it can be something like
 <dd><p>Performs initial setup for VaspJob, including overriding any settings
 and backing up.</p>
 </dd></dl>
-
-<dl class="attribute">
-<dt id="custodian.vasp.jobs.VaspJob.to_dict">
-<tt class="descclassname">VaspJob.</tt><tt class="descname">to_dict</tt><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.to_dict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 
@@ -929,13 +967,13 @@ and backing up.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.5 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.6 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

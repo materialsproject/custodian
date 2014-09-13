@@ -22,6 +22,11 @@ calculations.
 Change log
 ==========
 
+v0.7.6
+------
+1. Custodian is now Python 3 compatible and uses the latest versions of
+   pymatgen and monty.
+
 v0.7.5
 ------
 1. **Major** Custodian now exits with RuntimeError when max_errors or

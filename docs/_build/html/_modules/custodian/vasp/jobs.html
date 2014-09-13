@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp.jobs &mdash; custodian 0.7.5 documentation</title>
+    <title>custodian.vasp.jobs &mdash; custodian 0.7.6 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.7.5',
+        VERSION:     '0.7.6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.5 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.7.6 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.5 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.6 documentation</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -77,10 +77,11 @@
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
-<span class="kn">from</span> <span class="nn">pymatgen.io.vaspio.vasp_input</span> <span class="kn">import</span> <span class="n">VaspInput</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vaspio.vasp_input</span> <span class="kn">import</span> <span class="n">VaspInput</span><span class="p">,</span> <span class="n">Incar</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vaspio.vasp_output</span> <span class="kn">import</span> <span class="n">Outcar</span>
 <span class="kn">from</span> <span class="nn">pymatgen.io.smartio</span> <span class="kn">import</span> <span class="n">read_structure</span>
 <span class="kn">from</span> <span class="nn">pymatgen.io.vaspio_set</span> <span class="kn">import</span> <span class="n">MITVaspInputSet</span>
-<span class="kn">from</span> <span class="nn">pymatgen.serializers.json_coders</span> <span class="kn">import</span> <span class="n">PMGJSONDecoder</span>
+<span class="kn">from</span> <span class="nn">monty.json</span> <span class="kn">import</span> <span class="n">MontyDecoder</span>
 <span class="kn">from</span> <span class="nn">monty.os.path</span> <span class="kn">import</span> <span class="n">which</span>
 
 <span class="kn">from</span> <span class="nn">custodian.ansible.interpreter</span> <span class="kn">import</span> <span class="n">Modder</span>
@@ -105,7 +106,7 @@
                  <span class="n">final</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">gzipped</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                  <span class="n">default_vasp_input_set</span><span class="o">=</span><span class="n">MITVaspInputSet</span><span class="p">(),</span> <span class="n">auto_npar</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                  <span class="n">auto_gamma</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">settings_override</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">gamma_vasp_cmd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                 <span class="n">gamma_vasp_cmd</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">copy_magmom</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This constructor is necessarily complex due to the need for</span>
 <span class="sd">        flexibility. For standard kinds of runs, it&#39;s often better to use one</span>
@@ -157,6 +158,10 @@
 <span class="sd">                auto_gamma is True. Should follow the list style of</span>
 <span class="sd">                subprocess. Defaults to None, which means &quot;.gamma&quot; is added</span>
 <span class="sd">                to the last argument of the standard vasp_cmd.</span>
+<span class="sd">            copy_magmom (bool): Whether to copy the final magmom from the</span>
+<span class="sd">                OUTCAR to the next INCAR. Useful for multi-relaxation runs </span>
+<span class="sd">                where the CHGCAR and WAVECAR are sometimes deleted (due to </span>
+<span class="sd">                changes in fft grid, etc.). Only applies to non-final runs.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vasp_cmd</span> <span class="o">=</span> <span class="n">vasp_cmd</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span> <span class="o">=</span> <span class="n">output_file</span>
@@ -169,6 +174,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">auto_npar</span> <span class="o">=</span> <span class="n">auto_npar</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auto_gamma</span> <span class="o">=</span> <span class="n">auto_gamma</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span> <span class="o">=</span> <span class="n">gamma_vasp_cmd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">copy_magmom</span> <span class="o">=</span> <span class="n">copy_magmom</span>
 
 <div class="viewcode-block" id="VaspJob.setup"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -196,8 +202,7 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_npar</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
-                <span class="n">incar</span> <span class="o">=</span> <span class="n">vi</span><span class="p">[</span><span class="s">&quot;INCAR&quot;</span><span class="p">]</span>
+                <span class="n">incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s">&quot;INCAR&quot;</span><span class="p">)</span>
                 <span class="c">#Only optimized NPAR for non-HF and non-RPA calculations.</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;LHFCALC&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;LRPA&quot;</span><span class="p">)</span> <span class="ow">or</span>
                         <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;LEPSILON&quot;</span><span class="p">)):</span>
@@ -256,6 +261,7 @@
 <div class="viewcode-block" id="VaspJob.postprocess"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.postprocess">[docs]</a>    <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Postprocessing includes renaming and gzipping where necessary.</span>
+<span class="sd">        Also copies the magmom to the incar if necessary</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">VASP_OUTPUT_FILES</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
@@ -263,6 +269,16 @@
                     <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&quot;{}{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="p">))</span>
                 <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span> <span class="o">!=</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
                     <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&quot;{}{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy_magmom</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">final</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">outcar</span> <span class="o">=</span> <span class="n">Outcar</span><span class="p">(</span><span class="s">&quot;OUTCAR&quot;</span><span class="p">)</span>
+                <span class="n">magmom</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="p">[</span><span class="s">&#39;tot&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">outcar</span><span class="o">.</span><span class="n">magnetization</span><span class="p">]</span>
+                <span class="n">incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s">&quot;INCAR&quot;</span><span class="p">)</span>
+                <span class="n">incar</span><span class="p">[</span><span class="s">&#39;MAGMOM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">magmom</span>
+                <span class="n">incar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="s">&quot;INCAR&quot;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;MAGMOM copy from OUTCAR to INCAR failed&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gzipped</span><span class="p">:</span>
             <span class="n">gzip_dir</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
@@ -291,12 +307,11 @@
                         <span class="p">{</span><span class="s">&quot;filename&quot;</span><span class="p">:</span> <span class="s">&quot;CONTCAR&quot;</span><span class="p">,</span>
                          <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;dest&quot;</span><span class="p">:</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">}}}])]</span>
 </div>
-    <span class="nd">@property</span>
-<div class="viewcode-block" id="VaspJob.to_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="VaspJob.as_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.as_dict">[docs]</a>    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vasp_cmd</span><span class="p">,</span>
                  <span class="n">output_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="p">,</span>
                  <span class="n">final</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">final</span><span class="p">,</span> <span class="n">gzipped</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gzipped</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">backup</span><span class="p">,</span>
-                 <span class="n">default_vasp_input_set</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_vis</span><span class="o">.</span><span class="n">to_dict</span><span class="p">,</span>
+                 <span class="n">default_vasp_input_set</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_vis</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span>
                  <span class="n">auto_npar</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">auto_npar</span><span class="p">,</span> <span class="n">auto_gamma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">auto_gamma</span><span class="p">,</span>
                  <span class="n">settings_override</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings_override</span><span class="p">,</span>
                  <span class="n">gamma_vasp_cmd</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span>
@@ -307,7 +322,7 @@
 </div>
     <span class="nd">@classmethod</span>
 <div class="viewcode-block" id="VaspJob.from_dict"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
-        <span class="n">vis</span> <span class="o">=</span> <span class="n">PMGJSONDecoder</span><span class="p">()</span><span class="o">.</span><span class="n">process_decoded</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;default_vasp_input_set&quot;</span><span class="p">])</span>
+        <span class="n">vis</span> <span class="o">=</span> <span class="n">MontyDecoder</span><span class="p">()</span><span class="o">.</span><span class="n">process_decoded</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;default_vasp_input_set&quot;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">VaspJob</span><span class="p">(</span>
             <span class="n">vasp_cmd</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;vasp_cmd&quot;</span><span class="p">],</span> <span class="n">output_file</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;output_file&quot;</span><span class="p">],</span>
             <span class="n">suffix</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;suffix&quot;</span><span class="p">],</span> <span class="n">final</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;final&quot;</span><span class="p">],</span> <span class="n">gzipped</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;gzipped&quot;</span><span class="p">],</span>
@@ -348,14 +363,14 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.5 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.6 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

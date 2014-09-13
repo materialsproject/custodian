@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.custodian &mdash; custodian 0.7.5 documentation</title>
+    <title>custodian.custodian &mdash; custodian 0.7.6 documentation</title>
     
     <link rel="stylesheet" href="../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.7.5',
+        VERSION:     '0.7.6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.5 documentation" href="../../index.html" />
+    <link rel="top" title="custodian 0.7.6 documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">custodian 0.7.5 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">custodian 0.7.6 documentation</a> &raquo;</li>
           <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -64,6 +64,8 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">six</span>
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">filter</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;Shyue Ping Ong, William Davidson Richards&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright 2012, The Materials Project&quot;</span>
@@ -85,6 +87,9 @@
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">monty.tempfile</span> <span class="kn">import</span> <span class="n">ScratchDir</span>
 <span class="kn">from</span> <span class="nn">monty.shutil</span> <span class="kn">import</span> <span class="n">gzip_dir</span>
+<span class="kn">from</span> <span class="nn">monty.json</span> <span class="kn">import</span> <span class="n">MSONable</span>
+<span class="kn">from</span> <span class="nn">monty.dev</span> <span class="kn">import</span> <span class="n">deprecated</span>
+
 
 <span class="n">pjoin</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span>
 
@@ -251,12 +256,14 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">restart</span><span class="p">,</span> <span class="n">run_log</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">[]</span>
 
+            <span class="n">terminal</span> <span class="o">=</span> <span class="bp">False</span>
+
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">job</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">restart</span><span class="p">:</span>
                     <span class="c">#Skip all jobs until the restart point.</span>
                     <span class="k">continue</span>
-                <span class="n">run_log</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;job&quot;</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">to_dict</span><span class="p">,</span> <span class="s">&quot;corrections&quot;</span><span class="p">:</span> <span class="p">[]})</span>
-                <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_errors</span><span class="p">):</span>
+                <span class="n">run_log</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;job&quot;</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="s">&quot;corrections&quot;</span><span class="p">:</span> <span class="p">[]})</span>
+                <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_errors</span><span class="p">):</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                         <span class="s">&quot;Starting job no. {} ({}) attempt no. {}. Errors &quot;</span>
                         <span class="s">&quot;thus far = {}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
@@ -282,7 +289,7 @@
                                 <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
                                     <span class="k">break</span>
                                 <span class="k">if</span> <span class="n">n</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor_freq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                                    <span class="n">corrections</span> <span class="o">=</span> <span class="n">_do_check</span><span class="p">(</span>
+                                    <span class="n">corrections</span><span class="p">,</span> <span class="n">terminal</span> <span class="o">=</span> <span class="n">_do_check</span><span class="p">(</span>
                                         <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">,</span>
                                         <span class="n">terminate_func</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">,</span>
                                         <span class="n">skip_over_errors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">skip_over_errors</span><span class="p">)</span>
@@ -303,7 +310,7 @@
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">remaining_handlers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span>
 
-                    <span class="n">corrections</span> <span class="o">=</span> <span class="n">_do_check</span><span class="p">(</span>
+                    <span class="n">corrections</span><span class="p">,</span> <span class="n">terminal</span> <span class="o">=</span> <span class="n">_do_check</span><span class="p">(</span>
                         <span class="n">remaining_handlers</span><span class="p">,</span>
                         <span class="n">skip_over_errors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">skip_over_errors</span><span class="p">)</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">corrections</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -322,8 +329,10 @@
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">has_error</span><span class="p">:</span>
                         <span class="n">job</span><span class="o">.</span><span class="n">postprocess</span><span class="p">()</span>
                         <span class="k">break</span>
-                    <span class="k">elif</span> <span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&quot;corrections&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&quot;actions&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                        <span class="c"># Check if there has been an unrecoverable error.</span>
+                    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">filter</span><span class="p">(</span>
+                            <span class="bp">None</span><span class="p">,</span>
+                            <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="s">&quot;actions&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&quot;corrections&quot;</span><span class="p">]]):</span>
+                        <span class="c"># Check that no corrections were applied</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Unrecoverable error.&quot;</span><span class="p">)</span>
                         <span class="n">unrecoverable</span> <span class="o">=</span> <span class="bp">True</span>
                         <span class="k">break</span>
@@ -344,14 +353,14 @@
             <span class="n">run_time</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
 
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Run completed. Total time taken = {}.&quot;</span>
-                         <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">run_time</span><span class="p">))</span>
+                        <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">run_time</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gzipped_output</span><span class="p">:</span>
                 <span class="n">gzip_dir</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">total_errors</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_errors</span> <span class="ow">or</span> <span class="n">unrecoverable</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">terminal</span> <span class="ow">and</span> <span class="p">(</span><span class="n">total_errors</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_errors</span> <span class="ow">or</span> <span class="n">unrecoverable</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;{} errors reached. Unrecoverable? {}. &quot;</span>
-                                   <span class="s">&quot;Exited...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_errors</span><span class="p">,</span>
+                                   <span class="s">&quot;Exited...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">total_errors</span><span class="p">,</span>
                                                       <span class="n">unrecoverable</span><span class="p">))</span>
             <span class="k">elif</span> <span class="ow">not</span> <span class="n">unrecoverable</span><span class="p">:</span>
                 <span class="c">#Cleanup checkpoint files (if any) if run is successful.</span>
@@ -362,9 +371,11 @@
 </div></div>
 <span class="k">def</span> <span class="nf">_do_check</span><span class="p">(</span><span class="n">handlers</span><span class="p">,</span> <span class="n">terminate_func</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">skip_over_errors</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="n">corrections</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">terminal</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">handlers</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">check</span><span class="p">():</span>
+                <span class="n">terminal</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">is_terminating</span>
                 <span class="k">if</span> <span class="n">terminate_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">h</span><span class="o">.</span><span class="n">is_terminating</span><span class="p">:</span>
                     <span class="n">terminate_func</span><span class="p">()</span>
                 <span class="n">d</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">correct</span><span class="p">()</span>
@@ -377,27 +388,33 @@
                 <span class="n">corrections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Bad handler &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">h</span><span class="p">)],</span>
                      <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[]})</span>
-    <span class="k">return</span> <span class="n">corrections</span>
+    <span class="k">return</span> <span class="n">corrections</span><span class="p">,</span> <span class="n">terminal</span>
 
 
-<div class="viewcode-block" id="JSONSerializable"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.JSONSerializable">[docs]</a><span class="k">class</span> <span class="nc">JSONSerializable</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="JSONSerializable"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.JSONSerializable">[docs]</a><span class="k">class</span> <span class="nc">JSONSerializable</span><span class="p">(</span><span class="n">MSONable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class to be inherited to provide useful standard json serialization</span>
 <span class="sd">    and deserialization protocols based on init args.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="nd">@property</span>
-<div class="viewcode-block" id="JSONSerializable.to_dict"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.JSONSerializable.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="JSONSerializable.as_dict"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.JSONSerializable.as_dict">[docs]</a>    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;@module&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span>
              <span class="s">&quot;@class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">}</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;__init__&quot;</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__init__</span><span class="p">)</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">c</span> <span class="o">!=</span> <span class="s">&quot;self&quot;</span><span class="p">:</span>
                     <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getattribute__</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s">&quot;to_dict&quot;</span><span class="p">):</span>
-                        <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">to_dict</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s">&quot;as_dict&quot;</span><span class="p">):</span>
+                        <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
                     <span class="n">d</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span>
         <span class="k">return</span> <span class="n">d</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="nd">@deprecated</span><span class="p">(</span>
+        <span class="n">message</span><span class="o">=</span><span class="s">&quot;All to_dict properties have been deprecated. They will be &quot;</span>
+                <span class="s">&quot;removed from v0.8. Use the as_dict() method instead.&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="JSONSerializable.to_dict"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.JSONSerializable.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
 </div>
     <span class="nd">@classmethod</span>
 <div class="viewcode-block" id="JSONSerializable.from_dict"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.JSONSerializable.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
@@ -410,11 +427,10 @@
         <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 </div></div>
-<div class="viewcode-block" id="ErrorHandler"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.ErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">ErrorHandler</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
+<div class="viewcode-block" id="ErrorHandler"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.ErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">ErrorHandler</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">with_metaclass</span><span class="p">(</span><span class="n">ABCMeta</span><span class="p">,</span> <span class="n">JSONSerializable</span><span class="p">)):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract base class defining the interface for an ErrorHandler.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">ABCMeta</span>
 
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -465,11 +481,10 @@
         <span class="k">pass</span>
 
 </div></div>
-<div class="viewcode-block" id="Job"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Job">[docs]</a><span class="k">class</span> <span class="nc">Job</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
+<div class="viewcode-block" id="Job"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Job">[docs]</a><span class="k">class</span> <span class="nc">Job</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">with_metaclass</span><span class="p">(</span><span class="n">ABCMeta</span><span class="p">,</span> <span class="n">JSONSerializable</span><span class="p">)):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract base class defining the interface for a Job.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">ABCMeta</span>
 
     <span class="nd">@abstractmethod</span>
 <div class="viewcode-block" id="Job.setup"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Job.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -535,14 +550,14 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">custodian 0.7.5 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">custodian 0.7.6 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
