@@ -340,7 +340,10 @@ class QChemErrorHandlerTest(TestCase):
             ref = f.read()
         with open(os.path.join(scr_dir, "hf_opt_failed.qcinp")) as f:
             ans = f.read()
-        self.assertEqual(ref, ans)
+        for l1, l2 in zip(ref.split("\n"), ans.split("\n")):
+            print(l1)
+            print(l2)
+            self.assertEqual(l1, l2)
 
         shutil.copyfile(os.path.join(test_dir, "hf_opt_failed_tried_0.qcinp"),
                         os.path.join(scr_dir, "hf_opt_failed_tried_0.qcinp"))
