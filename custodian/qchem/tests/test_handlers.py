@@ -336,7 +336,7 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d, {'errors': ['Geometry optimization failed'],
                              'actions': ['increase_iter']})
-        with open(os.path.join(test_dir, "hf_opt_failed.qcinp")) as f:
+        with open(os.path.join(test_dir, "hf_opt_failed_tried_0.qcinp")) as f:
             ref = f.read()
         with open(os.path.join(scr_dir, "hf_opt_failed.qcinp")) as f:
             ans = f.read()
