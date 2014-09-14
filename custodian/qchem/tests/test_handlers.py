@@ -53,9 +53,9 @@ class QChemErrorHandlerTest(TestCase):
                                         'Molecular charge is not found'],
                              'actions': ['increase_iter']})
         with open(os.path.join(test_dir, "hf_rca_tried_0.inp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_rca.inp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
         shutil.copyfile(os.path.join(test_dir, "hf_rca_tried_0.inp"),
@@ -72,9 +72,9 @@ class QChemErrorHandlerTest(TestCase):
                                         'Molecular charge is not found'],
                              'actions': ['rca_diis']})
         with open(os.path.join(test_dir, "hf_rca_tried_1.inp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_rca_tried_0.inp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
         shutil.copyfile(os.path.join(test_dir, "hf_rca_tried_1.inp"),
@@ -91,9 +91,9 @@ class QChemErrorHandlerTest(TestCase):
                                         'Molecular charge is not found'],
                              'actions': ['gwh']})
         with open(os.path.join(test_dir, "hf_rca_tried_2.inp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_rca_tried_1.inp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
         shutil.copyfile(os.path.join(test_dir, "hf_rca_tried_2.inp"),
@@ -110,9 +110,9 @@ class QChemErrorHandlerTest(TestCase):
                                         'Molecular charge is not found'],
                              'actions': ['gdm']})
         with open(os.path.join(test_dir, "hf_rca_tried_3.inp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_rca_tried_2.inp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
         shutil.copyfile(os.path.join(test_dir, "hf_rca_tried_3.inp"),
@@ -129,9 +129,9 @@ class QChemErrorHandlerTest(TestCase):
                                         'Molecular charge is not found'],
                              'actions': ['rca']})
         with open(os.path.join(test_dir, "hf_rca_tried_4.inp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_rca_tried_3.inp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
         shutil.copyfile(os.path.join(test_dir, "hf_rca_tried_4.inp"),
@@ -148,9 +148,9 @@ class QChemErrorHandlerTest(TestCase):
                                         'Molecular charge is not found'],
                              'actions': ['core+rca']})
         with open(os.path.join(test_dir, "hf_rca_tried_5.inp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_rca_tried_4.inp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
         shutil.copyfile(os.path.join(test_dir, "hf_rca_tried_5.inp"),
@@ -191,9 +191,9 @@ class QChemErrorHandlerTest(TestCase):
                                         'Geometry optimization failed'],
                              'actions': ['reset']})
         with open(os.path.join(test_dir, "hf_scf_reset.inp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_scf_reset.inp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
     def test_scf_gdm(self):
@@ -211,9 +211,9 @@ class QChemErrorHandlerTest(TestCase):
                                         'Molecular charge is not found'],
                              'actions': ['increase_iter']})
         with open(os.path.join(test_dir, "hf_gdm_tried_0.inp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_gdm.inp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
         shutil.copyfile(os.path.join(test_dir, "hf_gdm_tried_0.inp"),
                         os.path.join(scr_dir, "hf_gdm_tried_0.inp"))
@@ -229,9 +229,9 @@ class QChemErrorHandlerTest(TestCase):
                                         'Molecular charge is not found'],
                              'actions': ['diis_gdm']})
         with open(os.path.join(test_dir, "hf_gdm_tried_1.inp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_gdm_tried_0.inp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
         shutil.copyfile(os.path.join(test_dir, "hf_gdm_tried_1.inp"),
@@ -248,9 +248,9 @@ class QChemErrorHandlerTest(TestCase):
                                         'Molecular charge is not found'],
                              'actions': ['gwh']})
         with open(os.path.join(test_dir, "hf_gdm_tried_2.inp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_gdm_tried_1.inp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
         shutil.copyfile(os.path.join(test_dir, "hf_gdm_tried_2.inp"),
@@ -267,9 +267,9 @@ class QChemErrorHandlerTest(TestCase):
                                         'Molecular charge is not found'],
                              'actions': ['rca']})
         with open(os.path.join(test_dir, "hf_gdm_tried_3.inp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_gdm_tried_2.inp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
         shutil.copyfile(os.path.join(test_dir, "hf_gdm_tried_3.inp"),
@@ -286,9 +286,9 @@ class QChemErrorHandlerTest(TestCase):
                                         'Molecular charge is not found'],
                              'actions': ['gdm']})
         with open(os.path.join(test_dir, "hf_gdm_tried_4.inp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_gdm_tried_3.inp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
         shutil.copyfile(os.path.join(test_dir, "hf_gdm_tried_4.inp"),
@@ -305,9 +305,9 @@ class QChemErrorHandlerTest(TestCase):
                                         'Molecular charge is not found'],
                              'actions': ['core+gdm']})
         with open(os.path.join(test_dir, "hf_gdm_tried_5.inp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_gdm_tried_4.inp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
         shutil.copyfile(os.path.join(test_dir, "hf_gdm_tried_5.inp"),
@@ -337,11 +337,10 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(d, {'errors': ['Geometry optimization failed'],
                              'actions': ['increase_iter']})
         with open(os.path.join(test_dir, "hf_opt_failed_tried_0.qcinp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_opt_failed.qcinp")) as f:
-            ans = f.read()
-        for l1, l2 in zip(ref.split("\n"), ans.split("\n")):
-            self.assertEqual(l1.strip(), l2.strip())
+            ans = [line.strip() for line in f.readlines()]
+        self.assertEqual(ref, ans)
 
         shutil.copyfile(os.path.join(test_dir, "hf_opt_failed_tried_0.qcinp"),
                         os.path.join(scr_dir, "hf_opt_failed_tried_0.qcinp"))
@@ -355,9 +354,9 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(d, {'errors': ['Geometry optimization failed'],
                              'actions': ['GDIIS']})
         with open(os.path.join(test_dir, "hf_opt_failed_tried_1.qcinp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_opt_failed_tried_0.qcinp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
         shutil.copyfile(os.path.join(test_dir, "hf_opt_failed_tried_1.qcinp"),
@@ -372,9 +371,9 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(d, {'errors': ['Geometry optimization failed'],
                              'actions': ['CartCoords']})
         with open(os.path.join(test_dir, "hf_opt_failed_tried_2.qcinp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_opt_failed_tried_1.qcinp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
         shutil.copyfile(os.path.join(test_dir, "hf_opt_failed_tried_2.qcinp"),
@@ -405,9 +404,9 @@ class QChemErrorHandlerTest(TestCase):
                                         'autoz error'],
                              'actions': ['disable symmetry']})
         with open(os.path.join(test_dir, "qunino_vinyl_nosymm.qcinp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "qunino_vinyl.qcinp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
         shutil.copyfile(os.path.join(test_dir, "qunino_vinyl_nosymm.qcinp"),
@@ -438,9 +437,9 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(d, {'errors': ['NAN values'],
                              'actions': ['use tighter grid']})
         with open(os.path.join(test_dir, "thiane_nan_dense_grid.inp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "thiane_nan.inp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
         shutil.copyfile(os.path.join(test_dir, "thiane_nan_dense_grid.inp"),
                         os.path.join(scr_dir, "thiane_nan_dense_grid.inp"))
@@ -466,9 +465,9 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(d, {'errors': ['NAN values'],
                              'actions': ['use tighter grid']})
         with open(os.path.join(test_dir, "h2o_nan_dense_grid.qcinp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "h2o_nan.qcinp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
     def test_no_input_text(self):
@@ -487,9 +486,9 @@ class QChemErrorHandlerTest(TestCase):
                                         'No input text'],
                              'actions': ['disable symmetry']})
         with open(os.path.join(test_dir, "no_reading_nosymm.qcinp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "no_reading.qcinp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
     def test_exit_code_134(self):
@@ -508,9 +507,9 @@ class QChemErrorHandlerTest(TestCase):
                              'actions': ['use tight integral threshold']})
         with open(os.path.join(test_dir, "exit_code_134_tight_thresh.qcinp"))\
                 as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "exit_code_134.qcinp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
     def test_exit_code_134_after_scf_fix(self):
@@ -529,9 +528,9 @@ class QChemErrorHandlerTest(TestCase):
                                         'Molecular charge is not found'],
                              'actions': ['use tight integral threshold']})
         with open(os.path.join(test_dir, "exit_134_after_scf_fix_tight_thresh.qcinp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "exit_134_after_scf_fix.qcinp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
         shutil.copyfile(os.path.join(test_dir, "exit_134_after_scf_fix_tight_thresh.qcinp"),
                         os.path.join(scr_dir, "exit_134_after_scf_fix_tight_thresh.qcinp"))
@@ -568,9 +567,9 @@ class QChemErrorHandlerTest(TestCase):
                                         'Geometry optimization failed'],
                              'actions': ['increase_iter']})
         with open(os.path.join(test_dir, "ts_cf3_leave_reset_first_step_mol.qcinp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "ts_cf3_leave.qcinp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
     def test_scf_in_aimd_reset(self):
@@ -586,9 +585,9 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(d, {'errors': ['Bad SCF convergence'],
                              'actions': ['reset']})
         with open(os.path.join(test_dir, "h2o_aimd_reset.qcinp")) as f:
-            ref = f.read()
+            ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "h2o_aimd.qcinp")) as f:
-            ans = f.read()
+            ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
     def tearDown(self):
