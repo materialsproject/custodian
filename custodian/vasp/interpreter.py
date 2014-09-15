@@ -2,6 +2,7 @@ from custodian.ansible.actions import FileActions, DictActions
 from custodian.ansible.interpreter import Modder
 from pymatgen.io.vaspio import VaspInput
 
+
 class VaspModder(Modder):
     def __init__(self, actions=None, strict=True, vi=None):
         """
@@ -35,10 +36,10 @@ class VaspModder(Modder):
         modified = []
         for a in actions:
             if "dict" in a:
-                 k = a["dict"]
-                 modified.append(k)
-                 self.vi[k] = self.modify_object(a["action"], self.vi[k])
+                k = a["dict"]
+                modified.append(k)
+                self.vi[k] = self.modify_object(a["action"], self.vi[k])
             elif "file" in a:
-                 self.modify(a["action"], a["file"])
+                self.modify(a["action"], a["file"])
         for f in modified:
-             self.vi[f].write_file(f)
+            self.vi[f].write_file(f)
