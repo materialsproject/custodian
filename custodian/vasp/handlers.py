@@ -42,6 +42,7 @@ from pymatgen.transformations.standard_transformations import \
 from pymatgen.io.vaspio.vasp_output import Vasprun, Oszicar
 from custodian.ansible.interpreter import Modder
 from custodian.ansible.actions import FileActions, DictActions
+from custodian.vasp.interpreter import VaspModder
 
 
 class VaspErrorHandler(ErrorHandler):
@@ -230,16 +231,7 @@ class VaspErrorHandler(ErrorHandler):
                             {"file": "WAVECAR","action": 
                              {"_file_delete": {'mode': "actual"}}}])
 
-        m = Modder(actions=[DictActions, FileActions])
-        modified = []
-        for a in actions:
-            if "dict" in a:
-                modified.append(a["dict"])
-                vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
-            elif "file" in a:
-                m.modify(a["action"], a["file"])
-        for f in modified:
-            vi[f].write_file(f)
+        VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
 
     def __str__(self):
@@ -299,13 +291,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
             m += m % 2
         actions = [{"dict": "KPOINTS",
                     "action": {"_set": {"kpoints": [[m] * 3]}}}]
-        m = Modder()
-        modified = []
-        for a in actions:
-            modified.append(a["dict"])
-            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
-        for f in modified:
-            vi[f].write_file(f)
+        VaspModder(vi=vi).apply_actions(actions)
         return {"errors": ["mesh_symmetry"], "actions": actions}
 
     def __str__(self):
@@ -349,15 +335,7 @@ class UnconvergedErrorHandler(ErrorHandler):
                                         "BMIX": 0.001,
                                         "AMIX_MAG": 0.8,
                                         "BMIX_MAG": 0.001}}}]
-        vi = VaspInput.from_directory(".")
-        m = Modder(actions=[DictActions, FileActions])
-        for a in actions:
-            if "dict" in a:
-                vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
-            elif "file" in a:
-                m.modify(a["action"], a["file"])
-        vi["INCAR"].write_file("INCAR")
-
+        VaspModder().apply_actions(actions)
         return {"errors": ["Unconverged"], "actions": actions}
 
     def __str__(self):
@@ -405,13 +383,7 @@ class MaxForceErrorHandler(ErrorHandler):
                     "action": {"_file_copy": {"dest": "POSCAR"}}},
                    {"dict": "INCAR",
                     "action": {"_set": {"EDIFF": ediff*0.75}}}]
-        m = Modder(actions=[DictActions, FileActions])
-        for a in actions:
-            if "dict" in a:
-                vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
-            elif "file" in a:
-                m.modify(a["action"], a["file"])
-        vi["INCAR"].write_file("INCAR")
+        VaspModder(vi=vi).apply_actions(actions)
 
         return {"errors": ["MaxForce"], "actions": actions}
 
@@ -466,13 +438,7 @@ class PotimErrorHandler(ErrorHandler):
             actions = [{"dict": "INCAR",
                         "action": {"_set": {"POTIM": potim * 0.5}}}]
 
-        m = Modder()
-        modified = []
-        for a in actions:
-            modified.append(a["dict"])
-            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
-        for f in modified:
-            vi[f].write_file(f)
+        VaspModder(vi=vi).apply_actions(actions)
         return {"errors": ["POTIM"], "actions": actions}
 
     def __str__(self):
@@ -518,11 +484,7 @@ class FrozenJobErrorHandler(ErrorHandler):
         actions = [{"dict": "POSCAR",
                     "action": {"_set": {"structure": new_s.as_dict()}},
                     "transformation": trans.as_dict()}]
-        m = Modder()
-        vi = VaspInput.from_directory(".")
-        for a in actions:
-            vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
-        vi["POSCAR"].write_file("POSCAR")
+        VaspModder().apply_actions(actions)
 
         return {"errors": ["Frozen job"], "actions": actions}
 
@@ -598,13 +560,7 @@ class NonConvergingErrorHandler(ErrorHandler):
                                                 "ICHARG": 2}}})
 
         if actions:
-            m = Modder()
-            modified = []
-            for a in actions:
-                modified.append(a["dict"])
-                vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
-            for f in modified:
-                vi[f].write_file(f)
+            VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Non-converging job"], "actions": actions}
 
         #Unfixable error. Just return None for actions.
@@ -908,13 +864,7 @@ class PositiveEnergyErrorHandler(ErrorHandler):
             backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
             actions = [{"dict": "INCAR",
                         "action": {"_set": {"ALGO": "Normal"}}}]
-            m = Modder()
-            modified = []
-            for a in actions:
-                modified.append(a["dict"])
-                vi[a["dict"]] = m.modify_object(a["action"], vi[a["dict"]])
-            for f in modified:
-                vi[f].write_file(f)
+            VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Positive energy"], "actions": actions}
         #Unfixable error. Just return None for actions.
         else:
