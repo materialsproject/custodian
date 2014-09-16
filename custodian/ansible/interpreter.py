@@ -1,11 +1,12 @@
-#!/usr/bin/env python
+# coding: utf-8
+
+from __future__ import unicode_literals, division
 
 """
 This module implements a Modder class that performs modifications on objects
 using support actions.
 """
 
-from __future__ import division
 
 __author__ = "Shyue Ping Ong"
 __copyright__ = "Copyright 2012, The Materials Project"

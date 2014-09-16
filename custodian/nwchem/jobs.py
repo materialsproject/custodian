@@ -1,10 +1,11 @@
-#!/usr/bin/env python
+# coding: utf-8
+
+from __future__ import unicode_literals, division
 
 """
 This module implements basic kinds of jobs for Nwchem runs.
 """
 
-from __future__ import division
 
 __author__ = "Shyue Ping Ong"
 __version__ = "0.1"

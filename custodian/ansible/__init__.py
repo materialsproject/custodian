@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 """
 The ansible package provides modules that provides a mongo-like syntax for
 making modifications to dicts, objects and files. The mongo-like syntax

@@ -1,3 +1,7 @@
+# coding: utf-8
+
+from __future__ import unicode_literals
+
 from custodian.ansible.actions import FileActions, DictActions
 from custodian.ansible.interpreter import Modder
 from pymatgen.io.vaspio import VaspInput

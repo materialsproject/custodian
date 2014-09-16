@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 """
 This package implements various Nwchem Jobs and Error Handlers.
 """
@@ -9,4 +11,3 @@ __maintainer__ = "Shyue Ping Ong"
 __email__ = "ongsp@ucsd.edu"
 __status__ = "Beta"
 __date__ = "6/17/13"
-

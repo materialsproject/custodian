@@ -1,11 +1,12 @@
-#!/usr/bin/env python
+# coding: utf-8
+
+from __future__ import unicode_literals, division
 
 """
 This module implements error handlers for Nwchem runs. Currently tested only
 for B3LYP DFT jobs.
 """
 
-from __future__ import division
 
 __author__ = "Shyue Ping Ong"
 __version__ = "0.1"

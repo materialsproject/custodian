@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian package &mdash; custodian 0.7.6 documentation</title>
+    <title>custodian package &mdash; custodian 0.7.7 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.6',
+        VERSION:     '0.7.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.6 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.7.7 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.6 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.7 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -94,6 +94,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="custodian.vasp.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.handlers">custodian.vasp.handlers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.interpreter">custodian.vasp.interpreter module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.jobs">custodian.vasp.jobs module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="custodian.vasp.html#module-custodian.vasp">Module contents</a></li>
 </ul>
@@ -106,12 +107,9 @@
 </div>
 <div class="section" id="module-custodian.custodian">
 <span id="custodian-custodian-module"></span><h2>custodian.custodian module<a class="headerlink" href="#module-custodian.custodian" title="Permalink to this headline">¶</a></h2>
-<p>This module implements the main Custodian class, which manages a list of jobs
-given a set of error handlers, the abstract base classes for the
-ErrorHandlers and Jobs.</p>
 <dl class="class">
 <dt id="custodian.custodian.Custodian">
-<em class="property">class </em><tt class="descname">Custodian</tt><big>(</big><em>handlers</em>, <em>jobs</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em>, <em>log_file='custodian.json'</em>, <em>skip_over_errors=False</em>, <em>scratch_dir=None</em>, <em>gzipped_output=False</em>, <em>checkpoint=False</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descname">Custodian</tt><big>(</big><em>handlers</em>, <em>jobs</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em>, <em>log_file=u'custodian.json'</em>, <em>skip_over_errors=False</em>, <em>scratch_dir=None</em>, <em>gzipped_output=False</em>, <em>checkpoint=False</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>The Custodian class is the manager for a list of jobs given a list of
 error handlers. The way it works is as follows:</p>
@@ -179,7 +177,7 @@ to False.</li>
 </table>
 <dl class="attribute">
 <dt id="custodian.custodian.Custodian.LOG_FILE">
-<tt class="descname">LOG_FILE</tt><em class="property"> = 'custodian.json'</em><a class="headerlink" href="#custodian.custodian.Custodian.LOG_FILE" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">LOG_FILE</tt><em class="property"> = u'custodian.json'</em><a class="headerlink" href="#custodian.custodian.Custodian.LOG_FILE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -327,10 +325,9 @@ pre-processing.</p>
 </div>
 <div class="section" id="module-custodian.utils">
 <span id="custodian-utils-module"></span><h2>custodian.utils module<a class="headerlink" href="#module-custodian.utils" title="Permalink to this headline">¶</a></h2>
-<p>Utility function and classes.</p>
 <dl class="function">
 <dt id="custodian.utils.backup">
-<tt class="descname">backup</tt><big>(</big><em>filenames</em>, <em>prefix='error'</em><big>)</big><a class="reference internal" href="_modules/custodian/utils.html#backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.utils.backup" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">backup</tt><big>(</big><em>filenames</em>, <em>prefix=u'error'</em><big>)</big><a class="reference internal" href="_modules/custodian/utils.html#backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.utils.backup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Backup files to a tar.gz file. Used, for example, in backing up the
 files of an errored run before performing corrections.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -404,7 +401,7 @@ series of error.1.tar.gz, error.2.tar.gz, ... will be generated.</li>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.6 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.7.7 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

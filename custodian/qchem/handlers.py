@@ -1,11 +1,12 @@
-#!/usr/bin/env python
+# coding: utf-8
+
+from __future__ import unicode_literals, division
 
 """
 This module implements error handlers for QChem runs. Currently tested only
 for B3LYP DFT jobs.
 """
 
-from __future__ import division
 import copy
 import glob
 import json
