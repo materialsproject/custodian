@@ -18,6 +18,14 @@ custodian.vasp.handlers module
     :undoc-members:
     :show-inheritance:
 
+custodian.vasp.interpreter module
+---------------------------------
+
+.. automodule:: custodian.vasp.interpreter
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 custodian.vasp.jobs module
 --------------------------
 

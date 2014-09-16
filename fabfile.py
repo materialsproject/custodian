@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """
 Deployment file to facilitate releases of custodian.
 """
@@ -20,7 +18,7 @@ from fabric.api import local, lcd
 from custodian import __version__ as ver
 
 
-def makedoc():
+def make_doc():
     with lcd("docs"):
         local("sphinx-apidoc -o . -f ../custodian")
         local("rm custodian*.tests.rst")
@@ -66,5 +64,5 @@ def setver():
 def release():
     setver()
     test()
-    makedoc()
+    make_doc()
     publish()

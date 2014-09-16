@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>custodian.vasp.interpreter &mdash; custodian 0.7.7 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.7.7',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="top" title="custodian 0.7.7 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+ 
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39574369-1']);
+  _gaq.push(['_trackPageview']);
+</script>
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">custodian 0.7.7 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for custodian.vasp.interpreter</h1><div class="highlight"><pre>
+<span class="c"># coding: utf-8</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">from</span> <span class="nn">custodian.ansible.actions</span> <span class="kn">import</span> <span class="n">FileActions</span><span class="p">,</span> <span class="n">DictActions</span>
+<span class="kn">from</span> <span class="nn">custodian.ansible.interpreter</span> <span class="kn">import</span> <span class="n">Modder</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vaspio</span> <span class="kn">import</span> <span class="n">VaspInput</span>
+
+
+<div class="viewcode-block" id="VaspModder"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.interpreter.VaspModder">[docs]</a><span class="k">class</span> <span class="nc">VaspModder</span><span class="p">(</span><span class="n">Modder</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">vi</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes a Modder for VaspInput sets</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            actions ([Action]): A sequence of supported actions. See</span>
+<span class="sd">                :mod:`custodian.ansible.actions`. Default is None,</span>
+<span class="sd">                which means DictActions and FileActions are supported.</span>
+<span class="sd">            strict (bool): Indicating whether to use strict mode. In non-strict</span>
+<span class="sd">                mode, unsupported actions are simply ignored without any</span>
+<span class="sd">                errors raised. In strict mode, if an unsupported action is</span>
+<span class="sd">                supplied, a ValueError is raised. Defaults to True.</span>
+<span class="sd">            vi (VaspInput): A VaspInput object from the current directory.</span>
+<span class="sd">                Initialized automatically if not passed (but passing it will</span>
+<span class="sd">                avoid having to reparse the directory).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vi</span> <span class="o">=</span> <span class="n">vi</span> <span class="ow">or</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="n">actions</span> <span class="ow">or</span> <span class="p">[</span><span class="n">FileActions</span><span class="p">,</span> <span class="n">DictActions</span><span class="p">]</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">VaspModder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="n">strict</span><span class="p">)</span>
+
+<div class="viewcode-block" id="VaspModder.apply_actions"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.interpreter.VaspModder.apply_actions">[docs]</a>    <span class="k">def</span> <span class="nf">apply_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a list of actions to the Vasp Input Set and rewrites modified</span>
+<span class="sd">        files.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            actions [dict]: A list of actions of the form {&#39;file&#39;: filename,</span>
+<span class="sd">                &#39;action&#39;: moddermodification} or {&#39;dict&#39;: vaspinput_key,</span>
+<span class="sd">                &#39;action&#39;: moddermodification}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">modified</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&quot;dict&quot;</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
+                <span class="n">k</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]</span>
+                <span class="n">modified</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vi</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">vi</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="s">&quot;file&quot;</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="s">&quot;file&quot;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">modified</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vi</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">custodian 0.7.7 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+<script type="text/javascript">
+  (function() {
+    var ga = document.createElement('script');
+    ga.src = ('https:' == document.location.protocol ?
+              'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    ga.setAttribute('async', 'true');
+    document.documentElement.firstChild.appendChild(ga);
+  })();
+</script>
+</div>
+
+  </body>
+</html>

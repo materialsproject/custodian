@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp.jobs &mdash; custodian 0.7.6 documentation</title>
+    <title>custodian.vasp.jobs &mdash; custodian 0.7.7 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.7.6',
+        VERSION:     '0.7.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.6 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.7.7 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.6 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.7 documentation</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,13 +55,14 @@
           <div class="body">
             
   <h1>Source code for custodian.vasp.jobs</h1><div class="highlight"><pre>
-<span class="c">#!/usr/bin/env python</span>
+<span class="c"># coding: utf-8</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This module implements basic kinds of jobs for VASP runs.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;Shyue Ping Ong&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;0.1&quot;</span>
@@ -84,9 +85,9 @@
 <span class="kn">from</span> <span class="nn">monty.json</span> <span class="kn">import</span> <span class="n">MontyDecoder</span>
 <span class="kn">from</span> <span class="nn">monty.os.path</span> <span class="kn">import</span> <span class="n">which</span>
 
-<span class="kn">from</span> <span class="nn">custodian.ansible.interpreter</span> <span class="kn">import</span> <span class="n">Modder</span>
 <span class="kn">from</span> <span class="nn">custodian.ansible.actions</span> <span class="kn">import</span> <span class="n">FileActions</span><span class="p">,</span> <span class="n">DictActions</span>
 <span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">Job</span><span class="p">,</span> <span class="n">gzip_dir</span>
+<span class="kn">from</span> <span class="nn">custodian.vasp.interpreter</span> <span class="kn">import</span> <span class="n">VaspModder</span>
 
 
 <span class="n">VASP_INPUT_FILES</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">,</span> <span class="s">&quot;POTCAR&quot;</span><span class="p">,</span> <span class="s">&quot;KPOINTS&quot;</span><span class="p">}</span>
@@ -223,18 +224,7 @@
                 <span class="k">pass</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings_override</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
-            <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">([</span><span class="n">FileActions</span><span class="p">,</span> <span class="n">DictActions</span><span class="p">])</span>
-            <span class="n">modified</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings_override</span><span class="p">:</span>
-                <span class="k">if</span> <span class="s">&quot;dict&quot;</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
-                    <span class="n">modified</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">])</span>
-                    <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span>
-                                                    <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]])</span>
-                <span class="k">elif</span> <span class="s">&quot;filename&quot;</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
-                    <span class="n">m</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="s">&quot;filename&quot;</span><span class="p">])</span>
-            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">modified</span><span class="p">:</span>
-                <span class="n">vi</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">VaspModder</span><span class="p">()</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings_override</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="VaspJob.run"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -363,7 +353,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.6 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.7 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>

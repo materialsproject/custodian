@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp.handlers &mdash; custodian 0.7.6 documentation</title>
+    <title>custodian.vasp.handlers &mdash; custodian 0.7.7 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.7.6',
+        VERSION:     '0.7.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.6 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.7.7 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.6 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.7 documentation</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,7 +55,9 @@
           <div class="body">
             
   <h1>Source code for custodian.vasp.handlers</h1><div class="highlight"><pre>
-<span class="c">#!/usr/bin/env python</span>
+<span class="c"># coding: utf-8</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This module implements specific error handlers for VASP runs. These handlers</span>
@@ -63,7 +65,6 @@
 <span class="sd">by modifying the input files.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="nb">reduce</span>
 <span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">map</span>
 
@@ -99,6 +100,7 @@
 <span class="kn">from</span> <span class="nn">pymatgen.io.vaspio.vasp_output</span> <span class="kn">import</span> <span class="n">Vasprun</span><span class="p">,</span> <span class="n">Oszicar</span>
 <span class="kn">from</span> <span class="nn">custodian.ansible.interpreter</span> <span class="kn">import</span> <span class="n">Modder</span>
 <span class="kn">from</span> <span class="nn">custodian.ansible.actions</span> <span class="kn">import</span> <span class="n">FileActions</span><span class="p">,</span> <span class="n">DictActions</span>
+<span class="kn">from</span> <span class="nn">custodian.vasp.interpreter</span> <span class="kn">import</span> <span class="n">VaspModder</span>
 
 
 <div class="viewcode-block" id="VaspErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">VaspErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
@@ -287,16 +289,7 @@
                             <span class="p">{</span><span class="s">&quot;file&quot;</span><span class="p">:</span> <span class="s">&quot;WAVECAR&quot;</span><span class="p">,</span><span class="s">&quot;action&quot;</span><span class="p">:</span> 
                              <span class="p">{</span><span class="s">&quot;_file_delete&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;mode&#39;</span><span class="p">:</span> <span class="s">&quot;actual&quot;</span><span class="p">}}}])</span>
 
-        <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">(</span><span class="n">actions</span><span class="o">=</span><span class="p">[</span><span class="n">DictActions</span><span class="p">,</span> <span class="n">FileActions</span><span class="p">])</span>
-        <span class="n">modified</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s">&quot;dict&quot;</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
-                <span class="n">modified</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">])</span>
-                <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]])</span>
-            <span class="k">elif</span> <span class="s">&quot;file&quot;</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
-                <span class="n">m</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="s">&quot;file&quot;</span><span class="p">])</span>
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">modified</span><span class="p">:</span>
-            <span class="n">vi</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">),</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -356,13 +349,7 @@
             <span class="n">m</span> <span class="o">+=</span> <span class="n">m</span> <span class="o">%</span> <span class="mi">2</span>
         <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;KPOINTS&quot;</span><span class="p">,</span>
                     <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;kpoints&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="n">m</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">]}}}]</span>
-        <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">()</span>
-        <span class="n">modified</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
-            <span class="n">modified</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">])</span>
-            <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]])</span>
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">modified</span><span class="p">:</span>
-            <span class="n">vi</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;mesh_symmetry&quot;</span><span class="p">],</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -406,15 +393,7 @@
                                         <span class="s">&quot;BMIX&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span>
                                         <span class="s">&quot;AMIX_MAG&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
                                         <span class="s">&quot;BMIX_MAG&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">}}}]</span>
-        <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
-        <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">(</span><span class="n">actions</span><span class="o">=</span><span class="p">[</span><span class="n">DictActions</span><span class="p">,</span> <span class="n">FileActions</span><span class="p">])</span>
-        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s">&quot;dict&quot;</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
-                <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]])</span>
-            <span class="k">elif</span> <span class="s">&quot;file&quot;</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
-                <span class="n">m</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="s">&quot;file&quot;</span><span class="p">])</span>
-        <span class="n">vi</span><span class="p">[</span><span class="s">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="s">&quot;INCAR&quot;</span><span class="p">)</span>
-
+        <span class="n">VaspModder</span><span class="p">()</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Unconverged&quot;</span><span class="p">],</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -462,13 +441,7 @@
                     <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;dest&quot;</span><span class="p">:</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">}}},</span>
                    <span class="p">{</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
                     <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;EDIFF&quot;</span><span class="p">:</span> <span class="n">ediff</span><span class="o">*</span><span class="mf">0.75</span><span class="p">}}}]</span>
-        <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">(</span><span class="n">actions</span><span class="o">=</span><span class="p">[</span><span class="n">DictActions</span><span class="p">,</span> <span class="n">FileActions</span><span class="p">])</span>
-        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s">&quot;dict&quot;</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
-                <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]])</span>
-            <span class="k">elif</span> <span class="s">&quot;file&quot;</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
-                <span class="n">m</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="s">&quot;file&quot;</span><span class="p">])</span>
-        <span class="n">vi</span><span class="p">[</span><span class="s">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="s">&quot;INCAR&quot;</span><span class="p">)</span>
+        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;MaxForce&quot;</span><span class="p">],</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 
@@ -523,13 +496,7 @@
             <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
                         <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;POTIM&quot;</span><span class="p">:</span> <span class="n">potim</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">}}}]</span>
 
-        <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">()</span>
-        <span class="n">modified</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
-            <span class="n">modified</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">])</span>
-            <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]])</span>
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">modified</span><span class="p">:</span>
-            <span class="n">vi</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;POTIM&quot;</span><span class="p">],</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -575,11 +542,7 @@
         <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">,</span>
                     <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;structure&quot;</span><span class="p">:</span> <span class="n">new_s</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()}},</span>
                     <span class="s">&quot;transformation&quot;</span><span class="p">:</span> <span class="n">trans</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()}]</span>
-        <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">()</span>
-        <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
-            <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]])</span>
-        <span class="n">vi</span><span class="p">[</span><span class="s">&quot;POSCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="s">&quot;POSCAR&quot;</span><span class="p">)</span>
+        <span class="n">VaspModder</span><span class="p">()</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Frozen job&quot;</span><span class="p">],</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 
@@ -655,13 +618,7 @@
                                                 <span class="s">&quot;ICHARG&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}}})</span>
 
         <span class="k">if</span> <span class="n">actions</span><span class="p">:</span>
-            <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">()</span>
-            <span class="n">modified</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
-                <span class="n">modified</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">])</span>
-                <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]])</span>
-            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">modified</span><span class="p">:</span>
-                <span class="n">vi</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Non-converging job&quot;</span><span class="p">],</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 
         <span class="c">#Unfixable error. Just return None for actions.</span>
@@ -965,13 +922,7 @@
             <span class="n">backup</span><span class="p">([</span><span class="s">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">,</span> <span class="s">&quot;OUTCAR&quot;</span><span class="p">,</span> <span class="s">&quot;vasprun.xml&quot;</span><span class="p">])</span>
             <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
                         <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s">&quot;Normal&quot;</span><span class="p">}}}]</span>
-            <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">()</span>
-            <span class="n">modified</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
-                <span class="n">modified</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">])</span>
-                <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modify_object</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;action&quot;</span><span class="p">],</span> <span class="n">vi</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s">&quot;dict&quot;</span><span class="p">]])</span>
-            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">modified</span><span class="p">:</span>
-                <span class="n">vi</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Positive energy&quot;</span><span class="p">],</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
         <span class="c">#Unfixable error. Just return None for actions.</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1016,7 +967,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.7.6 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.7.7 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
