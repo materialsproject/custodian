@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import unicode_literals, division
 
 """
 This module implements the main Custodian class, which manages a list of jobs
@@ -6,7 +6,6 @@ given a set of error handlers, the abstract base classes for the
 ErrorHandlers and Jobs.
 """
 
-from __future__ import division
 import six
 from six.moves import filter
 

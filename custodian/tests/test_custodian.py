@@ -1,11 +1,9 @@
-#!/usr/bin/env python
+from __future__ import unicode_literals, division, print_function
 
 """
 Created on Jun 1, 2012
 """
 
-from __future__ import division
-from __future__ import print_function
 
 __author__ = "Shyue Ping Ong"
 __copyright__ = "Copyright 2012, The Materials Project"

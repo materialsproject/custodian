@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import unicode_literals, division, print_function
 
 """
 This module defines various classes of supported actions. All actions are
@@ -6,8 +6,6 @@ implemented as static methods, but are defined using classes (as opposed to
 modules) so that a set of well-defined actions can be namespaced easily.
 """
 
-from __future__ import division
-from __future__ import print_function
 
 __author__ = "Shyue Ping Ong"
 __copyright__ = "Copyright 2012, The Materials Project"

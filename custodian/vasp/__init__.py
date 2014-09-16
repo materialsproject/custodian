@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 """
 This package implements various VASP Jobs and Error Handlers.
 """

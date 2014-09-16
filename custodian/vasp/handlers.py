@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import unicode_literals, division
 
 """
 This module implements specific error handlers for VASP runs. These handlers
@@ -6,7 +6,6 @@ tries to detect common errors in vasp runs and attempt to fix them on the fly
 by modifying the input files.
 """
 
-from __future__ import division
 from functools import reduce
 from six.moves import map
 

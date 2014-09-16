@@ -1,10 +1,9 @@
-#!/usr/bin/env python
+from __future__ import unicode_literals, division
 
 """
 This module implements basic kinds of jobs for QChem runs.
 """
 
-from __future__ import division
 import os
 from monty.io import zopen
 import shutil

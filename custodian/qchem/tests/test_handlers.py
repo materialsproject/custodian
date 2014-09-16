@@ -1,10 +1,9 @@
-#!/usr/bin/env python
+from __future__ import unicode_literals, division
 
 """
 Created on Dec 6, 2012
 """
 
-from __future__ import division
 import os
 import shutil
 from unittest import TestCase
