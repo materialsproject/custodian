@@ -823,6 +823,7 @@ class BadVasprunXMLHandler(ErrorHandler):
         return False
 
     def correct(self):
+        backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
         return {"errors": ["Bad vasprun.xml in %s." % self.vasprunxml],
                 "actions": None}
 
