@@ -9,7 +9,6 @@ ErrorHandlers and Jobs.
 """
 
 import six
-from six.moves import filter
 
 __author__ = "Shyue Ping Ong, William Davidson Richards"
 __copyright__ = "Copyright 2012, The Materials Project"
@@ -137,7 +136,7 @@ class Custodian(object):
         self.max_errors = max_errors
         self.jobs = jobs
         self.handlers = handlers
-        self.monitors = filter(lambda x: x.is_monitor, handlers)
+        self.monitors = [h for h in handlers if h.is_monitor]
         self.polling_time_step = polling_time_step
         self.monitor_freq = monitor_freq
         self.skip_over_errors = skip_over_errors
@@ -250,8 +249,8 @@ class Custodian(object):
                     # handlers fix the problems detected by monitors
                     # if an error has been found, not all handlers need to run
                     if has_error:
-                        remaining_handlers = filter(lambda x: not x.is_monitor,
-                                                    self.handlers)
+                        remaining_handlers = [h for h in self.handlers
+                                              if not h.is_monitor]
                     else:
                         remaining_handlers = self.handlers
 
@@ -274,10 +273,9 @@ class Custodian(object):
                     if not has_error:
                         job.postprocess()
                         break
-                    elif not filter(
-                            None,
-                            [x["actions"] for x in run_log[-1]["corrections"]]):
-                        # Check that no corrections were applied
+                    elif any([x["actions"] is None
+                              for x in run_log[-1]["corrections"]]):
+                        # Unrecoverable error if any of the actions are None.
                         logger.info("Unrecoverable error.")
                         unrecoverable = True
                         break
