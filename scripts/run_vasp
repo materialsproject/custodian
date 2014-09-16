@@ -55,24 +55,22 @@ def do_run(args):
         settings = []
         backup = True if i == 0 else False
         copy_magmom = False
-        if i > 0 and job_type != "static":
-            settings.extend([
-                {"dict": "INCAR",
-                 "action": {"_set": {"ISTART": 1}}},
+        if i > 0:
+            settings.append(
                 {"filename": "CONTCAR",
-                 "action": {"_file_copy": {"dest": "POSCAR"}}}])
-        elif job_type == "static":
+                 "action": {"_file_copy": {"dest": "POSCAR"}}})
+        if job_type == "static":
             vinput = VaspInput.from_directory(".")
             m = [i * args.static_kpoint for i in vinput["KPOINTS"].kpts[0]]
-            settings.extend([{"dict": "INCAR",
-                 "action": {"_set": {"ISTART": 1, "NSW": 0}}},
+            settings.extend([
+                {"dict": "INCAR",
+                 "action": {"_set": {"NSW": 0}}},
                 {'dict': 'KPOINTS',
-                 'action': {'_set': {'kpoints': [m]}}},
-                {"filename": "CONTCAR",
-                 "action": {"_file_copy": {"dest": "POSCAR"}}}])
+                 'action': {'_set': {'kpoints': [m]}}}])
         if job_type == "rampU":
             f = ramps / (n_ramp_u - 1)
-            settings.append({"dict": "INCAR",
+            settings.append(
+                {"dict": "INCAR",
                  "action": {"_set": {"LDAUJ": [j * f for j in ldauj], 
                                      "LDAUU": [u * f for u in ldauu]}}})
             copy_magmom = True
