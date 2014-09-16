@@ -94,7 +94,8 @@ class Custodian(object):
         Args:
             handlers ([ErrorHandler]): Error handlers. In order of priority of
                 fixing.
-            jobs ([Job]): List of Jobs to be run sequentially.
+            jobs ([Job]): Sequence of Jobs to be run. Note that this can be
+                any sequence or even a generator yielding jobs.
             max_errors (int): Maximum number of errors allowed before exiting.
                 Defaults to 1.
             polling_time_step (int): The length of time in seconds between
