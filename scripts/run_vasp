@@ -33,6 +33,8 @@ def do_run(args):
     logging.info("Handlers used are %s" % args.handlers)
     handlers = [load_class("custodian.vasp.handlers", n)() for n in
                 args.handlers]
+    validators = [load_class("custodian.vasp.validators", n)() for n in
+                args.validators]
     vasp_command = args.command.split()
 
     #save initial INCAR for rampU runs
@@ -80,8 +82,9 @@ def do_run(args):
                             backup=backup, settings_override=settings,
                             copy_magmom=copy_magmom))
 
-    c = Custodian(handlers, jobs, max_errors=args.max_errors, scratch_dir=args.scratch,
-                  gzipped_output=args.gzip, checkpoint=True)
+    c = Custodian(handlers, jobs, validators, max_errors=args.max_errors,
+                  scratch_dir=args.scratch, gzipped_output=args.gzip,
+                  checkpoint=True)
     c.run()
 
 
@@ -134,8 +137,16 @@ if __name__ == "__main__":
         "-hd", "--handlers", dest="handlers", nargs="+",
         default=["VaspErrorHandler", "MeshSymmetryErrorHandler",
                  "UnconvergedErrorHandler", "NonConvergingErrorHandler",
-                 "PotimErrorHandler", "BadVasprunXMLHandler"], type=str,
+                 "PotimErrorHandler"], type=str,
         help="The ErrorHandlers to use specified as string class names. Note "
+             "that the error handlers will be initialized with no args, i.e.,"
+             "default args will be assumed."
+    )
+
+    parser.add_argument(
+        "-vd", "--validators", dest="validators", nargs="+",
+        default=["VasprunXMLValidator"], type=str,
+        help="The Validators to use specified as string class names. Note "
              "that the error handlers will be initialized with no args, i.e.,"
              "default args will be assumed."
     )

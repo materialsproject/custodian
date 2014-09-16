@@ -28,6 +28,7 @@ import tarfile
 import os
 import shutil
 from abc import ABCMeta, abstractmethod
+from itertools import islice
 from monty.tempfile import ScratchDir
 from monty.shutil import gzip_dir
 from monty.json import MSONable
@@ -83,10 +84,10 @@ class Custodian(object):
     """
     LOG_FILE = "custodian.json"
 
-    def __init__(self, handlers, jobs, max_errors=1, polling_time_step=10,
-                 monitor_freq=30, log_file="custodian.json",
-                 skip_over_errors=False, scratch_dir=None,
-                 gzipped_output=False, checkpoint=False):
+    def __init__(self, handlers, jobs, validators=None, max_errors=1,
+                 polling_time_step=10, monitor_freq=30,
+                 log_file="custodian.json", skip_over_errors=False,
+                 scratch_dir=None, gzipped_output=False, checkpoint=False):
         """
         Initializes a Custodian from a list of jobs and error handler.s
 
@@ -136,6 +137,7 @@ class Custodian(object):
         self.max_errors = max_errors
         self.jobs = jobs
         self.handlers = handlers
+        self.validators = validators or []
         self.monitors = [h for h in handlers if h.is_monitor]
         self.polling_time_step = polling_time_step
         self.monitor_freq = monitor_freq
@@ -143,22 +145,24 @@ class Custodian(object):
         self.scratch_dir = scratch_dir
         self.gzipped_output = gzipped_output
         self.checkpoint = checkpoint
+        self.run_log = []
+        self.total_errors = 0
 
     @staticmethod
     def _load_checkpoint(cwd):
-        restart = -1
+        restart = 0
         run_log = []
-        for chkpt in glob(pjoin(cwd, "custodian.chk.*.tar.gz")):
-            jobno = int(chkpt.split(".")[-3])
-            if jobno > restart:
-                restart = jobno
-                logger.info("Loading from checkpoint file {}...".format(
-                    chkpt))
-                t = tarfile.open(chkpt)
-                t.extractall()
-                #Log the corrections to a json file.
-                with open(Custodian.LOG_FILE, "r") as f:
-                    run_log = json.load(f)
+        chkpts = glob(pjoin(cwd, "custodian.chk.*.tar.gz"))
+        if chkpts:
+            chkpt = sorted(chkpts, lambda c: int(c.split(".")[-3]))[0]
+            restart = int(chkpt.split(".")[-3])
+            logger.info("Loading from checkpoint file {}...".format(chkpt))
+            t = tarfile.open(chkpt)
+            t.extractall()
+            #Log the corrections to a json file.
+            with open(Custodian.LOG_FILE, "r") as f:
+                run_log = json.load(f)
+
         return restart, run_log
 
     @staticmethod
@@ -178,7 +182,7 @@ class Custodian(object):
 
     def run(self):
         """
-        Runs the job.
+        Runs all the jobs jobs.
 
         Returns:
             All errors encountered as a list of list.
@@ -189,149 +193,136 @@ class Custodian(object):
         with ScratchDir(self.scratch_dir, create_symbolic_link=True,
                         copy_to_current_on_exit=True,
                         copy_from_current_on_enter=True) as temp_dir:
-            total_errors = 0
-            unrecoverable = False
+            self.total_errors = 0
             start = datetime.datetime.now()
             logger.info("Run started at {} in {}.".format(
                 start, temp_dir))
 
             if self.checkpoint:
-                restart, run_log = Custodian._load_checkpoint(cwd)
-            else:
-                restart, run_log = -1, []
+                restart, self.run_log = Custodian._load_checkpoint(cwd)
 
-            terminal = False
-
-            for i, job in enumerate(self.jobs):
-                if i <= restart:
-                    #Skip all jobs until the restart point.
-                    continue
-                run_log.append({"job": job.as_dict(), "corrections": []})
-                for attempt in range(self.max_errors):
-                    logger.info(
-                        "Starting job no. {} ({}) attempt no. {}. Errors "
-                        "thus far = {}.".format(
-                            i + 1, job.name, attempt + 1, total_errors))
-
-                    # If this is the start of the job, do the setup.
-                    if not run_log[-1]["corrections"]:
-                        job.setup()
-
-                    p = job.run()
-                    # Check for errors using the error handlers and perform
-                    # corrections.
-                    has_error = False
-
-                    # While the job is running, we use the handlers that are
-                    # monitors to monitor the job.
-                    if isinstance(p, subprocess.Popen):
-                        if self.monitors:
-                            n = 0
-                            while True:
-                                n += 1
-                                time.sleep(self.polling_time_step)
-                                if p.poll() is not None:
-                                    break
-                                if n % self.monitor_freq == 0:
-                                    corrections, terminal = _do_check(
-                                        self.monitors,
-                                        terminate_func=p.terminate,
-                                        skip_over_errors=self.skip_over_errors)
-                                    if len(corrections) > 0:
-                                        has_error = True
-                                        total_errors += len(corrections)
-                                        run_log[-1]["corrections"].extend(
-                                            corrections)
-                        else:
-                            p.wait()
-
-                    # Check for errors again, since in some cases non-monitor
-                    # handlers fix the problems detected by monitors
-                    # if an error has been found, not all handlers need to run
-                    if has_error:
-                        remaining_handlers = [h for h in self.handlers
-                                              if not h.is_monitor]
-                    else:
-                        remaining_handlers = self.handlers
-
-                    corrections, terminal = _do_check(
-                        remaining_handlers,
-                        skip_over_errors=self.skip_over_errors)
-                    if len(corrections) > 0:
-                        has_error = True
-                        total_errors += len(corrections)
-                        run_log[-1]["corrections"].extend(corrections)
-
-                    #Log the corrections to a json file.
-                    with open(Custodian.LOG_FILE, "w") as f:
-                        logger.info("Logging to {}...".format(
-                            Custodian.LOG_FILE))
-                        json.dump(run_log, f, indent=4)
-
-                    # If there are no errors detected, perform
-                    # postprocessing and exit.
-                    if not has_error:
-                        job.postprocess()
-                        break
-                    elif all([x["actions"] is None
-                              for x in run_log[-1]["corrections"]]):
-                        # Unrecoverable error if any of the actions are None.
-                        logger.info("Unrecoverable error.")
-                        unrecoverable = True
-                        break
-                    elif total_errors >= self.max_errors:
-                        logger.info("Max errors reached.")
-                        break
-
-                if unrecoverable or total_errors >= self.max_errors:
-                    break
-
-                # Checkpoint after each job so that we can recover from last
-                # point and remove old checkpoints
-                if self.checkpoint:
-                    Custodian._save_checkpoint(cwd, i)
-
-            end = datetime.datetime.now()
-            logger.info("Run ended at {}.".format(end))
-            run_time = end - start
-
-            logger.info("Run completed. Total time taken = {}."
+            try:
+                #skip jobs until the restart
+                for i, job in islice(enumerate(self.jobs), restart, None):
+                    self._run_job(i, job)
+                    # Checkpoint after each job so that we can recover from last
+                    # point and remove old checkpoints
+                    if self.checkpoint:
+                        Custodian._save_checkpoint(cwd, i)
+            except CustodianError as ex:
+                if ex.terminal:
+                    raise RuntimeError("{} errors reached: {}. "
+                                   "Exited...".format(self.total_errors, ex))
+            finally:
+                end = datetime.datetime.now()
+                logger.info("Run ended at {}.".format(end))
+                run_time = end - start
+                logger.info("Run completed. Total time taken = {}."
                         .format(run_time))
+                if self.gzipped_output:
+                    gzip_dir(".")
 
-            if self.gzipped_output:
-                gzip_dir(".")
+            #Cleanup checkpoint files (if any) if run is successful.
+            Custodian._delete_checkpoints(cwd)
 
-            if terminal and (total_errors >= self.max_errors or unrecoverable):
-                raise RuntimeError("{} errors reached. Unrecoverable? {}. "
-                                   "Exited...".format(total_errors,
-                                                      unrecoverable))
-            elif not unrecoverable:
-                #Cleanup checkpoint files (if any) if run is successful.
-                Custodian._delete_checkpoints(cwd)
+        return self.run_log
 
-        return run_log
+    def _run_job(self, i, job):
+        """
+        Runs a single job,
 
+        Raises:
+            CustodianError on unrecoverable errors, max errors, and jobs
+            that fail validation
+        """
+        self.run_log.append({"job": job.as_dict(), "corrections": []})
+        job.setup()
 
-def _do_check(handlers, terminate_func=None, skip_over_errors=False):
-    corrections = []
-    terminal = False
-    for h in handlers:
-        try:
-            if h.check():
-                terminal = h.is_terminating
-                if terminate_func is not None and h.is_terminating:
-                    terminate_func()
-                d = h.correct()
-                logger.error(str(d))
-                corrections.append(d)
-        except Exception as ex:
-            if not skip_over_errors:
-                raise
+        for attempt in range(self.max_errors):
+            logger.info(
+                "Starting job no. {} ({}) attempt no. {}. Errors "
+                "thus far = {}.".format(
+                    i + 1, job.name, attempt + 1, self.total_errors))
+
+            p = job.run()
+            # Check for errors using the error handlers and perform
+            # corrections.
+            self.has_error = False
+            self.terminal = False
+
+            # While the job is running, we use the handlers that are
+            # monitors to monitor the job.
+            if isinstance(p, subprocess.Popen):
+                if self.monitors:
+                    n = 0
+                    while True:
+                        n += 1
+                        time.sleep(self.polling_time_step)
+                        if p.poll() is not None:
+                            break
+                        if n % self.monitor_freq == 0:
+                            self._do_check(self.monitors,
+                                           terminate_func=p.terminate)
+                else:
+                    p.wait()
+
+            # Check for errors again, since in some cases non-monitor
+            # handlers fix the problems detected by monitors
+            # if an error has been found, not all handlers need to run
+            if self.has_error:
+                self._do_check([h for h in self.handlers
+                                if not h.is_monitor])
             else:
-                corrections.append(
-                    {"errors": ["Bad handler " + str(h)],
-                     "actions": []})
-    return corrections, terminal
+                self._do_check(self.handlers)
+
+            #Log the corrections to a json file.
+            with open(Custodian.LOG_FILE, "w") as f:
+                logger.info("Logging to {}...".format(
+                    Custodian.LOG_FILE))
+                json.dump(self.run_log, f, indent=4)
+
+            # If there are no errors detected, perform
+            # postprocessing and exit.
+            if not self.has_error:
+                for v in self.validators:
+                    if v.check():
+                        logger.info("Validation failed: {}".format(v))
+                        raise CustodianError("Validation", True)
+                job.postprocess()
+                return
+
+            if any([x["actions"] is None for x in
+                    self.run_log[-1]["corrections"]]):
+                # Unrecoverable error if any of the actions are None.
+                logger.info("Unrecoverable error.")
+                raise CustodianError("Unrecoverable", self.terminal)
+            elif self.total_errors >= self.max_errors:
+                logger.info("Max errors reached.")
+                raise CustodianError("MaxErrors", self.terminal)
+
+    def _do_check(self, handlers, terminate_func=None):
+        corrections = []
+        for h in handlers:
+            try:
+                if h.check():
+                    self.terminal = h.is_terminating or self.terminal
+                    if terminate_func is not None and h.is_terminating:
+                        terminate_func()
+                        #make sure we don't terminate twice
+                        terminate_func = None
+                    d = h.correct()
+                    logger.error(str(d))
+                    corrections.append(d)
+            except Exception as ex:
+                if not self.skip_over_errors:
+                    raise
+                else:
+                    corrections.append(
+                        {"errors": ["Bad handler " + str(h)],
+                         "actions": []})
+        self.has_error = True
+        self.total_errors += len(corrections)
+        self.run_log[-1]["corrections"].extend(corrections)
 
 
 class JSONSerializable(MSONable):
@@ -424,6 +415,22 @@ class ErrorHandler(six.with_metaclass(ABCMeta, JSONSerializable)):
         pass
 
 
+class Validator(six.with_metaclass(ABCMeta, JSONSerializable)):
+    """
+    Abstract base class defining the interface for a Validator.
+    """
+
+    @abstractmethod
+    def check(self):
+        """
+        This method is called at the end of a job.
+
+        Returns:
+            (bool) Indicating if errors are detected.
+        """
+        pass
+
+
 class Job(six.with_metaclass(ABCMeta, JSONSerializable)):
     """
     Abstract base class defining the interface for a Job.
@@ -460,3 +467,9 @@ class Job(six.with_metaclass(ABCMeta, JSONSerializable)):
         A nice string name for the job.
         """
         return self.__class__.__name__
+
+
+class CustodianError(Exception):
+    def __init__(self, message, terminal=False):
+        Exception.__init__(self, message)
+        self.terminal = terminal

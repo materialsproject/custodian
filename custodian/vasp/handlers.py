@@ -802,36 +802,6 @@ class StoppedRunHandler(ErrorHandler):
         return "StoppedRunHandler"
 
 
-class BadVasprunXMLHandler(ErrorHandler):
-    """
-    Handler to properly terminate a run when a bad vasprun.xml is found.
-    """
-
-    is_monitor = False
-
-    is_terminating = True
-
-    def __init__(self):
-        self.vasprunxml = None
-        pass
-
-    def check(self):
-        try:
-            self.vasprunxml = _get_vasprun()
-            v = Vasprun(self.vasprunxml)
-        except:
-            return True
-        return False
-
-    def correct(self):
-        backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
-        return {"errors": ["Bad vasprun.xml in %s." % self.vasprunxml],
-                "actions": None}
-
-    def __str__(self):
-        return "BadVasprunXMLHandler"
-
-
 class PositiveEnergyErrorHandler(ErrorHandler):
     """
     Check if a run has positive absolute energy.
@@ -874,7 +844,3 @@ class PositiveEnergyErrorHandler(ErrorHandler):
 
     def __str__(self):
         return "PositiveEnergyErrorHandler"
-
-def _get_vasprun(path="."):
-    vaspruns = glob.glob(os.path.join(path, "vasprun.xml*"))
-    return sorted(vaspruns, reverse=True)[0] if vaspruns else None
