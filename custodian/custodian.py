@@ -378,7 +378,7 @@ class ErrorHandler(six.with_metaclass(ABCMeta, JSONSerializable)):
 
     is_monitor = False
     """
-    This class roperty indicates whether the error handler is a monitor,
+    This class property indicates whether the error handler is a monitor,
     i.e., a handler that monitors a job as it is running. If a
     monitor-type handler notices an error, the job will be sent a
     termination signal, the error is then corrected,
