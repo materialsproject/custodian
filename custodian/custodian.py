@@ -136,7 +136,7 @@ class Custodian(object):
         self.max_errors = max_errors
         self.jobs = jobs
         self.handlers = handlers
-        self.monitors = filter(lambda x: x.is_monitor, handlers)
+        self.monitors = list(filter(lambda x: x.is_monitor, handlers))
         self.polling_time_step = polling_time_step
         self.monitor_freq = monitor_freq
         self.skip_over_errors = skip_over_errors
@@ -249,8 +249,8 @@ class Custodian(object):
                     # handlers fix the problems detected by monitors
                     # if an error has been found, not all handlers need to run
                     if has_error:
-                        remaining_handlers = filter(lambda x: not x.is_monitor,
-                                                    self.handlers)
+                        remaining_handlers = list(filter(lambda x: not x.is_monitor,
+                                                    self.handlers))
                     else:
                         remaining_handlers = self.handlers
 
@@ -273,9 +273,9 @@ class Custodian(object):
                     if not has_error:
                         job.postprocess()
                         break
-                    elif not filter(
+                    elif not list(filter(
                             None,
-                            [x["actions"] for x in run_log[-1]["corrections"]]):
+                            [x["actions"] for x in run_log[-1]["corrections"]])):
                         # Check that no corrections were applied
                         logger.info("Unrecoverable error.")
                         unrecoverable = True
