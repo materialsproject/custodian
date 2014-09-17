@@ -301,7 +301,7 @@ class Custodian(object):
                     raise CustodianError(s, True, x["handler"])
             for x in self.run_log[-1]["corrections"]:
                 if x["actions"] is None:
-                    s = "Unrecoverable error for handler: {}".format(x["handler"])
+                    s = "Unrecoverable error for handler: %s" % x["handler"]
                     raise CustodianError(s, False, x["handler"])
 
         logger.info("Max errors reached.")
@@ -329,11 +329,12 @@ class Custodian(object):
                     raise
                 else:
                     corrections.append(
-                        {"errors": ["Bad handler " + str(h)],
+                        {"errors": ["Bad handler %s " % h],
                          "actions": []})
         self.total_errors += len(corrections)
         self.run_log[-1]["corrections"].extend(corrections)
         return len(corrections) > 0
+
 
 class JSONSerializable(MSONable):
     """
@@ -353,13 +354,6 @@ class JSONSerializable(MSONable):
                     d[c] = a
         return d
 
-    @property
-    @deprecated(
-        message="All to_dict properties have been deprecated. They will be "
-                "removed from v0.8. Use the as_dict() method instead.")
-    def to_dict(self):
-        return self.as_dict()
-
     @classmethod
     def from_dict(cls, d):
         """
@@ -371,21 +365,6 @@ class JSONSerializable(MSONable):
         return cls(**kwargs)
 
 
-class Validator(six.with_metaclass(ABCMeta, JSONSerializable)):
-    """
-    Abstract base class defining the interface for a Validator.
-    """
-
-    @abstractmethod
-    def check(self):
-        """
-        This method is called at the end of a job.
-
-        Returns:
-            (bool) Indicating if errors are detected.
-        """
-        pass
-
     @classmethod
     def __str__(cls):
         return cls.__name__
@@ -393,56 +372,6 @@ class Validator(six.with_metaclass(ABCMeta, JSONSerializable)):
     @classmethod
     def __repr__(cls):
         return cls.__name__
-
-
-class ErrorHandler(Validator):
-    """
-    Abstract base class defining the interface for an ErrorHandler.
-    """
-
-    is_monitor = False
-    """
-    This class property indicates whether the error handler is a monitor,
-    i.e., a handler that monitors a job as it is running. If a
-    monitor-type handler notices an error, the job will be sent a
-    termination signal, the error is then corrected,
-    and then the job is restarted. This is useful for catching errors
-    that occur early in the run but do not cause immediate failure.
-    """
-
-    is_terminating = True
-    """
-    Whether this handler terminates a job upon error detection. By
-    default, this is True, which means that the current Job will be
-    terminated upon error detection, corrections applied,
-    and restarted. In some instances, some errors may not need the job to be
-    terminated or may need to wait for some other event to terminate a job.
-    For example, a particular error may require a flag to be set to request
-    a job to terminate gracefully once it finishes its current task. The
-    handler to set the flag should be classified as is_terminating = False to
-    not terminate the job.
-    """
-
-    raises_runtime_error = True
-    """
-    Whether this handler causes custodian to raise a runtime error if it cannot
-    handle the error (i.e. if correct returns a dict with "actions":None)
-    """
-
-    @abstractmethod
-    def correct(self):
-        """
-        This method is called at the end of a job when an error is detected.
-        It should perform any corrective measures relating to the detected
-        error.
-
-        Returns:
-            (dict) JSON serializable dict that describes the errors and
-            actions taken. E.g.
-            {"errors": list_of_errors, "actions": list_of_actions_taken}.
-            If this is an unfixable error, actions should be set to None.
-        """
-        pass
 
 
 class Job(six.with_metaclass(ABCMeta, JSONSerializable)):
@@ -483,6 +412,83 @@ class Job(six.with_metaclass(ABCMeta, JSONSerializable)):
         return self.__class__.__name__
 
 
+class ErrorHandler(JSONSerializable):
+    """
+    Abstract base class defining the interface for an ErrorHandler.
+    """
+
+    is_monitor = False
+    """
+    This class property indicates whether the error handler is a monitor,
+    i.e., a handler that monitors a job as it is running. If a
+    monitor-type handler notices an error, the job will be sent a
+    termination signal, the error is then corrected,
+    and then the job is restarted. This is useful for catching errors
+    that occur early in the run but do not cause immediate failure.
+    """
+
+    is_terminating = True
+    """
+    Whether this handler terminates a job upon error detection. By
+    default, this is True, which means that the current Job will be
+    terminated upon error detection, corrections applied,
+    and restarted. In some instances, some errors may not need the job to be
+    terminated or may need to wait for some other event to terminate a job.
+    For example, a particular error may require a flag to be set to request
+    a job to terminate gracefully once it finishes its current task. The
+    handler to set the flag should be classified as is_terminating = False to
+    not terminate the job.
+    """
+
+    raises_runtime_error = True
+    """
+    Whether this handler causes custodian to raise a runtime error if it cannot
+    handle the error (i.e. if correct returns a dict with "actions":None)
+    """
+
+    @abstractmethod
+    def check(self):
+        """
+        This method is called during the job (for monitors) or at the end of
+        the job to check for errors.
+
+        Returns:
+            (bool) Indicating if errors are detected.
+        """
+        pass
+
+    @abstractmethod
+    def correct(self):
+        """
+        This method is called at the end of a job when an error is detected.
+        It should perform any corrective measures relating to the detected
+        error.
+
+        Returns:
+            (dict) JSON serializable dict that describes the errors and
+            actions taken. E.g.
+            {"errors": list_of_errors, "actions": list_of_actions_taken}.
+            If this is an unfixable error, actions should be set to None.
+        """
+        pass
+
+
+class Validator(six.with_metaclass(ABCMeta, JSONSerializable)):
+    """
+    Abstract base class defining the interface for a Validator.
+    """
+
+    @abstractmethod
+    def check(self):
+        """
+        This method is called at the end of a job.
+
+        Returns:
+            (bool) Indicating if errors are detected.
+        """
+        pass
+
+
 class CustodianError(Exception):
     def __init__(self, message, raises=False, validator=None):
         """
@@ -493,3 +499,4 @@ class CustodianError(Exception):
         Exception.__init__(self, message)
         self.raises = raises
         self.validator = validator
+        self.message = message
