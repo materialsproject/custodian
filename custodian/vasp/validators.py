@@ -10,9 +10,7 @@ class VasprunXMLValidator(Validator):
 
     def check(self):
         try:
-            fs = glob.glob("vasprun.xml*")
-            f = sorted(fs, reverse=True)[0] if fs else None
-            Vasprun(f)
+            Vasprun("vasprun.xml")
         except:
             return True
         return False
