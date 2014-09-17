@@ -274,6 +274,7 @@ class Custodian(object):
                 else:
                     p.wait()
 
+            logger.info("Job {}'s run method has returned".format(job.name))
             # Check for errors again, since in some cases non-monitor
             # handlers fix the problems detected by monitors
             # if an error has been found, not all handlers need to run
@@ -317,6 +318,7 @@ class Custodian(object):
             try:
                 if h.check():
                     if terminate_func is not None and h.is_terminating:
+                        logger.info("Terminating job")
                         terminate_func()
                         #make sure we don't terminate twice
                         terminate_func = None
