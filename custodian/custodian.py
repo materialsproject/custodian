@@ -33,7 +33,6 @@ import six
 from monty.tempfile import ScratchDir
 from monty.shutil import gzip_dir
 from monty.json import MSONable, MontyEncoder, MontyDecoder
-from monty.dev import deprecated
 from monty.serialization import loadfn, dumpfn
 
 
@@ -227,7 +226,7 @@ class Custodian(object):
                 logger.info("Run ended at {}.".format(end))
                 run_time = end - start
                 logger.info("Run completed. Total time taken = {}."
-                        .format(run_time))
+                            .format(run_time))
                 if self.gzipped_output:
                     gzip_dir(".")
 
@@ -272,7 +271,8 @@ class Custodian(object):
                         if p.poll() is not None:
                             break
                         if n % self.monitor_freq == 0:
-                            has_error = self._do_check(self.monitors, p.terminate)
+                            has_error = self._do_check(self.monitors,
+                                                       p.terminate)
                 else:
                     p.wait()
 
@@ -366,7 +366,6 @@ class JSONSerializable(MSONable):
         kwargs = {k: v for k, v in d.items()
                   if k in inspect.getargspec(cls.__init__).args}
         return cls(**kwargs)
-
 
     @classmethod
     def __str__(cls):
@@ -478,7 +477,10 @@ class ErrorHandler(JSONSerializable):
 
 class Validator(six.with_metaclass(ABCMeta, JSONSerializable)):
     """
-    Abstract base class defining the interface for a Validator.
+    Abstract base class defining the interface for a Validator. A Validator
+    differs from an ErrorHandler in that it does not correct a run and is run
+    only at the end of a Job. If errors are detected by a Validator, a run is
+    immediately terminated.
     """
 
     @abstractmethod
@@ -493,11 +495,19 @@ class Validator(six.with_metaclass(ABCMeta, JSONSerializable)):
 
 
 class CustodianError(Exception):
+    """
+    Exception class for Custodian errors.
+    """
+
     def __init__(self, message, raises=False, validator=None):
         """
-        :param message: Message passed to Exception
-        :param raises: Whether this should raise a runtime error when caught
-        :param validator: Validator or ErrorHandler that causes the exception
+        Initializes the error with a message.
+
+        Args:
+            message (str): Message passed to Exception
+            raises (bool): Whether this should raise a runtime error when caught
+            validator (Validator/ErrorHandler): Validator or ErrorHandler that
+                caused the exception.
         """
         Exception.__init__(self, message)
         self.raises = raises
