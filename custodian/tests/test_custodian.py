@@ -16,9 +16,10 @@ __date__ = "Jun 1, 2012"
 
 import unittest
 import random
-from custodian.custodian import Job, ErrorHandler, Custodian
+from custodian.custodian import Job, ErrorHandler, Custodian, Validator
 import os
 import glob
+import shutil
 
 
 class ExampleJob(Job):
@@ -42,10 +43,6 @@ class ExampleJob(Job):
     def name(self):
         return "ExampleJob{}".format(self.jobid)
 
-    @staticmethod
-    def from_dict(d):
-        return ExampleJob(d["jobid"])
-
 
 class ExampleHandler(ErrorHandler):
 
@@ -58,10 +55,6 @@ class ExampleHandler(ErrorHandler):
     def correct(self):
         self.params["initial"] += 1
         return {"errors": "total < 50", "actions": "increment by 1"}
-
-    @staticmethod
-    def from_dict(d):
-        return ExampleHandler()
 
 
 class ExampleHandler2(ErrorHandler):
@@ -79,16 +72,25 @@ class ExampleHandler2(ErrorHandler):
         self.has_error = True
         return {"errors": "Unrecoverable error", "actions": None}
 
-    @staticmethod
-    def from_dict(d):
-        return ExampleHandler2()
-
 
 class ExampleHandler2b(ExampleHandler2):
     """
     This handler always result in an error. No runtime error though
     """
     raises_runtime_error = False
+
+
+class ExampleValidator1(Validator):
+
+    def check(self):
+        return False
+
+
+class ExampleValidator2(Validator):
+
+    def check(self):
+        return True
+
 
 class CustodianTest(unittest.TestCase):
 
@@ -101,7 +103,7 @@ class CustodianTest(unittest.TestCase):
         params = {"initial": 0, "total": 0}
         c = Custodian([ExampleHandler(params)],
                       [ExampleJob(i, params) for i in range(njobs)],
-                      max_errors=njobs, log_file=None)
+                      max_errors=njobs)
         output = c.run()
         self.assertEqual(len(output), njobs)
         print(ExampleHandler(params).as_dict())
@@ -112,19 +114,61 @@ class CustodianTest(unittest.TestCase):
         h = ExampleHandler2(params)
         c = Custodian([h],
                       [ExampleJob(i, params) for i in range(njobs)],
-                      max_errors=njobs, log_file=None)
+                      max_errors=njobs)
         self.assertRaises(RuntimeError, c.run)
         self.assertTrue(h.has_error)
         h = ExampleHandler2b(params)
         c = Custodian([h],
                       [ExampleJob(i, params) for i in range(njobs)],
-                      max_errors=njobs, log_file=None)
+                      max_errors=njobs)
         c.run()
         self.assertTrue(h.has_error)
+
+    def test_validators(self):
+        njobs = 100
+        params = {"initial": 0, "total": 0}
+        c = Custodian([ExampleHandler(params)],
+                      [ExampleJob(i, params) for i in range(njobs)],
+                      [ExampleValidator1()],
+                      max_errors=njobs)
+        output = c.run()
+        self.assertEqual(len(output), njobs)
+
+        njobs = 100
+        params = {"initial": 0, "total": 0}
+        c = Custodian([ExampleHandler(params)],
+                      [ExampleJob(i, params) for i in range(njobs)],
+                      [ExampleValidator2()],
+                      max_errors=njobs)
+        self.assertRaises(RuntimeError, c.run)
 
     def tearDown(self):
         for f in glob.glob("custodian.*.tar.gz"):
             os.remove(f)
+        os.remove("custodian.json")
+        os.chdir(self.cwd)
+
+
+class CustodianCheckpointTest(unittest.TestCase):
+
+    def setUp(self):
+        self.cwd = os.getcwd()
+        os.chdir(os.path.join(os.path.dirname(__file__), "..", "..",
+                              "test_files", "checkpointing"))
+        shutil.copy(os.path.join('backup.tar.gz'),
+                    'custodian.chk.3.tar.gz')
+
+    def test_checkpoint_loading(self):
+        njobs = 5
+        params = {"initial": 0, "total": 0}
+        c = Custodian([ExampleHandler(params)],
+                      [ExampleJob(i, params) for i in range(njobs)],
+                      [ExampleValidator1()],
+                      max_errors=njobs, checkpoint=True)
+        self.assertEqual(len(c.run_log), 3)
+        self.assertEqual(len(c.run()), 5)
+
+    def tearDown(self):
         os.remove("custodian.json")
         os.chdir(self.cwd)
 

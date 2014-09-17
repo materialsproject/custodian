@@ -86,8 +86,8 @@ class Custodian(object):
 
     def __init__(self, handlers, jobs, validators=None, max_errors=1,
                  polling_time_step=10, monitor_freq=30,
-                 log_file="custodian.json", skip_over_errors=False,
-                 scratch_dir=None, gzipped_output=False, checkpoint=False):
+                 skip_over_errors=False, scratch_dir=None,
+                 gzipped_output=False, checkpoint=False):
         """
         Initializes a Custodian from a list of jobs and error handler.s
 
@@ -145,7 +145,12 @@ class Custodian(object):
         self.scratch_dir = scratch_dir
         self.gzipped_output = gzipped_output
         self.checkpoint = checkpoint
-        self.run_log = []
+        cwd = os.getcwd()
+        if self.checkpoint:
+            self.restart, self.run_log = Custodian._load_checkpoint(cwd)
+        else:
+            self.restart = 0
+            self.run_log = []
         self.total_errors = 0
 
     @staticmethod
@@ -198,21 +203,17 @@ class Custodian(object):
             logger.info("Run started at {} in {}.".format(
                 start, temp_dir))
 
-            if self.checkpoint:
-                restart, self.run_log = Custodian._load_checkpoint(cwd)
-            else:
-                restart = 0
-
             try:
                 #skip jobs until the restart
                 for job_n, job in islice(enumerate(self.jobs, 1),
-                                         restart, None):
+                                         self.restart, None):
                     self._run_job(job_n, job)
                     # Checkpoint after each job so that we can recover from last
                     # point and remove old checkpoints
                     if self.checkpoint:
-                        Custodian._save_checkpoint(cwd, i)
+                        Custodian._save_checkpoint(cwd, job_n)
             except CustodianError as ex:
+                logger.error(ex.message)
                 if ex.raises:
                     raise RuntimeError("{} errors reached: {}. "
                                    "Exited...".format(self.total_errors, ex))
@@ -289,20 +290,22 @@ class Custodian(object):
             if not has_error:
                 for v in self.validators:
                     if v.check():
-                        logger.info("Validation failed: {}".format(v))
-                        raise CustodianError("Validation", True)
+                        s = "Validation failed for validator: {}".format(v)
+                        logger.info(s)
+                        raise CustodianError(s, True, v)
                 job.postprocess()
                 return
 
             #check that all errors could be handled
-            if any([x["actions"] is None and x["handler"].raises_runtime_error
-                    for x in self.run_log[-1]["corrections"]]):
-                logger.info("Unrecoverable error.")
-                raise CustodianError("Unrecoverable", True)
-            elif any([x["actions"] is None for x in
-                      self.run_log[-1]["corrections"]]):
-                logger.info("Unrecoverable error.")
-                raise CustodianError("Unrecoverable", False)
+            for x in self.run_log[-1]["corrections"]:
+                if x["actions"] is None and x["handler"].raises_runtime_error:
+                    s = "Unrecoverable error for handler: {}. " \
+                        "Raising RuntimeError".format(x["handler"])
+                    raise CustodianError(s, True, x["handler"])
+            for x in self.run_log[-1]["corrections"]:
+                if x["actions"] is None:
+                    s = "Unrecoverable error for handler: {}".format(x["handler"])
+                    raise CustodianError(s, False, x["handler"])
 
         logger.info("Max errors reached.")
         raise CustodianError("MaxErrors", True)
@@ -483,6 +486,12 @@ class Job(six.with_metaclass(ABCMeta, JSONSerializable)):
 
 
 class CustodianError(Exception):
-    def __init__(self, message, raises=False):
+    def __init__(self, message, raises=False, validator=None):
+        """
+        :param message: Message passed to Exception
+        :param raises: Whether this should raise a runtime error when caught
+        :param validator: Validator or ErrorHandler that causes the exception
+        """
         Exception.__init__(self, message)
         self.raises = raises
+        self.validator = validator
