@@ -20,6 +20,7 @@ __date__ = "May 3, 2013"
 import logging
 import inspect
 import subprocess
+import sys
 import datetime
 import time
 import json
@@ -200,6 +201,8 @@ class Custodian(object):
             start = datetime.datetime.now()
             logger.info("Run started at {} in {}.".format(
                 start, temp_dir))
+            v = sys.version.replace("\n", " ")
+            logger.info("Custodian running on Python version {}".format(v))
 
             try:
                 #skip jobs until the restart
