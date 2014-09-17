@@ -205,8 +205,9 @@ class Custodian(object):
 
             try:
                 #skip jobs until the restart
-                for i, job in islice(enumerate(self.jobs), restart, None):
-                    self._run_job(i, job)
+                for job_n, job in islice(enumerate(self.jobs, 1),
+                                         restart, None):
+                    self._run_job(job_n, job)
                     # Checkpoint after each job so that we can recover from last
                     # point and remove old checkpoints
                     if self.checkpoint:
@@ -229,8 +230,11 @@ class Custodian(object):
 
         return self.run_log
 
-    def _run_job(self, i, job):
+    def _run_job(self, job_n, job):
         """
+        Args:
+            job_n: job number (1 index)
+            job: Custodian job
         Runs a single job,
 
         Raises:
@@ -240,11 +244,11 @@ class Custodian(object):
         self.run_log.append({"job": job.as_dict(), "corrections": []})
         job.setup()
 
-        for attempt in range(self.max_errors):
+        for attempt in range(1, self.max_errors + 1):
             logger.info(
                 "Starting job no. {} ({}) attempt no. {}. Errors "
                 "thus far = {}.".format(
-                    i + 1, job.name, attempt + 1, self.total_errors))
+                    job_n, job.name, attempt, self.total_errors))
 
             p = job.run()
             # Check for errors using the error handlers and perform
