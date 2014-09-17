@@ -289,7 +289,6 @@ class Custodian(object):
                 for v in self.validators:
                     if v.check():
                         s = "Validation failed for validator: {}".format(v)
-                        logger.info(s)
                         raise CustodianError(s, True, v)
                 job.postprocess()
                 return
