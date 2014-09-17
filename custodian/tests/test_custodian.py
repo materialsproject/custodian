@@ -164,7 +164,7 @@ class CustodianCheckpointTest(unittest.TestCase):
         c = Custodian([ExampleHandler(params)],
                       [ExampleJob(i, params) for i in range(njobs)],
                       [ExampleValidator1()],
-                      max_errors=njobs, checkpoint=True)
+                      max_errors=100, checkpoint=True)
         self.assertEqual(len(c.run_log), 3)
         self.assertEqual(len(c.run()), 5)
 
