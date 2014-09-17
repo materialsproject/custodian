@@ -295,7 +295,6 @@ class Custodian(object):
                 return
 
             #check that all errors could be handled
-            print self.run_log[-1]["corrections"]
             if any([x["actions"] is None and x["handler"].raises_runtime_error
                     for x in self.run_log[-1]["corrections"]]):
                 logger.info("Unrecoverable error.")
