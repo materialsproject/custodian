@@ -235,9 +235,6 @@ class VaspErrorHandler(ErrorHandler):
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
 
-    def __str__(self):
-        return "VaspErrorHandler"
-
 
 class MeshSymmetryErrorHandler(ErrorHandler):
     """
@@ -295,9 +292,6 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": ["mesh_symmetry"], "actions": actions}
 
-    def __str__(self):
-        return "MeshSymmetryErrorHandler"
-
 
 class UnconvergedErrorHandler(ErrorHandler):
     """
@@ -338,9 +332,6 @@ class UnconvergedErrorHandler(ErrorHandler):
                                         "BMIX_MAG": 0.001}}}]
         VaspModder().apply_actions(actions)
         return {"errors": ["Unconverged"], "actions": actions}
-
-    def __str__(self):
-        return self.__name__
 
 
 class MaxForceErrorHandler(ErrorHandler):
@@ -441,9 +432,6 @@ class PotimErrorHandler(ErrorHandler):
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": ["POTIM"], "actions": actions}
-
-    def __str__(self):
-        return "Large positive energy change (POTIM)"
 
 
 class FrozenJobErrorHandler(ErrorHandler):
@@ -568,9 +556,6 @@ class NonConvergingErrorHandler(ErrorHandler):
         else:
             return {"errors": ["Non-converging job"], "actions": None}
 
-    def __str__(self):
-        return "NonConvergingErrorHandler"
-
 
 class WalltimeHandler(ErrorHandler):
     """
@@ -585,6 +570,10 @@ class WalltimeHandler(ErrorHandler):
     # The WalltimeHandler should not terminate as we want VASP to terminate
     # itself naturally with the STOPCAR.
     is_terminating = False
+
+    # This handler will be unrecoverable, but custodian shouldn't raise an
+    # error
+    raises_runtime_error = False
 
     def __init__(self, wall_time=None, buffer_time=300,
                  electronic_step_stop=False):
@@ -684,9 +673,6 @@ class WalltimeHandler(ErrorHandler):
         # Actions is being returned as None so that custodian will stop after
         # STOPCAR is written. We do not want subsequent jobs to proceed.
         return {"errors": ["Walltime reached"], "actions": None}
-
-    def __str__(self):
-        return "WalltimeHandler"
 
 
 @deprecated(replacement=WalltimeHandler)
@@ -798,9 +784,6 @@ class StoppedRunHandler(ErrorHandler):
         return {"errors": ["Stopped run."],
                 "actions": actions}
 
-    def __str__(self):
-        return "StoppedRunHandler"
-
 
 class PositiveEnergyErrorHandler(ErrorHandler):
     """
@@ -841,6 +824,3 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         #Unfixable error. Just return None for actions.
         else:
             return {"errors": ["Positive energy"], "actions": None}
-
-    def __str__(self):
-        return "PositiveEnergyErrorHandler"

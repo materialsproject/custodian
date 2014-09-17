@@ -86,10 +86,9 @@ class ExampleHandler2(ErrorHandler):
 
 class ExampleHandler2b(ExampleHandler2):
     """
-    This handler always result in an error. But is non-terminating. So no
-    runtime error.
+    This handler always result in an error. No runtime error though
     """
-    is_terminating = False
+    raises_runtime_error = False
 
 class CustodianTest(unittest.TestCase):
 

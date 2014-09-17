@@ -31,7 +31,7 @@ from abc import ABCMeta, abstractmethod
 from itertools import islice
 from monty.tempfile import ScratchDir
 from monty.shutil import gzip_dir
-from monty.json import MSONable
+from monty.json import MSONable, MontyEncoder, MontyDecoder
 from monty.dev import deprecated
 
 
@@ -161,7 +161,7 @@ class Custodian(object):
             t.extractall()
             #Log the corrections to a json file.
             with open(Custodian.LOG_FILE, "r") as f:
-                run_log = json.load(f)
+                run_log = json.load(f, cls=MontyDecoder)
 
         return restart, run_log
 
@@ -213,10 +213,15 @@ class Custodian(object):
                     if self.checkpoint:
                         Custodian._save_checkpoint(cwd, i)
             except CustodianError as ex:
-                if ex.terminal:
+                if ex.raises:
                     raise RuntimeError("{} errors reached: {}. "
                                    "Exited...".format(self.total_errors, ex))
             finally:
+                #Log the corrections to a json file.
+                with open(Custodian.LOG_FILE, "w") as f:
+                    logger.info("Logging to {}...".format(
+                        Custodian.LOG_FILE))
+                    json.dump(self.run_log, f, cls=MontyEncoder, indent=4)
                 end = datetime.datetime.now()
                 logger.info("Run ended at {}.".format(end))
                 run_time = end - start
@@ -244,7 +249,7 @@ class Custodian(object):
         self.run_log.append({"job": job.as_dict(), "corrections": []})
         job.setup()
 
-        for attempt in range(1, self.max_errors + 1):
+        for attempt in range(1, self.max_errors - self.total_errors + 1):
             logger.info(
                 "Starting job no. {} ({}) attempt no. {}. Errors "
                 "thus far = {}.".format(
@@ -253,8 +258,7 @@ class Custodian(object):
             p = job.run()
             # Check for errors using the error handlers and perform
             # corrections.
-            self.has_error = False
-            self.terminal = False
+            has_error = False
 
             # While the job is running, we use the handlers that are
             # monitors to monitor the job.
@@ -267,29 +271,22 @@ class Custodian(object):
                         if p.poll() is not None:
                             break
                         if n % self.monitor_freq == 0:
-                            self._do_check(self.monitors,
-                                           terminate_func=p.terminate)
+                            has_error = self._do_check(self.monitors, p.terminate)
                 else:
                     p.wait()
 
             # Check for errors again, since in some cases non-monitor
             # handlers fix the problems detected by monitors
             # if an error has been found, not all handlers need to run
-            if self.has_error:
+            if has_error:
                 self._do_check([h for h in self.handlers
                                 if not h.is_monitor])
             else:
-                self._do_check(self.handlers)
-
-            #Log the corrections to a json file.
-            with open(Custodian.LOG_FILE, "w") as f:
-                logger.info("Logging to {}...".format(
-                    Custodian.LOG_FILE))
-                json.dump(self.run_log, f, indent=4)
+                has_error = self._do_check(self.handlers)
 
             # If there are no errors detected, perform
             # postprocessing and exit.
-            if not self.has_error:
+            if not has_error:
                 for v in self.validators:
                     if v.check():
                         logger.info("Validation failed: {}".format(v))
@@ -297,40 +294,46 @@ class Custodian(object):
                 job.postprocess()
                 return
 
-            if any([x["actions"] is None for x in
-                    self.run_log[-1]["corrections"]]):
-                # Unrecoverable error if any of the actions are None.
+            #check that all errors could be handled
+            print self.run_log[-1]["corrections"]
+            if any([x["actions"] is None and x["handler"].raises_runtime_error
+                    for x in self.run_log[-1]["corrections"]]):
                 logger.info("Unrecoverable error.")
-                raise CustodianError("Unrecoverable", self.terminal)
-            elif self.total_errors >= self.max_errors:
-                logger.info("Max errors reached.")
-                raise CustodianError("MaxErrors", self.terminal)
+                raise CustodianError("Unrecoverable", True)
+            elif any([x["actions"] is None for x in
+                      self.run_log[-1]["corrections"]]):
+                logger.info("Unrecoverable error.")
+                raise CustodianError("Unrecoverable", False)
+
+        logger.info("Max errors reached.")
+        raise CustodianError("MaxErrors", True)
 
     def _do_check(self, handlers, terminate_func=None):
+        """
+        checks the specified handlers. Returns True iff errors caught
+        """
         corrections = []
         for h in handlers:
             try:
                 if h.check():
-                    self.terminal = h.is_terminating or self.terminal
                     if terminate_func is not None and h.is_terminating:
                         terminate_func()
                         #make sure we don't terminate twice
                         terminate_func = None
                     d = h.correct()
+                    d["handler"] = h
                     logger.error(str(d))
                     corrections.append(d)
-            except Exception as ex:
+            except Exception:
                 if not self.skip_over_errors:
                     raise
                 else:
                     corrections.append(
                         {"errors": ["Bad handler " + str(h)],
                          "actions": []})
-        if corrections:
-            self.has_error = True
         self.total_errors += len(corrections)
         self.run_log[-1]["corrections"].extend(corrections)
-
+        return len(corrections) > 0
 
 class JSONSerializable(MSONable):
     """
@@ -368,7 +371,31 @@ class JSONSerializable(MSONable):
         return cls(**kwargs)
 
 
-class ErrorHandler(six.with_metaclass(ABCMeta, JSONSerializable)):
+class Validator(six.with_metaclass(ABCMeta, JSONSerializable)):
+    """
+    Abstract base class defining the interface for a Validator.
+    """
+
+    @abstractmethod
+    def check(self):
+        """
+        This method is called at the end of a job.
+
+        Returns:
+            (bool) Indicating if errors are detected.
+        """
+        pass
+
+    @classmethod
+    def __str__(cls):
+        return cls.__name__
+
+    @classmethod
+    def __repr__(cls):
+        return cls.__name__
+
+
+class ErrorHandler(Validator):
     """
     Abstract base class defining the interface for an ErrorHandler.
     """
@@ -396,15 +423,11 @@ class ErrorHandler(six.with_metaclass(ABCMeta, JSONSerializable)):
     not terminate the job.
     """
 
-    @abstractmethod
-    def check(self):
-        """
-        This method is called at the end of a job.
-
-        Returns:
-            (bool) Indicating if errors are detected.
-        """
-        pass
+    raises_runtime_error = True
+    """
+    Whether this handler causes custodian to raise a runtime error if it cannot
+    handle the error (i.e. if correct returns a dict with "actions":None)
+    """
 
     @abstractmethod
     def correct(self):
@@ -418,22 +441,6 @@ class ErrorHandler(six.with_metaclass(ABCMeta, JSONSerializable)):
             actions taken. E.g.
             {"errors": list_of_errors, "actions": list_of_actions_taken}.
             If this is an unfixable error, actions should be set to None.
-        """
-        pass
-
-
-class Validator(six.with_metaclass(ABCMeta, JSONSerializable)):
-    """
-    Abstract base class defining the interface for a Validator.
-    """
-
-    @abstractmethod
-    def check(self):
-        """
-        This method is called at the end of a job.
-
-        Returns:
-            (bool) Indicating if errors are detected.
         """
         pass
 
@@ -477,6 +484,6 @@ class Job(six.with_metaclass(ABCMeta, JSONSerializable)):
 
 
 class CustodianError(Exception):
-    def __init__(self, message, terminal=False):
+    def __init__(self, message, raises=False):
         Exception.__init__(self, message)
-        self.terminal = terminal
+        self.raises = raises
