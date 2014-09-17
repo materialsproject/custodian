@@ -437,12 +437,12 @@ class PotimErrorHandler(ErrorHandler):
 class FrozenJobErrorHandler(ErrorHandler):
     """
     Detects an error when the output file has not been updated
-    in timeout seconds. Perturbs structure and restarts.
+    in timeout seconds. Changes ALGO to Normal from Fast
     """
 
     is_monitor = True
 
-    def __init__(self, output_filename="vasp.out", timeout=3600):
+    def __init__(self, output_filename="vasp.out", timeout=21600):
         """
         Initializes the handler with the output file to check.
 
@@ -466,14 +466,14 @@ class FrozenJobErrorHandler(ErrorHandler):
     def correct(self):
         backup([self.output_filename, "INCAR", "KPOINTS", "POSCAR", "OUTCAR",
                 "vasprun.xml"])
-        p = Poscar.from_file("POSCAR")
-        s = p.structure
-        trans = PerturbStructureTransformation(0.05)
-        new_s = trans.apply_transformation(s)
-        actions = [{"dict": "POSCAR",
-                    "action": {"_set": {"structure": new_s.as_dict()}},
-                    "transformation": trans.as_dict()}]
-        VaspModder().apply_actions(actions)
+
+        vi = VaspInput.from_directory('.')
+        actions = []
+        if vi["INCAR"].get("ALGO", "Normal") == "Fast":
+            actions.append({"dict": "INCAR",
+                        "action": {"_set": {"ALGO": "Normal"}}})
+
+        VaspModder(vi=vi).apply_actions(actions)
 
         return {"errors": ["Frozen job"], "actions": actions}
 
