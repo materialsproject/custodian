@@ -8,9 +8,6 @@ tries to detect common errors in vasp runs and attempt to fix them on the fly
 by modifying the input files.
 """
 
-from functools import reduce
-from six.moves import map
-
 __author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, " \
              "Wei Chen, Stephen Dacek"
 __version__ = "0.1"
@@ -24,8 +21,10 @@ import time
 import datetime
 import operator
 import shutil
-import glob
+from functools import reduce
 import re
+
+from six.moves import map
 
 import numpy as np
 
@@ -42,7 +41,7 @@ from pymatgen.transformations.standard_transformations import \
 
 from pymatgen.io.vaspio.vasp_output import Vasprun, Oszicar
 from custodian.ansible.interpreter import Modder
-from custodian.ansible.actions import FileActions, DictActions
+from custodian.ansible.actions import FileActions
 from custodian.vasp.interpreter import VaspModder
 
 
@@ -104,9 +103,10 @@ class VaspErrorHandler(ErrorHandler):
                 for err, msgs in VaspErrorHandler.error_msgs.items():
                     for msg in msgs:
                         if l.find(msg) != -1:
-                            #this checks if we want to run a charged computation
-                            #(e.g., defects) if yes we don't want to kill it
-                            #because there is a change in e- density (brmix error)
+                            # this checks if we want to run a charged
+                            # computation (e.g., defects) if yes we don't
+                            # want to kill it because there is a change in e-
+                            # density (brmix error)
                             if err == "brmix" and 'NELECT' in incar:
                                 continue
                             self.errors.add(err)
@@ -118,7 +118,7 @@ class VaspErrorHandler(ErrorHandler):
         actions = []
         vi = VaspInput.from_directory(".")
 
-        if "tet" in self.errors or "dentet" in self.errors:
+        if self.errors.intersection(["tet", "dentet"]):
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ISMEAR": 0}}})
 
@@ -151,13 +151,13 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"file": "WAVECAR",
                             "action": {"_file_delete": {'mode': "actual"}}})
 
-        if "subspacematrix" in self.errors or "rspher" in self.errors or \
-                        "real_optlay" in self.errors:
+        if self.errors.intersection(["subspacematrix", "rspher",
+                                     "real_optlay"]):
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"LREAL": False}}})
 
-        if "tetirr" in self.errors or "incorrect_shift" in self.errors or \
-                    "rot_matrix" in self.errors:
+        if self.errors.intersection(["tetirr", "incorrect_shift",
+                                     "rot_matrix"]):
             actions.append({"dict": "KPOINTS",
                             "action": {"_set": {"generation_style": "Gamma"}}})
 
@@ -751,7 +751,7 @@ class StoppedRunHandler(ErrorHandler):
     subdir, and then the job is restarted. To use this proper, max_errors in
     Custodian must be set to a very high value, and you probably wouldn't
     want to use any standard VASP error handlers. The checkpoint will be
-    stored in subdirs chk_#. This should be used in combiantion with the
+    stored in subdirs chk_#. This should be used in combination with the
     StoppedRunHandler.
     """
     is_monitor = False

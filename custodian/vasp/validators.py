@@ -1,7 +1,10 @@
+# coding: utf-8
+
+from __future__ import unicode_literals, division
+
 from custodian.custodian import Validator
 from pymatgen.io.vaspio.vasp_output import Vasprun
 
-import glob
 
 class VasprunXMLValidator(Validator):
     """
@@ -14,6 +17,3 @@ class VasprunXMLValidator(Validator):
         except:
             return True
         return False
-
-    def __str__(self):
-        return "VasprunXMLValidator"
