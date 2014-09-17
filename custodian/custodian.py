@@ -106,8 +106,6 @@ class Custodian(object):
                 seconds and a monitor_freq of 30, this means that Custodian
                 uses the monitors to check for errors every 30 x 10 = 300
                 seconds, i.e., 5 minutes.
-            log_file (str): Deprecated. Custodian now always logs to a
-                custodian.json file.
             skip_over_errors (bool): If set to True, custodian will skip over
                 error handlers that failed (raised an Exception of some sort).
                 Otherwise, custodian will simply exit on unrecoverable errors.
