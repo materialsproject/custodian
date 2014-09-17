@@ -118,7 +118,7 @@ class VaspErrorHandler(ErrorHandler):
         actions = []
         vi = VaspInput.from_directory(".")
 
-        if "tet" in self.errors or "dentet" in self.errors:
+        if self.errors.intersection(["tet", "dentet"]):
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ISMEAR": 0}}})
 
