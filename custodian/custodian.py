@@ -8,8 +8,6 @@ given a set of error handlers, the abstract base classes for the
 ErrorHandlers and Jobs.
 """
 
-import six
-
 __author__ = "Shyue Ping Ong, William Davidson Richards"
 __copyright__ = "Copyright 2012, The Materials Project"
 __version__ = "0.1"
@@ -22,17 +20,20 @@ import inspect
 import subprocess
 import datetime
 import time
-import json
 from glob import glob
 import tarfile
 import os
 import shutil
 from abc import ABCMeta, abstractmethod
 from itertools import islice
+
+import six
+
 from monty.tempfile import ScratchDir
 from monty.shutil import gzip_dir
 from monty.json import MSONable, MontyEncoder, MontyDecoder
 from monty.dev import deprecated
+from monty.serialization import loadfn, dumpfn
 
 
 pjoin = os.path.join
@@ -157,14 +158,13 @@ class Custodian(object):
         run_log = []
         chkpts = glob(pjoin(cwd, "custodian.chk.*.tar.gz"))
         if chkpts:
-            chkpt = sorted(chkpts, lambda c: int(c.split(".")[-3]))[0]
+            chkpt = sorted(chkpts, key=lambda c: int(c.split(".")[-3]))[0]
             restart = int(chkpt.split(".")[-3])
             logger.info("Loading from checkpoint file {}...".format(chkpt))
             t = tarfile.open(chkpt)
             t.extractall()
             #Log the corrections to a json file.
-            with open(Custodian.LOG_FILE, "r") as f:
-                run_log = json.load(f, cls=MontyDecoder)
+            run_log = loadfn(Custodian.LOG_FILE, cls=MontyDecoder)
 
         return restart, run_log
 
@@ -213,14 +213,13 @@ class Custodian(object):
             except CustodianError as ex:
                 logger.error(ex.message)
                 if ex.raises:
-                    raise RuntimeError("{} errors reached: {}. "
-                                   "Exited...".format(self.total_errors, ex))
+                    raise RuntimeError("{} errors reached: {}. Exited..."
+                                       .format(self.total_errors, ex))
             finally:
                 #Log the corrections to a json file.
-                with open(Custodian.LOG_FILE, "w") as f:
-                    logger.info("Logging to {}...".format(
-                        Custodian.LOG_FILE))
-                    json.dump(self.run_log, f, cls=MontyEncoder, indent=4)
+                logger.info("Logging to {}...".format(Custodian.LOG_FILE))
+                dumpfn(self.run_log, Custodian.LOG_FILE, cls=MontyEncoder,
+                       indent=4)
                 end = datetime.datetime.now()
                 logger.info("Run ended at {}.".format(end))
                 run_time = end - start
