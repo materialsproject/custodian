@@ -200,6 +200,8 @@ class Custodian(object):
 
             if self.checkpoint:
                 restart, self.run_log = Custodian._load_checkpoint(cwd)
+            else:
+                restart = 0
 
             try:
                 #skip jobs until the restart
@@ -320,7 +322,8 @@ class Custodian(object):
                     corrections.append(
                         {"errors": ["Bad handler " + str(h)],
                          "actions": []})
-        self.has_error = True
+        if corrections:
+            self.has_error = True
         self.total_errors += len(corrections)
         self.run_log[-1]["corrections"].extend(corrections)
 
