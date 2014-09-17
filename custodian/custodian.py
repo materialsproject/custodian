@@ -10,10 +10,10 @@ ErrorHandlers and Jobs.
 
 __author__ = "Shyue Ping Ong, William Davidson Richards"
 __copyright__ = "Copyright 2012, The Materials Project"
-__version__ = "0.1"
+__version__ = "0.2"
 __maintainer__ = "Shyue Ping Ong"
-__email__ = "shyuep@gmail.com"
-__date__ = "May 3, 2013"
+__email__ = "ongsp@ucsd.edu"
+__date__ = "Sep 17 2014"
 
 import logging
 import inspect
