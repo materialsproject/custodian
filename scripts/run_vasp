@@ -70,7 +70,7 @@ def do_run(args):
         copy_magmom = False
         if i > 0:
             settings.append(
-                {"filename": "CONTCAR",
+                {"file": "CONTCAR",
                  "action": {"_file_copy": {"dest": "POSCAR"}}})
         if job_type == "static":
             vinput = VaspInput.from_directory(".")

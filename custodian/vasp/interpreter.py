@@ -45,5 +45,7 @@ class VaspModder(Modder):
                 self.vi[k] = self.modify_object(a["action"], self.vi[k])
             elif "file" in a:
                 self.modify(a["action"], a["file"])
+            else:
+                raise ValueError("Unrecognized format: {}".format(a))
         for f in modified:
             self.vi[f].write_file(f)
