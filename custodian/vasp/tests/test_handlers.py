@@ -22,7 +22,8 @@ import datetime
 
 from custodian.vasp.handlers import VaspErrorHandler, \
     UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler, \
-    MaxForceErrorHandler, BadVasprunXMLHandler, PositiveEnergyErrorHandler, PotimErrorHandler
+    MaxForceErrorHandler, PositiveEnergyErrorHandler, PotimErrorHandler, \
+    FrozenJobErrorHandler
 from pymatgen.io.vaspio import Incar, Poscar
 
 
@@ -49,6 +50,12 @@ class VaspErrorHandlerTest(unittest.TestCase):
         shutil.copy("KPOINTS", "KPOINTS.orig")
         shutil.copy("POSCAR", "POSCAR.orig")
         shutil.copy("CHGCAR", "CHGCAR.orig")
+
+    def test_frozen_job(self):
+        h = FrozenJobErrorHandler()
+        d = h.correct()
+        self.assertEqual(d['errors'], ['Frozen job'])
+        self.assertEqual(Incar.from_file("INCAR")['ALGO'], "Normal")
 
     def test_check_correct(self):
         h = VaspErrorHandler("vasp.teterror")
@@ -300,22 +307,6 @@ class WalltimeHandlerTest(unittest.TestCase):
             content = f.read()
             self.assertEqual(content, "LABORT = .TRUE.")
         os.remove("STOPCAR")
-
-    @classmethod
-    def tearDownClass(cls):
-        os.chdir(cwd)
-
-
-class BadVasprunXMLHandlerTest(unittest.TestCase):
-
-    def test_check_and_correct(self):
-        os.chdir(os.path.join(test_dir, "bad_vasprun"))
-        h = BadVasprunXMLHandler()
-        self.assertTrue(h.check())
-
-        #Unconverged still has a valid vasprun.
-        os.chdir(os.path.join(test_dir, "unconverged"))
-        self.assertFalse(h.check())
 
     @classmethod
     def tearDownClass(cls):

@@ -8,9 +8,6 @@ tries to detect common errors in vasp runs and attempt to fix them on the fly
 by modifying the input files.
 """
 
-from functools import reduce
-from six.moves import map
-
 __author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, " \
              "Wei Chen, Stephen Dacek"
 __version__ = "0.1"
@@ -24,8 +21,10 @@ import time
 import datetime
 import operator
 import shutil
-import glob
+from functools import reduce
 import re
+
+from six.moves import map
 
 import numpy as np
 
@@ -42,7 +41,7 @@ from pymatgen.transformations.standard_transformations import \
 
 from pymatgen.io.vaspio.vasp_output import Vasprun, Oszicar
 from custodian.ansible.interpreter import Modder
-from custodian.ansible.actions import FileActions, DictActions
+from custodian.ansible.actions import FileActions
 from custodian.vasp.interpreter import VaspModder
 
 
@@ -104,9 +103,10 @@ class VaspErrorHandler(ErrorHandler):
                 for err, msgs in VaspErrorHandler.error_msgs.items():
                     for msg in msgs:
                         if l.find(msg) != -1:
-                            #this checks if we want to run a charged computation
-                            #(e.g., defects) if yes we don't want to kill it
-                            #because there is a change in e- density (brmix error)
+                            # this checks if we want to run a charged
+                            # computation (e.g., defects) if yes we don't
+                            # want to kill it because there is a change in e-
+                            # density (brmix error)
                             if err == "brmix" and 'NELECT' in incar:
                                 continue
                             self.errors.add(err)
@@ -118,7 +118,7 @@ class VaspErrorHandler(ErrorHandler):
         actions = []
         vi = VaspInput.from_directory(".")
 
-        if "tet" in self.errors or "dentet" in self.errors:
+        if self.errors.intersection(["tet", "dentet"]):
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ISMEAR": 0}}})
 
@@ -151,13 +151,13 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"file": "WAVECAR",
                             "action": {"_file_delete": {'mode': "actual"}}})
 
-        if "subspacematrix" in self.errors or "rspher" in self.errors or \
-                        "real_optlay" in self.errors:
+        if self.errors.intersection(["subspacematrix", "rspher",
+                                     "real_optlay"]):
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"LREAL": False}}})
 
-        if "tetirr" in self.errors or "incorrect_shift" in self.errors or \
-                    "rot_matrix" in self.errors:
+        if self.errors.intersection(["tetirr", "incorrect_shift",
+                                     "rot_matrix"]):
             actions.append({"dict": "KPOINTS",
                             "action": {"_set": {"generation_style": "Gamma"}}})
 
@@ -235,9 +235,6 @@ class VaspErrorHandler(ErrorHandler):
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
 
-    def __str__(self):
-        return "VaspErrorHandler"
-
 
 class MeshSymmetryErrorHandler(ErrorHandler):
     """
@@ -295,9 +292,6 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": ["mesh_symmetry"], "actions": actions}
 
-    def __str__(self):
-        return "MeshSymmetryErrorHandler"
-
 
 class UnconvergedErrorHandler(ErrorHandler):
     """
@@ -338,9 +332,6 @@ class UnconvergedErrorHandler(ErrorHandler):
                                         "BMIX_MAG": 0.001}}}]
         VaspModder().apply_actions(actions)
         return {"errors": ["Unconverged"], "actions": actions}
-
-    def __str__(self):
-        return self.__name__
 
 
 class MaxForceErrorHandler(ErrorHandler):
@@ -442,19 +433,16 @@ class PotimErrorHandler(ErrorHandler):
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": ["POTIM"], "actions": actions}
 
-    def __str__(self):
-        return "Large positive energy change (POTIM)"
-
 
 class FrozenJobErrorHandler(ErrorHandler):
     """
     Detects an error when the output file has not been updated
-    in timeout seconds. Perturbs structure and restarts.
+    in timeout seconds. Changes ALGO to Normal from Fast
     """
 
     is_monitor = True
 
-    def __init__(self, output_filename="vasp.out", timeout=3600):
+    def __init__(self, output_filename="vasp.out", timeout=21600):
         """
         Initializes the handler with the output file to check.
 
@@ -478,14 +466,14 @@ class FrozenJobErrorHandler(ErrorHandler):
     def correct(self):
         backup([self.output_filename, "INCAR", "KPOINTS", "POSCAR", "OUTCAR",
                 "vasprun.xml"])
-        p = Poscar.from_file("POSCAR")
-        s = p.structure
-        trans = PerturbStructureTransformation(0.05)
-        new_s = trans.apply_transformation(s)
-        actions = [{"dict": "POSCAR",
-                    "action": {"_set": {"structure": new_s.as_dict()}},
-                    "transformation": trans.as_dict()}]
-        VaspModder().apply_actions(actions)
+
+        vi = VaspInput.from_directory('.')
+        actions = []
+        if vi["INCAR"].get("ALGO", "Normal") == "Fast":
+            actions.append({"dict": "INCAR",
+                        "action": {"_set": {"ALGO": "Normal"}}})
+
+        VaspModder(vi=vi).apply_actions(actions)
 
         return {"errors": ["Frozen job"], "actions": actions}
 
@@ -568,9 +556,6 @@ class NonConvergingErrorHandler(ErrorHandler):
         else:
             return {"errors": ["Non-converging job"], "actions": None}
 
-    def __str__(self):
-        return "NonConvergingErrorHandler"
-
 
 class WalltimeHandler(ErrorHandler):
     """
@@ -585,6 +570,10 @@ class WalltimeHandler(ErrorHandler):
     # The WalltimeHandler should not terminate as we want VASP to terminate
     # itself naturally with the STOPCAR.
     is_terminating = False
+
+    # This handler will be unrecoverable, but custodian shouldn't raise an
+    # error
+    raises_runtime_error = False
 
     def __init__(self, wall_time=None, buffer_time=300,
                  electronic_step_stop=False):
@@ -685,9 +674,6 @@ class WalltimeHandler(ErrorHandler):
         # STOPCAR is written. We do not want subsequent jobs to proceed.
         return {"errors": ["Walltime reached"], "actions": None}
 
-    def __str__(self):
-        return "WalltimeHandler"
-
 
 @deprecated(replacement=WalltimeHandler)
 class PBSWalltimeHandler(WalltimeHandler):
@@ -765,7 +751,7 @@ class StoppedRunHandler(ErrorHandler):
     subdir, and then the job is restarted. To use this proper, max_errors in
     Custodian must be set to a very high value, and you probably wouldn't
     want to use any standard VASP error handlers. The checkpoint will be
-    stored in subdirs chk_#. This should be used in combiantion with the
+    stored in subdirs chk_#. This should be used in combination with the
     StoppedRunHandler.
     """
     is_monitor = False
@@ -797,39 +783,6 @@ class StoppedRunHandler(ErrorHandler):
 
         return {"errors": ["Stopped run."],
                 "actions": actions}
-
-    def __str__(self):
-        return "StoppedRunHandler"
-
-
-class BadVasprunXMLHandler(ErrorHandler):
-    """
-    Handler to properly terminate a run when a bad vasprun.xml is found.
-    """
-
-    is_monitor = False
-
-    is_terminating = True
-
-    def __init__(self):
-        self.vasprunxml = None
-        pass
-
-    def check(self):
-        try:
-            self.vasprunxml = _get_vasprun()
-            v = Vasprun(self.vasprunxml)
-        except:
-            return True
-        return False
-
-    def correct(self):
-        backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
-        return {"errors": ["Bad vasprun.xml in %s." % self.vasprunxml],
-                "actions": None}
-
-    def __str__(self):
-        return "BadVasprunXMLHandler"
 
 
 class PositiveEnergyErrorHandler(ErrorHandler):
@@ -871,10 +824,3 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         #Unfixable error. Just return None for actions.
         else:
             return {"errors": ["Positive energy"], "actions": None}
-
-    def __str__(self):
-        return "PositiveEnergyErrorHandler"
-
-def _get_vasprun(path="."):
-    vaspruns = glob.glob(os.path.join(path, "vasprun.xml*"))
-    return sorted(vaspruns, reverse=True)[0] if vaspruns else None

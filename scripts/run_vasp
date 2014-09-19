@@ -16,6 +16,7 @@ __date__ = "12/31/13"
 
 import logging
 import sys
+import yaml
 
 from custodian.custodian import Custodian
 from custodian.vasp.jobs import VaspJob
@@ -23,16 +24,28 @@ from pymatgen.io.vaspio.vasp_input import VaspInput, Incar
 
 
 def load_class(mod, name):
-    mod = __import__(mod, globals(), locals(), [name], 0)
-    return getattr(mod, name)
+    toks = name.split("?")
+    params = {}
+    if len(toks) == 2:
+        for p in toks[-1].split(","):
+            ptoks = p.split("=")
+            params[ptoks[0]] = yaml.load(ptoks[1])
+    elif len(toks) > 2:
+        print("Bad handler specification")
+        sys.exit(-1)
+    mod = __import__(mod, globals(), locals(), [toks[0]], 0)
+    return getattr(mod, toks[0])(**params)
 
 
 def do_run(args):
     FORMAT = '%(asctime)s %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
     logging.info("Handlers used are %s" % args.handlers)
-    handlers = [load_class("custodian.vasp.handlers", n)() for n in
+    handlers = [load_class("custodian.vasp.handlers", n) for n in
                 args.handlers]
+    validators = [load_class("custodian.vasp.validators", n) for n in
+                  args.validators]
+
     vasp_command = args.command.split()
 
     #save initial INCAR for rampU runs
@@ -80,8 +93,9 @@ def do_run(args):
                             backup=backup, settings_override=settings,
                             copy_magmom=copy_magmom))
 
-    c = Custodian(handlers, jobs, max_errors=args.max_errors, scratch_dir=args.scratch,
-                  gzipped_output=args.gzip, checkpoint=True)
+    c = Custodian(handlers, jobs, validators, max_errors=args.max_errors,
+                  scratch_dir=args.scratch, gzipped_output=args.gzip,
+                  checkpoint=True)
     c.run()
 
 
@@ -134,10 +148,24 @@ if __name__ == "__main__":
         "-hd", "--handlers", dest="handlers", nargs="+",
         default=["VaspErrorHandler", "MeshSymmetryErrorHandler",
                  "UnconvergedErrorHandler", "NonConvergingErrorHandler",
-                 "PotimErrorHandler", "BadVasprunXMLHandler"], type=str,
-        help="The ErrorHandlers to use specified as string class names. Note "
-             "that the error handlers will be initialized with no args, i.e.,"
-             "default args will be assumed."
+                 "PotimErrorHandler"], type=str,
+        help="The ErrorHandlers to use specified as string class names, "
+             "with optional arguments specified as a url-like string. For "
+             "example, VaspErrorHandler?output_filename=myfile.out specifies a "
+             "VaspErrorHandler with output_name set to myfile.out. Multiple "
+             "arguments are joined by a comma. E.g., MyHandler?myfile=a,"
+             "data=1. The arguments are deserialized using yaml."
+    )
+
+    parser.add_argument(
+        "-vd", "--validators", dest="validators", nargs="+",
+        default=["VasprunXMLValidator"], type=str,
+        help="The Validators to use specified as string class names, "
+             "with optional arguments specified as a url-like string. For "
+             "example, VaspErrorHandler?output_filename=myfile.out specifies a "
+             "VaspErrorHandler with output_name set to myfile.out. Multiple "
+             "arguments are joined by a comma. E.g., MyHandler?myfile=a,"
+             "data=1. The arguments are deserialized using yaml."
     )
 
     parser.add_argument("jobs", metavar="jobs", type=str, nargs='+',
