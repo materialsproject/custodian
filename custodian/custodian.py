@@ -182,6 +182,8 @@ class Custodian(object):
             logger.info("Checkpoint written to {}".format(name))
         except Exception as ex:
             logger.info("Checkpointing failed")
+            import traceback
+            logger.error(traceback.format_exc())
 
     def run(self):
         """
@@ -276,7 +278,8 @@ class Custodian(object):
                 else:
                     p.wait()
 
-            logger.info("Job {}'s run method has returned".format(job.name))
+            logger.info("{}.run has completed. "
+                        "Checking remaining handlers".format(job.name))
             # Check for errors again, since in some cases non-monitor
             # handlers fix the problems detected by monitors
             # if an error has been found, not all handlers need to run
@@ -291,7 +294,7 @@ class Custodian(object):
             if not has_error:
                 for v in self.validators:
                     if v.check():
-                        s = "Validation failed for validator: {}".format(v)
+                        s = "Validation failed: {}".format(v)
                         raise CustodianError(s, True, v)
                 job.postprocess()
                 return
@@ -331,6 +334,9 @@ class Custodian(object):
                 if not self.skip_over_errors:
                     raise
                 else:
+                    import traceback
+                    logger.error("Bad handler %s " % h)
+                    logger.error(traceback.format_exc())
                     corrections.append(
                         {"errors": ["Bad handler %s " % h],
                          "actions": []})
