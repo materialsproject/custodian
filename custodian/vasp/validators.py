@@ -11,6 +11,9 @@ class VasprunXMLValidator(Validator):
     Checks that a valid vasprun.xml was generated
     """
 
+    def __init__(self):
+        pass
+
     def check(self):
         try:
             Vasprun("vasprun.xml")

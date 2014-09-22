@@ -18,6 +18,16 @@ class VasprunXMLValidatorTest(unittest.TestCase):
         os.chdir(os.path.join(test_dir, "unconverged"))
         self.assertFalse(h.check())
 
+    def test_as_dict(self):
+        h = VasprunXMLValidator()
+        d = h.as_dict()
+        h2 = VasprunXMLValidator.from_dict(d)
+        self.assertIs(h2, VasprunXMLValidator)
+
     @classmethod
     def tearDownClass(cls):
         os.chdir(cwd)
+
+
+if __name__ == "__main__":
+    unittest.main()
