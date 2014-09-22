@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian package &mdash; custodian 0.7.7 documentation</title>
+    <title>custodian package &mdash; custodian 0.8.0 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.7',
+        VERSION:     '0.8.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.7 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.8.0 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.7 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.8.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -96,6 +96,7 @@
 <li class="toctree-l2"><a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.handlers">custodian.vasp.handlers module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.interpreter">custodian.vasp.interpreter module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.jobs">custodian.vasp.jobs module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.validators">custodian.vasp.validators module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="custodian.vasp.html#module-custodian.vasp">Module contents</a></li>
 </ul>
 </li>
@@ -109,7 +110,7 @@
 <span id="custodian-custodian-module"></span><h2>custodian.custodian module<a class="headerlink" href="#module-custodian.custodian" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="custodian.custodian.Custodian">
-<em class="property">class </em><tt class="descname">Custodian</tt><big>(</big><em>handlers</em>, <em>jobs</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em>, <em>log_file=u'custodian.json'</em>, <em>skip_over_errors=False</em>, <em>scratch_dir=None</em>, <em>gzipped_output=False</em>, <em>checkpoint=False</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descname">Custodian</tt><big>(</big><em>handlers</em>, <em>jobs</em>, <em>validators=None</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em>, <em>skip_over_errors=False</em>, <em>scratch_dir=None</em>, <em>gzipped_output=False</em>, <em>checkpoint=False</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>The Custodian class is the manager for a list of jobs given a list of
 error handlers. The way it works is as follows:</p>
@@ -132,7 +133,8 @@ corrective measures are taken and the particular job is rerun.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>handlers</strong> (<em>[ErrorHandler]</em>) &#8211; Error handlers. In order of priority of
 fixing.</li>
-<li><strong>jobs</strong> (<em>[Job]</em>) &#8211; List of Jobs to be run sequentially.</li>
+<li><strong>jobs</strong> (<em>[Job]</em>) &#8211; Sequence of Jobs to be run. Note that this can be
+any sequence or even a generator yielding jobs.</li>
 <li><strong>max_errors</strong> (<em>int</em>) &#8211; Maximum number of errors allowed before exiting.
 Defaults to 1.</li>
 <li><strong>polling_time_step</strong> (<em>int</em>) &#8211; The length of time in seconds between
@@ -143,8 +145,6 @@ occurs. For example, if you have a polling_time_step of 10
 seconds and a monitor_freq of 30, this means that Custodian
 uses the monitors to check for errors every 30 x 10 = 300
 seconds, i.e., 5 minutes.</li>
-<li><strong>log_file</strong> (<em>str</em>) &#8211; Deprecated. Custodian now always logs to a
-custodian.json file.</li>
 <li><strong>skip_over_errors</strong> (<em>bool</em>) &#8211; If set to True, custodian will skip over
 error handlers that failed (raised an Exception of some sort).
 Otherwise, custodian will simply exit on unrecoverable errors.
@@ -183,7 +183,7 @@ to False.</li>
 <dl class="method">
 <dt id="custodian.custodian.Custodian.run">
 <tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Custodian.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Runs the job.</p>
+<dd><p>Runs all the jobs jobs.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -197,6 +197,28 @@ to False.</li>
 
 </dd></dl>
 
+<dl class="exception">
+<dt id="custodian.custodian.CustodianError">
+<em class="property">exception </em><tt class="descname">CustodianError</tt><big>(</big><em>message</em>, <em>raises=False</em>, <em>validator=None</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#CustodianError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.CustodianError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></p>
+<p>Exception class for Custodian errors.</p>
+<p>Initializes the error with a message.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>message</strong> (<em>str</em>) &#8211; Message passed to Exception</li>
+<li><strong>raises</strong> (<em>bool</em>) &#8211; Whether this should raise a runtime error when caught</li>
+<li><strong>validator</strong> (<em>Validator/ErrorHandler</em>) &#8211; Validator or ErrorHandler that
+caused the exception.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="class">
 <dt id="custodian.custodian.ErrorHandler">
 <em class="property">class </em><tt class="descname">ErrorHandler</tt><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler" title="Permalink to this definition">¶</a></dt>
@@ -205,7 +227,8 @@ to False.</li>
 <dl class="method">
 <dt id="custodian.custodian.ErrorHandler.check">
 <tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler.check" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method is called at the end of a job.</p>
+<dd><p>This method is called during the job (for monitors) or at the end of
+the job to check for errors.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -238,7 +261,7 @@ If this is an unfixable error, actions should be set to None.</td>
 <dl class="attribute">
 <dt id="custodian.custodian.ErrorHandler.is_monitor">
 <tt class="descname">is_monitor</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
-<dd><p>This class roperty indicates whether the error handler is a monitor,
+<dd><p>This class property indicates whether the error handler is a monitor,
 i.e., a handler that monitors a job as it is running. If a
 monitor-type handler notices an error, the job will be sent a
 termination signal, the error is then corrected,
@@ -260,6 +283,13 @@ handler to set the flag should be classified as is_terminating = False to
 not terminate the job.</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="custodian.custodian.ErrorHandler.raises_runtime_error">
+<tt class="descname">raises_runtime_error</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.raises_runtime_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether this handler causes custodian to raise a runtime error if it cannot
+handle the error (i.e. if correct returns a dict with &#8220;actions&#8221;:None)</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -279,11 +309,6 @@ and deserialization protocols based on init args.</p>
 <dd><p>This method should return the ErrorHandler from a dict representation
 of the object given by the to_dict property.</p>
 </dd></dl>
-
-<dl class="attribute">
-<dt id="custodian.custodian.JSONSerializable.to_dict">
-<tt class="descname">to_dict</tt><a class="reference internal" href="_modules/custodian/custodian.html#JSONSerializable.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.JSONSerializable.to_dict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 
@@ -318,6 +343,30 @@ checking (monitoring) is desired, this must return a Popen process.</p>
 <tt class="descname">setup</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Job.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.setup" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is run before the start of a job. Allows for some
 pre-processing.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="custodian.custodian.Validator">
+<em class="property">class </em><tt class="descname">Validator</tt><a class="reference internal" href="_modules/custodian/custodian.html#Validator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Validator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#custodian.custodian.JSONSerializable" title="custodian.custodian.JSONSerializable"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.JSONSerializable</span></tt></a></p>
+<p>Abstract base class defining the interface for a Validator. A Validator
+differs from an ErrorHandler in that it does not correct a run and is run
+only at the end of a Job. If errors are detected by a Validator, a run is
+immediately terminated.</p>
+<dl class="method">
+<dt id="custodian.custodian.Validator.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Validator.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Validator.check" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is called at the end of a job.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -401,7 +450,7 @@ series of error.1.tar.gz, error.2.tar.gz, ... will be generated.</li>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.7 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.8.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

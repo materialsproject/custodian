@@ -34,6 +34,14 @@ custodian.vasp.jobs module
     :undoc-members:
     :show-inheritance:
 
+custodian.vasp.validators module
+--------------------------------
+
+.. automodule:: custodian.vasp.validators
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

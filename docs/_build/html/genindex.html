@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Index &mdash; custodian 0.7.7 documentation</title>
+    <title>Index &mdash; custodian 0.8.0 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.7',
+        VERSION:     '0.8.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.7 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.8.0 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.7 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.8.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -73,7 +73,6 @@
  | <a href="#Q"><strong>Q</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
- | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
  | <a href="#W"><strong>W</strong></a>
@@ -123,26 +122,16 @@
 
       </dl></dd>
   </dl></td>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.BadVasprunXMLHandler">BadVasprunXMLHandler (class in custodian.vasp.handlers)</a>
-  </dt>
-
-  </dl></td>
 </tr></table>
 
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.BadVasprunXMLHandler.check">check() (BadVasprunXMLHandler method)</a>
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.CheckpointHandler.check">check() (CheckpointHandler method)</a>
   </dt>
 
       <dd><dl>
-        
-  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.CheckpointHandler.check">(CheckpointHandler method)</a>
-  </dt>
-
         
   <dt><a href="custodian.html#custodian.custodian.ErrorHandler.check">(ErrorHandler method)</a>
   </dt>
@@ -188,7 +177,15 @@
   </dt>
 
         
+  <dt><a href="custodian.html#custodian.custodian.Validator.check">(Validator method)</a>
+  </dt>
+
+        
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler.check">(VaspErrorHandler method)</a>
+  </dt>
+
+        
+  <dt><a href="custodian.vasp.html#custodian.vasp.validators.VasprunXMLValidator.check">(VasprunXMLValidator method)</a>
   </dt>
 
         
@@ -201,14 +198,10 @@
   </dt>
 
       
-  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.BadVasprunXMLHandler.correct">correct() (BadVasprunXMLHandler method)</a>
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.CheckpointHandler.correct">correct() (CheckpointHandler method)</a>
   </dt>
 
       <dd><dl>
-        
-  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.CheckpointHandler.correct">(CheckpointHandler method)</a>
-  </dt>
-
         
   <dt><a href="custodian.html#custodian.custodian.ErrorHandler.correct">(ErrorHandler method)</a>
   </dt>
@@ -290,12 +283,12 @@
   <dt><a href="custodian.nwchem.html#module-custodian.nwchem">custodian.nwchem (module)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="custodian.nwchem.html#module-custodian.nwchem.handlers">custodian.nwchem.handlers (module)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="custodian.nwchem.html#module-custodian.nwchem.jobs">custodian.nwchem.jobs (module)</a>
   </dt>
@@ -330,6 +323,14 @@
 
       
   <dt><a href="custodian.vasp.html#module-custodian.vasp.jobs">custodian.vasp.jobs (module)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.vasp.html#module-custodian.vasp.validators">custodian.vasp.validators (module)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.html#custodian.custodian.CustodianError">CustodianError</a>
   </dt>
 
   </dl></td>
@@ -451,14 +452,10 @@
   </dt>
 
       
-  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.BadVasprunXMLHandler.is_monitor">is_monitor (BadVasprunXMLHandler attribute)</a>
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.CheckpointHandler.is_monitor">is_monitor (CheckpointHandler attribute)</a>
   </dt>
 
       <dd><dl>
-        
-  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.CheckpointHandler.is_monitor">(CheckpointHandler attribute)</a>
-  </dt>
-
         
   <dt><a href="custodian.html#custodian.custodian.ErrorHandler.is_monitor">(ErrorHandler attribute)</a>
   </dt>
@@ -511,14 +508,10 @@
   </dt>
 
       
-  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.BadVasprunXMLHandler.is_terminating">is_terminating (BadVasprunXMLHandler attribute)</a>
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.CheckpointHandler.is_terminating">is_terminating (CheckpointHandler attribute)</a>
   </dt>
 
       <dd><dl>
-        
-  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.CheckpointHandler.is_terminating">(CheckpointHandler attribute)</a>
-  </dt>
-
         
   <dt><a href="custodian.html#custodian.custodian.ErrorHandler.is_terminating">(ErrorHandler attribute)</a>
   </dt>
@@ -687,6 +680,16 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="custodian.html#custodian.custodian.ErrorHandler.raises_runtime_error">raises_runtime_error (ErrorHandler attribute)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="custodian.vasp.html#custodian.vasp.handlers.WalltimeHandler.raises_runtime_error">(WalltimeHandler attribute)</a>
+  </dt>
+
+      </dl></dd>
+      
   <dt><a href="custodian.ansible.html#custodian.ansible.actions.DictActions.rename">rename() (DictActions static method)</a>
   </dt>
 
@@ -763,16 +766,6 @@
   </dl></td>
 </tr></table>
 
-<h2 id="T">T</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="custodian.html#custodian.custodian.JSONSerializable.to_dict">to_dict (JSONSerializable attribute)</a>
-  </dt>
-
-  </dl></td>
-</tr></table>
-
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
@@ -793,6 +786,10 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="custodian.html#custodian.custodian.Validator">Validator (class in custodian.custodian)</a>
+  </dt>
+
+      
   <dt><a href="custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler">VaspErrorHandler (class in custodian.vasp.handlers)</a>
   </dt>
 
@@ -800,6 +797,10 @@
   <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="custodian.vasp.html#custodian.vasp.interpreter.VaspModder">VaspModder (class in custodian.vasp.interpreter)</a>
+  </dt>
+
+      
+  <dt><a href="custodian.vasp.html#custodian.vasp.validators.VasprunXMLValidator">VasprunXMLValidator (class in custodian.vasp.validators)</a>
   </dt>
 
   </dl></td>
@@ -851,7 +852,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.7 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.8.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

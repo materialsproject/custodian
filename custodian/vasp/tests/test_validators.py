@@ -22,7 +22,7 @@ class VasprunXMLValidatorTest(unittest.TestCase):
         h = VasprunXMLValidator()
         d = h.as_dict()
         h2 = VasprunXMLValidator.from_dict(d)
-        self.assertIs(h2, VasprunXMLValidator)
+        self.assertIsInstance(h2, VasprunXMLValidator)
 
     @classmethod
     def tearDownClass(cls):

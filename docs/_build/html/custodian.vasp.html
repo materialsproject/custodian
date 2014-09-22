@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp package &mdash; custodian 0.7.7 documentation</title>
+    <title>custodian.vasp package &mdash; custodian 0.8.0 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.7',
+        VERSION:     '0.8.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.7.7 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.8.0 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.7 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.8.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -66,33 +66,6 @@
 </div>
 <div class="section" id="module-custodian.vasp.handlers">
 <span id="custodian-vasp-handlers-module"></span><h2>custodian.vasp.handlers module<a class="headerlink" href="#module-custodian.vasp.handlers" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="custodian.vasp.handlers.BadVasprunXMLHandler">
-<em class="property">class </em><tt class="descname">BadVasprunXMLHandler</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#BadVasprunXMLHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.BadVasprunXMLHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
-<p>Handler to properly terminate a run when a bad vasprun.xml is found.</p>
-<dl class="method">
-<dt id="custodian.vasp.handlers.BadVasprunXMLHandler.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#BadVasprunXMLHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.BadVasprunXMLHandler.check" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="custodian.vasp.handlers.BadVasprunXMLHandler.correct">
-<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#BadVasprunXMLHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.BadVasprunXMLHandler.correct" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="custodian.vasp.handlers.BadVasprunXMLHandler.is_monitor">
-<tt class="descname">is_monitor</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.BadVasprunXMLHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="custodian.vasp.handlers.BadVasprunXMLHandler.is_terminating">
-<tt class="descname">is_terminating</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.BadVasprunXMLHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 <dl class="class">
 <dt id="custodian.vasp.handlers.CheckpointHandler">
 <em class="property">class </em><tt class="descname">CheckpointHandler</tt><big>(</big><em>interval=3600</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#CheckpointHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler" title="Permalink to this definition">¶</a></dt>
@@ -138,10 +111,10 @@ combiantion with the StoppedRunHandler.</p>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.FrozenJobErrorHandler">
-<em class="property">class </em><tt class="descname">FrozenJobErrorHandler</tt><big>(</big><em>output_filename=u'vasp.out'</em>, <em>timeout=3600</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descname">FrozenJobErrorHandler</tt><big>(</big><em>output_filename=u'vasp.out'</em>, <em>timeout=21600</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
 <p>Detects an error when the output file has not been updated
-in timeout seconds. Perturbs structure and restarts.</p>
+in timeout seconds. Changes ALGO to Normal from Fast</p>
 <p>Initializes the handler with the output file to check.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -376,7 +349,7 @@ stop at the end of the next ionic step. The files are then copied into a
 subdir, and then the job is restarted. To use this proper, max_errors in
 Custodian must be set to a very high value, and you probably wouldn&#8217;t
 want to use any standard VASP error handlers. The checkpoint will be
-stored in subdirs chk_#. This should be used in combiantion with the
+stored in subdirs chk_#. This should be used in combination with the
 StoppedRunHandler.</p>
 <dl class="method">
 <dt id="custodian.vasp.handlers.StoppedRunHandler.check">
@@ -531,6 +504,11 @@ LSTOP = .TRUE.</li>
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.WalltimeHandler.is_terminating">
 <tt class="descname">is_terminating</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.WalltimeHandler.raises_runtime_error">
+<tt class="descname">raises_runtime_error</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.raises_runtime_error" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -948,6 +926,21 @@ and backing up.</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-custodian.vasp.validators">
+<span id="custodian-vasp-validators-module"></span><h2>custodian.vasp.validators module<a class="headerlink" href="#module-custodian.vasp.validators" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="custodian.vasp.validators.VasprunXMLValidator">
+<em class="property">class </em><tt class="descname">VasprunXMLValidator</tt><a class="reference internal" href="_modules/custodian/vasp/validators.html#VasprunXMLValidator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VasprunXMLValidator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Validator" title="custodian.custodian.Validator"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Validator</span></tt></a></p>
+<p>Checks that a valid vasprun.xml was generated</p>
+<dl class="method">
+<dt id="custodian.vasp.validators.VasprunXMLValidator.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/validators.html#VasprunXMLValidator.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VasprunXMLValidator.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-custodian.vasp">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-custodian.vasp" title="Permalink to this headline">¶</a></h2>
 </div>
@@ -967,6 +960,7 @@ and backing up.</p>
 <li><a class="reference internal" href="#module-custodian.vasp.handlers">custodian.vasp.handlers module</a></li>
 <li><a class="reference internal" href="#module-custodian.vasp.interpreter">custodian.vasp.interpreter module</a></li>
 <li><a class="reference internal" href="#module-custodian.vasp.jobs">custodian.vasp.jobs module</a></li>
+<li><a class="reference internal" href="#module-custodian.vasp.validators">custodian.vasp.validators module</a></li>
 <li><a class="reference internal" href="#module-custodian.vasp">Module contents</a></li>
 </ul>
 </li>
@@ -1003,7 +997,7 @@ and backing up.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.7.7 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.8.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
