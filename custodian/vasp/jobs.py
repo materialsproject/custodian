@@ -96,15 +96,15 @@ class VaspJob(Job):
                 runs and to copy the CONTCAR to the POSCAR, you will provide::
 
                     [{"dict": "INCAR", "action": {"_set": {"ISTART": 1}}},
-                     {"filename": "CONTCAR",
+                     {"file": "CONTCAR",
                       "action": {"_file_copy": {"dest": "POSCAR"}}}]
             gamma_vasp_cmd (str): Command for gamma vasp version when
                 auto_gamma is True. Should follow the list style of
                 subprocess. Defaults to None, which means ".gamma" is added
                 to the last argument of the standard vasp_cmd.
             copy_magmom (bool): Whether to copy the final magmom from the
-                OUTCAR to the next INCAR. Useful for multi-relaxation runs 
-                where the CHGCAR and WAVECAR are sometimes deleted (due to 
+                OUTCAR to the next INCAR. Useful for multi-relaxation runs
+                where the CHGCAR and WAVECAR are sometimes deleted (due to
                 changes in fft grid, etc.). Only applies to non-final runs.
         """
         self.vasp_cmd = vasp_cmd
@@ -237,7 +237,7 @@ class VaspJob(Job):
                     settings_override=[
                         {"dict": "INCAR",
                          "action": {"_set": {"ISTART": 1}}},
-                        {"filename": "CONTCAR",
+                        {"file": "CONTCAR",
                          "action": {"_file_copy": {"dest": "POSCAR"}}}])]
 
     def as_dict(self):
