@@ -35,7 +35,7 @@ from math import ceil
 
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
-from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput, Incar
+from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput, Incar, Kpoints
 from pymatgen.transformations.standard_transformations import \
     PerturbStructureTransformation, SupercellTransformation
 
@@ -157,10 +157,17 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"LREAL": False}}})
 
-        if self.errors.intersection(["tetirr", "incorrect_shift",
-                                     "rot_matrix"]):
+        if self.errors.intersection(["tetirr", "incorrect_shift"]):
             actions.append({"dict": "KPOINTS",
                             "action": {"_set": {"generation_style": "Gamma"}}})
+
+        if "rot_matrix" in self.errors:
+            if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                actions.append({"dict": "KPOINTS",
+                                "action": {"_set": {"generation_style": "Gamma"}}})
+            else:
+                actions.append({"dict": "INCAR",
+                                "action": {"_set": {"ISYM": 0}}})
 
         if "amin" in self.errors:
             actions.append({"dict": "INCAR",
