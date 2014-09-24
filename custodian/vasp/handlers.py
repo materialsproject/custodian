@@ -66,7 +66,7 @@ class VaspErrorHandler(ErrorHandler):
         "tetirr": ["Routine TETIRR needs special values"],
         "incorrect_shift": ["Could not get correct shifts"],
         "real_optlay": ["REAL_OPTLAY: internal error",
-                        "REAL_OPT: internal error"],
+                        "REAL_OPT: internal ERROR"],
         "rspher": ["ERROR RSPHER"],
         "dentet": ["DENTET"],
         "too_few_bands": ["TOO FEW BANDS"],
