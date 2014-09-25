@@ -76,10 +76,11 @@ class VaspErrorHandler(ErrorHandler):
         "pricel": ["internal error in subroutine PRICEL"],
         "zpotrf": ["LAPACK: Routine ZPOTRF failed"],
         "amin": ["One of the lattice vectors is very long (>50 A), but AMIN"],
-        "zbrent": ["ZBRENT: fatal internal in brackting"],
+        "zbrent": ["ZBRENT: fatal internal in"],
         "aliasing": ["WARNING: small aliasing (wrap around) errors must be expected"],
         "aliasing_incar": ["Your FFT grids (NGX,NGY,NGZ) are not sufficient "
-                           "for an accurate"]
+                           "for an accurate"],
+        "pssyevx": ["ERROR in subspace rotation PSSYEVX"]
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -239,6 +240,10 @@ class VaspErrorHandler(ErrorHandler):
                              {"_file_delete": {'mode': "actual"}}},
                             {"file": "WAVECAR","action": 
                              {"_file_delete": {'mode': "actual"}}}])
+
+        if "pssyevx" in self.errors:
+            actions.append({"dict": "INCAR", "action":
+                                    {"_set": {"ALGO": "Normal"}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}

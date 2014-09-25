@@ -182,6 +182,13 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(type(h2), type(h))
         self.assertEqual(h2.output_filename, "random_name")
 
+    def test_pssyevx(self):
+        h = VaspErrorHandler("vasp.pssyevx")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["pssyevx"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ALGO"], "Normal")
+
     def tearDown(self):
         os.chdir(test_dir)
         shutil.move("INCAR.orig", "INCAR")
