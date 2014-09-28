@@ -301,12 +301,12 @@ class Custodian(object):
 
             #check that all errors could be handled
             for x in self.run_log[-1]["corrections"]:
-                if x["actions"] is None and x["handler"].raises_runtime_error:
+                if not x["actions"] and x["handler"].raises_runtime_error:
                     s = "Unrecoverable error for handler: {}. " \
                         "Raising RuntimeError".format(x["handler"])
                     raise CustodianError(s, True, x["handler"])
             for x in self.run_log[-1]["corrections"]:
-                if x["actions"] is None:
+                if not x["actions"]:
                     s = "Unrecoverable error for handler: %s" % x["handler"]
                     raise CustodianError(s, False, x["handler"])
 
@@ -451,7 +451,8 @@ class ErrorHandler(JSONSerializable):
     raises_runtime_error = True
     """
     Whether this handler causes custodian to raise a runtime error if it cannot
-    handle the error (i.e. if correct returns a dict with "actions":None)
+    handle the error (i.e. if correct returns a dict with "actions":None, or
+    "actions":[])
     """
 
     @abstractmethod

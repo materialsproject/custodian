@@ -79,6 +79,10 @@ class ExampleHandler2b(ExampleHandler2):
     """
     raises_runtime_error = False
 
+    def correct(self):
+        self.has_error = True
+        return {"errors": "Unrecoverable error", "actions": []}
+
 
 class ExampleValidator1(Validator):
 
