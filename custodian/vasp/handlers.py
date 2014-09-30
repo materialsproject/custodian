@@ -80,7 +80,8 @@ class VaspErrorHandler(ErrorHandler):
         "aliasing": ["WARNING: small aliasing (wrap around) errors must be expected"],
         "aliasing_incar": ["Your FFT grids (NGX,NGY,NGZ) are not sufficient "
                            "for an accurate"],
-        "pssyevx": ["ERROR in subspace rotation PSSYEVX"]
+        "pssyevx": ["ERROR in subspace rotation PSSYEVX"],
+        "eddrmm": ["WARNING in EDDRMM: call to ZHEGV failed"]
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -244,6 +245,20 @@ class VaspErrorHandler(ErrorHandler):
         if "pssyevx" in self.errors:
             actions.append({"dict": "INCAR", "action":
                                     {"_set": {"ALGO": "Normal"}}})
+        if "eddrmm" in self.errors:
+            #RMM algorithm is not stable for this calculation
+            if vi["INCAR"].get("ALGO", "Normal") in ["Fast", "VeryFast"]:
+                actions.append({"dict": "INCAR", "action":
+                                        {"_set": {"ALGO": "Normal"}}})
+            else:
+                potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
+                actions.append({"dict": "INCAR",
+                            "action": {"_set": {"POTIM": potim}}})
+
+            actions.append({"file": "CHGCAR",
+                            "action": {"_file_delete": {'mode': "actual"}}})
+            actions.append({"file": "WAVECAR",
+                            "action": {"_file_delete": {'mode': "actual"}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}

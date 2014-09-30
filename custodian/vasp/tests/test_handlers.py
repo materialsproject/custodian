@@ -189,6 +189,16 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ALGO"], "Normal")
 
+    def test_eddrmm(self):
+        h = VaspErrorHandler("vasp.eddrmm")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["eddrmm"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ALGO"], "Normal")
+        self.assertEqual(h.correct()["errors"], ["eddrmm"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["POTIM"], 0.25)
+
     def tearDown(self):
         os.chdir(test_dir)
         shutil.move("INCAR.orig", "INCAR")
