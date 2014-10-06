@@ -37,7 +37,7 @@ from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput, Incar, Kpoints
 from pymatgen.transformations.standard_transformations import \
-    PerturbStructureTransformation, SupercellTransformation
+    SupercellTransformation
 
 from pymatgen.io.vaspio.vasp_output import Vasprun, Oszicar
 from custodian.ansible.interpreter import Modder
@@ -140,9 +140,9 @@ class VaspErrorHandler(ErrorHandler):
                             "action": {"_file_delete": {'mode': "actual"}}})
 
         if "zpotrf" in self.errors:
-            # Usually caused by short bond distances. If on the first step, volume
-            # needs to be increased. Otherwise, it was due to a step being too big
-            # and POTIM should be decreased.
+            # Usually caused by short bond distances. If on the first step,
+            # volume needs to be increased. Otherwise, it was due to a step
+            # being too big and POTIM should be decreased.
             try:
                 oszicar = Oszicar("OSZICAR")
                 nsteps = len(oszicar.ionic_steps)
@@ -151,8 +151,9 @@ class VaspErrorHandler(ErrorHandler):
 
             if nsteps >= 1:
                 potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
-                actions.append({"dict": "INCAR",
-                                "action": {"_set": {"ISYM": 0, "POTIM": potim}}})
+                actions.append(
+                    {"dict": "INCAR",
+                     "action": {"_set": {"ISYM": 0, "POTIM": potim}}})
             else:
                 s = vi["POSCAR"].structure
                 s.apply_strain(0.2)
@@ -237,12 +238,13 @@ class VaspErrorHandler(ErrorHandler):
                         grid_adjusted = True
                     #Ensure that all NGX, NGY, NGZ have been checked
                     if grid_adjusted and 'NGZ' in line:
-                        actions.extend([{"dict": 
-                            "INCAR", "action": {"_set": changes_dict}},
-                            {"file": "CHGCAR", "action": 
-                             {"_file_delete": {'mode': "actual"}}},
-                            {"file": "WAVECAR","action": 
-                             {"_file_delete": {'mode': "actual"}}}])
+                        actions.extend(
+                            [{"dict": "INCAR",
+                              "action": {"_set": changes_dict}},
+                             {"file": "CHGCAR",
+                              "action": {"_file_delete": {'mode': "actual"}}},
+                             {"file": "WAVECAR",
+                              "action": {"_file_delete": {'mode': "actual"}}}])
                         break
 
         if "aliasing_incar" in self.errors:
@@ -250,10 +252,10 @@ class VaspErrorHandler(ErrorHandler):
             #aliasing error was caused by user supplied inputs
             d = {k: 1 for k in ['NGX', 'NGY', 'NGZ'] if k in vi['INCAR'].keys()}
             actions.extend([{"dict": "INCAR", "action": {"_unset": d}},
-                            {"file": "CHGCAR", "action": 
-                             {"_file_delete": {'mode': "actual"}}},
-                            {"file": "WAVECAR","action": 
-                             {"_file_delete": {'mode': "actual"}}}])
+                            {"file": "CHGCAR",
+                             "action": {"_file_delete": {'mode': "actual"}}},
+                            {"file": "WAVECAR",
+                             "action": {"_file_delete": {'mode': "actual"}}}])
 
         if "pssyevx" in self.errors:
             actions.append({"dict": "INCAR", "action":
@@ -266,7 +268,7 @@ class VaspErrorHandler(ErrorHandler):
             else:
                 potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
                 actions.append({"dict": "INCAR",
-                            "action": {"_set": {"POTIM": potim}}})
+                                "action": {"_set": {"POTIM": potim}}})
 
             actions.append({"file": "CHGCAR",
                             "action": {"_file_delete": {'mode': "actual"}}})
@@ -579,15 +581,15 @@ class NonConvergingErrorHandler(ErrorHandler):
                 #try linear mixing
                 backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
                 actions.append({"dict": "INCAR",
-                            "action": {"_set": {"AMIX": 0.1, "BMIX": 0.01,
-                                                "ICHARG": 2}}})
+                                "action": {"_set": {"AMIX": 0.1, "BMIX": 0.01,
+                                                    "ICHARG": 2}}})
 
             elif bmix < 3.0 and amin > 0.01:
                 #Try increasing bmix
                 backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
                 actions.append({"dict": "INCAR",
-                            "action": {"_set": {"AMIN": 0.01, "BMIX": 3.0,
-                                                "ICHARG": 2}}})
+                                "action": {"_set": {"AMIN": 0.01, "BMIX": 3.0,
+                                                    "ICHARG": 2}}})
 
         if actions:
             VaspModder(vi=vi).apply_actions(actions)
@@ -667,7 +669,7 @@ class WalltimeHandler(ErrorHandler):
                     o = Oszicar("OSZICAR")
                     nsteps = len(o.ionic_steps)
                     time_per_step = total_secs / nsteps
-                except Exception as ex:
+                except Exception:
                     time_per_step = 0
             else:
                 try:
