@@ -24,7 +24,7 @@ from custodian.vasp.handlers import VaspErrorHandler, \
     UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler, \
     MaxForceErrorHandler, PositiveEnergyErrorHandler, PotimErrorHandler, \
     FrozenJobErrorHandler
-from pymatgen.io.vaspio import Incar, Poscar
+from pymatgen.io.vaspio import Incar, Poscar, Structure
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
@@ -245,6 +245,47 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        os.chdir(cwd)
+
+
+class ZpotrfErrorHandlerTest(unittest.TestCase):
+
+    def setUp(self):
+        if "VASP_PSP_DIR" not in os.environ:
+            os.environ["VASP_PSP_DIR"] = test_dir
+        os.chdir(test_dir)
+        os.chdir('zpotrf')
+        shutil.copy("POSCAR", "POSCAR.orig")
+        shutil.copy("INCAR", "INCAR.orig")
+
+    def test_first_step(self):
+        shutil.copy("OSZICAR.empty", "OSZICAR")
+        s1 = Structure.from_file("POSCAR")
+        h = VaspErrorHandler("vasp.out")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d['errors'], ['zpotrf'])
+        s2 = Structure.from_file("POSCAR")
+        self.assertAlmostEqual(s2.volume, s1.volume * 1.2 ** 3, 3)
+
+    def test_potim_correction(self):
+        shutil.copy("OSZICAR.one_step", "OSZICAR")
+        s1 = Structure.from_file("POSCAR")
+        h = VaspErrorHandler("vasp.out")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d['errors'], ['zpotrf'])
+        s2 = Structure.from_file("POSCAR")
+        self.assertAlmostEqual(s2.volume, s1.volume, 3)
+        self.assertAlmostEqual(Incar.from_file("INCAR")['POTIM'], 0.25)
+
+    def tearDown(self):
+        os.chdir(test_dir)
+        os.chdir('zpotrf')
+        shutil.move("POSCAR.orig", "POSCAR")
+        shutil.move("INCAR.orig", "INCAR")
+        os.remove("OSZICAR")
+        clean_dir()
         os.chdir(cwd)
 
 class MaxForceErrorHandlerTest(unittest.TestCase):
