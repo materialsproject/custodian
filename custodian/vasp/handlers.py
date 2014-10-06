@@ -117,7 +117,7 @@ class VaspErrorHandler(ErrorHandler):
 
     def correct(self):
         backup([self.output_filename, "INCAR", "KPOINTS", "POSCAR", "OUTCAR",
-                "vasprun.xml"])
+                "OSZICAR", "vasprun.xml"])
         actions = []
         vi = VaspInput.from_directory(".")
 
@@ -140,12 +140,25 @@ class VaspErrorHandler(ErrorHandler):
                             "action": {"_file_delete": {'mode': "actual"}}})
 
         if "zpotrf" in self.errors:
-            #Based on VASP forum's recommendation, you should
-            #decrease POTIM with this error
-            potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
+            # Usually caused by short bond distances. If on the first step, volume
+            # needs to be increased. Otherwise, it was due to a step being too big
+            # and POTIM should be decreased.
+            try:
+                oszicar = Oszicar("OSZICAR")
+                nsteps = len(oszicar.ionic_steps)
+            except:
+                nsteps = 0
 
-            actions.append({"dict": "INCAR",
-                            "action": {"_set": {"ISYM": 0, "POTIM": potim}}})
+            if nsteps >= 1:
+                potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
+                actions.append({"dict": "INCAR",
+                                "action": {"_set": {"ISYM": 0, "POTIM": potim}}})
+            else:
+                s = vi["POSCAR"].structure
+                s.apply_strain(0.2)
+                actions.append({"dict": "POSCAR",
+                                "action": {"_set": {"structure": s.as_dict()}}})
+
             # Based on VASP forum's recommendation, you should delete the
             # CHGCAR and WAVECAR when dealing with this error.
 
