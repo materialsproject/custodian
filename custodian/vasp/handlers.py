@@ -310,14 +310,13 @@ class MeshSymmetryErrorHandler(ErrorHandler):
             # if symmetry is off
             if v.converged or (not v.incar.get('ISYM', True)):
                 return False
-            # do not apply if job was terminated (vasprun.xml cannot be read)
-            with open(self.output_filename, "r") as f:
-                for line in f:
-                    l = line.strip()
-                    if l.find(msg) != -1:
-                        return True
         except:
             pass
+        with open(self.output_filename, "r") as f:
+            for line in f:
+                l = line.strip()
+                if l.find(msg) != -1:
+                    return True
         return False
 
     def correct(self):
