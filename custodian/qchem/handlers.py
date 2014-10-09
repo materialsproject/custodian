@@ -161,7 +161,7 @@ class QChemErrorHandler(ErrorHandler):
             if j.params["rem"]["jobtype"] == "freq":
                 return False
             if self.fix_step.params["rem"]["exchange"] in ["pbe", "b"]\
-                and self.fix_step.params["rem"]["correlation"] in ["pbe", "lyp"]:
+                    and self.fix_step.params["rem"]["correlation"] in ["pbe", "lyp"]:
                 return False
         return True
 
@@ -401,15 +401,15 @@ class QChemErrorHandler(ErrorHandler):
                 "@class": self.__class__.__name__,
                 "input_file": self.input_file,
                 "output_file": self.output_file,
-                "ex_backup_list": self.ex_backup_list,
+                "ex_backup_list": tuple(self.ex_backup_list),
                 "rca_gdm_thresh": self.rca_gdm_thresh,
                 "scf_max_cycles": self.scf_max_cycles,
                 "geom_max_cycles": self.geom_max_cycles,
                 "outdata": self.outdata,
-                "qcinp": self.qcinp.as_dict(),
+                "qcinp": self.qcinp.as_dict() if self.qcinp else None,
                 "error_step_id": self.error_step_id,
                 "errors": self.errors,
-                "fix_step": self.fix_step.as_dict()}
+                "fix_step": self.fix_step.as_dict() if self.fix_step else None}
 
     @classmethod
     def from_dict(cls, d):
@@ -420,8 +420,8 @@ class QChemErrorHandler(ErrorHandler):
                               scf_max_cycles=d["scf_max_cycles"],
                               geom_max_cycles=d["geom_max_cycles"])
         h.outdata = d["outdata"]
-        h.qcinp = QcInput.from_dict(d["qcinp"])
+        h.qcinp = QcInput.from_dict(d["qcinp"]) if d["qcinp"] else None
         h.error_step_id = d["error_step_id"]
         h.errors = d["errors"]
-        h.fix_step = QcTask.from_dict(d["fix_step"])
+        h.fix_step = QcTask.from_dict(d["fix_step"]) if d["fix_step"] else None
         return h

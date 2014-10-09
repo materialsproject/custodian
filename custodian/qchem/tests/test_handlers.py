@@ -1,6 +1,10 @@
 # coding: utf-8
 
 from __future__ import unicode_literals, division
+import json
+
+from monty.json import MontyEncoder, MontyDecoder
+
 
 """
 Created on Dec 6, 2012
@@ -590,6 +594,25 @@ class QChemErrorHandlerTest(TestCase):
         with open(os.path.join(scr_dir, "h2o_aimd.qcinp")) as f:
             ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
+
+    def test_json_serializable(self):
+        q1 = QChemErrorHandler()
+        str1 = json.dumps(q1, cls=MontyEncoder)
+        q2 = json.loads(str1, cls=MontyDecoder)
+        self.assertEqual(q1.as_dict(), q2.as_dict())
+        shutil.copyfile(os.path.join(test_dir, "qunino_vinyl.qcinp"),
+                        os.path.join(scr_dir, "qunino_vinyl.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "qunino_vinyl.qcout"),
+                        os.path.join(scr_dir, "qunino_vinyl.qcout"))
+        q3 = QChemErrorHandler(input_file="qunino_vinyl.qcinp",
+                               output_file="qunino_vinyl.qcout")
+        q3.check()
+        q3.correct()
+        for od in q3.outdata:
+            od.pop("input")
+        str3 = json.dumps(q3, cls=MontyEncoder)
+        q4 = json.loads(str3, cls=MontyDecoder)
+        self.assertEqual(q3.as_dict(), q4.as_dict())
 
     def tearDown(self):
         shutil.rmtree(scr_dir)
