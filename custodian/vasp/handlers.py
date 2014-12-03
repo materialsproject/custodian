@@ -132,6 +132,11 @@ class VaspErrorHandler(ErrorHandler):
         if "brmix" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ISYM": 0}}})
+
+            if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                actions.append({"dict": "KPOINTS",
+                                "action": {"_set": {"generation_style": "Gamma"}}})
+
             # Based on VASP forum's recommendation, you should delete the
             # CHGCAR and WAVECAR when dealing with this error.
             actions.append({"file": "CHGCAR",
@@ -174,8 +179,10 @@ class VaspErrorHandler(ErrorHandler):
                             "action": {"_set": {"LREAL": False}}})
 
         if self.errors.intersection(["tetirr", "incorrect_shift"]):
-            actions.append({"dict": "KPOINTS",
-                            "action": {"_set": {"generation_style": "Gamma"}}})
+
+            if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                actions.append({"dict": "KPOINTS",
+                                "action": {"_set": {"generation_style": "Gamma"}}})
 
         if "rot_matrix" in self.errors:
             if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
@@ -308,9 +315,12 @@ class MeshSymmetryErrorHandler(ErrorHandler):
               " lattices."
         try:
             v = Vasprun(self.output_vasprun)
+            vi = VaspInput.from_directory('.')
             # According to VASP admins, you can disregard this error
             # if symmetry is off
-            if v.converged or (not v.incar.get('ISYM', True)):
+            #Also disregard if automatic KPOINT generation is used
+            if v.converged or (not v.incar.get('ISYM', True)) or\
+                            vi["KPOINTS"].style == Kpoints.supported_modes.Automatic:
                 return False
         except:
             pass
