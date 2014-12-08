@@ -61,11 +61,11 @@ def do_run(args):
     njobs = len(args.jobs)
     post_settings = []  # append to this list to have settings applied on next job
     for i, job_type in enumerate(args.jobs):
-        if job_type not in ("quickrelax", "relax", "static", "rampU"):
-            print("Unsupported job type: {}".format(job_type))
-            sys.exit(-1)
         final = False if i != njobs - 1 else True
-        suffix = ".{}{}".format(job_type, i + 1)
+        if any(c.isdigit() for c in job_type):
+            suffix = "." + job_type
+        else:
+            suffix = ".{}{}".format(job_type, i + 1)
         settings = post_settings
         post_settings = []
         backup = True if i == 0 else False
@@ -75,14 +75,14 @@ def do_run(args):
             settings.append(
                 {"file": "CONTCAR",
                  "action": {"_file_copy": {"dest": "POSCAR"}}})
-        if job_type == "static":
+        if job_type.startswith("static"):
             m = [i * args.static_kpoint for i in vinput["KPOINTS"].kpts[0]]
             settings.extend([
                 {"dict": "INCAR",
                  "action": {"_set": {"NSW": 0}}},
                 {'dict': 'KPOINTS',
                  'action': {'_set': {'kpoints': [m]}}}])
-        elif job_type == "rampU":
+        elif job_type.startswith("rampU"):
             f = ramps / (n_ramp_u - 1)
             settings.append(
                 {"dict": "INCAR",
@@ -90,7 +90,7 @@ def do_run(args):
                                      "LDAUU": [u * f for u in ldauu]}}})
             copy_magmom = True
             ramps += 1
-        elif job_type == "quickrelax":
+        elif job_type.startswith("quickrelax"):
             kpoints = vinput["KPOINTS"]
             incar = vinput["INCAR"]
             structure = vinput["POSCAR"].structure
@@ -108,6 +108,11 @@ def do_run(args):
                  "action": {"_set": {"ISMEAR": 0}}},
                 {'dict': 'KPOINTS',
                  'action': {'_set': low_kpoints.as_dict()}}])
+        elif job_type.startswith("relax"):
+            pass
+        else:
+            print("Unsupported job type: {}".format(job_type))
+            sys.exit(-1)
 
         jobs.append(VaspJob(vasp_command, final=final, suffix=suffix,
                             backup=backup, settings_override=settings,
@@ -194,7 +199,9 @@ if __name__ == "__main__":
                              "quickrelax, static, and rampU are supported at "
                              "the moment. For example, \"relax relax static\" "
                              "will run a double relaxation followed by a static "
-                             "run.")
+                             "run. By default, suffixes are given sequential numbering,"
+                             "but this can be overrridden by adding a number to the job"
+                             "type, e.g. relax5 relax6 relax7")
 
     args = parser.parse_args()
     do_run(args)
