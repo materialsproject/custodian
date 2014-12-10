@@ -20,7 +20,7 @@ import yaml
 
 from custodian.custodian import Custodian
 from custodian.vasp.jobs import VaspJob
-from pymatgen.io.vaspio.vasp_input import VaspInput, Incar
+from pymatgen.io.vaspio.vasp_input import VaspInput, Incar, Kpoints
 
 
 def load_class(mod, name):
@@ -59,28 +59,30 @@ def do_run(args):
     jobs = []
 
     njobs = len(args.jobs)
+    post_settings = []  # append to this list to have settings applied on next job
     for i, job_type in enumerate(args.jobs):
-        if job_type not in ("relax", "static", "rampU"):
-            print("Unsupported job type: {}".format(job_type))
-            sys.exit(-1)
         final = False if i != njobs - 1 else True
-        suffix = ".{}{}".format(job_type, i + 1)
-        settings = []
+        if any(c.isdigit() for c in job_type):
+            suffix = "." + job_type
+        else:
+            suffix = ".{}{}".format(job_type, i + 1)
+        settings = post_settings
+        post_settings = []
         backup = True if i == 0 else False
         copy_magmom = False
+        vinput = VaspInput.from_directory(".")
         if i > 0:
             settings.append(
                 {"file": "CONTCAR",
                  "action": {"_file_copy": {"dest": "POSCAR"}}})
-        if job_type == "static":
-            vinput = VaspInput.from_directory(".")
+        if job_type.startswith("static"):
             m = [i * args.static_kpoint for i in vinput["KPOINTS"].kpts[0]]
             settings.extend([
                 {"dict": "INCAR",
                  "action": {"_set": {"NSW": 0}}},
                 {'dict': 'KPOINTS',
                  'action': {'_set': {'kpoints': [m]}}}])
-        if job_type == "rampU":
+        elif job_type.startswith("rampU"):
             f = ramps / (n_ramp_u - 1)
             settings.append(
                 {"dict": "INCAR",
@@ -88,6 +90,29 @@ def do_run(args):
                                      "LDAUU": [u * f for u in ldauu]}}})
             copy_magmom = True
             ramps += 1
+        elif job_type.startswith("quickrelax"):
+            kpoints = vinput["KPOINTS"]
+            incar = vinput["INCAR"]
+            structure = vinput["POSCAR"].structure
+            if "ISMEAR" in incar:
+                post_settings.append({"dict": "INCAR",
+                                      "action": {"_set": {"ISMEAR": incar["ISMEAR"]}}})
+            else:
+                post_settings.append({"dict": "INCAR",
+                                      "action": {"_unset": {"ISMEAR": 1}}})
+            post_settings.append({"dict": "KPOINTS",
+                                  "action": {"_set": kpoints.as_dict()}})
+            low_kpoints = Kpoints.gamma_automatic([max(int(7/l), 1) for l in structure.lattice.abc])
+            settings.extend([
+                {"dict": "INCAR",
+                 "action": {"_set": {"ISMEAR": 0}}},
+                {'dict': 'KPOINTS',
+                 'action': {'_set': low_kpoints.as_dict()}}])
+        elif job_type.startswith("relax"):
+            pass
+        else:
+            print("Unsupported job type: {}".format(job_type))
+            sys.exit(-1)
 
         jobs.append(VaspJob(vasp_command, final=final, suffix=suffix,
                             backup=backup, settings_override=settings,
@@ -171,9 +196,12 @@ if __name__ == "__main__":
     parser.add_argument("jobs", metavar="jobs", type=str, nargs='+',
                         default=["relax", "relax"],
                         help="Jobs to execute. Only sequences of relax, "
-                             "static, and rampU are supported at the moment. "
-                             "For example, \"relax relax static\" will run a "
-                             "double relaxation followed by a static run.")
+                             "quickrelax, static, and rampU are supported at "
+                             "the moment. For example, \"relax relax static\" "
+                             "will run a double relaxation followed by a static "
+                             "run. By default, suffixes are given sequential numbering,"
+                             "but this can be overrridden by adding a number to the job"
+                             "type, e.g. relax5 relax6 relax7")
 
     args = parser.parse_args()
     do_run(args)
