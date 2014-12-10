@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from __future__ import unicode_literals, division
+import shlex
 
 """
 This module implements basic kinds of jobs for QChem runs.
@@ -152,12 +153,17 @@ class QchemJob(Job):
                             "{}.{}.orig".format(self.qclog_file, i))
 
     def run(self):
+        if "edique" in os.environ["PBS_JOBID"] or "hopque" in os.environ["PBS_JOBID"]:
+            tmp_clean_cmd = shlex.split("aprun -n1 -N1 rm -rf /tmp")
+        else:
+            tmp_clean_cmd = None
         cmd = copy.deepcopy(self.current_command)
         cmd += [self.input_file, self.output_file]
         if self.chk_file:
             cmd.append(self.chk_file)
         if self.qclog_file:
             with zopen(self.qclog_file, "w") as filelog:
+                subprocess.call(tmp_clean_cmd, stdout=filelog)
                 returncode = subprocess.call(cmd, stdout=filelog)
         else:
             returncode = subprocess.call(cmd)
