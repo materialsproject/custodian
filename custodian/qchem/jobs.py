@@ -154,7 +154,7 @@ class QchemJob(Job):
 
     def run(self):
         if "edique" in os.environ["PBS_JOBID"] or "hopque" in os.environ["PBS_JOBID"]:
-            tmp_clean_cmd = shlex.split("aprun -n1 -N1 rm -rf /tmp")
+            tmp_clean_cmd = shlex.split("aprun -n1 -N1 rm -rf /tmp/*")
         else:
             tmp_clean_cmd = None
         cmd = copy.deepcopy(self.current_command)
