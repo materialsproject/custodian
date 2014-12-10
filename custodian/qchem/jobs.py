@@ -165,6 +165,7 @@ class QchemJob(Job):
             with zopen(self.qclog_file, "w") as filelog:
                 subprocess.call(tmp_clean_cmd, stdout=filelog)
                 returncode = subprocess.call(cmd, stdout=filelog)
+                subprocess.call(tmp_clean_cmd, stdout=filelog)
         else:
             returncode = subprocess.call(cmd)
         return returncode
