@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from __future__ import unicode_literals, division
+import glob
 import shlex
 
 """
@@ -162,7 +163,7 @@ class QchemJob(Job):
         if self.chk_file:
             cmd.append(self.chk_file)
         if self.qclog_file:
-            with zopen(self.qclog_file, "w") as filelog:
+            with open(self.qclog_file, "w") as filelog:
                 subprocess.call(tmp_clean_cmd, stdout=filelog)
                 returncode = subprocess.call(cmd, stdout=filelog)
                 subprocess.call(tmp_clean_cmd, stdout=filelog)
@@ -172,4 +173,10 @@ class QchemJob(Job):
 
     def postprocess(self):
         if self.gzipped:
-            gzip_dir(".")
+            if "edique" in os.environ["PBS_JOBID"] or "hopque" in os.environ["PBS_JOBID"]:
+                cur_dir = os.getcwd()
+                file_list = [os.path.join(cur_dir, name) for name in glob.glob("*")]
+                gzip_cmd = shlex.split("aprun -n1 -N1 gzip") + file_list
+                subprocess.call(gzip_cmd)
+            else:
+                gzip_dir(".")
