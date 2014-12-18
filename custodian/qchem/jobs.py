@@ -155,9 +155,11 @@ class QchemJob(Job):
 
     def run(self):
         if "edique" in os.environ["PBS_JOBID"] or "hopque" in os.environ["PBS_JOBID"]:
-            tmp_clean_cmd = shlex.split("aprun -n1 -N1 rm -rf /tmp/*")
+            tmp_creation_cmd = shlex.split("aprun -n1 -N1 mkdir /tmp/eg_qchem")
+            tmp_clean_cmd = shlex.split("aprun -n1 -N1 rm -rf /tmp/eg_qchem")
         else:
             tmp_clean_cmd = None
+            tmp_creation_cmd = None
         cmd = copy.deepcopy(self.current_command)
         cmd += [self.input_file, self.output_file]
         if self.chk_file:
@@ -165,6 +167,7 @@ class QchemJob(Job):
         if self.qclog_file:
             with open(self.qclog_file, "w") as filelog:
                 subprocess.call(tmp_clean_cmd, stdout=filelog)
+                subprocess.call(tmp_creation_cmd, stdout=filelog)
                 returncode = subprocess.call(cmd, stdout=filelog)
                 subprocess.call(tmp_clean_cmd, stdout=filelog)
         else:
