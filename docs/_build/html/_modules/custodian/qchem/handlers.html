@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.qchem.handlers &mdash; custodian 0.8.0 documentation</title>
+    <title>custodian.qchem.handlers &mdash; custodian 0.8.1 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.8.0',
+        VERSION:     '0.8.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.8.0 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.8.1 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.8.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.8.1 documentation</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -218,7 +218,7 @@
             <span class="k">if</span> <span class="n">j</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;freq&quot;</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">False</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;exchange&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;pbe&quot;</span><span class="p">,</span> <span class="s">&quot;b&quot;</span><span class="p">]</span>\
-                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;correlation&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;pbe&quot;</span><span class="p">,</span> <span class="s">&quot;lyp&quot;</span><span class="p">]:</span>
+                    <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;correlation&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;pbe&quot;</span><span class="p">,</span> <span class="s">&quot;lyp&quot;</span><span class="p">]:</span>
                 <span class="k">return</span> <span class="bp">False</span>
         <span class="k">return</span> <span class="bp">True</span>
 </div>
@@ -458,15 +458,15 @@
                 <span class="s">&quot;@class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
                 <span class="s">&quot;input_file&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span>
                 <span class="s">&quot;output_file&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span>
-                <span class="s">&quot;ex_backup_list&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ex_backup_list</span><span class="p">,</span>
+                <span class="s">&quot;ex_backup_list&quot;</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ex_backup_list</span><span class="p">),</span>
                 <span class="s">&quot;rca_gdm_thresh&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rca_gdm_thresh</span><span class="p">,</span>
                 <span class="s">&quot;scf_max_cycles&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span><span class="p">,</span>
                 <span class="s">&quot;geom_max_cycles&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_max_cycles</span><span class="p">,</span>
                 <span class="s">&quot;outdata&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span><span class="p">,</span>
-                <span class="s">&quot;qcinp&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span>
+                <span class="s">&quot;qcinp&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
                 <span class="s">&quot;error_step_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_step_id</span><span class="p">,</span>
                 <span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span>
-                <span class="s">&quot;fix_step&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()}</span>
+                <span class="s">&quot;fix_step&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span> <span class="k">else</span> <span class="bp">None</span><span class="p">}</span>
 </div>
     <span class="nd">@classmethod</span>
 <div class="viewcode-block" id="QChemErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
@@ -477,10 +477,10 @@
                               <span class="n">scf_max_cycles</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;scf_max_cycles&quot;</span><span class="p">],</span>
                               <span class="n">geom_max_cycles</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;geom_max_cycles&quot;</span><span class="p">])</span>
         <span class="n">h</span><span class="o">.</span><span class="n">outdata</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s">&quot;outdata&quot;</span><span class="p">]</span>
-        <span class="n">h</span><span class="o">.</span><span class="n">qcinp</span> <span class="o">=</span> <span class="n">QcInput</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;qcinp&quot;</span><span class="p">])</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">qcinp</span> <span class="o">=</span> <span class="n">QcInput</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;qcinp&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s">&quot;qcinp&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="bp">None</span>
         <span class="n">h</span><span class="o">.</span><span class="n">error_step_id</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s">&quot;error_step_id&quot;</span><span class="p">]</span>
         <span class="n">h</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s">&quot;errors&quot;</span><span class="p">]</span>
-        <span class="n">h</span><span class="o">.</span><span class="n">fix_step</span> <span class="o">=</span> <span class="n">QcTask</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;fix_step&quot;</span><span class="p">])</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">fix_step</span> <span class="o">=</span> <span class="n">QcTask</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;fix_step&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s">&quot;fix_step&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="bp">None</span>
         <span class="k">return</span> <span class="n">h</span></div></div>
 </pre></div>
 
@@ -515,7 +515,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.8.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">custodian 0.8.1 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
