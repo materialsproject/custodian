@@ -154,9 +154,7 @@ class QchemJob(Job):
                             "{}.{}.orig".format(self.qclog_file, i))
 
     def run(self):
-        if "PBS_JOBID" in os.environ and \
-                ("edique" in os.environ["PBS_JOBID"] or
-                         "hopque" in os.environ["PBS_JOBID"]):
+        if "PBS_JOBID" in os.environ and "edique" in os.environ["PBS_JOBID"]:
             nodelist = os.environ["QCNODE"]
             tmp_creation_cmd = shlex.split("aprun -n1 -N1 -L {} mkdir /tmp/eg_qchem".format(nodelist))
             tmp_clean_cmd = shlex.split("aprun -n1 -N1 -L {} rm -rf /tmp/eg_qchem".format(nodelist))
@@ -182,9 +180,7 @@ class QchemJob(Job):
 
     def postprocess(self):
         if self.gzipped:
-            if "PBS_JOBID" in os.environ and \
-                    ("edique" in os.environ["PBS_JOBID"] or
-                             "hopque" in os.environ["PBS_JOBID"]):
+            if "PBS_JOBID" in os.environ and "edique" in os.environ["PBS_JOBID"]:
                 cur_dir = os.getcwd()
                 file_list = [os.path.join(cur_dir, name) for name in glob.glob("*")]
                 nodelist = os.environ["QCNODE"]
