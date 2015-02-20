@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.custodian &mdash; custodian 0.8.0 documentation</title>
+    <title>custodian.custodian &mdash; custodian 0.8.1 documentation</title>
     
     <link rel="stylesheet" href="../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.8.0',
+        VERSION:     '0.8.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.8.0 documentation" href="../../index.html" />
+    <link rel="top" title="custodian 0.8.1 documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">custodian 0.8.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">custodian 0.8.1 documentation</a> &raquo;</li>
           <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -269,7 +269,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_run_job</span><span class="p">(</span><span class="n">job_n</span><span class="p">,</span> <span class="n">job</span><span class="p">)</span>
                     <span class="c"># Checkpoint after each job so that we can recover from last</span>
                     <span class="c"># point and remove old checkpoints</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span> <span class="ow">and</span> <span class="n">job_n</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">):</span>
                         <span class="n">Custodian</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">(</span><span class="n">cwd</span><span class="p">,</span> <span class="n">job_n</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">CustodianError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
@@ -358,12 +358,12 @@
 
             <span class="c">#check that all errors could be handled</span>
             <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&quot;corrections&quot;</span><span class="p">]:</span>
-                <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="s">&quot;actions&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="s">&quot;handler&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">raises_runtime_error</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span><span class="p">[</span><span class="s">&quot;actions&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="s">&quot;handler&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">raises_runtime_error</span><span class="p">:</span>
                     <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;Unrecoverable error for handler: {}. &quot;</span> \
                         <span class="s">&quot;Raising RuntimeError&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s">&quot;handler&quot;</span><span class="p">])</span>
                     <span class="k">raise</span> <span class="n">CustodianError</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="s">&quot;handler&quot;</span><span class="p">])</span>
             <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&quot;corrections&quot;</span><span class="p">]:</span>
-                <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="s">&quot;actions&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span><span class="p">[</span><span class="s">&quot;actions&quot;</span><span class="p">]:</span>
                     <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;Unrecoverable error for handler: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">x</span><span class="p">[</span><span class="s">&quot;handler&quot;</span><span class="p">]</span>
                     <span class="k">raise</span> <span class="n">CustodianError</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="s">&quot;handler&quot;</span><span class="p">])</span>
 
@@ -508,7 +508,8 @@
     <span class="n">raises_runtime_error</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Whether this handler causes custodian to raise a runtime error if it cannot</span>
-<span class="sd">    handle the error (i.e. if correct returns a dict with &quot;actions&quot;:None)</span>
+<span class="sd">    handle the error (i.e. if correct returns a dict with &quot;actions&quot;:None, or</span>
+<span class="sd">    &quot;actions&quot;:[])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@abstractmethod</span>
@@ -609,7 +610,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">custodian 0.8.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">custodian 0.8.1 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>

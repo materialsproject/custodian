@@ -155,7 +155,10 @@ class VaspJob(Job):
                         del incar["NPAR"]
                     else:
                         import multiprocessing
-                        ncores = multiprocessing.cpu_count()
+                        # try sge environment variable first
+                        # (since multiprocessing counts cores on the current machine only)
+                        ncores = os.environ.get('NSLOTS') or multiprocessing.cpu_count()
+                        ncores = int(ncores)
                         for npar in range(int(round(math.sqrt(ncores))),
                                           ncores):
                             if ncores % npar == 0:

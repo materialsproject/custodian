@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp package &mdash; custodian 0.8.0 documentation</title>
+    <title>custodian.vasp package &mdash; custodian 0.8.1 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.8.0',
+        VERSION:     '0.8.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.8.0 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.8.1 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.8.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.8.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -435,7 +435,7 @@ default redirect used by <tt class="xref py py-class docutils literal"><span cla
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.error_msgs">
-<tt class="descname">error_msgs</tt><em class="property"> = {u'too_few_bands': [u'TOO FEW BANDS'], u'triple_product': [u'ERROR: the triple product of the basis vectors'], u'amin': [u'One of the lattice vectors is very long (&gt;50 A), but AMIN'], u'pricel': [u'internal error in subroutine PRICEL'], u'zpotrf': [u'LAPACK: Routine ZPOTRF failed'], u'aliasing': [u'WARNING: small aliasing (wrap around) errors must be expected'], u'brmix': [u'BRMIX: very serious problems'], u'real_optlay': [u'REAL_OPTLAY: internal error'], u'aliasing_incar': [u'Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate'], u'inv_rot_mat': [u'inverse of rotation matrix was not found (increase SYMPREC)'], u'dentet': [u'DENTET'], u'incorrect_shift': [u'Could not get correct shifts'], u'subspacematrix': [u'WARNING: Sub-Space-Matrix is not hermitian in DAV'], u'rspher': [u'ERROR RSPHER'], u'rot_matrix': [u'Found some non-integer element in rotation matrix'], u'tet': [u'Tetrahedron method fails for NKPT&lt;4', u'Fatal error detecting k-mesh', u'Fatal error: unable to match k-point', u'Routine TETIRR needs special values'], u'zbrent': [u'ZBRENT: fatal internal in brackting'], u'tetirr': [u'Routine TETIRR needs special values'], u'brions': [u'BRIONS problems: POTIM should be increased']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">error_msgs</tt><em class="property"> = {u'too_few_bands': [u'TOO FEW BANDS'], u'triple_product': [u'ERROR: the triple product of the basis vectors'], u'amin': [u'One of the lattice vectors is very long (&gt;50 A), but AMIN'], u'eddrmm': [u'WARNING in EDDRMM: call to ZHEGV failed'], u'pricel': [u'internal error in subroutine PRICEL'], u'zpotrf': [u'LAPACK: Routine ZPOTRF failed'], u'aliasing': [u'WARNING: small aliasing (wrap around) errors must be expected'], u'brmix': [u'BRMIX: very serious problems'], u'real_optlay': [u'REAL_OPTLAY: internal error', u'REAL_OPT: internal ERROR'], u'aliasing_incar': [u'Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate'], u'inv_rot_mat': [u'inverse of rotation matrix was not found (increase SYMPREC)'], u'dentet': [u'DENTET'], u'pssyevx': [u'ERROR in subspace rotation PSSYEVX'], u'incorrect_shift': [u'Could not get correct shifts'], u'subspacematrix': [u'WARNING: Sub-Space-Matrix is not hermitian in DAV'], u'rspher': [u'ERROR RSPHER'], u'rot_matrix': [u'Found some non-integer element in rotation matrix'], u'tet': [u'Tetrahedron method fails for NKPT&lt;4', u'Fatal error detecting k-mesh', u'Fatal error: unable to match k-point', u'Routine TETIRR needs special values'], u'zbrent': [u'ZBRENT: fatal internal in'], u'tetirr': [u'Routine TETIRR needs special values'], u'brions': [u'BRIONS problems: POTIM should be increased']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -848,7 +848,7 @@ gamma_vasp_cmd argument if the command is named differently.</li>
 override changes. For example, to set ISTART=1 for subsequent
 runs and to copy the CONTCAR to the POSCAR, you will provide:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="p">[{</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}},</span>
- <span class="p">{</span><span class="s">&quot;filename&quot;</span><span class="p">:</span> <span class="s">&quot;CONTCAR&quot;</span><span class="p">,</span>
+ <span class="p">{</span><span class="s">&quot;file&quot;</span><span class="p">:</span> <span class="s">&quot;CONTCAR&quot;</span><span class="p">,</span>
   <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;dest&quot;</span><span class="p">:</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">}}}]</span>
 </pre></div>
 </div>
@@ -997,7 +997,7 @@ and backing up.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.8.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">custodian 0.8.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

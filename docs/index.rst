@@ -22,6 +22,10 @@ calculations.
 Change log
 ==========
 
+v0.8.1
+------
+1. Misc bug fixes (minor).
+
 v0.8.0
 ------
 1. Major refactoring of Custodian to introdce Validators,
