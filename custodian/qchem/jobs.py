@@ -157,8 +157,9 @@ class QchemJob(Job):
         if "PBS_JOBID" in os.environ and \
                 ("edique" in os.environ["PBS_JOBID"] or
                          "hopque" in os.environ["PBS_JOBID"]):
-            tmp_creation_cmd = shlex.split("aprun -n1 -N1 mkdir /tmp/eg_qchem")
-            tmp_clean_cmd = shlex.split("aprun -n1 -N1 rm -rf /tmp/eg_qchem")
+            nodelist = os.environ["QCNODE"]
+            tmp_creation_cmd = shlex.split("aprun -n1 -N1 -L {} mkdir /tmp/eg_qchem".format(nodelist))
+            tmp_clean_cmd = shlex.split("aprun -n1 -N1 -L {} rm -rf /tmp/eg_qchem".format(nodelist))
         else:
             tmp_clean_cmd = None
             tmp_creation_cmd = None
@@ -186,7 +187,8 @@ class QchemJob(Job):
                              "hopque" in os.environ["PBS_JOBID"]):
                 cur_dir = os.getcwd()
                 file_list = [os.path.join(cur_dir, name) for name in glob.glob("*")]
-                gzip_cmd = shlex.split("aprun -n1 -N1 gzip") + file_list
+                nodelist = os.environ["QCNODE"]
+                gzip_cmd = shlex.split("aprun -n1 -N1 -L {} gzip".format(nodelist)) + file_list
                 subprocess.call(gzip_cmd)
             else:
                 gzip_dir(".")
