@@ -154,9 +154,10 @@ class QchemJob(Job):
                             "{}.{}.orig".format(self.qclog_file, i))
 
     def run(self):
-        if "edique" in os.environ["PBS_JOBID"] or "hopque" in os.environ["PBS_JOBID"]:
-            tmp_creation_cmd = shlex.split("aprun -n1 -N1 mkdir /tmp/eg_qchem")
-            tmp_clean_cmd = shlex.split("aprun -n1 -N1 rm -rf /tmp/eg_qchem")
+        if "PBS_JOBID" in os.environ and "edique" in os.environ["PBS_JOBID"]:
+            nodelist = os.environ["QCNODE"]
+            tmp_creation_cmd = shlex.split("aprun -n1 -N1 -L {} mkdir /tmp/eg_qchem".format(nodelist))
+            tmp_clean_cmd = shlex.split("aprun -n1 -N1 -L {} rm -rf /tmp/eg_qchem".format(nodelist))
         else:
             tmp_clean_cmd = None
             tmp_creation_cmd = None
@@ -166,20 +167,24 @@ class QchemJob(Job):
             cmd.append(self.chk_file)
         if self.qclog_file:
             with open(self.qclog_file, "w") as filelog:
-                subprocess.call(tmp_clean_cmd, stdout=filelog)
-                subprocess.call(tmp_creation_cmd, stdout=filelog)
+                if tmp_clean_cmd:
+                    subprocess.call(tmp_clean_cmd, stdout=filelog)
+                if tmp_creation_cmd:
+                    subprocess.call(tmp_creation_cmd, stdout=filelog)
                 returncode = subprocess.call(cmd, stdout=filelog)
-                subprocess.call(tmp_clean_cmd, stdout=filelog)
+                if tmp_clean_cmd:
+                    subprocess.call(tmp_clean_cmd, stdout=filelog)
         else:
             returncode = subprocess.call(cmd)
         return returncode
 
     def postprocess(self):
         if self.gzipped:
-            if "edique" in os.environ["PBS_JOBID"] or "hopque" in os.environ["PBS_JOBID"]:
+            if "PBS_JOBID" in os.environ and "edique" in os.environ["PBS_JOBID"]:
                 cur_dir = os.getcwd()
                 file_list = [os.path.join(cur_dir, name) for name in glob.glob("*")]
-                gzip_cmd = shlex.split("aprun -n1 -N1 gzip") + file_list
+                nodelist = os.environ["QCNODE"]
+                gzip_cmd = shlex.split("aprun -n1 -N1 -L {} gzip".format(nodelist)) + file_list
                 subprocess.call(gzip_cmd)
             else:
                 gzip_dir(".")
