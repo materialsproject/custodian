@@ -80,43 +80,6 @@ class VaspErrorHandlerTest(unittest.TestCase):
                          [{'action': {'_set': {'LREAL': False}},
                            'dict': 'INCAR'}])
 
-    def test_aliasing(self):
-        os.chdir(os.path.join(test_dir, "aliasing"))
-        shutil.copy("INCAR", "INCAR.orig")
-        h = VaspErrorHandler("vasp.aliasing")
-        h.check()
-        d = h.correct()
-        shutil.move("INCAR.orig", "INCAR")
-        clean_dir()
-        os.chdir(test_dir)
-
-        self.assertEqual(d["errors"], ['aliasing'])
-        self.assertEqual(d["actions"],
-                         [{'action': {'_set': {'NGX': 34}},
-                           'dict': 'INCAR'}, {"file": "CHGCAR",
-                            "action": {"_file_delete": {'mode': "actual"}}},
-                          {"file": "WAVECAR",
-                            "action": {"_file_delete": {'mode': "actual"}}}])
-
-    def test_aliasing_incar(self):
-        os.chdir(os.path.join(test_dir, "aliasing"))
-        shutil.copy("INCAR", "INCAR.orig")
-        h = VaspErrorHandler("vasp.aliasing_incar")
-        h.check()
-        d = h.correct()
-        incar = Incar.from_file('INCAR')
-        shutil.move("INCAR.orig", "INCAR")
-        clean_dir()
-        os.chdir(test_dir)
-
-        self.assertEqual(d["errors"], ['aliasing_incar'])
-        self.assertEqual(d["actions"],
-                         [{'action': {'_unset': {'NGY':1, 'NGZ': 1}},
-                           'dict': 'INCAR'}, {"file": "CHGCAR",
-                            "action": {"_file_delete": {'mode': "actual"}}},
-                          {"file": "WAVECAR",
-                            "action": {"_file_delete": {'mode': "actual"}}}])
-
     def test_mesh_symmetry(self):
         h = MeshSymmetryErrorHandler("vasp.ibzkpt")
         h.check()
