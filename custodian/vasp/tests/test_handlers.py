@@ -23,7 +23,7 @@ import datetime
 from custodian.vasp.handlers import VaspErrorHandler, \
     UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler, \
     MaxForceErrorHandler, PositiveEnergyErrorHandler, PotimErrorHandler, \
-    FrozenJobErrorHandler
+    FrozenJobErrorHandler, AliasingErrorHandler
 from pymatgen.io.vaspio import Incar, Poscar, Structure
 
 
@@ -198,6 +198,64 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.correct()["errors"], ["eddrmm"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["POTIM"], 0.25)
+
+    def tearDown(self):
+        os.chdir(test_dir)
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("KPOINTS.orig", "KPOINTS")
+        shutil.move("POSCAR.orig", "POSCAR")
+        shutil.move("CHGCAR.orig", "CHGCAR")
+        clean_dir()
+        os.chdir(cwd)
+
+
+class AliasingErrorHandlerTest(unittest.TestCase):
+
+    def setUp(self):
+        if "VASP_PSP_DIR" not in os.environ:
+            os.environ["VASP_PSP_DIR"] = test_dir
+        os.chdir(test_dir)
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("KPOINTS", "KPOINTS.orig")
+        shutil.copy("POSCAR", "POSCAR.orig")
+        shutil.copy("CHGCAR", "CHGCAR.orig")
+
+    def test_aliasing(self):
+        os.chdir(os.path.join(test_dir, "aliasing"))
+        shutil.copy("INCAR", "INCAR.orig")
+        h = AliasingErrorHandler("vasp.aliasing")
+        h.check()
+        d = h.correct()
+        shutil.move("INCAR.orig", "INCAR")
+        clean_dir()
+        os.chdir(test_dir)
+
+        self.assertEqual(d["errors"], ['aliasing'])
+        self.assertEqual(d["actions"],
+                         [{'action': {'_set': {'NGX': 34}},
+                           'dict': 'INCAR'}, {"file": "CHGCAR",
+                            "action": {"_file_delete": {'mode': "actual"}}},
+                          {"file": "WAVECAR",
+                            "action": {"_file_delete": {'mode': "actual"}}}])
+
+    def test_aliasing_incar(self):
+        os.chdir(os.path.join(test_dir, "aliasing"))
+        shutil.copy("INCAR", "INCAR.orig")
+        h = AliasingErrorHandler("vasp.aliasing_incar")
+        h.check()
+        d = h.correct()
+        incar = Incar.from_file('INCAR')
+        shutil.move("INCAR.orig", "INCAR")
+        clean_dir()
+        os.chdir(test_dir)
+
+        self.assertEqual(d["errors"], ['aliasing_incar'])
+        self.assertEqual(d["actions"],
+                         [{'action': {'_unset': {'NGY':1, 'NGZ': 1}},
+                           'dict': 'INCAR'}, {"file": "CHGCAR",
+                            "action": {"_file_delete": {'mode': "actual"}}},
+                          {"file": "WAVECAR",
+                            "action": {"_file_delete": {'mode': "actual"}}}])
 
     def tearDown(self):
         os.chdir(test_dir)
