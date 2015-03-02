@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from __future__ import unicode_literals, division
+import time
 
 """
 This module implements error handlers for QChem runs. Currently tested only
@@ -128,6 +129,11 @@ class QChemErrorHandler(ErrorHandler):
                 self.fix_step.disable_symmetry()
                 actions.append("disable symmetry")
             else:
+                # This indicates something strange occured on the
+                # compute node. Wait for 30 minutes, such that it
+                # won't run too fast to make all the jobs fail
+                if "PBS_JOBID" in os.environ and "edique" in os.environ["PBS_JOBID"]:
+                    time.sleep(30.0 * 60.0)
                 return {"errors": self.errors, "actions": None}
         elif e == "Exit Code 134":
             act = self.fix_error_code_134()
@@ -269,6 +275,8 @@ class QChemErrorHandler(ErrorHandler):
             if len(old_strategy_text) > 0:
                 comments = scf_pattern.sub("", comments)
                 self.fix_step.params["comment"] = comments
+                if len(comments.strip()) == 0:
+                    self.fix_step.params.pop("comment")
             return "reset"
         elif strategy["current_method_id"] > len(strategy["methods"])-1:
             return None
