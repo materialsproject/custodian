@@ -35,9 +35,9 @@ scr_dir = os.path.join(test_dir, "scr")
 
 
 @unittest.skipIf(parse_version(pymatgen.__version__) <=
-                 parse_version('2.9.0'),
-                 "No input text error parsing is a feature after "
-                 "version 2.9.0")
+                 parse_version('3.0.11'),
+                 "Folding comment text is a feature after "
+                 "version 3.0.11")
 class QChemErrorHandlerTest(TestCase):
     def setUp(self):
         os.makedirs(scr_dir)
