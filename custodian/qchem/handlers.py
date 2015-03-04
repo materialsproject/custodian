@@ -162,34 +162,27 @@ class QChemErrorHandler(ErrorHandler):
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "actions": actions}
 
-    def is_openmp_compatible(self):
-        for j in self.qcinp.jobs:
-            if j.params["rem"]["jobtype"] == "freq":
-                return False
-            if self.fix_step.params["rem"]["exchange"] in ["pbe", "b"]\
-                    and self.fix_step.params["rem"]["correlation"] in ["pbe", "lyp"]:
-                return False
-        return True
+
 
     def fix_error_code_134(self):
 
         if "thresh" not in self.fix_step.params["rem"]:
             self.fix_step.set_integral_threshold(thresh=12)
             return "use tight integral threshold"
-        elif not self.is_openmp_compatible():
+        elif not self.qchem_job.is_openmp_compatible():
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
             else:
                 return None
-        elif self.qchem_job.current_command_name != "openmp":
-            self.qchem_job.select_command("openmp", self.qcinp)
-            return "openmp"
+        elif self.qchem_job.current_command_name != "general":
+            self.qchem_job.select_command("general", self.qcinp)
+            return "general"
         else:
             return None
 
     def fix_insufficient_static_memory(self):
-        if not self.is_openmp_compatible():
+        if not self.qchem_job.is_openmp_compatible():
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
@@ -199,9 +192,9 @@ class QChemErrorHandler(ErrorHandler):
                 self.qchem_job._set_qchem_memory(self.qcinp)
             else:
                 return None
-        elif self.qchem_job.current_command_name != "openmp":
-            self.qchem_job.select_command("openmp", self.qcinp)
-            return "openmp"
+        elif self.qchem_job.current_command_name != "general":
+            self.qchem_job.select_command("general", self.qcinp)
+            return "general"
         elif not self.qchem_job.large_static_mem:
             self.qchem_job.large_static_mem = True
             # noinspection PyProtectedMember
@@ -210,15 +203,15 @@ class QChemErrorHandler(ErrorHandler):
             return None
 
     def fix_error_killed(self):
-        if not self.is_openmp_compatible():
+        if not self.qchem_job.is_openmp_compatible():
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
             else:
                 return None
-        elif self.qchem_job.current_command_name != "openmp":
-            self.qchem_job.select_command("openmp", self.qcinp)
-            return "openmp"
+        elif self.qchem_job.current_command_name != "general":
+            self.qchem_job.select_command("general", self.qcinp)
+            return "general"
         else:
             return None
 

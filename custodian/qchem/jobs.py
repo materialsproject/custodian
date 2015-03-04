@@ -67,8 +67,14 @@ class QchemJob(Job):
         self.current_command = self.qchem_cmd
         self.current_command_name = "general"
         self.large_static_mem = large_static_mem
-        self._set_qchem_memory()
         self.alt_cmd = copy.deepcopy(alt_cmd)
+        available_commands = ["general"]
+        if self.alt_cmd:
+            available_commands.extend(self.alt_cmd.keys())
+        qcinp = QcInput.from_file(self.input_file)
+        if "openmp" in available_commands and self.is_openmp_compatible(qcinp):
+            self.current_command_name = "openmp"
+        self._set_qchem_memory()
 
     def _set_qchem_memory(self, qcinp=None):
         if not qcinp:
@@ -111,6 +117,17 @@ class QchemJob(Job):
                         else:
                             j.set_memory(total=60000, static=5000)
         qcinp.write_file(self.input_file)
+
+    @staticmethod
+    def is_openmp_compatible(qcinp):
+        for j in qcinp.jobs:
+            if j.params["rem"]["jobtype"] == "freq":
+                return False
+            if j.params["rem"]["exchange"] in ["pbe", "b"] \
+                and "correlation" in j.params['rem'] \
+                    and j.params["rem"]["correlation"] in ["pbe", "lyp"]:
+                return False
+        return True
 
     def select_command(self, cmd_name, qcinp=None):
         """
