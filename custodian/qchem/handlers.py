@@ -162,9 +162,11 @@ class QChemErrorHandler(ErrorHandler):
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "actions": actions}
 
-
-
     def fix_error_code_134(self):
+
+        next_run_mode = "openmp"
+        if "PBS_JOBID" in os.environ and "hopque" in os.environ["PBS_JOBID"]:
+            next_run_mode = "general"
 
         if "thresh" not in self.fix_step.params["rem"]:
             self.fix_step.set_integral_threshold(thresh=12)
@@ -175,13 +177,16 @@ class QChemErrorHandler(ErrorHandler):
                 return "half_cpus"
             else:
                 return None
-        elif self.qchem_job.current_command_name != "general":
-            self.qchem_job.select_command("general", self.qcinp)
-            return "general"
+        elif self.qchem_job.current_command_name != next_run_mode:
+            self.qchem_job.select_command(next_run_mode, self.qcinp)
+            return next_run_mode
         else:
             return None
 
     def fix_insufficient_static_memory(self):
+        next_run_mode = "openmp"
+        if "PBS_JOBID" in os.environ and "hopque" in os.environ["PBS_JOBID"]:
+            next_run_mode = "general"
         if not self.qchem_job.is_openmp_compatible():
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
@@ -192,9 +197,9 @@ class QChemErrorHandler(ErrorHandler):
                 self.qchem_job._set_qchem_memory(self.qcinp)
             else:
                 return None
-        elif self.qchem_job.current_command_name != "general":
-            self.qchem_job.select_command("general", self.qcinp)
-            return "general"
+        elif self.qchem_job.current_command_name != next_run_mode:
+            self.qchem_job.select_command(next_run_mode, self.qcinp)
+            return next_run_mode
         elif not self.qchem_job.large_static_mem:
             self.qchem_job.large_static_mem = True
             # noinspection PyProtectedMember
@@ -203,15 +208,20 @@ class QChemErrorHandler(ErrorHandler):
             return None
 
     def fix_error_killed(self):
+
+        next_run_mode = "openmp"
+        if "PBS_JOBID" in os.environ and "hopque" in os.environ["PBS_JOBID"]:
+            next_run_mode = "general"
+
         if not self.qchem_job.is_openmp_compatible():
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
             else:
                 return None
-        elif self.qchem_job.current_command_name != "general":
-            self.qchem_job.select_command("general", self.qcinp)
-            return "general"
+        elif self.qchem_job.current_command_name != next_run_mode:
+            self.qchem_job.select_command(next_run_mode, self.qcinp)
+            return next_run_mode
         else:
             return None
 
