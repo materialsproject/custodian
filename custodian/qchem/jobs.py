@@ -103,19 +103,19 @@ class QchemJob(Job):
                 for j in qcinp.jobs:
                     if self.current_command_name == "general":
                         if self.large_static_mem:
-                            j.set_memory(total=2500, static=500)
+                            j.set_memory(total=1200, static=300)
                         else:
-                            j.set_memory(total=2500, static=100)
+                            j.set_memory(total=1200, static=100)
                     elif self.current_command_name == "half_cpus":
                         if self.large_static_mem:
-                            j.set_memory(total=5000, static=1000)
+                            j.set_memory(total=2400, static=400)
                         else:
-                            j.set_memory(total=5000, static=200)
+                            j.set_memory(total=2400, static=200)
                     elif self.current_command_name == "openmp":
                         if self.large_static_mem:
-                            j.set_memory(total=60000, static=20000)
+                            j.set_memory(total=25000, static=1000)
                         else:
-                            j.set_memory(total=60000, static=5000)
+                            j.set_memory(total=25000, static=500)
         qcinp.write_file(self.input_file)
 
     @staticmethod
