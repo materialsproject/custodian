@@ -74,7 +74,7 @@ class QchemJob(Job):
         qcinp = QcInput.from_file(self.input_file)
         if "openmp" in available_commands and self.is_openmp_compatible(qcinp):
             if "PBS_JOBID" in os.environ and "hopque" in os.environ["PBS_JOBID"]:
-                self.current_command_name = "openmp"
+                self.select_command("openmp")
         self._set_qchem_memory()
 
     def _set_qchem_memory(self, qcinp=None):
