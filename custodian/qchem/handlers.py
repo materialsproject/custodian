@@ -364,6 +364,27 @@ class QChemErrorHandler(ErrorHandler):
             old_strategy_text = old_strategy_text[0]
 
         od = self.outdata[self.error_step_id]
+
+        if 'Lamda Determination Failed' in self.errors and len(od["molecules"])>=2:
+            self.fix_step.set_scf_algorithm_and_iterations(
+                algorithm="diis", iterations=self.scf_max_cycles)
+            if self.error_step_id > 0:
+                self.set_scf_initial_guess("read")
+            else:
+                self.set_scf_initial_guess("sad")
+            self.set_last_input_geom(od["molecules"][-1])
+            if od["jobtype"] == "aimd":
+                aimd_steps = self.fix_step.params["rem"]["aimd_steps"]
+                elapsed_steps = len(od["molecules"]) - 1
+                remaining_steps = aimd_steps - elapsed_steps + 1
+                self.fix_step.params["rem"]["aimd_steps"] = remaining_steps
+            if len(old_strategy_text) > 0:
+                comments = geom_pattern.sub("", comments)
+                self.fix_step.params["comment"] = comments
+                if len(comments.strip()) == 0:
+                    self.fix_step.params.pop("comment")
+            return "reset"
+
         if len(od["molecules"]) <= 10:
             # immature termination of geometry optimization
             if 'Exit Code 134' in self.errors:

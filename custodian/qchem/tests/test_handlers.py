@@ -201,6 +201,25 @@ class QChemErrorHandlerTest(TestCase):
             ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
+    def test_unable_to_determine_lambda(self):
+        shutil.copyfile(os.path.join(test_dir, "unable_to_determine_lambda_in_geom_opt.qcinp"),
+                        os.path.join(scr_dir, "unable_to_determine_lambda_in_geom_opt.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "unable_to_determine_lambda_in_geom_opt.qcout"),
+                        os.path.join(scr_dir, "unable_to_determine_lambda_in_geom_opt.qcout"))
+        h = QChemErrorHandler(input_file="unable_to_determine_lambda_in_geom_opt.qcinp",
+                              output_file="unable_to_determine_lambda_in_geom_opt.qcout")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Geometry optimization failed',
+                                        'Lamda Determination Failed'],
+                             'actions': ['reset']})
+        with open(os.path.join(test_dir, "unable_to_determine_lambda_in_geom_opt_reset.qcinp")) as f:
+            ref = [line.strip() for line in f.readlines()]
+        with open(os.path.join(scr_dir, "unable_to_determine_lambda_in_geom_opt.qcinp")) as f:
+            ans = [line.strip() for line in f.readlines()]
+        self.assertEqual(ref, ans)
+
     def test_scf_gdm(self):
         shutil.copyfile(os.path.join(test_dir, "hf_gdm.inp"),
                         os.path.join(scr_dir, "hf_gdm.inp"))
