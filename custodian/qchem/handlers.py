@@ -132,7 +132,8 @@ class QChemErrorHandler(ErrorHandler):
                 # This indicates something strange occured on the
                 # compute node. Wait for 30 minutes, such that it
                 # won't run too fast to make all the jobs fail
-                if "PBS_JOBID" in os.environ and "edique" in os.environ["PBS_JOBID"]:
+                if "PBS_JOBID" in os.environ and ("edique" in os.environ["PBS_JOBID"]
+                                                  or "hopque" in os.environ["PBS_JOBID"]):
                     time.sleep(30.0 * 60.0)
                 return {"errors": self.errors, "actions": None}
         elif e == "Exit Code 134":
