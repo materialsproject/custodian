@@ -88,6 +88,7 @@ class QChemErrorHandler(ErrorHandler):
                           "Killed",
                           "Insufficient static memory",
                           "NAN values",
+                          "Negative Eigen",
                           "Bad SCF convergence",
                           "Geometry optimization failed",
                           "Exit Code 134",
@@ -106,6 +107,15 @@ class QChemErrorHandler(ErrorHandler):
                 actions.append("disable symmetry")
             else:
                 return {"errors": self.errors, "actions": None}
+        elif e == "Negative Eigen":
+            if "thresh" not in self.fix_step.params["rem"]:
+                self.fix_step.set_integral_threshold(thresh=12)
+                return "use tight integral threshold"
+            elif int(self.fix_step.params["rem"]) < 14:
+                self.fix_step.set_integral_threshold(thresh=14)
+                return "use even tighter integral threshold"
+            else:
+                return None
         elif e == "Bad SCF convergence":
             act = self.fix_scf()
             if act:
