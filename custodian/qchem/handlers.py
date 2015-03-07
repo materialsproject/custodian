@@ -172,7 +172,7 @@ class QChemErrorHandler(ErrorHandler):
         if "thresh" not in self.fix_step.params["rem"]:
             self.fix_step.set_integral_threshold(thresh=12)
             return "use tight integral threshold"
-        elif not self.qchem_job.is_openmp_compatible():
+        elif not self.qchem_job.is_openmp_compatible(self.fix_step):
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
@@ -188,7 +188,7 @@ class QChemErrorHandler(ErrorHandler):
         next_run_mode = "openmp"
         if "PBS_JOBID" in os.environ and "hopque" in os.environ["PBS_JOBID"]:
             next_run_mode = "general"
-        if not self.qchem_job.is_openmp_compatible():
+        if not self.qchem_job.is_openmp_compatible(self.fix_step):
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
@@ -214,7 +214,7 @@ class QChemErrorHandler(ErrorHandler):
         if "PBS_JOBID" in os.environ and "hopque" in os.environ["PBS_JOBID"]:
             next_run_mode = "general"
 
-        if not self.qchem_job.is_openmp_compatible():
+        if not self.qchem_job.is_openmp_compatible(self.fix_step):
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
