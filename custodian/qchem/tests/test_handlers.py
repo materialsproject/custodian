@@ -172,6 +172,45 @@ class QChemErrorHandlerTest(TestCase):
                                         'Molecular charge is not found'],
                              'actions': None})
 
+    def test_negative_eigen(self):
+        shutil.copyfile(os.path.join(test_dir, "negative_eigen.qcinp"),
+                        os.path.join(scr_dir, "negative_eigen.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "negative_eigen.qcout"),
+                        os.path.join(scr_dir, "negative_eigen.qcout"))
+        h = QChemErrorHandler(input_file="negative_eigen.qcinp",
+                              output_file="negative_eigen.qcout")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Molecular charge is not found',
+                                        'Negative Eigen'],
+                             'actions': ['use tight integral threshold']})
+        with open(os.path.join(test_dir, "negative_eigen_tried_1.qcinp")) as f:
+            ref = [line.strip() for line in f.readlines()]
+        with open(os.path.join(scr_dir, "negative_eigen.qcinp")) as f:
+            ans = [line.strip() for line in f.readlines()]
+        self.assertEqual(ref, ans)
+
+        shutil.copyfile(os.path.join(test_dir, "negative_eigen_tried_1.qcinp"),
+                        os.path.join(scr_dir, "negative_eigen_tried_1.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "negative_eigen.qcout"),
+                        os.path.join(scr_dir, "negative_eigen.qcout"))
+        h = QChemErrorHandler(input_file="negative_eigen_tried_1.qcinp",
+                              output_file="negative_eigen.qcout")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Molecular charge is not found',
+                                        'Negative Eigen'],
+                             'actions': ['use even tighter integral threshold']})
+        with open(os.path.join(test_dir, "negative_eigen_tried_2.qcinp")) as f:
+            ref = [line.strip() for line in f.readlines()]
+        with open(os.path.join(scr_dir, "negative_eigen_tried_1.qcinp")) as f:
+            ans = [line.strip() for line in f.readlines()]
+        self.assertEqual(ref, ans)
+
     def test_no_error(self):
         shutil.copyfile(os.path.join(test_dir, "hf_no_error.inp"),
                         os.path.join(scr_dir, "hf_no_error.inp"))
