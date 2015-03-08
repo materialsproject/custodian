@@ -166,7 +166,9 @@ class QChemErrorHandler(ErrorHandler):
     def fix_error_code_134(self):
 
         next_run_mode = "openmp"
-        if "PBS_JOBID" in os.environ and "hopque" in os.environ["PBS_JOBID"]:
+        if "PBS_JOBID" in os.environ and \
+                ("hopque" in os.environ["PBS_JOBID"] or
+                 "edique" in os.environ["PBS_JOBID"]):
             next_run_mode = "general"
 
         if "thresh" not in self.fix_step.params["rem"]:
@@ -186,7 +188,9 @@ class QChemErrorHandler(ErrorHandler):
 
     def fix_insufficient_static_memory(self):
         next_run_mode = "openmp"
-        if "PBS_JOBID" in os.environ and "hopque" in os.environ["PBS_JOBID"]:
+        if "PBS_JOBID" in os.environ and \
+                ("hopque" in os.environ["PBS_JOBID"] or
+                 "edique" in os.environ["PBS_JOBID"]):
             next_run_mode = "general"
         if not self.qchem_job.is_openmp_compatible(self.qcinp):
             if self.qchem_job.current_command_name != "half_cpus":
@@ -211,7 +215,9 @@ class QChemErrorHandler(ErrorHandler):
     def fix_error_killed(self):
 
         next_run_mode = "openmp"
-        if "PBS_JOBID" in os.environ and "hopque" in os.environ["PBS_JOBID"]:
+        if "PBS_JOBID" in os.environ and \
+                ("hopque" in os.environ["PBS_JOBID"] or
+                 "edique" in os.environ["PBS_JOBID"]):
             next_run_mode = "general"
 
         if not self.qchem_job.is_openmp_compatible(self.qcinp):
