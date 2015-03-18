@@ -162,6 +162,12 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertEqual(i["POTIM"], 0.25)
 
+    def test_edddav(self):
+        h = VaspErrorHandler("vasp.edddav")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["edddav"])
+        self.assertFalse(os.path.exists("CHGCAR"))
+
     def tearDown(self):
         os.chdir(test_dir)
         shutil.move("INCAR.orig", "INCAR")
