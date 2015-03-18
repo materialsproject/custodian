@@ -78,7 +78,8 @@ class VaspErrorHandler(ErrorHandler):
         "amin": ["One of the lattice vectors is very long (>50 A), but AMIN"],
         "zbrent": ["ZBRENT: fatal internal in"],
         "pssyevx": ["ERROR in subspace rotation PSSYEVX"],
-        "eddrmm": ["WARNING in EDDRMM: call to ZHEGV failed"]
+        "eddrmm": ["WARNING in EDDRMM: call to ZHEGV failed"],
+        "edddav": ["Error EDDDAV: Call to ZHEGV failed"]
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -246,6 +247,9 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"file": "CHGCAR",
                             "action": {"_file_delete": {'mode': "actual"}}})
             actions.append({"file": "WAVECAR",
+                            "action": {"_file_delete": {'mode': "actual"}}})
+        if "edddav" in self.errors:
+            actions.append({"file": "CHGCAR",
                             "action": {"_file_delete": {'mode': "actual"}}})
 
         VaspModder(vi=vi).apply_actions(actions)
