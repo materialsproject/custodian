@@ -103,22 +103,42 @@ class QchemJob(Job):
                             j.set_memory(total=28000, static=3000)
             elif "edique" in os.environ["PBS_JOBID"]:
                 # on Edison
-                for j in qcinp.jobs:
-                    if self.current_command_name == "general":
-                        if self.large_static_mem:
-                            j.set_memory(total=1200, static=300)
-                        else:
-                            j.set_memory(total=1200, static=100)
-                    elif self.current_command_name == "half_cpus":
-                        if self.large_static_mem:
-                            j.set_memory(total=2400, static=400)
-                        else:
-                            j.set_memory(total=2400, static=200)
-                    elif self.current_command_name == "openmp":
-                        if self.large_static_mem:
-                            j.set_memory(total=25000, static=1000)
-                        else:
-                            j.set_memory(total=25000, static=500)
+                if "QCSCRATCH" in os.environ and "/tmp/eg_qchem" in os.environ["QCSCRATCH"]:
+                    # in memory scratch
+                    for j in qcinp.jobs:
+                        if self.current_command_name == "general":
+                            if self.large_static_mem:
+                                j.set_memory(total=1200, static=300)
+                            else:
+                                j.set_memory(total=1200, static=100)
+                        elif self.current_command_name == "half_cpus":
+                            if self.large_static_mem:
+                                j.set_memory(total=2400, static=400)
+                            else:
+                                j.set_memory(total=2400, static=200)
+                        elif self.current_command_name == "openmp":
+                            if self.large_static_mem:
+                                j.set_memory(total=25000, static=1000)
+                            else:
+                                j.set_memory(total=25000, static=500)
+                else:
+                    # disk scratch
+                    for j in qcinp.jobs:
+                        if self.current_command_name == "general":
+                            if self.large_static_mem:
+                                j.set_memory(total=2500, static=500)
+                            else:
+                                j.set_memory(total=2500, static=100)
+                        elif self.current_command_name == "half_cpus":
+                            if self.large_static_mem:
+                                j.set_memory(total=5000, static=1000)
+                            else:
+                                j.set_memory(total=5000, static=200)
+                        elif self.current_command_name == "openmp":
+                            if self.large_static_mem:
+                                j.set_memory(total=60000, static=20000)
+                            else:
+                                j.set_memory(total=60000, static=5000)
         qcinp.write_file(self.input_file)
 
     @staticmethod
