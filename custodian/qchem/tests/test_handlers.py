@@ -653,6 +653,37 @@ class QChemErrorHandlerTest(TestCase):
             ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
+    def test_freq_job_too_small(self):
+        shutil.copyfile(os.path.join(test_dir, "freq_seg_too_small.qcinp"),
+                        os.path.join(scr_dir, "freq_seg_too_small.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "freq_seg_too_small.qcout"),
+                        os.path.join(scr_dir, "freq_seg_too_small.qcout"))
+        h = QChemErrorHandler(input_file="freq_seg_too_small.qcinp",
+                              output_file="freq_seg_too_small.qcout")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Exit Code 134',
+                                        'Freq Job Too Small'],
+                             'actions': ['use 31 segment in CPSCF']})
+        with open(os.path.join(test_dir, "freq_seg_too_small_31_segments.qcinp")) as f:
+            ref = [line.strip() for line in f.readlines()]
+        with open(os.path.join(scr_dir, "freq_seg_too_small.qcinp")) as f:
+            ans = [line.strip() for line in f.readlines()]
+        self.assertEqual(ref, ans)
+        shutil.copyfile(os.path.join(test_dir, "freq_seg_too_small_31_segments.qcinp"),
+                        os.path.join(scr_dir, "freq_seg_too_small_31_segments.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "freq_seg_too_small.qcout"),
+                        os.path.join(scr_dir, "freq_seg_too_small.qcout"))
+        h = QChemErrorHandler(input_file="freq_seg_too_small_31_segments.qcinp",
+                              output_file="freq_seg_too_small.qcout")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Exit Code 134',
+                                        'Freq Job Too Small'],
+                             'actions': None})
+
     def test_json_serializable(self):
         q1 = QChemErrorHandler()
         str1 = json.dumps(q1, cls=MontyEncoder)

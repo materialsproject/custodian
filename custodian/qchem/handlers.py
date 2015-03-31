@@ -90,6 +90,7 @@ class QChemErrorHandler(ErrorHandler):
                           "NAN values",
                           "Bad SCF convergence",
                           "Geometry optimization failed",
+                          "Freq Job Too Small",
                           "Exit Code 134",
                           "Molecular charge is not found",
                           "Molecular spin multipilicity is not found"
@@ -135,6 +136,14 @@ class QChemErrorHandler(ErrorHandler):
                 if "PBS_JOBID" in os.environ and ("edique" in os.environ["PBS_JOBID"]
                                                   or "hopque" in os.environ["PBS_JOBID"]):
                     time.sleep(30.0 * 60.0)
+                return {"errors": self.errors, "actions": None}
+        elif e == "Freq Job Too Small":
+            natoms = len(self.fix_step.mol)
+            if "cpscf_nseg" not in self.fix_step.params["rem"] or \
+                            self.fix_step.params["rem"]["cpscf_nseg"] != natoms:
+                self.fix_step.params["rem"]["cpscf_nseg"] = natoms
+                actions.append("use {} segment in CPSCF".format(natoms))
+            else:
                 return {"errors": self.errors, "actions": None}
         elif e == "Exit Code 134":
             act = self.fix_error_code_134()
