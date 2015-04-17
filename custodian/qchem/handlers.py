@@ -82,11 +82,11 @@ class QChemErrorHandler(ErrorHandler):
     def correct(self):
         self.backup()
         actions = []
-
         error_rankings = ("autoz error",
                           "No input text",
                           "Killed",
                           "Insufficient static memory",
+                          "Not Enough Total Memory",
                           "NAN values",
                           "Bad SCF convergence",
                           "Geometry optimization failed",
@@ -163,6 +163,12 @@ class QChemErrorHandler(ErrorHandler):
                 actions.append(act)
             else:
                 return {"errors": self.errors, "actions": None}
+        elif e == "Not Enough Total Memory":
+            act = self.fix_not_enough_total_memory()
+            if act:
+                actions.append(act)
+            else:
+                return {"errors": self.errors, "actions": None}
         elif e == "Molecular charge is not found":
             return {"errors": self.errors, "actions": None}
         elif e == "Molecular spin multipilicity is not found":
@@ -171,6 +177,33 @@ class QChemErrorHandler(ErrorHandler):
             return {"errors": self.errors, "actions": None}
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "actions": actions}
+
+    def fix_not_enough_total_memory(self):
+        if self.fix_step.params['rem']["jobtype"] == "freq":
+            ncpu = 1
+            if "PBS_JOBID" in os.environ and \
+                    ("hopque" in os.environ["PBS_JOBID"] or
+                     "edique" in os.environ["PBS_JOBID"]):
+                ncpu = 24
+            natoms = len(self.qcinp.jobs[0].mol)
+            times_ncpu_full = int(natoms/ncpu)
+            nsegment_full = ncpu * times_ncpu_full
+            times_ncpu_half = int(natoms/(ncpu/2))
+            nsegment_half = int((ncpu/2) * times_ncpu_half)
+            if "cpscf_nseg" not in self.fix_step.params["rem"]:
+                self.fix_step.params["rem"]["cpscf_nseg"] = nsegment_full
+                return "Use {} CPSCF segments".format(nsegment_full)
+            elif self.fix_step.params["rem"]["cpscf_nseg"] < nsegment_half:
+                self.qchem_job.select_command("half_cpus", self.qcinp)
+                self.fix_step.params["rem"]["cpscf_nseg"] = nsegment_half
+                return "Use half CPUs and {} CPSCF segments".format(nsegment_half)
+            return None
+        elif not self.qchem_job.is_openmp_compatible(self.qcinp):
+            if self.qchem_job.current_command_name != "half_cpus":
+                self.qchem_job.select_command("half_cpus", self.qcinp)
+                return "half_cpus"
+            else:
+                return None
 
     def fix_error_code_134(self):
 

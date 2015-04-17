@@ -167,7 +167,7 @@ class QchemJob(Job):
         if self.alt_cmd:
             available_commands.extend(self.alt_cmd.keys())
         if cmd_name not in available_commands:
-            raise Exception("Command mode \"", cmd_name, "\" is not available")
+            raise Exception("Command mode \"{cmd_name}\" is not available".format(cmd_name=cmd_name))
         if cmd_name == "general":
             self.current_command = self.qchem_cmd
         else:

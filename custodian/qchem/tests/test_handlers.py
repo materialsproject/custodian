@@ -684,6 +684,53 @@ class QChemErrorHandlerTest(TestCase):
                                         'Freq Job Too Small'],
                              'actions': None})
 
+    def test_not_enough_total_memory(self):
+        old_jobid = os.environ.get("PBS_JOBID", None)
+        os.environ["PBS_JOBID"] = "hopque473945"
+        shutil.copyfile(os.path.join(test_dir, "not_enough_total_memory.qcinp"),
+                        os.path.join(scr_dir, "not_enough_total_memory.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "not_enough_total_memory.qcout"),
+                        os.path.join(scr_dir, "not_enough_total_memory.qcout"))
+        h = QChemErrorHandler(input_file="not_enough_total_memory.qcinp",
+                              output_file="not_enough_total_memory.qcout")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Exit Code 134',
+                                        'Not Enough Total Memory'],
+                             'actions': ['Use 48 CPSCF segments']})
+        with open(os.path.join(test_dir, "not_enough_total_memory_48_segments.qcinp")) as f:
+            ref = [line.strip() for line in f.readlines()]
+        with open(os.path.join(scr_dir, "not_enough_total_memory.qcinp")) as f:
+            ans = [line.strip() for line in f.readlines()]
+        self.assertEqual(ref, ans)
+        shutil.copyfile(os.path.join(test_dir, "not_enough_total_memory_48_segments.qcinp"),
+                        os.path.join(scr_dir, "not_enough_total_memory_48_segments.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "not_enough_total_memory.qcout"),
+                        os.path.join(scr_dir, "not_enough_total_memory.qcout"))
+        qchem_job = QchemJob(qchem_cmd=["qchem", "-np", "24"],
+                             alt_cmd={"openmp": ["qchem", "-seq", "-nt", "24"],
+                                      "half_cpus": ["qchem", "-np", "12"]},
+                             input_file="not_enough_total_memory_48_segments.qcinp")
+        h = QChemErrorHandler(input_file="not_enough_total_memory_48_segments.qcinp",
+                              output_file="not_enough_total_memory.qcout",
+                              qchem_job=qchem_job)
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Exit Code 134',
+                                        'Not Enough Total Memory'],
+                             'actions': ['Use half CPUs and 60 CPSCF segments']})
+        with open(os.path.join(test_dir, "not_enough_total_memory_60_segments.qcinp")) as f:
+            ref = [line.strip() for line in f.readlines()]
+        with open(os.path.join(scr_dir, "not_enough_total_memory_48_segments.qcinp")) as f:
+            ans = [line.strip() for line in f.readlines()]
+        self.assertEqual(ref, ans)
+        if old_jobid is None:
+            os.environ.pop("PBS_JOBID")
+        else:
+            os.environ["PBS_JOBID"] = old_jobid
+
     def test_json_serializable(self):
         q1 = QChemErrorHandler()
         str1 = json.dumps(q1, cls=MontyEncoder)
