@@ -66,7 +66,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "-z", "--gzip", dest="gzip", action="store_true",
+        "-z", "--gzip", dest="gzipped", action="store_true",
         help="Add this option to gzip the final output. Do not gzip if you "
              "are going to perform an additional static run."
     )
