@@ -86,6 +86,9 @@ class NwchemErrorHandler(ErrorHandler):
                         t.theory_directives["nocgmin"] = ""
                 action = {"_set": {"tasks": [t.as_dict() for t in nwi.tasks]}}
                 actions.append(action)
+            elif e == 'Geometry optimization failed':
+                action = {"_set": {"directives": [('Restart','')]}}
+                actions.append(action)
             else:
                 # For unimplemented errors, this should just cause the job to
                 # die.
