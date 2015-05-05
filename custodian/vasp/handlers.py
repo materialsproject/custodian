@@ -76,7 +76,8 @@ class VaspErrorHandler(ErrorHandler):
         "pricel": ["internal error in subroutine PRICEL"],
         "zpotrf": ["LAPACK: Routine ZPOTRF failed"],
         "amin": ["One of the lattice vectors is very long (>50 A), but AMIN"],
-        "zbrent": ["ZBRENT: fatal internal in"],
+        "zbrent": ["ZBRENT: fatal internal in",
+                   "ZBRENT: fatal error in bracketing"],
         "pssyevx": ["ERROR in subspace rotation PSSYEVX"],
         "eddrmm": ["WARNING in EDDRMM: call to ZHEGV failed"],
         "edddav": ["Error EDDDAV: Call to ZHEGV failed"]
