@@ -252,6 +252,8 @@ class VaspErrorHandler(ErrorHandler):
         if "edddav" in self.errors:
             actions.append({"file": "CHGCAR",
                             "action": {"_file_delete": {'mode': "actual"}}})
+            actions.append({"dict": "INCAR", "action":
+                            {"_set": {"ALGO": "All"}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
