@@ -44,6 +44,8 @@ from custodian.ansible.interpreter import Modder
 from custodian.ansible.actions import FileActions
 from custodian.vasp.interpreter import VaspModder
 
+VASP_BACKUP_FILES = {"INCAR", "KPOINTS", "POSCAR", "OUTCAR", "OSZICAR",
+                     "vasprun.xml", "vasp.out"}
 
 class VaspErrorHandler(ErrorHandler):
     """
@@ -115,8 +117,7 @@ class VaspErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
-        backup([self.output_filename, "INCAR", "KPOINTS", "POSCAR", "OUTCAR",
-                "OSZICAR", "vasprun.xml"])
+        backup(VASP_BACKUP_FILES | {self.output_filename})
         actions = []
         vi = VaspInput.from_directory(".")
 
@@ -305,8 +306,7 @@ class AliasingErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
-        backup([self.output_filename, "INCAR", "KPOINTS", "POSCAR", "OUTCAR",
-                "OSZICAR", "vasprun.xml"])
+        backup(VASP_BACKUP_FILES | {self.output_filename})
         actions = []
         vi = VaspInput.from_directory(".")
 
@@ -395,8 +395,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
-        backup([self.output_filename, "INCAR", "KPOINTS", "POSCAR", "OUTCAR",
-                "vasprun.xml"])
+        backup(VASP_BACKUP_FILES | {self.output_filename})
         vi = VaspInput.from_directory(".")
         m = reduce(operator.mul, vi["KPOINTS"].kpts[0])
         m = max(int(round(m ** (1 / 3))), 1)
@@ -434,8 +433,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
-        backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml", 
-                "vasp.out"])
+        backup(VASP_BACKUP_FILES)
         actions = [{"file": "CONTCAR",
                     "action": {"_file_copy": {"dest": "POSCAR"}}},
                    {"dict": "INCAR",
@@ -482,8 +480,7 @@ class MaxForceErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
-        backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR",
-                self.output_filename, "vasp.out"])
+        backup(VASP_BACKUP_FILES | {self.output_filename})
         vi = VaspInput.from_directory(".")
         ediff = float(vi["INCAR"].get("EDIFF", 1e-4))
         actions = [{"file": "CONTCAR",
@@ -532,8 +529,7 @@ class PotimErrorHandler(ErrorHandler):
             return False
 
     def correct(self):
-        backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR",
-                "vasprun.xml"])
+        backup(VASP_BACKUP_FILES)
         vi = VaspInput.from_directory(".")
         potim = float(vi["INCAR"].get("POTIM", 0.5))
         ibrion = int(vi["INCAR"].get("IBRION", 0))
@@ -579,8 +575,7 @@ class FrozenJobErrorHandler(ErrorHandler):
             return True
 
     def correct(self):
-        backup([self.output_filename, "INCAR", "KPOINTS", "POSCAR", "OUTCAR",
-                "vasprun.xml"])
+        backup(VASP_BACKUP_FILES | {self.output_filename})
 
         vi = VaspInput.from_directory('.')
         actions = []
@@ -645,20 +640,20 @@ class NonConvergingErrorHandler(ErrorHandler):
         actions = []
         if self.change_algo:
             if algo == "Fast":
-                backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
+                backup(VASP_BACKUP_FILES)
                 actions.append({"dict": "INCAR",
                             "action": {"_set": {"ALGO": "Normal"}}})
 
             elif amix > 0.1 and bmix > 0.01:
                 #try linear mixing
-                backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
+                backup(VASP_BACKUP_FILES)
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"AMIX": 0.1, "BMIX": 0.01,
                                                     "ICHARG": 2}}})
 
             elif bmix < 3.0 and amin > 0.01:
                 #Try increasing bmix
-                backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
+                backup(VASP_BACKUP_FILES)
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"AMIN": 0.01, "BMIX": 3.0,
                                                     "ICHARG": 2}}})
@@ -931,7 +926,7 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
         algo = vi["INCAR"].get("ALGO", "Normal")
         if algo.lower() not in ['normal', 'n']:
-            backup(["INCAR", "KPOINTS", "POSCAR", "OUTCAR", "vasprun.xml"])
+            backup(VASP_BACKUP_FILES)
             actions = [{"dict": "INCAR",
                         "action": {"_set": {"ALGO": "Normal"}}}]
             VaspModder(vi=vi).apply_actions(actions)
