@@ -219,7 +219,7 @@ class VaspJob(Job):
             gzip_dir(".")
 
     @staticmethod
-    def double_relaxation_run(vasp_cmd, gzipped=True):
+    def double_relaxation_run(vasp_cmd, gzipped=True, auto_npar=True):
         """
         Returns a list of two jobs corresponding to an AFLOW style double
         relaxation run.
@@ -232,10 +232,11 @@ class VaspJob(Job):
         Returns:
             List of two jobs corresponding to an AFLOW style run.
         """
-        return [VaspJob(vasp_cmd, final=False, suffix=".relax1"),
+        return [VaspJob(vasp_cmd, final=False, suffix=".relax1",
+                        auto_npar=auto_npar),
                 VaspJob(
                     vasp_cmd, final=True, backup=False,
-                    suffix=".relax2", gzipped=gzipped,
+                    suffix=".relax2", gzipped=gzipped, auto_npar=auto_npar,
                     settings_override=[
                         {"dict": "INCAR",
                          "action": {"_set": {"ISTART": 1}}},
