@@ -22,6 +22,10 @@ calculations.
 Change log
 ==========
 
+v0.8.2
+------
+1. Made auto_npar optional for double relaxation VASP run.
+
 v0.8.1
 ------
 1. Misc bug fixes (minor).

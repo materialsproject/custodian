@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp.jobs &mdash; custodian 0.8.1 documentation</title>
+    <title>custodian.vasp.jobs &mdash; custodian 0.8.2 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.8.1',
+        VERSION:     '0.8.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.8.1 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.8.2 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -34,8 +34,8 @@
 </script>
 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -44,15 +44,15 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.8.1 documentation</a> &raquo;</li>
-          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 0.8.2 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <h1>Source code for custodian.vasp.jobs</h1><div class="highlight"><pre>
 <span class="c"># coding: utf-8</span>
@@ -85,7 +85,6 @@
 <span class="kn">from</span> <span class="nn">monty.json</span> <span class="kn">import</span> <span class="n">MontyDecoder</span>
 <span class="kn">from</span> <span class="nn">monty.os.path</span> <span class="kn">import</span> <span class="n">which</span>
 
-<span class="kn">from</span> <span class="nn">custodian.ansible.actions</span> <span class="kn">import</span> <span class="n">FileActions</span><span class="p">,</span> <span class="n">DictActions</span>
 <span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">Job</span><span class="p">,</span> <span class="n">gzip_dir</span>
 <span class="kn">from</span> <span class="nn">custodian.vasp.interpreter</span> <span class="kn">import</span> <span class="n">VaspModder</span>
 
@@ -97,7 +96,7 @@
                      <span class="s">&#39;WAVECAR&#39;</span><span class="p">,</span> <span class="s">&#39;CONTCAR&#39;</span><span class="p">,</span> <span class="s">&#39;IBZKPT&#39;</span><span class="p">,</span> <span class="s">&#39;OUTCAR&#39;</span><span class="p">]</span>
 
 
-<span class="k">class</span> <span class="nc">VaspJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
+<div class="viewcode-block" id="VaspJob"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob">[docs]</a><span class="k">class</span> <span class="nc">VaspJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A basic vasp job. Just runs whatever is in the directory. But conceivably</span>
 <span class="sd">     can be a complex processing of inputs etc. with initialization.</span>
@@ -213,7 +212,10 @@
                         <span class="k">del</span> <span class="n">incar</span><span class="p">[</span><span class="s">&quot;NPAR&quot;</span><span class="p">]</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="kn">import</span> <span class="nn">multiprocessing</span>
-                        <span class="n">ncores</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+                        <span class="c"># try sge environment variable first</span>
+                        <span class="c"># (since multiprocessing counts cores on the current machine only)</span>
+                        <span class="n">ncores</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;NSLOTS&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+                        <span class="n">ncores</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ncores</span><span class="p">)</span>
                         <span class="k">for</span> <span class="n">npar</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ncores</span><span class="p">))),</span>
                                           <span class="n">ncores</span><span class="p">):</span>
                             <span class="k">if</span> <span class="n">ncores</span> <span class="o">%</span> <span class="n">npar</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -274,7 +276,7 @@
             <span class="n">gzip_dir</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
 </div>
     <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="VaspJob.double_relaxation_run"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.double_relaxation_run">[docs]</a>    <span class="k">def</span> <span class="nf">double_relaxation_run</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">gzipped</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="VaspJob.double_relaxation_run"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.double_relaxation_run">[docs]</a>    <span class="k">def</span> <span class="nf">double_relaxation_run</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">gzipped</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of two jobs corresponding to an AFLOW style double</span>
 <span class="sd">        relaxation run.</span>
@@ -287,10 +289,11 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            List of two jobs corresponding to an AFLOW style run.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">VaspJob</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s">&quot;.relax1&quot;</span><span class="p">),</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">VaspJob</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s">&quot;.relax1&quot;</span><span class="p">,</span>
+                        <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">),</span>
                 <span class="n">VaspJob</span><span class="p">(</span>
                     <span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                    <span class="n">suffix</span><span class="o">=</span><span class="s">&quot;.relax2&quot;</span><span class="p">,</span> <span class="n">gzipped</span><span class="o">=</span><span class="n">gzipped</span><span class="p">,</span>
+                    <span class="n">suffix</span><span class="o">=</span><span class="s">&quot;.relax2&quot;</span><span class="p">,</span> <span class="n">gzipped</span><span class="o">=</span><span class="n">gzipped</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">,</span>
                     <span class="n">settings_override</span><span class="o">=</span><span class="p">[</span>
                         <span class="p">{</span><span class="s">&quot;dict&quot;</span><span class="p">:</span> <span class="s">&quot;INCAR&quot;</span><span class="p">,</span>
                          <span class="s">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}},</span>
@@ -319,15 +322,15 @@
             <span class="n">backup</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;backup&quot;</span><span class="p">],</span> <span class="n">default_vasp_input_set</span><span class="o">=</span><span class="n">vis</span><span class="p">,</span>
             <span class="n">auto_npar</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;auto_npar&#39;</span><span class="p">],</span> <span class="n">auto_gamma</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;auto_gamma&#39;</span><span class="p">],</span>
             <span class="n">settings_override</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;settings_override&quot;</span><span class="p">],</span>
-            <span class="n">gamma_vasp_cmd</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;gamma_vasp_cmd&quot;</span><span class="p">])</span></div>
+            <span class="n">gamma_vasp_cmd</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;gamma_vasp_cmd&quot;</span><span class="p">])</span></div></div>
 </pre></div>
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<div id="searchbox" style="display: none">
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
       <input type="text" name="q" />
@@ -344,7 +347,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -353,14 +356,14 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.8.1 documentation</a> &raquo;</li>
-          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 0.8.2 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
 
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

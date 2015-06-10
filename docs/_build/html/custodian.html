@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian package &mdash; custodian 0.8.1 documentation</title>
+    <title>custodian package &mdash; custodian 0.8.2 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.8.1',
+        VERSION:     '0.8.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.8.1 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.8.2 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -33,8 +33,8 @@
 </script>
 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,14 +43,14 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.8.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 0.8.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="custodian-package">
 <h1>custodian package<a class="headerlink" href="#custodian-package" title="Permalink to this headline">¶</a></h1>
@@ -110,8 +110,8 @@
 <span id="custodian-custodian-module"></span><h2>custodian.custodian module<a class="headerlink" href="#module-custodian.custodian" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="custodian.custodian.Custodian">
-<em class="property">class </em><tt class="descname">Custodian</tt><big>(</big><em>handlers</em>, <em>jobs</em>, <em>validators=None</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em>, <em>skip_over_errors=False</em>, <em>scratch_dir=None</em>, <em>gzipped_output=False</em>, <em>checkpoint=False</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<em class="property">class </em><code class="descname">Custodian</code><span class="sig-paren">(</span><em>handlers</em>, <em>jobs</em>, <em>validators=None</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em>, <em>skip_over_errors=False</em>, <em>scratch_dir=None</em>, <em>gzipped_output=False</em>, <em>checkpoint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>The Custodian class is the manager for a list of jobs given a list of
 error handlers. The way it works is as follows:</p>
 <ol class="arabic simple">
@@ -177,12 +177,12 @@ to False.</li>
 </table>
 <dl class="attribute">
 <dt id="custodian.custodian.Custodian.LOG_FILE">
-<tt class="descname">LOG_FILE</tt><em class="property"> = u'custodian.json'</em><a class="headerlink" href="#custodian.custodian.Custodian.LOG_FILE" title="Permalink to this definition">¶</a></dt>
+<code class="descname">LOG_FILE</code><em class="property"> = u'custodian.json'</em><a class="headerlink" href="#custodian.custodian.Custodian.LOG_FILE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="custodian.custodian.Custodian.run">
-<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Custodian.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian.run" title="Permalink to this definition">¶</a></dt>
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Custodian.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runs all the jobs jobs.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -199,8 +199,8 @@ to False.</li>
 
 <dl class="exception">
 <dt id="custodian.custodian.CustodianError">
-<em class="property">exception </em><tt class="descname">CustodianError</tt><big>(</big><em>message</em>, <em>raises=False</em>, <em>validator=None</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#CustodianError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.CustodianError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></p>
+<em class="property">exception </em><code class="descname">CustodianError</code><span class="sig-paren">(</span><em>message</em>, <em>raises=False</em>, <em>validator=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#CustodianError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.CustodianError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
 <p>Exception class for Custodian errors.</p>
 <p>Initializes the error with a message.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -221,12 +221,12 @@ caused the exception.</li>
 
 <dl class="class">
 <dt id="custodian.custodian.ErrorHandler">
-<em class="property">class </em><tt class="descname">ErrorHandler</tt><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#custodian.custodian.JSONSerializable" title="custodian.custodian.JSONSerializable"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.JSONSerializable</span></tt></a></p>
+<em class="property">class </em><code class="descname">ErrorHandler</code><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#custodian.custodian.JSONSerializable" title="custodian.custodian.JSONSerializable"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.JSONSerializable</span></code></a></p>
 <p>Abstract base class defining the interface for an ErrorHandler.</p>
 <dl class="method">
 <dt id="custodian.custodian.ErrorHandler.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -241,7 +241,7 @@ the job to check for errors.</p>
 
 <dl class="method">
 <dt id="custodian.custodian.ErrorHandler.correct">
-<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
@@ -260,7 +260,7 @@ If this is an unfixable error, actions should be set to None.</td>
 
 <dl class="attribute">
 <dt id="custodian.custodian.ErrorHandler.is_monitor">
-<tt class="descname">is_monitor</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class property indicates whether the error handler is a monitor,
 i.e., a handler that monitors a job as it is running. If a
 monitor-type handler notices an error, the job will be sent a
@@ -271,7 +271,7 @@ that occur early in the run but do not cause immediate failure.</p>
 
 <dl class="attribute">
 <dt id="custodian.custodian.ErrorHandler.is_terminating">
-<tt class="descname">is_terminating</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_terminating</code><em class="property"> = True</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
 <dd><p>Whether this handler terminates a job upon error detection. By
 default, this is True, which means that the current Job will be
 terminated upon error detection, corrections applied,
@@ -285,7 +285,7 @@ not terminate the job.</p>
 
 <dl class="attribute">
 <dt id="custodian.custodian.ErrorHandler.raises_runtime_error">
-<tt class="descname">raises_runtime_error</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.raises_runtime_error" title="Permalink to this definition">¶</a></dt>
+<code class="descname">raises_runtime_error</code><em class="property"> = True</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.raises_runtime_error" title="Permalink to this definition">¶</a></dt>
 <dd><p>Whether this handler causes custodian to raise a runtime error if it cannot
 handle the error (i.e. if correct returns a dict with &#8220;actions&#8221;:None, or
 &#8220;actions&#8221;:[])</p>
@@ -295,18 +295,18 @@ handle the error (i.e. if correct returns a dict with &#8220;actions&#8221;:None
 
 <dl class="class">
 <dt id="custodian.custodian.JSONSerializable">
-<em class="property">class </em><tt class="descname">JSONSerializable</tt><a class="reference internal" href="_modules/custodian/custodian.html#JSONSerializable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.JSONSerializable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">monty.json.MSONable</span></tt></p>
+<em class="property">class </em><code class="descname">JSONSerializable</code><a class="reference internal" href="_modules/custodian/custodian.html#JSONSerializable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.JSONSerializable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">monty.json.MSONable</span></code></p>
 <p>Base class to be inherited to provide useful standard json serialization
 and deserialization protocols based on init args.</p>
 <dl class="method">
 <dt id="custodian.custodian.JSONSerializable.as_dict">
-<tt class="descname">as_dict</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#JSONSerializable.as_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.JSONSerializable.as_dict" title="Permalink to this definition">¶</a></dt>
+<code class="descname">as_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#JSONSerializable.as_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.JSONSerializable.as_dict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="classmethod">
 <dt id="custodian.custodian.JSONSerializable.from_dict">
-<em class="property">classmethod </em><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#JSONSerializable.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.JSONSerializable.from_dict" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="descname">from_dict</code><span class="sig-paren">(</span><em>d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#JSONSerializable.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.JSONSerializable.from_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method should return the ErrorHandler from a dict representation
 of the object given by the to_dict property.</p>
 </dd></dl>
@@ -315,18 +315,18 @@ of the object given by the to_dict property.</p>
 
 <dl class="class">
 <dt id="custodian.custodian.Job">
-<em class="property">class </em><tt class="descname">Job</tt><a class="reference internal" href="_modules/custodian/custodian.html#Job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#custodian.custodian.JSONSerializable" title="custodian.custodian.JSONSerializable"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.JSONSerializable</span></tt></a></p>
+<em class="property">class </em><code class="descname">Job</code><a class="reference internal" href="_modules/custodian/custodian.html#Job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#custodian.custodian.JSONSerializable" title="custodian.custodian.JSONSerializable"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.JSONSerializable</span></code></a></p>
 <p>Abstract base class defining the interface for a Job.</p>
 <dl class="attribute">
 <dt id="custodian.custodian.Job.name">
-<tt class="descname">name</tt><a class="reference internal" href="_modules/custodian/custodian.html#Job.name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><a class="headerlink" href="#custodian.custodian.Job.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>A nice string name for the job.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.custodian.Job.postprocess">
-<tt class="descname">postprocess</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Job.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.postprocess" title="Permalink to this definition">¶</a></dt>
+<code class="descname">postprocess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Job.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.postprocess" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job, <em>after</em> error detection.
 This allows post-processing, such as cleanup, analysis of results,
 etc.</p>
@@ -334,14 +334,14 @@ etc.</p>
 
 <dl class="method">
 <dt id="custodian.custodian.Job.run">
-<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Job.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.run" title="Permalink to this definition">¶</a></dt>
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Job.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method perform the actual work for the job. If parallel error
 checking (monitoring) is desired, this must return a Popen process.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.custodian.Job.setup">
-<tt class="descname">setup</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Job.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.setup" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Job.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.setup" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is run before the start of a job. Allows for some
 pre-processing.</p>
 </dd></dl>
@@ -350,15 +350,15 @@ pre-processing.</p>
 
 <dl class="class">
 <dt id="custodian.custodian.Validator">
-<em class="property">class </em><tt class="descname">Validator</tt><a class="reference internal" href="_modules/custodian/custodian.html#Validator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Validator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#custodian.custodian.JSONSerializable" title="custodian.custodian.JSONSerializable"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.JSONSerializable</span></tt></a></p>
+<em class="property">class </em><code class="descname">Validator</code><a class="reference internal" href="_modules/custodian/custodian.html#Validator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Validator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#custodian.custodian.JSONSerializable" title="custodian.custodian.JSONSerializable"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.JSONSerializable</span></code></a></p>
 <p>Abstract base class defining the interface for a Validator. A Validator
 differs from an ErrorHandler in that it does not correct a run and is run
 only at the end of a Job. If errors are detected by a Validator, a run is
 immediately terminated.</p>
 <dl class="method">
 <dt id="custodian.custodian.Validator.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/custodian.html#Validator.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Validator.check" title="Permalink to this definition">¶</a></dt>
+<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Validator.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Validator.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -377,7 +377,7 @@ immediately terminated.</p>
 <span id="custodian-utils-module"></span><h2>custodian.utils module<a class="headerlink" href="#module-custodian.utils" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="custodian.utils.backup">
-<tt class="descname">backup</tt><big>(</big><em>filenames</em>, <em>prefix=u'error'</em><big>)</big><a class="reference internal" href="_modules/custodian/utils.html#backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.utils.backup" title="Permalink to this definition">¶</a></dt>
+<code class="descname">backup</code><span class="sig-paren">(</span><em>filenames</em>, <em>prefix=u'error'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/utils.html#backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.utils.backup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Backup files to a tar.gz file. Used, for example, in backing up the
 files of an errored run before performing corrections.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -406,7 +406,7 @@ series of error.1.tar.gz, error.2.tar.gz, ... will be generated.</li>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
@@ -420,12 +420,14 @@ series of error.1.tar.gz, error.2.tar.gz, ... will be generated.</li>
 </li>
 </ul>
 
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/custodian.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/custodian.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -442,7 +444,7 @@ series of error.1.tar.gz, error.2.tar.gz, ... will be generated.</li>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -451,13 +453,13 @@ series of error.1.tar.gz, error.2.tar.gz, ... will be generated.</li>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.8.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 0.8.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

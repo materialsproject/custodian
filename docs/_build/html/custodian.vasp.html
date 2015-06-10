@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp package &mdash; custodian 0.8.1 documentation</title>
+    <title>custodian.vasp package &mdash; custodian 0.8.2 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.8.1',
+        VERSION:     '0.8.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.8.1 documentation" href="index.html" />
+    <link rel="top" title="custodian 0.8.2 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -33,8 +33,8 @@
 </script>
 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,14 +43,14 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.8.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 0.8.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="custodian-vasp-package">
 <h1>custodian.vasp package<a class="headerlink" href="#custodian-vasp-package" title="Permalink to this headline">¶</a></h1>
@@ -67,9 +67,49 @@
 <div class="section" id="module-custodian.vasp.handlers">
 <span id="custodian-vasp-handlers-module"></span><h2>custodian.vasp.handlers module<a class="headerlink" href="#module-custodian.vasp.handlers" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
+<dt id="custodian.vasp.handlers.AliasingErrorHandler">
+<em class="property">class </em><code class="descname">AliasingErrorHandler</code><span class="sig-paren">(</span><em>output_filename=u'vasp.out'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#AliasingErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
+<p>Master VaspErrorHandler class that handles a number of common errors
+that occur during VASP runs.</p>
+<p>Initializes the handler with the output file to check.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output_filename</strong> (<em>str</em>) &#8211; This is the file where the stdout for vasp
+is being redirected. The error messages that are checked are
+present in the stdout. Defaults to &#8220;vasp.out&#8221;, which is the
+default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="custodian.vasp.handlers.AliasingErrorHandler.check">
+<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#AliasingErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.handlers.AliasingErrorHandler.correct">
+<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#AliasingErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.AliasingErrorHandler.error_msgs">
+<code class="descname">error_msgs</code><em class="property"> = {u'aliasing_incar': [u'Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate'], u'aliasing': [u'WARNING: small aliasing (wrap around) errors must be expected']}</em><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="custodian.vasp.handlers.AliasingErrorHandler.is_monitor">
+<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="custodian.vasp.handlers.CheckpointHandler">
-<em class="property">class </em><tt class="descname">CheckpointHandler</tt><big>(</big><em>interval=3600</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#CheckpointHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<em class="property">class </em><code class="descname">CheckpointHandler</code><span class="sig-paren">(</span><em>interval=3600</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#CheckpointHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>This is not an error handler per se, but rather a checkpointer. What this
 does is that every X seconds, a STOPCAR and CHKPT will be written. This
 forces VASP to stop at the end of the next ionic step. The files are then
@@ -89,30 +129,30 @@ combiantion with the StoppedRunHandler.</p>
 </table>
 <dl class="method">
 <dt id="custodian.vasp.handlers.CheckpointHandler.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#CheckpointHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#CheckpointHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.CheckpointHandler.correct">
-<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#CheckpointHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#CheckpointHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.CheckpointHandler.is_monitor">
-<tt class="descname">is_monitor</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.CheckpointHandler.is_terminating">
-<tt class="descname">is_terminating</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_terminating</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.FrozenJobErrorHandler">
-<em class="property">class </em><tt class="descname">FrozenJobErrorHandler</tt><big>(</big><em>output_filename=u'vasp.out'</em>, <em>timeout=21600</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<em class="property">class </em><code class="descname">FrozenJobErrorHandler</code><span class="sig-paren">(</span><em>output_filename=u'vasp.out'</em>, <em>timeout=21600</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Detects an error when the output file has not been updated
 in timeout seconds. Changes ALGO to Normal from Fast</p>
 <p>Initializes the handler with the output file to check.</p>
@@ -124,7 +164,7 @@ in timeout seconds. Changes ALGO to Normal from Fast</p>
 <li><strong>output_filename</strong> (<em>str</em>) &#8211; This is the file where the stdout for vasp
 is being redirected. The error messages that are checked are
 present in the stdout. Defaults to &#8220;vasp.out&#8221;, which is the
-default redirect used by <tt class="xref py py-class docutils literal"><span class="pre">custodian.vasp.jobs.VaspJob</span></tt>.</li>
+default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</li>
 <li><strong>timeout</strong> (<em>int</em>) &#8211; The time in seconds between checks where if there
 is no activity on the output file, the run is considered
 frozen. Defaults to 3600 seconds, i.e., 1 hour.</li>
@@ -135,56 +175,64 @@ frozen. Defaults to 3600 seconds, i.e., 1 hour.</li>
 </table>
 <dl class="method">
 <dt id="custodian.vasp.handlers.FrozenJobErrorHandler.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.FrozenJobErrorHandler.correct">
-<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.FrozenJobErrorHandler.is_monitor">
-<tt class="descname">is_monitor</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.MaxForceErrorHandler">
-<em class="property">class </em><tt class="descname">MaxForceErrorHandler</tt><big>(</big><em>output_filename=u'vasprun.xml'</em>, <em>max_force_threshold=0.25</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<em class="property">class </em><code class="descname">MaxForceErrorHandler</code><span class="sig-paren">(</span><em>output_filename=u'vasprun.xml'</em>, <em>max_force_threshold=0.25</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Checks that the desired force convergence has been achieved. Otherwise
 restarts the run with smaller EDIFF. (This is necessary since energy
 and force convergence criteria cannot be set simultaneously)</p>
-<p>Args:
-input_filename (str): name of the vasp INCAR file
-output_filename (str): name to look for the vasprun
-max_force_threshold (float): Threshold for max force for</p>
-<blockquote>
-<div>restarting the run. (typically should be set to the value
-that the creator looks for)</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>input_filename</strong> (<em>str</em>) &#8211; name of the vasp INCAR file</li>
+<li><strong>output_filename</strong> (<em>str</em>) &#8211; name to look for the vasprun</li>
+<li><strong>max_force_threshold</strong> (<em>float</em>) &#8211; Threshold for max force for
+restarting the run. (typically should be set to the value
+that the creator looks for)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="custodian.vasp.handlers.MaxForceErrorHandler.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.MaxForceErrorHandler.correct">
-<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.MaxForceErrorHandler.is_monitor">
-<tt class="descname">is_monitor</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler">
-<em class="property">class </em><tt class="descname">MeshSymmetryErrorHandler</tt><big>(</big><em>output_filename=u'vasp.out'</em>, <em>output_vasprun=u'vasprun.xml'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MeshSymmetryErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<em class="property">class </em><code class="descname">MeshSymmetryErrorHandler</code><span class="sig-paren">(</span><em>output_filename=u'vasp.out'</em>, <em>output_vasprun=u'vasprun.xml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MeshSymmetryErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Corrects the mesh symmetry error in VASP. This error is sometimes
 non-fatal. So this error handler only checks at the end of the run,
 and if the run has converged, no error is recorded.</p>
@@ -197,7 +245,7 @@ and if the run has converged, no error is recorded.</p>
 <li><strong>output_filename</strong> (<em>str</em>) &#8211; This is the file where the stdout for vasp
 is being redirected. The error messages that are checked are
 present in the stdout. Defaults to &#8220;vasp.out&#8221;, which is the
-default redirect used by <tt class="xref py py-class docutils literal"><span class="pre">custodian.vasp.jobs.VaspJob</span></tt>.</li>
+default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</li>
 <li><strong>output_vasprun</strong> (<em>str</em>) &#8211; Filename for the vasprun.xml file. Change
 this only if it is different from the default (unlikely).</li>
 </ul>
@@ -207,25 +255,25 @@ this only if it is different from the default (unlikely).</li>
 </table>
 <dl class="method">
 <dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MeshSymmetryErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MeshSymmetryErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler.correct">
-<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MeshSymmetryErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MeshSymmetryErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler.is_monitor">
-<tt class="descname">is_monitor</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.NonConvergingErrorHandler">
-<em class="property">class </em><tt class="descname">NonConvergingErrorHandler</tt><big>(</big><em>output_filename=u'OSZICAR'</em>, <em>nionic_steps=10</em>, <em>change_algo=False</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#NonConvergingErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<em class="property">class </em><code class="descname">NonConvergingErrorHandler</code><span class="sig-paren">(</span><em>output_filename=u'OSZICAR'</em>, <em>nionic_steps=10</em>, <em>change_algo=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#NonConvergingErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Check if a run is hitting the maximum number of electronic steps at the
 last nionic_steps ionic steps (default=10). If so, change ALGO from Fast to
 Normal or kill the job.</p>
@@ -249,25 +297,25 @@ changing the ALGO from Fast to Normal.</li>
 </table>
 <dl class="method">
 <dt id="custodian.vasp.handlers.NonConvergingErrorHandler.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#NonConvergingErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#NonConvergingErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.NonConvergingErrorHandler.correct">
-<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#NonConvergingErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#NonConvergingErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.NonConvergingErrorHandler.is_monitor">
-<tt class="descname">is_monitor</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.PositiveEnergyErrorHandler">
-<em class="property">class </em><tt class="descname">PositiveEnergyErrorHandler</tt><big>(</big><em>output_filename=u'OSZICAR'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PositiveEnergyErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<em class="property">class </em><code class="descname">PositiveEnergyErrorHandler</code><span class="sig-paren">(</span><em>output_filename=u'OSZICAR'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PositiveEnergyErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Check if a run has positive absolute energy.
 If so, change ALGO from Fast to Normal or kill the job.</p>
 <p>Initializes the handler with the output file to check.</p>
@@ -282,25 +330,25 @@ this only if it is different from the default (unlikely).</td>
 </table>
 <dl class="method">
 <dt id="custodian.vasp.handlers.PositiveEnergyErrorHandler.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PositiveEnergyErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PositiveEnergyErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.PositiveEnergyErrorHandler.correct">
-<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PositiveEnergyErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PositiveEnergyErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.PositiveEnergyErrorHandler.is_monitor">
-<tt class="descname">is_monitor</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.PotimErrorHandler">
-<em class="property">class </em><tt class="descname">PotimErrorHandler</tt><big>(</big><em>input_filename=u'POSCAR'</em>, <em>output_filename=u'OSZICAR'</em>, <em>dE_threshold=1</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PotimErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<em class="property">class </em><code class="descname">PotimErrorHandler</code><span class="sig-paren">(</span><em>input_filename=u'POSCAR'</em>, <em>output_filename=u'OSZICAR'</em>, <em>dE_threshold=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PotimErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Check if a run has excessively large positive energy changes.
 This is typically caused by too large a POTIM. Runs typically
 end up crashing with some other error (e.g. BRMIX) as the geometry
@@ -324,25 +372,25 @@ this only if it is different from the default (unlikely).</li>
 </table>
 <dl class="method">
 <dt id="custodian.vasp.handlers.PotimErrorHandler.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PotimErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PotimErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.PotimErrorHandler.correct">
-<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PotimErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PotimErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.PotimErrorHandler.is_monitor">
-<tt class="descname">is_monitor</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.StoppedRunHandler">
-<em class="property">class </em><tt class="descname">StoppedRunHandler</tt><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StoppedRunHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<em class="property">class </em><code class="descname">StoppedRunHandler</code><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StoppedRunHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>This is not an error handler per se, but rather a checkpointer. What this
 does is that every X seconds, a STOPCAR will be written. This forces VASP to
 stop at the end of the next ionic step. The files are then copied into a
@@ -353,30 +401,30 @@ stored in subdirs chk_#. This should be used in combination with the
 StoppedRunHandler.</p>
 <dl class="method">
 <dt id="custodian.vasp.handlers.StoppedRunHandler.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StoppedRunHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StoppedRunHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.StoppedRunHandler.correct">
-<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StoppedRunHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StoppedRunHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.StoppedRunHandler.is_monitor">
-<tt class="descname">is_monitor</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.StoppedRunHandler.is_terminating">
-<tt class="descname">is_terminating</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_terminating</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.UnconvergedErrorHandler">
-<em class="property">class </em><tt class="descname">UnconvergedErrorHandler</tt><big>(</big><em>output_filename=u'vasprun.xml'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<em class="property">class </em><code class="descname">UnconvergedErrorHandler</code><span class="sig-paren">(</span><em>output_filename=u'vasprun.xml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Check if a run is converged. Switches to ALGO = Normal.</p>
 <p>Initializes the handler with the output file to check.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -390,25 +438,25 @@ this only if it is different from the default (unlikely).</td>
 </table>
 <dl class="method">
 <dt id="custodian.vasp.handlers.UnconvergedErrorHandler.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.UnconvergedErrorHandler.correct">
-<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.UnconvergedErrorHandler.is_monitor">
-<tt class="descname">is_monitor</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.VaspErrorHandler">
-<em class="property">class </em><tt class="descname">VaspErrorHandler</tt><big>(</big><em>output_filename=u'vasp.out'</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<em class="property">class </em><code class="descname">VaspErrorHandler</code><span class="sig-paren">(</span><em>output_filename=u'vasp.out'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Master VaspErrorHandler class that handles a number of common errors
 that occur during VASP runs.</p>
 <p>Initializes the handler with the output file to check.</p>
@@ -419,36 +467,36 @@ that occur during VASP runs.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output_filename</strong> (<em>str</em>) &#8211; This is the file where the stdout for vasp
 is being redirected. The error messages that are checked are
 present in the stdout. Defaults to &#8220;vasp.out&#8221;, which is the
-default redirect used by <tt class="xref py py-class docutils literal"><span class="pre">custodian.vasp.jobs.VaspJob</span></tt>.</td>
+default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.correct">
-<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.error_msgs">
-<tt class="descname">error_msgs</tt><em class="property"> = {u'too_few_bands': [u'TOO FEW BANDS'], u'triple_product': [u'ERROR: the triple product of the basis vectors'], u'amin': [u'One of the lattice vectors is very long (&gt;50 A), but AMIN'], u'eddrmm': [u'WARNING in EDDRMM: call to ZHEGV failed'], u'pricel': [u'internal error in subroutine PRICEL'], u'zpotrf': [u'LAPACK: Routine ZPOTRF failed'], u'aliasing': [u'WARNING: small aliasing (wrap around) errors must be expected'], u'brmix': [u'BRMIX: very serious problems'], u'real_optlay': [u'REAL_OPTLAY: internal error', u'REAL_OPT: internal ERROR'], u'aliasing_incar': [u'Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate'], u'inv_rot_mat': [u'inverse of rotation matrix was not found (increase SYMPREC)'], u'dentet': [u'DENTET'], u'pssyevx': [u'ERROR in subspace rotation PSSYEVX'], u'incorrect_shift': [u'Could not get correct shifts'], u'subspacematrix': [u'WARNING: Sub-Space-Matrix is not hermitian in DAV'], u'rspher': [u'ERROR RSPHER'], u'rot_matrix': [u'Found some non-integer element in rotation matrix'], u'tet': [u'Tetrahedron method fails for NKPT&lt;4', u'Fatal error detecting k-mesh', u'Fatal error: unable to match k-point', u'Routine TETIRR needs special values'], u'zbrent': [u'ZBRENT: fatal internal in'], u'tetirr': [u'Routine TETIRR needs special values'], u'brions': [u'BRIONS problems: POTIM should be increased']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">error_msgs</code><em class="property"> = {u'too_few_bands': [u'TOO FEW BANDS'], u'triple_product': [u'ERROR: the triple product of the basis vectors'], u'amin': [u'One of the lattice vectors is very long (&gt;50 A), but AMIN'], u'eddrmm': [u'WARNING in EDDRMM: call to ZHEGV failed'], u'pricel': [u'internal error in subroutine PRICEL'], u'zpotrf': [u'LAPACK: Routine ZPOTRF failed'], u'brmix': [u'BRMIX: very serious problems'], u'real_optlay': [u'REAL_OPTLAY: internal error', u'REAL_OPT: internal ERROR'], u'edddav': [u'Error EDDDAV: Call to ZHEGV failed'], u'inv_rot_mat': [u'inverse of rotation matrix was not found (increase SYMPREC)'], u'dentet': [u'DENTET'], u'pssyevx': [u'ERROR in subspace rotation PSSYEVX'], u'incorrect_shift': [u'Could not get correct shifts'], u'subspacematrix': [u'WARNING: Sub-Space-Matrix is not hermitian in DAV'], u'rspher': [u'ERROR RSPHER'], u'rot_matrix': [u'Found some non-integer element in rotation matrix'], u'tet': [u'Tetrahedron method fails for NKPT&lt;4', u'Fatal error detecting k-mesh', u'Fatal error: unable to match k-point', u'Routine TETIRR needs special values'], u'zbrent': [u'ZBRENT: fatal internal in', u'ZBRENT: fatal error in bracketing'], u'tetirr': [u'Routine TETIRR needs special values'], u'brions': [u'BRIONS problems: POTIM should be increased']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.is_monitor">
-<tt class="descname">is_monitor</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.WalltimeHandler">
-<em class="property">class </em><tt class="descname">WalltimeHandler</tt><big>(</big><em>wall_time=None</em>, <em>buffer_time=300</em>, <em>electronic_step_stop=False</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a></p>
+<em class="property">class </em><code class="descname">WalltimeHandler</code><span class="sig-paren">(</span><em>wall_time=None</em>, <em>buffer_time=300</em>, <em>electronic_step_stop=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Check if a run is nearing the walltime. If so, write a STOPCAR with
 LSTOP or LABORT = .True.. You can specify the walltime either in the init (
 which is unfortunately necessary for SGE and SLURM systems. If you happen
@@ -488,27 +536,27 @@ LSTOP = .TRUE.</li>
 </table>
 <dl class="method">
 <dt id="custodian.vasp.handlers.WalltimeHandler.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.WalltimeHandler.correct">
-<tt class="descname">correct</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.WalltimeHandler.is_monitor">
-<tt class="descname">is_monitor</tt><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.WalltimeHandler.is_terminating">
-<tt class="descname">is_terminating</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_terminating</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.WalltimeHandler.raises_runtime_error">
-<tt class="descname">raises_runtime_error</tt><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.raises_runtime_error" title="Permalink to this definition">¶</a></dt>
+<code class="descname">raises_runtime_error</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.raises_runtime_error" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -518,8 +566,8 @@ LSTOP = .TRUE.</li>
 <span id="custodian-vasp-interpreter-module"></span><h2>custodian.vasp.interpreter module<a class="headerlink" href="#module-custodian.vasp.interpreter" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="custodian.vasp.interpreter.VaspModder">
-<em class="property">class </em><tt class="descname">VaspModder</tt><big>(</big><em>actions=None</em>, <em>strict=True</em>, <em>vi=None</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/interpreter.html#VaspModder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.interpreter.VaspModder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.ansible.html#custodian.ansible.interpreter.Modder" title="custodian.ansible.interpreter.Modder"><tt class="xref py py-class docutils literal"><span class="pre">custodian.ansible.interpreter.Modder</span></tt></a></p>
+<em class="property">class </em><code class="descname">VaspModder</code><span class="sig-paren">(</span><em>actions=None</em>, <em>strict=True</em>, <em>vi=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/interpreter.html#VaspModder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.interpreter.VaspModder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.ansible.html#custodian.ansible.interpreter.Modder" title="custodian.ansible.interpreter.Modder"><code class="xref py py-class docutils literal"><span class="pre">custodian.ansible.interpreter.Modder</span></code></a></p>
 <p>Initializes a Modder for VaspInput sets</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -527,7 +575,7 @@ LSTOP = .TRUE.</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>actions</strong> (<em>[Action]</em>) &#8211; A sequence of supported actions. See
-<a class="reference internal" href="custodian.ansible.html#module-custodian.ansible.actions" title="custodian.ansible.actions"><tt class="xref py py-mod docutils literal"><span class="pre">custodian.ansible.actions</span></tt></a>. Default is None,
+<a class="reference internal" href="custodian.ansible.html#module-custodian.ansible.actions" title="custodian.ansible.actions"><code class="xref py py-mod docutils literal"><span class="pre">custodian.ansible.actions</span></code></a>. Default is None,
 which means DictActions and FileActions are supported.</li>
 <li><strong>strict</strong> (<em>bool</em>) &#8211; Indicating whether to use strict mode. In non-strict
 mode, unsupported actions are simply ignored without any
@@ -543,7 +591,7 @@ avoid having to reparse the directory).</li>
 </table>
 <dl class="method">
 <dt id="custodian.vasp.interpreter.VaspModder.apply_actions">
-<tt class="descname">apply_actions</tt><big>(</big><em>actions</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/interpreter.html#VaspModder.apply_actions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.interpreter.VaspModder.apply_actions" title="Permalink to this definition">¶</a></dt>
+<code class="descname">apply_actions</code><span class="sig-paren">(</span><em>actions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/interpreter.html#VaspModder.apply_actions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.interpreter.VaspModder.apply_actions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies a list of actions to the Vasp Input Set and rewrites modified
 files.</p>
 <blockquote>
@@ -557,247 +605,9 @@ files.</p>
 <div class="section" id="module-custodian.vasp.jobs">
 <span id="custodian-vasp-jobs-module"></span><h2>custodian.vasp.jobs module<a class="headerlink" href="#module-custodian.vasp.jobs" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt>
-<tt class="descname">VaspJob(vasp_cmd, output_file=u'vasp.out', suffix=u'', final=True, gzipped=False, backup=True, default_vasp_input_set=MIT</tt></dt>
-<dt>
-<tt class="descname"></tt></dt>
-<dt>
-<tt class="descname">INCAR settings</tt></dt>
-<dt>
-<tt class="descname">NELM = 100</tt></dt>
-<dt>
-<tt class="descname">PREC = Accurate</tt></dt>
-<dt>
-<tt class="descname">IBRION = 2</tt></dt>
-<dt>
-<tt class="descname">ENCUT = 520</tt></dt>
-<dt>
-<tt class="descname">ISMEAR = -5</tt></dt>
-<dt>
-<tt class="descname">LWAVE = False</tt></dt>
-<dt>
-<tt class="descname">LREAL = AUTO</tt></dt>
-<dt>
-<tt class="descname">SIGMA = 0.05</tt></dt>
-<dt>
-<tt class="descname">MAGMOM = {'Ni': 2, 'V': 5, 'Ni3+': 1, 'Mo': 5, 'Mn': 5, 'Mn2+': 5, 'W': 5, 'Mn3+': 4, 'Ni4+': 0.6, 'Fe4+': 4, 'Ta': 5, 'Mn4+': 3, 'Co': 5, 'Fe2+': 4, 'Co3+': 0.6, 'Fe3+': 5, 'Fe': 5, 'Cr': 5, 'Co4+': 1}</tt></dt>
-<dt>
-<tt class="descname">NELMIN = 6</tt></dt>
-<dt>
-<tt class="descname">LDAU = True</tt></dt>
-<dt>
-<tt class="descname">LDAUL = {'S': {'Mn': 2.5, 'Fe': 2}, 'O': {'Ni': 2, 'Co': 2, 'Ag': 2, 'Mo': 2, 'Mn': 2, 'Re': 2, 'Fe': 2, 'W': 2, 'V': 2, 'Cr': 2, 'Nb': 2, 'Cu': 2, 'Ta': 2}, 'F': {'Ni': 2, 'Co': 2, 'Ag': 2, 'Mo': 2, 'Mn': 2, 'Re': 2, 'Fe': 2, 'W': 2, 'V': 2, 'Cr': 2, 'Nb': 2, 'Cu': 2, 'Ta': 2}}</tt></dt>
-<dt>
-<tt class="descname">LDAUJ = {'S': {'Mn': 0, 'Fe': 0}, 'O': {'Ni': 0, 'Co': 0, 'Ag': 0, 'Mo': 0, 'Mn': 0, 'Re': 0, 'Fe': 0, 'W': 0, 'V': 0, 'Cr': 0, 'Nb': 0, 'Cu': 0, 'Ta': 0}, 'F': {'Ni': 0, 'Co': 0, 'Ag': 0, 'Mo': 0, 'Mn': 0, 'Re': 0, 'Fe': 0, 'W': 0, 'V': 0, 'Cr': 0, 'Nb': 0, 'Cu': 0, 'Ta': 0}}</tt></dt>
-<dt>
-<tt class="descname">LDAUTYPE = 2</tt></dt>
-<dt>
-<tt class="descname">ISIF = 3</tt></dt>
-<dt>
-<tt class="descname">ICHARG = 1</tt></dt>
-<dt>
-<tt class="descname">ALGO = FAST</tt></dt>
-<dt>
-<tt class="descname">LDAUU = {'S': {'Mn': 2.5, 'Fe': 1.9}, 'O': {'Ni': 6, 'Co': 3.4, 'Ag': 1.5, 'Mo': 4.38, 'Mn': 3.9, 'Re': 2, 'Fe': 4.0, 'W': 4.0, 'V': 3.1, 'Cr': 3.5, 'Nb': 1.5, 'Cu': 4, 'Ta': 2}, 'F': {'Ni': 6, 'Co': 3.4, 'Ag': 1.5, 'Mo': 4.38, 'Mn': 3.9, 'Re': 2, 'Fe': 4.0, 'W': 4.0, 'V': 3.1, 'Cr': 3.5, 'Nb': 1.5, 'Cu': 4, 'Ta': 2}}</tt></dt>
-<dt>
-<tt class="descname">ISPIN = 2</tt></dt>
-<dt>
-<tt class="descname">EDIFF = 5e-05</tt></dt>
-<dt>
-<tt class="descname">LORBIT = 11</tt></dt>
-<dt>
-<tt class="descname">NSW = 99</tt></dt>
-<dt>
-<tt class="descname"></tt></dt>
-<dt>
-<tt class="descname">KPOINTS settings</tt></dt>
-<dt>
-<tt class="descname">grid_density = 1000</tt></dt>
-<dt>
-<tt class="descname"></tt></dt>
-<dt>
-<tt class="descname">POTCAR settings</tt></dt>
-<dt>
-<tt class="descname">Ru = Ru_pv</tt></dt>
-<dt>
-<tt class="descname">Ni = Ni</tt></dt>
-<dt>
-<tt class="descname">Na = Na</tt></dt>
-<dt>
-<tt class="descname">Nb = Nb_pv</tt></dt>
-<dt>
-<tt class="descname">Nd = Nd</tt></dt>
-<dt>
-<tt class="descname">Ne = Ne</tt></dt>
-<dt>
-<tt class="descname">Re = Re</tt></dt>
-<dt>
-<tt class="descname">Rb = Rb_pv</tt></dt>
-<dt>
-<tt class="descname">Np = Np</tt></dt>
-<dt>
-<tt class="descname">Rh = Rh</tt></dt>
-<dt>
-<tt class="descname">Be = Be</tt></dt>
-<dt>
-<tt class="descname">Ba = Ba_sv</tt></dt>
-<dt>
-<tt class="descname">La = La</tt></dt>
-<dt>
-<tt class="descname">Bi = Bi</tt></dt>
-<dt>
-<tt class="descname">Fe = Fe</tt></dt>
-<dt>
-<tt class="descname">Br = Br</tt></dt>
-<dt>
-<tt class="descname">B = B</tt></dt>
-<dt>
-<tt class="descname">F = F</tt></dt>
-<dt>
-<tt class="descname">H = H</tt></dt>
-<dt>
-<tt class="descname">Dy = Dy_3</tt></dt>
-<dt>
-<tt class="descname">Lu = Lu_3</tt></dt>
-<dt>
-<tt class="descname">Ac = Ac</tt></dt>
-<dt>
-<tt class="descname">N = N</tt></dt>
-<dt>
-<tt class="descname">P = P</tt></dt>
-<dt>
-<tt class="descname">Si = Si</tt></dt>
-<dt>
-<tt class="descname">Sn = Sn_d</tt></dt>
-<dt>
-<tt class="descname">Sm = Sm_3</tt></dt>
-<dt>
-<tt class="descname">V = V_pv</tt></dt>
-<dt>
-<tt class="descname">Sc = Sc_sv</tt></dt>
-<dt>
-<tt class="descname">Sb = Sb</tt></dt>
-<dt>
-<tt class="descname">Os = Os</tt></dt>
-<dt>
-<tt class="descname">Se = Se</tt></dt>
-<dt>
-<tt class="descname">Co = Co</tt></dt>
-<dt>
-<tt class="descname">Cl = Cl</tt></dt>
-<dt>
-<tt class="descname">Ca = Ca_sv</tt></dt>
-<dt>
-<tt class="descname">Ce = Ce</tt></dt>
-<dt>
-<tt class="descname">Cd = Cd</tt></dt>
-<dt>
-<tt class="descname">Ge = Ge</tt></dt>
-<dt>
-<tt class="descname">Gd = Gd</tt></dt>
-<dt>
-<tt class="descname">Ga = Ga</tt></dt>
-<dt>
-<tt class="descname">Cs = Cs_sv</tt></dt>
-<dt>
-<tt class="descname">Cr = Cr</tt></dt>
-<dt>
-<tt class="descname">Cu = Cu</tt></dt>
-<dt>
-<tt class="descname">Pr = Pr</tt></dt>
-<dt>
-<tt class="descname">Th = Th</tt></dt>
-<dt>
-<tt class="descname">Pt = Pt</tt></dt>
-<dt>
-<tt class="descname">Pu = Pu</tt></dt>
-<dt>
-<tt class="descname">Mg = Mg</tt></dt>
-<dt>
-<tt class="descname">Li = Li</tt></dt>
-<dt>
-<tt class="descname">Pb = Pb</tt></dt>
-<dt>
-<tt class="descname">Tl = Tl</tt></dt>
-<dt>
-<tt class="descname">Pa = Pa</tt></dt>
-<dt>
-<tt class="descname">Pd = Pd</tt></dt>
-<dt>
-<tt class="descname">Ti = Ti</tt></dt>
-<dt>
-<tt class="descname">Xe = Xe</tt></dt>
-<dt>
-<tt class="descname">Tb = Tb_3</tt></dt>
-<dt>
-<tt class="descname">Tc = Tc</tt></dt>
-<dt>
-<tt class="descname">Pm = Pm</tt></dt>
-<dt>
-<tt class="descname">Te = Te</tt></dt>
-<dt>
-<tt class="descname">Yb = Yb</tt></dt>
-<dt>
-<tt class="descname">Ho = Ho_3</tt></dt>
-<dt>
-<tt class="descname">Sr = Sr_sv</tt></dt>
-<dt>
-<tt class="descname">Ta = Ta</tt></dt>
-<dt>
-<tt class="descname">Hf = Hf</tt></dt>
-<dt>
-<tt class="descname">Hg = Hg</tt></dt>
-<dt>
-<tt class="descname">He = He</tt></dt>
-<dt>
-<tt class="descname">C = C</tt></dt>
-<dt>
-<tt class="descname">I = I</tt></dt>
-<dt>
-<tt class="descname">K = K_sv</tt></dt>
-<dt>
-<tt class="descname">Mn = Mn</tt></dt>
-<dt>
-<tt class="descname">O = O</tt></dt>
-<dt>
-<tt class="descname">S = S</tt></dt>
-<dt>
-<tt class="descname">U = U</tt></dt>
-<dt>
-<tt class="descname">W = W_pv</tt></dt>
-<dt>
-<tt class="descname">Y = Y_sv</tt></dt>
-<dt>
-<tt class="descname">Mo = Mo_pv</tt></dt>
-<dt>
-<tt class="descname">Zn = Zn</tt></dt>
-<dt>
-<tt class="descname">Ag = Ag</tt></dt>
-<dt>
-<tt class="descname">Kr = Kr</tt></dt>
-<dt>
-<tt class="descname">Ir = Ir</tt></dt>
-<dt>
-<tt class="descname">Al = Al</tt></dt>
-<dt>
-<tt class="descname">As = As</tt></dt>
-<dt>
-<tt class="descname">Ar = Ar</tt></dt>
-<dt>
-<tt class="descname">Au = Au</tt></dt>
-<dt>
-<tt class="descname">In = In</tt></dt>
-<dt>
-<tt class="descname">Eu = Eu</tt></dt>
-<dt>
-<tt class="descname">Tm = Tm_3</tt></dt>
-<dt>
-<tt class="descname">Zr = Zr</tt></dt>
-<dt>
-<tt class="descname">Er = Er_3</tt></dt>
-<dt>
-<tt class="descname">, auto_npar=True, auto_gamma=True, settings_override=None, gamma_vasp_cmd=None, copy_magmom=False)</tt></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Job</span></tt></a></p>
+<dt id="custodian.vasp.jobs.VaspJob">
+<em class="property">class </em><code class="descname">VaspJob</code><span class="sig-paren">(</span><em>vasp_cmd</em>, <em>output_file=u'vasp.out'</em>, <em>suffix=u''</em>, <em>final=True</em>, <em>gzipped=False</em>, <em>backup=True</em>, <em>default_vasp_input_set=MIT  INCAR settings NELM = 100 PREC = Accurate IBRION = 2 ENCUT = 520 ISMEAR = -5 LWAVE = False LREAL = AUTO SIGMA = 0.05 LDAUPRINT = 1 MAGMOM = {'Ni': 2</em>, <em>'V': 5</em>, <em>'Ni3+': 1</em>, <em>'Mo': 5</em>, <em>'Mn': 5</em>, <em>'Mn2+': 5</em>, <em>'W': 5</em>, <em>'Mn3+': 4</em>, <em>'Ni4+': 0.6</em>, <em>'Fe4+': 4</em>, <em>'Ta': 5</em>, <em>'Mn4+': 3</em>, <em>'Co': 5</em>, <em>'Fe2+': 4</em>, <em>'Co3+': 0.6</em>, <em>'Fe3+': 5</em>, <em>'Fe': 5</em>, <em>'Cr': 5</em>, <em>'Co4+': 1} NELMIN = 6 LDAU = True LDAUL = {'S': {'Mn': 2.5</em>, <em>'Fe': 2}</em>, <em>'O': {'Ni': 2</em>, <em>'Co': 2</em>, <em>'Ag': 2</em>, <em>'Mo': 2</em>, <em>'Mn': 2</em>, <em>'Re': 2</em>, <em>'Fe': 2</em>, <em>'W': 2</em>, <em>'V': 2</em>, <em>'Cr': 2</em>, <em>'Nb': 2</em>, <em>'Cu': 2</em>, <em>'Ta': 2}</em>, <em>'F': {'Ni': 2</em>, <em>'Co': 2</em>, <em>'Ag': 2</em>, <em>'Mo': 2</em>, <em>'Mn': 2</em>, <em>'Re': 2</em>, <em>'Fe': 2</em>, <em>'W': 2</em>, <em>'V': 2</em>, <em>'Cr': 2</em>, <em>'Nb': 2</em>, <em>'Cu': 2</em>, <em>'Ta': 2}} LDAUJ = {'S': {'Mn': 0</em>, <em>'Fe': 0}</em>, <em>'O': {'Ni': 0</em>, <em>'Co': 0</em>, <em>'Ag': 0</em>, <em>'Mo': 0</em>, <em>'Mn': 0</em>, <em>'Re': 0</em>, <em>'Fe': 0</em>, <em>'W': 0</em>, <em>'V': 0</em>, <em>'Cr': 0</em>, <em>'Nb': 0</em>, <em>'Cu': 0</em>, <em>'Ta': 0}</em>, <em>'F': {'Ni': 0</em>, <em>'Co': 0</em>, <em>'Ag': 0</em>, <em>'Mo': 0</em>, <em>'Mn': 0</em>, <em>'Re': 0</em>, <em>'Fe': 0</em>, <em>'W': 0</em>, <em>'V': 0</em>, <em>'Cr': 0</em>, <em>'Nb': 0</em>, <em>'Cu': 0</em>, <em>'Ta': 0}} LDAUTYPE = 2 ISIF = 3 ICHARG = 1 ALGO = FAST LDAUU = {'S': {'Mn': 2.5</em>, <em>'Fe': 1.9}</em>, <em>'O': {'Ni': 6</em>, <em>'Co': 3.4</em>, <em>'Ag': 1.5</em>, <em>'Mo': 4.38</em>, <em>'Mn': 3.9</em>, <em>'Re': 2</em>, <em>'Fe': 4.0</em>, <em>'W': 4.0</em>, <em>'V': 3.1</em>, <em>'Cr': 3.5</em>, <em>'Nb': 1.5</em>, <em>'Cu': 4</em>, <em>'Ta': 2}</em>, <em>'F': {'Ni': 6</em>, <em>'Co': 3.4</em>, <em>'Ag': 1.5</em>, <em>'Mo': 4.38</em>, <em>'Mn': 3.9</em>, <em>'Re': 2</em>, <em>'Fe': 4.0</em>, <em>'W': 4.0</em>, <em>'V': 3.1</em>, <em>'Cr': 3.5</em>, <em>'Nb': 1.5</em>, <em>'Cu': 4</em>, <em>'Ta': 2}} ISPIN = 2 EDIFF = 5e-05 LORBIT = 11 NSW = 99  KPOINTS settings grid_density = 1000  POTCAR settings Ru = {'symbol': 'Ru_pv'</em>, <em>'hash': 'e0670836c05839313f290caf804a9930'} Ni = {'symbol': 'Ni'</em>, <em>'hash': '6aa314a5314ececec9e6f32bd9a47a67'} Na = {'symbol': 'Na'</em>, <em>'hash': '9178b9a3bb7cd96a03bf36ecc17887c5'} Nb = {'symbol': 'Nb_pv'</em>, <em>'hash': '3613f771112af96e69530838d9f871b9'} Nd = {'symbol': 'Nd'</em>, <em>'hash': 'fe199587a4cd3cae41b66610de273e62'} Ne = {'symbol': 'Ne'</em>, <em>'hash': '05028bf086ff942787f587f652c0f915'} Re = {'symbol': 'Re'</em>, <em>'hash': 'bfd3134ebee781f8c10a8b57e8ccdf3e'} Rb = {'symbol': 'Rb_pv'</em>, <em>'hash': 'eba1609a48399579a157d2382fe54147'} Np = {'symbol': 'Np'</em>, <em>'hash': '901c7eea516a40ab1f0022e5fe611b96'} Rh = {'symbol': 'Rh'</em>, <em>'hash': '9a5965b71021d659c383d4b3a2c27c92'} Be = {'symbol': 'Be'</em>, <em>'hash': '3c0d9366b7351813401045c87e728b41'} Ba = {'symbol': 'Ba_sv'</em>, <em>'hash': '485991a44f9abb117d91950eeb2b4429'} La = {'symbol': 'La'</em>, <em>'hash': '54ddd96957998f722631b9b9b619208e'} Bi = {'symbol': 'Bi'</em>, <em>'hash': '1d5d4955bcd53ef836826e489bcfb2a1'} Fe = {'symbol': 'Fe'</em>, <em>'hash': 'e0051a21ce51eb34a52e9153c17aa32d'} Br = {'symbol': 'Br'</em>, <em>'hash': 'aebb1e2d99deabf67629df71ec68faa6'} B = {'symbol': 'B'</em>, <em>'hash': '6f82f6d8181ceafd86150d4afd2ee217'} F = {'symbol': 'F'</em>, <em>'hash': '9b0fd56137ce81cfee1eb63a8901c66c'} H = {'symbol': 'H'</em>, <em>'hash': '57732e53d8a424e5b3721d0277f14ef0'} Dy = {'symbol': 'Dy_3'</em>, <em>'hash': '563b1a3db877e2e9a0942b7baf6912fc'} Lu = {'symbol': 'Lu_3'</em>, <em>'hash': 'fc611a12817d148e39ec66cf09d0011c'} Ac = {'symbol': 'Ac'</em>, <em>'hash': 'ab896d3414b6f2b5fc646de8d1175b3b'} N = {'symbol': 'N'</em>, <em>'hash': 'accf6eec0aac6dcb2f3909b240164405'} P = {'symbol': 'P'</em>, <em>'hash': '95fbb6408e51dff3516bcdfa913c1ae1'} Si = {'symbol': 'Si'</em>, <em>'hash': '7d68bdc19d5bb101b242afb70632e21d'} Sn = {'symbol': 'Sn_d'</em>, <em>'hash': '4ca5a5ded798f481fd917ee78d2b8b69'} Sm = {'symbol': 'Sm_3'</em>, <em>'hash': '139141abf169ea82407c054137099715'} V = {'symbol': 'V_pv'</em>, <em>'hash': '6af2fbd956cacbdc11b148602a19ff74'} Sc = {'symbol': 'Sc_sv'</em>, <em>'hash': '07569d3abd3dac9ccc783e96c59774d7'} Sb = {'symbol': 'Sb'</em>, <em>'hash': 'f3d4b0bf2cf25789b65750316564c229'} Os = {'symbol': 'Os'</em>, <em>'hash': '07d129608555acc64619aaa2f71f020d'} Se = {'symbol': 'Se'</em>, <em>'hash': 'b3107ca39cd95c072974ad9512643155'} Co = {'symbol': 'Co'</em>, <em>'hash': '6c5a5928146198687f93ee8e6c657f91'} Cl = {'symbol': 'Cl'</em>, <em>'hash': '2dddc321bf178f08cc5b55de17690c2c'} Ca = {'symbol': 'Ca_sv'</em>, <em>'hash': '2694a19250c6f83212d034611c80a7b7'} Ce = {'symbol': 'Ce'</em>, <em>'hash': 'e6c517a6b47b29367ad6badbf7658a84'} Cd = {'symbol': 'Cd'</em>, <em>'hash': 'cb3728b036fb539fcd1cfdad415bc6e3'} Ge = {'symbol': 'Ge'</em>, <em>'hash': '528ed543d8219527e1bf32cfdd907550'} Gd = {'symbol': 'Gd'</em>, <em>'hash': '9a655d3ad37e09e18c1cf735bf50d02f'} Ga = {'symbol': 'Ga'</em>, <em>'hash': '74ea8272a7d36b77e5012eda4c66c1e6'} Cs = {'symbol': 'Cs_sv'</em>, <em>'hash': '10cc54209c698d83d9cda3d842ba670e'} Cr = {'symbol': 'Cr'</em>, <em>'hash': 'b229e9bf0b2fd4100ad97d8c44ff779f'} Cu = {'symbol': 'Cu'</em>, <em>'hash': '12920f1bd9e05e219846eb1b2147aad2'} Pr = {'symbol': 'Pr'</em>, <em>'hash': '90f29e6d697cdca84258003aef55eabd'} Th = {'symbol': 'Th'</em>, <em>'hash': 'b47ab9512a0d504560743df6959711b5'} Pt = {'symbol': 'Pt'</em>, <em>'hash': '5eedb457fb34ed5f7e4d177354c24146'} Pu = {'symbol': 'Pu'</em>, <em>'hash': '714a9d23aaf7c419dacdb09e058cb154'} Mg = {'symbol': 'Mg'</em>, <em>'hash': '1823588a2ee3bb27056d17f2b33765a2'} Li = {'symbol': 'Li'</em>, <em>'hash': '9658a0ffb28da97ee7b36709966a0d1c'} Pb = {'symbol': 'Pb'</em>, <em>'hash': 'bc579707fd1e19954bdb79279b270845'} Tl = {'symbol': 'Tl'</em>, <em>'hash': 'fee8a3e06e4783bbc851784d87ae582f'} Pa = {'symbol': 'Pa'</em>, <em>'hash': '14ce3992d69e85ff1245589ea515099a'} Pd = {'symbol': 'Pd'</em>, <em>'hash': '531184ffdf879b6fb03f4c66349dab57'} Ti = {'symbol': 'Ti'</em>, <em>'hash': 'a0b93ffb4d0053e26c73f548295a0303'} Xe = {'symbol': 'Xe'</em>, <em>'hash': '840909bdaaef33813792f2ef369228f0'} Tb = {'symbol': 'Tb_3'</em>, <em>'hash': 'b43a90ba0a6903a64a940551d418ecf1'} Tc = {'symbol': 'Tc'</em>, <em>'hash': '1cd8df68cfbaf068a0e2c2a66f7d837a'} Pm = {'symbol': 'Pm'</em>, <em>'hash': '0fac03017e52c1ce9bccec3c06d3b9fb'} Te = {'symbol': 'Te'</em>, <em>'hash': '4baab09b5cb1853c18e1dd247cca2750'} Yb = {'symbol': 'Yb'</em>, <em>'hash': 'e7b79843d22986718b2e3995889b38d1'} Ho = {'symbol': 'Ho_3'</em>, <em>'hash': '648bac4b40cd03310be89a286ab11723'} Sr = {'symbol': 'Sr_sv'</em>, <em>'hash': '7c3df2de5e7e505501f5eed8965f8e35'} Ta = {'symbol': 'Ta'</em>, <em>'hash': 'fc7188123cefb52a5b9f7139311ecba9'} Hf = {'symbol': 'Hf'</em>, <em>'hash': '6b964549e14f525a85541ff682ee3cdf'} Hg = {'symbol': 'Hg'</em>, <em>'hash': '90cd2c22dd044c7e7dee6044de7924d2'} He = {'symbol': 'He'</em>, <em>'hash': 'd92babd515400b87c53ae10f1207baf0'} C = {'symbol': 'C'</em>, <em>'hash': '928197bd7fda1dfdfd78d4314756d4b6'} I = {'symbol': 'I'</em>, <em>'hash': '8d84981af6268445e6061ee5e4c8f1ff'} K = {'symbol': 'K_sv'</em>, <em>'hash': '3aa49a52448d031d7e3ceff922fd2bb5'} Mn = {'symbol': 'Mn'</em>, <em>'hash': 'd8f441d1afa31cbc8bca0146dd8d15f1'} O = {'symbol': 'O'</em>, <em>'hash': '7af704ddff29da5354831c4609f1cbc5'} S = {'symbol': 'S'</em>, <em>'hash': 'f7f8e4a74a6cbb8d63e41f4373b54df2'} U = {'symbol': 'U'</em>, <em>'hash': '5f65b444317154eb1642485eeae1c4f5'} W = {'symbol': 'W_pv'</em>, <em>'hash': 'a4f7269d3b3d0921b03cd854efdd5230'} Y = {'symbol': 'Y_sv'</em>, <em>'hash': '3db912f9d14a5213ad779ea6dedf5057'} Mo = {'symbol': 'Mo_pv'</em>, <em>'hash': '845c10332730e4479f1d8c900a62a451'} Zn = {'symbol': 'Zn'</em>, <em>'hash': 'b4d5e9d4062aae56d394731e18f44c4c'} Ag = {'symbol': 'Ag'</em>, <em>'hash': '4b91cc11ecf7bb18841c45a144a79c41'} Kr = {'symbol': 'Kr'</em>, <em>'hash': '13cd29c85b23be584b39e5584863f68a'} Ir = {'symbol': 'Ir'</em>, <em>'hash': '77f35e340570c6c64d58057c657e0f00'} Al = {'symbol': 'Al'</em>, <em>'hash': '805c888bbd2793e462311f6a20d873d9'} As = {'symbol': 'As'</em>, <em>'hash': 'f2975f7ebc8e17cf183cb5d96dbce04f'} Ar = {'symbol': 'Ar'</em>, <em>'hash': 'ed180b378a39ae600a758db378f79613'} Au = {'symbol': 'Au'</em>, <em>'hash': '625e379bf420815fc0b5030bae2d3020'} In = {'symbol': 'In'</em>, <em>'hash': 'dbf146f5877f1f9f8952e6f54a54fa33'} Eu = {'symbol': 'Eu'</em>, <em>'hash': 'a6a9205b00bcc39bb7e05b46a0a322a8'} Tm = {'symbol': 'Tm_3'</em>, <em>'hash': 'b5915dce17e99bda785786dcaaba88fa'} Zr = {'symbol': 'Zr'</em>, <em>'hash': '81f2c0f73adfc4f89f1a18dca3d14f52'} Er = {'symbol': 'Er_3'</em>, <em>'hash': '216f11f6ffc94d9cbc7e10e843c18243'}</em>, <em>auto_npar=True</em>, <em>auto_gamma=True</em>, <em>settings_override=None</em>, <em>gamma_vasp_cmd=None</em>, <em>copy_magmom=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Job</span></code></a></p>
 <dl class="docutils">
 <dt>A basic vasp job. Just runs whatever is in the directory. But conceivably</dt>
 <dd>can be a complex processing of inputs etc. with initialization.</dd>
@@ -868,12 +678,12 @@ changes in fft grid, etc.). Only applies to non-final runs.</li>
 </table>
 <dl class="method">
 <dt id="custodian.vasp.jobs.VaspJob.as_dict">
-<tt class="descclassname">VaspJob.</tt><tt class="descname">as_dict</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.as_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.as_dict" title="Permalink to this definition">¶</a></dt>
+<code class="descname">as_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.as_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.as_dict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="staticmethod">
 <dt id="custodian.vasp.jobs.VaspJob.double_relaxation_run">
-<em class="property">static </em><tt class="descclassname">VaspJob.</tt><tt class="descname">double_relaxation_run</tt><big>(</big><em>vasp_cmd</em>, <em>gzipped=True</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.double_relaxation_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.double_relaxation_run" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">double_relaxation_run</code><span class="sig-paren">(</span><em>vasp_cmd</em>, <em>gzipped=True</em>, <em>auto_npar=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.double_relaxation_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.double_relaxation_run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of two jobs corresponding to an AFLOW style double
 relaxation run.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -892,19 +702,19 @@ if you are using mpirun, it can be something like
 
 <dl class="classmethod">
 <dt id="custodian.vasp.jobs.VaspJob.from_dict">
-<em class="property">classmethod </em><tt class="descclassname">VaspJob.</tt><tt class="descname">from_dict</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.from_dict" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="descname">from_dict</code><span class="sig-paren">(</span><em>d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.from_dict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.jobs.VaspJob.postprocess">
-<tt class="descclassname">VaspJob.</tt><tt class="descname">postprocess</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.postprocess" title="Permalink to this definition">¶</a></dt>
+<code class="descname">postprocess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.postprocess" title="Permalink to this definition">¶</a></dt>
 <dd><p>Postprocessing includes renaming and gzipping where necessary.
 Also copies the magmom to the incar if necessary</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.jobs.VaspJob.run">
-<tt class="descclassname">VaspJob.</tt><tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.run" title="Permalink to this definition">¶</a></dt>
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the actual VASP run.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -918,7 +728,7 @@ Also copies the magmom to the incar if necessary</p>
 
 <dl class="method">
 <dt id="custodian.vasp.jobs.VaspJob.setup">
-<tt class="descclassname">VaspJob.</tt><tt class="descname">setup</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.setup" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.setup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs initial setup for VaspJob, including overriding any settings
 and backing up.</p>
 </dd></dl>
@@ -930,12 +740,12 @@ and backing up.</p>
 <span id="custodian-vasp-validators-module"></span><h2>custodian.vasp.validators module<a class="headerlink" href="#module-custodian.vasp.validators" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="custodian.vasp.validators.VasprunXMLValidator">
-<em class="property">class </em><tt class="descname">VasprunXMLValidator</tt><a class="reference internal" href="_modules/custodian/vasp/validators.html#VasprunXMLValidator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VasprunXMLValidator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Validator" title="custodian.custodian.Validator"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Validator</span></tt></a></p>
+<em class="property">class </em><code class="descname">VasprunXMLValidator</code><a class="reference internal" href="_modules/custodian/vasp/validators.html#VasprunXMLValidator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VasprunXMLValidator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Validator" title="custodian.custodian.Validator"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Validator</span></code></a></p>
 <p>Checks that a valid vasprun.xml was generated</p>
 <dl class="method">
 <dt id="custodian.vasp.validators.VasprunXMLValidator.check">
-<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/custodian/vasp/validators.html#VasprunXMLValidator.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VasprunXMLValidator.check" title="Permalink to this definition">¶</a></dt>
+<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/validators.html#VasprunXMLValidator.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VasprunXMLValidator.check" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -950,7 +760,7 @@ and backing up.</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
@@ -966,12 +776,14 @@ and backing up.</p>
 </li>
 </ul>
 
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/custodian.vasp.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/custodian.vasp.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -988,7 +800,7 @@ and backing up.</p>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -997,13 +809,13 @@ and backing up.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">custodian 0.8.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 0.8.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
