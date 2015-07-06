@@ -15,7 +15,7 @@ from pymatgen.io.gaussianio import GaussianOutput, GaussianInput
 class GaussianErrorHandler(ErrorHandler):
     """
     Errors handler for Gaussian jobs to be used inside Custodian
-            
+
     """
 
     is_monitor = False
