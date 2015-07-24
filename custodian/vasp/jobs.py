@@ -21,7 +21,7 @@ import shutil
 import math
 import logging
 
-from pymatgen.io.vaspio.vasp_input import VaspInput, Incar
+from pymatgen.io.vaspio.vasp_input import VaspInput, Incar, Poscar
 from pymatgen.io.vaspio.vasp_output import Outcar
 from pymatgen.io.smartio import read_structure
 from pymatgen.io.vaspio_set import MITVaspInputSet
@@ -218,8 +218,8 @@ class VaspJob(Job):
         if self.gzipped:
             gzip_dir(".")
 
-    @staticmethod
-    def double_relaxation_run(vasp_cmd, gzipped=True, auto_npar=True):
+    @classmethod
+    def double_relaxation_run(cls, vasp_cmd, auto_npar=True):
         """
         Returns a list of two jobs corresponding to an AFLOW style double
         relaxation run.
@@ -228,6 +228,10 @@ class VaspJob(Job):
             vasp_cmd (str): Command to run vasp as a list of args. For example,
                 if you are using mpirun, it can be something like
                 ["mpirun", "pvasp.5.2.11"]
+            auto_npar (bool): Whether to automatically tune NPAR to be sqrt(
+                number of cores) as recommended by VASP for DFT calculations.
+                Generally, this results in significant speedups. Defaults to
+                True. Set to False for HF, GW and RPA calculations.
 
         Returns:
             List of two jobs corresponding to an AFLOW style run.
@@ -242,6 +246,55 @@ class VaspJob(Job):
                          "action": {"_set": {"ISTART": 1}}},
                         {"file": "CONTCAR",
                          "action": {"_file_copy": {"dest": "POSCAR"}}}])]
+
+    @classmethod
+    def full_opt_run(cls, vasp_cmd, auto_npar=True, vol_change_tol=0.05,
+                     max_steps=10):
+        """
+        Returns a generator of jobs for a full optimization run. Basically,
+        this runs an infinite series of geometry optimization jobs until the
+        % vol change in a particular optimization is less than vol_change_tol.
+
+        Args:
+            vasp_cmd (str): Command to run vasp as a list of args. For example,
+                if you are using mpirun, it can be something like
+                ["mpirun", "pvasp.5.2.11"]
+            auto_npar (bool): Whether to automatically tune NPAR to be sqrt(
+                number of cores) as recommended by VASP for DFT calculations.
+                Generally, this results in significant speedups. Defaults to
+                True. Set to False for HF, GW and RPA calculations.
+            vol_change_tol (float): The tolerance at which to stop a run.
+                Defaults to 0.05, i.e., 5%.
+            max_steps (int): The maximum number of runs. Defaults to 10 (
+                highly unlikely that this limit is ever reached).
+
+        Returns:
+            Generator of jobs.
+        """
+        vol_change = float('inf')
+        for i in xrange(max_steps):
+            if i == 0:
+                settings = None
+                backup = True
+            else:
+                backup = False
+                initial = Poscar.from_file("POSCAR").structure
+                final = Poscar.from_file("CONTCAR").structure
+                vol_change = (final.volume - initial.volume) / initial.volume
+
+                logging.info("Vol change = %.2f!" % vol_change)
+                if abs(vol_change) < vol_change_tol:
+                    logging.info("Stopping optimization!")
+                    break
+                else:
+                    settings = [
+                        {"dict": "INCAR",
+                         "action": {"_set": {"ISTART": 1}}},
+                        {"filename": "CONTCAR",
+                         "action": {"_file_copy": {"dest": "POSCAR"}}}]
+            yield VaspJob(vasp_cmd, final=False, backup=backup,
+                          suffix=".relax%d" % (i+1),
+                          settings_override=settings)
 
     def as_dict(self):
         d = dict(vasp_cmd=self.vasp_cmd,
