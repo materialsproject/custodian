@@ -37,17 +37,8 @@ def load_class(mod, name):
     return getattr(mod, toks[0])(**params)
 
 
-def do_run(args):
-    FORMAT = '%(asctime)s %(message)s'
-    logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
-    logging.info("Handlers used are %s" % args.handlers)
-    handlers = [load_class("custodian.vasp.handlers", n) for n in
-                args.handlers]
-    validators = [load_class("custodian.vasp.validators", n) for n in
-                  args.validators]
-
+def get_jobs(args):
     vasp_command = args.command.split()
-
     #save initial INCAR for rampU runs
     n_ramp_u = args.jobs.count('rampU')
     ramps = 0
@@ -57,7 +48,6 @@ def do_run(args):
         ldauj = incar['LDAUJ']
 
     jobs = []
-
     njobs = len(args.jobs)
     post_settings = []  # append to this list to have settings applied on next job
     for i, job_type in enumerate(args.jobs):
@@ -114,16 +104,31 @@ def do_run(args):
                  'action': {'_set': low_kpoints.as_dict()}}])
         elif job_type.lower() == "relax":
             pass
+        elif job_type.lower() == "fullrelax":
+            for j in VaspJob.full_opt_run(
+                    vasp_command):
+                yield j
         else:
             print("Unsupported job type: {}".format(job_type))
             sys.exit(-1)
 
-        jobs.append(VaspJob(vasp_command, final=final, suffix=suffix,
-                            backup=backup, settings_override=settings,
-                            copy_magmom=copy_magmom))
+        if job_type.lower() != "fullrelax":
+            yield VaspJob(vasp_command, final=final, suffix=suffix,
+                          backup=backup, settings_override=settings,
+                          copy_magmom=copy_magmom)
 
-    c = Custodian(handlers, jobs, validators, max_errors=args.max_errors,
-                  scratch_dir=args.scratch, gzipped_output=args.gzip,
+def do_run(args):
+    FORMAT = '%(asctime)s %(message)s'
+    logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
+    logging.info("Handlers used are %s" % args.handlers)
+    handlers = [load_class("custodian.vasp.handlers", n) for n in
+                args.handlers]
+    validators = [load_class("custodian.vasp.validators", n) for n in
+                  args.validators]
+
+    c = Custodian(handlers, get_jobs(args), validators,
+                  max_errors=args.max_errors, scratch_dir=args.scratch,
+                  gzipped_output=args.gzip,
                   checkpoint=True)
     c.run()
 
