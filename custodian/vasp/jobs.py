@@ -271,7 +271,6 @@ class VaspJob(Job):
         Returns:
             Generator of jobs.
         """
-        vol_change = float('inf')
         for i in xrange(max_steps):
             if i == 0:
                 settings = None
