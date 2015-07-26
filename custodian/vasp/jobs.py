@@ -291,6 +291,7 @@ class VaspJob(Job):
                          "action": {"_set": {"ISTART": 1}}},
                         {"filename": "CONTCAR",
                          "action": {"_file_copy": {"dest": "POSCAR"}}}]
+            logging.info("Generating job = %d!" % (i+1))
             yield VaspJob(vasp_cmd, final=False, backup=backup,
                           suffix=".relax%d" % (i+1),
                           settings_override=settings)
