@@ -47,15 +47,14 @@ def get_jobs(args):
         ldauu = incar['LDAUU']
         ldauj = incar['LDAUJ']
 
-    jobs = []
     njobs = len(args.jobs)
     post_settings = []  # append to this list to have settings applied on next job
-    for i, job_type in enumerate(args.jobs):
+    for i, job in enumerate(args.jobs):
         final = False if i != njobs - 1 else True
-        if any(c.isdigit() for c in job_type):
-            suffix = "." + job_type
+        if any(c.isdigit() for c in job):
+            suffix = "." + job
         else:
-            suffix = ".{}{}".format(job_type, i + 1)
+            suffix = ".{}{}".format(job, i + 1)
         settings = post_settings
         post_settings = []
         backup = True if i == 0 else False
@@ -65,14 +64,17 @@ def get_jobs(args):
             settings.append(
                 {"file": "CONTCAR",
                  "action": {"_file_copy": {"dest": "POSCAR"}}})
-        if job_type.lower().startswith("static"):
+
+        job_type = job.lower()
+
+        if job_type.startswith("static"):
             m = [i * args.static_kpoint for i in vinput["KPOINTS"].kpts[0]]
             settings.extend([
                 {"dict": "INCAR",
                  "action": {"_set": {"NSW": 0}}},
                 {'dict': 'KPOINTS',
                  'action': {'_set': {'kpoints': [m]}}}])
-        elif job_type.lower().startswith("rampu"):
+        elif job_type.startswith("rampu"):
             f = ramps / (n_ramp_u - 1)
             settings.append(
                 {"dict": "INCAR",
@@ -80,7 +82,7 @@ def get_jobs(args):
                                      "LDAUU": [u * f for u in ldauu]}}})
             copy_magmom = True
             ramps += 1
-        elif job_type.lower().startswith("quickrelax"):
+        elif job_type.startswith("quickrelax"):
             kpoints = vinput["KPOINTS"]
             incar = vinput["INCAR"]
             structure = vinput["POSCAR"].structure
@@ -102,17 +104,17 @@ def get_jobs(args):
                  "action": {"_set": {"ISMEAR": 0}}},
                 {'dict': 'KPOINTS',
                  'action': {'_set': low_kpoints.as_dict()}}])
-        elif job_type.lower().startswith("relax"):
+        elif job_type.startswith("relax"):
             pass
-        elif job_type.lower().startswith("full_relax"):
+        elif job_type.startswith("full_relax"):
             for j in VaspJob.full_opt_run(
                     vasp_command):
                 yield j
         else:
-            print("Unsupported job type: {}".format(job_type))
+            print("Unsupported job type: {}".format(job))
             sys.exit(-1)
 
-        if not job_type.lower().startswith("full_relax"):
+        if not job_type.startswith("full_relax"):
             yield VaspJob(vasp_command, final=final, suffix=suffix,
                           backup=backup, settings_override=settings,
                           copy_magmom=copy_magmom)
