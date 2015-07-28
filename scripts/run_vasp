@@ -38,6 +38,7 @@ def load_class(mod, name):
 
 
 def get_jobs(args):
+    #Returns a generator of jobs. Allows of "infinite" jobs.
     vasp_command = args.command.split()
     #save initial INCAR for rampU runs
     n_ramp_u = args.jobs.count('rampU')
@@ -82,7 +83,8 @@ def get_jobs(args):
                                      "LDAUU": [u * f for u in ldauu]}}})
             copy_magmom = True
             ramps += 1
-        elif job_type.startswith("quickrelax"):
+        elif job_type.startswith("quick_relax") or job_type.startswith(\
+                "quickrelax"):
             kpoints = vinput["KPOINTS"]
             incar = vinput["INCAR"]
             structure = vinput["POSCAR"].structure
@@ -118,6 +120,7 @@ def get_jobs(args):
             yield VaspJob(vasp_command, final=final, suffix=suffix,
                           backup=backup, settings_override=settings,
                           copy_magmom=copy_magmom)
+
 
 def do_run(args):
     FORMAT = '%(asctime)s %(message)s'
@@ -204,15 +207,16 @@ if __name__ == "__main__":
              "data=1. The arguments are deserialized using yaml."
     )
 
-    parser.add_argument("jobs", metavar="jobs", type=str, nargs='+',
-                        default=["relax", "relax"],
-                        help="Jobs to execute. Only sequences of relax, "
-                             "quickrelax, static, rampU, full_relax are "
-                             "supported at the moment. For example, \"relax relax static\" "
-                             "will run a double relaxation followed by a static "
-                             "run. By default, suffixes are given sequential numbering,"
-                             "but this can be overrridden by adding a number to the job"
-                             "type, e.g. relax5 relax6 relax7")
+    parser.add_argument(
+        "jobs", metavar="jobs", type=str, nargs='+',
+        default=["relax", "relax"],
+        help="Jobs to execute. Only sequences of relax, "
+             "quickrelax, static, rampU, full_relax are "
+             "supported at the moment. For example, \"relax relax static\" "
+             "will run a double relaxation followed by a static "
+             "run. By default, suffixes are given sequential numbering,"
+             "but this can be overrridden by adding a number to the job"
+             "type, e.g. relax5 relax6 relax7")
 
     args = parser.parse_args()
     do_run(args)
