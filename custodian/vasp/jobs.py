@@ -45,7 +45,7 @@ class VaspJob(Job):
     """
 
     def __init__(self, vasp_cmd, output_file="vasp.out", suffix="",
-                 final=True, gzipped=False, backup=True,
+                 final=True, backup=True,
                  default_vasp_input_set=MITVaspInputSet(), auto_npar=True,
                  auto_gamma=True, settings_override=None,
                  gamma_vasp_cmd=None, copy_magmom=False):
@@ -68,8 +68,6 @@ class VaspJob(Job):
             backup (bool): Whether to backup the initial input files. If True,
                 the INCAR, KPOINTS, POSCAR and POTCAR will be copied with a
                 ".orig" appended. Defaults to True.
-            gzipped (bool): Deprecated. Please use the Custodian class's
-                gzipped_output option instead.
             default_vasp_input_set (VaspInputSet): Species the default input
                 set (see pymatgen's documentation in pymatgen.io.vasp.sets to
                 use for directories that do not contain full set of VASP
@@ -109,7 +107,6 @@ class VaspJob(Job):
         self.output_file = output_file
         self.final = final
         self.backup = backup
-        self.gzipped = gzipped
         self.default_vis = default_vasp_input_set
         self.suffix = suffix
         self.settings_override = settings_override
@@ -214,9 +211,6 @@ class VaspJob(Job):
             except:
                 logging.error('MAGMOM copy from OUTCAR to INCAR failed')
 
-        if self.gzipped:
-            gzip_dir(".")
-
     @classmethod
     def double_relaxation_run(cls, vasp_cmd, auto_npar=True):
         """
@@ -298,7 +292,7 @@ class VaspJob(Job):
     def as_dict(self):
         d = dict(vasp_cmd=self.vasp_cmd,
                  output_file=self.output_file, suffix=self.suffix,
-                 final=self.final, gzipped=self.gzipped, backup=self.backup,
+                 final=self.final, backup=self.backup,
                  default_vasp_input_set=self.default_vis.as_dict(),
                  auto_npar=self.auto_npar, auto_gamma=self.auto_gamma,
                  settings_override=self.settings_override,
@@ -313,7 +307,7 @@ class VaspJob(Job):
         vis = MontyDecoder().process_decoded(d["default_vasp_input_set"])
         return VaspJob(
             vasp_cmd=d["vasp_cmd"], output_file=d["output_file"],
-            suffix=d["suffix"], final=d["final"], gzipped=d["gzipped"],
+            suffix=d["suffix"], final=d["final"], 
             backup=d["backup"], default_vasp_input_set=vis,
             auto_npar=d['auto_npar'], auto_gamma=d['auto_gamma'],
             settings_override=d["settings_override"],
