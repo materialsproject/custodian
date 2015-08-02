@@ -3,7 +3,7 @@
 from __future__ import unicode_literals, division
 
 from custodian.custodian import Validator
-from pymatgen.io.vaspio.vasp_output import Vasprun
+from pymatgen.io.vasp import Vasprun
 
 
 class VasprunXMLValidator(Validator):

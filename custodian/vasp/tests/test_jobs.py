@@ -20,7 +20,7 @@ import shutil
 
 import multiprocessing
 from custodian.vasp.jobs import VaspJob
-from pymatgen.io.vaspio import Incar
+from pymatgen.io.vasp import Incar
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
                         'test_files')

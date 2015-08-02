@@ -21,10 +21,9 @@ import shutil
 import math
 import logging
 
-from pymatgen.io.vaspio.vasp_input import VaspInput, Incar, Poscar
-from pymatgen.io.vaspio.vasp_output import Outcar
-from pymatgen.io.smartio import read_structure
-from pymatgen.io.vaspio_set import MITVaspInputSet
+from pymatgen.io.vasp import VaspInput, Incar, Poscar, Outcar
+from pymatgen.io.smart import read_structure
+from pymatgen.io.vasp.sets import MITVaspInputSet
 from monty.json import MontyDecoder
 from monty.os.path import which
 
@@ -72,7 +71,7 @@ class VaspJob(Job):
             gzipped (bool): Deprecated. Please use the Custodian class's
                 gzipped_output option instead.
             default_vasp_input_set (VaspInputSet): Species the default input
-                set (see pymatgen's documentation in pymatgen.io.vaspio_set to
+                set (see pymatgen's documentation in pymatgen.io.vasp.sets to
                 use for directories that do not contain full set of VASP
                 input files. For example, if a directory contains only a
                 POSCAR or a cif, the vasp input set will be used to generate

@@ -20,7 +20,7 @@ import yaml
 
 from custodian.custodian import Custodian
 from custodian.vasp.jobs import VaspJob
-from pymatgen.io.vaspio.vasp_input import VaspInput, Incar, Kpoints
+from pymatgen.io.vasp import VaspInput, Incar, Kpoints
 
 
 def load_class(mod, name):

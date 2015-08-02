@@ -35,11 +35,10 @@ from math import ceil
 
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
-from pymatgen.io.vaspio.vasp_input import Poscar, VaspInput, Incar, Kpoints
+from pymatgen.io.vasp import Poscar, VaspInput, Incar, Kpoints, Vasprun, Oszicar
 from pymatgen.transformations.standard_transformations import \
     SupercellTransformation
 
-from pymatgen.io.vaspio.vasp_output import Vasprun, Oszicar
 from custodian.ansible.interpreter import Modder
 from custodian.ansible.actions import FileActions
 from custodian.vasp.interpreter import VaspModder
