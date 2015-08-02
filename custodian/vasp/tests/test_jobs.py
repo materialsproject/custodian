@@ -68,6 +68,9 @@ class VaspJobTest(unittest.TestCase):
         self.assertAlmostEqual(incar['MAGMOM'], [3.007, 1.397, -0.189, -0.189])
         self.assertAlmostEqual(incar_prev["MAGMOM"], [5, -5, 0.6, 0.6])
 
+    def test_static(self):
+        #Just a basic test of init.
+        VaspJob.double_relaxation_run(["vasp"])
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

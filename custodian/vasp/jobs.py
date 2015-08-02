@@ -239,7 +239,7 @@ class VaspJob(Job):
                         auto_npar=auto_npar),
                 VaspJob(
                     vasp_cmd, final=True, backup=False,
-                    suffix=".relax2", gzipped=gzipped, auto_npar=auto_npar,
+                    suffix=".relax2", auto_npar=auto_npar,
                     settings_override=[
                         {"dict": "INCAR",
                          "action": {"_set": {"ISTART": 1}}},
