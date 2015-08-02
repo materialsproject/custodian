@@ -22,7 +22,7 @@ calculations.
 Change log
 ==========
 
-v0.8.4
+v0.8.5
 ------
 1. Refactoring to support pymatgen 3.1.4.
 
