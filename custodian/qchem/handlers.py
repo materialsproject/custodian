@@ -221,11 +221,17 @@ class QChemErrorHandler(ErrorHandler):
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
             else:
+                if self.fix_step.params['rem']["jobtype"] == "freq":
+                    act = self.fix_not_enough_total_memory()
+                    return act
                 return None
         elif self.qchem_job.current_command_name != next_run_mode:
             self.qchem_job.select_command(next_run_mode, self.qcinp)
             return next_run_mode
         else:
+            if self.fix_step.params['rem']["jobtype"] == "freq":
+                act = self.fix_not_enough_total_memory()
+                return act
             return None
 
     def fix_insufficient_static_memory(self):
