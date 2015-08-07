@@ -24,7 +24,7 @@ from custodian.vasp.handlers import VaspErrorHandler, \
     UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler, \
     MaxForceErrorHandler, PositiveEnergyErrorHandler, PotimErrorHandler, \
     FrozenJobErrorHandler, AliasingErrorHandler
-from pymatgen.io.vaspio import Incar, Poscar, Structure
+from pymatgen.io.vasp import Incar, Poscar, Structure
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",

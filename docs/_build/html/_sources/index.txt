@@ -22,6 +22,14 @@ calculations.
 Change log
 ==========
 
+v0.8.5
+------
+1. Refactoring to support pymatgen 3.1.4.
+
+v0.8.2
+------
+1. Made auto_npar optional for double relaxation VASP run.
+
 v0.8.1
 ------
 1. Misc bug fixes (minor).

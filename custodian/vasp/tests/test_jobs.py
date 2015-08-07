@@ -20,7 +20,7 @@ import shutil
 
 import multiprocessing
 from custodian.vasp.jobs import VaspJob
-from pymatgen.io.vaspio import Incar
+from pymatgen.io.vasp import Incar
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
                         'test_files')
@@ -68,6 +68,9 @@ class VaspJobTest(unittest.TestCase):
         self.assertAlmostEqual(incar['MAGMOM'], [3.007, 1.397, -0.189, -0.189])
         self.assertAlmostEqual(incar_prev["MAGMOM"], [5, -5, 0.6, 0.6])
 
+    def test_static(self):
+        #Just a basic test of init.
+        VaspJob.double_relaxation_run(["vasp"])
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

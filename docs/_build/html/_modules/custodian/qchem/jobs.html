@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.qchem.jobs &mdash; custodian 0.8.1 documentation</title>
+    <title>custodian.qchem.jobs &mdash; custodian 0.8.6 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.8.1',
+        VERSION:     '0.8.6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.8.1 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.8.6 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -34,8 +34,8 @@
 </script>
 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -44,20 +44,22 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.8.1 documentation</a> &raquo;</li>
-          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 0.8.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <h1>Source code for custodian.qchem.jobs</h1><div class="highlight"><pre>
 <span class="c"># coding: utf-8</span>
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">shlex</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This module implements basic kinds of jobs for QChem runs.</span>
@@ -68,7 +70,7 @@
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.qchemio</span> <span class="kn">import</span> <span class="n">QcInput</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.qchem</span> <span class="kn">import</span> <span class="n">QcInput</span>
 <span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">Job</span><span class="p">,</span> <span class="n">gzip_dir</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;Xiaohui Qu&quot;</span>
@@ -122,8 +124,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">current_command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_cmd</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">=</span> <span class="s">&quot;general&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">large_static_mem</span> <span class="o">=</span> <span class="n">large_static_mem</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_qchem_memory</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alt_cmd</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">alt_cmd</span><span class="p">)</span>
+        <span class="n">available_commands</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;general&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt_cmd</span><span class="p">:</span>
+            <span class="n">available_commands</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt_cmd</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">qcinp</span> <span class="o">=</span> <span class="n">QcInput</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;openmp&quot;</span> <span class="ow">in</span> <span class="n">available_commands</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_openmp_compatible</span><span class="p">(</span><span class="n">qcinp</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s">&quot;PBS_JOBID&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> \
+                    <span class="p">(</span><span class="s">&quot;hopque&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_JOBID&quot;</span><span class="p">]</span> <span class="ow">or</span>
+                     <span class="s">&quot;edique&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_JOBID&quot;</span><span class="p">]):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s">&quot;openmp&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_qchem_memory</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_set_qchem_memory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qcinp</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">qcinp</span><span class="p">:</span>
@@ -149,24 +160,55 @@
                             <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">28000</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">3000</span><span class="p">)</span>
             <span class="k">elif</span> <span class="s">&quot;edique&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_JOBID&quot;</span><span class="p">]:</span>
                 <span class="c"># on Edison</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">qcinp</span><span class="o">.</span><span class="n">jobs</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">==</span> <span class="s">&quot;general&quot;</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">large_static_mem</span><span class="p">:</span>
-                            <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">2500</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">2500</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-                    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">==</span> <span class="s">&quot;half_cpus&quot;</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">large_static_mem</span><span class="p">:</span>
-                            <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
-                    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">==</span> <span class="s">&quot;openmp&quot;</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">large_static_mem</span><span class="p">:</span>
-                            <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">60000</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">20000</span><span class="p">)</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">60000</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s">&quot;QCSCRATCH&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> <span class="s">&quot;/tmp/eg_qchem&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;QCSCRATCH&quot;</span><span class="p">]:</span>
+                    <span class="c"># in memory scratch</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">qcinp</span><span class="o">.</span><span class="n">jobs</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">==</span> <span class="s">&quot;general&quot;</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">large_static_mem</span><span class="p">:</span>
+                                <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">1200</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">1200</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">==</span> <span class="s">&quot;half_cpus&quot;</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">large_static_mem</span><span class="p">:</span>
+                                <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">2400</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">2400</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">==</span> <span class="s">&quot;openmp&quot;</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">large_static_mem</span><span class="p">:</span>
+                                <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">25000</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">25000</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># disk scratch</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">qcinp</span><span class="o">.</span><span class="n">jobs</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">==</span> <span class="s">&quot;general&quot;</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">large_static_mem</span><span class="p">:</span>
+                                <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">2500</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">2500</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">==</span> <span class="s">&quot;half_cpus&quot;</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">large_static_mem</span><span class="p">:</span>
+                                <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">==</span> <span class="s">&quot;openmp&quot;</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">large_static_mem</span><span class="p">:</span>
+                                <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">60000</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">20000</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">60000</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
         <span class="n">qcinp</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">)</span>
 
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="QchemJob.is_openmp_compatible"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.jobs.QchemJob.is_openmp_compatible">[docs]</a>    <span class="k">def</span> <span class="nf">is_openmp_compatible</span><span class="p">(</span><span class="n">qcinp</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">qcinp</span><span class="o">.</span><span class="n">jobs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">j</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;freq&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="n">j</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;exchange&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;pbe&quot;</span><span class="p">,</span> <span class="s">&quot;b&quot;</span><span class="p">]</span> \
+                <span class="ow">and</span> <span class="s">&quot;correlation&quot;</span> <span class="ow">in</span> <span class="n">j</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&#39;rem&#39;</span><span class="p">]</span> \
+                    <span class="ow">and</span> <span class="n">j</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;correlation&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;pbe&quot;</span><span class="p">,</span> <span class="s">&quot;lyp&quot;</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
 <div class="viewcode-block" id="QchemJob.select_command"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.jobs.QchemJob.select_command">[docs]</a>    <span class="k">def</span> <span class="nf">select_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd_name</span><span class="p">,</span> <span class="n">qcinp</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the command to run QChem by name. &quot;general&quot; set to the default one.</span>
@@ -182,7 +224,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt_cmd</span><span class="p">:</span>
             <span class="n">available_commands</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt_cmd</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">cmd_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_commands</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Command mode </span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">cmd_name</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\&quot;</span><span class="s"> is not available&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Command mode </span><span class="se">\&quot;</span><span class="s">{cmd_name}</span><span class="se">\&quot;</span><span class="s"> is not available&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cmd_name</span><span class="o">=</span><span class="n">cmd_name</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">cmd_name</span> <span class="o">==</span> <span class="s">&quot;general&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current_command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_cmd</span>
         <span class="k">else</span><span class="p">:</span>
@@ -209,28 +251,48 @@
                             <span class="s">&quot;{}.{}.orig&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qclog_file</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
 </div>
 <div class="viewcode-block" id="QchemJob.run"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.jobs.QchemJob.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s">&quot;PBS_JOBID&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> <span class="s">&quot;edique&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_JOBID&quot;</span><span class="p">]:</span>
+            <span class="n">nodelist</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;QCNODE&quot;</span><span class="p">]</span>
+            <span class="n">tmp_creation_cmd</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;aprun -n1 -N1 -L {} mkdir /tmp/eg_qchem&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nodelist</span><span class="p">))</span>
+            <span class="n">tmp_clean_cmd</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;aprun -n1 -N1 -L {} rm -rf /tmp/eg_qchem&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nodelist</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tmp_clean_cmd</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">tmp_creation_cmd</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_command</span><span class="p">)</span>
         <span class="n">cmd</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chk_file</span><span class="p">:</span>
             <span class="n">cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chk_file</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qclog_file</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">zopen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qclog_file</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">filelog</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qclog_file</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">filelog</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">tmp_clean_cmd</span><span class="p">:</span>
+                    <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">tmp_clean_cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">filelog</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">tmp_creation_cmd</span><span class="p">:</span>
+                    <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">tmp_creation_cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">filelog</span><span class="p">)</span>
                 <span class="n">returncode</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">filelog</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">tmp_clean_cmd</span><span class="p">:</span>
+                    <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">tmp_clean_cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">filelog</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">returncode</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">returncode</span>
 </div>
 <div class="viewcode-block" id="QchemJob.postprocess"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.jobs.QchemJob.postprocess">[docs]</a>    <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gzipped</span><span class="p">:</span>
-            <span class="n">gzip_dir</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span></div></div>
+            <span class="k">if</span> <span class="s">&quot;PBS_JOBID&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> <span class="s">&quot;edique&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_JOBID&quot;</span><span class="p">]:</span>
+                <span class="n">cur_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+                <span class="n">file_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cur_dir</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s">&quot;*&quot;</span><span class="p">)]</span>
+                <span class="n">nodelist</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;QCNODE&quot;</span><span class="p">]</span>
+                <span class="n">gzip_cmd</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;aprun -n1 -N1 -L {} gzip&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nodelist</span><span class="p">))</span> <span class="o">+</span> <span class="n">file_list</span>
+                <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">gzip_cmd</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">gzip_dir</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<div id="searchbox" style="display: none">
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
       <input type="text" name="q" />
@@ -247,7 +309,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -256,14 +318,14 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.8.1 documentation</a> &raquo;</li>
-          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 0.8.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
 
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

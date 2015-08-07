@@ -21,10 +21,9 @@ import shutil
 import math
 import logging
 
-from pymatgen.io.vaspio.vasp_input import VaspInput, Incar
-from pymatgen.io.vaspio.vasp_output import Outcar
-from pymatgen.io.smartio import read_structure
-from pymatgen.io.vaspio_set import MITVaspInputSet
+from pymatgen.io.vasp import VaspInput, Incar, Poscar, Outcar
+from pymatgen.io.smart import read_structure
+from pymatgen.io.vasp.sets import MITVaspInputSet
 from monty.json import MontyDecoder
 from monty.os.path import which
 
@@ -46,7 +45,7 @@ class VaspJob(Job):
     """
 
     def __init__(self, vasp_cmd, output_file="vasp.out", suffix="",
-                 final=True, gzipped=False, backup=True,
+                 final=True, backup=True,
                  default_vasp_input_set=MITVaspInputSet(), auto_npar=True,
                  auto_gamma=True, settings_override=None,
                  gamma_vasp_cmd=None, copy_magmom=False):
@@ -69,10 +68,8 @@ class VaspJob(Job):
             backup (bool): Whether to backup the initial input files. If True,
                 the INCAR, KPOINTS, POSCAR and POTCAR will be copied with a
                 ".orig" appended. Defaults to True.
-            gzipped (bool): Deprecated. Please use the Custodian class's
-                gzipped_output option instead.
             default_vasp_input_set (VaspInputSet): Species the default input
-                set (see pymatgen's documentation in pymatgen.io.vaspio_set to
+                set (see pymatgen's documentation in pymatgen.io.vasp.sets to
                 use for directories that do not contain full set of VASP
                 input files. For example, if a directory contains only a
                 POSCAR or a cif, the vasp input set will be used to generate
@@ -110,7 +107,6 @@ class VaspJob(Job):
         self.output_file = output_file
         self.final = final
         self.backup = backup
-        self.gzipped = gzipped
         self.default_vis = default_vasp_input_set
         self.suffix = suffix
         self.settings_override = settings_override
@@ -215,11 +211,8 @@ class VaspJob(Job):
             except:
                 logging.error('MAGMOM copy from OUTCAR to INCAR failed')
 
-        if self.gzipped:
-            gzip_dir(".")
-
-    @staticmethod
-    def double_relaxation_run(vasp_cmd, gzipped=True):
+    @classmethod
+    def double_relaxation_run(cls, vasp_cmd, auto_npar=True):
         """
         Returns a list of two jobs corresponding to an AFLOW style double
         relaxation run.
@@ -228,24 +221,78 @@ class VaspJob(Job):
             vasp_cmd (str): Command to run vasp as a list of args. For example,
                 if you are using mpirun, it can be something like
                 ["mpirun", "pvasp.5.2.11"]
+            auto_npar (bool): Whether to automatically tune NPAR to be sqrt(
+                number of cores) as recommended by VASP for DFT calculations.
+                Generally, this results in significant speedups. Defaults to
+                True. Set to False for HF, GW and RPA calculations.
 
         Returns:
             List of two jobs corresponding to an AFLOW style run.
         """
-        return [VaspJob(vasp_cmd, final=False, suffix=".relax1"),
+        return [VaspJob(vasp_cmd, final=False, suffix=".relax1",
+                        auto_npar=auto_npar),
                 VaspJob(
                     vasp_cmd, final=True, backup=False,
-                    suffix=".relax2", gzipped=gzipped,
+                    suffix=".relax2", auto_npar=auto_npar,
                     settings_override=[
                         {"dict": "INCAR",
                          "action": {"_set": {"ISTART": 1}}},
                         {"file": "CONTCAR",
                          "action": {"_file_copy": {"dest": "POSCAR"}}}])]
 
+    @classmethod
+    def full_opt_run(cls, vasp_cmd, auto_npar=True, vol_change_tol=0.05,
+                     max_steps=10):
+        """
+        Returns a generator of jobs for a full optimization run. Basically,
+        this runs an infinite series of geometry optimization jobs until the
+        % vol change in a particular optimization is less than vol_change_tol.
+
+        Args:
+            vasp_cmd (str): Command to run vasp as a list of args. For example,
+                if you are using mpirun, it can be something like
+                ["mpirun", "pvasp.5.2.11"]
+            auto_npar (bool): Whether to automatically tune NPAR to be sqrt(
+                number of cores) as recommended by VASP for DFT calculations.
+                Generally, this results in significant speedups. Defaults to
+                True. Set to False for HF, GW and RPA calculations.
+            vol_change_tol (float): The tolerance at which to stop a run.
+                Defaults to 0.05, i.e., 5%.
+            max_steps (int): The maximum number of runs. Defaults to 10 (
+                highly unlikely that this limit is ever reached).
+
+        Returns:
+            Generator of jobs.
+        """
+        for i in xrange(max_steps):
+            if i == 0:
+                settings = None
+                backup = True
+            else:
+                backup = False
+                initial = Poscar.from_file("POSCAR").structure
+                final = Poscar.from_file("CONTCAR").structure
+                vol_change = (final.volume - initial.volume) / initial.volume
+
+                logging.info("Vol change = %.1f %%!" % (vol_change * 100))
+                if abs(vol_change) < vol_change_tol:
+                    logging.info("Stopping optimization!")
+                    break
+                else:
+                    settings = [
+                        {"dict": "INCAR",
+                         "action": {"_set": {"ISTART": 1}}},
+                        {"file": "CONTCAR",
+                         "action": {"_file_copy": {"dest": "POSCAR"}}}]
+            logging.info("Generating job = %d!" % (i+1))
+            yield VaspJob(vasp_cmd, final=False, backup=backup,
+                          suffix=".relax%d" % (i+1),
+                          settings_override=settings)
+
     def as_dict(self):
         d = dict(vasp_cmd=self.vasp_cmd,
                  output_file=self.output_file, suffix=self.suffix,
-                 final=self.final, gzipped=self.gzipped, backup=self.backup,
+                 final=self.final, backup=self.backup,
                  default_vasp_input_set=self.default_vis.as_dict(),
                  auto_npar=self.auto_npar, auto_gamma=self.auto_gamma,
                  settings_override=self.settings_override,
@@ -260,7 +307,7 @@ class VaspJob(Job):
         vis = MontyDecoder().process_decoded(d["default_vasp_input_set"])
         return VaspJob(
             vasp_cmd=d["vasp_cmd"], output_file=d["output_file"],
-            suffix=d["suffix"], final=d["final"], gzipped=d["gzipped"],
+            suffix=d["suffix"], final=d["final"], 
             backup=d["backup"], default_vasp_input_set=vis,
             auto_npar=d['auto_npar'], auto_gamma=d['auto_gamma'],
             settings_override=d["settings_override"],

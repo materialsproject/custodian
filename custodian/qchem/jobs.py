@@ -13,7 +13,7 @@ from monty.io import zopen
 import shutil
 import copy
 import subprocess
-from pymatgen.io.qchemio import QcInput
+from pymatgen.io.qchem import QcInput
 from custodian.custodian import Job, gzip_dir
 
 __author__ = "Xiaohui Qu"

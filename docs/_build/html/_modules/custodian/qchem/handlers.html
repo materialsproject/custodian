@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.qchem.handlers &mdash; custodian 0.8.1 documentation</title>
+    <title>custodian.qchem.handlers &mdash; custodian 0.8.6 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.8.1',
+        VERSION:     '0.8.6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.8.1 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.8.6 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -34,8 +34,8 @@
 </script>
 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -44,20 +44,21 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.8.1 documentation</a> &raquo;</li>
-          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 0.8.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <h1>Source code for custodian.qchem.handlers</h1><div class="highlight"><pre>
 <span class="c"># coding: utf-8</span>
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">time</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This module implements error handlers for QChem runs. Currently tested only</span>
@@ -72,7 +73,7 @@
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">tarfile</span>
 <span class="kn">from</span> <span class="nn">pymatgen.core.structure</span> <span class="kn">import</span> <span class="n">Molecule</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.qchemio</span> <span class="kn">import</span> <span class="n">QcOutput</span><span class="p">,</span> <span class="n">QcInput</span><span class="p">,</span> <span class="n">QcTask</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.qchem</span> <span class="kn">import</span> <span class="n">QcOutput</span><span class="p">,</span> <span class="n">QcInput</span><span class="p">,</span> <span class="n">QcTask</span>
 <span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">ErrorHandler</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;Xiaohui Qu&quot;</span>
@@ -138,14 +139,15 @@
 <div class="viewcode-block" id="QChemErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">backup</span><span class="p">()</span>
         <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
-
         <span class="n">error_rankings</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;autoz error&quot;</span><span class="p">,</span>
                           <span class="s">&quot;No input text&quot;</span><span class="p">,</span>
                           <span class="s">&quot;Killed&quot;</span><span class="p">,</span>
                           <span class="s">&quot;Insufficient static memory&quot;</span><span class="p">,</span>
+                          <span class="s">&quot;Not Enough Total Memory&quot;</span><span class="p">,</span>
                           <span class="s">&quot;NAN values&quot;</span><span class="p">,</span>
                           <span class="s">&quot;Bad SCF convergence&quot;</span><span class="p">,</span>
                           <span class="s">&quot;Geometry optimization failed&quot;</span><span class="p">,</span>
+                          <span class="s">&quot;Freq Job Too Small&quot;</span><span class="p">,</span>
                           <span class="s">&quot;Exit Code 134&quot;</span><span class="p">,</span>
                           <span class="s">&quot;Molecular charge is not found&quot;</span><span class="p">,</span>
                           <span class="s">&quot;Molecular spin multipilicity is not found&quot;</span>
@@ -185,6 +187,20 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">disable_symmetry</span><span class="p">()</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;disable symmetry&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
+                <span class="c"># This indicates something strange occured on the</span>
+                <span class="c"># compute node. Wait for 30 minutes, such that it</span>
+                <span class="c"># won&#39;t run too fast to make all the jobs fail</span>
+                <span class="k">if</span> <span class="s">&quot;PBS_JOBID&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> <span class="p">(</span><span class="s">&quot;edique&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_JOBID&quot;</span><span class="p">]</span>
+                                                  <span class="ow">or</span> <span class="s">&quot;hopque&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_JOBID&quot;</span><span class="p">]):</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">30.0</span> <span class="o">*</span> <span class="mf">60.0</span><span class="p">)</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s">&quot;Freq Job Too Small&quot;</span><span class="p">:</span>
+            <span class="n">natoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">mol</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s">&quot;cpscf_nseg&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">]</span> <span class="ow">or</span> \
+                            <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;cpscf_nseg&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">natoms</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;cpscf_nseg&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">natoms</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;use {} segment in CPSCF&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">natoms</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s">&quot;Exit Code 134&quot;</span><span class="p">:</span>
             <span class="n">act</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_error_code_134</span><span class="p">()</span>
@@ -204,6 +220,12 @@
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">act</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s">&quot;Not Enough Total Memory&quot;</span><span class="p">:</span>
+            <span class="n">act</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_not_enough_total_memory</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">act</span><span class="p">:</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">act</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s">&quot;Molecular charge is not found&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s">&quot;Molecular spin multipilicity is not found&quot;</span><span class="p">:</span>
@@ -213,34 +235,63 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 </div>
-<div class="viewcode-block" id="QChemErrorHandler.is_openmp_compatible"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.is_openmp_compatible">[docs]</a>    <span class="k">def</span> <span class="nf">is_openmp_compatible</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">jobs</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">j</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;freq&quot;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">False</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;exchange&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;pbe&quot;</span><span class="p">,</span> <span class="s">&quot;b&quot;</span><span class="p">]</span>\
-                    <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;correlation&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;pbe&quot;</span><span class="p">,</span> <span class="s">&quot;lyp&quot;</span><span class="p">]:</span>
-                <span class="k">return</span> <span class="bp">False</span>
-        <span class="k">return</span> <span class="bp">True</span>
-</div>
-<div class="viewcode-block" id="QChemErrorHandler.fix_error_code_134"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_error_code_134">[docs]</a>    <span class="k">def</span> <span class="nf">fix_error_code_134</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="k">if</span> <span class="s">&quot;thresh&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_integral_threshold</span><span class="p">(</span><span class="n">thresh</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-            <span class="k">return</span> <span class="s">&quot;use tight integral threshold&quot;</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_openmp_compatible</span><span class="p">():</span>
+<div class="viewcode-block" id="QChemErrorHandler.fix_not_enough_total_memory"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_not_enough_total_memory">[docs]</a>    <span class="k">def</span> <span class="nf">fix_not_enough_total_memory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&#39;rem&#39;</span><span class="p">][</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;freq&quot;</span><span class="p">:</span>
+            <span class="n">ncpu</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="s">&quot;PBS_JOBID&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> \
+                    <span class="p">(</span><span class="s">&quot;hopque&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_JOBID&quot;</span><span class="p">]</span> <span class="ow">or</span>
+                     <span class="s">&quot;edique&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_JOBID&quot;</span><span class="p">]):</span>
+                <span class="n">ncpu</span> <span class="o">=</span> <span class="mi">24</span>
+            <span class="n">natoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">jobs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mol</span><span class="p">)</span>
+            <span class="n">times_ncpu_full</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">natoms</span><span class="o">/</span><span class="n">ncpu</span><span class="p">)</span>
+            <span class="n">nsegment_full</span> <span class="o">=</span> <span class="n">ncpu</span> <span class="o">*</span> <span class="n">times_ncpu_full</span>
+            <span class="n">times_ncpu_half</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">natoms</span><span class="o">/</span><span class="p">(</span><span class="n">ncpu</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+            <span class="n">nsegment_half</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">ncpu</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">times_ncpu_half</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s">&quot;cpscf_nseg&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;cpscf_nseg&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nsegment_full</span>
+                <span class="k">return</span> <span class="s">&quot;Use {} CPSCF segments&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nsegment_full</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;cpscf_nseg&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">nsegment_half</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s">&quot;half_cpus&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;cpscf_nseg&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nsegment_half</span>
+                <span class="k">return</span> <span class="s">&quot;Use half CPUs and {} CPSCF segments&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nsegment_half</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">is_openmp_compatible</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="s">&quot;half_cpus&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s">&quot;half_cpus&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
                 <span class="k">return</span> <span class="s">&quot;half_cpus&quot;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">None</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="s">&quot;openmp&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s">&quot;openmp&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
-            <span class="k">return</span> <span class="s">&quot;openmp&quot;</span>
+</div>
+<div class="viewcode-block" id="QChemErrorHandler.fix_error_code_134"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_error_code_134">[docs]</a>    <span class="k">def</span> <span class="nf">fix_error_code_134</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">next_run_mode</span> <span class="o">=</span> <span class="s">&quot;openmp&quot;</span>
+        <span class="k">if</span> <span class="s">&quot;PBS_JOBID&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> \
+                <span class="p">(</span><span class="s">&quot;hopque&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_JOBID&quot;</span><span class="p">]</span> <span class="ow">or</span>
+                 <span class="s">&quot;edique&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_JOBID&quot;</span><span class="p">]):</span>
+            <span class="n">next_run_mode</span> <span class="o">=</span> <span class="s">&quot;general&quot;</span>
+
+        <span class="k">if</span> <span class="s">&quot;thresh&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_integral_threshold</span><span class="p">(</span><span class="n">thresh</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s">&quot;use tight integral threshold&quot;</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">is_openmp_compatible</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="s">&quot;half_cpus&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s">&quot;half_cpus&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
+                <span class="k">return</span> <span class="s">&quot;half_cpus&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="n">next_run_mode</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="n">next_run_mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">next_run_mode</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">None</span>
 </div>
 <div class="viewcode-block" id="QChemErrorHandler.fix_insufficient_static_memory"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_insufficient_static_memory">[docs]</a>    <span class="k">def</span> <span class="nf">fix_insufficient_static_memory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_openmp_compatible</span><span class="p">():</span>
+        <span class="n">next_run_mode</span> <span class="o">=</span> <span class="s">&quot;openmp&quot;</span>
+        <span class="k">if</span> <span class="s">&quot;PBS_JOBID&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> \
+                <span class="p">(</span><span class="s">&quot;hopque&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_JOBID&quot;</span><span class="p">]</span> <span class="ow">or</span>
+                 <span class="s">&quot;edique&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_JOBID&quot;</span><span class="p">]):</span>
+            <span class="n">next_run_mode</span> <span class="o">=</span> <span class="s">&quot;general&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">is_openmp_compatible</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="s">&quot;half_cpus&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s">&quot;half_cpus&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
                 <span class="k">return</span> <span class="s">&quot;half_cpus&quot;</span>
@@ -250,9 +301,9 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">_set_qchem_memory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">None</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="s">&quot;openmp&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s">&quot;openmp&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
-            <span class="k">return</span> <span class="s">&quot;openmp&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="n">next_run_mode</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="n">next_run_mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">next_run_mode</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">large_static_mem</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">large_static_mem</span> <span class="o">=</span> <span class="bp">True</span>
             <span class="c"># noinspection PyProtectedMember</span>
@@ -261,15 +312,22 @@
             <span class="k">return</span> <span class="bp">None</span>
 </div>
 <div class="viewcode-block" id="QChemErrorHandler.fix_error_killed"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_error_killed">[docs]</a>    <span class="k">def</span> <span class="nf">fix_error_killed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_openmp_compatible</span><span class="p">():</span>
+
+        <span class="n">next_run_mode</span> <span class="o">=</span> <span class="s">&quot;openmp&quot;</span>
+        <span class="k">if</span> <span class="s">&quot;PBS_JOBID&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> \
+                <span class="p">(</span><span class="s">&quot;hopque&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_JOBID&quot;</span><span class="p">]</span> <span class="ow">or</span>
+                 <span class="s">&quot;edique&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_JOBID&quot;</span><span class="p">]):</span>
+            <span class="n">next_run_mode</span> <span class="o">=</span> <span class="s">&quot;general&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">is_openmp_compatible</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="s">&quot;half_cpus&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s">&quot;half_cpus&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
                 <span class="k">return</span> <span class="s">&quot;half_cpus&quot;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">None</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="s">&quot;openmp&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s">&quot;openmp&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
-            <span class="k">return</span> <span class="s">&quot;openmp&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="n">next_run_mode</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="n">next_run_mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">next_run_mode</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">None</span>
 </div>
@@ -282,6 +340,14 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_strategy_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">old_strategy_text</span> <span class="o">=</span> <span class="n">old_strategy_text</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">od</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">error_step_id</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s">&quot;Negative Eigen&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&quot;thresh&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_integral_threshold</span><span class="p">(</span><span class="n">thresh</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+                <span class="k">return</span> <span class="s">&quot;use tight integral threshold&quot;</span>
+            <span class="k">elif</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;thresh&quot;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">14</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_integral_threshold</span><span class="p">(</span><span class="n">thresh</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+                <span class="k">return</span> <span class="s">&quot;use even tighter integral threshold&quot;</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;scf_iteration_energies&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span> \
                 <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;scf_iteration_energies&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
@@ -326,6 +392,8 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_strategy_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">comments</span> <span class="o">=</span> <span class="n">scf_pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">comments</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">comments</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">comments</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;comment&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="s">&quot;reset&quot;</span>
         <span class="k">elif</span> <span class="n">strategy</span><span class="p">[</span><span class="s">&quot;current_method_id&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">strategy</span><span class="p">[</span><span class="s">&quot;methods&quot;</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">None</span>
@@ -399,6 +467,27 @@
             <span class="n">old_strategy_text</span> <span class="o">=</span> <span class="n">old_strategy_text</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="n">od</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">error_step_id</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s">&#39;Lamda Determination Failed&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">])</span><span class="o">&gt;=</span><span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_scf_algorithm_and_iterations</span><span class="p">(</span>
+                <span class="n">algorithm</span><span class="o">=</span><span class="s">&quot;diis&quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_step_id</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;read&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_scf_initial_guess</span><span class="p">(</span><span class="s">&quot;sad&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_last_input_geom</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">od</span><span class="p">[</span><span class="s">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;aimd&quot;</span><span class="p">:</span>
+                <span class="n">aimd_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;aimd_steps&quot;</span><span class="p">]</span>
+                <span class="n">elapsed_steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="n">remaining_steps</span> <span class="o">=</span> <span class="n">aimd_steps</span> <span class="o">-</span> <span class="n">elapsed_steps</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;rem&quot;</span><span class="p">][</span><span class="s">&quot;aimd_steps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">remaining_steps</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_strategy_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">comments</span> <span class="o">=</span> <span class="n">geom_pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">comments</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">comments</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">comments</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;comment&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s">&quot;reset&quot;</span>
+
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s">&quot;molecules&quot;</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
             <span class="c"># immature termination of geometry optimization</span>
             <span class="k">if</span> <span class="s">&#39;Exit Code 134&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
@@ -487,9 +576,9 @@
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<div id="searchbox" style="display: none">
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
       <input type="text" name="q" />
@@ -506,7 +595,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -515,14 +604,14 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">custodian 0.8.1 documentation</a> &raquo;</li>
-          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 0.8.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
 
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
