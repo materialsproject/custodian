@@ -27,7 +27,7 @@ from pymatgen.io.vasp.sets import MITVaspInputSet
 from monty.json import MontyDecoder
 from monty.os.path import which
 
-from custodian.custodian import Job, gzip_dir
+from custodian.custodian import Job
 from custodian.vasp.interpreter import VaspModder
 
 
@@ -41,7 +41,7 @@ VASP_OUTPUT_FILES = ['DOSCAR', 'INCAR', 'KPOINTS', 'POSCAR', 'PROCAR',
 class VaspJob(Job):
     """
     A basic vasp job. Just runs whatever is in the directory. But conceivably
-     can be a complex processing of inputs etc. with initialization.
+    can be a complex processing of inputs etc. with initialization.
     """
 
     def __init__(self, vasp_cmd, output_file="vasp.out", suffix="",
@@ -286,7 +286,7 @@ class VaspJob(Job):
                          "action": {"_file_copy": {"dest": "POSCAR"}}}]
             logging.info("Generating job = %d!" % (i+1))
             yield VaspJob(vasp_cmd, final=False, backup=backup,
-                          suffix=".relax%d" % (i+1),
+                          suffix=".relax%d" % (i+1), auto_npar=auto_npar,
                           settings_override=settings)
 
     def as_dict(self):
@@ -307,7 +307,7 @@ class VaspJob(Job):
         vis = MontyDecoder().process_decoded(d["default_vasp_input_set"])
         return VaspJob(
             vasp_cmd=d["vasp_cmd"], output_file=d["output_file"],
-            suffix=d["suffix"], final=d["final"], 
+            suffix=d["suffix"], final=d["final"],
             backup=d["backup"], default_vasp_input_set=vis,
             auto_npar=d['auto_npar'], auto_gamma=d['auto_gamma'],
             settings_override=d["settings_override"],
