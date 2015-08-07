@@ -226,6 +226,9 @@ class QChemErrorHandler(ErrorHandler):
             self.qchem_job.select_command(next_run_mode, self.qcinp)
             return next_run_mode
         else:
+            if self.fix_step.params['rem']["jobtype"] == "freq":
+                act = self.fix_not_enough_total_memory()
+                return act
             return None
 
     def fix_insufficient_static_memory(self):
