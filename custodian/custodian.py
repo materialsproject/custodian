@@ -516,7 +516,7 @@ class CustodianError(Exception):
             validator (Validator/ErrorHandler): Validator or ErrorHandler that
                 caused the exception.
         """
-        Exception.__init__(self, message)
+        super(CustodianError, self).__init__(self, message)
         self.raises = raises
         self.validator = validator
         self.message = message

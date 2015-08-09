@@ -788,7 +788,7 @@ class WalltimeHandler(ErrorHandler):
 class PBSWalltimeHandler(WalltimeHandler):
 
     def __init__(self, buffer_time=300):
-        WalltimeHandler.__init__(self, None, buffer_time=buffer_time)
+        super(PBSWalltimeHandler, self).__init__(None, buffer_time=buffer_time)
 
 
 class CheckpointHandler(ErrorHandler):
