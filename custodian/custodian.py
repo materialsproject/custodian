@@ -24,7 +24,6 @@ import time
 from glob import glob
 import tarfile
 import os
-import shutil
 from abc import ABCMeta, abstractmethod
 from itertools import islice
 
@@ -177,9 +176,10 @@ class Custodian(object):
     def _save_checkpoint(cwd, index):
         try:
             Custodian._delete_checkpoints(cwd)
-            name = shutil.make_archive(
-                pjoin(cwd, "custodian.chk.{}".format(index)), "gztar")
-            logger.info("Checkpoint written to {}".format(name))
+            n = pjoin(cwd, "custodian.chk.{}.tar.gz".format(index))
+            with tarfile.open(n,  mode="w:gz", compresslevel=3) as f:
+                f.add(cwd, arcname='.')
+            logger.info("Checkpoint written to {}".format(n))
         except Exception as ex:
             logger.info("Checkpointing failed")
             import traceback
