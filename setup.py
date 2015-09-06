@@ -1,7 +1,10 @@
-import os
+# coding: utf-8
+# Copyright (c) Pymatgen Development Team.
+# Distributed under the terms of the MIT License.
 
-from ez_setup import use_setuptools
-use_setuptools()
+import os
+from io import open
+
 from setuptools import setup, find_packages
 
 with open("README.rst") as f:
