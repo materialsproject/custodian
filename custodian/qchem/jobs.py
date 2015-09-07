@@ -3,6 +3,7 @@
 from __future__ import unicode_literals, division
 import glob
 import shlex
+import socket
 
 """
 This module implements basic kinds of jobs for QChem runs.
@@ -139,6 +140,9 @@ class QchemJob(Job):
                                 j.set_memory(total=60000, static=20000)
                             else:
                                 j.set_memory(total=60000, static=5000)
+            elif 'vesta' in socket.gethostname():
+                for j in qcinp.jobs:
+                    j.set_memory(total=7200, static=800)
         qcinp.write_file(self.input_file)
 
     @staticmethod
