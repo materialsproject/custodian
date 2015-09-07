@@ -210,7 +210,7 @@ class QchemJob(Job):
         if self.chk_file:
             cmd.append(self.chk_file)
         if self.qclog_file:
-            with open(self.qclog_file, "w") as filelog:
+            with open(self.qclog_file, "a") as filelog:
                 if tmp_clean_cmd:
                     subprocess.call(tmp_clean_cmd, stdout=filelog)
                 if tmp_creation_cmd:
