@@ -4,6 +4,7 @@ from __future__ import unicode_literals, division
 import glob
 import shlex
 import socket
+import re
 
 """
 This module implements basic kinds of jobs for QChem runs.
@@ -197,6 +198,40 @@ class QchemJob(Job):
                 shutil.copy(self.qclog_file,
                             "{}.{}.orig".format(self.qclog_file, i))
 
+    def _run_qchem(self, log_file_object=None):
+        if not 'vesta' in socket.gethostname():
+            qc_cmd = copy.deepcopy(self.current_command)
+            qc_cmd += [self.input_file, self.output_file]
+            if self.chk_file:
+                qc_cmd.append(self.chk_file)
+            if log_file_object:
+                returncode = subprocess.call(qc_cmd, stdout=log_file_object)
+            else:
+                returncode = subprocess.call(qc_cmd)
+        else:
+            # on ALCF
+            qsub_cmd = self.current_command
+            p = subprocess.Popen(qsub_cmd,
+                                 stdin=subprocess.PIPE,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE)
+            out, err = p.communicate()
+            qc_jobid = int(out.strip())
+            cqwait_cmd = shlex.split("cqwait {}".format(qc_jobid))
+            subprocess.call(cqwait_cmd)
+            output_file_name = "{}.output".format(qc_jobid)
+            cobaltlog_file_name = "{}.cobaltlog".format(qc_jobid)
+            with open(cobaltlog_file_name) as f:
+                cobaltlog_last_line = f.readlines()[-1]
+                exit_code_pattern = re.compile("an exit code of (?P<code>\d+);")
+                m = exit_code_pattern.search(cobaltlog_last_line)
+                if m:
+                    returncode = float(m.group("code"))
+                else:
+                    returncode = -99999
+            shutil.move(output_file_name, self.output_file)
+        return returncode
+
     def run(self):
         if "PBS_JOBID" in os.environ and "edique" in os.environ["PBS_JOBID"]:
             nodelist = os.environ["QCNODE"]
@@ -205,21 +240,23 @@ class QchemJob(Job):
         else:
             tmp_clean_cmd = None
             tmp_creation_cmd = None
-        cmd = copy.deepcopy(self.current_command)
-        cmd += [self.input_file, self.output_file]
-        if self.chk_file:
-            cmd.append(self.chk_file)
         if self.qclog_file:
             with open(self.qclog_file, "a") as filelog:
                 if tmp_clean_cmd:
                     subprocess.call(tmp_clean_cmd, stdout=filelog)
                 if tmp_creation_cmd:
                     subprocess.call(tmp_creation_cmd, stdout=filelog)
-                returncode = subprocess.call(cmd, stdout=filelog)
+                returncode = self._run_qchem(log_file_object=filelog)
                 if tmp_clean_cmd:
                     subprocess.call(tmp_clean_cmd, stdout=filelog)
         else:
-            returncode = subprocess.call(cmd)
+            if tmp_clean_cmd:
+                subprocess.call(tmp_clean_cmd)
+            if tmp_creation_cmd:
+                subprocess.call(tmp_creation_cmd)
+            returncode = self._run_qchem()
+            if tmp_clean_cmd:
+                subprocess.call(tmp_clean_cmd)
         return returncode
 
     def postprocess(self):
