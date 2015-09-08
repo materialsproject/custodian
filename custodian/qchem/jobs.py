@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals, division
 import glob
+import logging
 import shlex
 import socket
 import re
@@ -211,6 +212,7 @@ class QchemJob(Job):
         else:
             # on ALCF
             qsub_cmd = self.current_command
+            logging.info("The command to run QChem is {}".format(' '.join(qsub_cmd)))
             p = subprocess.Popen(qsub_cmd,
                                  stdin=subprocess.PIPE,
                                  stdout=subprocess.PIPE,
