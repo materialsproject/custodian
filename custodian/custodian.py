@@ -16,7 +16,6 @@ __email__ = "ongsp@ucsd.edu"
 __date__ = "Sep 17 2014"
 
 import logging
-import inspect
 import subprocess
 import sys
 import datetime
@@ -345,44 +344,7 @@ class Custodian(object):
         return len(corrections) > 0
 
 
-class JSONSerializable(MSONable):
-    """
-    Base class to be inherited to provide useful standard json serialization
-    and deserialization protocols based on init args.
-    """
-
-    def as_dict(self):
-        d = {"@module": self.__class__.__module__,
-             "@class": self.__class__.__name__}
-        if hasattr(self, "__init__"):
-            for c in inspect.getargspec(self.__init__).args:
-                if c != "self":
-                    a = self.__getattribute__(c)
-                    if hasattr(a, "as_dict"):
-                        a = a.as_dict()
-                    d[c] = a
-        return d
-
-    @classmethod
-    def from_dict(cls, d):
-        """
-        This method should return the ErrorHandler from a dict representation
-        of the object given by the to_dict property.
-        """
-        kwargs = {k: v for k, v in d.items()
-                  if k in inspect.getargspec(cls.__init__).args}
-        return cls(**kwargs)
-
-    @classmethod
-    def __str__(cls):
-        return cls.__name__
-
-    @classmethod
-    def __repr__(cls):
-        return cls.__name__
-
-
-class Job(six.with_metaclass(ABCMeta, JSONSerializable)):
+class Job(six.with_metaclass(ABCMeta, MSONable)):
     """
     Abstract base class defining the interface for a Job.
     """
@@ -420,7 +382,7 @@ class Job(six.with_metaclass(ABCMeta, JSONSerializable)):
         return self.__class__.__name__
 
 
-class ErrorHandler(JSONSerializable):
+class ErrorHandler(MSONable):
     """
     Abstract base class defining the interface for an ErrorHandler.
     """
@@ -482,7 +444,7 @@ class ErrorHandler(JSONSerializable):
         pass
 
 
-class Validator(six.with_metaclass(ABCMeta, JSONSerializable)):
+class Validator(six.with_metaclass(ABCMeta, MSONable)):
     """
     Abstract base class defining the interface for a Validator. A Validator
     differs from an ErrorHandler in that it does not correct a run and is run
