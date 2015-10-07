@@ -95,6 +95,7 @@ class Custodian(object):
                 fixing.
             jobs ([Job]): Sequence of Jobs to be run. Note that this can be
                 any sequence or even a generator yielding jobs.
+            validators([Validator]): Validators to ensure job success
             max_errors (int): Maximum number of errors allowed before exiting.
                 Defaults to 1.
             polling_time_step (int): The length of time in seconds between
