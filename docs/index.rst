@@ -22,6 +22,10 @@ calculations.
 Change log
 ==========
 
+v0.8.8
+------
+1. Fix setup.py.
+
 v0.8.5
 ------
 1. Refactoring to support pymatgen 3.1.4.

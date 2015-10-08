@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.qchem.jobs &mdash; custodian 0.8.6 documentation</title>
+    <title>custodian.qchem.jobs &mdash; custodian 0.8.8 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.8.6',
+        VERSION:     '0.8.8',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.8.6 documentation" href="../../../index.html" />
+    <link rel="top" title="custodian 0.8.8 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
  
 <script type="text/javascript">
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 0.8.6 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 0.8.8 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -59,7 +59,10 @@
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
 <span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">shlex</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">re</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This module implements basic kinds of jobs for QChem runs.</span>
@@ -196,6 +199,9 @@
                                 <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">60000</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">20000</span><span class="p">)</span>
                             <span class="k">else</span><span class="p">:</span>
                                 <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">60000</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s">&#39;vesta&#39;</span> <span class="ow">in</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">qcinp</span><span class="o">.</span><span class="n">jobs</span><span class="p">:</span>
+                <span class="n">j</span><span class="o">.</span><span class="n">set_memory</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">7200</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
         <span class="n">qcinp</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
@@ -250,6 +256,41 @@
                 <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qclog_file</span><span class="p">,</span>
                             <span class="s">&quot;{}.{}.orig&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qclog_file</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
 </div>
+    <span class="k">def</span> <span class="nf">_run_qchem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_file_object</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="s">&#39;vesta&#39;</span> <span class="ow">in</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">():</span>
+            <span class="n">qc_cmd</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_command</span><span class="p">)</span>
+            <span class="n">qc_cmd</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chk_file</span><span class="p">:</span>
+                <span class="n">qc_cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chk_file</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">log_file_object</span><span class="p">:</span>
+                <span class="n">returncode</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">qc_cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">log_file_object</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">returncode</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">qc_cmd</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># on ALCF</span>
+            <span class="n">qsub_cmd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_command</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;The command to run QChem is {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">qsub_cmd</span><span class="p">)))</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">qsub_cmd</span><span class="p">,</span>
+                                 <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                                 <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                                 <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+            <span class="n">out</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+            <span class="n">qc_jobid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="n">cqwait_cmd</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;cqwait {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">qc_jobid</span><span class="p">))</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">cqwait_cmd</span><span class="p">)</span>
+            <span class="n">output_file_name</span> <span class="o">=</span> <span class="s">&quot;{}.output&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">qc_jobid</span><span class="p">)</span>
+            <span class="n">cobaltlog_file_name</span> <span class="o">=</span> <span class="s">&quot;{}.cobaltlog&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">qc_jobid</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cobaltlog_file_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">cobaltlog_last_line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">exit_code_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;an exit code of (?P&lt;code&gt;\d+);&quot;</span><span class="p">)</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="n">exit_code_pattern</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">cobaltlog_last_line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                    <span class="n">returncode</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&quot;code&quot;</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">returncode</span> <span class="o">=</span> <span class="o">-</span><span class="mi">99999</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">output_file_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">returncode</span>
+
 <div class="viewcode-block" id="QchemJob.run"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.jobs.QchemJob.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="s">&quot;PBS_JOBID&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> <span class="s">&quot;edique&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;PBS_JOBID&quot;</span><span class="p">]:</span>
             <span class="n">nodelist</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;QCNODE&quot;</span><span class="p">]</span>
@@ -258,21 +299,23 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">tmp_clean_cmd</span> <span class="o">=</span> <span class="bp">None</span>
             <span class="n">tmp_creation_cmd</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="n">cmd</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_command</span><span class="p">)</span>
-        <span class="n">cmd</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chk_file</span><span class="p">:</span>
-            <span class="n">cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chk_file</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qclog_file</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qclog_file</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">filelog</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qclog_file</span><span class="p">,</span> <span class="s">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">filelog</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">tmp_clean_cmd</span><span class="p">:</span>
                     <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">tmp_clean_cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">filelog</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">tmp_creation_cmd</span><span class="p">:</span>
                     <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">tmp_creation_cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">filelog</span><span class="p">)</span>
-                <span class="n">returncode</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">filelog</span><span class="p">)</span>
+                <span class="n">returncode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_qchem</span><span class="p">(</span><span class="n">log_file_object</span><span class="o">=</span><span class="n">filelog</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">tmp_clean_cmd</span><span class="p">:</span>
                     <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">tmp_clean_cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">filelog</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">returncode</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">tmp_clean_cmd</span><span class="p">:</span>
+                <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">tmp_clean_cmd</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">tmp_creation_cmd</span><span class="p">:</span>
+                <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">tmp_creation_cmd</span><span class="p">)</span>
+            <span class="n">returncode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_qchem</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">tmp_clean_cmd</span><span class="p">:</span>
+                <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">tmp_clean_cmd</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">returncode</span>
 </div>
 <div class="viewcode-block" id="QchemJob.postprocess"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.jobs.QchemJob.postprocess">[docs]</a>    <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -318,7 +361,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 0.8.6 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 0.8.8 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
