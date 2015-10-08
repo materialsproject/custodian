@@ -16,7 +16,7 @@ from monty.io import zopen
 import shutil
 import copy
 import subprocess
-from pymatgen.io.qchem import QcInput
+from pymatgen.io.qchem import QcInput, QcOutput
 from custodian.custodian import Job, gzip_dir
 
 __author__ = "Xiaohui Qu"
@@ -211,7 +211,27 @@ class QchemJob(Job):
                 returncode = subprocess.call(qc_cmd)
         else:
             # on ALCF
-            qsub_cmd = self.current_command
+            returncode = self._run_qchem_on_alcf()
+        return returncode
+
+    def _run_qchem_on_alcf(self, log_file_object=None):
+        parent_qcinp = QcInput.from_file(self.input_file)
+        njobs = len(parent_qcinp.jobs)
+        return_codes = []
+        for i, j in enumerate(parent_qcinp.jobs):
+            qsub_cmd = copy.deepcopy(self.current_command)
+            sub_input_filename = "alcf_{}_{}".format(i+1, self.input_file)
+            sub_output_filename = "alcf_{}_{}".format(i+1, self.output_file)
+            sub_log_filename = "alcf_{}_{}".format(i+1, self.qclog_file)
+            qsub_cmd[-2] = sub_input_filename
+            sub_qcinp = QcInput([j])
+            if i > 0:
+                if j.mol == "read":
+                    prev_qcout_filename = "alcf_{}_{}".format(i+1-1, self.output_file)
+                    prev_qcout = QcOutput(prev_qcout_filename)
+                    prev_final_mol = prev_qcout.data["molecules"][-1]
+                    j.mol = prev_final_mol
+            sub_qcinp.write_file(sub_input_filename)
             logging.info("The command to run QChem is {}".format(' '.join(qsub_cmd)))
             p = subprocess.Popen(qsub_cmd,
                                  stdin=subprocess.PIPE,
@@ -228,11 +248,28 @@ class QchemJob(Job):
                 exit_code_pattern = re.compile("an exit code of (?P<code>\d+);")
                 m = exit_code_pattern.search(cobaltlog_last_line)
                 if m:
-                    returncode = float(m.group("code"))
+                    rc = float(m.group("code"))
                 else:
-                    returncode = -99999
-            shutil.move(output_file_name, self.output_file)
-        return returncode
+                    rc = -99999
+                return_codes.append(rc)
+            shutil.move(output_file_name, sub_output_filename)
+            shutil.move(cobaltlog_file_name, sub_log_filename)
+        overall_return_code = min(return_codes)
+        with open(self.output_file, "w") as out_file_object:
+            for i in range(njobs):
+                sub_output_filename = "alcf_{}_{}".format(i+1, self.output_file)
+                sub_log_filename = "alcf_{}_{}".format(i+1, self.qclog_file)
+                with open(sub_output_filename) as sub_out_file_object:
+                    header_line = ["Running Job {} of {} {}".format(i+1, njobs, self.input_file)]
+                    if i > 0:
+                        header_line = ['', ''] + header_line
+                    sub_out = sub_out_file_object.readlines()
+                    out_file_object.writelines(header_line)
+                    out_file_object.writelines(sub_out)
+                with open(sub_log_filename) as sub_log_file_object:
+                    sub_log = sub_log_file_object.readlines()
+                    log_file_object.writelines(sub_log)
+        return overall_return_code
 
     def run(self):
         if "PBS_JOBID" in os.environ and "edique" in os.environ["PBS_JOBID"]:
