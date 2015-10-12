@@ -227,7 +227,7 @@ class QchemJob(Job):
             qsub_cmd[-2] = sub_input_filename
             sub_qcinp = QcInput([j])
             if i > 0:
-                if j.mol == "read":
+                if isinstance(j.mol, str) and j.mol == "read":
                     prev_qcout_filename = "alcf_{}_{}".format(i+1-1, self.output_file)
                     prev_qcout = QcOutput(prev_qcout_filename)
                     prev_final_mol = prev_qcout.data["molecules"][-1]
