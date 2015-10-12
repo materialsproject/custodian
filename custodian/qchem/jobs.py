@@ -200,7 +200,11 @@ class QchemJob(Job):
                             "{}.{}.orig".format(self.qclog_file, i))
 
     def _run_qchem(self, log_file_object=None):
-        if not 'vesta' in socket.gethostname():
+        if 'vesta' in socket.gethostname():
+            # on ALCF
+            returncode = self._run_qchem_on_alcf()
+        else:
+
             qc_cmd = copy.deepcopy(self.current_command)
             qc_cmd += [self.input_file, self.output_file]
             if self.chk_file:
@@ -209,9 +213,6 @@ class QchemJob(Job):
                 returncode = subprocess.call(qc_cmd, stdout=log_file_object)
             else:
                 returncode = subprocess.call(qc_cmd)
-        else:
-            # on ALCF
-            returncode = self._run_qchem_on_alcf()
         return returncode
 
     def _run_qchem_on_alcf(self, log_file_object=None):
@@ -266,9 +267,10 @@ class QchemJob(Job):
                     sub_out = sub_out_file_object.readlines()
                     out_file_object.writelines(header_line)
                     out_file_object.writelines(sub_out)
-                with open(sub_log_filename) as sub_log_file_object:
-                    sub_log = sub_log_file_object.readlines()
-                    log_file_object.writelines(sub_log)
+                if log_file_object:
+                    with open(sub_log_filename) as sub_log_file_object:
+                        sub_log = sub_log_file_object.readlines()
+                        log_file_object.writelines(sub_log)
         return overall_return_code
 
     def run(self):
