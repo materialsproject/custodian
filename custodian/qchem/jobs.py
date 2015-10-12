@@ -261,7 +261,7 @@ class QchemJob(Job):
                 sub_output_filename = "alcf_{}_{}".format(i+1, self.output_file)
                 sub_log_filename = "alcf_{}_{}".format(i+1, self.qclog_file)
                 with open(sub_output_filename) as sub_out_file_object:
-                    header_line = ["Running Job {} of {} {}".format(i+1, njobs, self.input_file)]
+                    header_line = ["Running Job {} of {} {}\n".format(i+1, njobs, self.input_file)]
                     if i > 0:
                         header_line = ['', ''] + header_line
                     sub_out = sub_out_file_object.readlines()
