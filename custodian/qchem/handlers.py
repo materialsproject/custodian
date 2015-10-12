@@ -82,7 +82,8 @@ class QChemErrorHandler(ErrorHandler):
     def correct(self):
         self.backup()
         actions = []
-        error_rankings = ("autoz error",
+        error_rankings = ("pcm_solvent deprecated",
+                          "autoz error",
                           "No input text",
                           "Killed",
                           "Insufficient static memory",
@@ -143,6 +144,13 @@ class QChemErrorHandler(ErrorHandler):
                             self.fix_step.params["rem"]["cpscf_nseg"] != natoms:
                 self.fix_step.params["rem"]["cpscf_nseg"] = natoms
                 actions.append("use {} segment in CPSCF".format(natoms))
+            else:
+                return {"errors": self.errors, "actions": None}
+        elif e == "pcm_solvent deprecated":
+            solvent_params = self.fix_step.params.pop("pcm_solvent")
+            if solvent_params is not None:
+                self.fix_step.params["solvent"] = solvent_params
+                actions.append("use keyword solvent instead")
             else:
                 return {"errors": self.errors, "actions": None}
         elif e == "Exit Code 134":

@@ -684,6 +684,27 @@ class QChemErrorHandlerTest(TestCase):
                                         'Freq Job Too Small'],
                              'actions': None})
 
+    def test_pcm_solvent_deprecated(self):
+        shutil.copyfile(os.path.join(test_dir, "pcm_solvent_deprecated.qcinp"),
+                        os.path.join(scr_dir, "pcm_solvent_deprecated.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "pcm_solvent_deprecated.qcout"),
+                        os.path.join(scr_dir, "pcm_solvent_deprecated.qcout"))
+        h = QChemErrorHandler(input_file="pcm_solvent_deprecated.qcinp",
+                              output_file="pcm_solvent_deprecated.qcout")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Molecular charge is not found',
+                                        'No input text',
+                                        'pcm_solvent deprecated'],
+                             'actions': ['use keyword solvent instead']})
+        with open(os.path.join(test_dir, "pcm_solvent_deprecated_use_qc42_format.qcinp")) as f:
+            ref = [line.strip() for line in f.readlines()]
+        with open(os.path.join(scr_dir, "pcm_solvent_deprecated.qcinp")) as f:
+            ans = [line.strip() for line in f.readlines()]
+        self.assertEqual(ref, ans)
+
     def test_not_enough_total_memory(self):
         old_jobid = os.environ.get("PBS_JOBID", None)
         os.environ["PBS_JOBID"] = "hopque473945"
