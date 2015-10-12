@@ -12,7 +12,6 @@ This module implements basic kinds of jobs for QChem runs.
 """
 
 import os
-from monty.io import zopen
 import shutil
 import copy
 import subprocess
@@ -299,6 +298,32 @@ class QchemJob(Job):
             if tmp_clean_cmd:
                 subprocess.call(tmp_clean_cmd)
         return returncode
+
+    def as_dict(self):
+        d = {"@module": self.__class__.__module__,
+             "@class": self.__class__.__name__,
+             "qchem_cmd": self.qchem_cmd,
+             "input_file": self.input_file,
+             "output_file": self.output_file,
+             "chk_file": self.chk_file,
+             "qclog_file": self.qclog_file,
+             "gzipped": self.gzipped,
+             "backup": self.backup,
+             "large_static_mem": self.large_static_mem,
+             "alt_cmd": self.alt_cmd}
+        return d
+
+    @classmethod
+    def from_dict(cls, d):
+        return QchemJob(qchem_cmd=d["qchem_cmd"],
+                        input_file=d["input_file"],
+                        output_file=d["output_file"],
+                        chk_file=d["chk_file"],
+                        qclog_file=d["qclog_file"],
+                        gzipped=d["gzipped"],
+                        backup=d["backup"],
+                        alt_cmd=d["alt_cmd"],
+                        large_static_mem=d["large_static_mem"])
 
     def postprocess(self):
         if self.gzipped:
