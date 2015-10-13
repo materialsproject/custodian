@@ -34,10 +34,6 @@ test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
 scr_dir = os.path.join(test_dir, "scr")
 
 
-@unittest.skipIf(parse_version(pymatgen.__version__) <=
-                 parse_version('3.0.11'),
-                 "Folding comment text is a feature after "
-                 "version 3.0.11")
 class QChemErrorHandlerTest(TestCase):
     def setUp(self):
         os.makedirs(scr_dir)
@@ -684,6 +680,10 @@ class QChemErrorHandlerTest(TestCase):
                                         'Freq Job Too Small'],
                              'actions': None})
 
+    @unittest.skipIf(parse_version(pymatgen.__version__) <=
+                     parse_version('3.0.13'),
+                     "New QChem PCM format in pymatgen is a feature after "
+                     "version 3.0.11")
     def test_pcm_solvent_deprecated(self):
         shutil.copyfile(os.path.join(test_dir, "pcm_solvent_deprecated.qcinp"),
                         os.path.join(scr_dir, "pcm_solvent_deprecated.qcinp"))
