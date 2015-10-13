@@ -681,9 +681,9 @@ class QChemErrorHandlerTest(TestCase):
                              'actions': None})
 
     @unittest.skipIf(parse_version(pymatgen.__version__) <=
-                     parse_version('3.0.13'),
-                     "New QChem PCM format in pymatgen is a feature after "
-                     "version 3.0.11")
+                     parse_version('3.2.3'),
+                     "New QChem 4.2 PCM format in pymatgen is a feature after "
+                     "version 3.2.3")
     def test_pcm_solvent_deprecated(self):
         shutil.copyfile(os.path.join(test_dir, "pcm_solvent_deprecated.qcinp"),
                         os.path.join(scr_dir, "pcm_solvent_deprecated.qcinp"))
