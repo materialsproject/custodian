@@ -224,7 +224,10 @@ class QchemJob(Job):
             sub_output_filename = "alcf_{}_{}".format(i+1, self.output_file)
             sub_log_filename = "alcf_{}_{}".format(i+1, self.qclog_file)
             qsub_cmd[-2] = sub_input_filename
-            sub_qcinp = QcInput([j])
+            sub_qcinp = QcInput([copy.deepcopy(j)])
+            if "scf_guess" in sub_qcinp.jobs[0].params["rem"] and \
+                    sub_qcinp.jobs[0].params["rem"]["scf_guess"] == "read":
+                sub_qcinp.jobs[0].params["rem"].pop("scf_guess")
             if i > 0:
                 if isinstance(j.mol, str) and j.mol == "read":
                     prev_qcout_filename = "alcf_{}_{}".format(i+1-1, self.output_file)
