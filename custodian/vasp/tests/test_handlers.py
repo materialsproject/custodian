@@ -344,7 +344,7 @@ class MaxForceErrorHandlerTest(unittest.TestCase):
         shutil.move("POSCAR.orig", "POSCAR")
 
         self.assertEqual(poscar.structure, contcar.structure)
-        self.assertAlmostEqual(incar['EDIFF'], 0.00075)
+        self.assertAlmostEqual(incar['EDIFFG'], 0.005)
 
     def tearDown(self):
         os.chdir(cwd)

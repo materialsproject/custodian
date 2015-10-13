@@ -482,10 +482,11 @@ class MaxForceErrorHandler(ErrorHandler):
         backup(VASP_BACKUP_FILES | {self.output_filename})
         vi = VaspInput.from_directory(".")
         ediff = float(vi["INCAR"].get("EDIFF", 1e-4))
+        ediffg = float(vi["INCAR"].get("EDIFFG", ediff * 10))
         actions = [{"file": "CONTCAR",
                     "action": {"_file_copy": {"dest": "POSCAR"}}},
                    {"dict": "INCAR",
-                    "action": {"_set": {"EDIFF": ediff*0.75}}}]
+                    "action": {"_set": {"EDIFFG": ediffg*0.5}}}]
         VaspModder(vi=vi).apply_actions(actions)
 
         return {"errors": ["MaxForce"], "actions": actions}
