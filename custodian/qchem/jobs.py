@@ -218,6 +218,7 @@ class QchemJob(Job):
         parent_qcinp = QcInput.from_file(self.input_file)
         njobs = len(parent_qcinp.jobs)
         return_codes = []
+        alcf_cmds = []
         for i, j in enumerate(parent_qcinp.jobs):
             qsub_cmd = copy.deepcopy(self.current_command)
             sub_input_filename = "alcf_{}_{}".format(i+1, self.input_file)
@@ -236,6 +237,7 @@ class QchemJob(Job):
                     j.mol = prev_final_mol
             sub_qcinp.write_file(sub_input_filename)
             logging.info("The command to run QChem is {}".format(' '.join(qsub_cmd)))
+            alcf_cmds.append(qsub_cmd)
             p = subprocess.Popen(qsub_cmd,
                                  stdin=subprocess.PIPE,
                                  stdout=subprocess.PIPE,
@@ -259,15 +261,16 @@ class QchemJob(Job):
             shutil.move(cobaltlog_file_name, sub_log_filename)
         overall_return_code = min(return_codes)
         with open(self.output_file, "w") as out_file_object:
-            for i in range(njobs):
+            for i, job_cmd in zip(range(njobs), alcf_cmds):
                 sub_output_filename = "alcf_{}_{}".format(i+1, self.output_file)
                 sub_log_filename = "alcf_{}_{}".format(i+1, self.qclog_file)
                 with open(sub_output_filename) as sub_out_file_object:
-                    header_line = ["Running Job {} of {} {}\n".format(i+1, njobs, self.input_file)]
+                    header_lines = ["Running Job {} of {} {}\n".format(i + 1, njobs, self.input_file),
+                                    " ".join(job_cmd) + "\n"]
                     if i > 0:
-                        header_line = ['', ''] + header_line
+                        header_lines = ['', ''] + header_lines
                     sub_out = sub_out_file_object.readlines()
-                    out_file_object.writelines(header_line)
+                    out_file_object.writelines(header_lines)
                     out_file_object.writelines(sub_out)
                 if log_file_object:
                     with open(sub_log_filename) as sub_log_file_object:
