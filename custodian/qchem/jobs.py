@@ -143,7 +143,7 @@ class QchemJob(Job):
                                 j.set_memory(total=60000, static=5000)
         elif 'vesta' in socket.gethostname():
             for j in qcinp.jobs:
-                j.set_memory(total=7200, static=800)
+                j.set_memory(total=13500, static=800)
         qcinp.write_file(self.input_file)
 
     @staticmethod
