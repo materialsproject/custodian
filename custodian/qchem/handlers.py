@@ -224,7 +224,8 @@ class QChemErrorHandler(ErrorHandler):
         if "thresh" not in self.fix_step.params["rem"]:
             self.fix_step.set_integral_threshold(thresh=12)
             return "use tight integral threshold"
-        elif not self.qchem_job.is_openmp_compatible(self.qcinp):
+        elif (not self.qchem_job.is_openmp_compatible(self.qcinp)) or \
+                (not self.qchem_job.command_available("openmp")):
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"

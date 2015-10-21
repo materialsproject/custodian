@@ -157,6 +157,12 @@ class QchemJob(Job):
                 return False
         return True
 
+    def command_available(self, cmd_name):
+        available_commands = ["general"]
+        if self.alt_cmd:
+            available_commands.extend(self.alt_cmd.keys())
+        return cmd_name in available_commands
+
     def select_command(self, cmd_name, qcinp=None):
         """
         Set the command to run QChem by name. "general" set to the default one.
@@ -168,10 +174,7 @@ class QchemJob(Job):
             True: success
             False: failed
         """
-        available_commands = ["general"]
-        if self.alt_cmd:
-            available_commands.extend(self.alt_cmd.keys())
-        if cmd_name not in available_commands:
+        if not self.command_available(cmd_name):
             raise Exception("Command mode \"{cmd_name}\" is not available".format(cmd_name=cmd_name))
         if cmd_name == "general":
             self.current_command = self.qchem_cmd
@@ -219,6 +222,7 @@ class QchemJob(Job):
         njobs = len(parent_qcinp.jobs)
         return_codes = []
         alcf_cmds = []
+        qc_jobids = []
         for i, j in enumerate(parent_qcinp.jobs):
             qsub_cmd = copy.deepcopy(self.current_command)
             sub_input_filename = "alcf_{}_{}".format(i+1, self.input_file)
@@ -244,6 +248,7 @@ class QchemJob(Job):
                                  stderr=subprocess.PIPE)
             out, err = p.communicate()
             qc_jobid = int(out.strip())
+            qc_jobids.append(qc_jobid)
             cqwait_cmd = shlex.split("cqwait {}".format(qc_jobid))
             subprocess.call(cqwait_cmd)
             output_file_name = "{}.output".format(qc_jobid)
@@ -261,7 +266,7 @@ class QchemJob(Job):
             shutil.move(cobaltlog_file_name, sub_log_filename)
         overall_return_code = min(return_codes)
         with open(self.output_file, "w") as out_file_object:
-            for i, job_cmd in zip(range(njobs), alcf_cmds):
+            for i, job_cmd, rc, qc_jobid in zip(range(njobs), alcf_cmds, return_codes, qc_jobids):
                 sub_output_filename = "alcf_{}_{}".format(i+1, self.output_file)
                 sub_log_filename = "alcf_{}_{}".format(i+1, self.qclog_file)
                 with open(sub_output_filename) as sub_out_file_object:
@@ -272,6 +277,8 @@ class QchemJob(Job):
                     sub_out = sub_out_file_object.readlines()
                     out_file_object.writelines(header_lines)
                     out_file_object.writelines(sub_out)
+                    if rc < 0:
+                        out_file_object.writelines(["Application {} exit codes: {}\n".format(qc_jobid, rc)])
                 if log_file_object:
                     with open(sub_log_filename) as sub_log_file_object:
                         sub_log = sub_log_file_object.readlines()
