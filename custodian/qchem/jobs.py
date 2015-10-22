@@ -277,7 +277,7 @@ class QchemJob(Job):
                     sub_out = sub_out_file_object.readlines()
                     out_file_object.writelines(header_lines)
                     out_file_object.writelines(sub_out)
-                    if rc < 0:
+                    if rc < 0 and rc != -99999:
                         out_file_object.writelines(["Application {} exit codes: {}\n".format(qc_jobid, rc)])
                 if log_file_object:
                     with open(sub_log_filename) as sub_log_file_object:
