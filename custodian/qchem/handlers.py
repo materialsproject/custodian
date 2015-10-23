@@ -147,7 +147,7 @@ class QChemErrorHandler(ErrorHandler):
             else:
                 return {"errors": self.errors, "actions": None}
         elif e == "pcm_solvent deprecated":
-            solvent_params = self.fix_step.params.pop("pcm_solvent")
+            solvent_params = self.fix_step.params.pop("pcm_solvent", None)
             if solvent_params is not None:
                 self.fix_step.params["solvent"] = solvent_params
                 actions.append("use keyword solvent instead")
