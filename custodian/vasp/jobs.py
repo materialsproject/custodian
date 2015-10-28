@@ -290,10 +290,14 @@ class VaspJob(Job):
                           settings_override=settings)
 
     def as_dict(self):
+	try:
+		default_vasp_input_set = self.default_vis.as_dict()
+	except:
+		default_vasp_input_set = self.default_vis
         d = dict(vasp_cmd=self.vasp_cmd,
                  output_file=self.output_file, suffix=self.suffix,
                  final=self.final, backup=self.backup,
-                 default_vasp_input_set=self.default_vis.as_dict(),
+                 default_vasp_input_set=default_vasp_input_set,
                  auto_npar=self.auto_npar, auto_gamma=self.auto_gamma,
                  settings_override=self.settings_override,
                  gamma_vasp_cmd=self.gamma_vasp_cmd
