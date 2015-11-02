@@ -205,7 +205,7 @@ class QchemJob(Job):
     def _run_qchem(self, log_file_object=None):
         if 'vesta' in socket.gethostname():
             # on ALCF
-            returncode = self._run_qchem_on_alcf()
+            returncode = self._run_qchem_on_alcf(log_file_object=log_file_object)
         else:
 
             qc_cmd = copy.deepcopy(self.current_command)
