@@ -6,6 +6,7 @@ import logging
 import shlex
 import socket
 import re
+import time
 
 """
 This module implements basic kinds of jobs for QChem runs.
@@ -262,6 +263,26 @@ class QchemJob(Job):
                 else:
                     rc = -99999
                 return_codes.append(rc)
+            for name_change_trial in range(10):
+                if not os.path.exists(output_file_name):
+                    message = "{} is not found in {}, {}th wait " \
+                              "for 5 mins\n".format(
+                                    output_file_name,
+                                    os.getcwd(), name_change_trial)
+                    logging.info(message)
+                    if log_file_object:
+                        log_file_object.writelines([message])
+                    time.sleep(60 * 5)
+                    pass
+                else:
+                    message = "Found qchem output file {} in {}, change file " \
+                              "name\n".format(output_file_name,
+                                              os.getcwd(),
+                                              name_change_trial)
+                    logging.info(message)
+                    if log_file_object:
+                        log_file_object.writelines([message])
+                    break
             shutil.move(output_file_name, sub_output_filename)
             shutil.move(cobaltlog_file_name, sub_log_filename)
         overall_return_code = min(return_codes)
