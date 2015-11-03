@@ -283,6 +283,8 @@ class QchemJob(Job):
                     if log_file_object:
                         log_file_object.writelines([message])
                     break
+            log_file_object.flush()
+            os.fsync(log_file_object.fileno())
             shutil.move(output_file_name, sub_output_filename)
             shutil.move(cobaltlog_file_name, sub_log_filename)
         overall_return_code = min(return_codes)
