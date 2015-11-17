@@ -17,6 +17,7 @@ import unittest
 
 from pkg_resources import parse_version
 import pymatgen
+import copy
 
 from custodian.qchem.handlers import QChemErrorHandler
 from custodian.qchem.jobs import QchemJob
@@ -39,6 +40,54 @@ class QChemErrorHandlerTest(TestCase):
         os.makedirs(scr_dir)
         os.chdir(scr_dir)
 
+
+    @classmethod
+    def _revert_scf_fix_strategy_to_version(cls, old_lines, fix_version="1.0"):
+        old_lines = copy.deepcopy(old_lines)
+        start_index = 0
+        end_index = 0
+        for i, v in enumerate(old_lines):
+            if "<SCF Fix Strategy>" in v:
+                start_index = i + 1
+                break
+        for i, v in enumerate(old_lines):
+            if "</SCF Fix Strategy>" in v:
+                end_index = i
+                break
+        old_strategy_text = old_lines[start_index: end_index]
+        old_strategy = json.loads("\n".join(["{"] + old_strategy_text + ["}"]))
+        target_version_strategy = dict()
+        if fix_version == "1.0":
+            target_version_strategy["current_method_id"] = old_strategy["current_method_id"]
+            if old_strategy["methods"][1] == "rca_diis":
+                methods_list = ["increase_iter", "rca_diis", "gwh",
+                                "gdm", "rca", "core+rca"]
+            else:
+                methods_list = ["increase_iter", "diis_gdm", "gwh",
+                                "rca", "gdm", "core+gdm"]
+            target_version_strategy["methods"] = methods_list
+        elif fix_version == "2.0":
+            target_version_strategy["current_method_id"] = old_strategy["current_method_id"]
+            if old_strategy["methods"][1] == "rca_diis":
+                methods_list = ["increase_iter", "rca_diis", "gwh",
+                                "gdm", "rca", "core+rca", "fon"]
+            else:
+                methods_list = ["increase_iter", "diis_gdm", "gwh",
+                                "rca", "gdm", "core+gdm", "fon"]
+            target_version_strategy["methods"] = methods_list
+            target_version_strategy["version"] = old_strategy["version"]
+        else:
+            raise ValueError("Revert to SCF Fix Strategy Version \"{}\" is not "
+                             "supported yet".format(fix_version))
+        target_version_strategy_text = json.dumps(target_version_strategy,
+                                                  indent=4, sort_keys=True)
+        stripped_target_stragy_lines = [line.strip() for line in
+                                        target_version_strategy_text.split("\n")]
+        target_lines = copy.deepcopy(old_lines)
+        target_lines[start_index: end_index] = stripped_target_stragy_lines[1: -1]
+        return target_lines
+
+
     def test_scf_rca(self):
         shutil.copyfile(os.path.join(test_dir, "hf_rca.inp"),
                         os.path.join(scr_dir, "hf_rca.inp"))
@@ -57,6 +106,7 @@ class QChemErrorHandlerTest(TestCase):
             ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_rca.inp")) as f:
             ans = [line.strip() for line in f.readlines()]
+        ans = self._revert_scf_fix_strategy_to_version(ans, fix_version="1.0")
         self.assertEqual(ref, ans)
 
         shutil.copyfile(os.path.join(test_dir, "hf_rca_tried_0.inp"),
@@ -273,6 +323,7 @@ class QChemErrorHandlerTest(TestCase):
             ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_gdm.inp")) as f:
             ans = [line.strip() for line in f.readlines()]
+        ans = self._revert_scf_fix_strategy_to_version(ans, fix_version="1.0")
         self.assertEqual(ref, ans)
         shutil.copyfile(os.path.join(test_dir, "hf_gdm_tried_0.inp"),
                         os.path.join(scr_dir, "hf_gdm_tried_0.inp"))

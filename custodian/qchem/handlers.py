@@ -320,12 +320,13 @@ class QChemErrorHandler(ErrorHandler):
             scf_iters = od["scf_iteration_energies"][-1]
             if scf_iters[-1][1] >= self.rca_gdm_thresh:
                 strategy["methods"] = ["increase_iter", "rca_diis", "gwh",
-                                       "gdm", "rca", "core+rca"]
+                                       "gdm", "rca", "core+rca", "fon"]
                 strategy["current_method_id"] = 0
             else:
                 strategy["methods"] = ["increase_iter", "diis_gdm", "gwh",
-                                       "rca", "gdm", "core+gdm"]
+                                       "rca", "gdm", "core+gdm", "fon"]
                 strategy["current_method_id"] = 0
+            strategy["version"] = 2.0
 
         # noinspection PyTypeChecker
         if strategy == "reset":
