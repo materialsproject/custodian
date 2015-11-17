@@ -83,8 +83,11 @@ class QchemJob(Job):
     @classmethod
     def _modify_qchem_according_to_version(cls, qchem_cmd):
         cmd2 = copy.deepcopy(qchem_cmd)
-        from rubicon.utils.qchem_info import get_qchem_version
-        cur_version = get_qchem_version()
+        try:
+            from rubicon.utils.qchem_info import get_qchem_version
+            cur_version = get_qchem_version()
+        except:
+            cur_version = "4.3.0"
         if cur_version >= parse_version("4.3.0"):
             if cmd2[0] == "qchem":
                 if "-dbg" not in cmd2:
