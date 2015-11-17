@@ -104,7 +104,7 @@ class QchemJob(Job):
                 cmd2.remove("-dbg")
             if "-pbs" in cmd2:
                 cmd2.remove("-pbs")
-
+        return cmd2
 
     def _set_qchem_memory(self, qcinp=None):
         if not qcinp:
