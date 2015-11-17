@@ -215,17 +215,11 @@ class QChemErrorHandler(ErrorHandler):
 
     def fix_error_code_134(self):
 
-        next_run_mode = "openmp"
-        if "PBS_JOBID" in os.environ and \
-                ("hopque" in os.environ["PBS_JOBID"] or
-                 "edique" in os.environ["PBS_JOBID"]):
-            next_run_mode = "general"
-
         if "thresh" not in self.fix_step.params["rem"]:
             self.fix_step.set_integral_threshold(thresh=12)
             return "use tight integral threshold"
-        elif (not self.qchem_job.is_openmp_compatible(self.qcinp)) or \
-                (not self.qchem_job.command_available("openmp")):
+        elif not (self.qchem_job.is_openmp_compatible(self.qcinp) and
+                      self.qchem_job.command_available("openmp")):
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
@@ -234,9 +228,9 @@ class QChemErrorHandler(ErrorHandler):
                     act = self.fix_not_enough_total_memory()
                     return act
                 return None
-        elif self.qchem_job.current_command_name != next_run_mode:
-            self.qchem_job.select_command(next_run_mode, self.qcinp)
-            return next_run_mode
+        elif self.qchem_job.current_command_name != "openmp":
+            self.qchem_job.select_command("openmp", self.qcinp)
+            return "openmp"
         else:
             if self.fix_step.params['rem']["jobtype"] == "freq":
                 act = self.fix_not_enough_total_memory()
