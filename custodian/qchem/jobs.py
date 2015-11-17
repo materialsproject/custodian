@@ -8,6 +8,8 @@ import socket
 import re
 import time
 
+from pkg_resources import parse_version
+
 """
 This module implements basic kinds of jobs for QChem runs.
 """
@@ -81,6 +83,28 @@ class QchemJob(Job):
                      "edique" in os.environ["PBS_JOBID"]):
                 self.select_command("openmp")
         self._set_qchem_memory()
+
+
+    @classmethod
+    def _modify_qchem_according_to_version(cls, qchem_cmd):
+        cmd2 = copy.deepcopy(qchem_cmd)
+        from rubicon.utils.qchem_info import get_qchem_version
+        cur_version = get_qchem_version()
+        if cur_version >= parse_version("4.3.0"):
+            if cmd2[0] == "qchem":
+                if "-dbg" not in cmd2:
+                    cmd2.insert(1, "-dbg")
+                if "PBS_JOBID" in os.environ and \
+                        ("hopque" in os.environ["PBS_JOBID"] or
+                         "edique" in os.environ["PBS_JOBID"]):
+                    if "-pbs" not in cmd2:
+                        cmd2.insert(2, "-pbs")
+        else:
+            if "-dbg" in cmd2:
+                cmd2.remove("-dbg")
+            if "-pbs" in cmd2:
+                cmd2.remove("-pbs")
+
 
     def _set_qchem_memory(self, qcinp=None):
         if not qcinp:
