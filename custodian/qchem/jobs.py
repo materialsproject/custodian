@@ -95,6 +95,8 @@ class QchemJob(Job):
             if cmd2[0] == "qchem":
                 if "-dbg" not in cmd2:
                     cmd2.insert(1, "-dbg")
+                if "-seq" in cmd2:
+                    cmd2.remove("-seq")
                 if "PBS_JOBID" in os.environ and \
                         ("hopque" in os.environ["PBS_JOBID"] or
                          "edique" in os.environ["PBS_JOBID"]):
