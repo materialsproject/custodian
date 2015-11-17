@@ -385,6 +385,18 @@ class QChemErrorHandler(ErrorHandler):
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="gdm", iterations=self.scf_max_cycles)
                 self.set_scf_initial_guess("core")
+            elif method == "fon":
+                self.fix_step.set_scf_algorithm_and_iterations(
+                    algorithm="diis", iterations=self.scf_max_cycles)
+                self.set_scf_initial_guess("sad")
+                natoms = len(od["molecules"][-1])
+                self.fix_step.params["rem"]["occupations"] = 2
+                self.fix_step.params["rem"]["fon_norb"] = int(natoms * 0.618)
+                self.fix_step.params["rem"]["fon_t_start"] = 300
+                self.fix_step.params["rem"]["fon_t_end"] = 300
+                self.fix_step.params["rem"]["fon_e_thresh"] = 6
+                self.fix_step.set_integral_threshold(14)
+                self.fix_step.set_scf_convergence_threshold(7)
             else:
                 raise ValueError("fix method " + method + " is not supported")
             strategy_text = "<SCF Fix Strategy>"

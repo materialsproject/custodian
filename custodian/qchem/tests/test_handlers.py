@@ -218,6 +218,29 @@ class QChemErrorHandlerTest(TestCase):
                                         'Molecular charge is not found'],
                              'actions': None})
 
+
+    def test_scf_fon(self):
+        shutil.copyfile(os.path.join(test_dir, "hf_rca_hit_5.inp"),
+                        os.path.join(scr_dir, "hf_rca_hit_5.inp"))
+        shutil.copyfile(os.path.join(test_dir, "hf_rca.out"),
+                        os.path.join(scr_dir, "hf_rca.out"))
+        h = QChemErrorHandler(input_file="hf_rca_hit_5.inp",
+                              output_file="hf_rca.out")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
+                                        'Molecular charge is not found'],
+                             'actions': ['fon']})
+        with open(os.path.join(test_dir, "hf_rca_hit_5_fon.inp")) as f:
+            ref = [line.strip() for line in f.readlines()]
+        with open(os.path.join(scr_dir, "hf_rca_hit_5.inp")) as f:
+            ans = [line.strip() for line in f.readlines()]
+        ans = self._revert_scf_fix_strategy_to_version(ans, fix_version="2.0")
+        self.assertEqual(ref, ans)
+
+
     def test_negative_eigen(self):
         shutil.copyfile(os.path.join(test_dir, "negative_eigen.qcinp"),
                         os.path.join(scr_dir, "negative_eigen.qcinp"))
