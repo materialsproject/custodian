@@ -235,6 +235,7 @@ class QchemJob(Job):
 
             qc_cmd = copy.deepcopy(self.current_command)
             qc_cmd += [self.input_file, self.output_file]
+            qc_cmd = [str(t) for t in qc_cmd]
             if self.chk_file:
                 qc_cmd.append(self.chk_file)
             if log_file_object:
