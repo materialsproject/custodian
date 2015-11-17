@@ -62,7 +62,7 @@ class QchemJob(Job):
                               "half_cpus": ["qchem", "-np", "12"]}
             large_static_mem: use ultra large static memory
         """
-        self.qchem_cmd = copy.deepcopy(qchem_cmd)
+        self.qchem_cmd = self._modify_qchem_according_to_version(copy.deepcopy(qchem_cmd))
         self.input_file = input_file
         self.output_file = output_file
         self.chk_file = chk_file
