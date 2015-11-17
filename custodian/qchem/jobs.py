@@ -72,7 +72,8 @@ class QchemJob(Job):
         self.current_command = self.qchem_cmd
         self.current_command_name = "general"
         self.large_static_mem = large_static_mem
-        self.alt_cmd = copy.deepcopy(alt_cmd)
+        self.alt_cmd = {k: self._modify_qchem_according_to_version(c)
+                        for k, c in copy.deepcopy(alt_cmd).items()}
         available_commands = ["general"]
         if self.alt_cmd:
             available_commands.extend(self.alt_cmd.keys())
