@@ -8,7 +8,7 @@ from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from custodian.ansible.interpreter import Modder
 
-from pymatgen.io.gaussianio import GaussianOutput, GaussianInput
+from pymatgen.io.gaussian import GaussianOutput, GaussianInput
 
 
 
