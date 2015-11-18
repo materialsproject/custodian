@@ -16,7 +16,7 @@ import os
 import re
 import tarfile
 from pymatgen.core.structure import Molecule
-from pymatgen.io.qchemio import QcOutput, QcInput, QcTask
+from pymatgen.io.qchem import QcOutput, QcInput, QcTask
 from custodian.custodian import ErrorHandler
 
 __author__ = "Xiaohui Qu"
@@ -82,11 +82,12 @@ class QChemErrorHandler(ErrorHandler):
     def correct(self):
         self.backup()
         actions = []
-
-        error_rankings = ("autoz error",
+        error_rankings = ("pcm_solvent deprecated",
+                          "autoz error",
                           "No input text",
                           "Killed",
                           "Insufficient static memory",
+                          "Not Enough Total Memory",
                           "NAN values",
                           "Bad SCF convergence",
                           "Geometry optimization failed",
@@ -145,6 +146,13 @@ class QChemErrorHandler(ErrorHandler):
                 actions.append("use {} segment in CPSCF".format(natoms))
             else:
                 return {"errors": self.errors, "actions": None}
+        elif e == "pcm_solvent deprecated":
+            solvent_params = self.fix_step.params.pop("pcm_solvent", None)
+            if solvent_params is not None:
+                self.fix_step.params["solvent"] = solvent_params
+                actions.append("use keyword solvent instead")
+            else:
+                return {"errors": self.errors, "actions": None}
         elif e == "Exit Code 134":
             act = self.fix_error_code_134()
             if act:
@@ -163,6 +171,12 @@ class QChemErrorHandler(ErrorHandler):
                 actions.append(act)
             else:
                 return {"errors": self.errors, "actions": None}
+        elif e == "Not Enough Total Memory":
+            act = self.fix_not_enough_total_memory()
+            if act:
+                actions.append(act)
+            else:
+                return {"errors": self.errors, "actions": None}
         elif e == "Molecular charge is not found":
             return {"errors": self.errors, "actions": None}
         elif e == "Molecular spin multipilicity is not found":
@@ -172,27 +186,55 @@ class QChemErrorHandler(ErrorHandler):
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "actions": actions}
 
-    def fix_error_code_134(self):
-
-        next_run_mode = "openmp"
-        if "PBS_JOBID" in os.environ and \
-                ("hopque" in os.environ["PBS_JOBID"] or
-                 "edique" in os.environ["PBS_JOBID"]):
-            next_run_mode = "general"
-
-        if "thresh" not in self.fix_step.params["rem"]:
-            self.fix_step.set_integral_threshold(thresh=12)
-            return "use tight integral threshold"
+    def fix_not_enough_total_memory(self):
+        if self.fix_step.params['rem']["jobtype"] == "freq":
+            ncpu = 1
+            if "PBS_JOBID" in os.environ and \
+                    ("hopque" in os.environ["PBS_JOBID"] or
+                     "edique" in os.environ["PBS_JOBID"]):
+                ncpu = 24
+            natoms = len(self.qcinp.jobs[0].mol)
+            times_ncpu_full = int(natoms/ncpu)
+            nsegment_full = ncpu * times_ncpu_full
+            times_ncpu_half = int(natoms/(ncpu/2))
+            nsegment_half = int((ncpu/2) * times_ncpu_half)
+            if "cpscf_nseg" not in self.fix_step.params["rem"]:
+                self.fix_step.params["rem"]["cpscf_nseg"] = nsegment_full
+                return "Use {} CPSCF segments".format(nsegment_full)
+            elif self.fix_step.params["rem"]["cpscf_nseg"] < nsegment_half:
+                self.qchem_job.select_command("half_cpus", self.qcinp)
+                self.fix_step.params["rem"]["cpscf_nseg"] = nsegment_half
+                return "Use half CPUs and {} CPSCF segments".format(nsegment_half)
+            return None
         elif not self.qchem_job.is_openmp_compatible(self.qcinp):
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
             else:
                 return None
-        elif self.qchem_job.current_command_name != next_run_mode:
-            self.qchem_job.select_command(next_run_mode, self.qcinp)
-            return next_run_mode
+
+    def fix_error_code_134(self):
+
+        if "thresh" not in self.fix_step.params["rem"]:
+            self.fix_step.set_integral_threshold(thresh=12)
+            return "use tight integral threshold"
+        elif not (self.qchem_job.is_openmp_compatible(self.qcinp) and
+                      self.qchem_job.command_available("openmp")):
+            if self.qchem_job.current_command_name != "half_cpus":
+                self.qchem_job.select_command("half_cpus", self.qcinp)
+                return "half_cpus"
+            else:
+                if self.fix_step.params['rem']["jobtype"] == "freq":
+                    act = self.fix_not_enough_total_memory()
+                    return act
+                return None
+        elif self.qchem_job.current_command_name != "openmp":
+            self.qchem_job.select_command("openmp", self.qcinp)
+            return "openmp"
         else:
+            if self.fix_step.params['rem']["jobtype"] == "freq":
+                act = self.fix_not_enough_total_memory()
+                return act
             return None
 
     def fix_insufficient_static_memory(self):
@@ -278,12 +320,13 @@ class QChemErrorHandler(ErrorHandler):
             scf_iters = od["scf_iteration_energies"][-1]
             if scf_iters[-1][1] >= self.rca_gdm_thresh:
                 strategy["methods"] = ["increase_iter", "rca_diis", "gwh",
-                                       "gdm", "rca", "core+rca"]
+                                       "gdm", "rca", "core+rca", "fon"]
                 strategy["current_method_id"] = 0
             else:
                 strategy["methods"] = ["increase_iter", "diis_gdm", "gwh",
-                                       "rca", "gdm", "core+gdm"]
+                                       "rca", "gdm", "core+gdm", "fon"]
                 strategy["current_method_id"] = 0
+            strategy["version"] = 2.0
 
         # noinspection PyTypeChecker
         if strategy == "reset":
@@ -342,6 +385,18 @@ class QChemErrorHandler(ErrorHandler):
                 self.fix_step.set_scf_algorithm_and_iterations(
                     algorithm="gdm", iterations=self.scf_max_cycles)
                 self.set_scf_initial_guess("core")
+            elif method == "fon":
+                self.fix_step.set_scf_algorithm_and_iterations(
+                    algorithm="diis", iterations=self.scf_max_cycles)
+                self.set_scf_initial_guess("sad")
+                natoms = len(od["molecules"][-1])
+                self.fix_step.params["rem"]["occupations"] = 2
+                self.fix_step.params["rem"]["fon_norb"] = int(natoms * 0.618)
+                self.fix_step.params["rem"]["fon_t_start"] = 300
+                self.fix_step.params["rem"]["fon_t_end"] = 300
+                self.fix_step.params["rem"]["fon_e_thresh"] = 6
+                self.fix_step.set_integral_threshold(14)
+                self.fix_step.set_scf_convergence_threshold(7)
             else:
                 raise ValueError("fix method " + method + " is not supported")
             strategy_text = "<SCF Fix Strategy>"

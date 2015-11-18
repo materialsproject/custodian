@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Change log &mdash; custodian 0.8.1 documentation</title>
+    <title>Change log &mdash; custodian 0.8.8 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.8.1',
+        VERSION:     '0.8.8',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.8.1 documentation" href="#" />
+    <link rel="top" title="custodian 0.8.8 documentation" href="#" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -33,8 +33,8 @@
 </script>
 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,14 +43,14 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.8.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="#">custodian 0.8.8 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <p>Custodian is a simple, robust and flexible just-in-time (JIT) job management
 framework written in Python. Using custodian, you can create wrappers that
@@ -71,6 +71,24 @@ handling for Vienna Ab Initio Simulation Package (VASP), NwChem and QChem
 calculations.</p>
 <div class="section" id="change-log">
 <h1>Change log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="v0-8-8">
+<h2>v0.8.8<a class="headerlink" href="#v0-8-8" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Fix setup.py.</li>
+</ol>
+</div>
+<div class="section" id="v0-8-5">
+<h2>v0.8.5<a class="headerlink" href="#v0-8-5" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Refactoring to support pymatgen 3.1.4.</li>
+</ol>
+</div>
+<div class="section" id="v0-8-2">
+<h2>v0.8.2<a class="headerlink" href="#v0-8-2" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Made auto_npar optional for double relaxation VASP run.</li>
+</ol>
+</div>
 <div class="section" id="v0-8-1">
 <h2>v0.8.1<a class="headerlink" href="#v0-8-1" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
@@ -146,14 +164,14 @@ VASP, NwChem and Qchem. Please install using:</p>
 <p>The main class in the workflow is known as Custodian, which manages a series
 of jobs with a list of error handlers. The general workflow for Custodian is
 presented in the figure below.</p>
-<div class="align-center figure">
+<div class="align-center figure" id="id1">
 <a class="reference internal image-reference" href="_images/Custodian.png"><img alt="Custodian workflow" src="_images/Custodian.png" style="width: 500px;" /></a>
-<p class="caption">Overview of the Custodian workflow.</p>
+<p class="caption"><span class="caption-text">Overview of the Custodian workflow.</span></p>
 </div>
 <p>The Custodian class takes in two general inputs - a <strong>list of Jobs</strong> and
 a <strong>list of ErrorHandlers</strong>. <strong>Jobs</strong> should be subclasses of the
-<a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Job</span></tt></a> abstract base class and <strong>ErrorHandlers</strong>
-should be subclasses of the <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><tt class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></tt></a> abstract
+<a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Job</span></code></a> abstract base class and <strong>ErrorHandlers</strong>
+should be subclasses of the <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a> abstract
 base class. To use custodian, you need to implement concrete implementations
 of these abstract base classes.</p>
 <div class="section" id="simple-example">
@@ -326,8 +344,8 @@ random or otherwise. Such errors become a major issue in projects that
 performs such calculations in high throughput, such as the <a class="reference external" href="https://www.materialsproject.org">Materials
 Project</a>.</p>
 <p>The Custodian package comes with a fairly comprehensive plugin to deal
-with jobs (<a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.jobs" title="custodian.vasp.jobs"><tt class="xref py py-mod docutils literal"><span class="pre">custodian.vasp.jobs</span></tt></a>) and errors
-(<a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.handlers" title="custodian.vasp.handlers"><tt class="xref py py-mod docutils literal"><span class="pre">custodian.vasp.handlers</span></tt></a>) in electronic structure calculations based
+with jobs (<a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.jobs" title="custodian.vasp.jobs"><code class="xref py py-mod docutils literal"><span class="pre">custodian.vasp.jobs</span></code></a>) and errors
+(<a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.handlers" title="custodian.vasp.handlers"><code class="xref py py-mod docutils literal"><span class="pre">custodian.vasp.handlers</span></code></a>) in electronic structure calculations based
 on the Vienna Ab Initio Simulation Package (VASP). To do this,
 Custodian uses the Python Materials Genomics (<a class="reference external" href="https://pypi.python.org/pypi/pymatgen">pymatgen</a>) package to
 perform analysis and io from VASP input and output files.</p>
@@ -408,11 +426,14 @@ DEALINGS IN THE SOFTWARE.
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Change log</a><ul>
+<li><a class="reference internal" href="#v0-8-8">v0.8.8</a></li>
+<li><a class="reference internal" href="#v0-8-5">v0.8.5</a></li>
+<li><a class="reference internal" href="#v0-8-2">v0.8.2</a></li>
 <li><a class="reference internal" href="#v0-8-1">v0.8.1</a></li>
 <li><a class="reference internal" href="#v0-8-0">v0.8.0</a></li>
 </ul>
@@ -436,12 +457,14 @@ DEALINGS IN THE SOFTWARE.
 <li><a class="reference internal" href="#license">License</a></li>
 </ul>
 
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/index.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -458,7 +481,7 @@ DEALINGS IN THE SOFTWARE.
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -467,13 +490,13 @@ DEALINGS IN THE SOFTWARE.
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">custodian 0.8.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="#">custodian 0.8.8 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

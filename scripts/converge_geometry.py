@@ -19,7 +19,7 @@ from custodian.custodian import Custodian
 from custodian.vasp.handlers import VaspErrorHandler, UnconvergedErrorHandler, \
     MeshSymmetryErrorHandler, NonConvergingErrorHandler, PotimErrorHandler
 from custodian.vasp.jobs import VaspJob
-from pymatgen.io.vaspio.vasp_output import Vasprun
+from pymatgen.io.vasp import Vasprun
 
 
 FORMAT = '%(asctime)s %(message)s'

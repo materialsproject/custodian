@@ -17,6 +17,7 @@ import unittest
 
 from pkg_resources import parse_version
 import pymatgen
+import copy
 
 from custodian.qchem.handlers import QChemErrorHandler
 from custodian.qchem.jobs import QchemJob
@@ -34,14 +35,58 @@ test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
 scr_dir = os.path.join(test_dir, "scr")
 
 
-@unittest.skipIf(parse_version(pymatgen.__version__) <=
-                 parse_version('3.0.11'),
-                 "Folding comment text is a feature after "
-                 "version 3.0.11")
 class QChemErrorHandlerTest(TestCase):
     def setUp(self):
         os.makedirs(scr_dir)
         os.chdir(scr_dir)
+
+
+    @classmethod
+    def _revert_scf_fix_strategy_to_version(cls, old_lines, fix_version="1.0"):
+        old_lines = copy.deepcopy(old_lines)
+        start_index = 0
+        end_index = 0
+        for i, v in enumerate(old_lines):
+            if "<SCF Fix Strategy>" in v:
+                start_index = i + 1
+                break
+        for i, v in enumerate(old_lines):
+            if "</SCF Fix Strategy>" in v:
+                end_index = i
+                break
+        old_strategy_text = old_lines[start_index: end_index]
+        old_strategy = json.loads("\n".join(["{"] + old_strategy_text + ["}"]))
+        target_version_strategy = dict()
+        if fix_version == "1.0":
+            target_version_strategy["current_method_id"] = old_strategy["current_method_id"]
+            if old_strategy["methods"][1] == "rca_diis":
+                methods_list = ["increase_iter", "rca_diis", "gwh",
+                                "gdm", "rca", "core+rca"]
+            else:
+                methods_list = ["increase_iter", "diis_gdm", "gwh",
+                                "rca", "gdm", "core+gdm"]
+            target_version_strategy["methods"] = methods_list
+        elif fix_version == "2.0":
+            target_version_strategy["current_method_id"] = old_strategy["current_method_id"]
+            if old_strategy["methods"][1] == "rca_diis":
+                methods_list = ["increase_iter", "rca_diis", "gwh",
+                                "gdm", "rca", "core+rca", "fon"]
+            else:
+                methods_list = ["increase_iter", "diis_gdm", "gwh",
+                                "rca", "gdm", "core+gdm", "fon"]
+            target_version_strategy["methods"] = methods_list
+            target_version_strategy["version"] = old_strategy["version"]
+        else:
+            raise ValueError("Revert to SCF Fix Strategy Version \"{}\" is not "
+                             "supported yet".format(fix_version))
+        target_version_strategy_text = json.dumps(target_version_strategy,
+                                                  indent=4, sort_keys=True)
+        stripped_target_stragy_lines = [line.strip() for line in
+                                        target_version_strategy_text.split("\n")]
+        target_lines = copy.deepcopy(old_lines)
+        target_lines[start_index: end_index] = stripped_target_stragy_lines[1: -1]
+        return target_lines
+
 
     def test_scf_rca(self):
         shutil.copyfile(os.path.join(test_dir, "hf_rca.inp"),
@@ -61,6 +106,7 @@ class QChemErrorHandlerTest(TestCase):
             ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_rca.inp")) as f:
             ans = [line.strip() for line in f.readlines()]
+        ans = self._revert_scf_fix_strategy_to_version(ans, fix_version="1.0")
         self.assertEqual(ref, ans)
 
         shutil.copyfile(os.path.join(test_dir, "hf_rca_tried_0.inp"),
@@ -172,6 +218,29 @@ class QChemErrorHandlerTest(TestCase):
                                         'Molecular charge is not found'],
                              'actions': None})
 
+
+    def test_scf_fon(self):
+        shutil.copyfile(os.path.join(test_dir, "hf_rca_hit_5.inp"),
+                        os.path.join(scr_dir, "hf_rca_hit_5.inp"))
+        shutil.copyfile(os.path.join(test_dir, "hf_rca.out"),
+                        os.path.join(scr_dir, "hf_rca.out"))
+        h = QChemErrorHandler(input_file="hf_rca_hit_5.inp",
+                              output_file="hf_rca.out")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Geometry optimization failed',
+                                        'Molecular charge is not found'],
+                             'actions': ['fon']})
+        with open(os.path.join(test_dir, "hf_rca_hit_5_fon.inp")) as f:
+            ref = [line.strip() for line in f.readlines()]
+        with open(os.path.join(scr_dir, "hf_rca_hit_5.inp")) as f:
+            ans = [line.strip() for line in f.readlines()]
+        ans = self._revert_scf_fix_strategy_to_version(ans, fix_version="2.0")
+        self.assertEqual(ref, ans)
+
+
     def test_negative_eigen(self):
         shutil.copyfile(os.path.join(test_dir, "negative_eigen.qcinp"),
                         os.path.join(scr_dir, "negative_eigen.qcinp"))
@@ -277,6 +346,7 @@ class QChemErrorHandlerTest(TestCase):
             ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "hf_gdm.inp")) as f:
             ans = [line.strip() for line in f.readlines()]
+        ans = self._revert_scf_fix_strategy_to_version(ans, fix_version="1.0")
         self.assertEqual(ref, ans)
         shutil.copyfile(os.path.join(test_dir, "hf_gdm_tried_0.inp"),
                         os.path.join(scr_dir, "hf_gdm_tried_0.inp"))
@@ -683,6 +753,78 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(d, {'errors': ['Exit Code 134',
                                         'Freq Job Too Small'],
                              'actions': None})
+
+    @unittest.skipIf(parse_version(pymatgen.__version__) <=
+                     parse_version('3.2.3'),
+                     "New QChem 4.2 PCM format in pymatgen is a feature after "
+                     "version 3.2.3")
+    def test_pcm_solvent_deprecated(self):
+        shutil.copyfile(os.path.join(test_dir, "pcm_solvent_deprecated.qcinp"),
+                        os.path.join(scr_dir, "pcm_solvent_deprecated.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "pcm_solvent_deprecated.qcout"),
+                        os.path.join(scr_dir, "pcm_solvent_deprecated.qcout"))
+        h = QChemErrorHandler(input_file="pcm_solvent_deprecated.qcinp",
+                              output_file="pcm_solvent_deprecated.qcout")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Bad SCF convergence',
+                                        'Molecular charge is not found',
+                                        'No input text',
+                                        'pcm_solvent deprecated'],
+                             'actions': ['use keyword solvent instead']})
+        with open(os.path.join(test_dir, "pcm_solvent_deprecated_use_qc42_format.qcinp")) as f:
+            ref = [line.strip() for line in f.readlines()]
+        with open(os.path.join(scr_dir, "pcm_solvent_deprecated.qcinp")) as f:
+            ans = [line.strip() for line in f.readlines()]
+        self.assertEqual(ref, ans)
+
+    def test_not_enough_total_memory(self):
+        old_jobid = os.environ.get("PBS_JOBID", None)
+        os.environ["PBS_JOBID"] = "hopque473945"
+        shutil.copyfile(os.path.join(test_dir, "not_enough_total_memory.qcinp"),
+                        os.path.join(scr_dir, "not_enough_total_memory.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "not_enough_total_memory.qcout"),
+                        os.path.join(scr_dir, "not_enough_total_memory.qcout"))
+        h = QChemErrorHandler(input_file="not_enough_total_memory.qcinp",
+                              output_file="not_enough_total_memory.qcout")
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Exit Code 134',
+                                        'Not Enough Total Memory'],
+                             'actions': ['Use 48 CPSCF segments']})
+        with open(os.path.join(test_dir, "not_enough_total_memory_48_segments.qcinp")) as f:
+            ref = [line.strip() for line in f.readlines()]
+        with open(os.path.join(scr_dir, "not_enough_total_memory.qcinp")) as f:
+            ans = [line.strip() for line in f.readlines()]
+        self.assertEqual(ref, ans)
+        shutil.copyfile(os.path.join(test_dir, "not_enough_total_memory_48_segments.qcinp"),
+                        os.path.join(scr_dir, "not_enough_total_memory_48_segments.qcinp"))
+        shutil.copyfile(os.path.join(test_dir, "not_enough_total_memory.qcout"),
+                        os.path.join(scr_dir, "not_enough_total_memory.qcout"))
+        qchem_job = QchemJob(qchem_cmd=["qchem", "-np", "24"],
+                             alt_cmd={"openmp": ["qchem", "-seq", "-nt", "24"],
+                                      "half_cpus": ["qchem", "-np", "12"]},
+                             input_file="not_enough_total_memory_48_segments.qcinp")
+        h = QChemErrorHandler(input_file="not_enough_total_memory_48_segments.qcinp",
+                              output_file="not_enough_total_memory.qcout",
+                              qchem_job=qchem_job)
+        has_error = h.check()
+        self.assertTrue(has_error)
+        d = h.correct()
+        self.assertEqual(d, {'errors': ['Exit Code 134',
+                                        'Not Enough Total Memory'],
+                             'actions': ['Use half CPUs and 60 CPSCF segments']})
+        with open(os.path.join(test_dir, "not_enough_total_memory_60_segments.qcinp")) as f:
+            ref = [line.strip() for line in f.readlines()]
+        with open(os.path.join(scr_dir, "not_enough_total_memory_48_segments.qcinp")) as f:
+            ans = [line.strip() for line in f.readlines()]
+        self.assertEqual(ref, ans)
+        if old_jobid is None:
+            os.environ.pop("PBS_JOBID")
+        else:
+            os.environ["PBS_JOBID"] = old_jobid
 
     def test_json_serializable(self):
         q1 = QChemErrorHandler()

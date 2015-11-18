@@ -2,18 +2,23 @@
 
 from __future__ import unicode_literals, division
 import glob
+import logging
 import shlex
+import socket
+import re
+import time
+
+from pkg_resources import parse_version
 
 """
 This module implements basic kinds of jobs for QChem runs.
 """
 
 import os
-from monty.io import zopen
 import shutil
 import copy
 import subprocess
-from pymatgen.io.qchemio import QcInput
+from pymatgen.io.qchem import QcInput, QcOutput
 from custodian.custodian import Job, gzip_dir
 
 __author__ = "Xiaohui Qu"
@@ -57,7 +62,7 @@ class QchemJob(Job):
                               "half_cpus": ["qchem", "-np", "12"]}
             large_static_mem: use ultra large static memory
         """
-        self.qchem_cmd = copy.deepcopy(qchem_cmd)
+        self.qchem_cmd = self._modify_qchem_according_to_version(copy.deepcopy(qchem_cmd))
         self.input_file = input_file
         self.output_file = output_file
         self.chk_file = chk_file
@@ -67,17 +72,39 @@ class QchemJob(Job):
         self.current_command = self.qchem_cmd
         self.current_command_name = "general"
         self.large_static_mem = large_static_mem
-        self.alt_cmd = copy.deepcopy(alt_cmd)
+        self.alt_cmd = {k: self._modify_qchem_according_to_version(c)
+                        for k, c in copy.deepcopy(alt_cmd).items()}
         available_commands = ["general"]
         if self.alt_cmd:
             available_commands.extend(self.alt_cmd.keys())
-        qcinp = QcInput.from_file(self.input_file)
-        if "openmp" in available_commands and self.is_openmp_compatible(qcinp):
-            if "PBS_JOBID" in os.environ and \
-                    ("hopque" in os.environ["PBS_JOBID"] or
-                     "edique" in os.environ["PBS_JOBID"]):
-                self.select_command("openmp")
         self._set_qchem_memory()
+
+
+    @classmethod
+    def _modify_qchem_according_to_version(cls, qchem_cmd):
+        cmd2 = copy.deepcopy(qchem_cmd)
+        try:
+            from rubicon.utils.qchem_info import get_qchem_version
+            cur_version = get_qchem_version()
+        except:
+            cur_version = "4.3.0"
+        if cur_version >= parse_version("4.3.0"):
+            if cmd2[0] == "qchem":
+                if "-dbg" not in cmd2:
+                    cmd2.insert(1, "-dbg")
+                if "-seq" in cmd2:
+                    cmd2.remove("-seq")
+                if "PBS_JOBID" in os.environ and \
+                        ("hopque" in os.environ["PBS_JOBID"] or
+                         "edique" in os.environ["PBS_JOBID"]):
+                    if "-pbs" not in cmd2:
+                        cmd2.insert(2, "-pbs")
+        else:
+            if "-dbg" in cmd2:
+                cmd2.remove("-dbg")
+            if "-pbs" in cmd2:
+                cmd2.remove("-pbs")
+        return cmd2
 
     def _set_qchem_memory(self, qcinp=None):
         if not qcinp:
@@ -139,6 +166,9 @@ class QchemJob(Job):
                                 j.set_memory(total=60000, static=20000)
                             else:
                                 j.set_memory(total=60000, static=5000)
+        elif 'vesta' in socket.gethostname():
+            for j in qcinp.jobs:
+                j.set_memory(total=13500, static=800)
         qcinp.write_file(self.input_file)
 
     @staticmethod
@@ -152,6 +182,12 @@ class QchemJob(Job):
                 return False
         return True
 
+    def command_available(self, cmd_name):
+        available_commands = ["general"]
+        if self.alt_cmd:
+            available_commands.extend(self.alt_cmd.keys())
+        return cmd_name in available_commands
+
     def select_command(self, cmd_name, qcinp=None):
         """
         Set the command to run QChem by name. "general" set to the default one.
@@ -163,11 +199,8 @@ class QchemJob(Job):
             True: success
             False: failed
         """
-        available_commands = ["general"]
-        if self.alt_cmd:
-            available_commands.extend(self.alt_cmd.keys())
-        if cmd_name not in available_commands:
-            raise Exception("Command mode \"", cmd_name, "\" is not available")
+        if not self.command_available(cmd_name):
+            raise Exception("Command mode \"{cmd_name}\" is not available".format(cmd_name=cmd_name))
         if cmd_name == "general":
             self.current_command = self.qchem_cmd
         else:
@@ -193,6 +226,113 @@ class QchemJob(Job):
                 shutil.copy(self.qclog_file,
                             "{}.{}.orig".format(self.qclog_file, i))
 
+    def _run_qchem(self, log_file_object=None):
+        if 'vesta' in socket.gethostname():
+            # on ALCF
+            returncode = self._run_qchem_on_alcf(log_file_object=log_file_object)
+        else:
+
+            qc_cmd = copy.deepcopy(self.current_command)
+            qc_cmd += [self.input_file, self.output_file]
+            qc_cmd = [str(t) for t in qc_cmd]
+            if self.chk_file:
+                qc_cmd.append(self.chk_file)
+            if log_file_object:
+                returncode = subprocess.call(qc_cmd, stdout=log_file_object)
+            else:
+                returncode = subprocess.call(qc_cmd)
+        return returncode
+
+    def _run_qchem_on_alcf(self, log_file_object=None):
+        parent_qcinp = QcInput.from_file(self.input_file)
+        njobs = len(parent_qcinp.jobs)
+        return_codes = []
+        alcf_cmds = []
+        qc_jobids = []
+        for i, j in enumerate(parent_qcinp.jobs):
+            qsub_cmd = copy.deepcopy(self.current_command)
+            sub_input_filename = "alcf_{}_{}".format(i+1, self.input_file)
+            sub_output_filename = "alcf_{}_{}".format(i+1, self.output_file)
+            sub_log_filename = "alcf_{}_{}".format(i+1, self.qclog_file)
+            qsub_cmd[-2] = sub_input_filename
+            sub_qcinp = QcInput([copy.deepcopy(j)])
+            if "scf_guess" in sub_qcinp.jobs[0].params["rem"] and \
+                    sub_qcinp.jobs[0].params["rem"]["scf_guess"] == "read":
+                sub_qcinp.jobs[0].params["rem"].pop("scf_guess")
+            if i > 0:
+                if isinstance(j.mol, str) and j.mol == "read":
+                    prev_qcout_filename = "alcf_{}_{}".format(i+1-1, self.output_file)
+                    prev_qcout = QcOutput(prev_qcout_filename)
+                    prev_final_mol = prev_qcout.data[0]["molecules"][-1]
+                    j.mol = prev_final_mol
+            sub_qcinp.write_file(sub_input_filename)
+            logging.info("The command to run QChem is {}".format(' '.join(qsub_cmd)))
+            alcf_cmds.append(qsub_cmd)
+            p = subprocess.Popen(qsub_cmd,
+                                 stdin=subprocess.PIPE,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE)
+            out, err = p.communicate()
+            qc_jobid = int(out.strip())
+            qc_jobids.append(qc_jobid)
+            cqwait_cmd = shlex.split("cqwait {}".format(qc_jobid))
+            subprocess.call(cqwait_cmd)
+            output_file_name = "{}.output".format(qc_jobid)
+            cobaltlog_file_name = "{}.cobaltlog".format(qc_jobid)
+            with open(cobaltlog_file_name) as f:
+                cobaltlog_last_line = f.readlines()[-1]
+                exit_code_pattern = re.compile("an exit code of (?P<code>\d+);")
+                m = exit_code_pattern.search(cobaltlog_last_line)
+                if m:
+                    rc = float(m.group("code"))
+                else:
+                    rc = -99999
+                return_codes.append(rc)
+            for name_change_trial in range(10):
+                if not os.path.exists(output_file_name):
+                    message = "{} is not found in {}, {}th wait " \
+                              "for 5 mins\n".format(
+                                    output_file_name,
+                                    os.getcwd(), name_change_trial)
+                    logging.info(message)
+                    if log_file_object:
+                        log_file_object.writelines([message])
+                    time.sleep(60 * 5)
+                    pass
+                else:
+                    message = "Found qchem output file {} in {}, change file " \
+                              "name\n".format(output_file_name,
+                                              os.getcwd(),
+                                              name_change_trial)
+                    logging.info(message)
+                    if log_file_object:
+                        log_file_object.writelines([message])
+                    break
+            log_file_object.flush()
+            os.fsync(log_file_object.fileno())
+            shutil.move(output_file_name, sub_output_filename)
+            shutil.move(cobaltlog_file_name, sub_log_filename)
+        overall_return_code = min(return_codes)
+        with open(self.output_file, "w") as out_file_object:
+            for i, job_cmd, rc, qc_jobid in zip(range(njobs), alcf_cmds, return_codes, qc_jobids):
+                sub_output_filename = "alcf_{}_{}".format(i+1, self.output_file)
+                sub_log_filename = "alcf_{}_{}".format(i+1, self.qclog_file)
+                with open(sub_output_filename) as sub_out_file_object:
+                    header_lines = ["Running Job {} of {} {}\n".format(i + 1, njobs, self.input_file),
+                                    " ".join(job_cmd) + "\n"]
+                    if i > 0:
+                        header_lines = ['', ''] + header_lines
+                    sub_out = sub_out_file_object.readlines()
+                    out_file_object.writelines(header_lines)
+                    out_file_object.writelines(sub_out)
+                    if rc < 0 and rc != -99999:
+                        out_file_object.writelines(["Application {} exit codes: {}\n".format(qc_jobid, rc), '\n', '\n'])
+                if log_file_object:
+                    with open(sub_log_filename) as sub_log_file_object:
+                        sub_log = sub_log_file_object.readlines()
+                        log_file_object.writelines(sub_log)
+        return overall_return_code
+
     def run(self):
         if "PBS_JOBID" in os.environ and "edique" in os.environ["PBS_JOBID"]:
             nodelist = os.environ["QCNODE"]
@@ -201,22 +341,50 @@ class QchemJob(Job):
         else:
             tmp_clean_cmd = None
             tmp_creation_cmd = None
-        cmd = copy.deepcopy(self.current_command)
-        cmd += [self.input_file, self.output_file]
-        if self.chk_file:
-            cmd.append(self.chk_file)
         if self.qclog_file:
-            with open(self.qclog_file, "w") as filelog:
+            with open(self.qclog_file, "a") as filelog:
                 if tmp_clean_cmd:
                     subprocess.call(tmp_clean_cmd, stdout=filelog)
                 if tmp_creation_cmd:
                     subprocess.call(tmp_creation_cmd, stdout=filelog)
-                returncode = subprocess.call(cmd, stdout=filelog)
+                returncode = self._run_qchem(log_file_object=filelog)
                 if tmp_clean_cmd:
                     subprocess.call(tmp_clean_cmd, stdout=filelog)
         else:
-            returncode = subprocess.call(cmd)
+            if tmp_clean_cmd:
+                subprocess.call(tmp_clean_cmd)
+            if tmp_creation_cmd:
+                subprocess.call(tmp_creation_cmd)
+            returncode = self._run_qchem()
+            if tmp_clean_cmd:
+                subprocess.call(tmp_clean_cmd)
         return returncode
+
+    def as_dict(self):
+        d = {"@module": self.__class__.__module__,
+             "@class": self.__class__.__name__,
+             "qchem_cmd": self.qchem_cmd,
+             "input_file": self.input_file,
+             "output_file": self.output_file,
+             "chk_file": self.chk_file,
+             "qclog_file": self.qclog_file,
+             "gzipped": self.gzipped,
+             "backup": self.backup,
+             "large_static_mem": self.large_static_mem,
+             "alt_cmd": self.alt_cmd}
+        return d
+
+    @classmethod
+    def from_dict(cls, d):
+        return QchemJob(qchem_cmd=d["qchem_cmd"],
+                        input_file=d["input_file"],
+                        output_file=d["output_file"],
+                        chk_file=d["chk_file"],
+                        qclog_file=d["qclog_file"],
+                        gzipped=d["gzipped"],
+                        backup=d["backup"],
+                        alt_cmd=d["alt_cmd"],
+                        large_static_mem=d["large_static_mem"])
 
     def postprocess(self):
         if self.gzipped:
