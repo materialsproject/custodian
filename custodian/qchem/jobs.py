@@ -91,21 +91,20 @@ class QchemJob(Job):
         if cmd2 is not None:
             if cur_version >= parse_version("4.3.0"):
                 if cmd2[0] == "qchem":
-                    if "-dbg" not in cmd2:
-                        cmd2.insert(1, "-dbg")
-                    if "-seq" in cmd2:
-                        cmd2.remove("-seq")
                     if "PBS_JOBID" in os.environ and \
                             ("hopque" in os.environ["PBS_JOBID"] or
                              "edique" in os.environ["PBS_JOBID"]):
                         if "-pbs" not in cmd2:
                             cmd2.insert(2, "-pbs")
+                        if "-dbg" not in cmd2:
+                            cmd2.insert(1, "-dbg")
+                        if "-seq" in cmd2:
+                            cmd2.remove("-seq")
             else:
                 if "-dbg" in cmd2:
                     cmd2.remove("-dbg")
                 if "-pbs" in cmd2:
                     cmd2.remove("-pbs")
-        print("CMD2 is, ", cmd2)
         return cmd2
 
     def _set_qchem_memory(self, qcinp=None):
