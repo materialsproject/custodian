@@ -89,7 +89,7 @@ class QchemJob(Job):
         except:
             cur_version = parse_version("4.3.0")
         if cur_version >= parse_version("4.3.0"):
-            if cmd2[0] == "qchem":
+            if (cmd2 is not None) and (cmd2[0] == "qchem"):
                 if "-dbg" not in cmd2:
                     cmd2.insert(1, "-dbg")
                 if "-seq" in cmd2:
