@@ -87,7 +87,7 @@ class QchemJob(Job):
             from rubicon.utils.qchem_info import get_qchem_version
             cur_version = get_qchem_version()
         except:
-            cur_version = "4.3.0"
+            cur_version = parse_version("4.3.0")
         if cur_version >= parse_version("4.3.0"):
             if cmd2[0] == "qchem":
                 if "-dbg" not in cmd2:
