@@ -684,7 +684,7 @@ class QChemErrorHandlerTest(TestCase):
                                         'Exit Code 134',
                                         'Geometry optimization failed',
                                         'Molecular charge is not found'],
-                             'actions': ['half_cpus']})
+                             'actions': ['openmp']})
 
     def test_ts_opt(self):
         shutil.copyfile(os.path.join(test_dir, "ts_cf3_leave.qcinp"),
