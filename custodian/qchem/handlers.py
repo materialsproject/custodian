@@ -193,6 +193,8 @@ class QChemErrorHandler(ErrorHandler):
                     ("hopque" in os.environ["PBS_JOBID"] or
                      "edique" in os.environ["PBS_JOBID"]):
                 ncpu = 24
+            elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
+                ncpu = 32
             natoms = len(self.qcinp.jobs[0].mol)
             times_ncpu_full = int(natoms/ncpu)
             nsegment_full = ncpu * times_ncpu_full
@@ -238,12 +240,8 @@ class QChemErrorHandler(ErrorHandler):
             return None
 
     def fix_insufficient_static_memory(self):
-        next_run_mode = "openmp"
-        if "PBS_JOBID" in os.environ and \
-                ("hopque" in os.environ["PBS_JOBID"] or
-                 "edique" in os.environ["PBS_JOBID"]):
-            next_run_mode = "general"
-        if not self.qchem_job.is_openmp_compatible(self.qcinp):
+        if not (self.qchem_job.is_openmp_compatible(self.qcinp)
+                    and self.qchem_job.command_available("openmp")):
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
@@ -251,35 +249,31 @@ class QChemErrorHandler(ErrorHandler):
                 self.qchem_job.large_static_mem = True
                 # noinspection PyProtectedMember
                 self.qchem_job._set_qchem_memory(self.qcinp)
+                return "Increase Static Memory"
             else:
                 return None
-        elif self.qchem_job.current_command_name != next_run_mode:
-            self.qchem_job.select_command(next_run_mode, self.qcinp)
-            return next_run_mode
+        elif self.qchem_job.current_command_name != "openmp":
+            self.qchem_job.select_command("openmp", self.qcinp)
+            return "Use OpenMP"
         elif not self.qchem_job.large_static_mem:
             self.qchem_job.large_static_mem = True
             # noinspection PyProtectedMember
             self.qchem_job._set_qchem_memory(self.qcinp)
+            return "Increase Static Memory"
         else:
             return None
 
     def fix_error_killed(self):
-
-        next_run_mode = "openmp"
-        if "PBS_JOBID" in os.environ and \
-                ("hopque" in os.environ["PBS_JOBID"] or
-                 "edique" in os.environ["PBS_JOBID"]):
-            next_run_mode = "general"
-
-        if not self.qchem_job.is_openmp_compatible(self.qcinp):
+        if not (self.qchem_job.is_openmp_compatible(self.qcinp)
+                    and self.qchem_job.command_available("openmp")):
             if self.qchem_job.current_command_name != "half_cpus":
                 self.qchem_job.select_command("half_cpus", self.qcinp)
                 return "half_cpus"
             else:
                 return None
-        elif self.qchem_job.current_command_name != next_run_mode:
-            self.qchem_job.select_command(next_run_mode, self.qcinp)
-            return next_run_mode
+        elif self.qchem_job.current_command_name != "openmp":
+            self.qchem_job.select_command("openmp", self.qcinp)
+            return "Use OpenMP"
         else:
             return None
 

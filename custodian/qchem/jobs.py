@@ -95,11 +95,15 @@ class QchemJob(Job):
                             ("hopque" in os.environ["PBS_JOBID"] or
                              "edique" in os.environ["PBS_JOBID"]):
                         if "-pbs" not in cmd2:
-                            cmd2.insert(2, "-pbs")
+                            cmd2.insert(1, "-pbs")
                         if "-dbg" not in cmd2:
                             cmd2.insert(1, "-dbg")
                         if "-seq" in cmd2:
                             cmd2.remove("-seq")
+                    elif "NERSC_HOST" in os.environ and \
+                            os.environ["NERSC_HOST"] == "cori":
+                        if "-dbg" not in cmd2:
+                            cmd2.insert(1, "-dbg")
             else:
                 if "-dbg" in cmd2:
                     cmd2.remove("-dbg")
@@ -167,6 +171,43 @@ class QchemJob(Job):
                                 j.set_memory(total=60000, static=20000)
                             else:
                                 j.set_memory(total=60000, static=5000)
+        elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
+            if "QCSCRATCH" in os.environ and "eg_qchem" in os.environ["QCSCRATCH"]:
+                # in memory scratch
+                for j in qcinp.jobs:
+                    if self.current_command_name == "general":
+                        if self.large_static_mem:
+                            j.set_memory(total=1400, static=200)
+                        else:
+                            j.set_memory(total=1500, static=100)
+                    elif self.current_command_name == "half_cpus":
+                        if self.large_static_mem:
+                            j.set_memory(total=3000, static=500)
+                        else:
+                            j.set_memory(total=3200, static=300)
+                    elif self.current_command_name == "openmp":
+                        if self.large_static_mem:
+                            j.set_memory(total=50000, static=12000)
+                        else:
+                            j.set_memory(total=60000, static=2000)
+            else:
+                # disk scratch
+                for j in qcinp.jobs:
+                    if self.current_command_name == "general":
+                        if self.large_static_mem:
+                            j.set_memory(total=2700, static=500)
+                        else:
+                            j.set_memory(total=3000, static=200)
+                    elif self.current_command_name == "half_cpus":
+                        if self.large_static_mem:
+                            j.set_memory(total=6000, static=1000)
+                        else:
+                            j.set_memory(total=6500, static=500)
+                    elif self.current_command_name == "openmp":
+                        if self.large_static_mem:
+                            j.set_memory(total=100000, static=25000)
+                        else:
+                            j.set_memory(total=120000, static=8000)
         elif 'vesta' in socket.gethostname():
             for j in qcinp.jobs:
                 j.set_memory(total=13500, static=800)
@@ -177,10 +218,16 @@ class QchemJob(Job):
         for j in qcinp.jobs:
             if j.params["rem"]["jobtype"] == "freq":
                 return False
-            if j.params["rem"]["exchange"] in ["pbe", "b"] \
-                and "correlation" in j.params['rem'] \
-                    and j.params["rem"]["correlation"] in ["pbe", "lyp"]:
-                return False
+            try:
+                from rubicon.utils.qchem_info import get_qchem_version
+                cur_version = get_qchem_version()
+            except:
+                cur_version = parse_version("4.3.0")
+            if cur_version < parse_version("4.3.0"):
+                if j.params["rem"]["exchange"] in ["pbe", "b"] \
+                    and "correlation" in j.params['rem'] \
+                        and j.params["rem"]["correlation"] in ["pbe", "lyp"]:
+                    return False
         return True
 
     def command_available(self, cmd_name):
@@ -339,6 +386,11 @@ class QchemJob(Job):
             nodelist = os.environ["QCNODE"]
             tmp_creation_cmd = shlex.split("aprun -n1 -N1 -L {} mkdir /tmp/eg_qchem".format(nodelist))
             tmp_clean_cmd = shlex.split("aprun -n1 -N1 -L {} rm -rf /tmp/eg_qchem".format(nodelist))
+        elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
+            nodelist = os.environ["QCNODE"]
+            num_nodes = len(nodelist.split(","))
+            tmp_creation_cmd = shlex.split("srun -N {} --ntasks-per-node 1 -L {}  mkdir /dev/shm/eg_qchem".format(num_nodes, nodelist))
+            tmp_clean_cmd = shlex.split("srun -N {} --ntasks-per-node 1 -L {} rm -rf /dev/shm/eg_qchem".format(num_nodes, nodelist))
         else:
             tmp_clean_cmd = None
             tmp_creation_cmd = None
