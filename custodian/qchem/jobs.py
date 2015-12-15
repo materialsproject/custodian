@@ -399,14 +399,14 @@ class QchemJob(Job):
         if self.qclog_file:
             with open(self.qclog_file, "a") as filelog:
                 if tmp_clean_cmd:
-                    filelog.write("delete scratch before running qchem using command {}\n".format())
+                    filelog.write("delete scratch before running qchem using command {}\n".format(tmp_clean_cmd))
                     subprocess.call(tmp_clean_cmd, stdout=filelog)
                 if tmp_creation_cmd:
-                    filelog.write("Create scratch dir before running qchem using command {}\n".format())
+                    filelog.write("Create scratch dir before running qchem using command {}\n".format(tmp_creation_cmd))
                     subprocess.call(tmp_creation_cmd, stdout=filelog)
                 returncode = self._run_qchem(log_file_object=filelog)
                 if tmp_clean_cmd:
-                    filelog.write("clean scratch after running qchem using command {}\n".format())
+                    filelog.write("clean scratch after running qchem using command {}\n".format(tmp_clean_cmd))
                     subprocess.call(tmp_clean_cmd, stdout=filelog)
         else:
             if tmp_clean_cmd:
