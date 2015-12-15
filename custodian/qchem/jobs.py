@@ -394,14 +394,19 @@ class QchemJob(Job):
         else:
             tmp_clean_cmd = None
             tmp_creation_cmd = None
+        logging.info("Scratch dir creation command is {}".format(tmp_creation_cmd))
+        logging.info("Scratch dir deleting command is {}".format(tmp_clean_cmd))
         if self.qclog_file:
             with open(self.qclog_file, "a") as filelog:
                 if tmp_clean_cmd:
+                    filelog.write("delete scratch before running qchem using command {}\n".format())
                     subprocess.call(tmp_clean_cmd, stdout=filelog)
                 if tmp_creation_cmd:
+                    filelog.write("Create scratch dir before running qchem using command {}\n".format())
                     subprocess.call(tmp_creation_cmd, stdout=filelog)
                 returncode = self._run_qchem(log_file_object=filelog)
                 if tmp_clean_cmd:
+                    filelog.write("clean scratch after running qchem using command {}\n".format())
                     subprocess.call(tmp_clean_cmd, stdout=filelog)
         else:
             if tmp_clean_cmd:
