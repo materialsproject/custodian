@@ -195,6 +195,8 @@ class QChemErrorHandler(ErrorHandler):
                 ncpu = 24
             elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
                 ncpu = 32
+            elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
+                ncpu = 16
             natoms = len(self.qcinp.jobs[0].mol)
             times_ncpu_full = int(natoms/ncpu)
             nsegment_full = ncpu * times_ncpu_full
