@@ -441,8 +441,8 @@ class QchemJob(Job):
         elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "matgen":
             nodelist = os.environ["QCNODE"]
             num_nodes = len(nodelist.split(","))
-            tmp_creation_cmd = shlex.split("srun -N {} --ntasks-per-node 1 --nodelist {}  mkdir /dev/shm/eg_qchem".format(num_nodes, nodelist))
-            tmp_clean_cmd = shlex.split("srun -N {} --ntasks-per-node 1 --nodelist {} rm -rf /dev/shm/eg_qchem".format(num_nodes, nodelist))
+            tmp_creation_cmd = shlex.split("mpirun -n {} --npernode 1 --host {}  mkdir /dev/shm/eg_qchem".format(num_nodes, nodelist))
+            tmp_clean_cmd = shlex.split("mpirun -n {} --npernode 1 --host {} rm -rf /dev/shm/eg_qchem".format(num_nodes, nodelist))
         else:
             tmp_clean_cmd = None
             tmp_creation_cmd = None
