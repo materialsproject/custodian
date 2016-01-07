@@ -398,7 +398,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
         m = reduce(operator.mul, vi["KPOINTS"].kpts[0])
         m = max(int(round(m ** (1 / 3))), 1)
-        if vi["KPOINTS"].style.lower().startswith("m"):
+        if vi["KPOINTS"].style.name.lower().startswith("m"):
             m += m % 2
         actions = [{"dict": "KPOINTS",
                     "action": {"_set": {"kpoints": [[m] * 3]}}}]
