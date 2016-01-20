@@ -93,17 +93,8 @@ class QchemJob(Job):
                 if cmd2[0] == "qchem":
                     if "-seq" in cmd2:
                         cmd2.remove("-seq")
-                    if "PBS_JOBID" in os.environ and \
-                            ("hopque" in os.environ["PBS_JOBID"] or
-                             "edique" in os.environ["PBS_JOBID"]):
-                        if "-pbs" not in cmd2:
-                            cmd2.insert(1, "-pbs")
-                        if "-dbg" not in cmd2:
-                            cmd2.insert(1, "-dbg")
-                        if "-seq" in cmd2:
-                            cmd2.remove("-seq")
-                    elif "NERSC_HOST" in os.environ and \
-                            os.environ["NERSC_HOST"] == "cori":
+                    if "NERSC_HOST" in os.environ and \
+                            os.environ["NERSC_HOST"] in ["cori", "edison"]:
                         if "-dbg" not in cmd2:
                             cmd2.insert(1, "-dbg")
                         if "-seq" in cmd2:
@@ -143,44 +134,6 @@ class QchemJob(Job):
                             j.set_memory(total=28000, static=10000)
                         else:
                             j.set_memory(total=28000, static=3000)
-            elif "edique" in os.environ["PBS_JOBID"]:
-                # on Edison
-                if "QCSCRATCH" in os.environ and "/tmp/eg_qchem" in os.environ["QCSCRATCH"]:
-                    # in memory scratch
-                    for j in qcinp.jobs:
-                        if self.current_command_name == "general":
-                            if self.large_static_mem:
-                                j.set_memory(total=1200, static=300)
-                            else:
-                                j.set_memory(total=1200, static=100)
-                        elif self.current_command_name == "half_cpus":
-                            if self.large_static_mem:
-                                j.set_memory(total=2400, static=400)
-                            else:
-                                j.set_memory(total=2400, static=200)
-                        elif self.current_command_name == "openmp":
-                            if self.large_static_mem:
-                                j.set_memory(total=25000, static=1000)
-                            else:
-                                j.set_memory(total=25000, static=500)
-                else:
-                    # disk scratch
-                    for j in qcinp.jobs:
-                        if self.current_command_name == "general":
-                            if self.large_static_mem:
-                                j.set_memory(total=2500, static=500)
-                            else:
-                                j.set_memory(total=2500, static=100)
-                        elif self.current_command_name == "half_cpus":
-                            if self.large_static_mem:
-                                j.set_memory(total=5000, static=1000)
-                            else:
-                                j.set_memory(total=5000, static=200)
-                        elif self.current_command_name == "openmp":
-                            if self.large_static_mem:
-                                j.set_memory(total=60000, static=20000)
-                            else:
-                                j.set_memory(total=60000, static=5000)
         elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
             if "QCSCRATCH" in os.environ and "eg_qchem" in os.environ["QCSCRATCH"]:
                 # in memory scratch
@@ -218,6 +171,43 @@ class QchemJob(Job):
                             j.set_memory(total=100000, static=25000)
                         else:
                             j.set_memory(total=120000, static=8000)
+        elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "edison":
+            if "QCSCRATCH" in os.environ and "/tmp/eg_qchem" in os.environ["QCSCRATCH"]:
+                # in memory scratch
+                for j in qcinp.jobs:
+                    if self.current_command_name == "general":
+                        if self.large_static_mem:
+                            j.set_memory(total=1200, static=300)
+                        else:
+                            j.set_memory(total=1200, static=100)
+                    elif self.current_command_name == "half_cpus":
+                        if self.large_static_mem:
+                            j.set_memory(total=2400, static=400)
+                        else:
+                            j.set_memory(total=2400, static=200)
+                    elif self.current_command_name == "openmp":
+                        if self.large_static_mem:
+                            j.set_memory(total=25000, static=1000)
+                        else:
+                            j.set_memory(total=25000, static=500)
+            else:
+                # disk scratch
+                for j in qcinp.jobs:
+                    if self.current_command_name == "general":
+                        if self.large_static_mem:
+                            j.set_memory(total=2500, static=500)
+                        else:
+                            j.set_memory(total=2500, static=100)
+                    elif self.current_command_name == "half_cpus":
+                        if self.large_static_mem:
+                            j.set_memory(total=5000, static=1000)
+                        else:
+                            j.set_memory(total=5000, static=200)
+                    elif self.current_command_name == "openmp":
+                        if self.large_static_mem:
+                            j.set_memory(total=60000, static=20000)
+                        else:
+                            j.set_memory(total=60000, static=5000)
         elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "matgen":
             if "QCSCRATCH" in os.environ and "eg_qchem" in os.environ["QCSCRATCH"]:
                 # in memory scratch
@@ -429,11 +419,7 @@ class QchemJob(Job):
         return overall_return_code
 
     def run(self):
-        if "PBS_JOBID" in os.environ and "edique" in os.environ["PBS_JOBID"]:
-            nodelist = os.environ["QCNODE"]
-            tmp_creation_cmd = shlex.split("aprun -n1 -N1 -L {} mkdir /tmp/eg_qchem".format(nodelist))
-            tmp_clean_cmd = shlex.split("aprun -n1 -N1 -L {} rm -rf /tmp/eg_qchem".format(nodelist))
-        elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
+        if "NERSC_HOST" in os.environ and (os.environ["NERSC_HOST"] in ["cori", "edison"]):
             nodelist = os.environ["QCNODE"]
             num_nodes = len(nodelist.split(","))
             tmp_creation_cmd = shlex.split("srun -N {} --ntasks-per-node 1 --nodelist {}  mkdir /dev/shm/eg_qchem".format(num_nodes, nodelist))
@@ -498,11 +484,12 @@ class QchemJob(Job):
 
     def postprocess(self):
         if self.gzipped:
-            if "PBS_JOBID" in os.environ and "edique" in os.environ["PBS_JOBID"]:
+            if "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "edison":
                 cur_dir = os.getcwd()
                 file_list = [os.path.join(cur_dir, name) for name in glob.glob("*")]
                 nodelist = os.environ["QCNODE"]
-                gzip_cmd = shlex.split("aprun -n1 -N1 -L {} gzip".format(nodelist)) + file_list
+                gzip_cmd = shlex.split("srun -N 1 --ntasks-per-node 1 --nodelist  "
+                                       "{} gzip".format(nodelist)) + file_list
                 subprocess.call(gzip_cmd)
             else:
                 gzip_dir(".")
