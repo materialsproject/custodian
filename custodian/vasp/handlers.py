@@ -22,6 +22,7 @@ import datetime
 import operator
 import shutil
 from functools import reduce
+from collections import Counter
 import re
 
 from six.moves import map
@@ -96,6 +97,7 @@ class VaspErrorHandler(ErrorHandler):
         """
         self.output_filename = output_filename
         self.errors = set()
+        self.error_count = Counter()
 
     def check(self):
         incar = Incar.from_file("INCAR")
@@ -130,13 +132,15 @@ class VaspErrorHandler(ErrorHandler):
 
         if "brmix" in self.errors:
 
-            if vi["KPOINTS"].style == Kpoints.supported_modes.Gamma:
+            if self.error_count['brmix'] == 0 and vi["KPOINTS"].style == Kpoints.supported_modes.Gamma:
                 actions.append({"dict": "KPOINTS",
                                 "action": {"_set": {"generation_style": "Monkhorst"}}})
+                self.error_count['brmix'] += 1
 
-            elif vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+            elif self.error_count['brmix'] <= 1 and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
                 actions.append({"dict": "KPOINTS",
                                 "action": {"_set": {"generation_style": "Gamma"}}})
+                self.error_count['brmix'] += 1
 
                 if vi["KPOINTS"].num_kpts < 1:
                     all_kpts_even = all([
@@ -150,9 +154,13 @@ class VaspErrorHandler(ErrorHandler):
                             "kpoints": new_kpts
                         }}})
 
-            if not actions:
+            else:
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"ISYM": 0}}})
+
+                if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                   actions.append({"dict": "KPOINTS",
+                                   "action": {"_set": {"generation_style": "Gamma"}}})
 
                 # Based on VASP forum's recommendation, you should delete the
                 # CHGCAR and WAVECAR when dealing with this error.
