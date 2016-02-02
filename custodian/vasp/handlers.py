@@ -22,6 +22,7 @@ import datetime
 import operator
 import shutil
 from functools import reduce
+from collections import Counter
 import re
 
 from six.moves import map
@@ -96,6 +97,7 @@ class VaspErrorHandler(ErrorHandler):
         """
         self.output_filename = output_filename
         self.errors = set()
+        self.error_count = Counter()
 
     def check(self):
         incar = Incar.from_file("INCAR")
@@ -129,19 +131,43 @@ class VaspErrorHandler(ErrorHandler):
                             "action": {"_set": {"SYMPREC": 1e-8}}})
 
         if "brmix" in self.errors:
-            actions.append({"dict": "INCAR",
-                            "action": {"_set": {"ISYM": 0}}})
 
-            if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+            if self.error_count['brmix'] == 0 and vi["KPOINTS"].style == Kpoints.supported_modes.Gamma:
+                actions.append({"dict": "KPOINTS",
+                                "action": {"_set": {"generation_style": "Monkhorst"}}})
+                self.error_count['brmix'] += 1
+
+            elif self.error_count['brmix'] <= 1 and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
                 actions.append({"dict": "KPOINTS",
                                 "action": {"_set": {"generation_style": "Gamma"}}})
+                self.error_count['brmix'] += 1
 
-            # Based on VASP forum's recommendation, you should delete the
-            # CHGCAR and WAVECAR when dealing with this error.
-            actions.append({"file": "CHGCAR",
-                            "action": {"_file_delete": {'mode': "actual"}}})
-            actions.append({"file": "WAVECAR",
-                            "action": {"_file_delete": {'mode': "actual"}}})
+                if vi["KPOINTS"].num_kpts < 1:
+                    all_kpts_even = all([
+                        bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0]
+                    ])
+                    print("all_kpts_even = {}".format(all_kpts_even))
+                    if all_kpts_even:
+                        new_kpts = (tuple(n+1 for n in vi["KPOINTS"].kpts[0]),)
+                        print("new_kpts = {}".format(new_kpts))
+                        actions.append({"dict": "KPOINTS", "action": {"_set": {
+                            "kpoints": new_kpts
+                        }}})
+
+            else:
+                actions.append({"dict": "INCAR",
+                                "action": {"_set": {"ISYM": 0}}})
+
+                if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                   actions.append({"dict": "KPOINTS",
+                                   "action": {"_set": {"generation_style": "Gamma"}}})
+
+                # Based on VASP forum's recommendation, you should delete the
+                # CHGCAR and WAVECAR when dealing with this error.
+                actions.append({"file": "CHGCAR",
+                                "action": {"_file_delete": {'mode': "actual"}}})
+                actions.append({"file": "WAVECAR",
+                                "action": {"_file_delete": {'mode': "actual"}}})
 
         if "zpotrf" in self.errors:
             # Usually caused by short bond distances. If on the first step,
