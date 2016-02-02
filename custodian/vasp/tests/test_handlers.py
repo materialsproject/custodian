@@ -24,7 +24,7 @@ from custodian.vasp.handlers import VaspErrorHandler, \
     UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler, \
     MaxForceErrorHandler, PositiveEnergyErrorHandler, PotimErrorHandler, \
     FrozenJobErrorHandler, AliasingErrorHandler
-from pymatgen.io.vasp import Incar, Poscar, Structure
+from pymatgen.io.vasp import Incar, Poscar, Structure, Kpoints, VaspInput
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
@@ -103,7 +103,18 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.check(), True)
         d = h.correct()
         self.assertEqual(d["errors"], ['brmix'])
-        self.assertFalse(os.path.exists("CHGCAR"))
+
+        vi = VaspInput.from_directory(".")
+        chgcar_exists = os.path.exists("CHGCAR")
+        if h.error_count['brmix'] > 1:
+            self.assertFalse(chgcar_exists)
+        else:
+            self.assertTrue(chgcar_exists)
+            if vi["KPOINTS"].style == Kpoints.supported_modes.Gamma and vi["KPOINTS"].num_kpts < 1:
+                all_kpts_even = all([
+                    bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0]
+                ])
+                self.assertFalse(all_kpts_even)
 
         shutil.copy("INCAR.nelect", "INCAR")
         h = VaspErrorHandler("vasp.brmix")
