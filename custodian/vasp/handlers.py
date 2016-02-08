@@ -85,7 +85,7 @@ class VaspErrorHandler(ErrorHandler):
         "edddav": ["Error EDDDAV: Call to ZHEGV failed"]
     }
 
-    def __init__(self, output_filename="vasp.out"):
+    def __init__(self, output_filename="vasp.out", **kwargs):
         """
         Initializes the handler with the output file to check.
 
@@ -299,7 +299,7 @@ class AliasingErrorHandler(ErrorHandler):
                            "for an accurate"]
     }
 
-    def __init__(self, output_filename="vasp.out"):
+    def __init__(self, output_filename="vasp.out", **kwargs):
         """
         Initializes the handler with the output file to check.
 
@@ -379,7 +379,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
     is_monitor = False
 
     def __init__(self, output_filename="vasp.out",
-                 output_vasprun="vasprun.xml"):
+                 output_vasprun="vasprun.xml", **kwargs):
         """
         Initializes the handler with the output files to check.
 
@@ -438,7 +438,7 @@ class UnconvergedErrorHandler(ErrorHandler):
     """
     is_monitor = False
 
-    def __init__(self, output_filename="vasprun.xml"):
+    def __init__(self, output_filename="vasprun.xml", **kwargs):
         """
         Initializes the handler with the output file to check.
 
@@ -481,7 +481,7 @@ class MaxForceErrorHandler(ErrorHandler):
     is_monitor = False
 
     def __init__(self, output_filename="vasprun.xml",
-                 max_force_threshold=0.25):
+                 max_force_threshold=0.25, **kwargs):
         """
         Args:
             input_filename (str): name of the vasp INCAR file
@@ -528,7 +528,7 @@ class PotimErrorHandler(ErrorHandler):
     is_monitor = True
 
     def __init__(self, input_filename="POSCAR", output_filename="OSZICAR",
-                 dE_threshold=1):
+                 dE_threshold=1, **kwargs):
         """
         Initializes the handler with the input and output files to check.
 
@@ -579,7 +579,7 @@ class FrozenJobErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, output_filename="vasp.out", timeout=21600):
+    def __init__(self, output_filename="vasp.out", timeout=21600, **kwargs):
         """
         Initializes the handler with the output file to check.
 
@@ -623,7 +623,7 @@ class NonConvergingErrorHandler(ErrorHandler):
     is_monitor = True
 
     def __init__(self, output_filename="OSZICAR", nionic_steps=10,
-                 change_algo=False):
+                 change_algo=False, **kwargs):
         """
         Initializes the handler with the output file to check.
 
@@ -712,7 +712,7 @@ class WalltimeHandler(ErrorHandler):
     raises_runtime_error = False
 
     def __init__(self, wall_time=None, buffer_time=300,
-                 electronic_step_stop=False):
+                 electronic_step_stop=False, **kwargs):
         """
         Initializes the handler with a buffer time.
 
@@ -814,8 +814,8 @@ class WalltimeHandler(ErrorHandler):
 @deprecated(replacement=WalltimeHandler)
 class PBSWalltimeHandler(WalltimeHandler):
 
-    def __init__(self, buffer_time=300):
-        super(PBSWalltimeHandler, self).__init__(None, buffer_time=buffer_time)
+    def __init__(self, buffer_time=300, **kwargs):
+        super(PBSWalltimeHandler, self).__init__(None, buffer_time=buffer_time, **kwargs)
 
 
 class CheckpointHandler(ErrorHandler):
@@ -835,7 +835,7 @@ class CheckpointHandler(ErrorHandler):
     # itself naturally with the STOPCAR.
     is_terminating = False
 
-    def __init__(self, interval=3600):
+    def __init__(self, interval=3600, **kwargs):
         """
         Initializes the handler with an interval.
 
@@ -896,7 +896,7 @@ class StoppedRunHandler(ErrorHandler):
     # itself naturally with the STOPCAR.
     is_terminating = False
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         pass
 
     def check(self):
@@ -928,7 +928,7 @@ class PositiveEnergyErrorHandler(ErrorHandler):
     """
     is_monitor = True
 
-    def __init__(self, output_filename="OSZICAR"):
+    def __init__(self, output_filename="OSZICAR", **kwargs):
         """
         Initializes the handler with the output file to check.
 
