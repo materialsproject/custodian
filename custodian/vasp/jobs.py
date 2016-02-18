@@ -21,7 +21,7 @@ import shutil
 import math
 import logging
 
-from pymatgen.io.vasp import VaspInput, Incar, Poscar, Outcar
+from pymatgen.io.vasp import VaspInput, Incar, Poscar, Outcar, Kpoints
 from pymatgen.io.smart import read_structure
 from pymatgen.io.vasp.sets import MITVaspInputSet
 from monty.json import MontyDecoder
@@ -178,7 +178,8 @@ class VaspJob(Job):
         if self.auto_gamma:
             vi = VaspInput.from_directory(".")
             kpts = vi["KPOINTS"]
-            if kpts.style == "Gamma" and tuple(kpts.kpts[0]) == (1, 1, 1):
+            if kpts.style == Kpoints.supported_modes.Gamma \
+                    and tuple(kpts.kpts[0]) == (1, 1, 1):
                 if self.gamma_vasp_cmd is not None and which(
                         self.gamma_vasp_cmd[-1]):
                     cmd = self.gamma_vasp_cmd
