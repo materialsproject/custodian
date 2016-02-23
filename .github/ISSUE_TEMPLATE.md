@@ -3,8 +3,9 @@ is a feature request, please simply state the requested feature.
 
 ## System
 
-* <Version of custodian>
-* <OS version> 
+* Custodian version: <If it is the dev master branch, write "dev" here.>
+* Python version: <Only 2.7.* and 3.* supported.>
+* OS version: <If you are writing Windows here, you are on your own.> 
 
 ## Summary
 
