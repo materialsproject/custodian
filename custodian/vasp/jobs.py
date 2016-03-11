@@ -155,7 +155,7 @@ class VaspJob(Job):
                         # (since multiprocessing counts cores on the current machine only)
                         ncores = os.environ.get('NSLOTS') or multiprocessing.cpu_count()
                         ncores = int(ncores)
-                        for npar in range(int(round(math.sqrt(ncores))),
+                        for npar in range(int(math.sqrt(ncores)),
                                           ncores):
                             if ncores % npar == 0:
                                 incar["NPAR"] = npar
