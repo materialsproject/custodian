@@ -106,6 +106,36 @@ def get_jobs(args):
                  "action": {"_set": {"ISMEAR": 0}}},
                 {'dict': 'KPOINTS',
                  'action': {'_set': low_kpoints.as_dict()}}])
+
+            # let vasp determine encut (will be lower than
+            # needed for compatibility with other runs)
+            if "ENCUT" in incar:
+                post_settings.append(
+                    {"dict": "INCAR",
+                     "action": {"_set": {"ENCUT": incar["ENCUT"]}}})
+                settings.append(
+                    {"dict": "INCAR",
+                     "action": {"_unset": {"ENCUT": 1}}})
+
+            # unset magnetization
+            if "MAGMOM" in incar:
+                post_settings.append(
+                    {"dict": "INCAR",
+                     "action": {"_set": {"MAGMOM": incar["MAGMOM"]}}})
+                settings.append(
+                    {"dict": "INCAR",
+                     "action": {"_unset": {"MAGMOM": 1}}})
+            if "ISPIN" in incar:
+                post_settings.append(
+                    {"dict": "INCAR",
+                     "action": {"_set": {"ISPIN": incar["ISPIN"]}}})
+            else:
+                post_settings.append(
+                    {"dict": "INCAR",
+                     "action": {"_unset": {"ISPIN": 1}}})
+            settings.append(
+                {"dict": "INCAR", "action": {"_set": {"ISPIN": 1}}})
+
         elif job_type.startswith("relax"):
             pass
         elif job_type.startswith("full_relax"):
