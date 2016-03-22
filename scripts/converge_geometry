@@ -57,7 +57,7 @@ def get_runs(args):
                 settings = [
                     {"dict": "INCAR",
                      "action": {"_set": {"ISTART": 1}}},
-                    {"filename": "CONTCAR",
+                    {"file": "CONTCAR",
                      "action": {"_file_copy": {"dest": "POSCAR"}}}]
 
             #switch to RMM-DIIS once we are near the
@@ -66,7 +66,7 @@ def get_runs(args):
                 settings = [
                     {"dict": "INCAR",
                      "action": {"_set": {"ISTART": 1, "IBRION": 1}}},
-                    {"filename": "CONTCAR",
+                    {"file": "CONTCAR",
                      "action": {"_file_copy": {"dest": "POSCAR"}}}]
 
         job_number += 1
@@ -81,6 +81,7 @@ def do_run(args):
     c = Custodian(handlers, get_runs(args), max_errors=10, gzipped_output=args.gzip)
     c.run()
     logging.info("Geometry optimization complete")
+
 
 if __name__ == "__main__":
     import argparse
