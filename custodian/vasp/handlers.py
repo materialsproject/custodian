@@ -145,6 +145,8 @@ class VaspErrorHandler(ErrorHandler):
             if self.error_count['brmix'] == 0:
                 # Valid OUTCAR - simply rerun the job and increment
                 # error count for next time
+                actions.append({"dict": "INCAR",
+                                "action": {"_set": {"ISTART": 1}}})
                 self.error_count['brmix'] += 1
 
             elif self.error_count['brmix'] == 1:
