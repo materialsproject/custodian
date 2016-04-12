@@ -101,20 +101,30 @@ class VaspErrorHandlerTest(unittest.TestCase):
     def test_brmix(self):
         h = VaspErrorHandler("vasp.brmix")
         self.assertEqual(h.check(), True)
+
+        # The first (no good OUTCAR) correction, check IMIX
         d = h.correct()
         self.assertEqual(d["errors"], ['brmix'])
-
         vi = VaspInput.from_directory(".")
-        chgcar_exists = os.path.exists("CHGCAR")
-        if h.error_count['brmix'] > 1:
-            self.assertFalse(chgcar_exists)
-        else:
-            self.assertTrue(chgcar_exists)
-            if vi["KPOINTS"].style == Kpoints.supported_modes.Gamma and vi["KPOINTS"].num_kpts < 1:
-                all_kpts_even = all([
-                    bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0]
-                ])
-                self.assertFalse(all_kpts_even)
+        self.assertEqual(vi["INCAR"]["IMIX"], 1)
+        self.assertTrue(os.path.exists("CHGCAR"))
+
+        # The next correction check Gamma and evenize
+        h.correct()
+        vi = VaspInput.from_directory(".")
+        self.assertFalse("IMIX" in vi["INCAR"])
+        self.assertTrue(os.path.exists("CHGCAR"))
+        if vi["KPOINTS"].style == Kpoints.supported_modes.Gamma and vi["KPOINTS"].num_kpts < 1:
+            all_kpts_even = all([
+                bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0]
+            ])
+            self.assertFalse(all_kpts_even)
+
+        # The next correction check ISYM and no CHGCAR
+        h.correct()
+        vi = VaspInput.from_directory(".")
+        self.assertEqual(vi["INCAR"]["ISYM"], 0)
+        self.assertFalse(os.path.exists("CHGCAR"))
 
         shutil.copy("INCAR.nelect", "INCAR")
         h = VaspErrorHandler("vasp.brmix")

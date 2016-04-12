@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals, division
 
+from monty.os.path import zpath
+
 """
 This module implements specific error handlers for VASP runs. These handlers
 tries to detect common errors in vasp runs and attempt to fix them on the fly
@@ -36,7 +38,7 @@ from math import ceil
 
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
-from pymatgen.io.vasp import Poscar, VaspInput, Incar, Kpoints, Vasprun, Oszicar
+from pymatgen.io.vasp import Poscar, VaspInput, Incar, Kpoints, Vasprun, Oszicar, Outcar
 from pymatgen.transformations.standard_transformations import \
     SupercellTransformation
 
@@ -131,15 +133,42 @@ class VaspErrorHandler(ErrorHandler):
                             "action": {"_set": {"SYMPREC": 1e-8}}})
 
         if "brmix" in self.errors:
+            # If there is not a valid OUTCAR already, increment
+            # error count to 1 to skip first fix
+            if self.error_count['brmix'] == 0:
+                try:
+                    assert(Outcar(zpath(os.path.join(
+                        os.getcwd(), "OUTCAR"))).is_stopped is False)
+                except:
+                    self.error_count['brmix'] += 1
 
-            if self.error_count['brmix'] == 0 and vi["KPOINTS"].style == Kpoints.supported_modes.Gamma:
-                actions.append({"dict": "KPOINTS",
-                                "action": {"_set": {"generation_style": "Monkhorst"}}})
+            if self.error_count['brmix'] == 0:
+                # Valid OUTCAR - simply rerun the job and increment
+                # error count for next time
                 self.error_count['brmix'] += 1
 
-            elif self.error_count['brmix'] <= 1 and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+            elif self.error_count['brmix'] == 1:
+                # Use Kerker mixing w/default values for other parameters
+                actions.append({"dict": "INCAR",
+                                "action": {"_set": {"IMIX": 1}}})
+                self.error_count['brmix'] += 1
+
+            elif self.error_count['brmix'] == 2 and vi["KPOINTS"].style \
+                    == Kpoints.supported_modes.Gamma:
                 actions.append({"dict": "KPOINTS",
-                                "action": {"_set": {"generation_style": "Gamma"}}})
+                                "action": {"_set": {"generation_style":
+                                                        "Monkhorst"}}})
+                actions.append({"dict": "INCAR",
+                                "action": {"_unset": {"IMIX": 1}}})
+                self.error_count['brmix'] += 1
+
+            elif self.error_count['brmix'] in [2, 3] and vi["KPOINTS"].style \
+                    == Kpoints.supported_modes.Monkhorst:
+                actions.append({"dict": "KPOINTS",
+                                "action": {"_set": {"generation_style":
+                                                        "Gamma"}}})
+                actions.append({"dict": "INCAR",
+                                "action": {"_unset": {"IMIX": 1}}})
                 self.error_count['brmix'] += 1
 
                 if vi["KPOINTS"].num_kpts < 1:
