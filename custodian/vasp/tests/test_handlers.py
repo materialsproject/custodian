@@ -234,10 +234,6 @@ class AliasingErrorHandlerTest(unittest.TestCase):
         h = AliasingErrorHandler("vasp.aliasing_incar")
         h.check()
         d = h.correct()
-        incar = Incar.from_file('INCAR')
-        shutil.move("INCAR.orig", "INCAR")
-        clean_dir()
-        os.chdir(test_dir)
 
         self.assertEqual(d["errors"], ['aliasing_incar'])
         self.assertEqual(d["actions"],
@@ -246,6 +242,20 @@ class AliasingErrorHandlerTest(unittest.TestCase):
                             "action": {"_file_delete": {'mode': "actual"}}},
                           {"file": "WAVECAR",
                             "action": {"_file_delete": {'mode': "actual"}}}])
+
+        incar = Incar.from_file('INCAR')
+        incar["ICHARG"] = 10
+        incar.write_file("INCAR")
+        d = h.correct()
+        self.assertEqual(d["errors"], ['aliasing_incar'])
+        self.assertEqual(d["actions"],
+                         [{'action': {'_unset': {'NGY': 1, 'NGZ': 1}},
+                           'dict': 'INCAR'}])
+
+        shutil.move("INCAR.orig", "INCAR")
+        clean_dir()
+        os.chdir(test_dir)
+
 
     def tearDown(self):
         os.chdir(test_dir)
@@ -447,6 +457,7 @@ class PositiveEnergyHandlerTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         os.chdir(cwd)
+
 
 class PotimHandlerTest(unittest.TestCase):
 
