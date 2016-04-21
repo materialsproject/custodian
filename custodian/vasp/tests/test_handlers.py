@@ -243,7 +243,7 @@ class AliasingErrorHandlerTest(unittest.TestCase):
                           {"file": "WAVECAR",
                             "action": {"_file_delete": {'mode': "actual"}}}])
 
-        incar = Incar.from_file('INCAR')
+        incar = Incar.from_file('INCAR.orig')
         incar["ICHARG"] = 10
         incar.write_file("INCAR")
         d = h.correct()
