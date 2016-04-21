@@ -49,6 +49,7 @@ from custodian.vasp.interpreter import VaspModder
 VASP_BACKUP_FILES = {"INCAR", "KPOINTS", "POSCAR", "OUTCAR", "OSZICAR",
                      "vasprun.xml", "vasp.out"}
 
+
 class VaspErrorHandler(ErrorHandler):
     """
     Master VaspErrorHandler class that handles a number of common errors
@@ -195,10 +196,11 @@ class VaspErrorHandler(ErrorHandler):
 
                 # Based on VASP forum's recommendation, you should delete the
                 # CHGCAR and WAVECAR when dealing with this error.
-                actions.append({"file": "CHGCAR",
-                                "action": {"_file_delete": {'mode': "actual"}}})
-                actions.append({"file": "WAVECAR",
-                                "action": {"_file_delete": {'mode': "actual"}}})
+                if vi["INCAR"].get("ICHARG", 0) < 10:
+                    actions.append({"file": "CHGCAR",
+                                    "action": {"_file_delete": {'mode': "actual"}}})
+                    actions.append({"file": "WAVECAR",
+                                    "action": {"_file_delete": {'mode': "actual"}}})
 
         if "zpotrf" in self.errors:
             # Usually caused by short bond distances. If on the first step,
@@ -223,11 +225,11 @@ class VaspErrorHandler(ErrorHandler):
 
             # Based on VASP forum's recommendation, you should delete the
             # CHGCAR and WAVECAR when dealing with this error.
-
-            actions.append({"file": "CHGCAR",
-                            "action": {"_file_delete": {'mode': "actual"}}})
-            actions.append({"file": "WAVECAR",
-                            "action": {"_file_delete": {'mode': "actual"}}})
+            if vi["INCAR"].get("ICHARG", 0) < 10:
+                actions.append({"file": "CHGCAR",
+                                "action": {"_file_delete": {'mode': "actual"}}})
+                actions.append({"file": "WAVECAR",
+                                "action": {"_file_delete": {'mode': "actual"}}})
 
         if self.errors.intersection(["subspacematrix", "rspher",
                                      "real_optlay"]):
@@ -301,14 +303,15 @@ class VaspErrorHandler(ErrorHandler):
                 potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"POTIM": potim}}})
-
-            actions.append({"file": "CHGCAR",
-                            "action": {"_file_delete": {'mode': "actual"}}})
-            actions.append({"file": "WAVECAR",
-                            "action": {"_file_delete": {'mode': "actual"}}})
+            if vi["INCAR"].get("ICHARG", 0) < 10:
+                actions.append({"file": "CHGCAR",
+                                "action": {"_file_delete": {'mode': "actual"}}})
+                actions.append({"file": "WAVECAR",
+                                "action": {"_file_delete": {'mode': "actual"}}})
         if "edddav" in self.errors:
-            actions.append({"file": "CHGCAR",
-                            "action": {"_file_delete": {'mode': "actual"}}})
+            if vi["INCAR"].get("ICHARG", 0) < 10:
+                actions.append({"file": "CHGCAR",
+                                "action": {"_file_delete": {'mode': "actual"}}})
             actions.append({"dict": "INCAR", "action":
                             {"_set": {"ALGO": "All"}}})
 
@@ -378,24 +381,25 @@ class AliasingErrorHandler(ErrorHandler):
                         grid_adjusted = True
                     #Ensure that all NGX, NGY, NGZ have been checked
                     if grid_adjusted and 'NGZ' in line:
-                        actions.extend(
-                            [{"dict": "INCAR",
-                              "action": {"_set": changes_dict}},
-                             {"file": "CHGCAR",
-                              "action": {"_file_delete": {'mode': "actual"}}},
-                             {"file": "WAVECAR",
-                              "action": {"_file_delete": {'mode': "actual"}}}])
+                        actions.append({"dict": "INCAR", "action": {"_set": changes_dict}})
+                        if vi["INCAR"].get("ICHARG", 0) < 10:
+                            actions.extend([{"file": "CHGCAR",
+                                             "action": {"_file_delete": {'mode': "actual"}}},
+                                            {"file": "WAVECAR",
+                                             "action": {"_file_delete": {'mode': "actual"}}}])
                         break
 
         if "aliasing_incar" in self.errors:
             #vasp seems to give different warnings depending on whether the
             #aliasing error was caused by user supplied inputs
             d = {k: 1 for k in ['NGX', 'NGY', 'NGZ'] if k in vi['INCAR'].keys()}
-            actions.extend([{"dict": "INCAR", "action": {"_unset": d}},
-                            {"file": "CHGCAR",
-                             "action": {"_file_delete": {'mode': "actual"}}},
-                            {"file": "WAVECAR",
-                             "action": {"_file_delete": {'mode': "actual"}}}])
+            actions.append({"dict": "INCAR", "action": {"_unset": d}})
+
+            if vi["INCAR"].get("ICHARG", 0) < 10:
+                actions.extend([{"file": "CHGCAR",
+                                 "action": {"_file_delete": {'mode': "actual"}}},
+                                {"file": "WAVECAR",
+                                 "action": {"_file_delete": {'mode': "actual"}}}])
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
@@ -991,3 +995,4 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         #Unfixable error. Just return None for actions.
         else:
             return {"errors": ["Positive energy"], "actions": None}
+
