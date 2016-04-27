@@ -87,7 +87,8 @@ def get_jobs(args):
                                           "LEPSILON": True, 'LREAL':False},
                 ediff_per_atom=False)
             i = vis.incar
-            del i["NPAR"]
+            if "NPAR" in i:
+                del i["NPAR"]
             settings.extend([
                 {"dict": "INCAR",
                  "action": {"_set": dict(i),
