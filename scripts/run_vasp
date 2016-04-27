@@ -77,7 +77,7 @@ def get_jobs(args):
             settings.extend([
                 {"dict"  : "INCAR",
                  "action": {"_set": dict(vis.incar)}},
-                {'dict'  : 'KPOINTS',
+                {'dict': 'KPOINTS',
                  'action': {'_set': vis.kpoints.as_dict()}}])
 
         if job_type.startswith("static_dielectric_derived"):
@@ -86,9 +86,12 @@ def get_jobs(args):
                 ".", user_incar_settings={"EDIFF": 1e-6, "IBRION": 8,
                                           "LEPSILON": True, 'LREAL':False},
                 ediff_per_atom=False)
+            i = vis.incar
+            del i["NPAR"]
             settings.extend([
                 {"dict": "INCAR",
-                 "action": {"_set": dict(vis.incar)}},
+                 "action": {"_set": dict(i),
+                            "_unset": {"NPAR": 1}}},
                 {'dict': 'KPOINTS',
                  'action': {'_set': vis.kpoints.as_dict()}}])
 
