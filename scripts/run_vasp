@@ -71,8 +71,8 @@ def get_jobs(args):
 
         if job_type.startswith("static_derived"):
             from pymatgen.io.vasp.sets import MPStaticSet
-            vis = MPStaticSet.from_prev_calc(".",
-                                             user_incar_settings={"LWAVE": True})
+            vis = MPStaticSet.from_prev_calc(
+                ".", user_incar_settings={"LWAVE": True})
             settings.extend([
                 {"dict"  : "INCAR",
                  "action": {"_set": dict(vis.incar)}},
@@ -92,11 +92,9 @@ def get_jobs(args):
             from pymatgen.io.vasp.sets import MPNonSCFSet
             vis = MPNonSCFSet.from_prev_calc(".", copy_chgcar=False,
                                              user_incar_settings={"LWAVE": True})
-            incar = vis.incar
-            incar["LWAVE"] = True
             settings.extend([
                 {"dict": "INCAR",
-                 "action": {"_set": dict(incar)}},
+                 "action": {"_set": dict(vis.incar)}},
                 {'dict': 'KPOINTS',
                  'action': {'_set': vis.kpoints.as_dict()}}])
 
