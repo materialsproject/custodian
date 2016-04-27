@@ -72,7 +72,7 @@ def get_jobs(args):
         if job_type.startswith("static_derived"):
             from pymatgen.io.vasp.sets import MPStaticSet
             vis = MPStaticSet.from_prev_calc(
-                ".", user_incar_settings={"LWAVE": True, "EDIFF": 1e-6},
+                ".", user_incar_settings={"LWAVE": True, "ISMEAR": -5, "EDIFF": 1e-6},
                 ediff_per_atom=False)
             settings.extend([
                 {"dict"  : "INCAR",
@@ -104,7 +104,7 @@ def get_jobs(args):
             vis = MPNonSCFSet.from_prev_calc(
                 ".", optics=True, copy_chgcar=False,
                 nedos=2001, mode="uniform", nbands_factor=5,
-                user_incar_settings={"LWAVE": True, "ALGO": "Exact", "EDIFF": 1e-6},
+                user_incar_settings={"LWAVE": True, "ALGO": "Exact", "ISMEAR": -5, "EDIFF": 1e-6},
                 ediff_per_atom=False)
             settings.extend([
                 {"dict": "INCAR",
