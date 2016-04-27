@@ -80,6 +80,18 @@ def get_jobs(args):
                 {'dict'  : 'KPOINTS',
                  'action': {'_set': vis.kpoints.as_dict()}}])
 
+        if job_type.startswith("static_dielectric_derived"):
+            from pymatgen.io.vasp.sets import MPStaticSet
+            vis = MPStaticSet.from_prev_calc(
+                ".", user_incar_settings={"EDIFF": 1e-6, "IBRION": 8,
+                                          "LEPSILON": True, 'LREAL':False},
+                ediff_per_atom=False)
+            settings.extend([
+                {"dict": "INCAR",
+                 "action": {"_set": dict(vis.incar)}},
+                {'dict': 'KPOINTS',
+                 'action': {'_set': vis.kpoints.as_dict()}}])
+
         elif job_type.startswith("static"):
             m = [i * args.static_kpoint for i in vinput["KPOINTS"].kpts[0]]
             settings.extend([
@@ -98,6 +110,7 @@ def get_jobs(args):
                  "action": {"_set": dict(vis.incar)}},
                 {'dict': 'KPOINTS',
                  'action': {'_set': vis.kpoints.as_dict()}}])
+
 
         elif job_type.startswith("optics_derived"):
             from pymatgen.io.vasp.sets import MPNonSCFSet
