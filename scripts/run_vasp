@@ -87,8 +87,17 @@ def get_jobs(args):
 
         elif job_type.startswith("nonscf_derived"):
             from pymatgen.io.vasp.sets import MPNonSCFSet
-            vis = MPNonSCFSet.from_prev_calc(".", standardize=True,
-                                             copy_chgcar=False)
+            vis = MPNonSCFSet.from_prev_calc(".", copy_chgcar=False)
+            settings.extend([
+                {"dict": "INCAR",
+                 "action": {"_set": dict(vis.incar)}},
+                {'dict': 'KPOINTS',
+                 'action': {'_set': vis.kpoints.as_dict()}}])
+
+        elif job_type.startswith("optics_derived"):
+            from pymatgen.io.vasp.sets import MPNonSCFSet
+            vis = MPNonSCFSet.from_prev_calc(".", optics=True,
+                                             nedos=2001, mode="uniform")
             settings.extend([
                 {"dict": "INCAR",
                  "action": {"_set": dict(vis.incar)}},
@@ -262,7 +271,7 @@ if __name__ == "__main__":
         default=["relax", "relax"],
         help="Jobs to execute. Only sequences of relax, "
              "quickrelax, static, rampU, full_relax, static_derived, "
-             "nonscf_derived are "
+             "nonscf_derived, optics_derived are "
              "supported at the moment. For example, \"relax relax static\" "
              "will run a double relaxation followed by a static "
              "run. By default, suffixes are given sequential numbering,"
