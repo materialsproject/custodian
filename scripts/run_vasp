@@ -81,22 +81,22 @@ def get_jobs(args):
                  'action': {'_set': vis.kpoints.as_dict()}}])
 
         if job_type.startswith("static_dielectric_derived"):
-            from pymatgen.io.vasp.sets import MPStaticSet
-            vis = MPStaticSet.from_prev_calc(
-                ".", user_incar_settings={"EDIFF": 1e-6, "IBRION": 8,
-                                          "LEPSILON": True, 'LREAL':False,
-                                          "LPEAD": True, "ISMEAR": 0,
-                                          "SIGMA": 0.01},
-                ediff_per_atom=False)
-            i = vis.incar
-            if "NPAR" in i:
-                del i["NPAR"]
+            from pymatgen.io.vasp.sets import MPStaticSet, MPStaticDielectricDFPTVaspInputSet
+
+            # vis = MPStaticSet.from_prev_calc(
+            #     ".", user_incar_settings={"EDIFF": 1e-6, "IBRION": 8,
+            #                               "LEPSILON": True, 'LREAL':False,
+            #                               "LPEAD": True, "ISMEAR": 0,
+            #                               "SIGMA": 0.01},
+            #     ediff_per_atom=False)
+            vis = MPStaticDielectricDFPTVaspInputSet()
+            incar = vis.get_incar(vinput["POSCAR"].structure)
+            kpoints = vis.get_kpoints(vinput["POSCAR"].structure)
             settings.extend([
-                {"dict": "INCAR",
-                 "action": {"_set": dict(i),
-                            "_unset": {"NPAR": 1}}},
-                {'dict': 'KPOINTS',
-                 'action': {'_set': vis.kpoints.as_dict()}}])
+                {"dict"  : "INCAR",
+                 "action": {"_set": dict(incar)}},
+                {'dict'  : 'KPOINTS',
+                 'action': {'_set': kpoints.as_dict()}}])
 
         elif job_type.startswith("static"):
             m = [i * args.static_kpoint for i in vinput["KPOINTS"].kpts[0]]
