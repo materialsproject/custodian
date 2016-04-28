@@ -84,7 +84,9 @@ def get_jobs(args):
             from pymatgen.io.vasp.sets import MPStaticSet
             vis = MPStaticSet.from_prev_calc(
                 ".", user_incar_settings={"EDIFF": 1e-6, "IBRION": 8,
-                                          "LEPSILON": True, 'LREAL':False},
+                                          "LEPSILON": True, 'LREAL':False,
+                                          "LPEAD": True, "ISMEAR": 0,
+                                          "SIGMA": 0.01},
                 ediff_per_atom=False)
             i = vis.incar
             if "NPAR" in i:
