@@ -68,7 +68,7 @@ def get_jobs(args):
                  "action": {"_file_copy": {"dest": "POSCAR"}}})
 
         job_type = job.lower()
-
+        auto_npar = True
         if job_type.startswith("static_derived"):
             from pymatgen.io.vasp.sets import MPStaticSet
             vis = MPStaticSet.from_prev_calc(
@@ -91,13 +91,15 @@ def get_jobs(args):
             #     ediff_per_atom=False)
             vis = MPStaticDielectricDFPTVaspInputSet()
             incar = vis.get_incar(vinput["POSCAR"].structure)
+            incar.pop("NPAR", None)
             kpoints = vis.get_kpoints(vinput["POSCAR"].structure)
             settings.extend([
                 {"dict"  : "INCAR",
-                 "action": {"_set": dict(incar)}},
+                 "action": {"_set": dict(incar),
+                            "_unset": {"NPAR": 1}}},
                 {'dict'  : 'KPOINTS',
                  'action': {'_set': kpoints.as_dict()}}])
-
+            auto_npar = False
         elif job_type.startswith("static"):
             m = [i * args.static_kpoint for i in vinput["KPOINTS"].kpts[0]]
             settings.extend([
@@ -205,7 +207,7 @@ def get_jobs(args):
         if not job_type.startswith("full_relax"):
             yield VaspJob(vasp_command, final=final, suffix=suffix,
                           backup=backup, settings_override=settings,
-                          copy_magmom=copy_magmom)
+                          copy_magmom=copy_magmom, auto_npar=auto_npar)
 
 
 def do_run(args):
