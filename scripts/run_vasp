@@ -95,7 +95,8 @@ def get_jobs(args):
             for k in ["NPAR", "KPOINT_BSE", "LAECHG", "LCHARG", "LVHAR",
                       "NSW"]:
                 incar.pop(k, None)
-                unset[k] = 1
+                if k in vinput["INCAR"]:
+                    unset[k] = 1
             kpoints = vis.get_kpoints(vinput["POSCAR"].structure)
             settings.extend([
                 {"dict": "INCAR",
