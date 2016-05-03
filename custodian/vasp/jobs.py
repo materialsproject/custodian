@@ -213,7 +213,7 @@ class VaspJob(Job):
                 logging.error('MAGMOM copy from OUTCAR to INCAR failed')
 
     @classmethod
-    def double_relaxation_run(cls, vasp_cmd, auto_npar=True):
+    def double_relaxation_run(cls, vasp_cmd, auto_npar=True, ediffg=-0.05):
         """
         Returns a list of two jobs corresponding to an AFLOW style double
         relaxation run.
@@ -226,10 +226,15 @@ class VaspJob(Job):
                 number of cores) as recommended by VASP for DFT calculations.
                 Generally, this results in significant speedups. Defaults to
                 True. Set to False for HF, GW and RPA calculations.
+            ediffg (float): Force convergence criteria for subsequent runs (
+                ignored for the initial run.)
 
         Returns:
             List of two jobs corresponding to an AFLOW style run.
         """
+        incar_update = {"ISTART": 1}
+        if ediffg:
+            incar_update["EDIFFG"] = ediffg
         return [VaspJob(vasp_cmd, final=False, suffix=".relax1",
                         auto_npar=auto_npar),
                 VaspJob(
@@ -237,13 +242,13 @@ class VaspJob(Job):
                     suffix=".relax2", auto_npar=auto_npar,
                     settings_override=[
                         {"dict": "INCAR",
-                         "action": {"_set": {"ISTART": 1}}},
+                         "action": {"_set": incar_update}},
                         {"file": "CONTCAR",
                          "action": {"_file_copy": {"dest": "POSCAR"}}}])]
 
     @classmethod
-    def full_opt_run(cls, vasp_cmd, auto_npar=True, vol_change_tol=0.05,
-                     max_steps=10):
+    def full_opt_run(cls, vasp_cmd, auto_npar=True, vol_change_tol=0.02,
+                     max_steps=10, ediffg=-0.05):
         """
         Returns a generator of jobs for a full optimization run. Basically,
         this runs an infinite series of geometry optimization jobs until the
@@ -261,11 +266,13 @@ class VaspJob(Job):
                 Defaults to 0.05, i.e., 5%.
             max_steps (int): The maximum number of runs. Defaults to 10 (
                 highly unlikely that this limit is ever reached).
+            ediffg (float): Force convergence criteria for subsequent runs (
+                ignored for the initial run.)
 
         Returns:
             Generator of jobs.
         """
-        for i in xrange(max_steps):
+        for i in range(max_steps):
             if i == 0:
                 settings = None
                 backup = True
@@ -280,9 +287,12 @@ class VaspJob(Job):
                     logging.info("Stopping optimization!")
                     break
                 else:
+                    incar_update = {"ISTART": 1}
+                    if ediffg:
+                        incar_update["EDIFFG"] = ediffg
                     settings = [
                         {"dict": "INCAR",
-                         "action": {"_set": {"ISTART": 1}}},
+                         "action": {"_set": incar_update}},
                         {"file": "CONTCAR",
                          "action": {"_file_copy": {"dest": "POSCAR"}}}]
             logging.info("Generating job = %d!" % (i+1))
