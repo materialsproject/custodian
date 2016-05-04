@@ -215,7 +215,7 @@ class VaspJob(Job):
 
     @classmethod
     def double_relaxation_run(cls, vasp_cmd, auto_npar=True, ediffg=-0.05,
-                              half_kpt_first_relax=False):
+                              half_kpts_first_relax=False):
         """
         Returns a list of two jobs corresponding to an AFLOW style double
         relaxation run.
@@ -246,7 +246,7 @@ class VaspJob(Job):
              "action": {"_set": incar_update}},
             {"file": "CONTCAR",
              "action": {"_file_copy": {"dest": "POSCAR"}}}]
-        if half_kpt_first_relax and os.path.exists("KPOINTS") and \
+        if half_kpts_first_relax and os.path.exists("KPOINTS") and \
                 os.path.exists("POSCAR"):
             kpts = Kpoints.from_file("KPOINTS")
             orig_kpts_dict = kpts.as_dict()
@@ -271,7 +271,7 @@ class VaspJob(Job):
 
     @classmethod
     def full_opt_run(cls, vasp_cmd, auto_npar=True, vol_change_tol=0.02,
-                     max_steps=10, ediffg=-0.05, half_kpt_first_relax=False):
+                     max_steps=10, ediffg=-0.05, half_kpts_first_relax=False):
         """
         Returns a generator of jobs for a full optimization run. Basically,
         this runs an infinite series of geometry optimization jobs until the
@@ -291,7 +291,7 @@ class VaspJob(Job):
                 highly unlikely that this limit is ever reached).
             ediffg (float): Force convergence criteria for subsequent runs (
                 ignored for the initial run.)
-            half_kpt_first_relax (bool): Whether to halve the kpoint grid
+            half_kpts_first_relax (bool): Whether to halve the kpoint grid
                 for the first relaxation. Speeds up difficult convergence
                 considerably. Defaults to False.
 
@@ -302,7 +302,7 @@ class VaspJob(Job):
             if i == 0:
                 settings = None
                 backup = True
-                if half_kpt_first_relax and os.path.exists("KPOINTS") and \
+                if half_kpts_first_relax and os.path.exists("KPOINTS") and \
                         os.path.exists("POSCAR"):
                     kpts = Kpoints.from_file("KPOINTS")
                     orig_kpts_dict = kpts.as_dict()
@@ -331,7 +331,7 @@ class VaspJob(Job):
                          "action": {"_set": incar_update}},
                         {"file": "CONTCAR",
                          "action": {"_file_copy": {"dest": "POSCAR"}}}]
-                    if i == 1 and half_kpt_first_relax:
+                    if i == 1 and half_kpts_first_relax:
                         settings.append({"dict": "KPOINTS",
                                          "action": {"_set": orig_kpts_dict}})
             logging.info("Generating job = %d!" % (i+1))
