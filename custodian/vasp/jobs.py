@@ -20,10 +20,11 @@ import os
 import shutil
 import math
 import logging
+import numpy as np
 
 from pymatgen.io.vasp import VaspInput, Incar, Poscar, Outcar, Kpoints
 from pymatgen.io.smart import read_structure
-from pymatgen.io.vasp.sets import MITVaspInputSet
+from pymatgen.io.vasp.sets import MPVaspInputSet
 from monty.json import MontyDecoder
 from monty.os.path import which
 
@@ -46,7 +47,7 @@ class VaspJob(Job):
 
     def __init__(self, vasp_cmd, output_file="vasp.out", suffix="",
                  final=True, backup=True,
-                 default_vasp_input_set=MITVaspInputSet(), auto_npar=True,
+                 default_vasp_input_set=MPVaspInputSet(), auto_npar=True,
                  auto_gamma=True, settings_override=None,
                  gamma_vasp_cmd=None, copy_magmom=False):
         """
@@ -213,7 +214,8 @@ class VaspJob(Job):
                 logging.error('MAGMOM copy from OUTCAR to INCAR failed')
 
     @classmethod
-    def double_relaxation_run(cls, vasp_cmd, auto_npar=True, ediffg=-0.05):
+    def double_relaxation_run(cls, vasp_cmd, auto_npar=True, ediffg=-0.05,
+                              half_kpt_first_relax=False):
         """
         Returns a list of two jobs corresponding to an AFLOW style double
         relaxation run.
@@ -228,6 +230,9 @@ class VaspJob(Job):
                 True. Set to False for HF, GW and RPA calculations.
             ediffg (float): Force convergence criteria for subsequent runs (
                 ignored for the initial run.)
+            half_kpt_first_relax (bool): Whether to halve the kpoint grid
+                for the first relaxation. Speeds up difficult convergence
+                considerably. Defaults to False.
 
         Returns:
             List of two jobs corresponding to an AFLOW style run.
@@ -235,20 +240,38 @@ class VaspJob(Job):
         incar_update = {"ISTART": 1}
         if ediffg:
             incar_update["EDIFFG"] = ediffg
+        settings_overide_1 = None
+        settings_overide_2  = [
+            {"dict": "INCAR",
+             "action": {"_set": incar_update}},
+            {"file": "CONTCAR",
+             "action": {"_file_copy": {"dest": "POSCAR"}}}]
+        if half_kpt_first_relax and os.path.exists("KPOINTS") and \
+                os.path.exists("POSCAR"):
+            kpts = Kpoints.from_file("KPOINTS")
+            orig_kpts_dict = kpts.as_dict()
+            # lattice vectors with length < 8 will get >1 KPOINT
+            kpts.kpts = np.maximum(np.array(kpts.kpts) / 2, 1).tolist()
+            low_kpts_dict = kpts.as_dict()
+            settings_overide_1 = [
+                {"dict": "KPOINTS",
+                 "action": {"_set": low_kpts_dict}}
+            ]
+            settings_overide_2.append(
+                {"dict": "KPOINTS",
+                 "action": {"_set": orig_kpts_dict}}
+            )
+
         return [VaspJob(vasp_cmd, final=False, suffix=".relax1",
-                        auto_npar=auto_npar),
-                VaspJob(
-                    vasp_cmd, final=True, backup=False,
-                    suffix=".relax2", auto_npar=auto_npar,
-                    settings_override=[
-                        {"dict": "INCAR",
-                         "action": {"_set": incar_update}},
-                        {"file": "CONTCAR",
-                         "action": {"_file_copy": {"dest": "POSCAR"}}}])]
+                        auto_npar=auto_npar,
+                        settings_override=settings_overide_1),
+                VaspJob(vasp_cmd, final=True, backup=False, suffix=".relax2",
+                        auto_npar=auto_npar,
+                        settings_override=settings_overide_2)]
 
     @classmethod
     def full_opt_run(cls, vasp_cmd, auto_npar=True, vol_change_tol=0.02,
-                     max_steps=10, ediffg=-0.05):
+                     max_steps=10, ediffg=-0.05, half_kpt_first_relax=False):
         """
         Returns a generator of jobs for a full optimization run. Basically,
         this runs an infinite series of geometry optimization jobs until the
@@ -268,6 +291,9 @@ class VaspJob(Job):
                 highly unlikely that this limit is ever reached).
             ediffg (float): Force convergence criteria for subsequent runs (
                 ignored for the initial run.)
+            half_kpt_first_relax (bool): Whether to halve the kpoint grid
+                for the first relaxation. Speeds up difficult convergence
+                considerably. Defaults to False.
 
         Returns:
             Generator of jobs.
@@ -276,6 +302,16 @@ class VaspJob(Job):
             if i == 0:
                 settings = None
                 backup = True
+                if half_kpt_first_relax and os.path.exists("KPOINTS") and \
+                        os.path.exists("POSCAR"):
+                    kpts = Kpoints.from_file("KPOINTS")
+                    orig_kpts_dict = kpts.as_dict()
+                    kpts.kpts = np.maximum(np.array(kpts.kpts) / 2, 1).tolist()
+                    low_kpts_dict = kpts.as_dict()
+                    settings = [
+                        {"dict": "KPOINTS",
+                         "action": {"_set": low_kpts_dict}}
+                    ]
             else:
                 backup = False
                 initial = Poscar.from_file("POSCAR").structure
@@ -295,6 +331,9 @@ class VaspJob(Job):
                          "action": {"_set": incar_update}},
                         {"file": "CONTCAR",
                          "action": {"_file_copy": {"dest": "POSCAR"}}}]
+                    if i == 1 and half_kpt_first_relax:
+                        settings.append({"dict": "KPOINTS",
+                                         "action": {"_set": orig_kpts_dict}})
             logging.info("Generating job = %d!" % (i+1))
             yield VaspJob(vasp_cmd, final=False, backup=backup,
                           suffix=".relax%d" % (i+1), auto_npar=auto_npar,
