@@ -39,7 +39,7 @@ custodian_params:
 def run(args):
     FORMAT = '%(asctime)s %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
-    logging.info("Handlers used are %s" % args.handlers)
+    logging.info("Spec file is %s" % args.spec_file)
     d = loadfn(args.spec_file)
     c = Custodian.from_spec(d)
     c.run()
