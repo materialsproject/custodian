@@ -33,6 +33,7 @@ handlers:
 validators:
 - vldr: custodian.vasp.validators.VasprunXMLValidator
 custodian_params:
+  max_errors: 10
   scratch_dir: /tmp
 """
 
