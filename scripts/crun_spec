@@ -56,8 +56,7 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers()
 
     prun = subparsers.add_parser("run", help="Run custodian.")
-    prun.add_argument("spec_file", metavar="spec_file", type=str,
-                      required=True,
+    prun.add_argument("spec_file", metavar="spec_file", type=str, nargs=1,
                       help="YAML/JSON spec file.")
     prun.set_defaults(func=run)
 
