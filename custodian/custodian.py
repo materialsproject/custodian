@@ -232,36 +232,49 @@ class Custodian(object):
         Returns:
             Custodian instance.
         """
-        jobs = []
-        common_params = spec.get("jobs_common_params", {})
+
+        dec = MontyDecoder()
 
         def load_class(dotpath):
             modname, classname = dotpath.rsplit(".", 1)
             mod = __import__(modname, globals(), locals(), [classname], 0)
             return getattr(mod, classname)
 
+        def process_params(d):
+            decoded = {}
+            for k, v in d.items():
+                if k.startswith("$"):
+                    if isinstance(v, list):
+                        v = [os.path.expandvars(i) for i in v]
+                    elif isinstance(v, dict):
+                        v = {k2: os.path.expandvars(v2) for k2, v2 in v.items()}
+                    else:
+                        v = os.path.expandvars(v)
+                decoded[k.strip("$")] = dec.process_decoded(v)
+            return decoded
+
+        jobs = []
+        common_params = process_params(spec.get("jobs_common_params", {}))
+
         for d in spec["jobs"]:
             cls_ = load_class(d["jb"])
-            params = {k: MontyDecoder().process_decoded(v) for k, v in
-                      d.get("params", {}).items()}
+            params = process_params(d.get("params", {}))
             params.update(common_params)
             jobs.append(cls_(**params))
 
         handlers = []
         for d in spec.get("handlers", []):
             cls_ = load_class(d["hdlr"])
-            params = {k: MontyDecoder().process_decoded(v) for k, v in
-                      d.get("params", {}).items()}
+            params = process_params(d.get("params", {}))
             handlers.append(cls_(**params))
 
         validators = []
         for d in spec.get("validators", []):
             cls_ = load_class(d["vldr"])
-            params = {k: MontyDecoder().process_decoded(v) for k, v in
-                      d.get("params", {}).items()}
+            params = process_params(d.get("params", {}))
             validators.append(cls_(**params))
 
-        custodian_params = spec.get("custodian_params", {})
+        custodian_params = process_params(spec.get("custodian_params", {}))
 
         return cls(jobs=jobs, handlers=handlers, validators=validators,
                    **custodian_params)

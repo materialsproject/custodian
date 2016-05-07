@@ -158,7 +158,7 @@ class CustodianTest(unittest.TestCase):
     suffix: .relax2
     settings_override: {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
 jobs_common_params:
-  vasp_cmd: /opt/vasp
+  $vasp_cmd: ["mpirun", "-machinefile", "$PBS_NODEFILE", "-np", "24", "/opt/vasp/5.4.1/bin/vasp"]
 handlers:
 - hdlr: custodian.vasp.handlers.VaspErrorHandler
 - hdlr: custodian.vasp.handlers.AliasingErrorHandler
@@ -166,11 +166,14 @@ handlers:
 validators:
 - vldr: custodian.vasp.validators.VasprunXMLValidator
 custodian_params:
-  scratch_dir: /tmp"""
+  $scratch_dir: $TMPDIR"""
         import yaml
+        os.environ["TMPDIR"] = "/tmp/random"
+        os.environ["PBS_NODEFILE"] = "whatever"
         d = yaml.load(spec)
         c = Custodian.from_spec(d)
-        self.assertEqual(c.scratch_dir, "/tmp")
+        self.assertEqual(c.jobs[0].vasp_cmd[2], "whatever")
+        self.assertEqual(c.scratch_dir, "/tmp/random")
         self.assertEqual(len(c.jobs), 2)
         self.assertEqual(len(c.handlers), 3)
         self.assertEqual(len(c.validators), 1)

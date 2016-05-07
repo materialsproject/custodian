@@ -24,8 +24,16 @@ example_yaml = """jobs: # Specifies a list of jobs to run.
     suffix: .relax2
     settings_override:
     - {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
+- jb: custodian.vasp.jobs.VaspJob
+  params:
+    final: True
+    suffix: .static3
+    settings_override:
+    - {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
+    - {"dict": "INCAR", "action": {"_set": {"NSW": 0}}}
 jobs_common_params: #This key specifies parameters common to all jobs.
-  vasp_cmd: ["vasp5.4.1"]
+  # Keys starting with $ means that the parameters should be expanded to the environmental values.
+  $vasp_cmd: ["mpirun", "-machinefile", "$PBS_NODEFILE", "-np", "24", "/opt/vasp/5.4.1/bin/vasp"]
 
 handlers: # Specifies a list of error handlers in the same format as jobs.
 - hdlr: custodian.vasp.handlers.VaspErrorHandler
