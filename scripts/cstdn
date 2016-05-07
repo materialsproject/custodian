@@ -13,14 +13,26 @@ from custodian.custodian import Custodian
 import logging
 
 
-example_yaml = """jobs: # Specifies a list of jobs to run.
-- jb: custodian.vasp.jobs.VaspJob #Each job is specified by a full path
-  params: #These are a list of kwargs given to each job.
+example_yaml = """
+# This is an example of a Custodian yaml spec file. It shows how you can specify
+# a double relaxation followed by a static calculation. Minor modifications
+# would allow very customizable calculations, though this is obviously not meant
+# for highly complex workflows. For those, you will need to code and usage of
+# FireWorks is highly recommended.
+
+
+# Specifies a list of jobs to run.
+# Each job is specified by a `jb: <full class path>` with parameters specified
+# via the params dict.
+
+jobs:
+- jb: custodian.vasp.jobs.VaspJob
+  params:
     final: False
     suffix: .relax1
 - jb: custodian.vasp.jobs.VaspJob
   params:
-    final: True
+    final: False
     suffix: .relax2
     settings_override:
     - {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
@@ -31,19 +43,31 @@ example_yaml = """jobs: # Specifies a list of jobs to run.
     settings_override:
     - {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
     - {"dict": "INCAR", "action": {"_set": {"NSW": 0}}}
-jobs_common_params: #This key specifies parameters common to all jobs.
-  # Keys starting with $ means that the parameters should be expanded to the environmental values.
-  $vasp_cmd: ["mpirun", "-machinefile", "$PBS_NODEFILE", "-np", "24", "/opt/vasp/5.4.1/bin/vasp"]
 
-handlers: # Specifies a list of error handlers in the same format as jobs.
+
+# This key specifies parameters common to all jobs.
+# Keys starting with $ are expanded to the environmental values.
+# The example below means the parameter vasp_cmd is set to the value with
+# $PBS_NODEFILE expanded.
+
+jobs_common_params:
+  $vasp_cmd: ["mpirun", "-machinefile", "$PBS_NODEFILE", "-np", "24", "vasp"]
+
+
+# Specifies a list of error handlers in the same format as jobs.
+handlers:
 - hdlr: custodian.vasp.handlers.VaspErrorHandler
 - hdlr: custodian.vasp.handlers.AliasingErrorHandler
 - hdlr: custodian.vasp.handlers.MeshSymmetryErrorHandler
 
-validators: # Specifies a list of error handlers in the same format as jobs.
+
+# Specifies a list of error handlers in the same format as jobs.
+validators:
 - vldr: custodian.vasp.validators.VasprunXMLValidator
 
-custodian_params: #This sets all custodian running parameters.
+
+#This sets all custodian running parameters.
+custodian_params:
   max_errors: 10
   scratch_dir: /tmp
   gzipped_output: True
