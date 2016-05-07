@@ -13,9 +13,9 @@ from custodian.custodian import Custodian
 import logging
 
 
-example_yaml = """jobs:
-- jb: custodian.vasp.jobs.VaspJob
-  params:
+example_yaml = """jobs: # Specifies a list of jobs to run.
+- jb: custodian.vasp.jobs.VaspJob #Each job is specified by a full path
+  params: #These are a list of kwargs given to each job.
     final: False
     suffix: .relax1
 - jb: custodian.vasp.jobs.VaspJob
@@ -24,17 +24,22 @@ example_yaml = """jobs:
     suffix: .relax2
     settings_override:
     - {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
-jobs_common_params:
-  vasp_cmd: ["vasp5.4.1"] # Note that vasp cmd is specified as a list. Change this to whatever you use, e.g., with mpirun.
-handlers:
+jobs_common_params: #This key specifies parameters common to all jobs.
+  vasp_cmd: ["vasp5.4.1"]
+
+handlers: # Specifies a list of error handlers in the same format as jobs.
 - hdlr: custodian.vasp.handlers.VaspErrorHandler
 - hdlr: custodian.vasp.handlers.AliasingErrorHandler
 - hdlr: custodian.vasp.handlers.MeshSymmetryErrorHandler
-validators:
+
+validators: # Specifies a list of error handlers in the same format as jobs.
 - vldr: custodian.vasp.validators.VasprunXMLValidator
-custodian_params:
+
+custodian_params: #This sets all custodian running parameters.
   max_errors: 10
   scratch_dir: /tmp
+  gzipped_output: True
+  checkpoint: True
 """
 
 
@@ -46,12 +51,14 @@ def run(args):
     c = Custodian.from_spec(d)
     c.run()
 
+
 def print_example(args):
     print(example_yaml)
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="""
-    crun_spec is a convenient script to run custodian style jobs using a
+    cstdn is a convenient script to run custodian style jobs using a
     simple YAML spec.""", epilog="""Author: Shyue Ping Ong""")
 
     subparsers = parser.add_subparsers()
