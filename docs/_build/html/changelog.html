@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Change Log &mdash; custodian 0.8.8 documentation</title>
+    <title>Change Log &mdash; custodian 1.0.0 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.8.8',
+        VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.8.8 documentation" href="index.html" />
+    <link rel="top" title="custodian 1.0.0 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 0.8.8 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -54,12 +54,45 @@
             
   <div class="section" id="change-log">
 <h1>Change Log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="v0-7-6">
-<h2>v0.7.6<a class="headerlink" href="#v0-7-6" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="v0-8-8">
+<h2>v0.8.8<a class="headerlink" href="#v0-8-8" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li>Custodian is now Python 3 compatible and uses the latest versions of
-pymatgen and monty.</li>
+<li>Fix setup.py.</li>
 </ol>
+</div>
+<div class="section" id="v0-8-5">
+<h2>v0.8.5<a class="headerlink" href="#v0-8-5" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Refactoring to support pymatgen 3.1.4.</li>
+</ol>
+</div>
+<div class="section" id="v0-8-2">
+<h2>v0.8.2<a class="headerlink" href="#v0-8-2" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Made auto_npar optional for double relaxation VASP run.</li>
+</ol>
+</div>
+<div class="section" id="v0-8-1">
+<h2>v0.8.1<a class="headerlink" href="#v0-8-1" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Misc bug fixes (minor).</li>
+</ol>
+</div>
+<div class="section" id="v0-8-0">
+<h2>v0.8.0<a class="headerlink" href="#v0-8-0" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Major refactoring of Custodian to introdce Validators,
+which are effectively post-Job checking mechanisms that do not perform
+error correction.</li>
+<li><strong>Backwards incompatibility</strong> BadVasprunXMLHandler is now a validator,
+which must be separately imported to be used.</li>
+</ol>
+<p>3. Miscellaneous cleanup of Py3k fixes.
+v0.7.6
+&#8212;&#8212;
+1. Custodian is now Python 3 compatible and uses the latest versions of</p>
+<blockquote>
+<div>pymatgen and monty.</div></blockquote>
 </div>
 <div class="section" id="v0-7-5">
 <h2>v0.7.5<a class="headerlink" href="#v0-7-5" title="Permalink to this headline">¶</a></h2>
@@ -269,7 +302,11 @@ corrections performed.</li>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Change Log</a><ul>
-<li><a class="reference internal" href="#v0-7-6">v0.7.6</a></li>
+<li><a class="reference internal" href="#v0-8-8">v0.8.8</a></li>
+<li><a class="reference internal" href="#v0-8-5">v0.8.5</a></li>
+<li><a class="reference internal" href="#v0-8-2">v0.8.2</a></li>
+<li><a class="reference internal" href="#v0-8-1">v0.8.1</a></li>
+<li><a class="reference internal" href="#v0-8-0">v0.8.0</a></li>
 <li><a class="reference internal" href="#v0-7-5">v0.7.5</a></li>
 <li><a class="reference internal" href="#v0-7-4">v0.7.4</a></li>
 <li><a class="reference internal" href="#v0-7-3">v0.7.3</a></li>
@@ -312,9 +349,6 @@ corrections performed.</li>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -330,13 +364,13 @@ corrections performed.</li>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 0.8.8 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
