@@ -251,7 +251,8 @@ class VaspJob(Job):
             kpts = Kpoints.from_file("KPOINTS")
             orig_kpts_dict = kpts.as_dict()
             # lattice vectors with length < 8 will get >1 KPOINT
-            kpts.kpts = np.maximum(np.array(kpts.kpts) / 2, 1).tolist()
+            kpts.kpts = np.round(np.maximum(np.array(kpts.kpts) / 2,
+                                            1)).astype(int).tolist()
             low_kpts_dict = kpts.as_dict()
             settings_overide_1 = [
                 {"dict": "KPOINTS",
