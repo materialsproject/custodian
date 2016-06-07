@@ -179,25 +179,6 @@ def get_jobs(args):
                     {"dict": "INCAR",
                      "action": {"_unset": {"ENCUT": 1}}})
 
-            # unset magnetization
-            if "MAGMOM" in incar:
-                post_settings.append(
-                    {"dict": "INCAR",
-                     "action": {"_set": {"MAGMOM": incar["MAGMOM"]}}})
-                settings.append(
-                    {"dict": "INCAR",
-                     "action": {"_unset": {"MAGMOM": 1}}})
-            if "ISPIN" in incar:
-                post_settings.append(
-                    {"dict": "INCAR",
-                     "action": {"_set": {"ISPIN": incar["ISPIN"]}}})
-            else:
-                post_settings.append(
-                    {"dict": "INCAR",
-                     "action": {"_unset": {"ISPIN": 1}}})
-            settings.append(
-                {"dict": "INCAR", "action": {"_set": {"ISPIN": 1}}})
-
         elif job_type.startswith("relax"):
             pass
         elif job_type.startswith("full_relax"):
