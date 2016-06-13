@@ -23,8 +23,6 @@ import logging
 import numpy as np
 
 from pymatgen.io.vasp import VaspInput, Incar, Poscar, Outcar, Kpoints
-from pymatgen.io.smart import read_structure
-from pymatgen.io.vasp.sets import MPVaspInputSet
 from monty.json import MontyDecoder
 from monty.os.path import which
 
@@ -46,8 +44,7 @@ class VaspJob(Job):
     """
 
     def __init__(self, vasp_cmd, output_file="vasp.out", suffix="",
-                 final=True, backup=True,
-                 default_vasp_input_set=MPVaspInputSet(), auto_npar=True,
+                 final=True, backup=True, auto_npar=True,
                  auto_gamma=True, settings_override=None,
                  gamma_vasp_cmd=None, copy_magmom=False):
         """
@@ -108,7 +105,6 @@ class VaspJob(Job):
         self.output_file = output_file
         self.final = final
         self.backup = backup
-        self.default_vis = default_vasp_input_set
         self.suffix = suffix
         self.settings_override = settings_override
         self.auto_npar = auto_npar
@@ -121,20 +117,6 @@ class VaspJob(Job):
         Performs initial setup for VaspJob, including overriding any settings
         and backing up.
         """
-        files = os.listdir(".")
-        num_structures = 0
-        if not set(files).issuperset(VASP_INPUT_FILES):
-            for f in files:
-                try:
-                    struct = read_structure(f)
-                    num_structures += 1
-                except:
-                    pass
-            if num_structures != 1:
-                raise RuntimeError("{} structures found. Unable to continue."
-                                   .format(num_structures))
-            else:
-                self.default_vis.write_input(struct, ".")
 
         if self.backup:
             for f in VASP_INPUT_FILES:
@@ -143,7 +125,7 @@ class VaspJob(Job):
         if self.auto_npar:
             try:
                 incar = Incar.from_file("INCAR")
-                #Only optimized NPAR for non-HF and non-RPA calculations.
+                # Only optimized NPAR for non-HF and non-RPA calculations.
                 if not (incar.get("LHFCALC") or incar.get("LRPA") or
                         incar.get("LEPSILON")):
                     if incar.get("IBRION") in [5, 6, 7, 8]:
@@ -153,7 +135,8 @@ class VaspJob(Job):
                     else:
                         import multiprocessing
                         # try sge environment variable first
-                        # (since multiprocessing counts cores on the current machine only)
+                        # (since multiprocessing counts cores on the current
+                        # machine only)
                         ncores = os.environ.get('NSLOTS') or multiprocessing.cpu_count()
                         ncores = int(ncores)
                         for npar in range(int(math.sqrt(ncores)),
@@ -344,7 +327,6 @@ class VaspJob(Job):
         d = dict(vasp_cmd=self.vasp_cmd,
                  output_file=self.output_file, suffix=self.suffix,
                  final=self.final, backup=self.backup,
-                 default_vasp_input_set=self.default_vis.as_dict(),
                  auto_npar=self.auto_npar, auto_gamma=self.auto_gamma,
                  settings_override=self.settings_override,
                  gamma_vasp_cmd=self.gamma_vasp_cmd
@@ -355,11 +337,10 @@ class VaspJob(Job):
 
     @classmethod
     def from_dict(cls, d):
-        vis = MontyDecoder().process_decoded(d["default_vasp_input_set"])
         return VaspJob(
             vasp_cmd=d["vasp_cmd"], output_file=d["output_file"],
             suffix=d["suffix"], final=d["final"],
-            backup=d["backup"], default_vasp_input_set=vis,
+            backup=d["backup"],
             auto_npar=d['auto_npar'], auto_gamma=d['auto_gamma'],
             settings_override=d["settings_override"],
             gamma_vasp_cmd=d["gamma_vasp_cmd"])
