@@ -23,7 +23,6 @@ import logging
 import numpy as np
 
 from pymatgen.io.vasp import VaspInput, Incar, Poscar, Outcar, Kpoints
-from monty.json import MontyDecoder
 from monty.os.path import which
 
 from custodian.custodian import Job
