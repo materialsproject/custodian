@@ -6,4 +6,5 @@ dependencies:
 test:
   override:
     - mv custodian ctd
-    - nosetests
+    - nosetests --config=nose.cfg --cover-html --cover-html-dir=$CIRCLE_ARTIFACTS
+    - coveralls
