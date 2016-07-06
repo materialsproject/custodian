@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp package &mdash; custodian 1.0.0 documentation</title>
+    <title>custodian.vasp package &mdash; custodian 1.0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.0.0',
+        VERSION:     '1.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 1.0.0 documentation" href="index.html" />
+    <link rel="top" title="custodian 1.0.1 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -611,7 +611,7 @@ files.
 <span id="custodian-vasp-jobs-module"></span><h2>custodian.vasp.jobs module<a class="headerlink" href="#module-custodian.vasp.jobs" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="custodian.vasp.jobs.VaspJob">
-<em class="property">class </em><code class="descname">VaspJob</code><span class="sig-paren">(</span><em>vasp_cmd</em>, <em>output_file=u'vasp.out'</em>, <em>suffix=u''</em>, <em>final=True</em>, <em>backup=True</em>, <em>default_vasp_input_set=MP  INCAR settings NELM = 100 PREC = Accurate IBRION = 2 ENCUT = 520 ISMEAR = -5 LWAVE = False LREAL = AUTO SIGMA = 0.05 LDAUPRINT = 1 MAGMOM = {'Ni': 5</em>, <em>'Mn4+': 3</em>, <em>'Co': 5</em>, <em>'Mo': 5</em>, <em>'Mn': 5</em>, <em>'Co3+': 0.6</em>, <em>'Ce': 5</em>, <em>'Fe': 5</em>, <em>'W': 5</em>, <em>'Mn3+': 4</em>, <em>'Eu': 10</em>, <em>'Cr': 5</em>, <em>'V': 5</em>, <em>'Co4+': 1} LDAU = True LDAUL = {'O': {'Ni': 2</em>, <em>'Co': 2</em>, <em>'Mo': 2</em>, <em>'Mn': 2</em>, <em>'Fe': 2</em>, <em>'W': 2</em>, <em>'V': 2</em>, <em>'Cr': 2}</em>, <em>'F': {'Ni': 2</em>, <em>'Co': 2</em>, <em>'Mo': 2</em>, <em>'Mn': 2</em>, <em>'Fe': 2</em>, <em>'W': 2</em>, <em>'V': 2</em>, <em>'Cr': 2}} LDAUJ = {'O': {'Ni': 0</em>, <em>'Co': 0</em>, <em>'Mo': 0</em>, <em>'Mn': 0</em>, <em>'Fe': 0</em>, <em>'W': 0</em>, <em>'V': 0</em>, <em>'Cr': 0}</em>, <em>'F': {'Ni': 0</em>, <em>'Co': 0</em>, <em>'Mo': 0</em>, <em>'Mn': 0</em>, <em>'Fe': 0</em>, <em>'W': 0</em>, <em>'V': 0</em>, <em>'Cr': 0}} LDAUTYPE = 2 ISIF = 3 ICHARG = 1 ALGO = FAST LDAUU = {'O': {'Ni': 6.2</em>, <em>'Co': 3.32</em>, <em>'Mo': 4.38</em>, <em>'Mn': 3.9</em>, <em>'Fe': 5.3</em>, <em>'W': 6.2</em>, <em>'V': 3.25</em>, <em>'Cr': 3.7}</em>, <em>'F': {'Ni': 6.2</em>, <em>'Co': 3.32</em>, <em>'Mo': 4.38</em>, <em>'Mn': 3.9</em>, <em>'Fe': 5.3</em>, <em>'W': 6.2</em>, <em>'V': 3.25</em>, <em>'Cr': 3.7}} ISPIN = 2 EDIFF = 5e-05 LORBIT = 11 NSW = 99  KPOINTS settings grid_density = 1000  POTCAR settings Ru = Ru_pv Ni = Ni_pv Na = Na_pv Nb = Nb_pv Nd = Nd_3 Ne = Ne Re = Re_pv Rb = Rb_sv Np = Np Rh = Rh_pv Be = Be_sv Ba = Ba_sv La = La Bi = Bi Fe = Fe_pv Br = Br B = B F = F H = H Dy = Dy_3 Lu = Lu_3 Ac = Ac N = N P = P Si = Si Sn = Sn_d Sm = Sm_3 V = V_pv Sc = Sc_sv Sb = Sb Os = Os_pv Se = Se Co = Co Cl = Cl Ca = Ca_sv Ce = Ce Cd = Cd Ge = Ge_d Gd = Gd Ga = Ga_d Cs = Cs_sv Cr = Cr_pv Cu = Cu_pv Pr = Pr_3 Th = Th Pt = Pt Pu = Pu Mg = Mg_pv Li = Li_sv Pb = Pb_d Tl = Tl_d Pa = Pa Pd = Pd Ti = Ti_pv Xe = Xe Tb = Tb_3 Tc = Tc_pv Pm = Pm_3 Te = Te Yb = Yb_2 Ho = Ho_3 Sr = Sr_sv Ta = Ta_pv Hf = Hf_pv Hg = Hg He = He C = C I = I K = K_sv Mn = Mn_pv O = O S = S U = U W = W_pv Y = Y_sv Mo = Mo_pv Zn = Zn Ag = Ag Kr = Kr Ir = Ir Al = Al As = As Ar = Ar Au = Au In = In_d Eu = Eu Tm = Tm_3 Zr = Zr_sv Er = Er_3</em>, <em>auto_npar=True</em>, <em>auto_gamma=True</em>, <em>settings_override=None</em>, <em>gamma_vasp_cmd=None</em>, <em>copy_magmom=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">VaspJob</code><span class="sig-paren">(</span><em>vasp_cmd</em>, <em>output_file=u'vasp.out'</em>, <em>suffix=u''</em>, <em>final=True</em>, <em>backup=True</em>, <em>auto_npar=True</em>, <em>auto_gamma=True</em>, <em>settings_override=None</em>, <em>gamma_vasp_cmd=None</em>, <em>copy_magmom=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Job</span></code></a></p>
 <p>A basic vasp job. Just runs whatever is in the directory. But conceivably
 can be a complex processing of inputs etc. with initialization.</p>
@@ -837,8 +837,8 @@ and backing up.</p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -857,13 +857,13 @@ and backing up.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
