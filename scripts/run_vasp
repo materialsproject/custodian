@@ -160,9 +160,9 @@ def get_jobs(args):
                      "action": {"_unset": {"ISMEAR": 1}}})
             post_settings.append({"dict": "KPOINTS",
                                   "action": {"_set": kpoints.as_dict()}})
-            # lattice vectors with length < 8 will get >1 KPOINT
+            # lattice vectors with length < 9 will get >1 KPOINT
             low_kpoints = Kpoints.gamma_automatic(
-                [max(int(16/l), 1) for l in structure.lattice.abc])
+                [max(int(18/l), 1) for l in structure.lattice.abc])
             settings.extend([
                 {"dict": "INCAR",
                  "action": {"_set": {"ISMEAR": 0}}},
@@ -178,25 +178,6 @@ def get_jobs(args):
                 settings.append(
                     {"dict": "INCAR",
                      "action": {"_unset": {"ENCUT": 1}}})
-
-            # unset magnetization
-            if "MAGMOM" in incar:
-                post_settings.append(
-                    {"dict": "INCAR",
-                     "action": {"_set": {"MAGMOM": incar["MAGMOM"]}}})
-                settings.append(
-                    {"dict": "INCAR",
-                     "action": {"_unset": {"MAGMOM": 1}}})
-            if "ISPIN" in incar:
-                post_settings.append(
-                    {"dict": "INCAR",
-                     "action": {"_set": {"ISPIN": incar["ISPIN"]}}})
-            else:
-                post_settings.append(
-                    {"dict": "INCAR",
-                     "action": {"_unset": {"ISPIN": 1}}})
-            settings.append(
-                {"dict": "INCAR", "action": {"_set": {"ISPIN": 1}}})
 
         elif job_type.startswith("relax"):
             pass

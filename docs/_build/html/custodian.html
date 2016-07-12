@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian package &mdash; custodian 0.8.8 documentation</title>
+    <title>custodian package &mdash; custodian 1.0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.8.8',
+        VERSION:     '1.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.8.8 documentation" href="index.html" />
+    <link rel="top" title="custodian 1.0.1 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 0.8.8 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -135,6 +135,7 @@ corrective measures are taken and the particular job is rerun.</li>
 fixing.</li>
 <li><strong>jobs</strong> (<em>[Job]</em>) &#8211; Sequence of Jobs to be run. Note that this can be
 any sequence or even a generator yielding jobs.</li>
+<li><strong>validators</strong> (<em>[Validator]</em>) &#8211; Validators to ensure job success</li>
 <li><strong>max_errors</strong> (<em>int</em>) &#8211; Maximum number of errors allowed before exiting.
 Defaults to 1.</li>
 <li><strong>polling_time_step</strong> (<em>int</em>) &#8211; The length of time in seconds between
@@ -180,6 +181,66 @@ to False.</li>
 <code class="descname">LOG_FILE</code><em class="property"> = u'custodian.json'</em><a class="headerlink" href="#custodian.custodian.Custodian.LOG_FILE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="classmethod">
+<dt id="custodian.custodian.Custodian.from_spec">
+<em class="property">classmethod </em><code class="descname">from_spec</code><span class="sig-paren">(</span><em>spec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Custodian.from_spec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian.from_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a Custodian instance where the jobs are specified from a
+structure and a spec dict. This allows simple
+custom job sequences to be constructed quickly via a YAML file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>spec</strong> (<em>dict</em>) &#8211; <p>A dict specifying job. A sample of the dict in
+YAML format for the usual MP workflow is given as follows:</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a>`
+jobs:
+- jb: custodian.vasp.jobs.VaspJob</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>params:</dt>
+<dd>final: False
+suffix: .relax1</dd>
+</dl>
+</div></blockquote>
+<ul>
+<li>jb: custodian.vasp.jobs.VaspJob
+params:<blockquote>
+<div>final: True
+suffix: .relax2
+settings_override: {&#8220;file&#8221;: &#8220;CONTCAR&#8221;, &#8220;action&#8221;: {&#8220;_file_copy&#8221;: {&#8220;dest&#8221;: &#8220;POSCAR&#8221;}}</div></blockquote>
+</li>
+</ul>
+<dl class="docutils">
+<dt>jobs_common_params:</dt>
+<dd>vasp_cmd: /opt/vasp</dd>
+</dl>
+<p>handlers:
+- hdlr: custodian.vasp.handlers.VaspErrorHandler
+- hdlr: custodian.vasp.handlers.AliasingErrorHandler
+- hdlr: custodian.vasp.handlers.MeshSymmetryHandler
+validators:
+- vldr: custodian.vasp.validators.VasprunXMLValidator
+custodian_params:</p>
+<blockquote>
+<div>scratch_dir: /tmp</div></blockquote>
+<p><a href="#id3"><span class="problematic" id="id4">``</span></a><a href="#id5"><span class="problematic" id="id6">`</span></a></p>
+<p>The <cite>jobs</cite> key is a list of jobs. Each job is
+specified via &#8220;job&#8221;: &lt;explicit path&gt;, and all parameters other
+than
+structure are specified via <cite>params</cite> which is a dict. <cite>parents</cite> is
+a special parameter, which provides the <em>indices</em> of the parents
+of that particular firework in the list.</p>
+<p><cite>common_params</cite> specify a common set of parameters that are
+passed to all jobs, e.g., vasp_cmd.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Custodian instance.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="method">
 <dt id="custodian.custodian.Custodian.run">
 <code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Custodian.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian.run" title="Permalink to this definition">¶</a></dt>
@@ -222,7 +283,7 @@ caused the exception.</li>
 <dl class="class">
 <dt id="custodian.custodian.ErrorHandler">
 <em class="property">class </em><code class="descname">ErrorHandler</code><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#custodian.custodian.JSONSerializable" title="custodian.custodian.JSONSerializable"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.JSONSerializable</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">monty.json.MSONable</span></code></p>
 <p>Abstract base class defining the interface for an ErrorHandler.</p>
 <dl class="method">
 <dt id="custodian.custodian.ErrorHandler.check">
@@ -294,29 +355,9 @@ handle the error (i.e. if correct returns a dict with &#8220;actions&#8221;:None
 </dd></dl>
 
 <dl class="class">
-<dt id="custodian.custodian.JSONSerializable">
-<em class="property">class </em><code class="descname">JSONSerializable</code><a class="reference internal" href="_modules/custodian/custodian.html#JSONSerializable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.JSONSerializable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">monty.json.MSONable</span></code></p>
-<p>Base class to be inherited to provide useful standard json serialization
-and deserialization protocols based on init args.</p>
-<dl class="method">
-<dt id="custodian.custodian.JSONSerializable.as_dict">
-<code class="descname">as_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#JSONSerializable.as_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.JSONSerializable.as_dict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="classmethod">
-<dt id="custodian.custodian.JSONSerializable.from_dict">
-<em class="property">classmethod </em><code class="descname">from_dict</code><span class="sig-paren">(</span><em>d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#JSONSerializable.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.JSONSerializable.from_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method should return the ErrorHandler from a dict representation
-of the object given by the to_dict property.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
 <dt id="custodian.custodian.Job">
 <em class="property">class </em><code class="descname">Job</code><a class="reference internal" href="_modules/custodian/custodian.html#Job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#custodian.custodian.JSONSerializable" title="custodian.custodian.JSONSerializable"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.JSONSerializable</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">monty.json.MSONable</span></code></p>
 <p>Abstract base class defining the interface for a Job.</p>
 <dl class="attribute">
 <dt id="custodian.custodian.Job.name">
@@ -351,7 +392,7 @@ pre-processing.</p>
 <dl class="class">
 <dt id="custodian.custodian.Validator">
 <em class="property">class </em><code class="descname">Validator</code><a class="reference internal" href="_modules/custodian/custodian.html#Validator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Validator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#custodian.custodian.JSONSerializable" title="custodian.custodian.JSONSerializable"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.JSONSerializable</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">monty.json.MSONable</span></code></p>
 <p>Abstract base class defining the interface for a Validator. A Validator
 differs from an ErrorHandler in that it does not correct a run and is run
 only at the end of a Job. If errors are detected by a Validator, a run is
@@ -430,14 +471,11 @@ series of error.1.tar.gz, error.2.tar.gz, ... will be generated.</li>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -453,13 +491,13 @@ series of error.1.tar.gz, error.2.tar.gz, ... will be generated.</li>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 0.8.8 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

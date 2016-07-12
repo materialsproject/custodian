@@ -185,6 +185,100 @@ class Custodian(object):
             import traceback
             logger.error(traceback.format_exc())
 
+    @classmethod
+    def from_spec(cls, spec):
+        """
+        Load a Custodian instance where the jobs are specified from a
+        structure and a spec dict. This allows simple
+        custom job sequences to be constructed quickly via a YAML file.
+
+        Args:
+            spec (dict): A dict specifying job. A sample of the dict in
+                YAML format for the usual MP workflow is given as follows:
+
+                ```
+                jobs:
+                - jb: custodian.vasp.jobs.VaspJob
+                  params:
+                    final: False
+                    suffix: .relax1
+                - jb: custodian.vasp.jobs.VaspJob
+                  params:
+                    final: True
+                    suffix: .relax2
+                    settings_override: {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}
+                jobs_common_params:
+                  vasp_cmd: /opt/vasp
+                handlers:
+                - hdlr: custodian.vasp.handlers.VaspErrorHandler
+                - hdlr: custodian.vasp.handlers.AliasingErrorHandler
+                - hdlr: custodian.vasp.handlers.MeshSymmetryHandler
+                validators:
+                - vldr: custodian.vasp.validators.VasprunXMLValidator
+                custodian_params:
+                  scratch_dir: /tmp
+                ```
+
+                The `jobs` key is a list of jobs. Each job is
+                specified via "job": <explicit path>, and all parameters other
+                than
+                structure are specified via `params` which is a dict. `parents` is
+                a special parameter, which provides the *indices* of the parents
+                of that particular firework in the list.
+
+                `common_params` specify a common set of parameters that are
+                passed to all jobs, e.g., vasp_cmd.
+
+        Returns:
+            Custodian instance.
+        """
+
+        dec = MontyDecoder()
+
+        def load_class(dotpath):
+            modname, classname = dotpath.rsplit(".", 1)
+            mod = __import__(modname, globals(), locals(), [classname], 0)
+            return getattr(mod, classname)
+
+        def process_params(d):
+            decoded = {}
+            for k, v in d.items():
+                if k.startswith("$"):
+                    if isinstance(v, list):
+                        v = [os.path.expandvars(i) for i in v]
+                    elif isinstance(v, dict):
+                        v = {k2: os.path.expandvars(v2) for k2, v2 in v.items()}
+                    else:
+                        v = os.path.expandvars(v)
+                decoded[k.strip("$")] = dec.process_decoded(v)
+            return decoded
+
+        jobs = []
+        common_params = process_params(spec.get("jobs_common_params", {}))
+
+        for d in spec["jobs"]:
+            cls_ = load_class(d["jb"])
+            params = process_params(d.get("params", {}))
+            params.update(common_params)
+            jobs.append(cls_(**params))
+
+        handlers = []
+        for d in spec.get("handlers", []):
+            cls_ = load_class(d["hdlr"])
+            params = process_params(d.get("params", {}))
+            handlers.append(cls_(**params))
+
+        validators = []
+        for d in spec.get("validators", []):
+            cls_ = load_class(d["vldr"])
+            params = process_params(d.get("params", {}))
+            validators.append(cls_(**params))
+
+        custodian_params = process_params(spec.get("custodian_params", {}))
+
+        return cls(jobs=jobs, handlers=handlers, validators=validators,
+                   **custodian_params)
+
     def run(self):
         """
         Runs all the jobs jobs.

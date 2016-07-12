@@ -1,6 +1,30 @@
 Change Log
 ==========
 
+v0.8.8
+------
+1. Fix setup.py.
+
+v0.8.5
+------
+1. Refactoring to support pymatgen 3.1.4.
+
+v0.8.2
+------
+1. Made auto_npar optional for double relaxation VASP run.
+
+v0.8.1
+------
+1. Misc bug fixes (minor).
+
+v0.8.0
+------
+1. Major refactoring of Custodian to introdce Validators,
+   which are effectively post-Job checking mechanisms that do not perform
+   error correction.
+2. **Backwards incompatibility** BadVasprunXMLHandler is now a validator,
+   which must be separately imported to be used.
+3. Miscellaneous cleanup of Py3k fixes.
 v0.7.6
 ------
 1. Custodian is now Python 3 compatible and uses the latest versions of

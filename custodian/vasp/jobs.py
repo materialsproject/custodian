@@ -20,11 +20,9 @@ import os
 import shutil
 import math
 import logging
+import numpy as np
 
 from pymatgen.io.vasp import VaspInput, Incar, Poscar, Outcar, Kpoints
-from pymatgen.io.smart import read_structure
-from pymatgen.io.vasp.sets import MITVaspInputSet
-from monty.json import MontyDecoder
 from monty.os.path import which
 
 from custodian.custodian import Job
@@ -45,8 +43,7 @@ class VaspJob(Job):
     """
 
     def __init__(self, vasp_cmd, output_file="vasp.out", suffix="",
-                 final=True, backup=True,
-                 default_vasp_input_set=MITVaspInputSet(), auto_npar=True,
+                 final=True, backup=True, auto_npar=True,
                  auto_gamma=True, settings_override=None,
                  gamma_vasp_cmd=None, copy_magmom=False):
         """
@@ -107,7 +104,6 @@ class VaspJob(Job):
         self.output_file = output_file
         self.final = final
         self.backup = backup
-        self.default_vis = default_vasp_input_set
         self.suffix = suffix
         self.settings_override = settings_override
         self.auto_npar = auto_npar
@@ -120,20 +116,6 @@ class VaspJob(Job):
         Performs initial setup for VaspJob, including overriding any settings
         and backing up.
         """
-        files = os.listdir(".")
-        num_structures = 0
-        if not set(files).issuperset(VASP_INPUT_FILES):
-            for f in files:
-                try:
-                    struct = read_structure(f)
-                    num_structures += 1
-                except:
-                    pass
-            if num_structures != 1:
-                raise RuntimeError("{} structures found. Unable to continue."
-                                   .format(num_structures))
-            else:
-                self.default_vis.write_input(struct, ".")
 
         if self.backup:
             for f in VASP_INPUT_FILES:
@@ -142,7 +124,7 @@ class VaspJob(Job):
         if self.auto_npar:
             try:
                 incar = Incar.from_file("INCAR")
-                #Only optimized NPAR for non-HF and non-RPA calculations.
+                # Only optimized NPAR for non-HF and non-RPA calculations.
                 if not (incar.get("LHFCALC") or incar.get("LRPA") or
                         incar.get("LEPSILON")):
                     if incar.get("IBRION") in [5, 6, 7, 8]:
@@ -152,7 +134,8 @@ class VaspJob(Job):
                     else:
                         import multiprocessing
                         # try sge environment variable first
-                        # (since multiprocessing counts cores on the current machine only)
+                        # (since multiprocessing counts cores on the current
+                        # machine only)
                         ncores = os.environ.get('NSLOTS') or multiprocessing.cpu_count()
                         ncores = int(ncores)
                         for npar in range(int(math.sqrt(ncores)),
@@ -213,7 +196,8 @@ class VaspJob(Job):
                 logging.error('MAGMOM copy from OUTCAR to INCAR failed')
 
     @classmethod
-    def double_relaxation_run(cls, vasp_cmd, auto_npar=True):
+    def double_relaxation_run(cls, vasp_cmd, auto_npar=True, ediffg=-0.05,
+                              half_kpts_first_relax=False):
         """
         Returns a list of two jobs corresponding to an AFLOW style double
         relaxation run.
@@ -226,24 +210,51 @@ class VaspJob(Job):
                 number of cores) as recommended by VASP for DFT calculations.
                 Generally, this results in significant speedups. Defaults to
                 True. Set to False for HF, GW and RPA calculations.
+            ediffg (float): Force convergence criteria for subsequent runs (
+                ignored for the initial run.)
+            half_kpt_first_relax (bool): Whether to halve the kpoint grid
+                for the first relaxation. Speeds up difficult convergence
+                considerably. Defaults to False.
 
         Returns:
             List of two jobs corresponding to an AFLOW style run.
         """
+        incar_update = {"ISTART": 1}
+        if ediffg:
+            incar_update["EDIFFG"] = ediffg
+        settings_overide_1 = None
+        settings_overide_2  = [
+            {"dict": "INCAR",
+             "action": {"_set": incar_update}},
+            {"file": "CONTCAR",
+             "action": {"_file_copy": {"dest": "POSCAR"}}}]
+        if half_kpts_first_relax and os.path.exists("KPOINTS") and \
+                os.path.exists("POSCAR"):
+            kpts = Kpoints.from_file("KPOINTS")
+            orig_kpts_dict = kpts.as_dict()
+            # lattice vectors with length < 8 will get >1 KPOINT
+            kpts.kpts = np.round(np.maximum(np.array(kpts.kpts) / 2,
+                                            1)).astype(int).tolist()
+            low_kpts_dict = kpts.as_dict()
+            settings_overide_1 = [
+                {"dict": "KPOINTS",
+                 "action": {"_set": low_kpts_dict}}
+            ]
+            settings_overide_2.append(
+                {"dict": "KPOINTS",
+                 "action": {"_set": orig_kpts_dict}}
+            )
+
         return [VaspJob(vasp_cmd, final=False, suffix=".relax1",
-                        auto_npar=auto_npar),
-                VaspJob(
-                    vasp_cmd, final=True, backup=False,
-                    suffix=".relax2", auto_npar=auto_npar,
-                    settings_override=[
-                        {"dict": "INCAR",
-                         "action": {"_set": {"ISTART": 1}}},
-                        {"file": "CONTCAR",
-                         "action": {"_file_copy": {"dest": "POSCAR"}}}])]
+                        auto_npar=auto_npar,
+                        settings_override=settings_overide_1),
+                VaspJob(vasp_cmd, final=True, backup=False, suffix=".relax2",
+                        auto_npar=auto_npar,
+                        settings_override=settings_overide_2)]
 
     @classmethod
-    def full_opt_run(cls, vasp_cmd, auto_npar=True, vol_change_tol=0.05,
-                     max_steps=10):
+    def full_opt_run(cls, vasp_cmd, auto_npar=True, vol_change_tol=0.02,
+                     max_steps=10, ediffg=-0.05, half_kpts_first_relax=False):
         """
         Returns a generator of jobs for a full optimization run. Basically,
         this runs an infinite series of geometry optimization jobs until the
@@ -261,14 +272,29 @@ class VaspJob(Job):
                 Defaults to 0.05, i.e., 5%.
             max_steps (int): The maximum number of runs. Defaults to 10 (
                 highly unlikely that this limit is ever reached).
+            ediffg (float): Force convergence criteria for subsequent runs (
+                ignored for the initial run.)
+            half_kpts_first_relax (bool): Whether to halve the kpoint grid
+                for the first relaxation. Speeds up difficult convergence
+                considerably. Defaults to False.
 
         Returns:
             Generator of jobs.
         """
-        for i in xrange(max_steps):
+        for i in range(max_steps):
             if i == 0:
                 settings = None
                 backup = True
+                if half_kpts_first_relax and os.path.exists("KPOINTS") and \
+                        os.path.exists("POSCAR"):
+                    kpts = Kpoints.from_file("KPOINTS")
+                    orig_kpts_dict = kpts.as_dict()
+                    kpts.kpts = np.maximum(np.array(kpts.kpts) / 2, 1).tolist()
+                    low_kpts_dict = kpts.as_dict()
+                    settings = [
+                        {"dict": "KPOINTS",
+                         "action": {"_set": low_kpts_dict}}
+                    ]
             else:
                 backup = False
                 initial = Poscar.from_file("POSCAR").structure
@@ -280,11 +306,17 @@ class VaspJob(Job):
                     logging.info("Stopping optimization!")
                     break
                 else:
+                    incar_update = {"ISTART": 1}
+                    if ediffg:
+                        incar_update["EDIFFG"] = ediffg
                     settings = [
                         {"dict": "INCAR",
-                         "action": {"_set": {"ISTART": 1}}},
+                         "action": {"_set": incar_update}},
                         {"file": "CONTCAR",
                          "action": {"_file_copy": {"dest": "POSCAR"}}}]
+                    if i == 1 and half_kpts_first_relax:
+                        settings.append({"dict": "KPOINTS",
+                                         "action": {"_set": orig_kpts_dict}})
             logging.info("Generating job = %d!" % (i+1))
             yield VaspJob(vasp_cmd, final=False, backup=backup,
                           suffix=".relax%d" % (i+1), auto_npar=auto_npar,
@@ -294,7 +326,6 @@ class VaspJob(Job):
         d = dict(vasp_cmd=self.vasp_cmd,
                  output_file=self.output_file, suffix=self.suffix,
                  final=self.final, backup=self.backup,
-                 default_vasp_input_set=self.default_vis.as_dict(),
                  auto_npar=self.auto_npar, auto_gamma=self.auto_gamma,
                  settings_override=self.settings_override,
                  gamma_vasp_cmd=self.gamma_vasp_cmd
@@ -305,11 +336,10 @@ class VaspJob(Job):
 
     @classmethod
     def from_dict(cls, d):
-        vis = MontyDecoder().process_decoded(d["default_vasp_input_set"])
         return VaspJob(
             vasp_cmd=d["vasp_cmd"], output_file=d["output_file"],
             suffix=d["suffix"], final=d["final"],
-            backup=d["backup"], default_vasp_input_set=vis,
+            backup=d["backup"],
             auto_npar=d['auto_npar'], auto_gamma=d['auto_gamma'],
             settings_override=d["settings_override"],
             gamma_vasp_cmd=d["gamma_vasp_cmd"])

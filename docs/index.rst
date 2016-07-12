@@ -22,30 +22,16 @@ calculations.
 Change log
 ==========
 
-v0.8.8
+v1.0.1
 ------
-1. Fix setup.py.
+1. Pymatgen 4.0.0 compatible release.
 
-v0.8.5
+v1.0.0
 ------
-1. Refactoring to support pymatgen 3.1.4.
+1. Custodian now comes with a "cstdn" script that enables the arbitrary creation
+   of simple job sequences using a yaml file, and the running of calculations
+   based on these yaml specifications.
 
-v0.8.2
-------
-1. Made auto_npar optional for double relaxation VASP run.
-
-v0.8.1
-------
-1. Misc bug fixes (minor).
-
-v0.8.0
-------
-1. Major refactoring of Custodian to introdce Validators,
-   which are effectively post-Job checking mechanisms that do not perform
-   error correction.
-2. **Backwards incompatibility** BadVasprunXMLHandler is now a validator,
-   which must be separately imported to be used.
-3. Miscellaneous cleanup of Py3k fixes.
 
 :doc:`Older versions </changelog>`
 

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.qchem package &mdash; custodian 0.8.8 documentation</title>
+    <title>custodian.qchem package &mdash; custodian 1.0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.8.8',
+        VERSION:     '1.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 0.8.8 documentation" href="index.html" />
+    <link rel="top" title="custodian 1.0.1 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 0.8.8 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -201,6 +201,21 @@ For example: {&#8220;openmp&#8221;: [&#8220;qchem&#8221;, &#8220;-seq&#8221;, &#
 </tr>
 </tbody>
 </table>
+<dl class="method">
+<dt id="custodian.qchem.jobs.QchemJob.as_dict">
+<code class="descname">as_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/jobs.html#QchemJob.as_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.jobs.QchemJob.as_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="custodian.qchem.jobs.QchemJob.command_available">
+<code class="descname">command_available</code><span class="sig-paren">(</span><em>cmd_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/jobs.html#QchemJob.command_available"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.jobs.QchemJob.command_available" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="custodian.qchem.jobs.QchemJob.from_dict">
+<em class="property">classmethod </em><code class="descname">from_dict</code><span class="sig-paren">(</span><em>d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/jobs.html#QchemJob.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.jobs.QchemJob.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="staticmethod">
 <dt id="custodian.qchem.jobs.QchemJob.is_openmp_compatible">
 <em class="property">static </em><code class="descname">is_openmp_compatible</code><span class="sig-paren">(</span><em>qcinp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/jobs.html#QchemJob.is_openmp_compatible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.jobs.QchemJob.is_openmp_compatible" title="Permalink to this definition">¶</a></dt>
@@ -282,14 +297,11 @@ False: failed</td>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -305,13 +317,13 @@ False: failed</td>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 0.8.8 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
