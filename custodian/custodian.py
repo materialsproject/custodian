@@ -213,6 +213,7 @@ class Custodian(object):
                     # Checkpoint after each job so that we can recover from last
                     # point and remove old checkpoints
                     if self.checkpoint:
+                        self.restart = job_n
                         Custodian._save_checkpoint(cwd, job_n)
             except CustodianError as ex:
                 logger.error(ex.message)
