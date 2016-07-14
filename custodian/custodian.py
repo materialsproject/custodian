@@ -413,14 +413,98 @@ class Custodian(object):
         Validates the job based on the error handlers and validators
 
         Returns:
-            number of remaining jobs
+            True if all jobs completed
+            False if fully validated a job but not done with all jobs
 
         Raises:
             CustodianError on unrecoverable errors, max errors, and jobs
             that fail validation
         """
+        cwd = os.getcwd()
+        start = datetime.datetime.now()
+        logger.info("Validation started at {} in {}.".format(
+            start, temp_dir))
+        v = sys.version.replace("\n", " ")
+        logger.info("Custodian running on Python version {}".format(v))
 
-        return -1
+        # load checkpoint
+        job_n, self.run_log = Custodian._load_checkpoint(cwd)
+        job = self.jobs[job_n]
+
+        # check error handlers
+        logger.info("Checking error handlers for {}.run".format(job.name))
+        if self._do_check(self.handlers):
+            logger.info("Failed validation based on error handler")
+            # raise an error for an unrecoverable error
+            for x in self.run_log[-1]["corrections"]:
+                if not x["actions"] and x["handler"].raises_runtime_error:
+                    s = "Unrecoverable error for handler: {}. " \
+                        "Raising RuntimeError".format(x["handler"])
+                    raise CustodianError(s, True, x["handler"])
+            # Return with more jobs to run if recoverable error caught and corrected for
+            return len(self.jobs) - job_n
+
+        # check validators
+        logger.info("Checking validator for {}.run".format(job.name))
+        for v in self.validators:
+            if v.check():
+                logger.info("Failed validation based on validator")
+                s = "Validation failed: {}".format(v)
+                raise CustodianError(s, True, v)
+
+
+        # post process
+        job.postprocess()
+
+        # save checkpoint
+        self._save_checkpoint()
+
+
+        # IF DONE WITH ALL JOBS - DELETE ALL CHECKPOINTS AND RETURN VALIDATED
+        if len(self.jobs) == (job_n + 1):
+            self._delete_checkpoints()
+            return 0
+
+        return len(self.jobs) - (job_n + 1 )
+
+
+
+
+
+
+
+
+
+
+
+
+            Custodian._save_checkpoint(cwd, job_n)
+
+
+
+            except CustodianError as ex:
+                logger.error(ex.message)
+                validated = False
+
+
+        #Log the corrections to a json file.
+        logger.info("Logging to {}...".format(Custodian.LOG_FILE))
+        dumpfn(self.run_log, Custodian.LOG_FILE, cls=MontyEncoder,
+                   indent=4)
+        end = datetime.datetime.now()
+        logger.info("Run ended at {}.".format(end))
+        run_time = end - start
+        logger.info("Run completed. Total time taken = {}."
+                        .format(run_time))
+
+        if validated:
+            if self.gzipped_output:
+                gzip_dir(".")
+
+                #Cleanup checkpoint files (if any) if run is successful.
+                Custodian._delete_checkpoints(cwd)
+
+        return validated
 
     def _do_check(self, handlers, terminate_func=None):
         """
