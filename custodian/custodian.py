@@ -408,6 +408,20 @@ class Custodian(object):
         logger.info("Max errors reached.")
         raise CustodianError("MaxErrors", True)
 
+    def validate(self):
+        """
+        Validates the job based on the error handlers and validators
+
+        Returns:
+            number of remaining jobs
+
+        Raises:
+            CustodianError on unrecoverable errors, max errors, and jobs
+            that fail validation
+        """
+
+        return -1
+
     def _do_check(self, handlers, terminate_func=None):
         """
         checks the specified handlers. Returns True iff errors caught
