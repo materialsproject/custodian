@@ -413,11 +413,10 @@ class Custodian(object):
         Validates the job based on the error handlers and validators
 
         Returns:
-            True if all jobs completed
-            False if fully validated a job but not done with all jobs
+            number of remaining jobs
 
         Raises:
-            CustodianError on unrecoverable errors, max errors, and jobs
+            CustodianError on unrecoverable errors, and jobs
             that fail validation
         """
         cwd = os.getcwd()
