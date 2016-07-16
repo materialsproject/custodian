@@ -307,6 +307,7 @@ class Custodian(object):
                     # Checkpoint after each job so that we can recover from last
                     # point and remove old checkpoints
                     if self.checkpoint:
+                        self.restart = job_n
                         Custodian._save_checkpoint(cwd, job_n)
             except CustodianError as ex:
                 logger.error(ex.message)
@@ -406,6 +407,101 @@ class Custodian(object):
 
         logger.info("Max errors reached.")
         raise CustodianError("MaxErrors", True)
+
+    def run_interrupted(self):
+        """
+        Runs custodian in a interuppted mode, which sets up and
+        validates jobs but doesn't run the executable
+
+        Returns:
+            number of remaining jobs
+
+        Raises:
+            CustodianError on unrecoverable errors, and jobs that fail validation
+        """
+
+
+        try:
+            cwd = os.getcwd()
+            start = datetime.datetime.now()
+            v = sys.version.replace("\n", " ")
+            logger.info("Custodian started in singleshot mode at {} in {}.".format(start, cwd))
+            logger.info("Custodian running on Python version {}".format(v))
+
+            # load run log
+            if os.path.exists(Custodian.LOG_FILE):
+                self.run_log = loadfn(Custodian.LOG_FILE, cls=MontyDecoder)
+
+            if len(self.run_log) == 0:
+                # starting up an initial job - setup input and quit
+                job = self.jobs[0]
+                self.run_log.append({"job": job.as_dict(), "corrections": [], 'job_n': 0})
+                logger.info("Setting up job no. 1 ({}) ".format(job.name))
+                job.setup()
+                return len(self.jobs)
+            else:
+                # continuting after running calculation
+                job_n = self.run_log[-1]['job_n']
+                job = self.jobs[job_n]
+
+                # If we had to fix errors from a previous run, insert clean log dict
+                if len(self.run_log[-1]['corrections']) > 0:
+                    logger.info("Reran {}.run due to catchable errors".format(job.name))
+
+                # check error handlers
+                logger.info("Checking error handlers for {}.run".format(job.name))
+                if self._do_check(self.handlers):
+                    logger.info("Failed validation based on error handlers")
+                    # raise an error for an unrecoverable error
+                    for x in self.run_log[-1]["corrections"]:
+                        if not x["actions"] and x["handler"].raises_runtime_error:
+                            s = "Unrecoverable error for handler: {}. " \
+                                "Raising RuntimeError".format(x["handler"])
+                            raise CustodianError(s, True, x["handler"])
+                    logger.info("Corrected input based on error handlers")
+                    # Return with more jobs to run if recoverable error caught and corrected for
+                    return len(self.jobs) - job_n
+
+                # check validators
+                logger.info("Checking validator for {}.run".format(job.name))
+                for v in self.validators:
+                    if v.check():
+                        logger.info("Failed validation based on validator")
+                        s = "Validation failed: {}".format(v)
+                        raise CustodianError(s, True, v)
+
+                logger.info("Postprocessing for {}.run".format(job.name))
+                job.postprocess()
+
+                # IF DONE WITH ALL JOBS - DELETE ALL CHECKPOINTS AND RETURN VALIDATED
+                if len(self.jobs) == (job_n + 1):
+                    return 0
+
+                # Setup next job_n
+                job_n = job_n + 1
+                job = self.jobs[job_n]
+                self.run_log.append({"job": job.as_dict(), "corrections": [], 'job_n': job_n})
+                job.setup()
+                return len(self.jobs) - job_n
+
+        except CustodianError as ex:
+            logger.error(ex.message)
+            if ex.raises:
+                raise RuntimeError("{} errors reached: {}. Exited..."
+                                   .format(self.total_errors, ex))
+
+        finally:
+            #Log the corrections to a json file.
+            logger.info("Logging to {}...".format(Custodian.LOG_FILE))
+            dumpfn(self.run_log, Custodian.LOG_FILE, cls=MontyEncoder,
+                   indent=4)
+            end = datetime.datetime.now()
+            logger.info("Run ended at {}.".format(end))
+            run_time = end - start
+            logger.info("Run completed. Total time taken = {}."
+                        .format(run_time))
+            if self.gzipped_output:
+                gzip_dir(".")
 
     def _do_check(self, handlers, terminate_func=None):
         """
