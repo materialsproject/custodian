@@ -178,7 +178,7 @@ to False.</li>
 </table>
 <dl class="attribute">
 <dt id="custodian.custodian.Custodian.LOG_FILE">
-<code class="descname">LOG_FILE</code><em class="property"> = u'custodian.json'</em><a class="headerlink" href="#custodian.custodian.Custodian.LOG_FILE" title="Permalink to this definition">¶</a></dt>
+<code class="descname">LOG_FILE</code><em class="property"> = 'custodian.json'</em><a class="headerlink" href="#custodian.custodian.Custodian.LOG_FILE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="classmethod">
@@ -256,12 +256,29 @@ passed to all jobs, e.g., vasp_cmd.</p>
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="custodian.custodian.Custodian.run_interrupted">
+<code class="descname">run_interrupted</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Custodian.run_interrupted"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian.run_interrupted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs custodian in a interuppted mode, which sets up and
+validates jobs but doesn&#8217;t run the executable</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number of remaining jobs</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body">CustodianError on unrecoverable errors, and jobs that fail validation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="exception">
 <dt id="custodian.custodian.CustodianError">
 <em class="property">exception </em><code class="descname">CustodianError</code><span class="sig-paren">(</span><em>message</em>, <em>raises=False</em>, <em>validator=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#CustodianError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.CustodianError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
 <p>Exception class for Custodian errors.</p>
 <p>Initializes the error with a message.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -418,7 +435,7 @@ immediately terminated.</p>
 <span id="custodian-utils-module"></span><h2>custodian.utils module<a class="headerlink" href="#module-custodian.utils" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="custodian.utils.backup">
-<code class="descname">backup</code><span class="sig-paren">(</span><em>filenames</em>, <em>prefix=u'error'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/utils.html#backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.utils.backup" title="Permalink to this definition">¶</a></dt>
+<code class="descname">backup</code><span class="sig-paren">(</span><em>filenames</em>, <em>prefix='error'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/utils.html#backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.utils.backup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Backup files to a tar.gz file. Used, for example, in backing up the
 files of an errored run before performing corrections.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -497,7 +514,7 @@ series of error.1.tar.gz, error.2.tar.gz, ... will be generated.</li>
 
     <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

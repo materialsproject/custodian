@@ -57,7 +57,7 @@
   <h1>Source code for custodian.nwchem.jobs</h1><div class="highlight"><pre>
 <span></span><span class="c1"># coding: utf-8</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This module implements basic kinds of jobs for Nwchem runs.</span>
@@ -75,10 +75,10 @@
 <span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 
-<span class="kn">from</span> <span class="nn">monty.io</span> <span class="kn">import</span> <span class="n">zopen</span>
+<span class="kn">from</span> <span class="nn">monty.io</span> <span class="k">import</span> <span class="n">zopen</span>
 
-<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">Job</span>
-<span class="kn">from</span> <span class="nn">monty.shutil</span> <span class="kn">import</span> <span class="n">gzip_dir</span>
+<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="k">import</span> <span class="n">Job</span>
+<span class="kn">from</span> <span class="nn">monty.shutil</span> <span class="k">import</span> <span class="n">gzip_dir</span>
 
 
 <div class="viewcode-block" id="NwchemJob"><a class="viewcode-back" href="../../../custodian.nwchem.html#custodian.nwchem.jobs.NwchemJob">[docs]</a><span class="k">class</span> <span class="nc">NwchemJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
@@ -87,8 +87,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nwchem_cmd</span><span class="p">,</span> <span class="n">input_file</span><span class="o">=</span><span class="s2">&quot;mol.nw&quot;</span><span class="p">,</span>
-                 <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;mol.nwout&quot;</span><span class="p">,</span> <span class="n">gzipped</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                 <span class="n">backup</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">settings_override</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                 <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;mol.nwout&quot;</span><span class="p">,</span> <span class="n">gzipped</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">backup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">settings_override</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes a basic NwChem job.</span>
 
@@ -119,7 +119,7 @@
 <span class="sd">        Performs backup if necessary.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backup</span><span class="p">:</span>
-            <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span> <span class="s2">&quot;{}.orig&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">))</span></div>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.orig&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="NwchemJob.run"><a class="viewcode-back" href="../../../custodian.nwchem.html#custodian.nwchem.jobs.NwchemJob.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -172,7 +172,7 @@
 
     <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

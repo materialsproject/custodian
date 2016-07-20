@@ -57,7 +57,7 @@
   <h1>Source code for custodian.qchem.handlers</h1><div class="highlight"><pre>
 <span></span><span class="c1"># coding: utf-8</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
 <span class="kn">import</span> <span class="nn">time</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
@@ -72,9 +72,9 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">tarfile</span>
-<span class="kn">from</span> <span class="nn">pymatgen.core.structure</span> <span class="kn">import</span> <span class="n">Molecule</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.qchem</span> <span class="kn">import</span> <span class="n">QcOutput</span><span class="p">,</span> <span class="n">QcInput</span><span class="p">,</span> <span class="n">QcTask</span>
-<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">ErrorHandler</span>
+<span class="kn">from</span> <span class="nn">pymatgen.core.structure</span> <span class="k">import</span> <span class="n">Molecule</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.qchem</span> <span class="k">import</span> <span class="n">QcOutput</span><span class="p">,</span> <span class="n">QcInput</span><span class="p">,</span> <span class="n">QcTask</span>
+<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="k">import</span> <span class="n">ErrorHandler</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Xiaohui Qu&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.1&quot;</span>
@@ -91,7 +91,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_file</span><span class="o">=</span><span class="s2">&quot;mol.qcinp&quot;</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;mol.qcout&quot;</span><span class="p">,</span>
                  <span class="n">ex_backup_list</span><span class="o">=</span><span class="p">(),</span> <span class="n">rca_gdm_thresh</span><span class="o">=</span><span class="mf">1.0E-3</span><span class="p">,</span>
-                 <span class="n">scf_max_cycles</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">geom_max_cycles</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">qchem_job</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                 <span class="n">scf_max_cycles</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">geom_max_cycles</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">qchem_job</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes the error handler from a set of input and output files.</span>
 
@@ -114,27 +114,27 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">rca_gdm_thresh</span> <span class="o">=</span> <span class="n">rca_gdm_thresh</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span> <span class="o">=</span> <span class="n">scf_max_cycles</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">geom_max_cycles</span> <span class="o">=</span> <span class="n">geom_max_cycles</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">error_step_id</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error_step_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span> <span class="o">=</span> <span class="n">qchem_job</span>
 
 <div class="viewcode-block" id="QChemErrorHandler.check"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Checks output file for errors.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span> <span class="o">=</span> <span class="n">QcOutput</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span> <span class="o">=</span> <span class="n">QcInput</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">error_step_id</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error_step_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">od</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outdata</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">od</span><span class="p">[</span><span class="s2">&quot;has_error&quot;</span><span class="p">]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">error_step_id</span> <span class="o">=</span> <span class="n">i</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">jobs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">])))</span>
-                <span class="k">return</span> <span class="bp">True</span>
-        <span class="k">return</span> <span class="bp">False</span></div>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="QChemErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">backup</span><span class="p">()</span>
@@ -164,25 +164,25 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">disable_symmetry</span><span class="p">()</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;disable symmetry&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s2">&quot;Bad SCF convergence&quot;</span><span class="p">:</span>
             <span class="n">act</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_scf</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">act</span><span class="p">:</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">act</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s2">&quot;Geometry optimization failed&quot;</span><span class="p">:</span>
             <span class="n">act</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_geom_opt</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">act</span><span class="p">:</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">act</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s2">&quot;NAN values&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="s2">&quot;xc_grid&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;rem&quot;</span><span class="p">]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">set_dft_grid</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">302</span><span class="p">)</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;use tighter grid&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s2">&quot;No input text&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="s2">&quot;sym_ignore&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;rem&quot;</span><span class="p">]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">disable_symmetry</span><span class="p">()</span>
@@ -194,52 +194,52 @@
                 <span class="k">if</span> <span class="s2">&quot;PBS_JOBID&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;edique&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PBS_JOBID&quot;</span><span class="p">]</span>
                                                   <span class="ow">or</span> <span class="s2">&quot;hopque&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PBS_JOBID&quot;</span><span class="p">]):</span>
                     <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">30.0</span> <span class="o">*</span> <span class="mf">60.0</span><span class="p">)</span>
-                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s2">&quot;Freq Job Too Small&quot;</span><span class="p">:</span>
             <span class="n">natoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">mol</span><span class="p">)</span>
             <span class="k">if</span> <span class="s2">&quot;cpscf_nseg&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;rem&quot;</span><span class="p">]</span> <span class="ow">or</span> \
                             <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;rem&quot;</span><span class="p">][</span><span class="s2">&quot;cpscf_nseg&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">natoms</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;rem&quot;</span><span class="p">][</span><span class="s2">&quot;cpscf_nseg&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">natoms</span>
-                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;use {} segment in CPSCF&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">natoms</span><span class="p">))</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;use </span><span class="si">{}</span><span class="s2"> segment in CPSCF&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">natoms</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s2">&quot;pcm_solvent deprecated&quot;</span><span class="p">:</span>
-            <span class="n">solvent_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;pcm_solvent&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">solvent_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">solvent_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;pcm_solvent&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">solvent_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;solvent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">solvent_params</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;use keyword solvent instead&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s2">&quot;Exit Code 134&quot;</span><span class="p">:</span>
             <span class="n">act</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_error_code_134</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">act</span><span class="p">:</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">act</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s2">&quot;Killed&quot;</span><span class="p">:</span>
             <span class="n">act</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_error_killed</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">act</span><span class="p">:</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">act</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s2">&quot;Insufficient static memory&quot;</span><span class="p">:</span>
             <span class="n">act</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_insufficient_static_memory</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">act</span><span class="p">:</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">act</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s2">&quot;Not Enough Total Memory&quot;</span><span class="p">:</span>
             <span class="n">act</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_not_enough_total_memory</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">act</span><span class="p">:</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">act</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s2">&quot;Molecular charge is not found&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s2">&quot;Molecular spin multipilicity is not found&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div>
 
@@ -261,18 +261,18 @@
             <span class="n">nsegment_half</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">ncpu</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">times_ncpu_half</span><span class="p">)</span>
             <span class="k">if</span> <span class="s2">&quot;cpscf_nseg&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;rem&quot;</span><span class="p">]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;rem&quot;</span><span class="p">][</span><span class="s2">&quot;cpscf_nseg&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nsegment_full</span>
-                <span class="k">return</span> <span class="s2">&quot;Use {} CPSCF segments&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nsegment_full</span><span class="p">)</span>
+                <span class="k">return</span> <span class="s2">&quot;Use </span><span class="si">{}</span><span class="s2"> CPSCF segments&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nsegment_full</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;rem&quot;</span><span class="p">][</span><span class="s2">&quot;cpscf_nseg&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">nsegment_half</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s2">&quot;half_cpus&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;rem&quot;</span><span class="p">][</span><span class="s2">&quot;cpscf_nseg&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nsegment_half</span>
-                <span class="k">return</span> <span class="s2">&quot;Use half CPUs and {} CPSCF segments&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nsegment_half</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">None</span>
+                <span class="k">return</span> <span class="s2">&quot;Use half CPUs and </span><span class="si">{}</span><span class="s2"> CPSCF segments&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nsegment_half</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">is_openmp_compatible</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="s2">&quot;half_cpus&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s2">&quot;half_cpus&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
                 <span class="k">return</span> <span class="s2">&quot;half_cpus&quot;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">None</span></div>
+                <span class="k">return</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="QChemErrorHandler.fix_error_code_134"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_error_code_134">[docs]</a>    <span class="k">def</span> <span class="nf">fix_error_code_134</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -288,7 +288,7 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;rem&#39;</span><span class="p">][</span><span class="s2">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;freq&quot;</span><span class="p">:</span>
                     <span class="n">act</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_not_enough_total_memory</span><span class="p">()</span>
                     <span class="k">return</span> <span class="n">act</span>
-                <span class="k">return</span> <span class="bp">None</span>
+                <span class="k">return</span> <span class="kc">None</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="s2">&quot;openmp&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s2">&quot;openmp&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
             <span class="k">return</span> <span class="s2">&quot;openmp&quot;</span>
@@ -296,7 +296,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;rem&#39;</span><span class="p">][</span><span class="s2">&quot;jobtype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;freq&quot;</span><span class="p">:</span>
                 <span class="n">act</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_not_enough_total_memory</span><span class="p">()</span>
                 <span class="k">return</span> <span class="n">act</span>
-            <span class="k">return</span> <span class="bp">None</span></div>
+            <span class="k">return</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="QChemErrorHandler.fix_insufficient_static_memory"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_insufficient_static_memory">[docs]</a>    <span class="k">def</span> <span class="nf">fix_insufficient_static_memory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">is_openmp_compatible</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
@@ -305,22 +305,22 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s2">&quot;half_cpus&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
                 <span class="k">return</span> <span class="s2">&quot;half_cpus&quot;</span>
             <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">large_static_mem</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">large_static_mem</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">large_static_mem</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="c1"># noinspection PyProtectedMember</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">_set_qchem_memory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
                 <span class="k">return</span> <span class="s2">&quot;Increase Static Memory&quot;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">None</span>
+                <span class="k">return</span> <span class="kc">None</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="s2">&quot;openmp&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s2">&quot;openmp&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
             <span class="k">return</span> <span class="s2">&quot;Use OpenMP&quot;</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">large_static_mem</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">large_static_mem</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">large_static_mem</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="c1"># noinspection PyProtectedMember</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">_set_qchem_memory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
             <span class="k">return</span> <span class="s2">&quot;Increase Static Memory&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span></div>
+            <span class="k">return</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="QChemErrorHandler.fix_error_killed"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_error_killed">[docs]</a>    <span class="k">def</span> <span class="nf">fix_error_killed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">is_openmp_compatible</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
@@ -329,12 +329,12 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s2">&quot;half_cpus&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
                 <span class="k">return</span> <span class="s2">&quot;half_cpus&quot;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">None</span>
+                <span class="k">return</span> <span class="kc">None</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">current_command_name</span> <span class="o">!=</span> <span class="s2">&quot;openmp&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span><span class="o">.</span><span class="n">select_command</span><span class="p">(</span><span class="s2">&quot;openmp&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="p">)</span>
             <span class="k">return</span> <span class="s2">&quot;Use OpenMP&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span></div>
+            <span class="k">return</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="QChemErrorHandler.fix_scf"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.fix_scf">[docs]</a>    <span class="k">def</span> <span class="nf">fix_scf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">comments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;comment&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
@@ -360,7 +360,7 @@
                 <span class="c1"># immature termination of SCF</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_error_code_134</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">None</span>
+                <span class="k">return</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">od</span><span class="p">[</span><span class="s2">&quot;jobtype&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;opt&quot;</span><span class="p">,</span> <span class="s2">&quot;ts&quot;</span><span class="p">,</span> <span class="s2">&quot;aimd&quot;</span><span class="p">]</span> \
                 <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">od</span><span class="p">[</span><span class="s2">&quot;molecules&quot;</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
@@ -402,7 +402,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;comment&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="s2">&quot;reset&quot;</span>
         <span class="k">elif</span> <span class="n">strategy</span><span class="p">[</span><span class="s2">&quot;current_method_id&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">strategy</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># noinspection PyTypeChecker</span>
             <span class="n">method</span> <span class="o">=</span> <span class="n">strategy</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="n">strategy</span><span class="p">[</span><span class="s2">&quot;current_method_id&quot;</span><span class="p">]]</span>
@@ -453,7 +453,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;fix method &quot;</span> <span class="o">+</span> <span class="n">method</span> <span class="o">+</span> <span class="s2">&quot; is not supported&quot;</span><span class="p">)</span>
             <span class="n">strategy_text</span> <span class="o">=</span> <span class="s2">&quot;&lt;SCF Fix Strategy&gt;&quot;</span>
-            <span class="n">strategy_text</span> <span class="o">+=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">strategy</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">strategy_text</span> <span class="o">+=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">strategy</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">strategy_text</span> <span class="o">+=</span> <span class="s2">&quot;&lt;/SCF Fix Strategy&gt;&quot;</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_strategy_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">comments</span> <span class="o">=</span> <span class="n">scf_pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">strategy_text</span><span class="p">,</span> <span class="n">comments</span><span class="p">)</span>
@@ -511,7 +511,7 @@
             <span class="k">if</span> <span class="s1">&#39;Exit Code 134&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_error_code_134</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">None</span>
+                <span class="k">return</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_strategy_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">strategy</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">old_strategy_text</span><span class="p">)</span>
             <span class="n">strategy</span><span class="p">[</span><span class="s2">&quot;current_method_id&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -520,7 +520,7 @@
             <span class="n">strategy</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;increase_iter&quot;</span><span class="p">,</span> <span class="s2">&quot;GDIIS&quot;</span><span class="p">,</span> <span class="s2">&quot;CartCoords&quot;</span><span class="p">]</span>
             <span class="n">strategy</span><span class="p">[</span><span class="s2">&quot;current_method_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">strategy</span><span class="p">[</span><span class="s2">&quot;current_method_id&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">strategy</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">method</span> <span class="o">=</span> <span class="n">strategy</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="n">strategy</span><span class="p">[</span><span class="s2">&quot;current_method_id&quot;</span><span class="p">]]</span>
             <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;increase_iter&quot;</span><span class="p">:</span>
@@ -538,7 +538,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;fix method&quot;</span> <span class="o">+</span> <span class="n">method</span> <span class="o">+</span> <span class="s2">&quot;is not supported&quot;</span><span class="p">)</span>
             <span class="n">strategy_text</span> <span class="o">=</span> <span class="s2">&quot;&lt;Geom Opt Fix Strategy&gt;&quot;</span>
-            <span class="n">strategy_text</span> <span class="o">+=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">strategy</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">strategy_text</span> <span class="o">+=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">strategy</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">strategy_text</span> <span class="o">+=</span> <span class="s2">&quot;&lt;/Geom Opt Fix Strategy&gt;&quot;</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_strategy_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">comments</span> <span class="o">=</span> <span class="n">geom_pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">strategy_text</span><span class="p">,</span> <span class="n">comments</span><span class="p">)</span>
@@ -550,8 +550,8 @@
 <div class="viewcode-block" id="QChemErrorHandler.backup"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.backup">[docs]</a>    <span class="k">def</span> <span class="nf">backup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">error_num</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
                                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;error.*.tar.gz&quot;</span><span class="p">)])</span>
-        <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;error.{}.tar.gz&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">error_num</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Backing up run to {}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;error.</span><span class="si">{}</span><span class="s2">.tar.gz&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">error_num</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Backing up run to </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
         <span class="n">tar</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w:gz&quot;</span><span class="p">)</span>
         <span class="n">bak_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">]</span> <span class="o">+</span> \
             <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ex_backup_list</span><span class="p">)</span>
@@ -570,10 +570,10 @@
                 <span class="s2">&quot;scf_max_cycles&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span><span class="p">,</span>
                 <span class="s2">&quot;geom_max_cycles&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_max_cycles</span><span class="p">,</span>
                 <span class="s2">&quot;outdata&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span><span class="p">,</span>
-                <span class="s2">&quot;qcinp&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+                <span class="s2">&quot;qcinp&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="s2">&quot;error_step_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_step_id</span><span class="p">,</span>
                 <span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span>
-                <span class="s2">&quot;fix_step&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span> <span class="k">else</span> <span class="bp">None</span><span class="p">}</span></div>
+                <span class="s2">&quot;fix_step&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_step</span> <span class="k">else</span> <span class="kc">None</span><span class="p">}</span></div>
 
     <span class="nd">@classmethod</span>
 <div class="viewcode-block" id="QChemErrorHandler.from_dict"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
@@ -584,10 +584,10 @@
                               <span class="n">scf_max_cycles</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;scf_max_cycles&quot;</span><span class="p">],</span>
                               <span class="n">geom_max_cycles</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;geom_max_cycles&quot;</span><span class="p">])</span>
         <span class="n">h</span><span class="o">.</span><span class="n">outdata</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;outdata&quot;</span><span class="p">]</span>
-        <span class="n">h</span><span class="o">.</span><span class="n">qcinp</span> <span class="o">=</span> <span class="n">QcInput</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;qcinp&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;qcinp&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="bp">None</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">qcinp</span> <span class="o">=</span> <span class="n">QcInput</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;qcinp&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;qcinp&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">h</span><span class="o">.</span><span class="n">error_step_id</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;error_step_id&quot;</span><span class="p">]</span>
         <span class="n">h</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">]</span>
-        <span class="n">h</span><span class="o">.</span><span class="n">fix_step</span> <span class="o">=</span> <span class="n">QcTask</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;fix_step&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;fix_step&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="bp">None</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">fix_step</span> <span class="o">=</span> <span class="n">QcTask</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;fix_step&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;fix_step&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">h</span></div></div>
 </pre></div>
 
@@ -626,7 +626,7 @@
 
     <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
