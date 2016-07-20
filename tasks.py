@@ -12,16 +12,16 @@ __email__ = "shyue@mit.edu"
 __date__ = "Apr 29, 2012"
 
 import glob
-import os
 
-from fabric.api import local, lcd
+from invoke import task
+from monty.os import cd
 from custodian import __version__ as ver
 
-
-def make_doc():
-    with lcd("docs"):
-        local("sphinx-apidoc -o . -f ../custodian")
-        local("rm custodian*.tests.rst")
+@task
+def make_doc(ctx):
+    with cd("docs"):
+        ctx.run("sphinx-apidoc -o . -f ../custodian")
+        ctx.run("rm custodian*.tests.rst")
         for f in glob.glob("docs/*.rst"):
             if f.startswith('docs/custodian') and f.endswith('rst'):
                 newoutput = []
@@ -45,24 +45,28 @@ def make_doc():
                 with open(f, 'w') as fid:
                     fid.write("".join(newoutput))
 
-        local("make html")
+        ctx.run("make html")
 
 
-def publish():
-    local("python setup.py release")
+@task
+def publish(ctx):
+    ctx.run("python setup.py release")
 
 
-def test():
-    local("nosetests")
+@task
+def test(ctx):
+    ctx.run("nosetests")
 
 
-def setver():
-    local("sed s/version=.*,/version=\\\"{}\\\",/ setup.py > newsetup".format(ver))
-    local("mv newsetup setup.py")
+@task
+def setver(ctx):
+    ctx.run("sed s/version=.*,/version=\\\"{}\\\",/ setup.py > newsetup".format(ver))
+    ctx.run("mv newsetup setup.py")
 
 
-def release():
-    setver()
-    test()
-    make_doc()
-    publish()
+@task
+def release(ctx):
+    setver(ctx)
+    test(ctx)
+    make_doc(ctx)
+    publish(ctx)
