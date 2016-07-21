@@ -57,8 +57,6 @@
 <div class="section" id="subpackages">
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
-<ul class="simple">
-</ul>
 </div>
 </div>
 <div class="section" id="submodules">
@@ -68,7 +66,7 @@
 <span id="custodian-vasp-handlers-module"></span><h2>custodian.vasp.handlers module<a class="headerlink" href="#module-custodian.vasp.handlers" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="custodian.vasp.handlers.AliasingErrorHandler">
-<em class="property">class </em><code class="descname">AliasingErrorHandler</code><span class="sig-paren">(</span><em>output_filename=u'vasp.out'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#AliasingErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">AliasingErrorHandler</code><span class="sig-paren">(</span><em>output_filename='vasp.out'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#AliasingErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Master VaspErrorHandler class that handles a number of common errors
 that occur during VASP runs.</p>
@@ -96,7 +94,7 @@ default redirect used by <a class="reference internal" href="#custodian.vasp.job
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.AliasingErrorHandler.error_msgs">
-<code class="descname">error_msgs</code><em class="property"> = {u'aliasing_incar': [u'Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate'], u'aliasing': [u'WARNING: small aliasing (wrap around) errors must be expected']}</em><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">error_msgs</code><em class="property"> = {'aliasing': ['WARNING: small aliasing (wrap around) errors must be expected'], 'aliasing_incar': ['Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate']}</em><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -155,7 +153,7 @@ combiantion with the StoppedRunHandler.</p>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.FrozenJobErrorHandler">
-<em class="property">class </em><code class="descname">FrozenJobErrorHandler</code><span class="sig-paren">(</span><em>output_filename=u'vasp.out'</em>, <em>timeout=21600</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">FrozenJobErrorHandler</code><span class="sig-paren">(</span><em>output_filename='vasp.out'</em>, <em>timeout=21600</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Detects an error when the output file has not been updated
 in timeout seconds. Changes ALGO to Normal from Fast</p>
@@ -196,7 +194,7 @@ frozen. Defaults to 3600 seconds, i.e., 1 hour.</li>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.MaxForceErrorHandler">
-<em class="property">class </em><code class="descname">MaxForceErrorHandler</code><span class="sig-paren">(</span><em>output_filename=u'vasprun.xml'</em>, <em>max_force_threshold=0.25</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">MaxForceErrorHandler</code><span class="sig-paren">(</span><em>output_filename='vasprun.xml'</em>, <em>max_force_threshold=0.25</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Checks that the desired force convergence has been achieved. Otherwise
 restarts the run with smaller EDIFF. (This is necessary since energy
@@ -235,7 +233,7 @@ that the creator looks for)</li>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler">
-<em class="property">class </em><code class="descname">MeshSymmetryErrorHandler</code><span class="sig-paren">(</span><em>output_filename=u'vasp.out'</em>, <em>output_vasprun=u'vasprun.xml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MeshSymmetryErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">MeshSymmetryErrorHandler</code><span class="sig-paren">(</span><em>output_filename='vasp.out'</em>, <em>output_vasprun='vasprun.xml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MeshSymmetryErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Corrects the mesh symmetry error in VASP. This error is sometimes
 non-fatal. So this error handler only checks at the end of the run,
@@ -276,7 +274,7 @@ this only if it is different from the default (unlikely).</li>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.NonConvergingErrorHandler">
-<em class="property">class </em><code class="descname">NonConvergingErrorHandler</code><span class="sig-paren">(</span><em>output_filename=u'OSZICAR'</em>, <em>nionic_steps=10</em>, <em>change_algo=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#NonConvergingErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">NonConvergingErrorHandler</code><span class="sig-paren">(</span><em>output_filename='OSZICAR'</em>, <em>nionic_steps=10</em>, <em>change_algo=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#NonConvergingErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Check if a run is hitting the maximum number of electronic steps at the
 last nionic_steps ionic steps (default=10). If so, change ALGO from Fast to
@@ -318,7 +316,7 @@ changing the ALGO from Fast to Normal.</li>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.PositiveEnergyErrorHandler">
-<em class="property">class </em><code class="descname">PositiveEnergyErrorHandler</code><span class="sig-paren">(</span><em>output_filename=u'OSZICAR'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PositiveEnergyErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">PositiveEnergyErrorHandler</code><span class="sig-paren">(</span><em>output_filename='OSZICAR'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PositiveEnergyErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Check if a run has positive absolute energy.
 If so, change ALGO from Fast to Normal or kill the job.</p>
@@ -351,7 +349,7 @@ this only if it is different from the default (unlikely).</td>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.PotimErrorHandler">
-<em class="property">class </em><code class="descname">PotimErrorHandler</code><span class="sig-paren">(</span><em>input_filename=u'POSCAR'</em>, <em>output_filename=u'OSZICAR'</em>, <em>dE_threshold=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PotimErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">PotimErrorHandler</code><span class="sig-paren">(</span><em>input_filename='POSCAR'</em>, <em>output_filename='OSZICAR'</em>, <em>dE_threshold=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PotimErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Check if a run has excessively large positive energy changes.
 This is typically caused by too large a POTIM. Runs typically
@@ -427,7 +425,7 @@ StoppedRunHandler.</p>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.UnconvergedErrorHandler">
-<em class="property">class </em><code class="descname">UnconvergedErrorHandler</code><span class="sig-paren">(</span><em>output_filename=u'vasprun.xml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">UnconvergedErrorHandler</code><span class="sig-paren">(</span><em>output_filename='vasprun.xml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Check if a run is converged. Switches to ALGO = Normal.</p>
 <p>Initializes the handler with the output file to check.</p>
@@ -459,7 +457,7 @@ this only if it is different from the default (unlikely).</td>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.VaspErrorHandler">
-<em class="property">class </em><code class="descname">VaspErrorHandler</code><span class="sig-paren">(</span><em>output_filename=u'vasp.out'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">VaspErrorHandler</code><span class="sig-paren">(</span><em>output_filename='vasp.out'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Master VaspErrorHandler class that handles a number of common errors
 that occur during VASP runs.</p>
@@ -487,7 +485,7 @@ default redirect used by <a class="reference internal" href="#custodian.vasp.job
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.error_msgs">
-<code class="descname">error_msgs</code><em class="property"> = {u'too_few_bands': [u'TOO FEW BANDS'], u'triple_product': [u'ERROR: the triple product of the basis vectors'], u'amin': [u'One of the lattice vectors is very long (&gt;50 A), but AMIN'], u'eddrmm': [u'WARNING in EDDRMM: call to ZHEGV failed'], u'pricel': [u'internal error in subroutine PRICEL'], u'zpotrf': [u'LAPACK: Routine ZPOTRF failed'], u'brmix': [u'BRMIX: very serious problems'], u'real_optlay': [u'REAL_OPTLAY: internal error', u'REAL_OPT: internal ERROR'], u'edddav': [u'Error EDDDAV: Call to ZHEGV failed'], u'inv_rot_mat': [u'inverse of rotation matrix was not found (increase SYMPREC)'], u'dentet': [u'DENTET'], u'pssyevx': [u'ERROR in subspace rotation PSSYEVX'], u'incorrect_shift': [u'Could not get correct shifts'], u'subspacematrix': [u'WARNING: Sub-Space-Matrix is not hermitian in DAV'], u'rspher': [u'ERROR RSPHER'], u'rot_matrix': [u'Found some non-integer element in rotation matrix'], u'tet': [u'Tetrahedron method fails for NKPT&lt;4', u'Fatal error detecting k-mesh', u'Fatal error: unable to match k-point', u'Routine TETIRR needs special values'], u'zbrent': [u'ZBRENT: fatal internal in', u'ZBRENT: fatal error in bracketing'], u'tetirr': [u'Routine TETIRR needs special values'], u'brions': [u'BRIONS problems: POTIM should be increased']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">error_msgs</code><em class="property"> = {'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'dentet': ['DENTET'], 'tetirr': ['Routine TETIRR needs special values'], 'eddrmm': ['WARNING in EDDRMM: call to ZHEGV failed'], 'real_optlay': ['REAL_OPTLAY: internal error', 'REAL_OPT: internal ERROR'], 'rot_matrix': ['Found some non-integer element in rotation matrix'], 'too_few_bands': ['TOO FEW BANDS'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values'], 'zbrent': ['ZBRENT: fatal internal in', 'ZBRENT: fatal error in bracketing'], 'amin': ['One of the lattice vectors is very long (&gt;50 A), but AMIN'], 'brmix': ['BRMIX: very serious problems'], 'brions': ['BRIONS problems: POTIM should be increased'], 'rspher': ['ERROR RSPHER'], 'pssyevx': ['ERROR in subspace rotation PSSYEVX'], 'triple_product': ['ERROR: the triple product of the basis vectors'], 'incorrect_shift': ['Could not get correct shifts'], 'edddav': ['Error EDDDAV: Call to ZHEGV failed'], 'pricel': ['internal error in subroutine PRICEL'], 'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'zpotrf': ['LAPACK: Routine ZPOTRF failed']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -611,7 +609,7 @@ files.
 <span id="custodian-vasp-jobs-module"></span><h2>custodian.vasp.jobs module<a class="headerlink" href="#module-custodian.vasp.jobs" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="custodian.vasp.jobs.VaspJob">
-<em class="property">class </em><code class="descname">VaspJob</code><span class="sig-paren">(</span><em>vasp_cmd</em>, <em>output_file=u'vasp.out'</em>, <em>suffix=u''</em>, <em>final=True</em>, <em>backup=True</em>, <em>auto_npar=True</em>, <em>auto_gamma=True</em>, <em>settings_override=None</em>, <em>gamma_vasp_cmd=None</em>, <em>copy_magmom=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">VaspJob</code><span class="sig-paren">(</span><em>vasp_cmd</em>, <em>output_file='vasp.out'</em>, <em>suffix=''</em>, <em>final=True</em>, <em>backup=True</em>, <em>auto_npar=True</em>, <em>auto_gamma=True</em>, <em>settings_override=None</em>, <em>gamma_vasp_cmd=None</em>, <em>copy_magmom=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Job</span></code></a></p>
 <p>A basic vasp job. Just runs whatever is in the directory. But conceivably
 can be a complex processing of inputs etc. with initialization.</p>
@@ -863,7 +861,7 @@ and backing up.</p>
 
     <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

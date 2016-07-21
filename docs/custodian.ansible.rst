@@ -6,6 +6,7 @@ Subpackages
 
 .. toctree::
 
+    custodian.ansible.tests
 
 Submodules
 ----------

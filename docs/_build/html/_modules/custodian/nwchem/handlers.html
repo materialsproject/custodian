@@ -57,7 +57,7 @@
   <h1>Source code for custodian.nwchem.handlers</h1><div class="highlight"><pre>
 <span></span><span class="c1"># coding: utf-8</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This module implements error handlers for Nwchem runs. Currently tested only</span>
@@ -73,10 +73,10 @@
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;5/20/13&quot;</span>
 
 
-<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">ErrorHandler</span>
-<span class="kn">from</span> <span class="nn">custodian.utils</span> <span class="kn">import</span> <span class="n">backup</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.nwchem</span> <span class="kn">import</span> <span class="n">NwOutput</span><span class="p">,</span> <span class="n">NwInput</span>
-<span class="kn">from</span> <span class="nn">custodian.ansible.interpreter</span> <span class="kn">import</span> <span class="n">Modder</span>
+<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="k">import</span> <span class="n">ErrorHandler</span>
+<span class="kn">from</span> <span class="nn">custodian.utils</span> <span class="k">import</span> <span class="n">backup</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.nwchem</span> <span class="k">import</span> <span class="n">NwOutput</span><span class="p">,</span> <span class="n">NwInput</span>
+<span class="kn">from</span> <span class="nn">custodian.ansible.interpreter</span> <span class="k">import</span> <span class="n">Modder</span>
 
 
 <div class="viewcode-block" id="NwchemErrorHandler"><a class="viewcode-back" href="../../../custodian.nwchem.html#custodian.nwchem.handlers.NwchemErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">NwchemErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
@@ -146,7 +146,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># For unimplemented errors, this should just cause the job to</span>
                 <span class="c1"># die.</span>
-                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
 
         <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
@@ -193,7 +193,7 @@
 
     <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

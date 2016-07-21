@@ -9,6 +9,7 @@ Subpackages
     custodian.ansible
     custodian.nwchem
     custodian.qchem
+    custodian.tests
     custodian.vasp
 
 Submodules

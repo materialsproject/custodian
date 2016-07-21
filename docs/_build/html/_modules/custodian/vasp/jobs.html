@@ -57,7 +57,7 @@
   <h1>Source code for custodian.vasp.jobs</h1><div class="highlight"><pre>
 <span></span><span class="c1"># coding: utf-8</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This module implements basic kinds of jobs for VASP runs.</span>
@@ -77,13 +77,13 @@
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="kn">import</span> <span class="n">VaspInput</span><span class="p">,</span> <span class="n">Incar</span><span class="p">,</span> <span class="n">Poscar</span><span class="p">,</span> <span class="n">Outcar</span><span class="p">,</span> <span class="n">Kpoints</span>
-<span class="kn">from</span> <span class="nn">monty.os.path</span> <span class="kn">import</span> <span class="n">which</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="k">import</span> <span class="n">VaspInput</span><span class="p">,</span> <span class="n">Incar</span><span class="p">,</span> <span class="n">Poscar</span><span class="p">,</span> <span class="n">Outcar</span><span class="p">,</span> <span class="n">Kpoints</span>
+<span class="kn">from</span> <span class="nn">monty.os.path</span> <span class="k">import</span> <span class="n">which</span>
 
-<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">Job</span>
-<span class="kn">from</span> <span class="nn">custodian.vasp.interpreter</span> <span class="kn">import</span> <span class="n">VaspModder</span>
+<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="k">import</span> <span class="n">Job</span>
+<span class="kn">from</span> <span class="nn">custodian.vasp.interpreter</span> <span class="k">import</span> <span class="n">VaspModder</span>
 
 
 <span class="n">VASP_INPUT_FILES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">}</span>
@@ -100,9 +100,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;vasp.out&quot;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-                 <span class="n">final</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                 <span class="n">auto_gamma</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">settings_override</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">gamma_vasp_cmd</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">copy_magmom</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+                 <span class="n">final</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">auto_gamma</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">settings_override</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">gamma_vasp_cmd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy_magmom</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This constructor is necessarily complex due to the need for</span>
 <span class="sd">        flexibility. For standard kinds of runs, it&#39;s often better to use one</span>
@@ -176,7 +176,7 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backup</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">VASP_INPUT_FILES</span><span class="p">:</span>
-                <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;{}.orig&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.orig&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_npar</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -204,7 +204,7 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="k">pass</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings_override</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings_override</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">VaspModder</span><span class="p">()</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings_override</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VaspJob.run"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -220,12 +220,12 @@
             <span class="n">kpts</span> <span class="o">=</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">kpts</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">supported_modes</span><span class="o">.</span><span class="n">Gamma</span> \
                     <span class="ow">and</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">kpts</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">which</span><span class="p">(</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">which</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
                     <span class="n">cmd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span>
                 <span class="k">elif</span> <span class="n">which</span><span class="p">(</span><span class="n">cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.gamma&quot;</span><span class="p">):</span>
                     <span class="n">cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;.gamma&quot;</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Running {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cmd</span><span class="p">)))</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Running </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cmd</span><span class="p">)))</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">p</span></div>
@@ -238,9 +238,9 @@
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">VASP_OUTPUT_FILES</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">final</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-                    <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;{}{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="p">))</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="p">))</span>
                 <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-                    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;{}{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="p">))</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy_magmom</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">final</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -253,8 +253,8 @@
                 <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;MAGMOM copy from OUTCAR to INCAR failed&#39;</span><span class="p">)</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="VaspJob.double_relaxation_run"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.double_relaxation_run">[docs]</a>    <span class="k">def</span> <span class="nf">double_relaxation_run</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">ediffg</span><span class="o">=-</span><span class="mf">0.05</span><span class="p">,</span>
-                              <span class="n">half_kpts_first_relax</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="VaspJob.double_relaxation_run"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.double_relaxation_run">[docs]</a>    <span class="k">def</span> <span class="nf">double_relaxation_run</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ediffg</span><span class="o">=-</span><span class="mf">0.05</span><span class="p">,</span>
+                              <span class="n">half_kpts_first_relax</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of two jobs corresponding to an AFLOW style double</span>
 <span class="sd">        relaxation run.</span>
@@ -279,7 +279,7 @@
         <span class="n">incar_update</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
         <span class="k">if</span> <span class="n">ediffg</span><span class="p">:</span>
             <span class="n">incar_update</span><span class="p">[</span><span class="s2">&quot;EDIFFG&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ediffg</span>
-        <span class="n">settings_overide_1</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">settings_overide_1</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">settings_overide_2</span>  <span class="o">=</span> <span class="p">[</span>
             <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
              <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">incar_update</span><span class="p">}},</span>
@@ -302,16 +302,16 @@
                  <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">orig_kpts_dict</span><span class="p">}}</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="p">[</span><span class="n">VaspJob</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.relax1&quot;</span><span class="p">,</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">VaspJob</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.relax1&quot;</span><span class="p">,</span>
                         <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">,</span>
                         <span class="n">settings_override</span><span class="o">=</span><span class="n">settings_overide_1</span><span class="p">),</span>
-                <span class="n">VaspJob</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.relax2&quot;</span><span class="p">,</span>
+                <span class="n">VaspJob</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.relax2&quot;</span><span class="p">,</span>
                         <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">,</span>
                         <span class="n">settings_override</span><span class="o">=</span><span class="n">settings_overide_2</span><span class="p">)]</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="VaspJob.full_opt_run"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.full_opt_run">[docs]</a>    <span class="k">def</span> <span class="nf">full_opt_run</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">vol_change_tol</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
-                     <span class="n">max_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ediffg</span><span class="o">=-</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">half_kpts_first_relax</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="VaspJob.full_opt_run"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.full_opt_run">[docs]</a>    <span class="k">def</span> <span class="nf">full_opt_run</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">vol_change_tol</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+                     <span class="n">max_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ediffg</span><span class="o">=-</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">half_kpts_first_relax</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a generator of jobs for a full optimization run. Basically,</span>
 <span class="sd">        this runs an infinite series of geometry optimization jobs until the</span>
@@ -340,8 +340,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_steps</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">settings</span> <span class="o">=</span> <span class="bp">None</span>
-                <span class="n">backup</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">settings</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">backup</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">if</span> <span class="n">half_kpts_first_relax</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">)</span> <span class="ow">and</span> \
                         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">):</span>
                     <span class="n">kpts</span> <span class="o">=</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">)</span>
@@ -353,7 +353,7 @@
                          <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">low_kpts_dict</span><span class="p">}}</span>
                     <span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">backup</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="n">backup</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">initial</span> <span class="o">=</span> <span class="n">Poscar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">structure</span>
                 <span class="n">final</span> <span class="o">=</span> <span class="n">Poscar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;CONTCAR&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">structure</span>
                 <span class="n">vol_change</span> <span class="o">=</span> <span class="p">(</span><span class="n">final</span><span class="o">.</span><span class="n">volume</span> <span class="o">-</span> <span class="n">initial</span><span class="o">.</span><span class="n">volume</span><span class="p">)</span> <span class="o">/</span> <span class="n">initial</span><span class="o">.</span><span class="n">volume</span>
@@ -375,7 +375,7 @@
                         <span class="n">settings</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span>
                                          <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">orig_kpts_dict</span><span class="p">}})</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Generating job = </span><span class="si">%d</span><span class="s2">!&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
-            <span class="k">yield</span> <span class="n">VaspJob</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="n">backup</span><span class="p">,</span>
+            <span class="k">yield</span> <span class="n">VaspJob</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="n">backup</span><span class="p">,</span>
                           <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.relax</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">,</span>
                           <span class="n">settings_override</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span></div>
 
@@ -437,7 +437,7 @@
 
     <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
