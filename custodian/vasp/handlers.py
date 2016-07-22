@@ -47,7 +47,7 @@ from custodian.ansible.actions import FileActions
 from custodian.vasp.interpreter import VaspModder
 
 VASP_BACKUP_FILES = {"INCAR", "KPOINTS", "POSCAR", "OUTCAR", "OSZICAR",
-                     "vasprun.xml", "vasp.out"}
+                     "vasprun.xml", "vasp.out", "std_err.txt"}
 
 
 class VaspErrorHandler(ErrorHandler):
