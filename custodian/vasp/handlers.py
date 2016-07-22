@@ -85,7 +85,8 @@ class VaspErrorHandler(ErrorHandler):
                    "ZBRENT: fatal error in bracketing"],
         "pssyevx": ["ERROR in subspace rotation PSSYEVX"],
         "eddrmm": ["WARNING in EDDRMM: call to ZHEGV failed"],
-        "edddav": ["Error EDDDAV: Call to ZHEGV failed"]
+        "edddav": ["Error EDDDAV: Call to ZHEGV failed"],
+        "grad_not_orth": ["EDWAV: internal error, the gradient is not orthogonal"]
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -316,6 +317,11 @@ class VaspErrorHandler(ErrorHandler):
                                 "action": {"_file_delete": {'mode': "actual"}}})
             actions.append({"dict": "INCAR", "action":
                             {"_set": {"ALGO": "All"}}})
+
+        if "grad_not_orth" in self.errors:
+            if vi["INCAR"].get("ISMEAR", 1) < 0:
+                actions.append({"dict": "INCAR",
+                                "action": {"_set": {"ISMEAR": "0"}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
