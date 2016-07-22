@@ -374,8 +374,13 @@ class Custodian(object):
                         if n % self.monitor_freq == 0:
                             has_error = self._do_check(self.monitors,
                                                        terminate)
+                        if terminate is not None and terminate != p.terminate:
+                            time.sleep(self.polling_time_step)
                 else:
                     p.wait()
+                    if self.terminate_func is not None and self.terminate_func != p.terminate:
+                        self.terminate_func()
+                        time.sleep(self.polling_time_step)
 
             logger.info("{}.run has completed. "
                         "Checking remaining handlers".format(job.name))
