@@ -2,19 +2,6 @@
 
 from __future__ import unicode_literals, division
 
-"""
-This module implements the main Custodian class, which manages a list of jobs
-given a set of error handlers, the abstract base classes for the
-ErrorHandlers and Jobs.
-"""
-
-__author__ = "Shyue Ping Ong, William Davidson Richards"
-__copyright__ = "Copyright 2012, The Materials Project"
-__version__ = "0.2"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "ongsp@ucsd.edu"
-__date__ = "Sep 17 2014"
-
 import logging
 import subprocess
 import sys
@@ -32,6 +19,19 @@ from monty.tempfile import ScratchDir
 from monty.shutil import gzip_dir
 from monty.json import MSONable, MontyEncoder, MontyDecoder
 from monty.serialization import loadfn, dumpfn
+
+"""
+This module implements the main Custodian class, which manages a list of jobs
+given a set of error handlers, the abstract base classes for the
+ErrorHandlers and Jobs.
+"""
+
+__author__ = "Shyue Ping Ong, William Davidson Richards"
+__copyright__ = "Copyright 2012, The Materials Project"
+__version__ = "0.2"
+__maintainer__ = "Shyue Ping Ong"
+__email__ = "ongsp@ucsd.edu"
+__date__ = "Sep 17 2014"
 
 
 pjoin = os.path.join
@@ -86,7 +86,7 @@ class Custodian(object):
     def __init__(self, handlers, jobs, validators=None, max_errors=1,
                  polling_time_step=10, monitor_freq=30,
                  skip_over_errors=False, scratch_dir=None,
-                 gzipped_output=False, checkpoint=False):
+                 gzipped_output=False, checkpoint=False, terminate_func=None):
         """
         Initializes a Custodian from a list of jobs and error handler.s
 
@@ -131,6 +131,8 @@ class Custodian(object):
             checkpoint (bool):  Whether to checkpoint after each successful Job.
                 Checkpoints are stored as custodian.chk.#.tar.gz files. Defaults
                 to False.
+            terminate_func (callable): A function to be called to terminate a
+                running job. If None, the default is to call Popen.terminate.
         """
         self.max_errors = max_errors
         self.jobs = jobs
@@ -150,6 +152,7 @@ class Custodian(object):
             self.restart = 0
             self.run_log = []
         self.total_errors = 0
+        self.terminate_func = terminate_func
 
     @staticmethod
     def _load_checkpoint(cwd):
@@ -162,7 +165,7 @@ class Custodian(object):
             logger.info("Loading from checkpoint file {}...".format(chkpt))
             t = tarfile.open(chkpt)
             t.extractall()
-            #Log the corrections to a json file.
+            # Log the corrections to a json file.
             run_log = loadfn(Custodian.LOG_FILE, cls=MontyDecoder)
 
         return restart, run_log
@@ -300,7 +303,7 @@ class Custodian(object):
             logger.info("Custodian running on Python version {}".format(v))
 
             try:
-                #skip jobs until the restart
+                # skip jobs until the restart
                 for job_n, job in islice(enumerate(self.jobs, 1),
                                          self.restart, None):
                     self._run_job(job_n, job)
@@ -315,7 +318,7 @@ class Custodian(object):
                     raise RuntimeError("{} errors reached: {}. Exited..."
                                        .format(self.total_errors, ex))
             finally:
-                #Log the corrections to a json file.
+                # Log the corrections to a json file.
                 logger.info("Logging to {}...".format(Custodian.LOG_FILE))
                 dumpfn(self.run_log, Custodian.LOG_FILE, cls=MontyEncoder,
                        indent=4)
@@ -327,7 +330,7 @@ class Custodian(object):
                 if self.gzipped_output:
                     gzip_dir(".")
 
-            #Cleanup checkpoint files (if any) if run is successful.
+            # Cleanup checkpoint files (if any) if run is successful.
             Custodian._delete_checkpoints(cwd)
 
         return self.run_log
@@ -367,9 +370,10 @@ class Custodian(object):
                         time.sleep(self.polling_time_step)
                         if p.poll() is not None:
                             break
+                        terminate = self.terminate_func or p.terminate
                         if n % self.monitor_freq == 0:
                             has_error = self._do_check(self.monitors,
-                                                       p.terminate)
+                                                       terminate)
                 else:
                     p.wait()
 
@@ -394,7 +398,7 @@ class Custodian(object):
                 job.postprocess()
                 return
 
-            #check that all errors could be handled
+            # Check that all errors could be handled
             for x in self.run_log[-1]["corrections"]:
                 if not x["actions"] and x["handler"].raises_runtime_error:
                     s = "Unrecoverable error for handler: {}. " \
@@ -417,15 +421,16 @@ class Custodian(object):
             number of remaining jobs
 
         Raises:
-            CustodianError on unrecoverable errors, and jobs that fail validation
+            CustodianError on unrecoverable errors, and jobs that fail
+            validation
         """
-
 
         try:
             cwd = os.getcwd()
             start = datetime.datetime.now()
             v = sys.version.replace("\n", " ")
-            logger.info("Custodian started in singleshot mode at {} in {}.".format(start, cwd))
+            logger.info("Custodian started in singleshot mode at {} in {}."
+                        .format(start, cwd))
             logger.info("Custodian running on Python version {}".format(v))
 
             # load run log
@@ -440,11 +445,12 @@ class Custodian(object):
                 job.setup()
                 return len(self.jobs)
             else:
-                # continuting after running calculation
+                # Continuting after running calculation
                 job_n = self.run_log[-1]['job_n']
                 job = self.jobs[job_n]
 
-                # If we had to fix errors from a previous run, insert clean log dict
+                # If we had to fix errors from a previous run, insert clean log
+                # dict
                 if len(self.run_log[-1]['corrections']) > 0:
                     logger.info("Reran {}.run due to catchable errors".format(job.name))
 
@@ -459,7 +465,8 @@ class Custodian(object):
                                 "Raising RuntimeError".format(x["handler"])
                             raise CustodianError(s, True, x["handler"])
                     logger.info("Corrected input based on error handlers")
-                    # Return with more jobs to run if recoverable error caught and corrected for
+                    # Return with more jobs to run if recoverable error caught
+                    # and corrected for
                     return len(self.jobs) - job_n
 
                 # check validators
@@ -473,14 +480,16 @@ class Custodian(object):
                 logger.info("Postprocessing for {}.run".format(job.name))
                 job.postprocess()
 
-                # IF DONE WITH ALL JOBS - DELETE ALL CHECKPOINTS AND RETURN VALIDATED
+                # IF DONE WITH ALL JOBS - DELETE ALL CHECKPOINTS AND RETURN
+                # VALIDATED
                 if len(self.jobs) == (job_n + 1):
                     return 0
 
                 # Setup next job_n
-                job_n = job_n + 1
+                job_n += 1
                 job = self.jobs[job_n]
-                self.run_log.append({"job": job.as_dict(), "corrections": [], 'job_n': job_n})
+                self.run_log.append({"job": job.as_dict(), "corrections": [],
+                                     'job_n': job_n})
                 job.setup()
                 return len(self.jobs) - job_n
 
@@ -514,7 +523,7 @@ class Custodian(object):
                     if terminate_func is not None and h.is_terminating:
                         logger.info("Terminating job")
                         terminate_func()
-                        #make sure we don't terminate twice
+                        # make sure we don't terminate twice
                         terminate_func = None
                     d = h.correct()
                     d["handler"] = h

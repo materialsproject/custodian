@@ -6,15 +6,6 @@ from __future__ import unicode_literals, division
 This module implements basic kinds of jobs for VASP runs.
 """
 
-
-__author__ = "Shyue Ping Ong"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "shyuep@gmail.com"
-__status__ = "Beta"
-__date__ = "2/4/13"
-
-
 import subprocess
 import os
 import shutil
@@ -27,6 +18,14 @@ from monty.os.path import which
 
 from custodian.custodian import Job
 from custodian.vasp.interpreter import VaspModder
+
+
+__author__ = "Shyue Ping Ong"
+__version__ = "0.1"
+__maintainer__ = "Shyue Ping Ong"
+__email__ = "shyuep@gmail.com"
+__status__ = "Beta"
+__date__ = "2/4/13"
 
 
 VASP_INPUT_FILES = {"INCAR", "POSCAR", "POTCAR", "KPOINTS"}
