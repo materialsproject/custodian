@@ -189,6 +189,13 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.correct()["errors"], ["edddav"])
         self.assertFalse(os.path.exists("CHGCAR"))
 
+    def test_gradient_not_orthogonal(self):
+        h = VaspErrorHandler("vasp.gradient_not_orthogonal")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["grad_not_orth"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ISMEAR"], 0)
+
     def tearDown(self):
         os.chdir(test_dir)
         shutil.move("INCAR.orig", "INCAR")
