@@ -41,8 +41,8 @@ class VaspJob(Job):
     can be a complex processing of inputs etc. with initialization.
     """
 
-    def __init__(self, vasp_cmd, output_file="vasp.out", suffix="",
-                 final=True, backup=True, auto_npar=True,
+    def __init__(self, vasp_cmd, output_file="vasp.out", stderr_file="std_err.txt",
+                 suffix="", final=True, backup=True, auto_npar=True,
                  auto_gamma=True, settings_override=None,
                  gamma_vasp_cmd=None, copy_magmom=False):
         """
@@ -56,6 +56,8 @@ class VaspJob(Job):
                 ["mpirun", "pvasp.5.2.11"]
             output_file (str): Name of file to direct standard out to.
                 Defaults to "vasp.out".
+            output_file (str): Name of file to direct standard error to.
+                Defaults to "std_err.txt".
             suffix (str): A suffix to be appended to the final output. E.g.,
                 to rename all VASP output from say vasp.out to
                 vasp.out.relax1, provide ".relax1" as the suffix.
@@ -101,6 +103,7 @@ class VaspJob(Job):
         """
         self.vasp_cmd = vasp_cmd
         self.output_file = output_file
+        self.stderr_file = stderr_file
         self.final = final
         self.backup = backup
         self.suffix = suffix
@@ -168,8 +171,10 @@ class VaspJob(Job):
                 elif which(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
         logging.info("Running {}".format(" ".join(cmd)))
-        with open(self.output_file, 'w') as f:
-            p = subprocess.Popen(cmd, stdout=f)
+        with open(self.output_file, 'w') as f_std, \
+                open(self.stderr_file, "w", buffering=1) as f_err:
+            # use line bufferring for stderr
+            p = subprocess.Popen(cmd, stdout=f_std, stderr=f_err)
         return p
 
     def postprocess(self):
