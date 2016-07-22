@@ -363,6 +363,7 @@ class Custodian(object):
             # While the job is running, we use the handlers that are
             # monitors to monitor the job.
             if isinstance(p, subprocess.Popen):
+                terminate = None
                 if self.monitors:
                     n = 0
                     while True:
@@ -376,6 +377,10 @@ class Custodian(object):
                                                        terminate)
                 else:
                     p.wait()
+
+                if terminate is not None and terminate != p.terminate:
+                    terminate()
+                    time.sleep(self.polling_time_step)
 
             logger.info("{}.run has completed. "
                         "Checking remaining handlers".format(job.name))
