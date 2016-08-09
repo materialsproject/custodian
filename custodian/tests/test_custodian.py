@@ -111,6 +111,17 @@ class CustodianTest(unittest.TestCase):
         output = c.run()
         self.assertEqual(len(output), njobs)
         print(ExampleHandler(params).as_dict())
+        
+    def test_run_interrupted(self):
+        njobs = 100
+        params = {'initial': 0, 'total': 0}
+        c = Custodian([ExampleHandler(params)],
+                      [ExampleJob(i,params) for i in range(njobs)],
+                      max_errors=njobs)
+
+        total = njobs
+        self.assertEqual(c.run_interrupted(),100)
+        self.assertEqual(c.run_interrupted(),100)
 
     def test_unrecoverable(self):
         njobs = 100
