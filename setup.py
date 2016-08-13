@@ -16,7 +16,7 @@ setup(
     name="custodian",
     packages=find_packages(),
     version="1.0.1",
-    install_requires=["monty>=0.7.0", "six"],
+    install_requires=["monty>=0.9.0", "six"],
     extras_require={"vasp, nwchem, qchem": ["pymatgen>=3.3.1"]},
     package_data={},
     author="Shyue Ping Ong, William Davidson Richards, Stephen Dacek, "
@@ -32,8 +32,7 @@ setup(
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.3",
-        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: MIT License",
