@@ -4,7 +4,7 @@ machine:
 dependencies:
   override:
     - pip install numpy
-    - pip install -r requirements-ci.txt
+    - pip install -r requirements-ci.txt --upgrade
     - python setup.py install --quiet
 test:
   override:

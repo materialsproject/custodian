@@ -31,7 +31,7 @@ def get_runs(vasp_command, target=1e-3, max_steps=10, mode="linear"):
     energy = 0
     vinput = VaspInput.from_directory(".")
     kpoints = vinput["KPOINTS"].kpts[0]
-    for i in xrange(max_steps):
+    for i in range(max_steps):
         if mode == "linear":
             m = [k * (i + 1) for k in kpoints]
         else:
@@ -70,7 +70,7 @@ def do_run(args):
     c.run()
 
 
-if __name__ == "__main__":
+def main():
     import argparse
     parser = argparse.ArgumentParser(description="""
     converge_kpoints perform a KPOINTS convergence. What this script will do
@@ -119,3 +119,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     do_run(args)
+
+
+if __name__ == "__main__":
+    main()

@@ -41,5 +41,13 @@ setup(
         "Topic :: Scientific/Engineering :: Chemistry",
         "Topic :: Software Development :: Libraries :: Python Modules"
     ],
-    scripts=[os.path.join("scripts", f) for f in os.listdir("scripts")]
+    entry_points={
+          'console_scripts': [
+              'cstdn = custodian.cli.custodian:main',
+              'run_vasp = custodian.cli.run_vasp:main',
+              'run_nwchem = custodian.cli.run_nwchem:main',
+              'converge_kpoints = custodian.cli.converge_kpoints:main',
+              'converge_geometry = custodian.cli.converge_geometry:main',
+          ]
+    }
 )
