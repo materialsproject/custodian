@@ -43,7 +43,7 @@ setup(
     ],
     entry_points={
           'console_scripts': [
-              'cstdn = custodian.cli.custodian:main',
+              'cstdn = custodian.cli.cstdn:main',
               'run_vasp = custodian.cli.run_vasp:main',
               'run_nwchem = custodian.cli.run_nwchem:main',
               'converge_kpoints = custodian.cli.converge_kpoints:main',
