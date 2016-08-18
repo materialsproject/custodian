@@ -221,3 +221,18 @@ class FileActions(object):
         for k, v in settings.items():
             if k.startswith("dest"):
                 shutil.copyfile(filename, v)
+
+    @staticmethod
+    def file_modify(filename, settings):
+        """
+        Creates a file.
+
+        Args:
+            filename (str): Filename.
+            settings (dict): Can be "mode" or "owners"
+        """
+        for k, v in settings.items():
+            if k == "mode":
+                os.chmod(filename,v)
+            if k == "owners":
+                os.chown(filename,v)

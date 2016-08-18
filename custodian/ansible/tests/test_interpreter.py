@@ -127,6 +127,7 @@ class ModderTest(unittest.TestCase):
                       'test_file')
         modder.modify({'_file_delete': {'mode': "actual"}},
                       'renamed_test_file')
+        modder.modify({'_file_modify': {'mode': 0666}}, 'test_file_copy')
         modder.modify({'_file_delete': {'mode': "actual"}}, 'test_file_copy')
         modder.modify({'_file_delete': {'mode': "actual"}}, 'test_file_copy1')
         modder.modify({'_file_delete': {'mode': "actual"}}, 'test_file_copy2')
