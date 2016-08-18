@@ -111,7 +111,7 @@ class CustodianTest(unittest.TestCase):
         output = c.run()
         self.assertEqual(len(output), njobs)
         print(ExampleHandler(params).as_dict())
-        
+
     def test_run_interrupted(self):
         njobs = 100
         params = {'initial': 0, 'total': 0}
@@ -122,6 +122,14 @@ class CustodianTest(unittest.TestCase):
         total = njobs
         self.assertEqual(c.run_interrupted(),100)
         self.assertEqual(c.run_interrupted(),100)
+
+        total_done = 1
+        while total_done < 100:
+            c.jobs[i].run()
+            if params['total'] > 50:
+                self.assertEqual(c.run_interrupted(),100-total_done)
+                total_done += 1
+
 
     def test_unrecoverable(self):
         njobs = 100
