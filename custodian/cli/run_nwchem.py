@@ -33,7 +33,7 @@ def do_run(args):
     c.run()
 
 
-if __name__ == "__main__":
+def main():
     import argparse
     parser = argparse.ArgumentParser(description="""
     run_nwchem is a master script to perform various kinds of Nwchem runs.
@@ -73,3 +73,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     do_run(args)
+
+
+if __name__ == "__main__":
+    main()

@@ -211,7 +211,7 @@ def do_run(args):
     c.run()
 
 
-if __name__ == "__main__":
+def main():
     import argparse
     parser = argparse.ArgumentParser(description="""
     run_vasp is a master script to perform various kinds of VASP runs.

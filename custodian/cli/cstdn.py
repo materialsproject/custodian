@@ -88,7 +88,7 @@ def print_example(args):
     print(example_yaml)
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="""
     cstdn is a convenient script to run custodian style jobs using a
     simple YAML spec.""", epilog="""Author: Shyue Ping Ong""")
@@ -113,3 +113,6 @@ if __name__ == "__main__":
         sys.exit(0)
     args.func(args)
 
+
+if __name__ == "__main__":
+    main()
