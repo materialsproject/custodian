@@ -225,7 +225,7 @@ class FileActions(object):
     @staticmethod
     def file_modify(filename, settings):
         """
-        Creates a file.
+        Modifies file access
 
         Args:
             filename (str): Filename.
