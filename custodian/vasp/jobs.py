@@ -44,7 +44,7 @@ class VaspJob(Job):
     def __init__(self, vasp_cmd, output_file="vasp.out", stderr_file="std_err.txt",
                  suffix="", final=True, backup=True, auto_npar=True,
                  auto_gamma=True, settings_override=None,
-                 gamma_vasp_cmd=None, copy_magmom=False):
+                 gamma_vasp_cmd=None, copy_magmom=False,auto_continue=False):
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -100,6 +100,10 @@ class VaspJob(Job):
                 OUTCAR to the next INCAR. Useful for multi-relaxation runs
                 where the CHGCAR and WAVECAR are sometimes deleted (due to
                 changes in fft grid, etc.). Only applies to non-final runs.
+            auto_continue (bool): Whether to automatically continue a run
+                if a STOPCAR is present. This is very usefull if using the
+                wall-time handler which will write a read-only STOPCAR to
+                prevent VASP from deleting it once it finishes
         """
         self.vasp_cmd = vasp_cmd
         self.output_file = output_file
@@ -112,6 +116,7 @@ class VaspJob(Job):
         self.auto_gamma = auto_gamma
         self.gamma_vasp_cmd = gamma_vasp_cmd
         self.copy_magmom = copy_magmom
+        self.auto_continue = auto_continue
 
     def setup(self):
         """
@@ -148,6 +153,21 @@ class VaspJob(Job):
                     incar.write_file("INCAR")
             except:
                 pass
+
+        # Auto continue if a read-only STOPCAR is present
+        if self.auto_continue and \
+           os.path.exists("STOPCAR") and \
+           not os.access("STOPCAR",os.W_OK):
+            # Remove STOPCAR
+            os.chmod("STOPCAR",0644)
+            os.remove("STOPCAR")
+
+            # Setup INCAR to continue
+            incar = Incar.from_file("INCAR")
+            incar['ISTART'] = 1
+            incar.write_file("INCAR")
+
+            shutil.copy('CONTCAR','POSCAR')
 
         if self.settings_override is not None:
             VaspModder().apply_actions(self.settings_override)

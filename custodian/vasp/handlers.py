@@ -755,7 +755,8 @@ class WalltimeHandler(ErrorHandler):
     raises_runtime_error = False
 
     def __init__(self, wall_time=None, buffer_time=300,
-                 electronic_step_stop=False):
+                 electronic_step_stop=False,
+                 auto_continue = False):
         """
         Initializes the handler with a buffer time.
 
@@ -781,6 +782,8 @@ class WalltimeHandler(ErrorHandler):
                 Should be used with LWAVE = .True. to be useful. If this is
                 True, the STOPCAR is written with LABORT = .TRUE. instead of
                 LSTOP = .TRUE.
+            auto_continue (bool): Use the auto-continue functionality within the
+                VaspJob by ensuring Vasp doesn't delete the STOPCAR
         """
         if wall_time is not None:
             self.wall_time = wall_time
@@ -794,6 +797,7 @@ class WalltimeHandler(ErrorHandler):
         self.electronic_steps_timings = [0]
         self.prev_check_time = self.start_time
         self.prev_check_nscf_steps = 0
+        self.auto_continue = auto_continue
 
     def check(self):
         if self.wall_time:
@@ -846,6 +850,11 @@ class WalltimeHandler(ErrorHandler):
         #Write STOPCAR
         actions = [{"file": "STOPCAR",
                     "action": {"_file_create": {'content': content}}}]
+
+        if self.auto_continue:
+            actions.append({"file": "STOPCAR",
+                            "action": {"_file_modify": {'mode': 0444}}})
+
         m = Modder(actions=[FileActions])
         for a in actions:
             m.modify(a["action"], a["file"])
@@ -1003,4 +1012,3 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         #Unfixable error. Just return None for actions.
         else:
             return {"errors": ["Positive energy"], "actions": None}
-

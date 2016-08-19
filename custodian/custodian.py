@@ -153,6 +153,7 @@ class Custodian(object):
             self.run_log = []
         self.total_errors = 0
         self.terminate_func = terminate_func
+        self.finished = False
 
     @staticmethod
     def _load_checkpoint(cwd):
@@ -444,20 +445,21 @@ class Custodian(object):
 
             if len(self.run_log) == 0:
                 # starting up an initial job - setup input and quit
-                job = self.jobs[0]
-                self.run_log.append({"job": job.as_dict(), "corrections": [], 'job_n': 0})
+                job_n = 0
+                job = self.jobs[job_n]
                 logger.info("Setting up job no. 1 ({}) ".format(job.name))
                 job.setup()
+                self.run_log.append({"job": job.as_dict(), "corrections": [], 'job_n': job_n})
                 return len(self.jobs)
             else:
-                # Continuting after running calculation
+                # Continuing after running calculation
                 job_n = self.run_log[-1]['job_n']
                 job = self.jobs[job_n]
 
                 # If we had to fix errors from a previous run, insert clean log
                 # dict
                 if len(self.run_log[-1]['corrections']) > 0:
-                    logger.info("Reran {}.run due to catchable errors".format(job.name))
+                    logger.info("Reran {}.run due to fixable errors".format(job.name))
 
                 # check error handlers
                 logger.info("Checking error handlers for {}.run".format(job.name))
@@ -488,6 +490,7 @@ class Custodian(object):
                 # IF DONE WITH ALL JOBS - DELETE ALL CHECKPOINTS AND RETURN
                 # VALIDATED
                 if len(self.jobs) == (job_n + 1):
+                    self.finished = True
                     return 0
 
                 # Setup next job_n
@@ -514,7 +517,7 @@ class Custodian(object):
             run_time = end - start
             logger.info("Run completed. Total time taken = {}."
                         .format(run_time))
-            if self.gzipped_output:
+            if self.finished and self.gzipped_output:
                 gzip_dir(".")
 
     def _do_check(self, handlers, terminate_func=None):
