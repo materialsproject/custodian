@@ -159,7 +159,7 @@ class VaspJob(Job):
            os.path.exists("STOPCAR") and \
            not os.access("STOPCAR",os.W_OK):
             # Remove STOPCAR
-            os.chmod("STOPCAR",0644)
+            os.chmod("STOPCAR",0o644)
             os.remove("STOPCAR")
 
             # Setup INCAR to continue

@@ -853,7 +853,7 @@ class WalltimeHandler(ErrorHandler):
 
         if self.auto_continue:
             actions.append({"file": "STOPCAR",
-                            "action": {"_file_modify": {'mode': 0444}}})
+                            "action": {"_file_modify": {'mode': 0o444}}})
 
         m = Modder(actions=[FileActions])
         for a in actions:
