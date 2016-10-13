@@ -16,6 +16,7 @@ __date__ = "1/12/14"
 
 from glob import glob
 import logging
+import os
 import tarfile
 
 
@@ -38,3 +39,22 @@ def backup(filenames, prefix="error"):
         for fname in filenames:
             for f in glob(fname):
                 tar.add(f)
+
+
+def get_execution_host_info():
+    """
+    Tries to return a tuple describing the execution host.
+    Doesn't work for all queueing systems
+
+    Returns:
+        (HOSTNAME, CLUSTER_NAME)
+    """
+    host = os.environ.get('HOSTNAME', None)
+    cluster = os.environ.get('SGE_O_HOST', None)
+    if host is None:
+        try:
+            import socket
+            host = host or socket.gethostname()
+        except:
+            pass
+    return host or 'unknown', cluster or 'unknown'
