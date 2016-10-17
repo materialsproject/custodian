@@ -1,4 +1,1 @@
-pymatgen>=4.2.1
-six==1.9.0
-coverage
-coveralls
+six==1.10.0
