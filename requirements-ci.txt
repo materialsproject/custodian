@@ -1,2 +1,2 @@
-pymatgen==4.4.3
+pymatgen==4.4.4
 six==1.10.0
