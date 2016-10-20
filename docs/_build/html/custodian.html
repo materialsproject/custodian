@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian package &mdash; custodian 1.0.1 documentation</title>
+    <title>custodian package &#8212; custodian 1.0.2 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.0.1',
+        VERSION:     '1.0.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,9 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 1.0.1 documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="custodian 1.0.2 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +45,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.2 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -66,6 +68,16 @@
 <li class="toctree-l2"><a class="reference internal" href="custodian.ansible.html#module-custodian.ansible.actions">custodian.ansible.actions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="custodian.ansible.html#module-custodian.ansible.interpreter">custodian.ansible.interpreter module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="custodian.ansible.html#module-custodian.ansible">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custodian.cli.html">custodian.cli package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="custodian.cli.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custodian.cli.html#module-custodian.cli.converge_geometry">custodian.cli.converge_geometry module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custodian.cli.html#module-custodian.cli.converge_kpoints">custodian.cli.converge_kpoints module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custodian.cli.html#module-custodian.cli.cstdn">custodian.cli.cstdn module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custodian.cli.html#module-custodian.cli.run_nwchem">custodian.cli.run_nwchem module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custodian.cli.html#module-custodian.cli.run_vasp">custodian.cli.run_vasp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custodian.cli.html#module-custodian.cli">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="custodian.nwchem.html">custodian.nwchem package</a><ul>
@@ -110,7 +122,7 @@
 <span id="custodian-custodian-module"></span><h2>custodian.custodian module<a class="headerlink" href="#module-custodian.custodian" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="custodian.custodian.Custodian">
-<em class="property">class </em><code class="descname">Custodian</code><span class="sig-paren">(</span><em>handlers</em>, <em>jobs</em>, <em>validators=None</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em>, <em>skip_over_errors=False</em>, <em>scratch_dir=None</em>, <em>gzipped_output=False</em>, <em>checkpoint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">Custodian</code><span class="sig-paren">(</span><em>handlers</em>, <em>jobs</em>, <em>validators=None</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em>, <em>skip_over_errors=False</em>, <em>scratch_dir=None</em>, <em>gzipped_output=False</em>, <em>checkpoint=False</em>, <em>terminate_func=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>The Custodian class is the manager for a list of jobs given a list of
 error handlers. The way it works is as follows:</p>
@@ -171,6 +183,8 @@ space. Defaults to False.</li>
 <li><strong>checkpoint</strong> (<em>bool</em>) &#8211; Whether to checkpoint after each successful Job.
 Checkpoints are stored as custodian.chk.#.tar.gz files. Defaults
 to False.</li>
+<li><strong>terminate_func</strong> (<em>callable</em>) &#8211; A function to be called to terminate a
+running job. If None, the default is to call Popen.terminate.</li>
 </ul>
 </td>
 </tr>
@@ -265,9 +279,14 @@ validates jobs but doesn&#8217;t run the executable</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number of remaining jobs</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">number of remaining jobs</p>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body">CustodianError on unrecoverable errors, and jobs that fail validation</td>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li>CustodianError on unrecoverable errors, and jobs that fail</li>
+<li><code class="xref py py-exc docutils literal"><span class="pre">validation</span></code></li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -454,6 +473,21 @@ series of error.1.tar.gz, error.2.tar.gz, ... will be generated.</li>
 </table>
 </dd></dl>
 
+<dl class="function">
+<dt id="custodian.utils.get_execution_host_info">
+<code class="descname">get_execution_host_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/utils.html#get_execution_host_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.utils.get_execution_host_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tries to return a tuple describing the execution host.
+Doesn&#8217;t work for all queueing systems</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(HOSTNAME, CLUSTER_NAME)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="module-custodian">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-custodian" title="Permalink to this headline">¶</a></h2>
@@ -508,13 +542,13 @@ series of error.1.tar.gz, error.2.tar.gz, ... will be generated.</li>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.2 documentation</a> &#187;</li> 
       </ul>
     </div>
 
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
+        &#169; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

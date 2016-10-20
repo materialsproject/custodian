@@ -22,15 +22,19 @@ calculations.
 Change log
 ==========
 
+v1.0.2
+------
+* Interrupted run feature. (Shyam Dwaraknath)
+
 v1.0.1
 ------
-1. Pymatgen 4.0.0 compatible release.
+* Pymatgen 4.0.0 compatible release.
 
 v1.0.0
 ------
-1. Custodian now comes with a "cstdn" script that enables the arbitrary creation
-   of simple job sequences using a yaml file, and the running of calculations
-   based on these yaml specifications.
+* Custodian now comes with a "cstdn" script that enables the arbitrary creation
+  of simple job sequences using a yaml file, and the running of calculations
+  based on these yaml specifications.
 
 
 :doc:`Older versions </changelog>`

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.custodian &mdash; custodian 1.0.1 documentation</title>
+    <title>custodian.custodian &#8212; custodian 1.0.2 documentation</title>
     
     <link rel="stylesheet" href="../../_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.1',
+        VERSION:     '1.0.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,9 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-    <link rel="top" title="custodian 1.0.1 documentation" href="../../index.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="top" title="custodian 1.0.2 documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" />
  
 <script type="text/javascript">
@@ -44,8 +46,8 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">custodian 1.0.1 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">custodian 1.0.2 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -58,19 +60,6 @@
 <span></span><span class="c1"># coding: utf-8</span>
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
-
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This module implements the main Custodian class, which manages a list of jobs</span>
-<span class="sd">given a set of error handlers, the abstract base classes for the</span>
-<span class="sd">ErrorHandlers and Jobs.</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Shyue Ping Ong, William Davidson Richards&quot;</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2012, The Materials Project&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.2&quot;</span>
-<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Shyue Ping Ong&quot;</span>
-<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;ongsp@ucsd.edu&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;Sep 17 2014&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
@@ -85,10 +74,25 @@
 
 <span class="kn">import</span> <span class="nn">six</span>
 
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">get_execution_host_info</span>
+
 <span class="kn">from</span> <span class="nn">monty.tempfile</span> <span class="k">import</span> <span class="n">ScratchDir</span>
 <span class="kn">from</span> <span class="nn">monty.shutil</span> <span class="k">import</span> <span class="n">gzip_dir</span>
 <span class="kn">from</span> <span class="nn">monty.json</span> <span class="k">import</span> <span class="n">MSONable</span><span class="p">,</span> <span class="n">MontyEncoder</span><span class="p">,</span> <span class="n">MontyDecoder</span>
 <span class="kn">from</span> <span class="nn">monty.serialization</span> <span class="k">import</span> <span class="n">loadfn</span><span class="p">,</span> <span class="n">dumpfn</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module implements the main Custodian class, which manages a list of jobs</span>
+<span class="sd">given a set of error handlers, the abstract base classes for the</span>
+<span class="sd">ErrorHandlers and Jobs.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Shyue Ping Ong, William Davidson Richards&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2012, The Materials Project&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.2&quot;</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Shyue Ping Ong&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;ongsp@ucsd.edu&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;Sep 17 2014&quot;</span>
 
 
 <span class="n">pjoin</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span>
@@ -143,7 +147,7 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handlers</span><span class="p">,</span> <span class="n">jobs</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_errors</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                  <span class="n">polling_time_step</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">monitor_freq</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
                  <span class="n">skip_over_errors</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">scratch_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">gzipped_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">checkpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                 <span class="n">gzipped_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">checkpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">terminate_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes a Custodian from a list of jobs and error handler.s</span>
 
@@ -188,6 +192,8 @@
 <span class="sd">            checkpoint (bool):  Whether to checkpoint after each successful Job.</span>
 <span class="sd">                Checkpoints are stored as custodian.chk.#.tar.gz files. Defaults</span>
 <span class="sd">                to False.</span>
+<span class="sd">            terminate_func (callable): A function to be called to terminate a</span>
+<span class="sd">                running job. If None, the default is to call Popen.terminate.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_errors</span> <span class="o">=</span> <span class="n">max_errors</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span> <span class="o">=</span> <span class="n">jobs</span>
@@ -207,6 +213,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">restart</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_errors</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">terminate_func</span> <span class="o">=</span> <span class="n">terminate_func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">finished</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_load_checkpoint</span><span class="p">(</span><span class="n">cwd</span><span class="p">):</span>
@@ -219,7 +227,7 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading from checkpoint file </span><span class="si">{}</span><span class="s2">...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chkpt</span><span class="p">))</span>
             <span class="n">t</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">chkpt</span><span class="p">)</span>
             <span class="n">t</span><span class="o">.</span><span class="n">extractall</span><span class="p">()</span>
-            <span class="c1">#Log the corrections to a json file.</span>
+            <span class="c1"># Log the corrections to a json file.</span>
             <span class="n">run_log</span> <span class="o">=</span> <span class="n">loadfn</span><span class="p">(</span><span class="n">Custodian</span><span class="o">.</span><span class="n">LOG_FILE</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">MontyDecoder</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">restart</span><span class="p">,</span> <span class="n">run_log</span>
@@ -355,9 +363,10 @@
                 <span class="n">start</span><span class="p">,</span> <span class="n">temp_dir</span><span class="p">))</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Custodian running on Python version </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Hostname: </span><span class="si">{}</span><span class="s2">, Cluster: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">get_execution_host_info</span><span class="p">()))</span>
 
             <span class="k">try</span><span class="p">:</span>
-                <span class="c1">#skip jobs until the restart</span>
+                <span class="c1"># skip jobs until the restart</span>
                 <span class="k">for</span> <span class="n">job_n</span><span class="p">,</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">islice</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
                                          <span class="bp">self</span><span class="o">.</span><span class="n">restart</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_run_job</span><span class="p">(</span><span class="n">job_n</span><span class="p">,</span> <span class="n">job</span><span class="p">)</span>
@@ -372,7 +381,7 @@
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> errors reached: </span><span class="si">{}</span><span class="s2">. Exited...&quot;</span>
                                        <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_errors</span><span class="p">,</span> <span class="n">ex</span><span class="p">))</span>
             <span class="k">finally</span><span class="p">:</span>
-                <span class="c1">#Log the corrections to a json file.</span>
+                <span class="c1"># Log the corrections to a json file.</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Logging to </span><span class="si">{}</span><span class="s2">...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Custodian</span><span class="o">.</span><span class="n">LOG_FILE</span><span class="p">))</span>
                 <span class="n">dumpfn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">,</span> <span class="n">Custodian</span><span class="o">.</span><span class="n">LOG_FILE</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">MontyEncoder</span><span class="p">,</span>
                        <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
@@ -384,7 +393,7 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gzipped_output</span><span class="p">:</span>
                     <span class="n">gzip_dir</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
 
-            <span class="c1">#Cleanup checkpoint files (if any) if run is successful.</span>
+            <span class="c1"># Cleanup checkpoint files (if any) if run is successful.</span>
             <span class="n">Custodian</span><span class="o">.</span><span class="n">_delete_checkpoints</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span></div>
@@ -424,11 +433,17 @@
                         <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polling_time_step</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                             <span class="k">break</span>
+                        <span class="n">terminate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminate_func</span> <span class="ow">or</span> <span class="n">p</span><span class="o">.</span><span class="n">terminate</span>
                         <span class="k">if</span> <span class="n">n</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor_freq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                             <span class="n">has_error</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_check</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">,</span>
-                                                       <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">)</span>
+                                                       <span class="n">terminate</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">terminate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">terminate</span> <span class="o">!=</span> <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">:</span>
+                            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polling_time_step</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">p</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminate_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminate_func</span> <span class="o">!=</span> <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">terminate_func</span><span class="p">()</span>
+                        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polling_time_step</span><span class="p">)</span>
 
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.run has completed. &quot;</span>
                         <span class="s2">&quot;Checking remaining handlers&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
@@ -451,7 +466,7 @@
                 <span class="n">job</span><span class="o">.</span><span class="n">postprocess</span><span class="p">()</span>
                 <span class="k">return</span>
 
-            <span class="c1">#check that all errors could be handled</span>
+            <span class="c1"># Check that all errors could be handled</span>
             <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;corrections&quot;</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;handler&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">raises_runtime_error</span><span class="p">:</span>
                     <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Unrecoverable error for handler: </span><span class="si">{}</span><span class="s2">. &quot;</span> \
@@ -474,15 +489,16 @@
 <span class="sd">            number of remaining jobs</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            CustodianError on unrecoverable errors, and jobs that fail validation</span>
+<span class="sd">            CustodianError on unrecoverable errors, and jobs that fail</span>
+<span class="sd">            validation</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
             <span class="n">start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Custodian started in singleshot mode at </span><span class="si">{}</span><span class="s2"> in </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">cwd</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Custodian started in singleshot mode at </span><span class="si">{}</span><span class="s2"> in </span><span class="si">{}</span><span class="s2">.&quot;</span>
+                        <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">cwd</span><span class="p">))</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Custodian running on Python version </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 
             <span class="c1"># load run log</span>
@@ -491,19 +507,21 @@
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># starting up an initial job - setup input and quit</span>
-                <span class="n">job</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;job&quot;</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="s2">&quot;corrections&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;job_n&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+                <span class="n">job_n</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">job</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">[</span><span class="n">job_n</span><span class="p">]</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Setting up job no. 1 (</span><span class="si">{}</span><span class="s2">) &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;job&quot;</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="s2">&quot;corrections&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;job_n&#39;</span><span class="p">:</span> <span class="n">job_n</span><span class="p">})</span>
                 <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># continuting after running calculation</span>
+                <span class="c1"># Continuing after running calculation</span>
                 <span class="n">job_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;job_n&#39;</span><span class="p">]</span>
                 <span class="n">job</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">[</span><span class="n">job_n</span><span class="p">]</span>
 
-                <span class="c1"># If we had to fix errors from a previous run, insert clean log dict</span>
+                <span class="c1"># If we had to fix errors from a previous run, insert clean log</span>
+                <span class="c1"># dict</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;corrections&#39;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reran </span><span class="si">{}</span><span class="s2">.run due to catchable errors&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reran </span><span class="si">{}</span><span class="s2">.run due to fixable errors&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
                 <span class="c1"># check error handlers</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Checking error handlers for </span><span class="si">{}</span><span class="s2">.run&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
@@ -516,7 +534,8 @@
                                 <span class="s2">&quot;Raising RuntimeError&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;handler&quot;</span><span class="p">])</span>
                             <span class="k">raise</span> <span class="n">CustodianError</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;handler&quot;</span><span class="p">])</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Corrected input based on error handlers&quot;</span><span class="p">)</span>
-                    <span class="c1"># Return with more jobs to run if recoverable error caught and corrected for</span>
+                    <span class="c1"># Return with more jobs to run if recoverable error caught</span>
+                    <span class="c1"># and corrected for</span>
                     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">)</span> <span class="o">-</span> <span class="n">job_n</span>
 
                 <span class="c1"># check validators</span>
@@ -530,14 +549,17 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Postprocessing for </span><span class="si">{}</span><span class="s2">.run&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">postprocess</span><span class="p">()</span>
 
-                <span class="c1"># IF DONE WITH ALL JOBS - DELETE ALL CHECKPOINTS AND RETURN VALIDATED</span>
+                <span class="c1"># IF DONE WITH ALL JOBS - DELETE ALL CHECKPOINTS AND RETURN</span>
+                <span class="c1"># VALIDATED</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">job_n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">finished</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">return</span> <span class="mi">0</span>
 
                 <span class="c1"># Setup next job_n</span>
-                <span class="n">job_n</span> <span class="o">=</span> <span class="n">job_n</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">job_n</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="n">job</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">[</span><span class="n">job_n</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;job&quot;</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="s2">&quot;corrections&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;job_n&#39;</span><span class="p">:</span> <span class="n">job_n</span><span class="p">})</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;job&quot;</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="s2">&quot;corrections&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                                     <span class="s1">&#39;job_n&#39;</span><span class="p">:</span> <span class="n">job_n</span><span class="p">})</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
                 <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">)</span> <span class="o">-</span> <span class="n">job_n</span>
 
@@ -557,7 +579,7 @@
             <span class="n">run_time</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Run completed. Total time taken = </span><span class="si">{}</span><span class="s2">.&quot;</span>
                         <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">run_time</span><span class="p">))</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gzipped_output</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">finished</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">gzipped_output</span><span class="p">:</span>
                 <span class="n">gzip_dir</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_do_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handlers</span><span class="p">,</span> <span class="n">terminate_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -571,7 +593,7 @@
                     <span class="k">if</span> <span class="n">terminate_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">h</span><span class="o">.</span><span class="n">is_terminating</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Terminating job&quot;</span><span class="p">)</span>
                         <span class="n">terminate_func</span><span class="p">()</span>
-                        <span class="c1">#make sure we don&#39;t terminate twice</span>
+                        <span class="c1"># make sure we don&#39;t terminate twice</span>
                         <span class="n">terminate_func</span> <span class="o">=</span> <span class="kc">None</span>
                     <span class="n">d</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">correct</span><span class="p">()</span>
                     <span class="n">d</span><span class="p">[</span><span class="s2">&quot;handler&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span>
@@ -760,14 +782,14 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">custodian 1.0.1 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">custodian 1.0.2 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
 
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
+        &#169; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

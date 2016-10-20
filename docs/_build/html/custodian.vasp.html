@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp package &mdash; custodian 1.0.1 documentation</title>
+    <title>custodian.vasp package &#8212; custodian 1.0.2 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.0.1',
+        VERSION:     '1.0.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,9 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="custodian 1.0.1 documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="custodian 1.0.2 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -43,7 +45,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.2 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -94,7 +96,7 @@ default redirect used by <a class="reference internal" href="#custodian.vasp.job
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.AliasingErrorHandler.error_msgs">
-<code class="descname">error_msgs</code><em class="property"> = {'aliasing': ['WARNING: small aliasing (wrap around) errors must be expected'], 'aliasing_incar': ['Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate']}</em><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">error_msgs</code><em class="property"> = {'aliasing_incar': ['Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate'], 'aliasing': ['WARNING: small aliasing (wrap around) errors must be expected']}</em><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -485,7 +487,7 @@ default redirect used by <a class="reference internal" href="#custodian.vasp.job
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.error_msgs">
-<code class="descname">error_msgs</code><em class="property"> = {'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'dentet': ['DENTET'], 'tetirr': ['Routine TETIRR needs special values'], 'eddrmm': ['WARNING in EDDRMM: call to ZHEGV failed'], 'real_optlay': ['REAL_OPTLAY: internal error', 'REAL_OPT: internal ERROR'], 'rot_matrix': ['Found some non-integer element in rotation matrix'], 'too_few_bands': ['TOO FEW BANDS'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values'], 'zbrent': ['ZBRENT: fatal internal in', 'ZBRENT: fatal error in bracketing'], 'amin': ['One of the lattice vectors is very long (&gt;50 A), but AMIN'], 'brmix': ['BRMIX: very serious problems'], 'brions': ['BRIONS problems: POTIM should be increased'], 'rspher': ['ERROR RSPHER'], 'pssyevx': ['ERROR in subspace rotation PSSYEVX'], 'triple_product': ['ERROR: the triple product of the basis vectors'], 'incorrect_shift': ['Could not get correct shifts'], 'edddav': ['Error EDDDAV: Call to ZHEGV failed'], 'pricel': ['internal error in subroutine PRICEL'], 'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'zpotrf': ['LAPACK: Routine ZPOTRF failed']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">error_msgs</code><em class="property"> = {'tetirr': ['Routine TETIRR needs special values'], 'brions': ['BRIONS problems: POTIM should be increased'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values'], 'pssyevx': ['ERROR in subspace rotation PSSYEVX'], 'eddrmm': ['WARNING in EDDRMM: call to ZHEGV failed'], 'rspher': ['ERROR RSPHER'], 'rot_matrix': ['Found some non-integer element in rotation matrix'], 'real_optlay': ['REAL_OPTLAY: internal error', 'REAL_OPT: internal ERROR'], 'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'edddav': ['Error EDDDAV: Call to ZHEGV failed'], 'triple_product': ['ERROR: the triple product of the basis vectors'], 'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'too_few_bands': ['TOO FEW BANDS'], 'incorrect_shift': ['Could not get correct shifts'], 'dentet': ['DENTET'], 'zpotrf': ['LAPACK: Routine ZPOTRF failed'], 'zbrent': ['ZBRENT: fatal internal in', 'ZBRENT: fatal error in bracketing'], 'grad_not_orth': ['EDWAV: internal error, the gradient is not orthogonal'], 'pricel': ['internal error in subroutine PRICEL'], 'amin': ['One of the lattice vectors is very long (&gt;50 A), but AMIN'], 'brmix': ['BRMIX: very serious problems']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -497,7 +499,7 @@ default redirect used by <a class="reference internal" href="#custodian.vasp.job
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.WalltimeHandler">
-<em class="property">class </em><code class="descname">WalltimeHandler</code><span class="sig-paren">(</span><em>wall_time=None</em>, <em>buffer_time=300</em>, <em>electronic_step_stop=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">WalltimeHandler</code><span class="sig-paren">(</span><em>wall_time=None</em>, <em>buffer_time=300</em>, <em>electronic_step_stop=False</em>, <em>auto_continue=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Check if a run is nearing the walltime. If so, write a STOPCAR with
 LSTOP or LABORT = .True.. You can specify the walltime either in the init (
@@ -531,6 +533,8 @@ or wavefunctions might not be converged at the electronic level.
 Should be used with LWAVE = .True. to be useful. If this is
 True, the STOPCAR is written with LABORT = .TRUE. instead of
 LSTOP = .TRUE.</li>
+<li><strong>auto_continue</strong> (<em>bool</em>) &#8211; Use the auto-continue functionality within the
+VaspJob by ensuring Vasp doesn&#8217;t delete the STOPCAR</li>
 </ul>
 </td>
 </tr>
@@ -609,7 +613,7 @@ files.
 <span id="custodian-vasp-jobs-module"></span><h2>custodian.vasp.jobs module<a class="headerlink" href="#module-custodian.vasp.jobs" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="custodian.vasp.jobs.VaspJob">
-<em class="property">class </em><code class="descname">VaspJob</code><span class="sig-paren">(</span><em>vasp_cmd</em>, <em>output_file='vasp.out'</em>, <em>suffix=''</em>, <em>final=True</em>, <em>backup=True</em>, <em>auto_npar=True</em>, <em>auto_gamma=True</em>, <em>settings_override=None</em>, <em>gamma_vasp_cmd=None</em>, <em>copy_magmom=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">VaspJob</code><span class="sig-paren">(</span><em>vasp_cmd</em>, <em>output_file='vasp.out'</em>, <em>stderr_file='std_err.txt'</em>, <em>suffix=''</em>, <em>final=True</em>, <em>backup=True</em>, <em>auto_npar=True</em>, <em>auto_gamma=True</em>, <em>settings_override=None</em>, <em>gamma_vasp_cmd=None</em>, <em>copy_magmom=False</em>, <em>auto_continue=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.Job</span></code></a></p>
 <p>A basic vasp job. Just runs whatever is in the directory. But conceivably
 can be a complex processing of inputs etc. with initialization.</p>
@@ -626,6 +630,8 @@ if you are using mpirun, it can be something like
 [&#8220;mpirun&#8221;, &#8220;pvasp.5.2.11&#8221;]</li>
 <li><strong>output_file</strong> (<em>str</em>) &#8211; Name of file to direct standard out to.
 Defaults to &#8220;vasp.out&#8221;.</li>
+<li><strong>output_file</strong> &#8211; Name of file to direct standard error to.
+Defaults to &#8220;std_err.txt&#8221;.</li>
 <li><strong>suffix</strong> (<em>str</em>) &#8211; A suffix to be appended to the final output. E.g.,
 to rename all VASP output from say vasp.out to
 vasp.out.relax1, provide &#8221;.relax1&#8221; as the suffix.</li>
@@ -670,6 +676,10 @@ to the last argument of the standard vasp_cmd.</li>
 OUTCAR to the next INCAR. Useful for multi-relaxation runs
 where the CHGCAR and WAVECAR are sometimes deleted (due to
 changes in fft grid, etc.). Only applies to non-final runs.</li>
+<li><strong>auto_continue</strong> (<em>bool</em>) &#8211; Whether to automatically continue a run
+if a STOPCAR is present. This is very usefull if using the
+wall-time handler which will write a read-only STOPCAR to
+prevent VASP from deleting it once it finishes</li>
 </ul>
 </td>
 </tr>
@@ -855,13 +865,13 @@ and backing up.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.2 documentation</a> &#187;</li> 
       </ul>
     </div>
 
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
+        &#169; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
