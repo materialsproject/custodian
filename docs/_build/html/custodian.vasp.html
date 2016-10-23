@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>custodian.vasp package &#8212; custodian 1.0.2 documentation</title>
+    <title>custodian.vasp package &#8212; custodian 1.0.3 documentation</title>
     
     <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.0.2',
+        VERSION:     '1.0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="custodian 1.0.2 documentation" href="index.html" />
+    <link rel="top" title="custodian 1.0.3 documentation" href="index.html" />
  
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.2 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.3 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -96,7 +96,7 @@ default redirect used by <a class="reference internal" href="#custodian.vasp.job
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.AliasingErrorHandler.error_msgs">
-<code class="descname">error_msgs</code><em class="property"> = {'aliasing_incar': ['Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate'], 'aliasing': ['WARNING: small aliasing (wrap around) errors must be expected']}</em><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">error_msgs</code><em class="property"> = {'aliasing': ['WARNING: small aliasing (wrap around) errors must be expected'], 'aliasing_incar': ['Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate']}</em><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -487,7 +487,7 @@ default redirect used by <a class="reference internal" href="#custodian.vasp.job
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.error_msgs">
-<code class="descname">error_msgs</code><em class="property"> = {'tetirr': ['Routine TETIRR needs special values'], 'brions': ['BRIONS problems: POTIM should be increased'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values'], 'pssyevx': ['ERROR in subspace rotation PSSYEVX'], 'eddrmm': ['WARNING in EDDRMM: call to ZHEGV failed'], 'rspher': ['ERROR RSPHER'], 'rot_matrix': ['Found some non-integer element in rotation matrix'], 'real_optlay': ['REAL_OPTLAY: internal error', 'REAL_OPT: internal ERROR'], 'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'edddav': ['Error EDDDAV: Call to ZHEGV failed'], 'triple_product': ['ERROR: the triple product of the basis vectors'], 'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'too_few_bands': ['TOO FEW BANDS'], 'incorrect_shift': ['Could not get correct shifts'], 'dentet': ['DENTET'], 'zpotrf': ['LAPACK: Routine ZPOTRF failed'], 'zbrent': ['ZBRENT: fatal internal in', 'ZBRENT: fatal error in bracketing'], 'grad_not_orth': ['EDWAV: internal error, the gradient is not orthogonal'], 'pricel': ['internal error in subroutine PRICEL'], 'amin': ['One of the lattice vectors is very long (&gt;50 A), but AMIN'], 'brmix': ['BRMIX: very serious problems']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">error_msgs</code><em class="property"> = {'triple_product': ['ERROR: the triple product of the basis vectors'], 'rot_matrix': ['Found some non-integer element in rotation matrix'], 'too_few_bands': ['TOO FEW BANDS'], 'tetirr': ['Routine TETIRR needs special values'], 'brmix': ['BRMIX: very serious problems'], 'zpotrf': ['LAPACK: Routine ZPOTRF failed'], 'amin': ['One of the lattice vectors is very long (&gt;50 A), but AMIN'], 'edddav': ['Error EDDDAV: Call to ZHEGV failed'], 'rspher': ['ERROR RSPHER'], 'grad_not_orth': ['EDWAV: internal error, the gradient is not orthogonal'], 'real_optlay': ['REAL_OPTLAY: internal error', 'REAL_OPT: internal ERROR'], 'eddrmm': ['WARNING in EDDRMM: call to ZHEGV failed'], 'brions': ['BRIONS problems: POTIM should be increased'], 'pssyevx': ['ERROR in subspace rotation PSSYEVX'], 'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'dentet': ['DENTET'], 'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'incorrect_shift': ['Could not get correct shifts'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values'], 'pricel': ['internal error in subroutine PRICEL'], 'zbrent': ['ZBRENT: fatal internal in', 'ZBRENT: fatal error in bracketing']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -865,7 +865,7 @@ and backing up.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.2 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.0.3 documentation</a> &#187;</li> 
       </ul>
     </div>
 
