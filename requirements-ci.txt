@@ -1,1 +1,1 @@
-pymatgen==4.4.8
+pymatgen==4.4.9
