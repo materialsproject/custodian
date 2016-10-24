@@ -348,7 +348,7 @@ How to cite custodian
 =====================
 
 If you use custodian in your research, especially the VASP component, please
-consider citing the following work:
+consider citing the following work::
 
     Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Geoffroy Hautier,
     Michael Kocher, Shreyas Cholia, Dan Gunter, Vincent Chevrier, Kristin A.
