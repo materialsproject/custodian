@@ -6,7 +6,6 @@ Subpackages
 
 .. toctree::
 
-    custodian.vasp.tests
 
 Submodules
 ----------

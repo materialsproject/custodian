@@ -6,7 +6,6 @@ Subpackages
 
 .. toctree::
 
-    custodian.qchem.tests
 
 Submodules
 ----------

@@ -6,7 +6,6 @@ Subpackages
 
 .. toctree::
 
-    custodian.nwchem.tests
 
 Submodules
 ----------

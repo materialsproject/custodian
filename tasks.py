@@ -23,8 +23,8 @@ def make_doc(ctx):
     with cd("docs"):
         ctx.run("sphinx-apidoc -d 6 -o . -f ../custodian")
         ctx.run("rm custodian*.tests.rst")
-        for f in glob.glob("docs/*.rst"):
-            if f.startswith('docs/custodian') and f.endswith('rst'):
+        for f in glob.glob("*.rst"):
+            if f.startswith('custodian') and f.endswith('rst'):
                 newoutput = []
                 suboutput = []
                 subpackage = False
