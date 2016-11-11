@@ -3,11 +3,8 @@ machine:
     version: 3.5.2
 dependencies:
   override:
-    - pip install numpy
-    - pip install -r requirements-ci.txt --upgrade
-    - python setup.py install --quiet
+    - pip install tox tox-pyenv
+    - pyenv local 2.7.12 3.5.2
 test:
   override:
-    - mv custodian ctd
-    - nosetests --config=nose.cfg --cover-html --cover-html-dir=$CIRCLE_ARTIFACTS
-    - coveralls
+    - tox

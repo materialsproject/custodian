@@ -2,19 +2,6 @@
 
 from __future__ import unicode_literals, division
 
-"""
-This module implements basic kinds of jobs for Nwchem runs.
-"""
-
-
-__author__ = "Shyue Ping Ong"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "ongsp@ucsd.edu"
-__status__ = "Beta"
-__date__ = "5/20/13"
-
-
 import subprocess
 import shutil
 
@@ -22,6 +9,17 @@ from monty.io import zopen
 
 from custodian.custodian import Job
 from monty.shutil import gzip_dir
+
+"""
+This module implements basic kinds of jobs for Nwchem runs.
+"""
+
+__author__ = "Shyue Ping Ong"
+__version__ = "0.1"
+__maintainer__ = "Shyue Ping Ong"
+__email__ = "ongsp@ucsd.edu"
+__status__ = "Beta"
+__date__ = "5/20/13"
 
 
 class NwchemJob(Job):

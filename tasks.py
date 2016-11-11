@@ -4,6 +4,12 @@ Deployment file to facilitate releases of custodian.
 
 from __future__ import division
 
+import glob
+
+from invoke import task
+from monty.os import cd
+from custodian import __version__ as ver
+
 __author__ = "Shyue Ping Ong"
 __copyright__ = "Copyright 2012, The Materials Project"
 __version__ = "0.1"
@@ -11,19 +17,14 @@ __maintainer__ = "Shyue Ping Ong"
 __email__ = "shyue@mit.edu"
 __date__ = "Apr 29, 2012"
 
-import glob
-
-from invoke import task
-from monty.os import cd
-from custodian import __version__ as ver
 
 @task
 def make_doc(ctx):
     with cd("docs"):
-        ctx.run("sphinx-apidoc -o . -f ../custodian")
+        ctx.run("sphinx-apidoc -d 6 -o . -f ../custodian")
         ctx.run("rm custodian*.tests.rst")
-        for f in glob.glob("docs/*.rst"):
-            if f.startswith('docs/custodian') and f.endswith('rst'):
+        for f in glob.glob("*.rst"):
+            if f.startswith('custodian') and f.endswith('rst'):
                 newoutput = []
                 suboutput = []
                 subpackage = False
@@ -37,15 +38,32 @@ def make_doc(ctx):
                         else:
                             if not clean.endswith("tests"):
                                 suboutput.append(line)
-                            if clean.startswith("custodian") and not clean.endswith("tests"):
+                            if clean.startswith("custodian") and not clean.endswith(
+                                    "tests"):
                                 newoutput.extend(suboutput)
                                 subpackage = False
                                 suboutput = []
 
                 with open(f, 'w') as fid:
                     fid.write("".join(newoutput))
-
         ctx.run("make html")
+        # ctx.run("cp _static/* _build/html/_static")
+
+        # This makes sure pymatgen.org works to redirect to the Gihub page
+        # ctx.run("echo \"pymatgen.org\" > _build/html/CNAME")
+        # Avoid ths use of jekyll so that _dir works as intended.
+        ctx.run("touch _build/html/.nojekyll")
+
+
+@task
+def update_doc(ctx):
+    with cd("docs/_build/html/"):
+        ctx.run("git pull")
+    make_doc(ctx)
+    with cd("docs/_build/html/"):
+        ctx.run("git add .")
+        ctx.run("git commit -a -m \"Update dev docs\"")
+        ctx.run("git push origin gh-pages")
 
 
 @task
@@ -68,5 +86,5 @@ def setver(ctx):
 def release(ctx):
     setver(ctx)
     test(ctx)
-    make_doc(ctx)
     publish(ctx)
+    update_doc(ctx)

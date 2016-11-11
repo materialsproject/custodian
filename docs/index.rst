@@ -1,3 +1,6 @@
+Custodian
+=========
+
 Custodian is a simple, robust and flexible just-in-time (JIT) job management
 framework written in Python. Using custodian, you can create wrappers that
 perform error checking, job management and error recovery. It has a simple
@@ -22,15 +25,19 @@ calculations.
 Change log
 ==========
 
+v1.0.2
+------
+* Interrupted run feature. (Shyam Dwaraknath)
+
 v1.0.1
 ------
-1. Pymatgen 4.0.0 compatible release.
+* Pymatgen 4.0.0 compatible release.
 
 v1.0.0
 ------
-1. Custodian now comes with a "cstdn" script that enables the arbitrary creation
-   of simple job sequences using a yaml file, and the running of calculations
-   based on these yaml specifications.
+* Custodian now comes with a "cstdn" script that enables the arbitrary creation
+  of simple job sequences using a yaml file, and the running of calculations
+  based on these yaml specifications.
 
 
 :doc:`Older versions </changelog>`
@@ -341,7 +348,7 @@ How to cite custodian
 =====================
 
 If you use custodian in your research, especially the VASP component, please
-consider citing the following work:
+consider citing the following work::
 
     Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Geoffroy Hautier,
     Michael Kocher, Shreyas Cholia, Dan Gunter, Vincent Chevrier, Kristin A.

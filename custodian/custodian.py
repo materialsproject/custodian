@@ -15,6 +15,8 @@ from itertools import islice
 
 import six
 
+from .utils import get_execution_host_info
+
 from monty.tempfile import ScratchDir
 from monty.shutil import gzip_dir
 from monty.json import MSONable, MontyEncoder, MontyDecoder
@@ -302,6 +304,7 @@ class Custodian(object):
                 start, temp_dir))
             v = sys.version.replace("\n", " ")
             logger.info("Custodian running on Python version {}".format(v))
+            logger.info("Hostname: {}, Cluster: {}".format(*get_execution_host_info()))
 
             try:
                 # skip jobs until the restart

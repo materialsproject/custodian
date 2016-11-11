@@ -116,7 +116,7 @@ class CustodianTest(unittest.TestCase):
         njobs = 100
         params = {'initial': 0, 'total': 0}
         c = Custodian([ExampleHandler(params)],
-                      [ExampleJob(i,params) for i in range(njobs)],
+                      [ExampleJob(i, params) for i in range(njobs)],
                       max_errors=njobs)
 
         total = njobs
@@ -125,9 +125,9 @@ class CustodianTest(unittest.TestCase):
 
         total_done = 1
         while total_done < 100:
-            c.jobs[i].run()
+            c.jobs[njobs - 1].run()
             if params['total'] > 50:
-                self.assertEqual(c.run_interrupted(),100-total_done)
+                self.assertEqual(c.run_interrupted(), 100-total_done)
                 total_done += 1
 
 

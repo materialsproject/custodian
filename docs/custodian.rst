@@ -7,9 +7,9 @@ Subpackages
 .. toctree::
 
     custodian.ansible
+    custodian.cli
     custodian.nwchem
     custodian.qchem
-    custodian.tests
     custodian.vasp
 
 Submodules
