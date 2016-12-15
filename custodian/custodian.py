@@ -386,6 +386,9 @@ class Custodian(object):
                         self.terminate_func()
                         time.sleep(self.polling_time_step)
 
+            if p.returncode != 0:
+                warnings.warn("subprocess returned a non-zero return code. Check outputs carefully...")
+
             logger.info("{}.run has completed. "
                         "Checking remaining handlers".format(job.name))
             # Check for errors again, since in some cases non-monitor
@@ -433,10 +436,9 @@ class Custodian(object):
             CustodianError on unrecoverable errors, and jobs that fail
             validation
         """
-
+        start = datetime.datetime.now()
         try:
             cwd = os.getcwd()
-            start = datetime.datetime.now()
             v = sys.version.replace("\n", " ")
             logger.info("Custodian started in singleshot mode at {} in {}."
                         .format(start, cwd))
@@ -511,7 +513,7 @@ class Custodian(object):
                                    .format(self.total_errors, ex))
 
         finally:
-            #Log the corrections to a json file.
+            # Log the corrections to a json file.
             logger.info("Logging to {}...".format(Custodian.LOG_FILE))
             dumpfn(self.run_log, Custodian.LOG_FILE, cls=MontyEncoder,
                    indent=4)
