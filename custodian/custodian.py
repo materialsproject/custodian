@@ -386,10 +386,6 @@ class Custodian(object):
                         self.terminate_func()
                         time.sleep(self.polling_time_step)
 
-                # Exit if the command errored during execution      
-                if p.returncode != 0:
-                    raise CustodianError("Process {} failed with returncode {}".format(p.pid,p.returncode), True)
-                
             logger.info("{}.run has completed. "
                         "Checking remaining handlers".format(job.name))
             # Check for errors again, since in some cases non-monitor
