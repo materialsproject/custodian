@@ -382,12 +382,14 @@ class Custodian(object):
                             time.sleep(self.polling_time_step)
                 else:
                     p.wait()
-                    if self.terminate_func is not None and self.terminate_func != p.terminate:
+                    if self.terminate_func is not None and \
+                            self.terminate_func != p.terminate:
                         self.terminate_func()
                         time.sleep(self.polling_time_step)
 
-            if p.returncode != 0:
-                warnings.warn("subprocess returned a non-zero return code. Check outputs carefully...")
+                if p.returncode != 0:
+                    warnings.warn("subprocess returned a non-zero return code. "
+                                  "Check outputs carefully...")
 
             logger.info("{}.run has completed. "
                         "Checking remaining handlers".format(job.name))
