@@ -37,9 +37,6 @@ __email__ = "ongsp@ucsd.edu"
 __date__ = "Sep 17 2014"
 
 
-pjoin = os.path.join
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -166,7 +163,7 @@ class Custodian(object):
     def _load_checkpoint(cwd):
         restart = 0
         run_log = []
-        chkpts = glob(pjoin(cwd, "custodian.chk.*.tar.gz"))
+        chkpts = glob(os.path.join(cwd, "custodian.chk.*.tar.gz"))
         if chkpts:
             chkpt = sorted(chkpts, key=lambda c: int(c.split(".")[-3]))[0]
             restart = int(chkpt.split(".")[-3])
@@ -180,14 +177,14 @@ class Custodian(object):
 
     @staticmethod
     def _delete_checkpoints(cwd):
-        for f in glob(pjoin(cwd, "custodian.chk.*.tar.gz")):
+        for f in glob(os.path.join(cwd, "custodian.chk.*.tar.gz")):
             os.remove(f)
 
     @staticmethod
     def _save_checkpoint(cwd, index):
         try:
             Custodian._delete_checkpoints(cwd)
-            n = pjoin(cwd, "custodian.chk.{}.tar.gz".format(index))
+            n = os.path.join(cwd, "custodian.chk.{}.tar.gz".format(index))
             with tarfile.open(n,  mode="w:gz", compresslevel=3) as f:
                 f.add(cwd, arcname='.')
             logger.info("Checkpoint written to {}".format(n))
