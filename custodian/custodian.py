@@ -12,6 +12,7 @@ import tarfile
 import os
 from abc import ABCMeta, abstractmethod
 from itertools import islice
+import warnings
 
 import six
 
@@ -88,7 +89,8 @@ class Custodian(object):
     def __init__(self, handlers, jobs, validators=None, max_errors=1,
                  polling_time_step=10, monitor_freq=30,
                  skip_over_errors=False, scratch_dir=None,
-                 gzipped_output=False, checkpoint=False, terminate_func=None):
+                 gzipped_output=False, checkpoint=False, terminate_func=None,
+                 terminate_on_nonzero_returncode=True):
         """
         Initializes a Custodian from a list of jobs and error handler.s
 
@@ -135,6 +137,8 @@ class Custodian(object):
                 to False.
             terminate_func (callable): A function to be called to terminate a
                 running job. If None, the default is to call Popen.terminate.
+            terminate_on_nonzero_returncode (bool): If True, a non-zero return
+                code on any Job will result in a termination. Defaults to True.
         """
         self.max_errors = max_errors
         self.jobs = jobs
@@ -155,6 +159,7 @@ class Custodian(object):
             self.run_log = []
         self.total_errors = 0
         self.terminate_func = terminate_func
+        self.terminate_on_nonzero_returncode = terminate_on_nonzero_returncode
         self.finished = False
 
     @staticmethod
@@ -304,7 +309,8 @@ class Custodian(object):
                 start, temp_dir))
             v = sys.version.replace("\n", " ")
             logger.info("Custodian running on Python version {}".format(v))
-            logger.info("Hostname: {}, Cluster: {}".format(*get_execution_host_info()))
+            logger.info("Hostname: {}, Cluster: {}".format(
+                *get_execution_host_info()))
 
             try:
                 # skip jobs until the restart
@@ -388,8 +394,14 @@ class Custodian(object):
                         time.sleep(self.polling_time_step)
 
                 if p.returncode != 0:
-                    warnings.warn("subprocess returned a non-zero return code. "
-                                  "Check outputs carefully...")
+                    if self.terminate_on_nonzero_returncode:
+                        s = "Job return code is %d. Terminating..." % \
+                            p.returncode
+                        logger.info(s)
+                        raise CustodianError(s, True)
+                    else:
+                        warnings.warn("subprocess returned a non-zero return "
+                                      "code. Check outputs carefully...")
 
             logger.info("{}.run has completed. "
                         "Checking remaining handlers".format(job.name))
@@ -456,7 +468,8 @@ class Custodian(object):
                 job = self.jobs[job_n]
                 logger.info("Setting up job no. 1 ({}) ".format(job.name))
                 job.setup()
-                self.run_log.append({"job": job.as_dict(), "corrections": [], 'job_n': job_n})
+                self.run_log.append({"job": job.as_dict(), "corrections": [],
+                                     'job_n': job_n})
                 return len(self.jobs)
             else:
                 # Continuing after running calculation
@@ -466,10 +479,12 @@ class Custodian(object):
                 # If we had to fix errors from a previous run, insert clean log
                 # dict
                 if len(self.run_log[-1]['corrections']) > 0:
-                    logger.info("Reran {}.run due to fixable errors".format(job.name))
+                    logger.info("Reran {}.run due to fixable errors".format(
+                        job.name))
 
                 # check error handlers
-                logger.info("Checking error handlers for {}.run".format(job.name))
+                logger.info("Checking error handlers for {}.run".format(
+                    job.name))
                 if self._do_check(self.handlers):
                     logger.info("Failed validation based on error handlers")
                     # raise an error for an unrecoverable error
