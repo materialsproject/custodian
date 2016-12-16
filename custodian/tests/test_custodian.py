@@ -20,6 +20,23 @@ from custodian.custodian import Job, ErrorHandler, Custodian, Validator
 import os
 import glob
 import shutil
+import subprocess
+
+
+class ExitCodeJob(Job):
+
+    def __init__(self, exitcode=0):
+        self.exitcode = exitcode
+
+    def setup(self):
+        pass
+
+
+    def run(self):
+        return subprocess.Popen('exit {}'.format(self.exitcode), shell=True)
+
+    def postprocess(self):
+        pass
 
 
 class ExampleJob(Job):
@@ -101,6 +118,14 @@ class CustodianTest(unittest.TestCase):
     def setUp(self):
         self.cwd = os.getcwd()
         os.chdir(os.path.abspath(os.path.dirname(__file__)))
+
+    def test_exitcode_error(self):
+        c = Custodian([], [ExitCodeJob(0)])
+        output = c.run()
+        c = Custodian([], [ExitCodeJob(1)])
+        self.assertRaises(RuntimeError, c.run)
+        c = Custodian([], [ExitCodeJob(1)], terminate_on_nonzero_returncode=False)
+        output = c.run()
 
     def test_run(self):
         njobs = 100
