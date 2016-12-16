@@ -1,4 +1,4 @@
-from custodian.vasp.validators import VasprunXMLValidator
+from custodian.vasp.validators import VasprunXMLValidator, VaspFilesValidator
 
 import os
 import unittest
@@ -28,6 +28,26 @@ class VasprunXMLValidatorTest(unittest.TestCase):
     def tearDownClass(cls):
         os.chdir(cwd)
 
+class VaspFilesValidatorTest(unittest.TestCase):
+
+    def test_check_and_correct(self):
+        # just an example where CONTCAR is not present
+        os.chdir(os.path.join(test_dir, "positive_energy"))
+        h = VaspFilesValidator()
+        self.assertTrue(h.check())
+
+        os.chdir(os.path.join(test_dir, "postprocess"))
+        self.assertFalse(h.check())
+
+    def test_as_dict(self):
+        h = VaspFilesValidator()
+        d = h.as_dict()
+        h2 = VaspFilesValidator.from_dict(d)
+        self.assertIsInstance(h2, VaspFilesValidator)
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cwd)
 
 if __name__ == "__main__":
     unittest.main()
