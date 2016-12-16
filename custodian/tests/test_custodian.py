@@ -1,19 +1,6 @@
 # coding: utf-8
 
 from __future__ import unicode_literals, division, print_function
-
-"""
-Created on Jun 1, 2012
-"""
-
-
-__author__ = "Shyue Ping Ong"
-__copyright__ = "Copyright 2012, The Materials Project"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "shyue@mit.edu"
-__date__ = "Jun 1, 2012"
-
 import unittest
 import random
 from custodian.custodian import Job, ErrorHandler, Custodian, Validator
@@ -21,6 +8,18 @@ import os
 import glob
 import shutil
 import subprocess
+import yaml
+
+"""
+Created on Jun 1, 2012
+"""
+
+__author__ = "Shyue Ping Ong"
+__copyright__ = "Copyright 2012, The Materials Project"
+__version__ = "0.1"
+__maintainer__ = "Shyue Ping Ong"
+__email__ = "shyue@mit.edu"
+__date__ = "Jun 1, 2012"
 
 
 class ExitCodeJob(Job):
@@ -31,7 +30,6 @@ class ExitCodeJob(Job):
     def setup(self):
         pass
 
-
     def run(self):
         return subprocess.Popen('exit {}'.format(self.exitcode), shell=True)
 
@@ -41,7 +39,9 @@ class ExitCodeJob(Job):
 
 class ExampleJob(Job):
 
-    def __init__(self, jobid, params={"initial": 0, "total": 0}):
+    def __init__(self, jobid, params=None):
+        if params is None:
+            params = {"initial": 0, "total": 0}
         self.jobid = jobid
         self.params = params
 
@@ -81,6 +81,7 @@ class ExampleHandler2(ErrorHandler):
 
     def __init__(self, params):
         self.params = params
+        self.has_error = False
 
     def check(self):
         return True
@@ -121,11 +122,12 @@ class CustodianTest(unittest.TestCase):
 
     def test_exitcode_error(self):
         c = Custodian([], [ExitCodeJob(0)])
-        output = c.run()
+        c.run()
         c = Custodian([], [ExitCodeJob(1)])
         self.assertRaises(RuntimeError, c.run)
-        c = Custodian([], [ExitCodeJob(1)], terminate_on_nonzero_returncode=False)
-        output = c.run()
+        c = Custodian([], [ExitCodeJob(1)],
+                      terminate_on_nonzero_returncode=False)
+        c.run()
 
     def test_run(self):
         njobs = 100
@@ -135,7 +137,7 @@ class CustodianTest(unittest.TestCase):
                       max_errors=njobs)
         output = c.run()
         self.assertEqual(len(output), njobs)
-        print(ExampleHandler(params).as_dict())
+        d = ExampleHandler(params).as_dict()
 
     def test_run_interrupted(self):
         njobs = 100
@@ -144,17 +146,15 @@ class CustodianTest(unittest.TestCase):
                       [ExampleJob(i, params) for i in range(njobs)],
                       max_errors=njobs)
 
-        total = njobs
-        self.assertEqual(c.run_interrupted(),100)
-        self.assertEqual(c.run_interrupted(),100)
+        self.assertEqual(c.run_interrupted(), njobs)
+        self.assertEqual(c.run_interrupted(), njobs)
 
         total_done = 1
-        while total_done < 100:
+        while total_done < njobs:
             c.jobs[njobs - 1].run()
             if params['total'] > 50:
-                self.assertEqual(c.run_interrupted(), 100-total_done)
+                self.assertEqual(c.run_interrupted(), njobs - total_done)
                 total_done += 1
-
 
     def test_unrecoverable(self):
         njobs = 100
@@ -191,7 +191,7 @@ class CustodianTest(unittest.TestCase):
         self.assertRaises(RuntimeError, c.run)
 
     def test_from_spec(self):
-        spec =  """jobs:
+        spec = """jobs:
 - jb: custodian.vasp.jobs.VaspJob
   params:
     final: False
@@ -211,7 +211,7 @@ validators:
 - vldr: custodian.vasp.validators.VasprunXMLValidator
 custodian_params:
   $scratch_dir: $TMPDIR"""
-        import yaml
+
         os.environ["TMPDIR"] = "/tmp/random"
         os.environ["PBS_NODEFILE"] = "whatever"
         d = yaml.load(spec)
@@ -228,7 +228,7 @@ custodian_params:
         try:
             os.remove("custodian.json")
         except OSError:
-            pass #Ignore if file cannot be found.
+            pass  # Ignore if file cannot be found.
         os.chdir(self.cwd)
 
 
@@ -257,5 +257,4 @@ class CustodianCheckpointTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
