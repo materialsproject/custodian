@@ -231,11 +231,8 @@ class Custodian(object):
                 ```
 
                 The `jobs` key is a list of jobs. Each job is
-                specified via "job": <explicit path>, and all parameters other
-                than
-                structure are specified via `params` which is a dict. `parents` is
-                a special parameter, which provides the *indices* of the parents
-                of that particular firework in the list.
+                specified via "job": <explicit path>, and all parameters are
+                specified via `params` which is a dict.
 
                 `common_params` specify a common set of parameters that are
                 passed to all jobs, e.g., vasp_cmd.
