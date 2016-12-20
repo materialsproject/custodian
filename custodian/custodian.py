@@ -363,6 +363,7 @@ class Custodian(object):
             # Check for errors using the error handlers and perform
             # corrections.
             has_error = False
+            zero_return_code = True
 
             # While the job is running, we use the handlers that are
             # monitors to monitor the job.
@@ -387,15 +388,7 @@ class Custodian(object):
                         self.terminate_func()
                         time.sleep(self.polling_time_step)
 
-                if p.returncode != 0:
-                    if self.terminate_on_nonzero_returncode:
-                        s = "Job return code is %d. Terminating..." % \
-                            p.returncode
-                        logger.info(s)
-                        raise CustodianError(s, True)
-                    else:
-                        warnings.warn("subprocess returned a non-zero return "
-                                      "code. Check outputs carefully...")
+                zero_return_code = p.returncode == 0
 
             logger.info("{}.run has completed. "
                         "Checking remaining handlers".format(job.name))
@@ -415,6 +408,15 @@ class Custodian(object):
                     if v.check():
                         s = "Validation failed: {}".format(v)
                         raise CustodianError(s, True, v)
+                if not zero_return_code:
+                    if self.terminate_on_nonzero_returncode:
+                        s = "Job return code is %d. Terminating..." % \
+                            p.returncode
+                        logger.info(s)
+                        raise CustodianError(s, True)
+                    else:
+                        warnings.warn("subprocess returned a non-zero return "
+                                      "code. Check outputs carefully...")
                 job.postprocess()
                 return
 
