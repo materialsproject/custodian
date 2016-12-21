@@ -3,21 +3,6 @@
 from __future__ import unicode_literals, division
 
 from monty.os.path import zpath
-
-"""
-This module implements specific error handlers for VASP runs. These handlers
-tries to detect common errors in vasp runs and attempt to fix them on the fly
-by modifying the input files.
-"""
-
-__author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, " \
-             "Wei Chen, Stephen Dacek"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "ongsp@ucsd.edu"
-__status__ = "Beta"
-__date__ = "2/4/13"
-
 import os
 import time
 import datetime
@@ -38,13 +23,29 @@ from math import ceil
 
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
-from pymatgen.io.vasp import Poscar, VaspInput, Incar, Kpoints, Vasprun, Oszicar, Outcar
+from pymatgen.io.vasp import Poscar, VaspInput, Incar, Kpoints, Vasprun, \
+    Oszicar, Outcar
 from pymatgen.transformations.standard_transformations import \
     SupercellTransformation
 
 from custodian.ansible.interpreter import Modder
 from custodian.ansible.actions import FileActions
 from custodian.vasp.interpreter import VaspModder
+
+"""
+This module implements specific error handlers for VASP runs. These handlers
+tries to detect common errors in vasp runs and attempt to fix them on the fly
+by modifying the input files.
+"""
+
+__author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, " \
+             "Wei Chen, Stephen Dacek"
+__version__ = "0.1"
+__maintainer__ = "Shyue Ping Ong"
+__email__ = "ongsp@ucsd.edu"
+__status__ = "Beta"
+__date__ = "2/4/13"
+
 
 VASP_BACKUP_FILES = {"INCAR", "KPOINTS", "POSCAR", "OUTCAR", "OSZICAR",
                      "vasprun.xml", "vasp.out", "std_err.txt"}
@@ -298,7 +299,7 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action":
                                     {"_set": {"ALGO": "Normal"}}})
         if "eddrmm" in self.errors:
-            #RMM algorithm is not stable for this calculation
+            # RMM algorithm is not stable for this calculation
             if vi["INCAR"].get("ALGO", "Normal") in ["Fast", "VeryFast"]:
                 actions.append({"dict": "INCAR", "action":
                                         {"_set": {"ALGO": "Normal"}}})
