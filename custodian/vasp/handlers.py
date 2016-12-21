@@ -312,6 +312,7 @@ class VaspErrorHandler(ErrorHandler):
                                 "action": {"_file_delete": {'mode': "actual"}}})
                 actions.append({"file": "WAVECAR",
                                 "action": {"_file_delete": {'mode': "actual"}}})
+
         if "edddav" in self.errors:
             if vi["INCAR"].get("ICHARG", 0) < 10:
                 actions.append({"file": "CHGCAR",

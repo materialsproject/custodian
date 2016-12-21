@@ -25,6 +25,10 @@ calculations.
 Change log
 ==========
 
+v1.0.4
+------
+* Improved handling of non-zero return codes.
+
 v1.0.2
 ------
 * Interrupted run feature. (Shyam Dwaraknath)
