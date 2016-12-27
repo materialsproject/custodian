@@ -34,6 +34,15 @@ VASP_OUTPUT_FILES = ['DOSCAR', 'INCAR', 'KPOINTS', 'POSCAR', 'PROCAR',
                      'vasprun.xml', 'CHGCAR', 'CHG', 'EIGENVAL', 'OSZICAR',
                      'WAVECAR', 'CONTCAR', 'IBZKPT', 'OUTCAR']
 
+VASP_NEB_INPUT_FILES = {'INCAR', 'POTCAR', 'KPOINTS'}
+
+VASP_NEB_OUTPUT_FILES = ['INCAR', 'KPOINTS', 'POTCAR', 'vasprun.xml']
+
+VASP_NEB_OUTPUT_SUB_FILES = ['CHG', 'CHGCAR', 'CONTCAR', 'DOSCAR',
+                             'EIGENVAL', 'IBZKPT', 'PCDAT', 'POSCAR',
+                             'REPORT', 'PROCAR', 'OSZICAR', 'OUTCAR',
+                             'WAVECAR', 'XDATCAR']
+
 
 class VaspJob(Job):
     """
@@ -56,7 +65,7 @@ class VaspJob(Job):
                 ["mpirun", "pvasp.5.2.11"]
             output_file (str): Name of file to direct standard out to.
                 Defaults to "vasp.out".
-            output_file (str): Name of file to direct standard error to.
+            stderr_file (str): Name of file to direct standard error to.
                 Defaults to "std_err.txt".
             suffix (str): A suffix to be appended to the final output. E.g.,
                 to rename all VASP output from say vasp.out to
@@ -66,14 +75,6 @@ class VaspJob(Job):
             backup (bool): Whether to backup the initial input files. If True,
                 the INCAR, KPOINTS, POSCAR and POTCAR will be copied with a
                 ".orig" appended. Defaults to True.
-            default_vasp_input_set (VaspInputSet): Species the default input
-                set (see pymatgen's documentation in pymatgen.io.vasp.sets to
-                use for directories that do not contain full set of VASP
-                input files. For example, if a directory contains only a
-                POSCAR or a cif, the vasp input set will be used to generate
-                the necessary input files for the run. If the directory already
-                contain a full set of VASP input files,
-                this input is ignored. Defaults to the MITVaspInputSet.
             auto_npar (bool): Whether to automatically tune NPAR to be sqrt(
                 number of cores) as recommended by VASP for DFT calculations.
                 Generally, this results in significant speedups. Defaults to
@@ -157,7 +158,7 @@ class VaspJob(Job):
         # Auto continue if a read-only STOPCAR is present
         if self.auto_continue and \
            os.path.exists("STOPCAR") and \
-           not os.access("STOPCAR",os.W_OK):
+           not os.access("STOPCAR", os.W_OK):
             # Remove STOPCAR
             os.chmod("STOPCAR",0o644)
             os.remove("STOPCAR")
@@ -366,4 +367,209 @@ class VaspJob(Job):
             backup=d["backup"],
             auto_npar=d['auto_npar'], auto_gamma=d['auto_gamma'],
             settings_override=d["settings_override"],
+            gamma_vasp_cmd=d["gamma_vasp_cmd"])
+
+
+class VaspNEBJob(Job):
+    """
+    A NEB vasp job, especially for CI-NEB running at PBS clusters.
+    The class is added for the purpose of handling a different folder
+    arrangement in NEB calculation.
+    """
+
+    def __init__(self, vasp_cmd,
+                 output_file="neb_vasp.out", stderr_file="neb_std_err.txt",
+                 suffix="", final=True, backup=True, auto_npar=True,
+                 half_kpts=False, auto_gamma=True, auto_continue=False,
+                 gamma_vasp_cmd=None):
+        """
+        This constructor is a simplified version of VaspJob, which satisfies
+        the need for flexibility. For standard kinds of runs, it's often
+        better to use one of the static constructors. The defaults are
+        usually fine too.
+
+        Args:
+            vasp_cmd (str): Command to run vasp as a list of args. For example,
+                if you are using mpirun, it can be something like
+                ["mpirun", "pvasp.5.2.11"]
+            output_file (str): Name of file to direct standard out to.
+                Defaults to "vasp.out".
+            stderr_file (str): Name of file to direct standard error to.
+                Defaults to "std_err.txt".
+            suffix (str): A suffix to be appended to the final output. E.g.,
+                to rename all VASP output from say vasp.out to
+                vasp.out.relax1, provide ".relax1" as the suffix.
+            final (bool): Indicating whether this is the final vasp job in a
+                series. Defaults to True.
+            backup (bool): Whether to backup the initial input files. If True,
+                the INCAR, KPOINTS, POSCAR and POTCAR will be copied with a
+                ".orig" appended. Defaults to True.
+            auto_npar (bool): Whether to automatically tune NPAR to be sqrt(
+                number of cores) as recommended by VASP for DFT calculations.
+                Generally, this results in significant speedups. Defaults to
+                True. Set to False for HF, GW and RPA calculations.
+            half_kpts (bool): Whether to halve the kpoint grid for NEB.
+                Speeds up convergence considerably. Defaults to False.
+            auto_gamma (bool): Whether to automatically check if run is a
+                Gamma 1x1x1 run, and whether a Gamma optimized version of
+                VASP exists with ".gamma" appended to the name of the VASP
+                executable (typical setup in many systems). If so, run the
+                gamma optimized version of VASP instead of regular VASP. You
+                can also specify the gamma vasp command using the
+                gamma_vasp_cmd argument if the command is named differently.
+            auto_continue (bool): Whether to automatically continue a run
+                if a STOPCAR is present. This is very useful if using the
+                wall-time handler which will write a read-only STOPCAR to
+                prevent VASP from deleting it once it finishes.
+            gamma_vasp_cmd (str): Command for gamma vasp version when
+                auto_gamma is True. Should follow the list style of
+                subprocess. Defaults to None, which means ".gamma" is added
+                to the last argument of the standard vasp_cmd.
+        """
+
+        self.vasp_cmd = vasp_cmd
+        self.output_file = output_file
+        self.stderr_file = stderr_file
+        self.final = final
+        self.backup = backup
+        self.suffix = suffix
+        self.auto_npar = auto_npar
+        self.half_kpts = half_kpts
+        self.auto_gamma = auto_gamma
+        self.gamma_vasp_cmd = gamma_vasp_cmd
+        self.auto_continue = auto_continue
+        self.neb_dirs = []  # 00, 01, etc.
+        self.neb_sub = []  # 01, 02, etc.
+
+        for path in os.listdir("."):
+            if os.path.isdir(path) and path.isdigit():
+                self.neb_dirs.append(path)
+        self.neb_dirs = sorted(self.neb_dirs)
+        self.neb_sub = self.neb_dirs[1: -1]
+
+    def setup(self):
+        """
+        Performs initial setup for VaspNEBJob, including overriding any settings
+        and backing up.
+        """
+        neb_dirs = self.neb_dirs
+
+        if self.backup:
+            # Back up KPOINTS, INCAR, POTCAR
+            for f in VASP_NEB_INPUT_FILES:
+                shutil.copy(f, "{}.orig".format(f))
+            # Back up POSCARs
+            for path in neb_dirs:
+                poscar = os.path.join(path, "POSCAR")
+                shutil.copy(poscar, "{}.orig".format(poscar))
+
+        if self.half_kpts and os.path.exists("KPOINTS"):
+            kpts = Kpoints.from_file("KPOINTS")
+            kpts.kpts = np.maximum(np.array(kpts.kpts) / 2, 1)
+            kpts.kpts = kpts.kpts.astype(int).tolist()
+            if tuple(kpts.kpts[0]) == (1, 1, 1):
+                kpt_dic = kpts.as_dict()
+                kpt_dic["generation_style"] = 'Gamma'
+                kpts = Kpoints.from_dict(kpt_dic)
+            kpts.write_file("KPOINTS")
+
+        if self.auto_npar:
+            try:
+                incar = Incar.from_file("INCAR")
+                import multiprocessing
+                # Try sge environment variable first
+                # (since multiprocessing counts cores on the current
+                # machine only)
+                ncores = os.environ.get('NSLOTS') or multiprocessing.cpu_count()
+                ncores = int(ncores)
+                for npar in range(int(math.sqrt(ncores)),
+                                  ncores):
+                    if ncores % npar == 0:
+                        incar["NPAR"] = npar
+                        break
+                incar.write_file("INCAR")
+            except:
+                pass
+
+        if self.auto_continue and \
+                os.path.exists("STOPCAR") and \
+                not os.access("STOPCAR", os.W_OK):
+            # Remove STOPCAR
+            os.chmod("STOPCAR", 0o644)
+            os.remove("STOPCAR")
+
+            # Copy CONTCAR to POSCAR
+            for path in self.neb_sub:
+                contcar = os.path.join(path, "CONTCAR")
+                poscar = os.path.join(path, "POSCAR")
+                shutil.copy(contcar, poscar)
+
+            if self.settings_override is not None:
+                VaspModder().apply_actions(self.settings_override)
+
+    def run(self):
+        """
+        Perform the actual VASP run.
+
+        Returns:
+            (subprocess.Popen) Used for monitoring.
+        """
+        cmd = list(self.vasp_cmd)
+        if self.auto_gamma:
+            kpts = Kpoints.from_file("KPOINTS")
+            if kpts.style == Kpoints.supported_modes.Gamma \
+                    and tuple(kpts.kpts[0]) == (1, 1, 1):
+                if self.gamma_vasp_cmd is not None and which(
+                        self.gamma_vasp_cmd[-1]):
+                    cmd = self.gamma_vasp_cmd
+                elif which(cmd[-1] + ".gamma"):
+                    cmd[-1] += ".gamma"
+        logging.info("Running {}".format(" ".join(cmd)))
+        with open(self.output_file, 'w') as f_std, \
+                open(self.stderr_file, "w", buffering=1) as f_err:
+
+            # Use line buffering for stderr
+            p = subprocess.Popen(cmd, stdout=f_std, stderr=f_err)
+        return p
+
+    def postprocess(self):
+        """
+        Postprocessing includes renaming and gzipping where necessary.
+        """
+        # Add suffix to all sub_dir/{items}
+        for path in self.neb_dirs:
+            for f in VASP_NEB_OUTPUT_SUB_FILES:
+                f = os.path.join(path, f)
+                if os.path.exists(f):
+                    if self.final and self.suffix != "":
+                        shutil.move(f, "{}{}".format(f, self.suffix))
+                    elif self.suffix != "":
+                        shutil.copy(f, "{}{}".format(f, self.suffix))
+
+        # Add suffix to all output files
+        for f in VASP_NEB_OUTPUT_FILES + [self.output_file]:
+            if os.path.exists(f):
+                if self.final and self.suffix != "":
+                    shutil.move(f, "{}{}".format(f, self.suffix))
+                elif self.suffix != "":
+                    shutil.copy(f, "{}{}".format(f, self.suffix))
+
+    def as_dict(self):
+        d = dict(vasp_cmd=self.vasp_cmd,
+                 output_file=self.output_file, suffix=self.suffix,
+                 final=self.final, backup=self.backup,
+                 auto_npar=self.auto_npar, auto_gamma=self.auto_gamma,
+                 gamma_vasp_cmd=self.gamma_vasp_cmd
+                 )
+        d["@module"] = self.__class__.__module__
+        d["@class"] = self.__class__.__name__
+        return d
+
+    @classmethod
+    def from_dict(cls, d):
+        return VaspNEBJob(
+            vasp_cmd=d["vasp_cmd"], output_file=d["output_file"],
+            suffix=d["suffix"], final=d["final"],
+            backup=d["backup"],
+            auto_npar=d['auto_npar'], auto_gamma=d['auto_gamma'],
             gamma_vasp_cmd=d["gamma_vasp_cmd"])
