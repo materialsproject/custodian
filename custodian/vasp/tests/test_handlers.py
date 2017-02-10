@@ -23,7 +23,7 @@ import datetime
 from custodian.vasp.handlers import VaspErrorHandler, \
     UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler, \
     MaxForceErrorHandler, PositiveEnergyErrorHandler, PotimErrorHandler, \
-    FrozenJobErrorHandler, AliasingErrorHandler
+    FrozenJobErrorHandler, AliasingErrorHandler, StdErrHandler
 from pymatgen.io.vasp import Incar, Poscar, Structure, Kpoints, VaspInput
 
 
@@ -498,6 +498,36 @@ class PotimHandlerTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        os.chdir(cwd)
+
+
+class StdErrHandlerTest(unittest.TestCase):
+
+    def setUp(self):
+        os.chdir(test_dir)
+        os.chdir('lrf_comm')
+        for f in ["INCAR", "OUTCAR", "std_err.txt"]:
+            shutil.copy(f, f+".orig")
+
+    def test_lrf_comm(self):
+        h = StdErrHandler("std_err.txt")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d["errors"], ['lrf_comm'])
+        vi = VaspInput.from_directory(".")
+        self.assertEqual(vi["INCAR"]["ISTART"], 1)
+
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d["errors"], ['lrf_comm'])
+        self.assertEqual(d["actions"], [])  # don't correct twice
+
+    def tearDown(self):
+        os.chdir(test_dir)
+        os.chdir('lrf_comm')
+        for f in ["INCAR", "OUTCAR", "std_err.txt"]:
+            shutil.move(f+".orig", f)
+        clean_dir()
         os.chdir(cwd)
 
 
