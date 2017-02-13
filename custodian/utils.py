@@ -18,6 +18,9 @@ from glob import glob
 import logging
 import os
 import tarfile
+import re
+import shlex
+import subprocess
 
 
 def backup(filenames, prefix="error"):
@@ -58,3 +61,46 @@ def get_execution_host_info():
         except:
             pass
     return host or 'unknown', cluster or 'unknown'
+
+
+class Terminator:
+    """
+    A tool to cancel a job step in a SLURM srun job using scancel command.
+    """
+
+    def __init__(self, stderr_filename):
+        """
+        Args:
+            stderr_filename: The file name of the stderr for srun job step.
+        """
+        self.stderr_filename = stderr_filename
+        self.q_type = None
+        try:
+            from fireworks.fw_config import LAUNCHPAD_LOC
+            from fireworks.utilities.fw_serializers import load_object_from_file
+            queueadapter = load_object_from_file(LAUNCHPAD_LOC)
+            self.q_type = queueadapter.q_type
+
+    def run(self):
+        q_type = self.q_type
+        if q_type == "SLURM":
+            step_id = self.parse_srun_step_number()
+            scancel_cmd = shlex.split("scancel --signal=KILL {}".format(step_id))
+            logging.info("Terminate the job step using {}".format(' '.join(scancel_cmd)))
+            subprocess.Popen(scancel_cmd)
+        else:
+            return None
+
+    def parse_srun_step_number(self):
+        step_pat_text = r"srun: launching (?P<step_id>\d+[.]\d+) on host \w+, \d+ tasks:"
+        step_pat = re.compile(step_pat_text)
+        step_id = None
+        with open(self.stderr_filename) as f:
+            err_text = f.readlines()
+        for line in err_text:
+            m = step_pat.search(line)
+            if m is not None:
+                step_id = m.group("step_id")
+        if step_id is None:
+            raise ValueError("Can't find SRUN job step number in STDERR file")
+        return step_id
