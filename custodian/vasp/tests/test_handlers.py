@@ -501,7 +501,7 @@ class PotimHandlerTest(unittest.TestCase):
         os.chdir(cwd)
 
 
-class StdErrHandlerTest(unittest.TestCase):
+class LrfCommHandlerTest(unittest.TestCase):
 
     def setUp(self):
         os.chdir(test_dir)
@@ -527,6 +527,33 @@ class StdErrHandlerTest(unittest.TestCase):
         os.chdir('lrf_comm')
         for f in ["INCAR", "OUTCAR", "std_err.txt"]:
             shutil.move(f+".orig", f)
+        clean_dir()
+        os.chdir(cwd)
+
+
+class KpointsTransHandlerTest(unittest.TestCase):
+
+    def setUp(self):
+        os.chdir(test_dir)
+        shutil.copy("KPOINTS", "KPOINTS.orig")
+
+    def test_kpoints_trans(self):
+        h = StdErrHandler("std_err.txt.kpoints_trans")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d["errors"], ['kpoints_trans'])
+        self.assertEqual(d["actions"],
+                         [{u'action': {u'_set':
+                                {u'kpoints': [[4, 4, 4]]}},
+                                u'dict': u'KPOINTS'}])
+
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d["errors"], ['kpoints_trans'])
+        self.assertEqual(d["actions"], [])  # don't correct twice
+
+    def tearDown(self):
+        shutil.move("KPOINTS.orig", "KPOINTS")
         clean_dir()
         os.chdir(cwd)
 
