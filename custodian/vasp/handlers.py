@@ -339,7 +339,9 @@ class StdErrHandler(ErrorHandler):
     is_monitor = True
 
     error_msgs = {
-        "lrf_comm": ["LRF_COMMUTATOR internal error"]
+        "lrf_comm": ["LRF_COMMUTATOR internal error"],
+        "kpoints_trans": ["internal error in GENERATE_KPOINTS_TRANS: "
+                          "number of G-vector changed in star"]
     }
 
     def __init__(self, output_filename="std_err.txt"):
@@ -381,6 +383,15 @@ class StdErrHandler(ErrorHandler):
                     actions.append({"dict": "INCAR",
                                     "action": {"_set": {"ISTART": 1}}})
                     self.error_count['lrf_comm'] += 1
+
+        if "kpoints_trans" in self.errors:
+            if self.error_count["kpoints_trans"] == 0:
+                m = reduce(operator.mul, vi["KPOINTS"].kpts[0])
+                m = max(int(round(m ** (1 / 3))), 1)
+                if vi["KPOINTS"].style.name.lower().startswith("m"):
+                    m += m % 2
+                actions.append({"dict": "KPOINTS", "action": {"_set": {"kpoints": [[m] * 3]}}})
+                self.error_count['kpoints_trans'] += 1
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
