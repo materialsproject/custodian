@@ -381,12 +381,14 @@ class Custodian(object):
                             break
                         terminate = self.terminate_func or p.terminate
                         if n % self.monitor_freq == 0:
-                            has_error = self._do_check(self.monitors, terminate)
+                            has_error = self._do_check(self.monitors,
+                                                       terminate)
                         if terminate is not None and terminate != p.terminate:
                             time.sleep(self.polling_time_step)
                 else:
                     p.wait()
-                    if self.terminate_func is not None and self.terminate_func != p.terminate:
+                    if self.terminate_func is not None and \
+                            self.terminate_func != p.terminate:
                         self.terminate_func()
                         time.sleep(self.polling_time_step)
 
