@@ -16,7 +16,7 @@ import warnings
 
 import six
 
-from .utils import get_execution_host_info
+from .utils import Terminator, get_execution_host_info
 
 from monty.tempfile import ScratchDir
 from monty.shutil import gzip_dir
@@ -86,7 +86,8 @@ class Custodian(object):
     def __init__(self, handlers, jobs, validators=None, max_errors=1,
                  polling_time_step=10, monitor_freq=30,
                  skip_over_errors=False, scratch_dir=None,
-                 gzipped_output=False, checkpoint=False, terminate_func=None,
+                 gzipped_output=False, checkpoint=False,
+                 mpi_cmd=None, terminate_func=None,
                  terminate_on_nonzero_returncode=True):
         """
         Initializes a Custodian from a list of jobs and error handler.s
@@ -132,6 +133,8 @@ class Custodian(object):
             checkpoint (bool):  Whether to checkpoint after each successful Job.
                 Checkpoints are stored as custodian.chk.#.tar.gz files. Defaults
                 to False.
+            mpi_cmd (str): Check the mpi cmd for terminate_func to call special
+                terminate function.
             terminate_func (callable): A function to be called to terminate a
                 running job. If None, the default is to call Popen.terminate.
             terminate_on_nonzero_returncode (bool): If True, a non-zero return
@@ -155,7 +158,8 @@ class Custodian(object):
             self.restart = 0
             self.run_log = []
         self.total_errors = 0
-        self.terminate_func = terminate_func
+        self.mpi_cmd = mpi_cmd
+        self.terminate_func = terminate_func or Terminator(mpi_cmd=mpi_cmd).run
         self.terminate_on_nonzero_returncode = terminate_on_nonzero_returncode
         self.finished = False
 

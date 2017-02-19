@@ -68,22 +68,17 @@ class Terminator:
     A tool to cancel a job step in a SLURM srun job using scancel command.
     """
 
-    def __init__(self, stderr_filename):
+    def __init__(self, mpi_cmd=None, stderr_filename=None):
         """
         Args:
             stderr_filename: The file name of the stderr for srun job step.
         """
+        self.mpi_cmd = mpi_cmd
         self.stderr_filename = stderr_filename
-        self.q_type = None
-        try:
-            from fireworks.fw_config import LAUNCHPAD_LOC
-            from fireworks.utilities.fw_serializers import load_object_from_file
-            queueadapter = load_object_from_file(LAUNCHPAD_LOC)
-            self.q_type = queueadapter.q_type
 
     def run(self):
-        q_type = self.q_type
-        if q_type == "SLURM":
+        if self.mpi_cmd == "sun":
+            self.stderr_filename = self.stderr_filename or "std_err.txt"
             step_id = self.parse_srun_step_number()
             scancel_cmd = shlex.split("scancel --signal=KILL {}".format(step_id))
             logging.info("Terminate the job step using {}".format(' '.join(scancel_cmd)))
