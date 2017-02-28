@@ -420,6 +420,7 @@ class VaspJob(Job):
                 else:
                     x = (sorted_x[1] + sorted_x[0]) / 2
 
+                lattice = lattice.matrix
                 lattice[lattice_index] = lattice[lattice_index] / np.linalg.norm(lattice[lattice_index]) * x
 
                 s = Structure(lattice, structure.species, structure.frac_coords)
