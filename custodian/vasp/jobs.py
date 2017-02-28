@@ -13,7 +13,8 @@ import math
 import logging
 import numpy as np
 
-from pymatgen.io.vasp import VaspInput, Incar, Poscar, Outcar, Kpoints
+from pymatgen import Structure
+from pymatgen.io.vasp import VaspInput, Incar, Poscar, Outcar, Kpoints, Vasprun
 from monty.os.path import which
 
 from custodian.custodian import Job
@@ -194,7 +195,7 @@ class VaspJob(Job):
         logging.info("Running {}".format(" ".join(cmd)))
         with open(self.output_file, 'w') as f_std, \
                 open(self.stderr_file, "w", buffering=1) as f_err:
-            # use line bufferring for stderr
+            # use line buffering for stderr
             p = subprocess.Popen(cmd, stdout=f_std, stderr=f_err)
         return p
 
@@ -278,8 +279,9 @@ class VaspJob(Job):
                         settings_override=settings_overide_2)]
 
     @classmethod
-    def full_opt_run(cls, vasp_cmd, auto_npar=True, vol_change_tol=0.02,
-                     max_steps=10, ediffg=-0.05, half_kpts_first_relax=False):
+    def full_opt_run(cls, vasp_cmd, vol_change_tol=0.02,
+                     max_steps=10, ediffg=-0.05, half_kpts_first_relax=False,
+                     **vasp_job_kwargs):
         """
         Returns a generator of jobs for a full optimization run. Basically,
         this runs an infinite series of geometry optimization jobs until the
@@ -289,10 +291,6 @@ class VaspJob(Job):
             vasp_cmd (str): Command to run vasp as a list of args. For example,
                 if you are using mpirun, it can be something like
                 ["mpirun", "pvasp.5.2.11"]
-            auto_npar (bool): Whether to automatically tune NPAR to be sqrt(
-                number of cores) as recommended by VASP for DFT calculations.
-                Generally, this results in significant speedups. Defaults to
-                True. Set to False for HF, GW and RPA calculations.
             vol_change_tol (float): The tolerance at which to stop a run.
                 Defaults to 0.05, i.e., 5%.
             max_steps (int): The maximum number of runs. Defaults to 10 (
@@ -302,6 +300,8 @@ class VaspJob(Job):
             half_kpts_first_relax (bool): Whether to halve the kpoint grid
                 for the first relaxation. Speeds up difficult convergence
                 considerably. Defaults to False.
+            \*\*vasp_job_kwargs: Passthrough kwargs to VaspJob. See
+                :class:`custodian.vasp.jobs.VaspJob`.
 
         Returns:
             Generator of jobs.
@@ -344,8 +344,100 @@ class VaspJob(Job):
                                          "action": {"_set": orig_kpts_dict}})
             logging.info("Generating job = %d!" % (i+1))
             yield VaspJob(vasp_cmd, final=False, backup=backup,
-                          suffix=".relax%d" % (i+1), auto_npar=auto_npar,
-                          settings_override=settings)
+                          suffix=".relax%d" % (i+1), settings_override=settings,
+                          **vasp_job_kwargs)
+
+    @classmethod
+    def constrained_opt_run(cls, vasp_cmd, lattice_direction, initial_strain,
+                            ediff=1e-3, atom_relax=True, max_steps=20,
+                            **vasp_job_kwargs):
+        """
+        Returns a generator of jobs for a constrained optimization run. Typical
+        use case is when you want to approximate a biaxial strain situation,
+        e.g., you apply a defined strain to a and b directions of the lattice,
+        but allows the c-direction to relax. Here, we use the bisection
+        algorithm since we are iterating over a narrow range.
+
+        Args:
+            vasp_cmd (str): Command to run vasp as a list of args. For example,
+                if you are using mpirun, it can be something like
+                ["mpirun", "pvasp.5.2.11"]
+            lattice_direction (str): Which direction to relax. Valid values are
+                "a", "b" or "c".
+            initial_strain (float): An initial strain to be applied to the
+                lattice_direction. This can usually be estimated as the
+                negative of the strain applied in the other two directions.
+                E.g., if you apply a tensile strain of 0.05 to the a and b
+                directions, you can use -0.05 as a reasonable first guess for
+                initial strain.
+            max_steps (int): The maximum number of runs. Defaults to 20 (
+                highly unlikely that this limit is ever reached).
+            ediff (float): Force convergence criteria for subsequent runs (
+                ignored for the initial run.)
+            atom_relax (bool): Whether to relax atomic positions.
+            \*\*vasp_job_kwargs: Passthrough kwargs to VaspJob. See
+                :class:`custodian.vasp.jobs.VaspJob`.
+
+        Returns:
+            Generator of jobs.
+        """
+        gr = (math.sqrt(5) + 1) / 2
+        nsw = 99 if atom_relax else 0
+        energies = {}
+
+        for i in range(max_steps):
+            if i == 0:
+                settings = [
+                        {"dict": "INCAR",
+                         "action": {"_set": {"ISIF": 2, "NSW": nsw}}}]
+                backup = True
+            else:
+                backup = False
+                v = Vasprun("vasprun.xml")
+                structure = v.final_structure
+                energy = v.final_energy
+                lattice = structure.lattice
+
+                if lattice_direction == "a":
+                    lattice_index = 0
+                elif lattice_direction == "b":
+                    lattice_index = 1
+                else:
+                    lattice_index = 2
+
+                x = lattice.abc[lattice_index]
+
+                energies[x] = energy
+
+                # Sort the lattice parameter by energies.
+                sorted_x = sorted(energies.keys(), key=lambda k: energies[k])
+
+                if i > 2 and abs(energies[sorted_x[1]] - energies[sorted_x[0]]) < ediff:
+                    logging.info("Stopping optimization! Final lattice parameter is %f" % sorted_x[0])
+                    break
+                elif i == 1:
+                    x *= (1 + initial_strain)
+                else:
+                    x = (sorted_x[1] + sorted_x[0]) / 2
+
+                lattice[lattice_index] = lattice[lattice_index] / np.linalg.norm(lattice[lattice_index]) * x
+
+                s = Structure(lattice, structure.species, structure.frac_coords)
+                fname = "POSCAR.%f" % x
+                s.to(fname)
+
+                incar_update = {"ISTART": 1, "NSW": nsw, "ISIF": 2}
+
+                settings = [
+                    {"dict": "INCAR",
+                     "action": {"_set": incar_update}},
+                    {"file": fname,
+                     "action": {"_file_copy": {"dest": "POSCAR"}}}]
+
+            logging.info("Generating job = %d!" % (i + 1))
+            yield VaspJob(vasp_cmd, final=False, backup=backup,
+                          suffix=".static.%d" % (i + 1),
+                          settings_override=settings, **vasp_job_kwargs)
 
     def as_dict(self):
         d = dict(vasp_cmd=self.vasp_cmd,
