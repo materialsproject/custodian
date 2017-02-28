@@ -412,8 +412,10 @@ class VaspJob(Job):
                 # Sort the lattice parameter by energies.
                 sorted_x = sorted(energies.keys(), key=lambda k: energies[k])
 
-                if i > 2 and abs(energies[sorted_x[1]] - energies[sorted_x[0]]) < ediff:
-                    logging.info("Stopping optimization! Final lattice parameter is %f" % sorted_x[0])
+                if i > 2 and abs(energies[sorted_x[1]]
+                                 - energies[sorted_x[0]]) < ediff:
+                    logging.info("Stopping optimization! Final lattice"
+                                 "parameter is %f" % sorted_x[0])
                     break
                 elif i == 1:
                     x *= (1 + initial_strain)
@@ -421,7 +423,8 @@ class VaspJob(Job):
                     x = (sorted_x[1] + sorted_x[0]) / 2
 
                 lattice = lattice.matrix
-                lattice[lattice_index] = lattice[lattice_index] / np.linalg.norm(lattice[lattice_index]) * x
+                lattice[lattice_index] = lattice[lattice_index] / \
+                    np.linalg.norm(lattice[lattice_index]) * x
 
                 s = Structure(lattice, structure.species, structure.frac_coords)
                 fname = "POSCAR.%f" % x
@@ -437,7 +440,7 @@ class VaspJob(Job):
 
             logging.info("Generating job = %d!" % (i + 1))
             yield VaspJob(vasp_cmd, final=False, backup=backup,
-                          suffix=".static.%d" % (i + 1),
+                          suffix=".static.%f" % x,
                           settings_override=settings, **vasp_job_kwargs)
 
     def as_dict(self):
