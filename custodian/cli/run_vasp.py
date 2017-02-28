@@ -123,7 +123,6 @@ def get_jobs(args):
                 {'dict': 'KPOINTS',
                  'action': {'_set': vis.kpoints.as_dict()}}])
 
-
         elif job_type.startswith("optics_derived"):
             from pymatgen.io.vasp.sets import MPNonSCFSet
             vis = MPNonSCFSet.from_prev_calc(

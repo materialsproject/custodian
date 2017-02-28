@@ -424,7 +424,7 @@ class VaspJob(Job):
 
                 s = Structure(lattice, structure.species, structure.frac_coords)
                 fname = "POSCAR.%f" % x
-                s.to(fname)
+                s.to(filename=fname)
 
                 incar_update = {"ISTART": 1, "NSW": nsw, "ISIF": 2}
 
