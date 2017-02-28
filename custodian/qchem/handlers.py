@@ -189,14 +189,9 @@ class QChemErrorHandler(ErrorHandler):
     def fix_not_enough_total_memory(self):
         if self.fix_step.params['rem']["jobtype"] == "freq":
             ncpu = 1
-            if "PBS_JOBID" in os.environ and \
-                    ("hopque" in os.environ["PBS_JOBID"] or
-                     "edique" in os.environ["PBS_JOBID"]):
-                ncpu = 24
-            elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
-                ncpu = 32
-            elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
-                ncpu = 16
+            if "-np" in self.qchem_job.current_command:
+                cmd = self.qchem_job.current_command
+                ncpu = cmd[cmd.index("-np") + 1]
             natoms = len(self.qcinp.jobs[0].mol)
             times_ncpu_full = int(natoms/ncpu)
             nsegment_full = ncpu * times_ncpu_full
