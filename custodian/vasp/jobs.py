@@ -444,7 +444,22 @@ class VaspJob(Job):
                         # there are at least 3 values.
                         x = sorted_x[-1] + (sorted_x[-1] - sorted_x[-2])
                     else:
-                        x = (min_x + sorted_x[other]) / 2
+                        try:
+                            if len(sorted_x) < 4:
+                                raise ValueError("Not enough points to interpolate!")
+                            # If there are more than 4 data points, we will do
+                            # a quadratic fit to accelerate convergence.
+                            data = np.array(list(energies.values()))
+                            z = np.polyfit(data[:, 0], data[:, 1])
+                            pp = np.poly1d(z)
+                            from scipy.optimize import minimize
+                            x = minimize(pp, min_x).x[0]
+                            if x < 0:
+                                raise ValueError(
+                                    "Negative lattice constant!")
+                        except ValueError as ex:
+                            logging.info(str(ex))
+                            x = (min_x + sorted_x[other]) / 2
 
                 lattice = lattice.matrix
                 lattice[lattice_index] = lattice[lattice_index] / \
