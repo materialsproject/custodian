@@ -349,8 +349,7 @@ class VaspJob(Job):
 
     @classmethod
     def constrained_opt_run(cls, vasp_cmd, lattice_direction, initial_strain,
-                            ediff=1e-3, atom_relax=True, max_steps=20,
-                            **vasp_job_kwargs):
+                            atom_relax=True, max_steps=20, **vasp_job_kwargs):
         """
         Returns a generator of jobs for a constrained optimization run. Typical
         use case is when you want to approximate a biaxial strain situation,
@@ -372,8 +371,6 @@ class VaspJob(Job):
                 initial strain.
             max_steps (int): The maximum number of runs. Defaults to 20 (
                 highly unlikely that this limit is ever reached).
-            ediff (float): Force convergence criteria for subsequent runs (
-                ignored for the initial run.)
             atom_relax (bool): Whether to relax atomic positions.
             \*\*vasp_job_kwargs: Passthrough kwargs to VaspJob. See
                 :class:`custodian.vasp.jobs.VaspJob`.
@@ -382,6 +379,15 @@ class VaspJob(Job):
             Generator of jobs.
         """
         nsw = 99 if atom_relax else 0
+
+        incar = Incar.from_file("INCAR")
+
+        # Set the energy convergence criteria as the EDIFFG (if present) or
+        # 10 x the EDIFF (which itself defaults to 1e-4 if not present).
+        if incar.get("EDIFFG") and incar.get("EDIFFG") > 0:
+            etol = incar["EDIFFG"]
+        else:
+            etol = incar.get("EDIFF", 1e-4) * 10
 
         if lattice_direction == "a":
             lattice_index = 0
@@ -426,7 +432,7 @@ class VaspJob(Job):
                         other = ind + 1 if energies[sorted_x[ind + 1]] < energies[sorted_x[ind - 1]] \
                             else ind - 1
                     if abs(energies[min_x]
-                           - energies[sorted_x[other]]) < ediff:
+                           - energies[sorted_x[other]]) < etol:
                         logging.info("Stopping optimization! Final lattice"
                                      "parameter is %f" % min_x)
                         break
@@ -444,23 +450,24 @@ class VaspJob(Job):
                         # there are at least 3 values.
                         x = sorted_x[-1] + (sorted_x[-1] - sorted_x[-2])
                     else:
-                        # try:
-                        #     if len(sorted_x) < 4:
-                        #         raise ValueError("Not enough points to interpolate!")
-                        #     # If there are more than 4 data points, we will do
-                        #     # a quadratic fit to accelerate convergence.
-                        #     x1 = list(energies.keys())
-                        #     y1 = [energies[j] for j in x1]
-                        #     z1 = np.polyfit(x1, y1, 2)
-                        #     pp = np.poly1d(z1)
-                        #     from scipy.optimize import minimize
-                        #     x = minimize(pp, min_x).x[0]
-                        #     if x < 0:
-                        #         raise ValueError(
-                        #             "Negative lattice constant!")
-                        # except ValueError as ex:
-                        #     logging.info(str(ex))
-                        x = (min_x + sorted_x[other]) / 2
+                        try:
+                            if len(sorted_x) < 4:
+                                raise ValueError("Not enough points to interpolate!")
+                            # If there are more than 4 data points, we will do
+                            # a quadratic fit to accelerate convergence.
+                            x1 = list(energies.keys())
+                            y1 = [energies[j] for j in x1]
+                            z1 = np.polyfit(x1, y1, 2)
+                            pp = np.poly1d(z1)
+                            from scipy.optimize import minimize
+                            result = minimize(
+                                pp, min_x, bounds=[(sorted_x[0], sorted_x[-1])])
+                            if (not result.success) or result.x < 0:
+                                raise ValueError(
+                                    "Negative lattice constant!")
+                        except ValueError as ex:
+                            logging.info(str(ex))
+                            x = (min_x + sorted_x[other]) / 2
 
                 lattice = lattice.matrix
                 lattice[lattice_index] = lattice[lattice_index] / \
