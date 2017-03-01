@@ -128,11 +128,11 @@ class QchemJob(Job):
         mem_per_proc = self.total_physical_memory * 1000 // nprocs
 
         if self.large_static_mem:
-            static_ratio = 0.1
-        else:
             static_ratio = 0.4
-        total_mem = mem_per_proc * instance_ratio
-        static_mem = total_mem * static_ratio
+        else:
+            static_ratio = 0.05
+        total_mem = int(mem_per_proc * instance_ratio)
+        static_mem = int(total_mem * static_ratio)
         if not qcinp:
             qcinp = QcInput.from_file(self.input_file)
         for j in qcinp.jobs:
