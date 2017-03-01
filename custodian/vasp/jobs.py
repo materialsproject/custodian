@@ -397,7 +397,7 @@ class VaspJob(Job):
                 settings = [
                         {"dict": "INCAR",
                          "action": {"_set": {"ISIF": 2, "NSW": nsw}}}]
-                structure = Poscar("POSCAR").structure
+                structure = Poscar.from_file("POSCAR").structure
                 x = structure.lattice.abc[lattice_index]
                 backup = True
             else:
