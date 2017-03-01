@@ -349,7 +349,7 @@ class VaspJob(Job):
 
     @classmethod
     def constrained_opt_run(cls, vasp_cmd, lattice_direction, initial_strain,
-                            atom_relax=True, max_steps=20, **vasp_job_kwargs):
+                            atom_relax=True, max_steps=20, algo="bisection", **vasp_job_kwargs):
         """
         Returns a generator of jobs for a constrained optimization run. Typical
         use case is when you want to approximate a biaxial strain situation,
@@ -369,9 +369,13 @@ class VaspJob(Job):
                 E.g., if you apply a tensile strain of 0.05 to the a and b
                 directions, you can use -0.05 as a reasonable first guess for
                 initial strain.
+            atom_relax (bool): Whether to relax atomic positions.
             max_steps (int): The maximum number of runs. Defaults to 20 (
                 highly unlikely that this limit is ever reached).
-            atom_relax (bool): Whether to relax atomic positions.
+            algo (str): Algorithm to use to find minimum. Default is "bisection",
+                which is robust but can be a bit slow. A faster alternative is
+                "BFGS", which is fast, but rather sensitive to numerical noise
+                in energy calculations.
             \*\*vasp_job_kwargs: Passthrough kwargs to VaspJob. See
                 :class:`custodian.vasp.jobs.VaspJob`.
 
@@ -450,25 +454,27 @@ class VaspJob(Job):
                         # there are at least 3 values.
                         x = sorted_x[-1] + abs(sorted_x[-1] - sorted_x[-2])
                     else:
-                        # try:
-                        #     if len(sorted_x) < 4:
-                        #         raise ValueError("Not enough points to interpolate!")
-                        #     # If there are more than 4 data points, we will do
-                        #     # a quadratic fit to accelerate convergence.
-                        #     x1 = list(energies.keys())
-                        #     y1 = [energies[j] for j in x1]
-                        #     z1 = np.polyfit(x1, y1, 2)
-                        #     pp = np.poly1d(z1)
-                        #     from scipy.optimize import minimize
-                        #     result = minimize(
-                        #         pp, min_x, bounds=[(sorted_x[0], sorted_x[-1])])
-                        #     if (not result.success) or result.x[0] < 0:
-                        #         raise ValueError(
-                        #             "Negative lattice constant!")
-                        #     x = result.x[0]
-                        # except ValueError as ex:
-                        #     logging.info(str(ex))
-                        x = (min_x + sorted_x[other]) / 2
+                        if algo.upper() == "BFGS" and len(sorted_x) >= 4:
+                            try:
+                                # If there are more than 4 data points, we will do
+                                # a quadratic fit to accelerate convergence.
+                                x1 = list(energies.keys())
+                                y1 = [energies[j] for j in x1]
+                                z1 = np.polyfit(x1, y1, 2)
+                                pp = np.poly1d(z1)
+                                from scipy.optimize import minimize
+                                result = minimize(
+                                    pp, min_x, bounds=[(sorted_x[0], sorted_x[-1])])
+                                if (not result.success) or result.x[0] < 0:
+                                    raise ValueError(
+                                        "Negative lattice constant!")
+                                x = result.x[0]
+                            except ValueError as ex:
+                                # Fall back on bisection algo if the bfgs fails.
+                                logging.info(str(ex))
+                                x = (min_x + sorted_x[other]) / 2
+                        else:
+                            x = (min_x + sorted_x[other]) / 2
 
                 lattice = lattice.matrix
                 lattice[lattice_index] = lattice[lattice_index] / \
