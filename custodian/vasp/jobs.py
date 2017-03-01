@@ -411,18 +411,27 @@ class VaspJob(Job):
 
                 energies[x] = energy
 
-                # Sort the lattice parameter by energies.
-                sorted_x = sorted(energies.keys(), key=lambda k: energies[k])
-
-                if i > 2 and abs(energies[sorted_x[1]]
-                                 - energies[sorted_x[0]]) < ediff:
-                    logging.info("Stopping optimization! Final lattice"
-                                 "parameter is %f" % sorted_x[0])
-                    break
-                elif i == 1:
+                if i == 1:
                     x *= (1 + initial_strain)
                 else:
-                    x = (sorted_x[1] + sorted_x[0]) / 2
+                    # Sort the lattice parameter by energies.
+                    min_x = sorted(energies.keys(), key=lambda k: energies[k])
+                    sorted_x = sorted(energies.keys())
+                    ind = sorted_x.index(min_x)
+                    if ind == 0:
+                        other = ind + 1
+                    elif ind == len(sorted_x) - 1:
+                        other = ind - 1
+                    else:
+                        other = ind + 1 if energies[sorted_x[ind + 1]] < energies[sorted_x[ind - 1]] \
+                            else ind - 1
+                    if abs(energies[min_x]
+                           - energies[sorted_x[other]]) < ediff:
+                        logging.info("Stopping optimization! Final lattice"
+                                     "parameter is %f" % sorted_x[0])
+                        break
+
+                    x = (min_x + sorted_x[other]) / 2
 
                 lattice = lattice.matrix
                 lattice[lattice_index] = lattice[lattice_index] / \
@@ -440,7 +449,7 @@ class VaspJob(Job):
                     {"file": fname,
                      "action": {"_file_copy": {"dest": "POSCAR"}}}]
 
-            logging.info("Generating job = %d!" % (i + 1))
+            logging.info("Generating job = %d with parameter %f!" % (i + 1, x))
             yield VaspJob(vasp_cmd, final=False, backup=backup,
                           suffix=".static.%f" % x,
                           settings_override=settings, **vasp_job_kwargs)
