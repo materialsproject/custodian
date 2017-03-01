@@ -462,9 +462,10 @@ class VaspJob(Job):
                             from scipy.optimize import minimize
                             result = minimize(
                                 pp, min_x, bounds=[(sorted_x[0], sorted_x[-1])])
-                            if (not result.success) or result.x < 0:
+                            if (not result.success) or result.x[0] < 0:
                                 raise ValueError(
                                     "Negative lattice constant!")
+                            x = result.x[0]
                         except ValueError as ex:
                             logging.info(str(ex))
                             x = (min_x + sorted_x[other]) / 2
