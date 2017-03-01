@@ -440,8 +440,7 @@ class VaspJob(Job):
                             else ind - 1
                     if abs(energies[min_x]
                            - energies[sorted_x[other]]) < etol:
-                        logger.info("Stopping optimization! Final lattice"
-                                    "parameter is %f" % min_x)
+                        logger.info("Stopping optimization! Final %s = %f" % (lattice_direction, min_x))
                         break
 
                     if ind == 0 and len(sorted_x) > 2:
