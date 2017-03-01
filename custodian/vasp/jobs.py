@@ -450,12 +450,14 @@ class VaspJob(Job):
                         # iteration to find a minimum. This applies only when
                         # there are at least 3 values.
                         x = sorted_x[0] - abs(sorted_x[1] - sorted_x[0])
+                        logger.info("Lowest energy lies below bounds. Setting %s = %f." % (lattice_direction, x))
                     elif ind == len(sorted_x) - 1 and len(sorted_x) > 2:
                         # Lowest energy lies outside of range of highest value.
                         # we increase the lattice parameter in the next
                         # iteration to find a minimum. This applies only when
                         # there are at least 3 values.
                         x = sorted_x[-1] + abs(sorted_x[-1] - sorted_x[-2])
+                        logger.info("Lowest energy lies above bounds. Setting %s = %f." % (lattice_direction, x))
                     else:
                         if algo.upper() == "BFGS" and len(sorted_x) >= 4:
                             try:
