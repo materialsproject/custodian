@@ -442,13 +442,13 @@ class VaspJob(Job):
                         # we decrease the lattice parameter in the next
                         # iteration to find a minimum. This applies only when
                         # there are at least 3 values.
-                        x = sorted_x[0] - (sorted_x[1] - sorted_x[0])
+                        x = sorted_x[0] - abs(sorted_x[1] - sorted_x[0])
                     elif ind == len(sorted_x) - 1 and len(sorted_x) > 2:
                         # Lowest energy lies outside of range of highest value.
                         # we increase the lattice parameter in the next
                         # iteration to find a minimum. This applies only when
                         # there are at least 3 values.
-                        x = sorted_x[-1] + (sorted_x[-1] - sorted_x[-2])
+                        x = sorted_x[-1] + abs(sorted_x[-1] - sorted_x[-2])
                     else:
                         # try:
                         #     if len(sorted_x) < 4:
@@ -490,6 +490,11 @@ class VaspJob(Job):
             yield VaspJob(vasp_cmd, final=False, backup=backup,
                           suffix=".static.%f" % x,
                           settings_override=settings, **vasp_job_kwargs)
+
+        with open("EOS.txt", "wt") as f:
+            f.write("#param energy")
+            for k in sorted(energies.keys()):
+                f.write("%f %f\n" % (k, energies[k]))
 
     def as_dict(self):
         d = dict(vasp_cmd=self.vasp_cmd,
