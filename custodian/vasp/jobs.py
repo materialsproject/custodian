@@ -415,7 +415,7 @@ class VaspJob(Job):
                     x *= (1 + initial_strain)
                 else:
                     # Sort the lattice parameter by energies.
-                    min_x = sorted(energies.keys(), key=lambda k: energies[k])
+                    min_x = min(energies.keys(), key=lambda k: energies[k])
                     sorted_x = sorted(energies.keys())
                     ind = sorted_x.index(min_x)
                     if ind == 0:
