@@ -381,8 +381,15 @@ class VaspJob(Job):
         Returns:
             Generator of jobs.
         """
-        gr = (math.sqrt(5) + 1) / 2
         nsw = 99 if atom_relax else 0
+
+        if lattice_direction == "a":
+            lattice_index = 0
+        elif lattice_direction == "b":
+            lattice_index = 1
+        else:
+            lattice_index = 2
+
         energies = {}
 
         for i in range(max_steps):
@@ -390,6 +397,8 @@ class VaspJob(Job):
                 settings = [
                         {"dict": "INCAR",
                          "action": {"_set": {"ISIF": 2, "NSW": nsw}}}]
+                structure = Poscar("POSCAR").structure
+                x = structure.lattice.abc[lattice_index]
                 backup = True
             else:
                 backup = False
@@ -397,13 +406,6 @@ class VaspJob(Job):
                 structure = v.final_structure
                 energy = v.final_energy
                 lattice = structure.lattice
-
-                if lattice_direction == "a":
-                    lattice_index = 0
-                elif lattice_direction == "b":
-                    lattice_index = 1
-                else:
-                    lattice_index = 2
 
                 x = lattice.abc[lattice_index]
 
