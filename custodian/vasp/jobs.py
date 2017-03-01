@@ -444,23 +444,23 @@ class VaspJob(Job):
                         # there are at least 3 values.
                         x = sorted_x[-1] + (sorted_x[-1] - sorted_x[-2])
                     else:
-                        try:
-                            if len(sorted_x) < 4:
-                                raise ValueError("Not enough points to interpolate!")
-                            # If there are more than 4 data points, we will do
-                            # a quadratic fit to accelerate convergence.
-                            x1 = list(energies.keys())
-                            y1 = [energies[j] for j in x1]
-                            z1 = np.polyfit(x1, y1, 2)
-                            pp = np.poly1d(z1)
-                            from scipy.optimize import minimize
-                            x = minimize(pp, min_x).x[0]
-                            if x < 0:
-                                raise ValueError(
-                                    "Negative lattice constant!")
-                        except ValueError as ex:
-                            logging.info(str(ex))
-                            x = (min_x + sorted_x[other]) / 2
+                        # try:
+                        #     if len(sorted_x) < 4:
+                        #         raise ValueError("Not enough points to interpolate!")
+                        #     # If there are more than 4 data points, we will do
+                        #     # a quadratic fit to accelerate convergence.
+                        #     x1 = list(energies.keys())
+                        #     y1 = [energies[j] for j in x1]
+                        #     z1 = np.polyfit(x1, y1, 2)
+                        #     pp = np.poly1d(z1)
+                        #     from scipy.optimize import minimize
+                        #     x = minimize(pp, min_x).x[0]
+                        #     if x < 0:
+                        #         raise ValueError(
+                        #             "Negative lattice constant!")
+                        # except ValueError as ex:
+                        #     logging.info(str(ex))
+                        x = (min_x + sorted_x[other]) / 2
 
                 lattice = lattice.matrix
                 lattice[lattice_index] = lattice[lattice_index] / \
