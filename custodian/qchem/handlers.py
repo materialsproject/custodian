@@ -191,7 +191,7 @@ class QChemErrorHandler(ErrorHandler):
             ncpu = 1
             if "-np" in self.qchem_job.current_command:
                 cmd = self.qchem_job.current_command
-                ncpu = cmd[cmd.index("-np") + 1]
+                ncpu = int(cmd[cmd.index("-np") + 1])
             natoms = len(self.qcinp.jobs[0].mol)
             times_ncpu_full = int(natoms/ncpu)
             nsegment_full = ncpu * times_ncpu_full

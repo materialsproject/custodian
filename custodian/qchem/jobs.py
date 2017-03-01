@@ -37,7 +37,7 @@ class QchemJob(Job):
     def __init__(self, qchem_cmd, input_file="mol.qcinp",
                  output_file="mol.qcout", chk_file=None, qclog_file=None,
                  gzipped=False, backup=True, alt_cmd=None,
-                 large_static_mem=False):
+                 large_static_mem=False, total_physical_memory=100):
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -61,6 +61,8 @@ class QchemJob(Job):
                 For example: {"openmp": ["qchem", "-seq", "-nt", "24"]
                               "half_cpus": ["qchem", "-np", "12"]}
             large_static_mem: use ultra large static memory
+            total_physical_memory (int): The total physical memory available to
+                the QChem job in unit of GB.
         """
         self.qchem_cmd = self._modify_qchem_according_to_version(copy.deepcopy(qchem_cmd))
         self.input_file = input_file
@@ -71,6 +73,7 @@ class QchemJob(Job):
         self.backup = backup
         self.current_command = self.qchem_cmd
         self.current_command_name = "general"
+        self.total_physical_memory = total_physical_memory
         self.large_static_mem = large_static_mem
         self.alt_cmd = {k: self._modify_qchem_according_to_version(c)
                         for k, c in copy.deepcopy(alt_cmd).items()}
@@ -113,141 +116,27 @@ class QchemJob(Job):
         return cmd2
 
     def _set_qchem_memory(self, qcinp=None):
+        instance_ratio = 1.0
+        if "QCSCRATCH" in os.environ and \
+            ("/tmp" in os.environ["QCSCRATCH"] or
+             "/dev/shm" in os.environ["QCSCRATCH"]):
+            instance_ratio = 0.5
+
+        nprocs = 1
+        if "-np" in self.current_command:
+            nprocs = int(self.current_command[self.current_command.index("-np") + 1])
+        mem_per_proc = self.total_physical_memory * 1000 / nprocs
+
+        if self.large_static_mem:
+            static_ratio = 0.1
+        else:
+            static_ratio = 0.4
+        total_mem = mem_per_proc * instance_ratio
+        static_mem = total_mem * static_ratio
         if not qcinp:
             qcinp = QcInput.from_file(self.input_file)
-        if "PBS_JOBID" in os.environ:
-            if "hopque" in os.environ["PBS_JOBID"]:
-                # on Hopper
-                for j in qcinp.jobs:
-                    if self.current_command_name == "general":
-                        if self.large_static_mem:
-                            j.set_memory(total=1100, static=300)
-                        else:
-                            j.set_memory(total=1100, static=100)
-                    elif self.current_command_name == "half_cpus":
-                        if self.large_static_mem:
-                            j.set_memory(total=2200, static=500)
-                        else:
-                            j.set_memory(total=2200, static=100)
-                    elif self.current_command_name == "openmp":
-                        if self.large_static_mem:
-                            j.set_memory(total=28000, static=10000)
-                        else:
-                            j.set_memory(total=28000, static=3000)
-        elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
-            if "QCSCRATCH" in os.environ and "eg_qchem" in os.environ["QCSCRATCH"]:
-                # in memory scratch
-                for j in qcinp.jobs:
-                    if self.current_command_name == "general":
-                        if self.large_static_mem:
-                            j.set_memory(total=1400, static=200)
-                        else:
-                            j.set_memory(total=1500, static=100)
-                    elif self.current_command_name == "half_cpus":
-                        if self.large_static_mem:
-                            j.set_memory(total=3000, static=500)
-                        else:
-                            j.set_memory(total=3200, static=300)
-                    elif self.current_command_name == "openmp":
-                        if self.large_static_mem:
-                            j.set_memory(total=50000, static=12000)
-                        else:
-                            j.set_memory(total=60000, static=2000)
-            else:
-                # disk scratch
-                for j in qcinp.jobs:
-                    if self.current_command_name == "general":
-                        if self.large_static_mem:
-                            j.set_memory(total=2700, static=500)
-                        else:
-                            j.set_memory(total=3000, static=200)
-                    elif self.current_command_name == "half_cpus":
-                        if self.large_static_mem:
-                            j.set_memory(total=6000, static=1000)
-                        else:
-                            j.set_memory(total=6500, static=500)
-                    elif self.current_command_name == "openmp":
-                        if self.large_static_mem:
-                            j.set_memory(total=100000, static=25000)
-                        else:
-                            j.set_memory(total=120000, static=8000)
-        elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "edison":
-            if "QCSCRATCH" in os.environ and "/tmp/eg_qchem" in os.environ["QCSCRATCH"]:
-                # in memory scratch
-                for j in qcinp.jobs:
-                    if self.current_command_name == "general":
-                        if self.large_static_mem:
-                            j.set_memory(total=1200, static=300)
-                        else:
-                            j.set_memory(total=1200, static=100)
-                    elif self.current_command_name == "half_cpus":
-                        if self.large_static_mem:
-                            j.set_memory(total=2400, static=400)
-                        else:
-                            j.set_memory(total=2400, static=200)
-                    elif self.current_command_name == "openmp":
-                        if self.large_static_mem:
-                            j.set_memory(total=25000, static=1000)
-                        else:
-                            j.set_memory(total=25000, static=500)
-            else:
-                # disk scratch
-                for j in qcinp.jobs:
-                    if self.current_command_name == "general":
-                        if self.large_static_mem:
-                            j.set_memory(total=2500, static=500)
-                        else:
-                            j.set_memory(total=2500, static=100)
-                    elif self.current_command_name == "half_cpus":
-                        if self.large_static_mem:
-                            j.set_memory(total=5000, static=1000)
-                        else:
-                            j.set_memory(total=5000, static=200)
-                    elif self.current_command_name == "openmp":
-                        if self.large_static_mem:
-                            j.set_memory(total=60000, static=20000)
-                        else:
-                            j.set_memory(total=60000, static=5000)
-        elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "matgen":
-            if "QCSCRATCH" in os.environ and "eg_qchem" in os.environ["QCSCRATCH"]:
-                # in memory scratch
-                for j in qcinp.jobs:
-                    if self.current_command_name == "general":
-                        if self.large_static_mem:
-                            j.set_memory(total=1500, static=200)
-                        else:
-                            j.set_memory(total=1600, static=100)
-                    elif self.current_command_name == "half_cpus":
-                        if self.large_static_mem:
-                            j.set_memory(total=3000, static=600)
-                        else:
-                            j.set_memory(total=3200, static=400)
-                    elif self.current_command_name == "openmp":
-                        if self.large_static_mem:
-                            j.set_memory(total=15000, static=5500)
-                        else:
-                            j.set_memory(total=29000, static=2000)
-            else:
-                # disk scratch
-                for j in qcinp.jobs:
-                    if self.current_command_name == "general":
-                        if self.large_static_mem:
-                            j.set_memory(total=2800, static=500)
-                        else:
-                            j.set_memory(total=3100, static=200)
-                    elif self.current_command_name == "half_cpus":
-                        if self.large_static_mem:
-                            j.set_memory(total=6000, static=1100)
-                        else:
-                            j.set_memory(total=6500, static=600)
-                    elif self.current_command_name == "openmp":
-                        if self.large_static_mem:
-                            j.set_memory(total=50000, static=10000)
-                        else:
-                            j.set_memory(total=59000, static=3000)
-        elif 'vesta' in socket.gethostname():
-            for j in qcinp.jobs:
-                j.set_memory(total=14500, static=800)
+        for j in qcinp.jobs:
+            j.set_memory(total=total_mem, static=static_mem)
         qcinp.write_file(self.input_file)
 
     @staticmethod
