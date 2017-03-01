@@ -125,7 +125,7 @@ class QchemJob(Job):
         nprocs = 1
         if "-np" in self.current_command:
             nprocs = int(self.current_command[self.current_command.index("-np") + 1])
-        mem_per_proc = self.total_physical_memory * 1000 / nprocs
+        mem_per_proc = self.total_physical_memory * 1000 // nprocs
 
         if self.large_static_mem:
             static_ratio = 0.1
