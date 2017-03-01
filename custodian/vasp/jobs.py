@@ -449,9 +449,10 @@ class VaspJob(Job):
                                 raise ValueError("Not enough points to interpolate!")
                             # If there are more than 4 data points, we will do
                             # a quadratic fit to accelerate convergence.
-                            data = np.array(list(energies.values()))
-                            z = np.polyfit(data[:, 0], data[:, 1])
-                            pp = np.poly1d(z)
+                            x1 = list(energies.keys())
+                            y1 = [energies[j] for j in x1]
+                            z1 = np.polyfit(x1, y1, 2)
+                            pp = np.poly1d(z1)
                             from scipy.optimize import minimize
                             x = minimize(pp, min_x).x[0]
                             if x < 0:
