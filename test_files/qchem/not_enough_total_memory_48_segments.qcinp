@@ -73,7 +73,7 @@ $rem
      jobtype = opt
     exchange = b3lyp
        basis = 6-31+g*
-  mem_static = 250
+  mem_static = 500
    mem_total = 5000
 $end
 
@@ -91,7 +91,7 @@ $rem
     exchange = b3lyp
        basis = 6-31+g*
   cpscf_nseg = 48
-  mem_static = 250
+  mem_static = 500
    mem_total = 5000
       thresh = 12
 $end

@@ -130,7 +130,7 @@ class QchemJob(Job):
         if self.large_static_mem:
             static_ratio = 0.4
         else:
-            static_ratio = 0.05
+            static_ratio = 0.1
         total_mem = int(mem_per_proc * instance_ratio)
         static_mem = int(total_mem * static_ratio)
         if not qcinp:
