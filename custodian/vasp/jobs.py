@@ -1,11 +1,6 @@
 # coding: utf-8
 
 from __future__ import unicode_literals, division
-
-"""
-This module implements basic kinds of jobs for VASP runs.
-"""
-
 import subprocess
 import os
 import shutil
@@ -19,6 +14,13 @@ from monty.os.path import which
 
 from custodian.custodian import Job
 from custodian.vasp.interpreter import VaspModder
+
+"""
+This module implements basic kinds of jobs for VASP runs.
+"""
+
+
+logger = logging.getLogger(__name__)
 
 
 __author__ = "Shyue Ping Ong"
@@ -54,7 +56,7 @@ class VaspJob(Job):
     def __init__(self, vasp_cmd, output_file="vasp.out", stderr_file="std_err.txt",
                  suffix="", final=True, backup=True, auto_npar=True,
                  auto_gamma=True, settings_override=None,
-                 gamma_vasp_cmd=None, copy_magmom=False,auto_continue=False):
+                 gamma_vasp_cmd=None, copy_magmom=False, auto_continue=False):
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -169,7 +171,7 @@ class VaspJob(Job):
             incar['ISTART'] = 1
             incar.write_file("INCAR")
 
-            shutil.copy('CONTCAR','POSCAR')
+            shutil.copy('CONTCAR', 'POSCAR')
 
         if self.settings_override is not None:
             VaspModder().apply_actions(self.settings_override)
@@ -192,7 +194,7 @@ class VaspJob(Job):
                     cmd = self.gamma_vasp_cmd
                 elif which(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
-        logging.info("Running {}".format(" ".join(cmd)))
+        logger.info("Running {}".format(" ".join(cmd)))
         with open(self.output_file, 'w') as f_std, \
                 open(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr
@@ -219,7 +221,7 @@ class VaspJob(Job):
                 incar['MAGMOM'] = magmom
                 incar.write_file("INCAR")
             except:
-                logging.error('MAGMOM copy from OUTCAR to INCAR failed')
+                logger.error('MAGMOM copy from OUTCAR to INCAR failed')
 
     @classmethod
     def double_relaxation_run(cls, vasp_cmd, auto_npar=True, ediffg=-0.05,
@@ -238,7 +240,7 @@ class VaspJob(Job):
                 True. Set to False for HF, GW and RPA calculations.
             ediffg (float): Force convergence criteria for subsequent runs (
                 ignored for the initial run.)
-            half_kpt_first_relax (bool): Whether to halve the kpoint grid
+            half_kpts_first_relax (bool): Whether to halve the kpoint grid
                 for the first relaxation. Speeds up difficult convergence
                 considerably. Defaults to False.
 
@@ -326,9 +328,9 @@ class VaspJob(Job):
                 final = Poscar.from_file("CONTCAR").structure
                 vol_change = (final.volume - initial.volume) / initial.volume
 
-                logging.info("Vol change = %.1f %%!" % (vol_change * 100))
+                logger.info("Vol change = %.1f %%!" % (vol_change * 100))
                 if abs(vol_change) < vol_change_tol:
-                    logging.info("Stopping optimization!")
+                    logger.info("Stopping optimization!")
                     break
                 else:
                     incar_update = {"ISTART": 1}
@@ -342,7 +344,7 @@ class VaspJob(Job):
                     if i == 1 and half_kpts_first_relax:
                         settings.append({"dict": "KPOINTS",
                                          "action": {"_set": orig_kpts_dict}})
-            logging.info("Generating job = %d!" % (i+1))
+            logger.info("Generating job = %d!" % (i+1))
             yield VaspJob(vasp_cmd, final=False, backup=backup,
                           suffix=".relax%d" % (i+1), settings_override=settings,
                           **vasp_job_kwargs)
@@ -380,7 +382,8 @@ class VaspJob(Job):
                 :class:`custodian.vasp.jobs.VaspJob`.
 
         Returns:
-            Generator of jobs.
+            Generator of jobs. At the end of the run, an "EOS.txt" is written which
+            provides a quick look at the E vs lattice parameter.
         """
         nsw = 99 if atom_relax else 0
 
@@ -437,8 +440,8 @@ class VaspJob(Job):
                             else ind - 1
                     if abs(energies[min_x]
                            - energies[sorted_x[other]]) < etol:
-                        logging.info("Stopping optimization! Final lattice"
-                                     "parameter is %f" % min_x)
+                        logger.info("Stopping optimization! Final lattice"
+                                    "parameter is %f" % min_x)
                         break
 
                     if ind == 0 and len(sorted_x) > 2:
@@ -469,12 +472,15 @@ class VaspJob(Job):
                                     raise ValueError(
                                         "Negative lattice constant!")
                                 x = result.x[0]
+                                logger.info("BFGS minimized %s = %f." % (lattice_direction, x))
                             except ValueError as ex:
                                 # Fall back on bisection algo if the bfgs fails.
-                                logging.info(str(ex))
+                                logger.info(str(ex))
                                 x = (min_x + sorted_x[other]) / 2
+                                logger.info("Falling back on bisection %s = %f." % (lattice_direction, x))
                         else:
                             x = (min_x + sorted_x[other]) / 2
+                            logger.info("Bisection %s = %f." % (lattice_direction, x))
 
                 lattice = lattice.matrix
                 lattice[lattice_index] = lattice[lattice_index] / \
@@ -492,7 +498,7 @@ class VaspJob(Job):
                     {"file": fname,
                      "action": {"_file_copy": {"dest": "POSCAR"}}}]
 
-            logging.info("Generating job = %d with parameter %f!" % (i + 1, x))
+            logger.info("Generating job = %d with parameter %f!" % (i + 1, x))
             yield VaspJob(vasp_cmd, final=False, backup=backup,
                           suffix=".static.%f" % x,
                           settings_override=settings, **vasp_job_kwargs)
@@ -679,7 +685,7 @@ class VaspNEBJob(Job):
                     cmd = self.gamma_vasp_cmd
                 elif which(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
-        logging.info("Running {}".format(" ".join(cmd)))
+        logger.info("Running {}".format(" ".join(cmd)))
         with open(self.output_file, 'w') as f_std, \
                 open(self.stderr_file, "w", buffering=1) as f_err:
 
