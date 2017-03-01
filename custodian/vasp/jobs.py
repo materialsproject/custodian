@@ -53,10 +53,11 @@ class VaspJob(Job):
     can be a complex processing of inputs etc. with initialization.
     """
 
-    def __init__(self, vasp_cmd, output_file="vasp.out", stderr_file="std_err.txt",
-                 suffix="", final=True, backup=True, auto_npar=True,
-                 auto_gamma=True, settings_override=None,
-                 gamma_vasp_cmd=None, copy_magmom=False, auto_continue=False):
+    def __init__(self, vasp_cmd, output_file="vasp.out",
+                 stderr_file="std_err.txt", suffix="", final=True,
+                 backup=True, auto_npar=True, auto_gamma=True,
+                 settings_override=None, gamma_vasp_cmd=None,
+                 copy_magmom=False, auto_continue=False):
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -147,7 +148,8 @@ class VaspJob(Job):
                         # try sge environment variable first
                         # (since multiprocessing counts cores on the current
                         # machine only)
-                        ncores = os.environ.get('NSLOTS') or multiprocessing.cpu_count()
+                        ncores = os.environ.get('NSLOTS') or \
+                            multiprocessing.cpu_count()
                         ncores = int(ncores)
                         for npar in range(int(math.sqrt(ncores)),
                                           ncores):
@@ -163,7 +165,7 @@ class VaspJob(Job):
            os.path.exists("STOPCAR") and \
            not os.access("STOPCAR", os.W_OK):
             # Remove STOPCAR
-            os.chmod("STOPCAR",0o644)
+            os.chmod("STOPCAR", 0o644)
             os.remove("STOPCAR")
 
             # Setup INCAR to continue
@@ -251,7 +253,7 @@ class VaspJob(Job):
         if ediffg:
             incar_update["EDIFFG"] = ediffg
         settings_overide_1 = None
-        settings_overide_2  = [
+        settings_overide_2 = [
             {"dict": "INCAR",
              "action": {"_set": incar_update}},
             {"file": "CONTCAR",
@@ -351,7 +353,8 @@ class VaspJob(Job):
 
     @classmethod
     def constrained_opt_run(cls, vasp_cmd, lattice_direction, initial_strain,
-                            atom_relax=True, max_steps=20, algo="bisection", **vasp_job_kwargs):
+                            atom_relax=True, max_steps=20, algo="bisection",
+                            **vasp_job_kwargs):
         """
         Returns a generator of jobs for a constrained optimization run. Typical
         use case is when you want to approximate a biaxial strain situation,
@@ -374,16 +377,16 @@ class VaspJob(Job):
             atom_relax (bool): Whether to relax atomic positions.
             max_steps (int): The maximum number of runs. Defaults to 20 (
                 highly unlikely that this limit is ever reached).
-            algo (str): Algorithm to use to find minimum. Default is "bisection",
-                which is robust but can be a bit slow. A faster alternative is
+            algo (str): Algorithm to use to find minimum. Default is "bisection"
+                , which is robust but can be a bit slow. A faster alternative is
                 "BFGS", which is fast, but rather sensitive to numerical noise
                 in energy calculations.
             \*\*vasp_job_kwargs: Passthrough kwargs to VaspJob. See
                 :class:`custodian.vasp.jobs.VaspJob`.
 
         Returns:
-            Generator of jobs. At the end of the run, an "EOS.txt" is written which
-            provides a quick look at the E vs lattice parameter.
+            Generator of jobs. At the end of the run, an "EOS.txt" is written
+            which provides a quick look at the E vs lattice parameter.
         """
         nsw = 99 if atom_relax else 0
 
@@ -428,7 +431,7 @@ class VaspJob(Job):
                     x *= (1 + initial_strain)
                 else:
                     # Sort the lattice parameter by energies.
-                    min_x = min(energies.keys(), key=lambda k: energies[k])
+                    min_x = min(energies.keys(), key=lambda e: energies[e])
                     sorted_x = sorted(energies.keys())
                     ind = sorted_x.index(min_x)
                     if ind == 0:
@@ -436,11 +439,14 @@ class VaspJob(Job):
                     elif ind == len(sorted_x) - 1:
                         other = ind - 1
                     else:
-                        other = ind + 1 if energies[sorted_x[ind + 1]] < energies[sorted_x[ind - 1]] \
+                        other = ind + 1 \
+                            if energies[sorted_x[ind + 1]] \
+                            < energies[sorted_x[ind - 1]] \
                             else ind - 1
                     if abs(energies[min_x]
                            - energies[sorted_x[other]]) < etol:
-                        logger.info("Stopping optimization! Final %s = %f" % (lattice_direction, min_x))
+                        logger.info("Stopping optimization! Final %s = %f"
+                                    % (lattice_direction, min_x))
                         break
 
                     if ind == 0 and len(sorted_x) > 2:
@@ -449,39 +455,45 @@ class VaspJob(Job):
                         # iteration to find a minimum. This applies only when
                         # there are at least 3 values.
                         x = sorted_x[0] - abs(sorted_x[1] - sorted_x[0])
-                        logger.info("Lowest energy lies below bounds. Setting %s = %f." % (lattice_direction, x))
+                        logger.info("Lowest energy lies below bounds. "
+                                    "Setting %s = %f." % (lattice_direction, x))
                     elif ind == len(sorted_x) - 1 and len(sorted_x) > 2:
                         # Lowest energy lies outside of range of highest value.
                         # we increase the lattice parameter in the next
                         # iteration to find a minimum. This applies only when
                         # there are at least 3 values.
                         x = sorted_x[-1] + abs(sorted_x[-1] - sorted_x[-2])
-                        logger.info("Lowest energy lies above bounds. Setting %s = %f." % (lattice_direction, x))
+                        logger.info("Lowest energy lies above bounds. "
+                                    "Setting %s = %f." % (lattice_direction, x))
                     else:
                         if algo.upper() == "BFGS" and len(sorted_x) >= 4:
                             try:
-                                # If there are more than 4 data points, we will do
-                                # a quadratic fit to accelerate convergence.
+                                # If there are more than 4 data points, we will
+                                # do a quadratic fit to accelerate convergence.
                                 x1 = list(energies.keys())
                                 y1 = [energies[j] for j in x1]
                                 z1 = np.polyfit(x1, y1, 2)
                                 pp = np.poly1d(z1)
                                 from scipy.optimize import minimize
                                 result = minimize(
-                                    pp, min_x, bounds=[(sorted_x[0], sorted_x[-1])])
+                                    pp, min_x,
+                                    bounds=[(sorted_x[0], sorted_x[-1])])
                                 if (not result.success) or result.x[0] < 0:
                                     raise ValueError(
                                         "Negative lattice constant!")
                                 x = result.x[0]
-                                logger.info("BFGS minimized %s = %f." % (lattice_direction, x))
+                                logger.info("BFGS minimized %s = %f."
+                                            % (lattice_direction, x))
                             except ValueError as ex:
                                 # Fall back on bisection algo if the bfgs fails.
                                 logger.info(str(ex))
                                 x = (min_x + sorted_x[other]) / 2
-                                logger.info("Falling back on bisection %s = %f." % (lattice_direction, x))
+                                logger.info("Falling back on bisection %s = %f."
+                                            % (lattice_direction, x))
                         else:
                             x = (min_x + sorted_x[other]) / 2
-                            logger.info("Bisection %s = %f." % (lattice_direction, x))
+                            logger.info("Bisection %s = %f."
+                                        % (lattice_direction, x))
 
                 lattice = lattice.matrix
                 lattice[lattice_index] = lattice[lattice_index] / \
