@@ -431,7 +431,20 @@ class VaspJob(Job):
                                      "parameter is %f" % min_x)
                         break
 
-                    x = (min_x + sorted_x[other]) / 2
+                    if ind == 0 and len(sorted_x) > 2:
+                        # Lowest energy lies outside of range of lowest value.
+                        # we decrease the lattice parameter in the next
+                        # iteration to find a minimum. This applies only when
+                        # there are at least 3 values.
+                        x = sorted_x[0] - (sorted_x[1] - sorted_x[0])
+                    elif ind == len(sorted_x) - 1 and len(sorted_x) > 2:
+                        # Lowest energy lies outside of range of highest value.
+                        # we increase the lattice parameter in the next
+                        # iteration to find a minimum. This applies only when
+                        # there are at least 3 values.
+                        x = sorted_x[-1] + (sorted_x[-1] - sorted_x[-2])
+                    else:
+                        x = (min_x + sorted_x[other]) / 2
 
                 lattice = lattice.matrix
                 lattice[lattice_index] = lattice[lattice_index] / \
