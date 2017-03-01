@@ -353,14 +353,20 @@ class VaspJob(Job):
 
     @classmethod
     def constrained_opt_run(cls, vasp_cmd, lattice_direction, initial_strain,
-                            atom_relax=True, max_steps=20, algo="bisection",
+                            atom_relax=True, max_steps=20, algo="bfgs",
                             **vasp_job_kwargs):
         """
         Returns a generator of jobs for a constrained optimization run. Typical
         use case is when you want to approximate a biaxial strain situation,
         e.g., you apply a defined strain to a and b directions of the lattice,
-        but allows the c-direction to relax. Here, we use the bisection
-        algorithm since we are iterating over a narrow range.
+        but allows the c-direction to relax.
+
+        Some guidelines on the use of this method:
+        i.  It is recommended you do not use the Auto kpoint generation. The
+            grid generated via Auto may fluctuate with changes in lattice
+            param, resulting in numerical noise.
+        ii. Make sure your EDIFF/EDIFFG is properly set in your INCAR. The
+            optimization relies on these values to determine convergence.
 
         Args:
             vasp_cmd (str): Command to run vasp as a list of args. For example,
@@ -377,10 +383,12 @@ class VaspJob(Job):
             atom_relax (bool): Whether to relax atomic positions.
             max_steps (int): The maximum number of runs. Defaults to 20 (
                 highly unlikely that this limit is ever reached).
-            algo (str): Algorithm to use to find minimum. Default is "bisection"
-                , which is robust but can be a bit slow. A faster alternative is
-                "BFGS", which is fast, but rather sensitive to numerical noise
-                in energy calculations.
+            algo (str): Algorithm to use to find minimum. Default is "bfgs",
+                which is fast, but can be sensitive to numerical noise
+                in energy calculations. The alternative is "bisection",
+                which is more robust but can be a bit slow. The code does fall
+                back on the bisection when bfgs gives a non-sensical result,
+                e.g., negative lattice params.
             \*\*vasp_job_kwargs: Passthrough kwargs to VaspJob. See
                 :class:`custodian.vasp.jobs.VaspJob`.
 
@@ -393,7 +401,7 @@ class VaspJob(Job):
         incar = Incar.from_file("INCAR")
 
         # Set the energy convergence criteria as the EDIFFG (if present) or
-        # 10 x the EDIFF (which itself defaults to 1e-4 if not present).
+        # 10 x EDIFF (which itself defaults to 1e-4 if not present).
         if incar.get("EDIFFG") and incar.get("EDIFFG") > 0:
             etol = incar["EDIFFG"]
         else:
@@ -466,7 +474,7 @@ class VaspJob(Job):
                         logger.info("Lowest energy lies above bounds. "
                                     "Setting %s = %f." % (lattice_direction, x))
                     else:
-                        if algo.upper() == "BFGS" and len(sorted_x) >= 4:
+                        if algo.lower() == "bfgs" and len(sorted_x) >= 4:
                             try:
                                 # If there are more than 4 data points, we will
                                 # do a quadratic fit to accelerate convergence.
