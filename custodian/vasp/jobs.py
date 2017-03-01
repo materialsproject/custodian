@@ -428,7 +428,7 @@ class VaspJob(Job):
                     if abs(energies[min_x]
                            - energies[sorted_x[other]]) < ediff:
                         logging.info("Stopping optimization! Final lattice"
-                                     "parameter is %f" % sorted_x[0])
+                                     "parameter is %f" % min_x)
                         break
 
                     x = (min_x + sorted_x[other]) / 2
