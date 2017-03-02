@@ -6,6 +6,7 @@ from custodian.custodian import Validator
 from pymatgen.io.vasp import Vasprun
 import os
 
+
 class VasprunXMLValidator(Validator):
     """
     Checks that a valid vasprun.xml was generated
