@@ -6,6 +6,8 @@ import os
 import shutil
 import math
 import logging
+import itertools
+
 import numpy as np
 
 from pymatgen import Structure
@@ -529,28 +531,6 @@ class VaspJob(Job):
             for k in sorted(energies.keys()):
                 f.write("%f %f\n" % (k, energies[k]))
 
-    def as_dict(self):
-        d = dict(vasp_cmd=self.vasp_cmd,
-                 output_file=self.output_file, suffix=self.suffix,
-                 final=self.final, backup=self.backup,
-                 auto_npar=self.auto_npar, auto_gamma=self.auto_gamma,
-                 settings_override=self.settings_override,
-                 gamma_vasp_cmd=self.gamma_vasp_cmd
-                 )
-        d["@module"] = self.__class__.__module__
-        d["@class"] = self.__class__.__name__
-        return d
-
-    @classmethod
-    def from_dict(cls, d):
-        return VaspJob(
-            vasp_cmd=d["vasp_cmd"], output_file=d["output_file"],
-            suffix=d["suffix"], final=d["final"],
-            backup=d["backup"],
-            auto_npar=d['auto_npar'], auto_gamma=d['auto_gamma'],
-            settings_override=d["settings_override"],
-            gamma_vasp_cmd=d["gamma_vasp_cmd"])
-
 
 class VaspNEBJob(Job):
     """
@@ -736,22 +716,236 @@ class VaspNEBJob(Job):
                 elif self.suffix != "":
                     shutil.copy(f, "{}{}".format(f, self.suffix))
 
-    def as_dict(self):
-        d = dict(vasp_cmd=self.vasp_cmd,
-                 output_file=self.output_file, suffix=self.suffix,
-                 final=self.final, backup=self.backup,
-                 auto_npar=self.auto_npar, auto_gamma=self.auto_gamma,
-                 gamma_vasp_cmd=self.gamma_vasp_cmd
-                 )
-        d["@module"] = self.__class__.__module__
-        d["@class"] = self.__class__.__name__
-        return d
 
-    @classmethod
-    def from_dict(cls, d):
-        return VaspNEBJob(
-            vasp_cmd=d["vasp_cmd"], output_file=d["output_file"],
-            suffix=d["suffix"], final=d["final"],
-            backup=d["backup"],
-            auto_npar=d['auto_npar'], auto_gamma=d['auto_gamma'],
-            gamma_vasp_cmd=d["gamma_vasp_cmd"])
+def get_constained_relaxation_jobs(vasp_cmd, variables, atom_relax=True,
+                                   max_steps=20, algo="bfgs",
+                                   **vasp_job_kwargs):
+        """
+        Returns a generator of jobs for a constrained optimization run. Typical
+        use case is when you want to approximate a biaxial strain situation,
+        e.g., you apply a defined strain to a and b directions of the lattice,
+        but allows the c-direction to relax. But this is a highly flexible
+        method that takes in any specification of "POSCAR.template".
+
+        Some guidelines on the use of this method:
+        i.  It is recommended you do not use the Auto kpoint generation. The
+            grid generated via Auto may fluctuate with changes in lattice
+            param, resulting in numerical noise.
+        ii. Make sure your EDIFF/EDIFFG is properly set in your INCAR. The
+            optimization relies on these values to determine convergence.
+
+        Args:
+            vasp_cmd (str): Command to run vasp as a list of args. For example,
+                if you are using mpirun, it can be something like
+                ["mpirun", "pvasp.5.2.11"]
+            \*\*vasp_job_kwargs: Passthrough kwargs to VaspJob. See
+                :class:`custodian.vasp.jobs.VaspJob`.
+
+        Returns:
+            Generator of jobs. At the end of the run, an "EOS.txt" is written
+            which provides a quick look at the E vs lattice parameter.
+        """
+        nsw = 99 if atom_relax else 0
+
+        incar = Incar.from_file("INCAR")
+
+        with open("POSCAR.template", "rt") as f:
+            poscar = f.read()
+
+        # Set the energy convergence criteria as the EDIFFG (if present) or
+        # 10 x EDIFF (which itself defaults to 1e-4 if not present).
+        if incar.get("EDIFFG") and incar.get("EDIFFG") > 0:
+            etol = incar["EDIFFG"]
+        else:
+            etol = incar.get("EDIFF", 1e-4) * 10
+
+        energies = []
+
+        step = 0
+        varnames = list(variables.keys())
+        varvals = [variables[k] for k in varnames]
+
+        for vals in itertools.product(*varvals):
+
+            vars = dict(zip(varnames, vals))
+            with open("POSCAR", "rt") as f:
+                f.write(poscar.format(**vars))
+
+            settings = [
+                {"dict": "INCAR",
+                 "action": {"_set": {"_set": {"ISIF": 2, "NSW": nsw}}}}]
+
+            logger.info("Generating job = %d with parameters %s!" % (str(vars)))
+            yield VaspJob(vasp_cmd, final=False,
+                          suffix=".static.%f" % step,
+                          settings_override=settings, **vasp_job_kwargs)
+            step += 1
+
+            v = Vasprun("vasprun.xml")
+            structure = v.final_structure
+            energy = v.final_energy
+            lattice = structure.lattice
+            energies.append(list(vals) + [energy])
+
+
+        while step < max_steps:
+            try:
+                # If there are more than 4 data points, we will
+                # do a quadratic fit to accelerate convergence.
+                x1 = list(energies.keys())
+                y1 = [energies[j] for j in x1]
+                z1 = np.polyfit(x1, y1, 2)
+                pp = np.poly1d(z1)
+                from scipy.optimize import minimize
+                result = minimize(
+                    pp, min_x,
+                    bounds=[(sorted_x[0], sorted_x[-1])])
+                if (not result.success) or result.x[0] < 0:
+                    raise ValueError(
+                        "Negative lattice constant!")
+                x = result.x[0]
+                logger.info("BFGS minimized %s = %f."
+                            % (lattice_direction, x))
+            except ValueError as ex:
+                # Fall back on bisection algo if the bfgs fails.
+                logger.info(str(ex))
+                x = (min_x + sorted_x[other]) / 2
+                logger.info("Falling back on bisection %s = %f."
+                            % (lattice_direction, x))
+        else:
+            x = (min_x + sorted_x[other]) / 2
+            logger.info("Bisection %s = %f."
+                        % (lattice_direction, x))
+                x = lattice.abc[lattice_index]
+
+                energies[x] = energy
+
+                if i == 1:
+                    x *= (1 + initial_strain)
+                else:
+                    # Sort the lattice parameter by energies.
+                    min_x = min(energies.keys(), key=lambda e: energies[e])
+                    sorted_x = sorted(energies.keys())
+                    ind = sorted_x.index(min_x)
+                    if ind == 0:
+                        other = ind + 1
+                    elif ind == len(sorted_x) - 1:
+                        other = ind - 1
+                    else:
+                        other = ind + 1 \
+                            if energies[sorted_x[ind + 1]] \
+                               < energies[sorted_x[ind - 1]] \
+                            else ind - 1
+                    if abs(energies[min_x]
+                                   - energies[sorted_x[other]]) < etol:
+                        logger.info("Stopping optimization! Final %s = %f"
+                                    % (lattice_direction, min_x))
+                        break
+
+                    if ind == 0 and len(sorted_x) > 2:
+                        # Lowest energy lies outside of range of lowest value.
+                        # we decrease the lattice parameter in the next
+                        # iteration to find a minimum. This applies only when
+                        # there are at least 3 values.
+                        x = sorted_x[0] - abs(sorted_x[1] - sorted_x[0])
+                        logger.info("Lowest energy lies below bounds. "
+                                    "Setting %s = %f." % (lattice_direction, x))
+                    elif ind == len(sorted_x) - 1 and len(sorted_x) > 2:
+                        # Lowest energy lies outside of range of highest value.
+                        # we increase the lattice parameter in the next
+                        # iteration to find a minimum. This applies only when
+                        # there are at least 3 values.
+                        x = sorted_x[-1] + abs(sorted_x[-1] - sorted_x[-2])
+                        logger.info("Lowest energy lies above bounds. "
+                                    "Setting %s = %f." % (lattice_direction, x))
+                    else:
+                        if algo.lower() == "bfgs" and len(sorted_x) >= 4:
+                            try:
+                                # If there are more than 4 data points, we will
+                                # do a quadratic fit to accelerate convergence.
+                                x1 = list(energies.keys())
+                                y1 = [energies[j] for j in x1]
+                                z1 = np.polyfit(x1, y1, 2)
+                                pp = np.poly1d(z1)
+                                from scipy.optimize import minimize
+                                result = minimize(
+                                    pp, min_x,
+                                    bounds=[(sorted_x[0], sorted_x[-1])])
+                                if (not result.success) or result.x[0] < 0:
+                                    raise ValueError(
+                                        "Negative lattice constant!")
+                                x = result.x[0]
+                                logger.info("BFGS minimized %s = %f."
+                                            % (lattice_direction, x))
+                            except ValueError as ex:
+                                # Fall back on bisection algo if the bfgs fails.
+                                logger.info(str(ex))
+                                x = (min_x + sorted_x[other]) / 2
+                                logger.info("Falling back on bisection %s = %f."
+                                            % (lattice_direction, x))
+                        else:
+                            x = (min_x + sorted_x[other]) / 2
+                            logger.info("Bisection %s = %f."
+                                        % (lattice_direction, x))
+
+                lattice = lattice.matrix
+                lattice[lattice_index] = lattice[lattice_index] / \
+                                         np.linalg.norm(
+                                             lattice[lattice_index]) * x
+
+
+
+
+        with open("EOS.txt", "wt") as f:
+            f.write("# %s energy\n" % lattice_direction)
+            for k in sorted(energies.keys()):
+                f.write("%f %f\n" % (k, energies[k]))
+
+    def run(self):
+        """
+        Perform the actual VASP run.
+
+        Returns:
+            (subprocess.Popen) Used for monitoring.
+        """
+        cmd = list(self.vasp_cmd)
+        if self.auto_gamma:
+            vi = VaspInput.from_directory(".")
+            kpts = vi["KPOINTS"]
+            if kpts.style == Kpoints.supported_modes.Gamma \
+                    and tuple(kpts.kpts[0]) == (1, 1, 1):
+                if self.gamma_vasp_cmd is not None and which(
+                        self.gamma_vasp_cmd[-1]):
+                    cmd = self.gamma_vasp_cmd
+                elif which(cmd[-1] + ".gamma"):
+                    cmd[-1] += ".gamma"
+        logger.info("Running {}".format(" ".join(cmd)))
+        with open(self.output_file, 'w') as f_std, \
+                open(self.stderr_file, "w", buffering=1) as f_err:
+            # use line buffering for stderr
+            p = subprocess.Popen(cmd, stdout=f_std, stderr=f_err)
+        return p
+
+    def postprocess(self):
+        """
+        Postprocessing includes renaming and gzipping where necessary.
+        Also copies the magmom to the incar if necessary
+        """
+        for f in VASP_OUTPUT_FILES + [self.output_file]:
+            if os.path.exists(f):
+                if self.final and self.suffix != "":
+                    shutil.move(f, "{}{}".format(f, self.suffix))
+                elif self.suffix != "":
+                    shutil.copy(f, "{}{}".format(f, self.suffix))
+
+        if self.copy_magmom and not self.final:
+            try:
+                outcar = Outcar("OUTCAR")
+                magmom = [m['tot'] for m in outcar.magnetization]
+                incar = Incar.from_file("INCAR")
+                incar['MAGMOM'] = magmom
+                incar.write_file("INCAR")
+            except:
+                logger.error('MAGMOM copy from OUTCAR to INCAR failed')
+
+

@@ -7,13 +7,6 @@ runs.
 
 from __future__ import division
 
-__author__ = "Shyue Ping Ong"
-__version__ = "0.5"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "ongsp@ucsd.edu"
-__status__ = "Beta"
-__date__ = "12/31/13"
-
 import logging
 import sys
 import yaml
@@ -22,6 +15,12 @@ from custodian.custodian import Custodian
 from custodian.vasp.jobs import VaspJob
 from pymatgen.io.vasp import VaspInput, Incar, Kpoints
 
+__author__ = "Shyue Ping Ong"
+__version__ = "0.5"
+__maintainer__ = "Shyue Ping Ong"
+__email__ = "ongsp@ucsd.edu"
+__status__ = "Beta"
+__date__ = "12/31/13"
 
 
 def load_class(mod, name):
@@ -39,9 +38,9 @@ def load_class(mod, name):
 
 
 def get_jobs(args):
-    #Returns a generator of jobs. Allows of "infinite" jobs.
+    # Returns a generator of jobs. Allows of "infinite" jobs.
     vasp_command = args.command.split()
-    #save initial INCAR for rampU runs
+    # save initial INCAR for rampU runs
     n_ramp_u = args.jobs.count('rampU')
     ramps = 0
     if n_ramp_u:
@@ -180,6 +179,8 @@ def get_jobs(args):
 
         elif job_type.startswith("relax"):
             pass
+        elif job_type.startswith("relax_hybrid_vasp"):
+            auto_npar = False
         elif job_type.startswith("full_relax"):
             for j in VaspJob.full_opt_run(
                     vasp_command):
