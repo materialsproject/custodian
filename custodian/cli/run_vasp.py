@@ -68,6 +68,10 @@ def get_jobs(args):
 
         job_type = job.lower()
         auto_npar = True
+
+        if args.no_auto_npar:
+            auto_npar = False
+
         if job_type.startswith("static_derived"):
             from pymatgen.io.vasp.sets import MPStaticSet
             vis = MPStaticSet.from_prev_calc(
@@ -179,8 +183,6 @@ def get_jobs(args):
 
         elif job_type.startswith("relax"):
             pass
-        elif job_type.startswith("relax_hybrid_vasp"):
-            auto_npar = False
         elif job_type.startswith("full_relax"):
             for j in VaspJob.full_opt_run(
                     vasp_command):
@@ -226,6 +228,12 @@ def main():
         default="pvasp", type=str,
         help="VASP command. Defaults to pvasp. If you are using mpirun, "
              "set this to something like \"mpirun pvasp\".")
+
+    parser.add_argument(
+        "--no_auto_npar", action="store_true",
+        help="Set to true to turn off auto_npar. Useful for certain machines "
+             "and calculations where you want absolute control.")
+
 
     parser.add_argument(
         "-z", "--gzip", dest="gzip", action="store_true",
