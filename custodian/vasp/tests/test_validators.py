@@ -79,6 +79,4 @@ class VaspNpTMDValidatorTest(unittest.TestCase):
         os.chdir(cwd)
 
 if __name__ == "__main__":
-    t = VaspFilesValidatorTest()
-    t = VaspFilesValidatorTest()
-    t = VaspNpTMDValidatorTest()
+    unittest.main()
