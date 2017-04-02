@@ -1,23 +1,28 @@
 # coding: utf-8
 
 from __future__ import unicode_literals, division
-
-"""
-This module implements basic kinds of jobs for VASP runs.
-"""
-
 import subprocess
 import os
 import shutil
 import math
 import logging
+import itertools
+
 import numpy as np
 
-from pymatgen.io.vasp import VaspInput, Incar, Poscar, Outcar, Kpoints
+from pymatgen import Structure
+from pymatgen.io.vasp import VaspInput, Incar, Poscar, Outcar, Kpoints, Vasprun
 from monty.os.path import which
 
 from custodian.custodian import Job
 from custodian.vasp.interpreter import VaspModder
+
+"""
+This module implements basic kinds of jobs for VASP runs.
+"""
+
+
+logger = logging.getLogger(__name__)
 
 
 __author__ = "Shyue Ping Ong"
@@ -50,10 +55,11 @@ class VaspJob(Job):
     can be a complex processing of inputs etc. with initialization.
     """
 
-    def __init__(self, vasp_cmd, output_file="vasp.out", stderr_file="std_err.txt",
-                 suffix="", final=True, backup=True, auto_npar=True,
-                 auto_gamma=True, settings_override=None,
-                 gamma_vasp_cmd=None, copy_magmom=False,auto_continue=False):
+    def __init__(self, vasp_cmd, output_file="vasp.out",
+                 stderr_file="std_err.txt", suffix="", final=True,
+                 backup=True, auto_npar=True, auto_gamma=True,
+                 settings_override=None, gamma_vasp_cmd=None,
+                 copy_magmom=False, auto_continue=False):
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -144,7 +150,8 @@ class VaspJob(Job):
                         # try sge environment variable first
                         # (since multiprocessing counts cores on the current
                         # machine only)
-                        ncores = os.environ.get('NSLOTS') or multiprocessing.cpu_count()
+                        ncores = os.environ.get('NSLOTS') or \
+                            multiprocessing.cpu_count()
                         ncores = int(ncores)
                         for npar in range(int(math.sqrt(ncores)),
                                           ncores):
@@ -160,7 +167,7 @@ class VaspJob(Job):
            os.path.exists("STOPCAR") and \
            not os.access("STOPCAR", os.W_OK):
             # Remove STOPCAR
-            os.chmod("STOPCAR",0o644)
+            os.chmod("STOPCAR", 0o644)
             os.remove("STOPCAR")
 
             # Setup INCAR to continue
@@ -168,7 +175,7 @@ class VaspJob(Job):
             incar['ISTART'] = 1
             incar.write_file("INCAR")
 
-            shutil.copy('CONTCAR','POSCAR')
+            shutil.copy('CONTCAR', 'POSCAR')
 
         if self.settings_override is not None:
             VaspModder().apply_actions(self.settings_override)
@@ -191,10 +198,10 @@ class VaspJob(Job):
                     cmd = self.gamma_vasp_cmd
                 elif which(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
-        logging.info("Running {}".format(" ".join(cmd)))
+        logger.info("Running {}".format(" ".join(cmd)))
         with open(self.output_file, 'w') as f_std, \
                 open(self.stderr_file, "w", buffering=1) as f_err:
-            # use line bufferring for stderr
+            # use line buffering for stderr
             p = subprocess.Popen(cmd, stdout=f_std, stderr=f_err)
         return p
 
@@ -218,7 +225,7 @@ class VaspJob(Job):
                 incar['MAGMOM'] = magmom
                 incar.write_file("INCAR")
             except:
-                logging.error('MAGMOM copy from OUTCAR to INCAR failed')
+                logger.error('MAGMOM copy from OUTCAR to INCAR failed')
 
     @classmethod
     def double_relaxation_run(cls, vasp_cmd, auto_npar=True, ediffg=-0.05,
@@ -237,7 +244,7 @@ class VaspJob(Job):
                 True. Set to False for HF, GW and RPA calculations.
             ediffg (float): Force convergence criteria for subsequent runs (
                 ignored for the initial run.)
-            half_kpt_first_relax (bool): Whether to halve the kpoint grid
+            half_kpts_first_relax (bool): Whether to halve the kpoint grid
                 for the first relaxation. Speeds up difficult convergence
                 considerably. Defaults to False.
 
@@ -248,7 +255,7 @@ class VaspJob(Job):
         if ediffg:
             incar_update["EDIFFG"] = ediffg
         settings_overide_1 = None
-        settings_overide_2  = [
+        settings_overide_2 = [
             {"dict": "INCAR",
              "action": {"_set": incar_update}},
             {"file": "CONTCAR",
@@ -278,8 +285,9 @@ class VaspJob(Job):
                         settings_override=settings_overide_2)]
 
     @classmethod
-    def full_opt_run(cls, vasp_cmd, auto_npar=True, vol_change_tol=0.02,
-                     max_steps=10, ediffg=-0.05, half_kpts_first_relax=False):
+    def full_opt_run(cls, vasp_cmd, vol_change_tol=0.02,
+                     max_steps=10, ediffg=-0.05, half_kpts_first_relax=False,
+                     **vasp_job_kwargs):
         """
         Returns a generator of jobs for a full optimization run. Basically,
         this runs an infinite series of geometry optimization jobs until the
@@ -289,10 +297,6 @@ class VaspJob(Job):
             vasp_cmd (str): Command to run vasp as a list of args. For example,
                 if you are using mpirun, it can be something like
                 ["mpirun", "pvasp.5.2.11"]
-            auto_npar (bool): Whether to automatically tune NPAR to be sqrt(
-                number of cores) as recommended by VASP for DFT calculations.
-                Generally, this results in significant speedups. Defaults to
-                True. Set to False for HF, GW and RPA calculations.
             vol_change_tol (float): The tolerance at which to stop a run.
                 Defaults to 0.05, i.e., 5%.
             max_steps (int): The maximum number of runs. Defaults to 10 (
@@ -302,6 +306,8 @@ class VaspJob(Job):
             half_kpts_first_relax (bool): Whether to halve the kpoint grid
                 for the first relaxation. Speeds up difficult convergence
                 considerably. Defaults to False.
+            \*\*vasp_job_kwargs: Passthrough kwargs to VaspJob. See
+                :class:`custodian.vasp.jobs.VaspJob`.
 
         Returns:
             Generator of jobs.
@@ -326,9 +332,9 @@ class VaspJob(Job):
                 final = Poscar.from_file("CONTCAR").structure
                 vol_change = (final.volume - initial.volume) / initial.volume
 
-                logging.info("Vol change = %.1f %%!" % (vol_change * 100))
+                logger.info("Vol change = %.1f %%!" % (vol_change * 100))
                 if abs(vol_change) < vol_change_tol:
-                    logging.info("Stopping optimization!")
+                    logger.info("Stopping optimization!")
                     break
                 else:
                     incar_update = {"ISTART": 1}
@@ -342,32 +348,188 @@ class VaspJob(Job):
                     if i == 1 and half_kpts_first_relax:
                         settings.append({"dict": "KPOINTS",
                                          "action": {"_set": orig_kpts_dict}})
-            logging.info("Generating job = %d!" % (i+1))
+            logger.info("Generating job = %d!" % (i+1))
             yield VaspJob(vasp_cmd, final=False, backup=backup,
-                          suffix=".relax%d" % (i+1), auto_npar=auto_npar,
-                          settings_override=settings)
-
-    def as_dict(self):
-        d = dict(vasp_cmd=self.vasp_cmd,
-                 output_file=self.output_file, suffix=self.suffix,
-                 final=self.final, backup=self.backup,
-                 auto_npar=self.auto_npar, auto_gamma=self.auto_gamma,
-                 settings_override=self.settings_override,
-                 gamma_vasp_cmd=self.gamma_vasp_cmd
-                 )
-        d["@module"] = self.__class__.__module__
-        d["@class"] = self.__class__.__name__
-        return d
+                          suffix=".relax%d" % (i+1), settings_override=settings,
+                          **vasp_job_kwargs)
 
     @classmethod
-    def from_dict(cls, d):
-        return VaspJob(
-            vasp_cmd=d["vasp_cmd"], output_file=d["output_file"],
-            suffix=d["suffix"], final=d["final"],
-            backup=d["backup"],
-            auto_npar=d['auto_npar'], auto_gamma=d['auto_gamma'],
-            settings_override=d["settings_override"],
-            gamma_vasp_cmd=d["gamma_vasp_cmd"])
+    def constrained_opt_run(cls, vasp_cmd, lattice_direction, initial_strain,
+                            atom_relax=True, max_steps=20, algo="bfgs",
+                            **vasp_job_kwargs):
+        """
+        Returns a generator of jobs for a constrained optimization run. Typical
+        use case is when you want to approximate a biaxial strain situation,
+        e.g., you apply a defined strain to a and b directions of the lattice,
+        but allows the c-direction to relax.
+
+        Some guidelines on the use of this method:
+        i.  It is recommended you do not use the Auto kpoint generation. The
+            grid generated via Auto may fluctuate with changes in lattice
+            param, resulting in numerical noise.
+        ii. Make sure your EDIFF/EDIFFG is properly set in your INCAR. The
+            optimization relies on these values to determine convergence.
+
+        Args:
+            vasp_cmd (str): Command to run vasp as a list of args. For example,
+                if you are using mpirun, it can be something like
+                ["mpirun", "pvasp.5.2.11"]
+            lattice_direction (str): Which direction to relax. Valid values are
+                "a", "b" or "c".
+            initial_strain (float): An initial strain to be applied to the
+                lattice_direction. This can usually be estimated as the
+                negative of the strain applied in the other two directions.
+                E.g., if you apply a tensile strain of 0.05 to the a and b
+                directions, you can use -0.05 as a reasonable first guess for
+                initial strain.
+            atom_relax (bool): Whether to relax atomic positions.
+            max_steps (int): The maximum number of runs. Defaults to 20 (
+                highly unlikely that this limit is ever reached).
+            algo (str): Algorithm to use to find minimum. Default is "bfgs",
+                which is fast, but can be sensitive to numerical noise
+                in energy calculations. The alternative is "bisection",
+                which is more robust but can be a bit slow. The code does fall
+                back on the bisection when bfgs gives a non-sensical result,
+                e.g., negative lattice params.
+            \*\*vasp_job_kwargs: Passthrough kwargs to VaspJob. See
+                :class:`custodian.vasp.jobs.VaspJob`.
+
+        Returns:
+            Generator of jobs. At the end of the run, an "EOS.txt" is written
+            which provides a quick look at the E vs lattice parameter.
+        """
+        nsw = 99 if atom_relax else 0
+
+        incar = Incar.from_file("INCAR")
+
+        # Set the energy convergence criteria as the EDIFFG (if present) or
+        # 10 x EDIFF (which itself defaults to 1e-4 if not present).
+        if incar.get("EDIFFG") and incar.get("EDIFFG") > 0:
+            etol = incar["EDIFFG"]
+        else:
+            etol = incar.get("EDIFF", 1e-4) * 10
+
+        if lattice_direction == "a":
+            lattice_index = 0
+        elif lattice_direction == "b":
+            lattice_index = 1
+        else:
+            lattice_index = 2
+
+        energies = {}
+
+        for i in range(max_steps):
+            if i == 0:
+                settings = [
+                        {"dict": "INCAR",
+                         "action": {"_set": {"ISIF": 2, "NSW": nsw}}}]
+                structure = Poscar.from_file("POSCAR").structure
+                x = structure.lattice.abc[lattice_index]
+                backup = True
+            else:
+                backup = False
+                v = Vasprun("vasprun.xml")
+                structure = v.final_structure
+                energy = v.final_energy
+                lattice = structure.lattice
+
+                x = lattice.abc[lattice_index]
+
+                energies[x] = energy
+
+                if i == 1:
+                    x *= (1 + initial_strain)
+                else:
+                    # Sort the lattice parameter by energies.
+                    min_x = min(energies.keys(), key=lambda e: energies[e])
+                    sorted_x = sorted(energies.keys())
+                    ind = sorted_x.index(min_x)
+                    if ind == 0:
+                        other = ind + 1
+                    elif ind == len(sorted_x) - 1:
+                        other = ind - 1
+                    else:
+                        other = ind + 1 \
+                            if energies[sorted_x[ind + 1]] \
+                            < energies[sorted_x[ind - 1]] \
+                            else ind - 1
+                    if abs(energies[min_x]
+                           - energies[sorted_x[other]]) < etol:
+                        logger.info("Stopping optimization! Final %s = %f"
+                                    % (lattice_direction, min_x))
+                        break
+
+                    if ind == 0 and len(sorted_x) > 2:
+                        # Lowest energy lies outside of range of lowest value.
+                        # we decrease the lattice parameter in the next
+                        # iteration to find a minimum. This applies only when
+                        # there are at least 3 values.
+                        x = sorted_x[0] - abs(sorted_x[1] - sorted_x[0])
+                        logger.info("Lowest energy lies below bounds. "
+                                    "Setting %s = %f." % (lattice_direction, x))
+                    elif ind == len(sorted_x) - 1 and len(sorted_x) > 2:
+                        # Lowest energy lies outside of range of highest value.
+                        # we increase the lattice parameter in the next
+                        # iteration to find a minimum. This applies only when
+                        # there are at least 3 values.
+                        x = sorted_x[-1] + abs(sorted_x[-1] - sorted_x[-2])
+                        logger.info("Lowest energy lies above bounds. "
+                                    "Setting %s = %f." % (lattice_direction, x))
+                    else:
+                        if algo.lower() == "bfgs" and len(sorted_x) >= 4:
+                            try:
+                                # If there are more than 4 data points, we will
+                                # do a quadratic fit to accelerate convergence.
+                                x1 = list(energies.keys())
+                                y1 = [energies[j] for j in x1]
+                                z1 = np.polyfit(x1, y1, 2)
+                                pp = np.poly1d(z1)
+                                from scipy.optimize import minimize
+                                result = minimize(
+                                    pp, min_x,
+                                    bounds=[(sorted_x[0], sorted_x[-1])])
+                                if (not result.success) or result.x[0] < 0:
+                                    raise ValueError(
+                                        "Negative lattice constant!")
+                                x = result.x[0]
+                                logger.info("BFGS minimized %s = %f."
+                                            % (lattice_direction, x))
+                            except ValueError as ex:
+                                # Fall back on bisection algo if the bfgs fails.
+                                logger.info(str(ex))
+                                x = (min_x + sorted_x[other]) / 2
+                                logger.info("Falling back on bisection %s = %f."
+                                            % (lattice_direction, x))
+                        else:
+                            x = (min_x + sorted_x[other]) / 2
+                            logger.info("Bisection %s = %f."
+                                        % (lattice_direction, x))
+
+                lattice = lattice.matrix
+                lattice[lattice_index] = lattice[lattice_index] / \
+                    np.linalg.norm(lattice[lattice_index]) * x
+
+                s = Structure(lattice, structure.species, structure.frac_coords)
+                fname = "POSCAR.%f" % x
+                s.to(filename=fname)
+
+                incar_update = {"ISTART": 1, "NSW": nsw, "ISIF": 2}
+
+                settings = [
+                    {"dict": "INCAR",
+                     "action": {"_set": incar_update}},
+                    {"file": fname,
+                     "action": {"_file_copy": {"dest": "POSCAR"}}}]
+
+            logger.info("Generating job = %d with parameter %f!" % (i + 1, x))
+            yield VaspJob(vasp_cmd, final=False, backup=backup,
+                          suffix=".static.%f" % x,
+                          settings_override=settings, **vasp_job_kwargs)
+
+        with open("EOS.txt", "wt") as f:
+            f.write("# %s energy\n" % lattice_direction)
+            for k in sorted(energies.keys()):
+                f.write("%f %f\n" % (k, energies[k]))
 
 
 class VaspNEBJob(Job):
@@ -524,7 +686,7 @@ class VaspNEBJob(Job):
                     cmd = self.gamma_vasp_cmd
                 elif which(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
-        logging.info("Running {}".format(" ".join(cmd)))
+        logger.info("Running {}".format(" ".join(cmd)))
         with open(self.output_file, 'w') as f_std, \
                 open(self.stderr_file, "w", buffering=1) as f_err:
 
@@ -553,23 +715,3 @@ class VaspNEBJob(Job):
                     shutil.move(f, "{}{}".format(f, self.suffix))
                 elif self.suffix != "":
                     shutil.copy(f, "{}{}".format(f, self.suffix))
-
-    def as_dict(self):
-        d = dict(vasp_cmd=self.vasp_cmd,
-                 output_file=self.output_file, suffix=self.suffix,
-                 final=self.final, backup=self.backup,
-                 auto_npar=self.auto_npar, auto_gamma=self.auto_gamma,
-                 gamma_vasp_cmd=self.gamma_vasp_cmd
-                 )
-        d["@module"] = self.__class__.__module__
-        d["@class"] = self.__class__.__name__
-        return d
-
-    @classmethod
-    def from_dict(cls, d):
-        return VaspNEBJob(
-            vasp_cmd=d["vasp_cmd"], output_file=d["output_file"],
-            suffix=d["suffix"], final=d["final"],
-            backup=d["backup"],
-            auto_npar=d['auto_npar'], auto_gamma=d['auto_gamma'],
-            gamma_vasp_cmd=d["gamma_vasp_cmd"])

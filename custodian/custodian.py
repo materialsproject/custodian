@@ -357,7 +357,9 @@ class Custodian(object):
         self.run_log.append({"job": job.as_dict(), "corrections": []})
         job.setup()
 
-        for attempt in range(1, self.max_errors - self.total_errors + 1):
+        attempt = 0
+        while self.total_errors < self.max_errors:
+            attempt += 1
             logger.info(
                 "Starting job no. {} ({}) attempt no. {}. Errors "
                 "thus far = {}.".format(
