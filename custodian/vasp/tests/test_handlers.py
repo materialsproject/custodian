@@ -80,6 +80,23 @@ class VaspErrorHandlerTest(unittest.TestCase):
                          [{'action': {'_set': {'LREAL': False}},
                            'dict': 'INCAR'}])
 
+        subdir = os.path.join(test_dir, "large_cell_real_optlay")
+        os.chdir(subdir)
+        shutil.copy("INCAR", "INCAR.orig")
+        h = VaspErrorHandler()
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ['real_optlay'])
+        vi = VaspInput.from_directory(".")
+        self.assertEqual(vi["INCAR"]["LREAL"], True)
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ['real_optlay'])
+        vi = VaspInput.from_directory(".")
+        self.assertEqual(vi["INCAR"]["LREAL"], False)
+        shutil.copy("INCAR.orig", "INCAR")
+        os.remove("INCAR.orig")
+
     def test_mesh_symmetry(self):
         h = MeshSymmetryErrorHandler("vasp.ibzkpt")
         h.check()

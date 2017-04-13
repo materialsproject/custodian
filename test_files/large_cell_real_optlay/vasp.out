@@ -1,0 +1,47 @@
+ running on   32 total cores
+ distrk:  each k-point on   32 cores,    1 groups
+ distr:  one band on    8 cores,    4 groups
+ using from now: INCAR     
+ vasp.5.3.5 31Mar14 (build Jun 29 2016 14:45:05) complex                        
+  
+ POSCAR found type information on POSCAR  O  Al Ca
+ POSCAR found :  3 types and     118 ions
+ scaLAPACK will be used
+ WARNING: PSMAXN for non-local potential too small
+ LDA part: xc-table for Pade appr. of Perdew
+ POSCAR found type information on POSCAR  O  Al Ca
+ POSCAR found :  3 types and     118 ions
+ generate k-points for:    3    3    3
+ POSCAR, INCAR and KPOINTS ok, starting setup
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632
+ REAL_OPTLAY: internal error (1)     2629200     2629632

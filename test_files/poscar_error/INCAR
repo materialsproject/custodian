@@ -7,6 +7,7 @@ ISIF = 3
 ISMEAR = 0
 ISPIN = 2
 ISTART = 1
+ISYM = 0
 LDAU = True
 LDAUJ = 0 0 0 0
 LDAUL = 0 2 2 0
