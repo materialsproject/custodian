@@ -103,6 +103,9 @@ class VaspErrorHandler(ErrorHandler):
         self.output_filename = output_filename
         self.errors = set()
         self.error_count = Counter()
+        # threshold of number of atoms to treat the cell as large.
+        self.natoms_large_cell = 100
+
 
     def check(self):
         incar = Incar.from_file("INCAR")
@@ -236,7 +239,7 @@ class VaspErrorHandler(ErrorHandler):
         if self.errors.intersection(["subspacematrix", "rspher",
                                      "real_optlay"]):
             s = vi["POSCAR"].structure
-            if len(s) < 50:
+            if len(s) < self.natoms_large_cell:
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"LREAL": False}}})
             else:
