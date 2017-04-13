@@ -96,6 +96,8 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(vi["INCAR"]["LREAL"], False)
         shutil.copy("INCAR.orig", "INCAR")
         os.remove("INCAR.orig")
+        os.remove("error.1.tar.gz")
+        os.remove("error.2.tar.gz")
         os.chdir(test_dir)
 
     def test_mesh_symmetry(self):
