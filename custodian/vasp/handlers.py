@@ -90,7 +90,7 @@ class VaspErrorHandler(ErrorHandler):
         "grad_not_orth": ["EDWAV: internal error, the gradient is not orthogonal"]
     }
 
-    def __init__(self, output_filename="vasp.out"):
+    def __init__(self, output_filename="vasp.out", natoms_large_cell=100):
         """
         Initializes the handler with the output file to check.
 
@@ -104,8 +104,7 @@ class VaspErrorHandler(ErrorHandler):
         self.errors = set()
         self.error_count = Counter()
         # threshold of number of atoms to treat the cell as large.
-        self.natoms_large_cell = 100
-
+        self.natoms_large_cell = natoms_large_cell
 
     def check(self):
         incar = Incar.from_file("INCAR")
