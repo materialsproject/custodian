@@ -47,7 +47,7 @@ __status__ = "Beta"
 __date__ = "2/4/13"
 
 
-VASP_BACKUP_FILES = {"INCAR", "KPOINTS", "POSCAR", "OUTCAR", "OSZICAR",
+VASP_BACKUP_FILES = {"INCAR", "KPOINTS", "POSCAR", "OUTCAR", "CONTCAR", "OSZICAR",
                      "vasprun.xml", "vasp.out", "std_err.txt"}
 
 
