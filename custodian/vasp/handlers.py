@@ -87,7 +87,8 @@ class VaspErrorHandler(ErrorHandler):
         "pssyevx": ["ERROR in subspace rotation PSSYEVX"],
         "eddrmm": ["WARNING in EDDRMM: call to ZHEGV failed"],
         "edddav": ["Error EDDDAV: Call to ZHEGV failed"],
-        "grad_not_orth": ["EDWAV: internal error, the gradient is not orthogonal"]
+        "grad_not_orth": ["EDWAV: internal error, the gradient is not orthogonal"],
+        "nicht_konv": ["ERROR: SBESSELITER : nicht konvergent"]
     }
 
     def __init__(self, output_filename="vasp.out", natoms_large_cell=100):
@@ -236,7 +237,7 @@ class VaspErrorHandler(ErrorHandler):
                                 "action": {"_file_delete": {'mode': "actual"}}})
 
         if self.errors.intersection(["subspacematrix", "rspher",
-                                     "real_optlay"]):
+                                     "real_optlay", "nicht_konv"]):
             s = vi["POSCAR"].structure
             if len(s) < self.natoms_large_cell:
                 actions.append({"dict": "INCAR",

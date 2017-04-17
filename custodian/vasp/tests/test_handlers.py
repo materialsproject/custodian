@@ -203,6 +203,14 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertEqual(i["POTIM"], 0.25)
 
+    def test_nicht_konv(self):
+        h = VaspErrorHandler("vasp.nicht_konvergent")
+        h.natoms_large_cell = 5
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["nicht_konv"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["LREAL"], True)
+
     def test_edddav(self):
         h = VaspErrorHandler("vasp.edddav")
         self.assertEqual(h.check(), True)

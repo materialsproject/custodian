@@ -1,0 +1,85 @@
+ running on   32 total cores
+ distrk:  each k-point on    8 cores,    4 groups
+ distr:  one band on    1 cores,    8 groups
+ using from now: INCAR     
+ vasp.5.4.1 24Jun15 (build Jul  5 2016 17:05:12) complex                         
+ POSCAR found type information on POSCAR  O  Al Gd
+ POSCAR found :  3 types and      80 ions
+ scaLAPACK will be used
+
+ ----------------------------------------------------------------------------- 
+|                                                                             |
+|           W    W    AA    RRRRR   N    N  II  N    N   GGGG   !!!           |
+|           W    W   A  A   R    R  NN   N  II  NN   N  G    G  !!!           |
+|           W    W  A    A  R    R  N N  N  II  N N  N  G       !!!           |
+|           W WW W  AAAAAA  RRRRR   N  N N  II  N  N N  G  GGG   !            |
+|           WW  WW  A    A  R   R   N   NN  II  N   NN  G    G                |
+|           W    W  A    A  R    R  N    N  II  N    N   GGGG   !!!           |
+|                                                                             |
+|      For optimal performance we recommend to set                            |
+|        NCORE= 4 - approx SQRT( number of cores)                             |
+|      NCORE specifies how many cores store one orbital (NPAR=cpu/NCORE).     |
+|      This setting can  greatly improve the performance of VASP for DFT.     |
+|      The default, NPAR=number of cores might be grossly inefficient         |
+|      on modern multi-core architectures or massively parallel machines.     |
+|      Do your own testing !!!!                                               |
+|      Unfortunately you need to use the default for GW and RPA calculations. |
+|      (for HF NCORE is supported but not extensively tested yet)             |
+|                                                                             |
+ ----------------------------------------------------------------------------- 
+
+
+ ----------------------------------------------------------------------------- 
+|                                                                             |
+|           W    W    AA    RRRRR   N    N  II  N    N   GGGG   !!!           |
+|           W    W   A  A   R    R  NN   N  II  NN   N  G    G  !!!           |
+|           W    W  A    A  R    R  N N  N  II  N N  N  G       !!!           |
+|           W WW W  AAAAAA  RRRRR   N  N N  II  N  N N  G  GGG   !            |
+|           WW  WW  A    A  R   R   N   NN  II  N   NN  G    G                |
+|           W    W  A    A  R    R  N    N  II  N    N   GGGG   !!!           |
+|                                                                             |
+|      You have enabled k-point parallelism (KPAR>1).                         |
+|      This developmental code was originally  written by Paul Kent at ORNL,  |
+|      and carefully double checked in Vienna.                                |
+|      GW as well as linear response parallelism added by Martijn Marsman     |
+|      and Georg Kresse.                                                      |
+|      Carefully verify results versus KPAR=1.                                |
+|      Report problems to Paul Kent and Vienna.                               |
+|                                                                             |
+ ----------------------------------------------------------------------------- 
+
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ ERROR: SBESSELITER : nicht konvergent
+ WARNING: PSMAXN for non-local potential too small
+ LDA part: xc-table for Pade appr. of Perdew
+ generate k-points for:    4    4    4
+ POSCAR, INCAR and KPOINTS ok, starting setup
