@@ -706,6 +706,10 @@ class QChemErrorHandlerTest(TestCase):
             ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
+    @unittest.skipIf(parse_version(pymatgen.__version__) <=
+                     parse_version('4.7.4'),
+                     "MXYZ and QcNucVeloc in pymatgen is a feature after "
+                     "version 4.7.4")
     def test_scf_in_aimd_reset(self):
         shutil.copyfile(os.path.join(test_dir, "h2o_aimd", "h2o_aimd.qcinp"),
                         os.path.join(scr_dir, "h2o_aimd.qcinp"))
