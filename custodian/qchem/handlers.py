@@ -339,7 +339,7 @@ class QChemErrorHandler(ErrorHandler):
                 qcnv_filepath = os.path.join(scr_dir, "AIMD", "NucVeloc")
                 qc_md_view_filepath = os.path.join(scr_dir, "AIMD", "View.xyz")
                 qcnv = QcNucVeloc(qcnv_filepath)
-                qc_md_view = MXYZ(qc_md_view_filepath)
+                qc_md_view = MXYZ.from_file(qc_md_view_filepath)
                 assert len(qcnv.velocities) == len(qc_md_view.molecules)
                 aimd_steps = self.fix_step.params["rem"]["aimd_steps"]
                 elapsed_steps = len(qc_md_view.molecules)

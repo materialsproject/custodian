@@ -58,7 +58,7 @@ qchem aimd.inp_10826.0 /Users/xiaohuiqu/scratch/qchem10826/ 1
 Host: 
 0
 
-     Scratch files written to /Users/xiaohuiqu/scratch/qchem10826//
+     Scratch files written to ./
  May1314 814_zgan 4730   
 Processing $rem in /Users/xiaohuiqu/program/qchem/config/preferences.
  MEM_TOTAL  2000 

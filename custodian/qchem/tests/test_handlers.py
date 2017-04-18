@@ -707,10 +707,12 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(ref, ans)
 
     def test_scf_in_aimd_reset(self):
-        shutil.copyfile(os.path.join(test_dir, "h2o_aimd.qcinp"),
+        shutil.copyfile(os.path.join(test_dir, "h2o_aimd", "h2o_aimd.qcinp"),
                         os.path.join(scr_dir, "h2o_aimd.qcinp"))
-        shutil.copyfile(os.path.join(test_dir, "h2o_aimd.qcout"),
+        shutil.copyfile(os.path.join(test_dir, "h2o_aimd", "h2o_aimd.qcout"),
                         os.path.join(scr_dir, "h2o_aimd.qcout"))
+        shutil.copytree(os.path.join(test_dir, "h2o_aimd", "AIMD"),
+                        "AIMD")
         h = QChemErrorHandler(input_file="h2o_aimd.qcinp",
                               output_file="h2o_aimd.qcout")
         has_error = h.check()
@@ -718,7 +720,7 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d, {'errors': ['Bad SCF convergence'],
                              'actions': ['reset']})
-        with open(os.path.join(test_dir, "h2o_aimd_reset.qcinp")) as f:
+        with open(os.path.join(test_dir,"h2o_aimd", "h2o_aimd_reset.qcinp")) as f:
             ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "h2o_aimd.qcinp")) as f:
             ans = [line.strip() for line in f.readlines()]
