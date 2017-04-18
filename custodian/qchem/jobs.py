@@ -208,8 +208,9 @@ class QchemJob(Job):
             # on ALCF
             returncode = self._run_qchem_on_alcf(log_file_object=log_file_object)
         else:
-            qc_cmd = shlex.split(" ".join(self.current_command + [self.run_name]))
+            qc_cmd = copy.deepcopy(self.current_command)
             qc_cmd += [self.input_file, self.output_file]
+            qc_cmd = shlex.split(" ".join(qc_cmd + [self.run_name]))
             qc_cmd = [str(t) for t in qc_cmd]
             if self.chk_file:
                 qc_cmd.append(self.chk_file)
