@@ -347,7 +347,7 @@ class QChemErrorHandler(ErrorHandler):
                 self.fix_step.params["rem"]["aimd_steps"] = remaining_steps
                 self.set_last_input_geom(qc_md_view.molecules[-1])
                 self.fix_step.set_velocities(qcnv.velocities[-1])
-                self.fix_step.params.pop("aimd_init_veloc", None)
+                self.fix_step.params["rem"].pop("aimd_init_veloc", None)
                 traj_num = max([0] + [int(f.split(".")[1])
                                        for f in glob.glob("traj_View.*.xyz")])
                 dest_view_filename = "traj_View.{}.xyz".format(traj_num + 1)

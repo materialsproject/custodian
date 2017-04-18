@@ -13,7 +13,6 @@ $rem
           jobtype = aimd
          exchange = b3lyp
             basis = 6-31g*
-  aimd_init_veloc = thermal
       aimd_method = bomd
        aimd_steps = 3
         aimd_temp = 298
