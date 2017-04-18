@@ -336,8 +336,9 @@ class QchemJob(Job):
                     subprocess.call(tmp_creation_cmd, stdout=filelog)
                 returncode = self._run_qchem(log_file_object=filelog)
                 if tmp_clean_cmd:
-                    filelog.write("clean scratch after running qchem using command {}\n".format(tmp_clean_cmd))
-                    subprocess.call(tmp_clean_cmd, stdout=filelog)
+                    filelog.write("Finished running qchem using command {}\n, "
+                                  "no clean of SCRATCH will be performed".format(tmp_clean_cmd))
+                    # subprocess.call(tmp_clean_cmd, stdout=filelog)
         else:
             if tmp_clean_cmd:
                 subprocess.call(tmp_clean_cmd)
