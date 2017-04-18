@@ -37,7 +37,8 @@ class QchemJob(Job):
     def __init__(self, qchem_cmd, input_file="mol.qcinp",
                  output_file="mol.qcout", chk_file=None, qclog_file=None,
                  gzipped=False, backup=True, alt_cmd=None,
-                 large_static_mem=False, total_physical_memory=100):
+                 large_static_mem=False, total_physical_memory=100,
+                 run_name=None):
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -63,8 +64,10 @@ class QchemJob(Job):
             large_static_mem: use ultra large static memory
             total_physical_memory (int): The total physical memory available to
                 the QChem job in unit of GB.
+            run_name (str): the name to save scratch files.
         """
         self.qchem_cmd = self._modify_qchem_according_to_version(copy.deepcopy(qchem_cmd))
+        self.run_name = "" if run_name is None else run_name
         self.input_file = input_file
         self.output_file = output_file
         self.chk_file = chk_file
@@ -205,8 +208,7 @@ class QchemJob(Job):
             # on ALCF
             returncode = self._run_qchem_on_alcf(log_file_object=log_file_object)
         else:
-
-            qc_cmd = copy.deepcopy(self.current_command)
+            qc_cmd = shlex.split(" ".join(self.current_command + [self.run_name]))
             qc_cmd += [self.input_file, self.output_file]
             qc_cmd = [str(t) for t in qc_cmd]
             if self.chk_file:
@@ -356,7 +358,8 @@ class QchemJob(Job):
              "gzipped": self.gzipped,
              "backup": self.backup,
              "large_static_mem": self.large_static_mem,
-             "alt_cmd": self.alt_cmd}
+             "alt_cmd": self.alt_cmd,
+             "run_name": self.run_name}
         return d
 
     @classmethod
@@ -369,7 +372,8 @@ class QchemJob(Job):
                         gzipped=d["gzipped"],
                         backup=d["backup"],
                         alt_cmd=d["alt_cmd"],
-                        large_static_mem=d["large_static_mem"])
+                        large_static_mem=d["large_static_mem"],
+                        run_name=d["run_name"])
 
     def postprocess(self):
         if self.gzipped:
