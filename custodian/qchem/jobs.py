@@ -209,6 +209,8 @@ class QchemJob(Job):
             returncode = self._run_qchem_on_alcf(log_file_object=log_file_object)
         else:
             qc_cmd = copy.deepcopy(self.current_command)
+            if len(self.run_name.strip()) > 0:
+                qc_cmd.insert(1, "-save")
             qc_cmd += [self.input_file, self.output_file]
             qc_cmd = shlex.split(" ".join(qc_cmd + [self.run_name]))
             qc_cmd = [str(t) for t in qc_cmd]
