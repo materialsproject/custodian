@@ -586,5 +586,30 @@ class KpointsTransHandlerTest(unittest.TestCase):
         os.chdir(cwd)
 
 
+class OutOfMemoryHandlerTest(unittest.TestCase):
+
+    def setUp(self):
+        os.chdir(test_dir)
+        shutil.copy("KPOINTS", "KPOINTS.orig")
+
+    def test_oom(self):
+        vi = VaspInput.from_directory(".")
+        from custodian.vasp.interpreter import VaspModder
+        VaspModder(vi=vi).apply_actions([{"dict": "INCAR",
+                                          "action": {"_set": {"KPAR": 4}}}])
+        h = StdErrHandler("std_err.txt.oom")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d["errors"], ['out_of_memory'])
+        self.assertEqual(d["actions"],
+                         [{'dict': 'INCAR',
+                           'action': {'_set': {'KPAR': 2}}}])
+
+    def tearDown(self):
+        shutil.move("KPOINTS.orig", "KPOINTS")
+        clean_dir()
+        os.chdir(cwd)
+
+
 if __name__ == "__main__":
     unittest.main()

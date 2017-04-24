@@ -358,7 +358,8 @@ class StdErrHandler(ErrorHandler):
     error_msgs = {
         "lrf_comm": ["LRF_COMMUTATOR internal error"],
         "kpoints_trans": ["internal error in GENERATE_KPOINTS_TRANS: "
-                          "number of G-vector changed in star"]
+                          "number of G-vector changed in star"],
+        "out_of_memory": ["Allocation would exceed memory limit"]
     }
 
     def __init__(self, output_filename="std_err.txt"):
@@ -409,6 +410,12 @@ class StdErrHandler(ErrorHandler):
                     m += m % 2
                 actions.append({"dict": "KPOINTS", "action": {"_set": {"kpoints": [[m] * 3]}}})
                 self.error_count['kpoints_trans'] += 1
+
+        if "out_of_memory" in self.errors:
+            if vi["INCAR"].get("KPAR", 1) > 1:
+                reduced_kpar = max(vi["INCAR"].get("KPAR", 1) // 2, 1)
+                actions.append({"dict": "INCAR",
+                                "action": {"_set": {"KPAR": reduced_kpar}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
