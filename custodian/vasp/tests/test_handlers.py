@@ -590,7 +590,7 @@ class OutOfMemoryHandlerTest(unittest.TestCase):
 
     def setUp(self):
         os.chdir(test_dir)
-        shutil.copy("KPOINTS", "KPOINTS.orig")
+        shutil.copy("INCAR", "INCAR.orig")
 
     def test_oom(self):
         vi = VaspInput.from_directory(".")
@@ -606,7 +606,7 @@ class OutOfMemoryHandlerTest(unittest.TestCase):
                            'action': {'_set': {'KPAR': 2}}}])
 
     def tearDown(self):
-        shutil.move("KPOINTS.orig", "KPOINTS")
+        shutil.move("INCAR.orig", "INCAR")
         clean_dir()
         os.chdir(cwd)
 
