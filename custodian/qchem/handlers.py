@@ -1,6 +1,8 @@
 # coding: utf-8
 
 from __future__ import unicode_literals, division
+
+import shutil
 import time
 
 """
@@ -327,12 +329,33 @@ class QChemErrorHandler(ErrorHandler):
                 self.set_scf_initial_guess("read")
             else:
                 self.set_scf_initial_guess("sad")
-            self.set_last_input_geom(od["molecules"][-1])
-            if od["jobtype"] == "aimd":
+            if od["jobtype"] in ["opt", "ts"]:
+                self.set_last_input_geom(od["molecules"][-1])
+            else:
+                assert od["jobtype"] == "aimd"
+                from pymatgen.io.qchem import QcNucVeloc
+                from pymatgen.io.xyz import XYZ
+                scr_dir = od["scratch_dir"]
+                qcnv_filepath = os.path.join(scr_dir, "AIMD", "NucVeloc")
+                qc_md_view_filepath = os.path.join(scr_dir, "AIMD", "View.xyz")
+                qcnv = QcNucVeloc(qcnv_filepath)
+                qc_md_view = XYZ.from_file(qc_md_view_filepath)
+                assert len(qcnv.velocities) == len(qc_md_view.all_molecules)
                 aimd_steps = self.fix_step.params["rem"]["aimd_steps"]
-                elapsed_steps = len(od["molecules"]) - 1
+                elapsed_steps = len(qc_md_view.all_molecules)
                 remaining_steps = aimd_steps - elapsed_steps + 1
                 self.fix_step.params["rem"]["aimd_steps"] = remaining_steps
+                self.set_last_input_geom(qc_md_view.molecule)
+                self.fix_step.set_velocities(qcnv.velocities[-1])
+                self.fix_step.params["rem"].pop("aimd_init_veloc", None)
+                traj_num = max([0] + [int(f.split(".")[1])
+                                       for f in glob.glob("traj_View.*.xyz")])
+                dest_view_filename = "traj_View.{}.xyz".format(traj_num + 1)
+                dest_nv_filename = "traj_NucVeloc.{}.txt".format(traj_num + 1)
+                logging.info("Backing up trajectory files to {} and {}."
+                             .format(dest_view_filename, dest_nv_filename))
+                shutil.copy(qc_md_view_filepath, dest_view_filename)
+                shutil.copy(qcnv_filepath, dest_nv_filename)
             if len(old_strategy_text) > 0:
                 comments = scf_pattern.sub("", comments)
                 self.fix_step.params["comment"] = comments

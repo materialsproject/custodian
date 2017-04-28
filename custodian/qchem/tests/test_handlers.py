@@ -34,7 +34,7 @@ test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
                         "test_files", "qchem")
 # noinspection PyUnresolvedReferences
 scr_dir = os.path.join(test_dir, "scr")
-
+cwd = os.getcwd()
 
 class QChemErrorHandlerTest(TestCase):
     def setUp(self):
@@ -706,11 +706,17 @@ class QChemErrorHandlerTest(TestCase):
             ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
+    @unittest.skipIf(parse_version(pymatgen.__version__) <=
+                     parse_version('4.7.4'),
+                     "MXYZ and QcNucVeloc in pymatgen is a feature after "
+                     "version 4.7.4")
     def test_scf_in_aimd_reset(self):
-        shutil.copyfile(os.path.join(test_dir, "h2o_aimd.qcinp"),
+        shutil.copyfile(os.path.join(test_dir, "h2o_aimd", "h2o_aimd.qcinp"),
                         os.path.join(scr_dir, "h2o_aimd.qcinp"))
-        shutil.copyfile(os.path.join(test_dir, "h2o_aimd.qcout"),
+        shutil.copyfile(os.path.join(test_dir, "h2o_aimd", "h2o_aimd.qcout"),
                         os.path.join(scr_dir, "h2o_aimd.qcout"))
+        shutil.copytree(os.path.join(test_dir, "h2o_aimd", "AIMD"),
+                        "AIMD")
         h = QChemErrorHandler(input_file="h2o_aimd.qcinp",
                               output_file="h2o_aimd.qcout")
         has_error = h.check()
@@ -718,7 +724,7 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d, {'errors': ['Bad SCF convergence'],
                              'actions': ['reset']})
-        with open(os.path.join(test_dir, "h2o_aimd_reset.qcinp")) as f:
+        with open(os.path.join(test_dir,"h2o_aimd", "h2o_aimd_reset.qcinp")) as f:
             ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "h2o_aimd.qcinp")) as f:
             ans = [line.strip() for line in f.readlines()]
@@ -848,6 +854,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(q3.as_dict(), q4.as_dict())
 
     def tearDown(self):
+        os.chdir(cwd)
         shutil.rmtree(scr_dir)
         pass
 
