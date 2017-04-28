@@ -34,7 +34,7 @@ test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
                         "test_files", "qchem")
 # noinspection PyUnresolvedReferences
 scr_dir = os.path.join(test_dir, "scr")
-
+cwd = os.getcwd()
 
 class QChemErrorHandlerTest(TestCase):
     def setUp(self):
@@ -854,6 +854,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(q3.as_dict(), q4.as_dict())
 
     def tearDown(self):
+        os.chdir(cwd)
         shutil.rmtree(scr_dir)
         pass
 
