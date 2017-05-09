@@ -18,9 +18,9 @@ import unittest
 import os
 import shutil
 import glob
-
+from monty.tempfile import ScratchDir
 import multiprocessing
-from custodian.vasp.jobs import VaspJob, VaspNEBJob
+from custodian.vasp.jobs import VaspJob, VaspNEBJob, GenerateVaspInputJob
 from pymatgen.io.vasp import Incar, Kpoints
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
@@ -133,6 +133,26 @@ class VaspNEBJobTest(unittest.TestCase):
                     self.assertTrue(os.path.isfile('{}.test'.format(f)))
                     os.remove('{}.test'.format(f))
 
+
+class GenerateVaspInputJobTest(unittest.TestCase):
+
+    def test_run(self):
+
+        if "VASP_PSP_DIR" not in os.environ:
+            os.environ["VASP_PSP_DIR"] = test_dir
+
+        with ScratchDir(".") as d:
+            for f in ["INCAR", "POSCAR", "POTCAR", "KPOINTS"]:
+                shutil.copy(os.path.join(test_dir, f), f)
+            oldincar = Incar.from_file("INCAR")
+            v = GenerateVaspInputJob("pymatgen.io.vasp.sets.MPNonSCFSet",
+                                     contcar_only=False)
+            v.run()
+            incar = Incar.from_file("INCAR")
+            self.assertEqual(incar["ICHARG"], 11)
+            self.assertEqual(oldincar["ICHARG"], 1)
+            kpoints = Kpoints.from_file("KPOINTS")
+            self.assertEqual(str(kpoints.style), "Reciprocal")
+
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

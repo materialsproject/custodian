@@ -715,3 +715,39 @@ class VaspNEBJob(Job):
                     shutil.move(f, "{}{}".format(f, self.suffix))
                 elif self.suffix != "":
                     shutil.copy(f, "{}{}".format(f, self.suffix))
+
+
+class GenerateVaspInputJob(Job):
+
+    def __init__(self, input_set, contcar_only=True, **kwargs):
+        """
+        Generates a VASP input based on an existing directory. This is typically
+        used to modify the VASP input files before the next VaspJob.
+        
+        Args:
+            input_set (str): Full path to the input set. E.g., 
+                "pymatgen.io.vasp.sets.MPBSSet".
+            contcar_only (bool): If True (default), only CONTCAR structures
+                are used as input to the input set.
+        """
+        self.input_set = input_set
+        self.contcar_only = contcar_only
+        self.kwargs = kwargs
+
+    def setup(self):
+        pass
+
+    def run(self):
+        if os.path.exists("CONTCAR"):
+            structure = Structure.from_file("CONTCAR")
+        elif (not self.contcar_only) and os.path.exists("POSCAR"):
+            structure = Structure.from_file("POSCAR")
+        else:
+            raise RuntimeError("No CONTCAR/POSCAR detected to generate input!")
+        modname, classname = self.input_set.rsplit(".", 1)
+        mod = __import__(modname, globals(), locals(), [classname], 0)
+        vis = getattr(mod, classname)(structure, **self.kwargs)
+        vis.write_input(".")
+
+    def postprocess(self):
+        pass
