@@ -138,8 +138,7 @@ class GenerateVaspInputJobTest(unittest.TestCase):
 
     def test_run(self):
 
-        if "PMG_VASP_PSP_DIR" not in os.environ:
-            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.environ["PMG_VASP_PSP_DIR"] = test_dir
 
         with ScratchDir(".") as d:
             for f in ["INCAR", "POSCAR", "POTCAR", "KPOINTS"]:
