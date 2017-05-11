@@ -43,8 +43,7 @@ def clean_dir():
 class VaspErrorHandlerTest(unittest.TestCase):
 
     def setUp(self):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
+        os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
         shutil.copy("INCAR", "INCAR.orig")
         shutil.copy("KPOINTS", "KPOINTS.orig")
@@ -167,8 +166,8 @@ class VaspErrorHandlerTest(unittest.TestCase):
         os.chdir(test_dir)
 
     def test_rot_matrix(self):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
         subdir = os.path.join(test_dir, "poscar_error")
         os.chdir(subdir)
         shutil.copy("KPOINTS", "KPOINTS.orig")
@@ -237,8 +236,8 @@ class VaspErrorHandlerTest(unittest.TestCase):
 class AliasingErrorHandlerTest(unittest.TestCase):
 
     def setUp(self):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
         shutil.copy("INCAR", "INCAR.orig")
         shutil.copy("KPOINTS", "KPOINTS.orig")
@@ -305,8 +304,8 @@ class AliasingErrorHandlerTest(unittest.TestCase):
 class UnconvergedErrorHandlerTest(unittest.TestCase):
 
     def setUp(cls):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
 
     def test_check_correct(self):
@@ -344,8 +343,8 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
 class ZpotrfErrorHandlerTest(unittest.TestCase):
 
     def setUp(self):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
         os.chdir('zpotrf')
         shutil.copy("POSCAR", "POSCAR.orig")
@@ -384,8 +383,8 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
 class MaxForceErrorHandlerTest(unittest.TestCase):
 
     def setUp(self):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
 
     def test_check_correct(self):
