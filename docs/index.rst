@@ -25,6 +25,10 @@ calculations.
 Change log
 ==========
 
+v1.1.0
+------
+* Improved error handling for Qchem calculations.
+
 v1.0.4
 ------
 * Improved handling of non-zero return codes.
