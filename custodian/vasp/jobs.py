@@ -726,7 +726,7 @@ class GenerateVaspInputJob(Job):
         
         Args:
             input_set (str): Full path to the input set. E.g., 
-                "pymatgen.io.vasp.sets.MPBSSet".
+                "pymatgen.io.vasp.sets.MPNonSCFSet".
             contcar_only (bool): If True (default), only CONTCAR structures
                 are used as input to the input set.
         """
