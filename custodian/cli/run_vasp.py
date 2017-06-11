@@ -9,7 +9,7 @@ from __future__ import division
 
 import logging
 import sys
-import yaml
+import ruamel.yaml as yaml
 
 from custodian.custodian import Custodian
 from custodian.vasp.jobs import VaspJob
@@ -29,7 +29,7 @@ def load_class(mod, name):
     if len(toks) == 2:
         for p in toks[-1].split(","):
             ptoks = p.split("=")
-            params[ptoks[0]] = yaml.load(ptoks[1])
+            params[ptoks[0]] = yaml.safe_load(ptoks[1])
     elif len(toks) > 2:
         print("Bad handler specification")
         sys.exit(-1)
