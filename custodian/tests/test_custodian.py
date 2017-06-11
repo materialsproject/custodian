@@ -8,7 +8,7 @@ import os
 import glob
 import shutil
 import subprocess
-import yaml
+import ruamel.yaml as yaml
 
 """
 Created on Jun 1, 2012
@@ -214,7 +214,7 @@ custodian_params:
 
         os.environ["TMPDIR"] = "/tmp/random"
         os.environ["PBS_NODEFILE"] = "whatever"
-        d = yaml.load(spec)
+        d = yaml.safe_load(spec)
         c = Custodian.from_spec(d)
         self.assertEqual(c.jobs[0].vasp_cmd[2], "whatever")
         self.assertEqual(c.scratch_dir, "/tmp/random")
