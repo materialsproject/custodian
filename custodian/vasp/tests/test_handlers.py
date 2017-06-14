@@ -303,12 +303,10 @@ class AliasingErrorHandlerTest(unittest.TestCase):
 
 class UnconvergedErrorHandlerTest(unittest.TestCase):
 
-    def setUp(cls):
+    def setUp(self):
         if "PMG_VASP_PSP_DIR" not in os.environ:
             os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
-
-    def test_check_correct(self):
         subdir = os.path.join(test_dir, "unconverged")
         os.chdir(subdir)
 
@@ -317,17 +315,21 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         shutil.copy("POSCAR", "POSCAR.orig")
         shutil.copy("CONTCAR", "CONTCAR.orig")
 
+    def test_check_correct_electronic(self):
+        shutil.copy("vasprun.xml.electronic", "vasprun.xml")
         h = UnconvergedErrorHandler()
         self.assertTrue(h.check())
         d = h.correct()
         self.assertEqual(d["errors"], ['Unconverged'])
+        os.remove("vasprun.xml")
 
-        os.remove(os.path.join(subdir, "error.1.tar.gz"))
-
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("KPOINTS.orig", "KPOINTS")
-        shutil.move("POSCAR.orig", "POSCAR")
-        shutil.move("CONTCAR.orig", "CONTCAR")
+    def test_check_correct_ionic(self):
+        shutil.copy("vasprun.xml.ionic", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ['Unconverged'])
+        os.remove("vasprun.xml")
 
     def test_to_from_dict(self):
         h = UnconvergedErrorHandler("random_name.xml")
@@ -335,8 +337,12 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         self.assertEqual(type(h2), UnconvergedErrorHandler)
         self.assertEqual(h2.output_filename, "random_name.xml")
 
-    @classmethod
-    def tearDownClass(cls):
+    def tearDown(self):
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("KPOINTS.orig", "KPOINTS")
+        shutil.move("POSCAR.orig", "POSCAR")
+        shutil.move("CONTCAR.orig", "CONTCAR")
+        clean_dir()
         os.chdir(cwd)
 
 

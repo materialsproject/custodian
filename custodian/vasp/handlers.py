@@ -610,7 +610,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         v = Vasprun(self.output_filename)
         actions = [{"file": "CONTCAR",
                     "action": {"_file_copy": {"dest": "POSCAR"}}}]
-        if not v.electronic_convergence:
+        if not v.converged_electronic:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ISTART": 1,
                                                 "ALGO": "Normal",
@@ -618,7 +618,7 @@ class UnconvergedErrorHandler(ErrorHandler):
                                                 "BMIX": 0.001,
                                                 "AMIX_MAG": 0.8,
                                                 "BMIX_MAG": 0.001}}})
-        if not v.ionic_convergence:
+        if not v.converged_ionic:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"IBRION":1}}})
         VaspModder().apply_actions(actions)
