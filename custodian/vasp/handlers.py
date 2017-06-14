@@ -88,7 +88,8 @@ class VaspErrorHandler(ErrorHandler):
         "eddrmm": ["WARNING in EDDRMM: call to ZHEGV failed"],
         "edddav": ["Error EDDDAV: Call to ZHEGV failed"],
         "grad_not_orth": ["EDWAV: internal error, the gradient is not orthogonal"],
-        "nicht_konv": ["ERROR: SBESSELITER : nicht konvergent"]
+        "nicht_konv": ["ERROR: SBESSELITER : nicht konvergent"],
+        "zheev": ["ERROR EDDIAG: Call to routine ZHEEV failed!"]
     }
 
     def __init__(self, output_filename="vasp.out", natoms_large_cell=100):
@@ -210,7 +211,8 @@ class VaspErrorHandler(ErrorHandler):
         if "zpotrf" in self.errors:
             # Usually caused by short bond distances. If on the first step,
             # volume needs to be increased. Otherwise, it was due to a step
-            # being too big and POTIM should be decreased.
+            # being too big and POTIM should be decreased.  If a static run
+            # try turning off symmetry.
             try:
                 oszicar = Oszicar("OSZICAR")
                 nsteps = len(oszicar.ionic_steps)
@@ -222,6 +224,10 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append(
                     {"dict": "INCAR",
                      "action": {"_set": {"ISYM": 0, "POTIM": potim}}})
+            elif vi["INCAR"].get("NSW", 0) == 0 \
+                    or vi["INCAR"].get("ISIF", 0) in range(3):
+                actions.append(
+                    {"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
             else:
                 s = vi["POSCAR"].structure
                 s.apply_strain(0.2)
@@ -341,6 +347,11 @@ class VaspErrorHandler(ErrorHandler):
             if vi["INCAR"].get("ISMEAR", 1) < 0:
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"ISMEAR": "0"}}})
+        
+        if "zheev" in self.errors:
+            if vi["INCAR"].get("ALGO", "Fast").lower() != "exact":
+                actions.append({"dict": "INCAR",
+                                "action": {"_set": {"ALGO": "Exact"}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
