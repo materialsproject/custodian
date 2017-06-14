@@ -596,15 +596,20 @@ class UnconvergedErrorHandler(ErrorHandler):
 
     def correct(self):
         backup(VASP_BACKUP_FILES)
+        v = Vasprun(self.output_filename)
         actions = [{"file": "CONTCAR",
-                    "action": {"_file_copy": {"dest": "POSCAR"}}},
-                   {"dict": "INCAR",
-                    "action": {"_set": {"ISTART": 1,
-                                        "ALGO": "Normal",
-                                        "NELMDL": -6,
-                                        "BMIX": 0.001,
-                                        "AMIX_MAG": 0.8,
-                                        "BMIX_MAG": 0.001}}}]
+                    "action": {"_file_copy": {"dest": "POSCAR"}}}]
+        if not v.electronic_convergence:
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"ISTART": 1,
+                                                "ALGO": "Normal",
+                                                "NELMDL": -6,
+                                                "BMIX": 0.001,
+                                                "AMIX_MAG": 0.8,
+                                                "BMIX_MAG": 0.001}}})
+        if not v.ionic_convergence:
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"IBRION":1}}})
         VaspModder().apply_actions(actions)
         return {"errors": ["Unconverged"], "actions": actions}
 
@@ -883,6 +888,8 @@ class WalltimeHandler(ErrorHandler):
             self.wall_time = wall_time
         elif "PBS_WALLTIME" in os.environ:
             self.wall_time = int(os.environ["PBS_WALLTIME"])
+        elif "SBATCH_TIMELIMIT" in os.environ:
+            self.walltime = int(os.environ["SBATCH_TIMELIMIT"]) 
         else:
             self.wall_time = None
         self.buffer_time = buffer_time
