@@ -1,4 +1,4 @@
-import os
+import os, shutil
 import unittest
 from custodian.vasp.validators import VasprunXMLValidator, VaspFilesValidator, \
     VaspNpTMDValidator
@@ -17,7 +17,9 @@ class VasprunXMLValidatorTest(unittest.TestCase):
 
         # Unconverged still has a valid vasprun.
         os.chdir(os.path.join(test_dir, "unconverged"))
+        shutil.copy("vasprun.xml.electronic", "vasprun.xml")
         self.assertFalse(h.check())
+        os.remove("vasprun.xml")
 
     def test_as_dict(self):
         h = VasprunXMLValidator()

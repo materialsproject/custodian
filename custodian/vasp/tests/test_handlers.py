@@ -307,8 +307,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         if "PMG_VASP_PSP_DIR" not in os.environ:
             os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
-
-    def test_check_correct(self):
         subdir = os.path.join(test_dir, "unconverged")
         os.chdir(subdir)
 
@@ -317,17 +315,21 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         shutil.copy("POSCAR", "POSCAR.orig")
         shutil.copy("CONTCAR", "CONTCAR.orig")
 
+    def test_check_correct_electronic(self):
+        shutil.copy("vasprun.xml.electronic", "vasprun.xml")
         h = UnconvergedErrorHandler()
         self.assertTrue(h.check())
         d = h.correct()
         self.assertEqual(d["errors"], ['Unconverged'])
+        os.remove("vasprun.xml")
 
-        os.remove(os.path.join(subdir, "error.1.tar.gz"))
-
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("KPOINTS.orig", "KPOINTS")
-        shutil.move("POSCAR.orig", "POSCAR")
-        shutil.move("CONTCAR.orig", "CONTCAR")
+    def test_check_correct_ionic(self):
+        shutil.copy("vasprun.xml.ionic", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ['Unconverged'])
+        os.remove("vasprun.xml")
 
     def test_to_from_dict(self):
         h = UnconvergedErrorHandler("random_name.xml")
@@ -337,6 +339,11 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("KPOINTS.orig", "KPOINTS")
+        shutil.move("POSCAR.orig", "POSCAR")
+        shutil.move("CONTCAR.orig", "CONTCAR")
+        clean_dir()
         os.chdir(cwd)
 
 
@@ -370,6 +377,33 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         s2 = Structure.from_file("POSCAR")
         self.assertAlmostEqual(s2.volume, s1.volume, 3)
         self.assertAlmostEqual(Incar.from_file("INCAR")['POTIM'], 0.25)
+
+    def test_static_run_correction(self):
+        shutil.copy("OSZICAR.empty", "OSZICAR")
+        s1 = Structure.from_file("POSCAR")
+        incar = Incar.from_file("INCAR")
+
+        # Test for NSW 0
+        incar.update({"NSW": 0})
+        incar.write_file("INCAR")
+        h = VaspErrorHandler("vasp.out")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d['errors'], ['zpotrf'])
+        s2 = Structure.from_file("POSCAR")
+        self.assertAlmostEqual(s2.volume, s1.volume, 3)
+        self.assertEqual(Incar.from_file("INCAR")["ISYM"], 0)
+
+        # Test for ISIF 0-2
+        incar.update({"NSW":99, "ISIF":2})
+        incar.write_file("INCAR")
+        h = VaspErrorHandler("vasp.out")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d['errors'], ['zpotrf'])
+        s2 = Structure.from_file("POSCAR")
+        self.assertAlmostEqual(s2.volume, s1.volume, 3)
+        self.assertEqual(Incar.from_file("INCAR")["ISYM"], 0)
 
     def tearDown(self):
         os.chdir(test_dir)
