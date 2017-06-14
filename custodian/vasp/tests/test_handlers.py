@@ -371,6 +371,33 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         self.assertAlmostEqual(s2.volume, s1.volume, 3)
         self.assertAlmostEqual(Incar.from_file("INCAR")['POTIM'], 0.25)
 
+    def test_static_run_correction(self):
+        shutil.copy("OSZICAR.empty", "OSZICAR")
+        s1 = Structure.from_file("POSCAR")
+        incar = Incar.from_file("INCAR")
+
+        # Test for NSW 0
+        incar.update({"NSW": 0})
+        incar.write_file("INCAR")
+        h = VaspErrorHandler("vasp.out")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d['errors'], ['zpotrf'])
+        s2 = Structure.from_file("POSCAR")
+        self.assertAlmostEqual(s2.volume, s1.volume, 3)
+        self.assertEqual(Incar.from_file("INCAR")["ISYM"], 0)
+
+        # Test for ISIF 0-2
+        incar.update({"NSW":99, "ISIF":2})
+        incar.write_file("INCAR")
+        h = VaspErrorHandler("vasp.out")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d['errors'], ['zpotrf'])
+        s2 = Structure.from_file("POSCAR")
+        self.assertAlmostEqual(s2.volume, s1.volume, 3)
+        self.assertEqual(Incar.from_file("INCAR")["ISYM"], 0)
+
     def tearDown(self):
         os.chdir(test_dir)
         os.chdir('zpotrf')
