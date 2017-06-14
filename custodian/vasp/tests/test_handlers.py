@@ -338,7 +338,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h2.output_filename, "random_name.xml")
 
     @classmethod
-    def tearDownClass(self):
+    def tearDownClass(cls):
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("KPOINTS.orig", "KPOINTS")
         shutil.move("POSCAR.orig", "POSCAR")
