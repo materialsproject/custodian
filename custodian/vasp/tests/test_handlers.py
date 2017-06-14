@@ -303,7 +303,7 @@ class AliasingErrorHandlerTest(unittest.TestCase):
 
 class UnconvergedErrorHandlerTest(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(cls):
         if "PMG_VASP_PSP_DIR" not in os.environ:
             os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
@@ -337,7 +337,8 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         self.assertEqual(type(h2), UnconvergedErrorHandler)
         self.assertEqual(h2.output_filename, "random_name.xml")
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(self):
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("KPOINTS.orig", "KPOINTS")
         shutil.move("POSCAR.orig", "POSCAR")
