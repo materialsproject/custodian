@@ -98,9 +98,8 @@ class VaspNEBJobTest(unittest.TestCase):
         self.assertEqual(kpt_pre.style.name, "Monkhorst")
         self.assertEqual(kpt.style.name, "Gamma")
 
-        shutil.copy("KPOINTS.orig", "KPOINTS")
-        os.remove("INCAR.orig")
-        os.remove("KPOINTS.orig")
+        shutil.move("KPOINTS.orig", "KPOINTS")
+        shutil.move("INCAR.orig", "INCAR")
         os.remove("POTCAR.orig")
         poscars = glob.glob("[0-9][0-9]/POSCAR.orig")
         for p in poscars:
