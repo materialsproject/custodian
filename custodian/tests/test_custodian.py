@@ -134,7 +134,7 @@ class CustodianTest(unittest.TestCase):
         params = {"initial": 0, "total": 0}
         c = Custodian([ExampleHandler(params)],
                       [ExampleJob(i, params) for i in range(njobs)],
-                      max_errors_per_job=njobs)
+                      max_errors=njobs)
         output = c.run()
         self.assertEqual(len(output), njobs)
         d = ExampleHandler(params).as_dict()
@@ -144,7 +144,7 @@ class CustodianTest(unittest.TestCase):
         params = {'initial': 0, 'total': 0}
         c = Custodian([ExampleHandler(params)],
                       [ExampleJob(i, params) for i in range(njobs)],
-                      max_errors_per_job=njobs)
+                      max_errors=njobs)
 
         self.assertEqual(c.run_interrupted(), njobs)
         self.assertEqual(c.run_interrupted(), njobs)
@@ -178,7 +178,7 @@ class CustodianTest(unittest.TestCase):
         c = Custodian([ExampleHandler(params)],
                       [ExampleJob(i, params) for i in range(njobs)],
                       [ExampleValidator1()],
-                      max_errors_per_job=njobs)
+                      max_errors=njobs)
         output = c.run()
         self.assertEqual(len(output), njobs)
 
@@ -187,7 +187,7 @@ class CustodianTest(unittest.TestCase):
         c = Custodian([ExampleHandler(params)],
                       [ExampleJob(i, params) for i in range(njobs)],
                       [ExampleValidator2()],
-                      max_errors_per_job=njobs)
+                      max_errors=njobs)
         self.assertRaises(RuntimeError, c.run)
 
     def test_from_spec(self):
@@ -247,7 +247,7 @@ class CustodianCheckpointTest(unittest.TestCase):
         c = Custodian([ExampleHandler(params)],
                       [ExampleJob(i, params) for i in range(njobs)],
                       [ExampleValidator1()],
-                      max_errors_per_job=100, checkpoint=True)
+                      max_errors=100, checkpoint=True)
         self.assertEqual(len(c.run_log), 3)
         self.assertEqual(len(c.run()), 5)
 
