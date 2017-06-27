@@ -172,6 +172,15 @@ class CustodianTest(unittest.TestCase):
         c.run()
         self.assertTrue(h.has_error)
 
+    def test_max_errors_per_job(self):
+        njobs = 100
+        params = {"initial": 0, "total": 0}
+        h = ExampleHandler(params)
+        c = Custodian([h],
+                      [ExampleJob(i, params) for i in range(njobs)],
+                      max_errors=njobs, max_errors_per_job=1)
+        self.assertRaises(RuntimeError, c.run)
+
     def test_validators(self):
         njobs = 100
         params = {"initial": 0, "total": 0}
