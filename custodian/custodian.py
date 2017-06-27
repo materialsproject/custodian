@@ -83,8 +83,8 @@ class Custodian(object):
     """
     LOG_FILE = "custodian.json"
 
-    def __init__(self, handlers, jobs, validators=None, max_errors=1,
-                 polling_time_step=10, monitor_freq=30,
+    def __init__(self, handlers, jobs, validators=None, max_errors_per_job=1,
+                 max_errors=float("inf"), polling_time_step=10, monitor_freq=30,
                  skip_over_errors=False, scratch_dir=None,
                  gzipped_output=False, checkpoint=False, terminate_func=None,
                  terminate_on_nonzero_returncode=True):
@@ -97,8 +97,11 @@ class Custodian(object):
             jobs ([Job]): Sequence of Jobs to be run. Note that this can be
                 any sequence or even a generator yielding jobs.
             validators([Validator]): Validators to ensure job success
-            max_errors (int): Maximum number of errors allowed before exiting.
-                Defaults to 1.
+            max_errors_per_job (int): Maximum number of errors per job allowed
+                before exiting. Defaults to 1.
+            max_errors (int): Maximum number of total errors allowed before
+                exiting. Defaults to infinity, which means error checking is
+                based on per job only.
             polling_time_step (int): The length of time in seconds between
                 steps in which a job is checked for completion. Defaults to
                 10 secs.
@@ -137,6 +140,7 @@ class Custodian(object):
             terminate_on_nonzero_returncode (bool): If True, a non-zero return
                 code on any Job will result in a termination. Defaults to True.
         """
+        self.max_errors_per_job = max_errors_per_job
         self.max_errors = max_errors
         self.jobs = jobs
         self.handlers = handlers
@@ -154,6 +158,7 @@ class Custodian(object):
         else:
             self.restart = 0
             self.run_log = []
+        self.errors_current_job = 0
         self.total_errors = 0
         self.terminate_func = terminate_func
         self.terminate_on_nonzero_returncode = terminate_on_nonzero_returncode
@@ -341,25 +346,30 @@ class Custodian(object):
 
     def _run_job(self, job_n, job):
         """
+        Runs a single job.
+
         Args:
             job_n: job number (1 index)
             job: Custodian job
-        Runs a single job,
+
 
         Raises:
             CustodianError on unrecoverable errors, max errors, and jobs
             that fail validation
         """
         self.run_log.append({"job": job.as_dict(), "corrections": []})
+        self.errors_current_job = 0
         job.setup()
 
         attempt = 0
-        while self.total_errors < self.max_errors:
+        while (self.total_errors < self.max_errors and
+               self.errors_current_job < self.max_errors_per_job):
             attempt += 1
             logger.info(
-                "Starting job no. {} ({}) attempt no. {}. Errors "
-                "thus far = {}.".format(
-                    job_n, job.name, attempt, self.total_errors))
+                "Starting job no. {} ({}) attempt no. {}. Total errors and "
+                "errors in job thus far = {}, {}.".format(
+                    job_n, job.name, attempt, self.total_errors,
+                    self.errors_current_job))
 
             p = job.run()
             # Check for errors using the error handlers and perform
@@ -433,8 +443,12 @@ class Custodian(object):
                     s = "Unrecoverable error for handler: %s" % x["handler"]
                     raise CustodianError(s, False, x["handler"])
 
-        logger.info("Max errors reached.")
-        raise CustodianError("MaxErrors", True)
+        if self.errors_current_job >= self.max_errors_per_job:
+            logger.info("Max errors per job reached.")
+            raise CustodianError("MaxErrorsPerJob", True)
+        else:
+            logger.info("Max errors reached.")
+            raise CustodianError("MaxErrors", True)
 
     def run_interrupted(self):
         """
@@ -524,8 +538,9 @@ class Custodian(object):
         except CustodianError as ex:
             logger.error(ex.message)
             if ex.raises:
-                raise RuntimeError("{} errors reached: {}. Exited..."
-                                   .format(self.total_errors, ex))
+                raise RuntimeError(
+                    "{} errors / {} errors per job reached: {}. Exited..."
+                    .format(self.total_errors, self.errors_current_job, ex))
 
         finally:
             # Log the corrections to a json file.
@@ -568,6 +583,7 @@ class Custodian(object):
                         {"errors": ["Bad handler %s " % h],
                          "actions": []})
         self.total_errors += len(corrections)
+        self.errors_current_job += len(corrections)
         self.run_log[-1]["corrections"].extend(corrections)
         return len(corrections) > 0
 
