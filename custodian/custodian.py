@@ -83,8 +83,9 @@ class Custodian(object):
     """
     LOG_FILE = "custodian.json"
 
-    def __init__(self, handlers, jobs, validators=None, max_errors_per_job=1,
-                 max_errors=float("inf"), polling_time_step=10, monitor_freq=30,
+    def __init__(self, handlers, jobs, validators=None,
+                 max_errors_per_job=None,
+                 max_errors=1, polling_time_step=10, monitor_freq=30,
                  skip_over_errors=False, scratch_dir=None,
                  gzipped_output=False, checkpoint=False, terminate_func=None,
                  terminate_on_nonzero_returncode=True):
@@ -98,10 +99,10 @@ class Custodian(object):
                 any sequence or even a generator yielding jobs.
             validators([Validator]): Validators to ensure job success
             max_errors_per_job (int): Maximum number of errors per job allowed
-                before exiting. Defaults to 1.
+                before exiting. Defaults to None, which means it is set to be
+                equal to max_errors..
             max_errors (int): Maximum number of total errors allowed before
-                exiting. Defaults to infinity, which means error checking is
-                based on per job only.
+                exiting. Defaults to 1.
             polling_time_step (int): The length of time in seconds between
                 steps in which a job is checked for completion. Defaults to
                 10 secs.
@@ -140,8 +141,8 @@ class Custodian(object):
             terminate_on_nonzero_returncode (bool): If True, a non-zero return
                 code on any Job will result in a termination. Defaults to True.
         """
-        self.max_errors_per_job = max_errors_per_job
         self.max_errors = max_errors
+        self.max_errors_per_job = max_errors_per_job or max_errors
         self.jobs = jobs
         self.handlers = handlers
         self.validators = validators or []
