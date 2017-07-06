@@ -1,0 +1,74 @@
+srun: defined options for program `srun'
+srun: --------------- ---------------------
+srun: user           : `xhqu'
+srun: uid            : 58809
+srun: gid            : 58809
+srun: cwd            : /global/cscratch1/sd/xhqu/calculations/nmr/launcher_2017-04-24-07-45-56-106993
+srun: ntasks         : 32 (set)
+srun: cpus_per_task  : 2
+srun: nodes          : 1 (set)
+srun: jobid          : 4677951 (default)
+srun: partition      : default
+srun: profile        : `NotSet'
+srun: job name       : `nmr_hthr'
+srun: reservation    : `(null)'
+srun: burst_buffer   : `(null)'
+srun: wckey          : `(null)'
+srun: cpu_freq_min   : 4294967294
+srun: cpu_freq_max   : 4294967294
+srun: cpu_freq_gov   : 4294967294
+srun: switches       : -1
+srun: wait-for-switches : -1
+srun: distribution   : unknown
+srun: cpu_bind       : default (4)
+srun: mem_bind       : default (0)
+srun: verbose        : 1
+srun: slurmd_debug   : 0
+srun: immediate      : false
+srun: label output   : false
+srun: unbuffered IO  : false
+srun: overcommit     : false
+srun: threads        : 60
+srun: checkpoint_dir : /var/slurm/checkpoint
+srun: wait           : 0
+srun: nice           : -2
+srun: account        : (null)
+srun: comment        : (null)
+srun: dependency     : (null)
+srun: exclusive      : false
+srun: bcast          : false
+srun: qos            : (null)
+srun: constraints    : mincpus-per-node=2 mem-per-node=124928M nodelist=nid00668 
+srun: geometry       : (null)
+srun: reboot         : yes
+srun: rotate         : no
+srun: preserve_env   : false
+srun: network        : (null)
+srun: propagate      : NONE
+srun: prolog         : (null)
+srun: epilog         : (null)
+srun: mail_type      : NONE
+srun: mail_user      : (null)
+srun: task_prolog    : (null)
+srun: task_epilog    : (null)
+srun: multi_prog     : no
+srun: sockets-per-node  : -2
+srun: cores-per-socket  : -2
+srun: threads-per-core  : -2
+srun: ntasks-per-node   : 32
+srun: ntasks-per-socket : -2
+srun: ntasks-per-core   : -2
+srun: plane_size        : 4294967294
+srun: core-spec         : NA
+srun: power             : 
+srun: remote command    : `/usr/common/software/vasp/5.4.1-gcc/hsw/bin/vasp_std'
+srun: Consumable Resources (CR) Node Selection plugin loaded with argument 1266
+srun: launching 4677951.26 on host nid00668, 32 tasks: [0-31]
+srun: route default plugin loaded
+srun: Node nid00668, 32 tasks started
+Operating system error: Cannot allocate memory
+Allocation would exceed memory limit
+srun: Received task exit notification for 32 tasks (status=0x0009).
+srun: error: nid00668: tasks 0-31: Killed
+srun: Terminating job step 4677951.26
+srun: Force Terminated job step 4677951.26

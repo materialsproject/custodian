@@ -1,6 +1,15 @@
 # coding: utf-8
 
 from __future__ import unicode_literals, division
+import unittest
+import os
+import shutil
+import glob
+from monty.tempfile import ScratchDir
+import multiprocessing
+from custodian.vasp.jobs import VaspJob, VaspNEBJob, GenerateVaspInputJob
+from pymatgen.io.vasp import Incar, Kpoints
+import pymatgen
 
 """
 Created on Jun 1, 2012
@@ -14,17 +23,10 @@ __maintainer__ = "Shyue Ping Ong"
 __email__ = "shyue@mit.edu"
 __date__ = "Jun 1, 2012"
 
-import unittest
-import os
-import shutil
-import glob
-
-import multiprocessing
-from custodian.vasp.jobs import VaspJob, VaspNEBJob
-from pymatgen.io.vasp import Incar, Kpoints
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
                         'test_files')
+pymatgen.SETTINGS["PMG_VASP_PSP_DIR"] = test_dir
 
 
 class VaspJobTest(unittest.TestCase):
@@ -36,8 +38,6 @@ class VaspJobTest(unittest.TestCase):
         self.assertEqual(v2.vasp_cmd, "hello")
 
     def test_setup(self):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
         v = VaspJob("hello")
         v.setup()
@@ -70,7 +70,7 @@ class VaspJobTest(unittest.TestCase):
         self.assertAlmostEqual(incar_prev["MAGMOM"], [5, -5, 0.6, 0.6])
 
     def test_static(self):
-        #Just a basic test of init.
+        # Just a basic test of init.
         VaspJob.double_relaxation_run(["vasp"])
 
 
@@ -83,8 +83,6 @@ class VaspNEBJobTest(unittest.TestCase):
         self.assertEqual(v2.vasp_cmd, "hello")
 
     def test_setup(self):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
         os.chdir(os.path.join(test_dir, 'setup_neb'))
 
         v = VaspNEBJob("hello", half_kpts=True)
@@ -100,9 +98,8 @@ class VaspNEBJobTest(unittest.TestCase):
         self.assertEqual(kpt_pre.style.name, "Monkhorst")
         self.assertEqual(kpt.style.name, "Gamma")
 
-        shutil.copy("KPOINTS.orig", "KPOINTS")
-        os.remove("INCAR.orig")
-        os.remove("KPOINTS.orig")
+        shutil.move("KPOINTS.orig", "KPOINTS")
+        shutil.move("INCAR.orig", "INCAR")
         os.remove("POTCAR.orig")
         poscars = glob.glob("[0-9][0-9]/POSCAR.orig")
         for p in poscars:
@@ -133,6 +130,22 @@ class VaspNEBJobTest(unittest.TestCase):
                     self.assertTrue(os.path.isfile('{}.test'.format(f)))
                     os.remove('{}.test'.format(f))
 
+
+class GenerateVaspInputJobTest(unittest.TestCase):
+
+    def test_run(self):
+        with ScratchDir(".") as d:
+            for f in ["INCAR", "POSCAR", "POTCAR", "KPOINTS"]:
+                shutil.copy(os.path.join(test_dir, f), f)
+            oldincar = Incar.from_file("INCAR")
+            v = GenerateVaspInputJob("pymatgen.io.vasp.sets.MPNonSCFSet",
+                                     contcar_only=False)
+            v.run()
+            incar = Incar.from_file("INCAR")
+            self.assertEqual(incar["ICHARG"], 11)
+            self.assertEqual(oldincar["ICHARG"], 1)
+            kpoints = Kpoints.from_file("KPOINTS")
+            self.assertEqual(str(kpoints.style), "Reciprocal")
+
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

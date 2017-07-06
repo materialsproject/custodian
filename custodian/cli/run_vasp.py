@@ -7,21 +7,20 @@ runs.
 
 from __future__ import division
 
+import logging
+import sys
+import ruamel.yaml as yaml
+
+from custodian.custodian import Custodian
+from custodian.vasp.jobs import VaspJob
+from pymatgen.io.vasp import VaspInput, Incar, Kpoints
+
 __author__ = "Shyue Ping Ong"
 __version__ = "0.5"
 __maintainer__ = "Shyue Ping Ong"
 __email__ = "ongsp@ucsd.edu"
 __status__ = "Beta"
 __date__ = "12/31/13"
-
-import logging
-import sys
-import yaml
-
-from custodian.custodian import Custodian
-from custodian.vasp.jobs import VaspJob
-from pymatgen.io.vasp import VaspInput, Incar, Kpoints
-
 
 
 def load_class(mod, name):
@@ -30,7 +29,7 @@ def load_class(mod, name):
     if len(toks) == 2:
         for p in toks[-1].split(","):
             ptoks = p.split("=")
-            params[ptoks[0]] = yaml.load(ptoks[1])
+            params[ptoks[0]] = yaml.safe_load(ptoks[1])
     elif len(toks) > 2:
         print("Bad handler specification")
         sys.exit(-1)
@@ -39,9 +38,9 @@ def load_class(mod, name):
 
 
 def get_jobs(args):
-    #Returns a generator of jobs. Allows of "infinite" jobs.
+    # Returns a generator of jobs. Allows of "infinite" jobs.
     vasp_command = args.command.split()
-    #save initial INCAR for rampU runs
+    # save initial INCAR for rampU runs
     n_ramp_u = args.jobs.count('rampU')
     ramps = 0
     if n_ramp_u:
@@ -69,6 +68,10 @@ def get_jobs(args):
 
         job_type = job.lower()
         auto_npar = True
+
+        if args.no_auto_npar:
+            auto_npar = False
+
         if job_type.startswith("static_derived"):
             from pymatgen.io.vasp.sets import MPStaticSet
             vis = MPStaticSet.from_prev_calc(
@@ -122,7 +125,6 @@ def get_jobs(args):
                  "action": {"_set": dict(vis.incar)}},
                 {'dict': 'KPOINTS',
                  'action': {'_set': vis.kpoints.as_dict()}}])
-
 
         elif job_type.startswith("optics_derived"):
             from pymatgen.io.vasp.sets import MPNonSCFSet
@@ -226,6 +228,12 @@ def main():
         default="pvasp", type=str,
         help="VASP command. Defaults to pvasp. If you are using mpirun, "
              "set this to something like \"mpirun pvasp\".")
+
+    parser.add_argument(
+        "--no_auto_npar", action="store_true",
+        help="Set to true to turn off auto_npar. Useful for certain machines "
+             "and calculations where you want absolute control.")
+
 
     parser.add_argument(
         "-z", "--gzip", dest="gzip", action="store_true",

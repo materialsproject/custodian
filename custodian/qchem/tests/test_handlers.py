@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals, division
 import json
+import shlex
 
 from monty.json import MontyEncoder, MontyDecoder
 
@@ -33,7 +34,7 @@ test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
                         "test_files", "qchem")
 # noinspection PyUnresolvedReferences
 scr_dir = os.path.join(test_dir, "scr")
-
+cwd = os.getcwd()
 
 class QChemErrorHandlerTest(TestCase):
     def setUp(self):
@@ -669,11 +670,11 @@ class QChemErrorHandlerTest(TestCase):
                         os.path.join(scr_dir, "exit_134_after_scf_fix_tight_thresh.qcinp"))
         shutil.copyfile(os.path.join(test_dir, "exit_134_after_scf_fix.qcout"),
                         os.path.join(scr_dir, "exit_134_after_scf_fix.qcout"))
-        qchem_job = QchemJob(qchem_cmd="qchem -np 24",
+        qchem_job = QchemJob(qchem_cmd=shlex.split("qchem -np 24"),
                              input_file="exit_134_after_scf_fix_tight_thresh.qcinp",
                              output_file="exit_134_after_scf_fix.qcout",
-                             alt_cmd={"half_cpus": "qchem -np 12",
-                                      "openmp": "qchem -nt 24"})
+                             alt_cmd={"half_cpus": shlex.split("qchem -np 12"),
+                                      "openmp": shlex.split("qchem -nt 24")})
         h = QChemErrorHandler(input_file="exit_134_after_scf_fix_tight_thresh.qcinp",
                               output_file="exit_134_after_scf_fix.qcout",
                               qchem_job=qchem_job)
@@ -705,11 +706,17 @@ class QChemErrorHandlerTest(TestCase):
             ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
 
+    @unittest.skipIf(parse_version(pymatgen.__version__) <=
+                     parse_version('4.7.4'),
+                     "MXYZ and QcNucVeloc in pymatgen is a feature after "
+                     "version 4.7.4")
     def test_scf_in_aimd_reset(self):
-        shutil.copyfile(os.path.join(test_dir, "h2o_aimd.qcinp"),
+        shutil.copyfile(os.path.join(test_dir, "h2o_aimd", "h2o_aimd.qcinp"),
                         os.path.join(scr_dir, "h2o_aimd.qcinp"))
-        shutil.copyfile(os.path.join(test_dir, "h2o_aimd.qcout"),
+        shutil.copyfile(os.path.join(test_dir, "h2o_aimd", "h2o_aimd.qcout"),
                         os.path.join(scr_dir, "h2o_aimd.qcout"))
+        shutil.copytree(os.path.join(test_dir, "h2o_aimd", "AIMD"),
+                        "AIMD")
         h = QChemErrorHandler(input_file="h2o_aimd.qcinp",
                               output_file="h2o_aimd.qcout")
         has_error = h.check()
@@ -717,7 +724,7 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d, {'errors': ['Bad SCF convergence'],
                              'actions': ['reset']})
-        with open(os.path.join(test_dir, "h2o_aimd_reset.qcinp")) as f:
+        with open(os.path.join(test_dir,"h2o_aimd", "h2o_aimd_reset.qcinp")) as f:
             ref = [line.strip() for line in f.readlines()]
         with open(os.path.join(scr_dir, "h2o_aimd.qcinp")) as f:
             ans = [line.strip() for line in f.readlines()]
@@ -780,14 +787,18 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(ref, ans)
 
     def test_not_enough_total_memory(self):
-        old_jobid = os.environ.get("PBS_JOBID", None)
-        os.environ["PBS_JOBID"] = "hopque473945"
         shutil.copyfile(os.path.join(test_dir, "not_enough_total_memory.qcinp"),
                         os.path.join(scr_dir, "not_enough_total_memory.qcinp"))
         shutil.copyfile(os.path.join(test_dir, "not_enough_total_memory.qcout"),
                         os.path.join(scr_dir, "not_enough_total_memory.qcout"))
+        qchem_job = QchemJob(qchem_cmd=shlex.split("qchem -np 24"),
+                             input_file="not_enough_total_memory.qcinp",
+                             output_file="not_enough_total_memory.qcout",
+                             alt_cmd={"half_cpus": shlex.split("qchem -np 12"),
+                                      "openmp": shlex.split("qchem -nt 24")},
+                             total_physical_memory=120)
         h = QChemErrorHandler(input_file="not_enough_total_memory.qcinp",
-                              output_file="not_enough_total_memory.qcout")
+                              output_file="not_enough_total_memory.qcout", qchem_job=qchem_job)
         has_error = h.check()
         self.assertTrue(has_error)
         d = h.correct()
@@ -821,10 +832,7 @@ class QChemErrorHandlerTest(TestCase):
         with open(os.path.join(scr_dir, "not_enough_total_memory_48_segments.qcinp")) as f:
             ans = [line.strip() for line in f.readlines()]
         self.assertEqual(ref, ans)
-        if old_jobid is None:
-            os.environ.pop("PBS_JOBID")
-        else:
-            os.environ["PBS_JOBID"] = old_jobid
+
 
     def test_json_serializable(self):
         q1 = QChemErrorHandler()
@@ -846,6 +854,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(q3.as_dict(), q4.as_dict())
 
     def tearDown(self):
+        os.chdir(cwd)
         shutil.rmtree(scr_dir)
         pass
 

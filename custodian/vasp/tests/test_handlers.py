@@ -23,7 +23,7 @@ import datetime
 from custodian.vasp.handlers import VaspErrorHandler, \
     UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler, \
     MaxForceErrorHandler, PositiveEnergyErrorHandler, PotimErrorHandler, \
-    FrozenJobErrorHandler, AliasingErrorHandler
+    FrozenJobErrorHandler, AliasingErrorHandler, StdErrHandler, LrfCommutatorHandler
 from pymatgen.io.vasp import Incar, Poscar, Structure, Kpoints, VaspInput
 
 
@@ -43,8 +43,7 @@ def clean_dir():
 class VaspErrorHandlerTest(unittest.TestCase):
 
     def setUp(self):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
+        os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
         shutil.copy("INCAR", "INCAR.orig")
         shutil.copy("KPOINTS", "KPOINTS.orig")
@@ -79,6 +78,26 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["actions"],
                          [{'action': {'_set': {'LREAL': False}},
                            'dict': 'INCAR'}])
+
+        subdir = os.path.join(test_dir, "large_cell_real_optlay")
+        os.chdir(subdir)
+        shutil.copy("INCAR", "INCAR.orig")
+        h = VaspErrorHandler()
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ['real_optlay'])
+        vi = VaspInput.from_directory(".")
+        self.assertEqual(vi["INCAR"]["LREAL"], True)
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ['real_optlay'])
+        vi = VaspInput.from_directory(".")
+        self.assertEqual(vi["INCAR"]["LREAL"], False)
+        shutil.copy("INCAR.orig", "INCAR")
+        os.remove("INCAR.orig")
+        os.remove("error.1.tar.gz")
+        os.remove("error.2.tar.gz")
+        os.chdir(test_dir)
 
     def test_mesh_symmetry(self):
         h = MeshSymmetryErrorHandler("vasp.ibzkpt")
@@ -147,8 +166,8 @@ class VaspErrorHandlerTest(unittest.TestCase):
         os.chdir(test_dir)
 
     def test_rot_matrix(self):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
         subdir = os.path.join(test_dir, "poscar_error")
         os.chdir(subdir)
         shutil.copy("KPOINTS", "KPOINTS.orig")
@@ -183,6 +202,14 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertEqual(i["POTIM"], 0.25)
 
+    def test_nicht_konv(self):
+        h = VaspErrorHandler("vasp.nicht_konvergent")
+        h.natoms_large_cell = 5
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["nicht_konv"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["LREAL"], True)
+
     def test_edddav(self):
         h = VaspErrorHandler("vasp.edddav")
         self.assertEqual(h.check(), True)
@@ -209,8 +236,8 @@ class VaspErrorHandlerTest(unittest.TestCase):
 class AliasingErrorHandlerTest(unittest.TestCase):
 
     def setUp(self):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
         shutil.copy("INCAR", "INCAR.orig")
         shutil.copy("KPOINTS", "KPOINTS.orig")
@@ -277,11 +304,9 @@ class AliasingErrorHandlerTest(unittest.TestCase):
 class UnconvergedErrorHandlerTest(unittest.TestCase):
 
     def setUp(cls):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
-
-    def test_check_correct(self):
         subdir = os.path.join(test_dir, "unconverged")
         os.chdir(subdir)
 
@@ -290,17 +315,21 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         shutil.copy("POSCAR", "POSCAR.orig")
         shutil.copy("CONTCAR", "CONTCAR.orig")
 
+    def test_check_correct_electronic(self):
+        shutil.copy("vasprun.xml.electronic", "vasprun.xml")
         h = UnconvergedErrorHandler()
         self.assertTrue(h.check())
         d = h.correct()
         self.assertEqual(d["errors"], ['Unconverged'])
+        os.remove("vasprun.xml")
 
-        os.remove(os.path.join(subdir, "error.1.tar.gz"))
-
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("KPOINTS.orig", "KPOINTS")
-        shutil.move("POSCAR.orig", "POSCAR")
-        shutil.move("CONTCAR.orig", "CONTCAR")
+    def test_check_correct_ionic(self):
+        shutil.copy("vasprun.xml.ionic", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ['Unconverged'])
+        os.remove("vasprun.xml")
 
     def test_to_from_dict(self):
         h = UnconvergedErrorHandler("random_name.xml")
@@ -310,14 +339,19 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("KPOINTS.orig", "KPOINTS")
+        shutil.move("POSCAR.orig", "POSCAR")
+        shutil.move("CONTCAR.orig", "CONTCAR")
+        clean_dir()
         os.chdir(cwd)
 
 
 class ZpotrfErrorHandlerTest(unittest.TestCase):
 
     def setUp(self):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
         os.chdir('zpotrf')
         shutil.copy("POSCAR", "POSCAR.orig")
@@ -344,6 +378,33 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         self.assertAlmostEqual(s2.volume, s1.volume, 3)
         self.assertAlmostEqual(Incar.from_file("INCAR")['POTIM'], 0.25)
 
+    def test_static_run_correction(self):
+        shutil.copy("OSZICAR.empty", "OSZICAR")
+        s1 = Structure.from_file("POSCAR")
+        incar = Incar.from_file("INCAR")
+
+        # Test for NSW 0
+        incar.update({"NSW": 0})
+        incar.write_file("INCAR")
+        h = VaspErrorHandler("vasp.out")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d['errors'], ['zpotrf'])
+        s2 = Structure.from_file("POSCAR")
+        self.assertAlmostEqual(s2.volume, s1.volume, 3)
+        self.assertEqual(Incar.from_file("INCAR")["ISYM"], 0)
+
+        # Test for ISIF 0-2
+        incar.update({"NSW":99, "ISIF":2})
+        incar.write_file("INCAR")
+        h = VaspErrorHandler("vasp.out")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d['errors'], ['zpotrf'])
+        s2 = Structure.from_file("POSCAR")
+        self.assertAlmostEqual(s2.volume, s1.volume, 3)
+        self.assertEqual(Incar.from_file("INCAR")["ISYM"], 0)
+
     def tearDown(self):
         os.chdir(test_dir)
         os.chdir('zpotrf')
@@ -356,8 +417,8 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
 class MaxForceErrorHandlerTest(unittest.TestCase):
 
     def setUp(self):
-        if "VASP_PSP_DIR" not in os.environ:
-            os.environ["VASP_PSP_DIR"] = test_dir
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
 
     def test_check_correct(self):
@@ -498,6 +559,83 @@ class PotimHandlerTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        os.chdir(cwd)
+
+
+class LrfCommHandlerTest(unittest.TestCase):
+
+    def setUp(self):
+        os.chdir(test_dir)
+        os.chdir('lrf_comm')
+        for f in ["INCAR", "OUTCAR", "std_err.txt"]:
+            shutil.copy(f, f+".orig")
+
+    def test_lrf_comm(self):
+        h = LrfCommutatorHandler("std_err.txt")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d["errors"], ['lrf_comm'])
+        vi = VaspInput.from_directory(".")
+        self.assertEqual(vi["INCAR"]["LPEAD"], True)
+
+    def tearDown(self):
+        os.chdir(test_dir)
+        os.chdir('lrf_comm')
+        for f in ["INCAR", "OUTCAR", "std_err.txt"]:
+            shutil.move(f+".orig", f)
+        clean_dir()
+        os.chdir(cwd)
+
+
+class KpointsTransHandlerTest(unittest.TestCase):
+
+    def setUp(self):
+        os.chdir(test_dir)
+        shutil.copy("KPOINTS", "KPOINTS.orig")
+
+    def test_kpoints_trans(self):
+        h = StdErrHandler("std_err.txt.kpoints_trans")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d["errors"], ['kpoints_trans'])
+        self.assertEqual(d["actions"],
+                         [{u'action': {u'_set':
+                                {u'kpoints': [[4, 4, 4]]}},
+                                u'dict': u'KPOINTS'}])
+
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d["errors"], ['kpoints_trans'])
+        self.assertEqual(d["actions"], [])  # don't correct twice
+
+    def tearDown(self):
+        shutil.move("KPOINTS.orig", "KPOINTS")
+        clean_dir()
+        os.chdir(cwd)
+
+
+class OutOfMemoryHandlerTest(unittest.TestCase):
+
+    def setUp(self):
+        os.chdir(test_dir)
+        shutil.copy("INCAR", "INCAR.orig")
+
+    def test_oom(self):
+        vi = VaspInput.from_directory(".")
+        from custodian.vasp.interpreter import VaspModder
+        VaspModder(vi=vi).apply_actions([{"dict": "INCAR",
+                                          "action": {"_set": {"KPAR": 4}}}])
+        h = StdErrHandler("std_err.txt.oom")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d["errors"], ['out_of_memory'])
+        self.assertEqual(d["actions"],
+                         [{'dict': 'INCAR',
+                           'action': {'_set': {'KPAR': 2}}}])
+
+    def tearDown(self):
+        shutil.move("INCAR.orig", "INCAR")
+        clean_dir()
         os.chdir(cwd)
 
 

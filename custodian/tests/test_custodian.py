@@ -8,7 +8,7 @@ import os
 import glob
 import shutil
 import subprocess
-import yaml
+import ruamel.yaml as yaml
 
 """
 Created on Jun 1, 2012
@@ -172,6 +172,15 @@ class CustodianTest(unittest.TestCase):
         c.run()
         self.assertTrue(h.has_error)
 
+    def test_max_errors_per_job(self):
+        njobs = 100
+        params = {"initial": 0, "total": 0}
+        h = ExampleHandler(params)
+        c = Custodian([h],
+                      [ExampleJob(i, params) for i in range(njobs)],
+                      max_errors=njobs, max_errors_per_job=1)
+        self.assertRaises(RuntimeError, c.run)
+
     def test_validators(self):
         njobs = 100
         params = {"initial": 0, "total": 0}
@@ -214,7 +223,7 @@ custodian_params:
 
         os.environ["TMPDIR"] = "/tmp/random"
         os.environ["PBS_NODEFILE"] = "whatever"
-        d = yaml.load(spec)
+        d = yaml.safe_load(spec)
         c = Custodian.from_spec(d)
         self.assertEqual(c.jobs[0].vasp_cmd[2], "whatever")
         self.assertEqual(c.scratch_dir, "/tmp/random")

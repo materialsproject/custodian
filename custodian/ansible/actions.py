@@ -1,6 +1,8 @@
 # coding: utf-8
 
 from __future__ import unicode_literals, division, print_function
+import os
+import shutil
 
 """
 This module defines various classes of supported actions. All actions are
@@ -8,17 +10,12 @@ implemented as static methods, but are defined using classes (as opposed to
 modules) so that a set of well-defined actions can be namespaced easily.
 """
 
-
 __author__ = "Shyue Ping Ong"
 __copyright__ = "Copyright 2012, The Materials Project"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
 __email__ = "ongsp@ucsd.edu"
 __date__ = "Jun 2, 2012"
-
-
-import os
-import shutil
 
 
 def get_nested_dict(input_dict, key):
