@@ -90,8 +90,8 @@ class VaspErrorHandler(ErrorHandler):
         "grad_not_orth": ["EDWAV: internal error, the gradient is not orthogonal"],
         "nicht_konv": ["ERROR: SBESSELITER : nicht konvergent"],
         "zheev": ["ERROR EDDIAG: Call to routine ZHEEV failed!"],
-        "elf": ["ELF: KPAR>1 not implemented",
-                "WARNING: ELF not implemented for non collinear case"]
+        "elf_kpar": ["ELF: KPAR>1 not implemented"],
+        "elf_ncl": ["WARNING: ELF not implemented for non collinear case"]
     }
 
     def __init__(self, output_filename="vasp.out", natoms_large_cell=100):
@@ -354,10 +354,9 @@ class VaspErrorHandler(ErrorHandler):
             if vi["INCAR"].get("ALGO", "Fast").lower() != "exact":
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"ALGO": "Exact"}}})
-                                
-        if "elf" in self.errors:
+        if "elf_kpar" in self.errors:
             actions.append({"dict": "INCAR",
-                            "action": {"_set": {"LELF": False}}})
+                            "action": {"_set": {"KPAR": 1}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
