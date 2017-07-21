@@ -823,6 +823,12 @@ class NonConvergingErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR",
                             "action": {"_set": {"ALGO": "Normal"}}})
 
+            elif algo == "Normal":
+                backup(VASP_BACKUP_FILES)
+                actions.append({"dict": "INCAR",
+                                "action": {"_set": {"ALGO": "All", "TIME": 0.2, 
+                                                    "LSUBROT":True}}})
+
             elif amix > 0.1 and bmix > 0.01:
                 #try linear mixing
                 backup(VASP_BACKUP_FILES)
@@ -904,7 +910,12 @@ class WalltimeHandler(ErrorHandler):
         else:
             self.wall_time = None
         self.buffer_time = buffer_time
-        self.start_time = datetime.datetime.now()
+        if "CUSTODIAN_START_TIME" in os.environ:
+            # Enables use of setting CUSTODIAN_START_TIME to `date` output
+            self.start_time = datetime.datetime.strptime(
+                os.environ["CUSTODIAN_START_TIME"], "%a %b %d %H:%M:%S %Z %Y")
+        else:
+            self.start_time = datetime.datetime.now()
         self.electronic_step_stop = electronic_step_stop
         self.electronic_steps_timings = [0]
         self.prev_check_time = self.start_time
