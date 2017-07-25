@@ -13,7 +13,7 @@ import os
 from abc import ABCMeta, abstractmethod
 from itertools import islice
 import warnings
-import json
+from pprint import pformat
 
 import six
 
@@ -572,7 +572,7 @@ class Custodian(object):
                         terminate_func = None
                     d = h.correct()
                     d["handler"] = h
-                    logger.error(("\n"+json.dumps(d, indent=4)).replace("\n", "\n"+" "*4))
+                    logger.error("\n" + pformat(d, indent=2, width=-1))
                     corrections.append(d)
             except Exception:
                 if not self.skip_over_errors:
