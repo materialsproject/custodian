@@ -8,6 +8,7 @@ import time
 import datetime
 import operator
 import shutil
+import json
 from functools import reduce
 from collections import Counter
 import re
@@ -611,13 +612,19 @@ class UnconvergedErrorHandler(ErrorHandler):
         actions = [{"file": "CONTCAR",
                     "action": {"_file_copy": {"dest": "POSCAR"}}}]
         if not v.converged_electronic:
-            actions.append({"dict": "INCAR",
-                            "action": {"_set": {"ISTART": 1,
-                                                "ALGO": "Normal",
-                                                "NELMDL": -6,
-                                                "BMIX": 0.001,
-                                                "AMIX_MAG": 0.8,
-                                                "BMIX_MAG": 0.001}}})
+            if algo != "All":
+                actions.append({"dict": "INCAR",
+                                "action": {"_set": {"ISTART": 1,
+                                                    "ALGO": "All", 
+                                                    "TIME": 0.2, 
+                                                    "LSUBROT":True}}})
+            else:
+                actions.append({"dict": "INCAR",
+                                "action": {"_set": {"ISTART": 1,
+                                                    "NELMDL": -6,
+                                                    "BMIX": 0.001,
+                                                    "AMIX_MAG": 0.8,
+                                                    "BMIX_MAG": 0.001}}})
         if not v.converged_ionic:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"IBRION":1}}})
@@ -776,7 +783,7 @@ class NonConvergingErrorHandler(ErrorHandler):
     is_monitor = True
 
     def __init__(self, output_filename="OSZICAR", nionic_steps=10,
-                 change_algo=False):
+                 change_algo=True):
         """
         Initializes the handler with the output file to check.
 
@@ -818,12 +825,7 @@ class NonConvergingErrorHandler(ErrorHandler):
         amin = vi["INCAR"].get("AMIN", 0.1)
         actions = []
         if self.change_algo:
-            if algo == "Fast":
-                backup(VASP_BACKUP_FILES)
-                actions.append({"dict": "INCAR",
-                            "action": {"_set": {"ALGO": "Normal"}}})
-
-            elif algo == "Normal":
+            if algo != "All":
                 backup(VASP_BACKUP_FILES)
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"ALGO": "All", "TIME": 0.2, 
@@ -868,7 +870,7 @@ class WalltimeHandler(ErrorHandler):
 
     # This handler will be unrecoverable, but custodian shouldn't raise an
     # error
-    raises_runtime_error = False
+    raises_runtime_error = True
 
     def __init__(self, wall_time=None, buffer_time=300,
                  electronic_step_stop=False,
@@ -906,7 +908,7 @@ class WalltimeHandler(ErrorHandler):
         elif "PBS_WALLTIME" in os.environ:
             self.wall_time = int(os.environ["PBS_WALLTIME"])
         elif "SBATCH_TIMELIMIT" in os.environ:
-            self.walltime = int(os.environ["SBATCH_TIMELIMIT"]) 
+            self.wall_time = int(os.environ["SBATCH_TIMELIMIT"]) 
         else:
             self.wall_time = None
         self.buffer_time = buffer_time
@@ -919,7 +921,6 @@ class WalltimeHandler(ErrorHandler):
         self.electronic_step_stop = electronic_step_stop
         self.electronic_steps_timings = [0]
         self.prev_check_time = self.start_time
-        self.prev_check_nscf_steps = 0
         self.auto_continue = auto_continue
 
     def check(self):
@@ -927,41 +928,21 @@ class WalltimeHandler(ErrorHandler):
             run_time = datetime.datetime.now() - self.start_time
             total_secs = run_time.total_seconds()
             if not self.electronic_step_stop:
-                try:
-                    # Intelligently determine time per ionic step.
-                    o = Oszicar("OSZICAR")
-                    nsteps = len(o.ionic_steps)
-                    time_per_step = total_secs / nsteps
-                except Exception:
-                    time_per_step = 0
+                # Determine max time per ionic step.
+                o = Outcar("OUTCAR")
+                o.read_pattern({"timings": "LOOP\+.+real time(.+)"},
+                                postprocess=float)
+                time_per_step = np.max(outcar.data.get('timings')) or 0
             else:
-                try:
-                    # Intelligently determine approximate time per electronic
-                    # step.
-                    o = Oszicar("OSZICAR")
-                    if len(o.ionic_steps) == 0:
-                        nsteps = 0
-                    else:
-                        nsteps = sum(map(len, o.electronic_steps))
-                    if nsteps > self.prev_check_nscf_steps:
-                        steps_time = datetime.datetime.now() - \
-                            self.prev_check_time
-                        steps_secs = steps_time.total_seconds()
-                        step_timing = self.buffer_time * ceil(
-                            (steps_secs /
-                             (nsteps - self.prev_check_nscf_steps)) /
-                            self.buffer_time)
-                        self.electronic_steps_timings.append(step_timing)
-                        self.prev_check_nscf_steps = nsteps
-                        self.prev_check_time = datetime.datetime.now()
-                    time_per_step = max(self.electronic_steps_timings)
-                except Exception as ex:
-                    time_per_step = 0
+                # Determine max time per electronic step.
+                o.read_pattern({"timings": "LOOP:.+real time(.+)"},
+                                postprocess=float)
+                time_per_step = np.max(outcar.data['timings']) or 0
 
-            # If the remaining time is less than average time for 3 ionic
+            # If the remaining time is less than average time for 3 
             # steps or buffer_time.
             time_left = self.wall_time - total_secs
-            if time_left < max(time_per_step * 3, self.buffer_time):
+            if time_left < max(time_per_step * 2.5, self.buffer_time):
                 return True
 
         return False
@@ -975,15 +956,18 @@ class WalltimeHandler(ErrorHandler):
                     "action": {"_file_create": {'content': content}}}]
 
         if self.auto_continue:
-            actions.append({"file": "STOPCAR",
-                            "action": {"_file_modify": {'mode': 0o444}}})
+            continue_dict = {"ionic": True, "electronic": self.electronic_step_stop}
+            actions.append({"file": "continue.json",
+                            "action": {"_file_create": {'content': json.dumps(continue_dict)}}})
 
         m = Modder(actions=[FileActions])
         for a in actions:
             m.modify(a["action"], a["file"])
         # Actions is being returned as None so that custodian will stop after
         # STOPCAR is written. We do not want subsequent jobs to proceed.
-        return {"errors": ["Walltime reached"], "actions": None}
+        errors = ["Walltime of {} reached at {}, start-time {} auto_continue is {}".format(
+            self.wall_time, datetime.datetime.now(), self.start_time, self.auto_continue)]
+        return {"errors": errors, "actions": None}
 
 
 @deprecated(replacement=WalltimeHandler)

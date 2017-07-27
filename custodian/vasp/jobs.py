@@ -13,9 +13,12 @@ import numpy as np
 from pymatgen import Structure
 from pymatgen.io.vasp import VaspInput, Incar, Poscar, Outcar, Kpoints, Vasprun
 from monty.os.path import which
+from monty.shutil import decompress_dir
 
 from custodian.custodian import Job
+from custodian.utils import backup
 from custodian.vasp.interpreter import VaspModder
+from custodian.vasp.handlers import VASP_BACKUP_FILES
 
 """
 This module implements basic kinds of jobs for VASP runs.
@@ -130,6 +133,7 @@ class VaspJob(Job):
         Performs initial setup for VaspJob, including overriding any settings
         and backing up.
         """
+        decompress_dir('.')
 
         if self.backup:
             for f in VASP_INPUT_FILES:
@@ -162,13 +166,14 @@ class VaspJob(Job):
             except:
                 pass
 
-        # Auto continue if a read-only STOPCAR is present
-        if self.auto_continue and \
-           os.path.exists("STOPCAR") and \
-           not os.access("STOPCAR", os.W_OK):
-            # Remove STOPCAR
-            os.chmod("STOPCAR", 0o644)
-            os.remove("STOPCAR")
+        if self.auto_continue and os.path.exists("continue.json") \
+           or os.path.exists("continue.json.gz"):
+            # Remove continue.json
+            # Could add more functionality here if desired.
+            logger.info("Continuing job.  Removing continue.json, setting ISTART=1," 
+                        " and moving CONTCAR to POSCAR.")
+            os.remove("continue.json")
+            backup(VASP_BACKUP_FILES, prefix="prev_run")
 
             # Setup INCAR to continue
             incar = Incar.from_file("INCAR")
@@ -176,7 +181,7 @@ class VaspJob(Job):
             incar.write_file("INCAR")
 
             shutil.copy('CONTCAR', 'POSCAR')
-
+               
         if self.settings_override is not None:
             VaspModder().apply_actions(self.settings_override)
 
@@ -226,10 +231,25 @@ class VaspJob(Job):
                 incar.write_file("INCAR")
             except:
                 logger.error('MAGMOM copy from OUTCAR to INCAR failed')
+        """       
+        if self.auto_continue:
+            if os.path.isfile("continue.json"):
+                raise RuntimeError("continue.json is present, custodian is erroring out. " 
+                                   "Job may be recoverable.")
+
+                v = Vasprun('vasprun.xml')
+                if not v.converged():
+                    raise RuntimeError("continue.json is present, custodian is erroring out. " 
+                                       "Job may be recoverable.")
+                else:
+                    logger.info("continue.json present, but job converged, removing continue.json"
+                                " and completing job normally")
+                                """
+
 
     @classmethod
     def double_relaxation_run(cls, vasp_cmd, auto_npar=True, ediffg=-0.05,
-                              half_kpts_first_relax=False):
+                              half_kpts_first_relax=False, auto_continue=False):
         """
         Returns a list of two jobs corresponding to an AFLOW style double
         relaxation run.
@@ -278,10 +298,10 @@ class VaspJob(Job):
             )
 
         return [VaspJob(vasp_cmd, final=False, suffix=".relax1",
-                        auto_npar=auto_npar,
+                        auto_npar=auto_npar, auto_continue=auto_continue,
                         settings_override=settings_overide_1),
                 VaspJob(vasp_cmd, final=True, backup=False, suffix=".relax2",
-                        auto_npar=auto_npar,
+                        auto_npar=auto_npar, auto_continue=auto_continue,
                         settings_override=settings_overide_2)]
 
     @classmethod
@@ -666,8 +686,8 @@ class VaspNEBJob(Job):
                 poscar = os.path.join(path, "POSCAR")
                 shutil.copy(contcar, poscar)
 
-            if self.settings_override is not None:
-                VaspModder().apply_actions(self.settings_override)
+        if self.settings_override is not None:
+            VaspModder().apply_actions(self.settings_override)
 
     def run(self):
         """
@@ -716,6 +736,7 @@ class VaspNEBJob(Job):
                 elif self.suffix != "":
                     shutil.copy(f, "{}{}".format(f, self.suffix))
 
+        
 
 class GenerateVaspInputJob(Job):
 
