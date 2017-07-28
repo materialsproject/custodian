@@ -870,11 +870,10 @@ class WalltimeHandler(ErrorHandler):
 
     # This handler will be unrecoverable, but custodian shouldn't raise an
     # error
-    raises_runtime_error = True
+    raises_runtime_error = False 
 
     def __init__(self, wall_time=None, buffer_time=300,
-                 electronic_step_stop=False,
-                 auto_continue = False):
+                 electronic_step_stop=False):
         """
         Initializes the handler with a buffer time.
 
@@ -900,8 +899,6 @@ class WalltimeHandler(ErrorHandler):
                 Should be used with LWAVE = .True. to be useful. If this is
                 True, the STOPCAR is written with LABORT = .TRUE. instead of
                 LSTOP = .TRUE.
-            auto_continue (bool): Use the auto-continue functionality within the
-                VaspJob by ensuring Vasp doesn't delete the STOPCAR
         """
         if wall_time is not None:
             self.wall_time = wall_time
@@ -921,7 +918,6 @@ class WalltimeHandler(ErrorHandler):
         self.electronic_step_stop = electronic_step_stop
         self.electronic_steps_timings = [0]
         self.prev_check_time = self.start_time
-        self.auto_continue = auto_continue
 
     def check(self):
         if self.wall_time:
@@ -942,7 +938,7 @@ class WalltimeHandler(ErrorHandler):
             # If the remaining time is less than average time for 3 
             # steps or buffer_time.
             time_left = self.wall_time - total_secs
-            if time_left < max(time_per_step * 2.5, self.buffer_time):
+            if time_left < max(time_per_step * 3.0, self.buffer_time):
                 return True
 
         return False
@@ -955,19 +951,10 @@ class WalltimeHandler(ErrorHandler):
         actions = [{"file": "STOPCAR",
                     "action": {"_file_create": {'content': content}}}]
 
-        if self.auto_continue:
-            continue_dict = {"ionic": True, "electronic": self.electronic_step_stop}
-            actions.append({"file": "continue.json",
-                            "action": {"_file_create": {'content': json.dumps(continue_dict)}}})
-
         m = Modder(actions=[FileActions])
         for a in actions:
             m.modify(a["action"], a["file"])
-        # Actions is being returned as None so that custodian will stop after
-        # STOPCAR is written. We do not want subsequent jobs to proceed.
-        errors = ["Walltime of {} reached at {}, start-time {} auto_continue is {}".format(
-            self.wall_time, datetime.datetime.now(), self.start_time, self.auto_continue)]
-        return {"errors": errors, "actions": None}
+        return {"errors": ["Walltime reached"], "actions": None}
 
 
 @deprecated(replacement=WalltimeHandler)

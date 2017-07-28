@@ -14,6 +14,7 @@ from pymatgen import Structure
 from pymatgen.io.vasp import VaspInput, Incar, Poscar, Outcar, Kpoints, Vasprun
 from monty.os.path import which
 from monty.shutil import decompress_dir
+from monty.serialization import dumpfn, loadfn
 
 from custodian.custodian import Job
 from custodian.utils import backup
@@ -166,22 +167,25 @@ class VaspJob(Job):
             except:
                 pass
 
-        if self.auto_continue and os.path.exists("continue.json") \
-           or os.path.exists("continue.json.gz"):
-            # Remove continue.json
-            # Could add more functionality here if desired.
-            logger.info("Continuing job.  Removing continue.json, setting ISTART=1," 
-                        " and moving CONTCAR to POSCAR.")
-            os.remove("continue.json")
-            backup(VASP_BACKUP_FILES, prefix="prev_run")
+        if self.auto_continue:
+            if os.path.exists("continue.json"):
+                actions = loadfn("continue.json").get("actions")
+                logger.info("Continuing previous VaspJob. Actions: {}".format(actions))
+                backup(VASP_BACKUP_FILES, prefix="prev_run")
+                VaspModder().apply_actions(actions)
 
-            # Setup INCAR to continue
-            incar = Incar.from_file("INCAR")
-            incar['ISTART'] = 1
-            incar.write_file("INCAR")
+            else:
+                # Default functionality is to copy CONTCAR to POSCAR and set
+                # ISTART to 1 in the INCAR, but other actions can be specified
+                if self.auto_continue is True:
+                    actions = [{"file": "CONTCAR", 
+                                "action": {"_file_copy": {"dest": "POSCAR"}}},
+                               {"dict": "INCAR",
+                                "action": {"_set": {"ISTART": 1}}}]
+                else:
+                    actions = self.auto_continue
+                dumpfn({"actions": actions}, "continue.json")
 
-            shutil.copy('CONTCAR', 'POSCAR')
-               
         if self.settings_override is not None:
             VaspModder().apply_actions(self.settings_override)
 
@@ -231,21 +235,11 @@ class VaspJob(Job):
                 incar.write_file("INCAR")
             except:
                 logger.error('MAGMOM copy from OUTCAR to INCAR failed')
-        """       
-        if self.auto_continue:
-            if os.path.isfile("continue.json"):
-                raise RuntimeError("continue.json is present, custodian is erroring out. " 
-                                   "Job may be recoverable.")
 
-                v = Vasprun('vasprun.xml')
-                if not v.converged():
-                    raise RuntimeError("continue.json is present, custodian is erroring out. " 
-                                       "Job may be recoverable.")
-                else:
-                    logger.info("continue.json present, but job converged, removing continue.json"
-                                " and completing job normally")
-                                """
-
+        # Remove continuation so if a subsequent job is run in
+        # the same directory, will not restart this job.
+        if os.path.exists("continue.json"):
+            os.remove("continue.json")
 
     @classmethod
     def double_relaxation_run(cls, vasp_cmd, auto_npar=True, ediffg=-0.05,
@@ -563,7 +557,7 @@ class VaspNEBJob(Job):
                  output_file="neb_vasp.out", stderr_file="neb_std_err.txt",
                  suffix="", final=True, backup=True, auto_npar=True,
                  half_kpts=False, auto_gamma=True, auto_continue=False,
-                 gamma_vasp_cmd=None):
+                 gamma_vasp_cmd=None, settings_override=None):
         """
         This constructor is a simplified version of VaspJob, which satisfies
         the need for flexibility. For standard kinds of runs, it's often
@@ -607,6 +601,13 @@ class VaspNEBJob(Job):
                 auto_gamma is True. Should follow the list style of
                 subprocess. Defaults to None, which means ".gamma" is added
                 to the last argument of the standard vasp_cmd.
+            settings_override ([dict]): An ansible style list of dict to
+                override changes. For example, to set ISTART=1 for subsequent
+                runs and to copy the CONTCAR to the POSCAR, you will provide::
+
+                    [{"dict": "INCAR", "action": {"_set": {"ISTART": 1}}},
+                     {"file": "CONTCAR",
+                      "action": {"_file_copy": {"dest": "POSCAR"}}}]
         """
 
         self.vasp_cmd = vasp_cmd
@@ -620,6 +621,7 @@ class VaspNEBJob(Job):
         self.auto_gamma = auto_gamma
         self.gamma_vasp_cmd = gamma_vasp_cmd
         self.auto_continue = auto_continue
+        self.settings_override = settings_override
         self.neb_dirs = []  # 00, 01, etc.
         self.neb_sub = []  # 01, 02, etc.
 
