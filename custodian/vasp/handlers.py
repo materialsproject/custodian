@@ -655,19 +655,12 @@ class UnconvergedErrorHandler(ErrorHandler):
         actions = [{"file": "CONTCAR",
                     "action": {"_file_copy": {"dest": "POSCAR"}}}]
         if not v.converged_electronic:
-            if algo != "All":
-                actions.append({"dict": "INCAR",
-                                "action": {"_set": {"ISTART": 1,
-                                                    "ALGO": "All", 
-                                                    "TIME": 0.2, 
-                                                    "LSUBROT":True}}})
-            else:
-                actions.append({"dict": "INCAR",
-                                "action": {"_set": {"ISTART": 1,
-                                                    "NELMDL": -6,
-                                                    "BMIX": 0.001,
-                                                    "AMIX_MAG": 0.8,
-                                                    "BMIX_MAG": 0.001}}})
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"ISTART": 1,
+                                                "NELMDL": -6,
+                                                "BMIX": 0.001,
+                                                "AMIX_MAG": 0.8,
+                                                "BMIX_MAG": 0.001}}})
         if not v.converged_ionic:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"IBRION":1}}})
@@ -826,7 +819,7 @@ class NonConvergingErrorHandler(ErrorHandler):
     is_monitor = True
 
     def __init__(self, output_filename="OSZICAR", nionic_steps=10,
-                 change_algo=True):
+                 change_algo=False):
         """
         Initializes the handler with the output file to check.
 
@@ -871,8 +864,7 @@ class NonConvergingErrorHandler(ErrorHandler):
             if algo != "All":
                 backup(VASP_BACKUP_FILES)
                 actions.append({"dict": "INCAR",
-                                "action": {"_set": {"ALGO": "All", "TIME": 0.2, 
-                                                    "LSUBROT":True}}})
+                                "action": {"_set": {"ALGO": "Normal"})
 
             elif amix > 0.1 and bmix > 0.01:
                 #try linear mixing
@@ -913,7 +905,7 @@ class WalltimeHandler(ErrorHandler):
 
     # This handler will be unrecoverable, but custodian shouldn't raise an
     # error
-    raises_runtime_error = False 
+    raises_runtime_error = False
 
     def __init__(self, wall_time=None, buffer_time=300,
                  electronic_step_stop=False):
@@ -981,7 +973,7 @@ class WalltimeHandler(ErrorHandler):
             # If the remaining time is less than average time for 3 
             # steps or buffer_time.
             time_left = self.wall_time - total_secs
-            if time_left < max(time_per_step * 3.0, self.buffer_time):
+            if time_left < max(time_per_step * 3, self.buffer_time):
                 return True
 
         return False
