@@ -115,26 +115,20 @@ class VaspNEBJobTest(unittest.TestCase):
 
     def test_setup(self):
         with cd(os.path.join(test_dir, 'setup_neb')):
-            v = VaspNEBJob("hello", half_kpts=True)
-            v.setup()
+            with ScratchDir('.', copy_from_current_on_enter=True) as d:
+                v = VaspNEBJob("hello", half_kpts=True)
+                v.setup()
 
-            incar = Incar.from_file("INCAR")
-            count = multiprocessing.cpu_count()
-            if count > 1:
-                self.assertGreater(incar["NPAR"], 1)
+                incar = Incar.from_file("INCAR")
+                count = multiprocessing.cpu_count()
+                if count > 1:
+                    self.assertGreater(incar["NPAR"], 1)
 
-            kpt = Kpoints.from_file("KPOINTS")
-            kpt_pre = Kpoints.from_file("KPOINTS.orig")
-            self.assertEqual(kpt_pre.style.name, "Monkhorst")
-            self.assertEqual(kpt.style.name, "Gamma")
-
-            shutil.move("KPOINTS.orig", "KPOINTS")
-            shutil.move("INCAR.orig", "INCAR")
-            os.remove("POTCAR.orig")
-            poscars = glob.glob("[0-9][0-9]/POSCAR.orig")
-            for p in poscars:
-                os.remove(p)
-
+                kpt = Kpoints.from_file("KPOINTS")
+                kpt_pre = Kpoints.from_file("KPOINTS.orig")
+                self.assertEqual(kpt_pre.style.name, "Monkhorst")
+                self.assertEqual(kpt.style.name, "Gamma")
+ 
     def test_postprocess(self):
         neb_outputs = ['INCAR', 'KPOINTS', 'POTCAR', 'vasprun.xml']
         neb_sub_outputs = ['CHG', 'CHGCAR', 'CONTCAR', 'DOSCAR',
