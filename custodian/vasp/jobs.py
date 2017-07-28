@@ -739,7 +739,6 @@ class VaspNEBJob(Job):
                     shutil.copy(f, "{}{}".format(f, self.suffix))
 
         
-
 class GenerateVaspInputJob(Job):
 
     def __init__(self, input_set, contcar_only=True, **kwargs):

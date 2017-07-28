@@ -8,7 +8,6 @@ import time
 import datetime
 import operator
 import shutil
-import json
 from functools import reduce
 from collections import Counter
 import re
@@ -853,7 +852,7 @@ class NonConvergingErrorHandler(ErrorHandler):
         # if change_algo is True, change ALGO = Fast to Normal if ALGO is
         # Fast. If still not converging, following Kresse's
         # recommendation, we will try two iterations of different mixing
-        # parameters. If this error is caught again, then kil the job
+        # parameters. If this error is caught again, then kill the job
         vi = VaspInput.from_directory(".")
         algo = vi["INCAR"].get("ALGO", "Normal")
         amix = vi["INCAR"].get("AMIX", 0.4)
@@ -861,10 +860,10 @@ class NonConvergingErrorHandler(ErrorHandler):
         amin = vi["INCAR"].get("AMIN", 0.1)
         actions = []
         if self.change_algo:
-            if algo != "All":
+            if algo == "Fast":
                 backup(VASP_BACKUP_FILES)
                 actions.append({"dict": "INCAR",
-                                "action": {"_set": {"ALGO": "Normal"})
+                                "action": {"_set": {"ALGO": "Normal"}}})
 
             elif amix > 0.1 and bmix > 0.01:
                 #try linear mixing

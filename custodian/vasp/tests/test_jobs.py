@@ -5,7 +5,6 @@ import unittest
 import os
 import shutil
 import glob
-import shlex
 from monty.tempfile import ScratchDir
 from monty.os import cd
 import multiprocessing
