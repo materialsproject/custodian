@@ -23,7 +23,7 @@ import datetime
 from custodian.vasp.handlers import VaspErrorHandler, \
     UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler, \
     MaxForceErrorHandler, PositiveEnergyErrorHandler, PotimErrorHandler, \
-    FrozenJobErrorHandler, AliasingErrorHandler, StdErrHandler
+    FrozenJobErrorHandler, AliasingErrorHandler, StdErrHandler, LrfCommutatorHandler
 from pymatgen.io.vasp import Incar, Poscar, Structure, Kpoints, VaspInput
 
 
@@ -571,17 +571,12 @@ class LrfCommHandlerTest(unittest.TestCase):
             shutil.copy(f, f+".orig")
 
     def test_lrf_comm(self):
-        h = StdErrHandler("std_err.txt")
+        h = LrfCommutatorHandler("std_err.txt")
         self.assertEqual(h.check(), True)
         d = h.correct()
         self.assertEqual(d["errors"], ['lrf_comm'])
         vi = VaspInput.from_directory(".")
-        self.assertEqual(vi["INCAR"]["ISTART"], 1)
-
-        self.assertEqual(h.check(), True)
-        d = h.correct()
-        self.assertEqual(d["errors"], ['lrf_comm'])
-        self.assertEqual(d["actions"], [])  # don't correct twice
+        self.assertEqual(vi["INCAR"]["LPEAD"], True)
 
     def tearDown(self):
         os.chdir(test_dir)
