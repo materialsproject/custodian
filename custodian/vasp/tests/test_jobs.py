@@ -41,42 +41,37 @@ class VaspJobTest(unittest.TestCase):
 
     def test_setup(self):
         with cd(test_dir):
-            v = VaspJob("hello")
-            v.setup()
-            incar = Incar.from_file("INCAR")
-            count = multiprocessing.cpu_count()
-            if count > 1:
-                self.assertGreater(incar["NPAR"], 1)
-            shutil.copy("INCAR.orig", "INCAR")
-            os.remove("INCAR.orig")
-            os.remove("KPOINTS.orig")
-            os.remove("POTCAR.orig")
-            os.remove("POSCAR.orig")
+            with ScratchDir('.', copy_from_current_on_enter=True) as d:
+                v = VaspJob("hello")
+                v.setup()
+                incar = Incar.from_file("INCAR")
+                count = multiprocessing.cpu_count()
+                if count > 1:
+                    self.assertGreater(incar["NPAR"], 1)
 
     def test_postprocess(self):
         with cd(os.path.join(test_dir, 'postprocess')):
-            shutil.copy('INCAR', 'INCAR.backup')
+            with ScratchDir('.', copy_from_current_on_enter=True) as d:
+                shutil.copy('INCAR', 'INCAR.backup')
 
-            v = VaspJob("hello", final=False, suffix=".test", copy_magmom=True)
-            v.postprocess()
-            incar = Incar.from_file("INCAR")
-            incar_prev = Incar.from_file("INCAR.test")
+                v = VaspJob("hello", final=False, suffix=".test", copy_magmom=True)
+                v.postprocess()
+                incar = Incar.from_file("INCAR")
+                incar_prev = Incar.from_file("INCAR.test")
 
-            for f in ['INCAR', 'KPOINTS', 'CONTCAR', 'OSZICAR', 'OUTCAR',
-                      'POSCAR', 'vasprun.xml']:
-                self.assertTrue(os.path.isfile('{}.test'.format(f)))
-                os.remove('{}.test'.format(f))
-            shutil.move('INCAR.backup', 'INCAR')
+                for f in ['INCAR', 'KPOINTS', 'CONTCAR', 'OSZICAR', 'OUTCAR',
+                          'POSCAR', 'vasprun.xml']:
+                    self.assertTrue(os.path.isfile('{}.test'.format(f)))
+                    os.remove('{}.test'.format(f))
+                shutil.move('INCAR.backup', 'INCAR')
 
-            self.assertAlmostEqual(incar['MAGMOM'], [3.007, 1.397, -0.189, -0.189])
-            self.assertAlmostEqual(incar_prev["MAGMOM"], [5, -5, 0.6, 0.6])
+                self.assertAlmostEqual(incar['MAGMOM'], [3.007, 1.397, -0.189, -0.189])
+                self.assertAlmostEqual(incar_prev["MAGMOM"], [5, -5, 0.6, 0.6])
 
     def test_continue(self):
         # Test the continuation functionality
-        with ScratchDir(".") as d:
-            file_loc = os.path.join(test_dir, "postprocess")
-            for f in ['INCAR', 'POSCAR', 'KPOINTS', 'POTCAR', 'CONTCAR']:
-                shutil.copy(os.path.join('..', file_loc, f), f)
+        with cd(os.path.join(test_dir, 'postprocess')):
+            with ScratchDir('.', copy_from_current_on_enter=True) as d:
 
             v = VaspJob("hello", auto_continue=True)
             v.setup()
