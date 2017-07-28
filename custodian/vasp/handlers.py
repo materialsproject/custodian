@@ -656,6 +656,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         if not v.converged_electronic:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ISTART": 1,
+                                                "ALGO": "Normal",
                                                 "NELMDL": -6,
                                                 "BMIX": 0.001,
                                                 "AMIX_MAG": 0.8,
