@@ -453,6 +453,19 @@ class WalltimeHandlerTest(unittest.TestCase):
 
     def setUp(self):
         os.chdir(os.path.join(test_dir, 'postprocess'))
+        if "CUSTODIAN_WALLTIME_START" in os.environ:
+            os.environ.pop("CUSTODIAN_WALLTIME_START")
+
+    def test_walltime_start(self):
+        # checks the walltime handlers starttime initialization
+        h = WalltimeHandler(wall_time=3600)
+        new_starttime = h.start_time
+        self.assertEqual(os.environ.get("CUSTODIAN_WALLTIME_START"),
+                         new_starttime.strftime("%a %b %d %H:%M:%S UTC %Y"))
+        # Test that walltime persists if new handler is created
+        h = WalltimeHandler(wall_time=3600)
+        self.assertEqual(os.environ.get("CUSTODIAN_WALLTIME_START"),
+                         new_starttime.strftime("%a %b %d %H:%M:%S UTC %Y"))
 
     def test_check_and_correct(self):
         # Try a 1 hr wall time with a 2 min buffer
@@ -492,7 +505,9 @@ class WalltimeHandlerTest(unittest.TestCase):
         os.remove("STOPCAR")
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDown(cls):
+        if "CUSTODIAN_WALLTIME_START" in os.environ:
+            os.environ.pop("CUSTODIAN_WALLTIME_START")
         os.chdir(cwd)
 
 
