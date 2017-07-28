@@ -958,15 +958,15 @@ class WalltimeHandler(ErrorHandler):
         if self.wall_time:
             run_time = datetime.datetime.now() - self.start_time
             total_secs = run_time.total_seconds()
+            outcar = Outcar("OUTCAR")
             if not self.electronic_step_stop:
                 # Determine max time per ionic step.
-                o = Outcar("OUTCAR")
-                o.read_pattern({"timings": "LOOP\+.+real time(.+)"},
+                outcar.read_pattern({"timings": "LOOP\+.+real time(.+)"},
                                 postprocess=float)
                 time_per_step = np.max(outcar.data.get('timings')) or 0
             else:
                 # Determine max time per electronic step.
-                o.read_pattern({"timings": "LOOP:.+real time(.+)"},
+                outcar.read_pattern({"timings": "LOOP:.+real time(.+)"},
                                 postprocess=float)
                 time_per_step = np.max(outcar.data['timings']) or 0
 

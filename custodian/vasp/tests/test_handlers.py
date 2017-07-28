@@ -338,7 +338,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h2.output_filename, "random_name.xml")
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDown(cls):
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("KPOINTS.orig", "KPOINTS")
         shutil.move("POSCAR.orig", "POSCAR")
@@ -452,11 +452,10 @@ class MaxForceErrorHandlerTest(unittest.TestCase):
 class WalltimeHandlerTest(unittest.TestCase):
 
     def setUp(self):
-        os.chdir(test_dir)
+        os.chdir(os.path.join(test_dir, 'postprocess'))
 
     def test_check_and_correct(self):
-        # The test OSZICAR file has 60 ionic steps. Let's try a 1 hr wall
-        # time with a 1min buffer
+        # Try a 1 hr wall time with a 2 min buffer
         h = WalltimeHandler(wall_time=3600, buffer_time=120)
         self.assertFalse(h.check())
 
