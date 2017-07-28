@@ -944,10 +944,13 @@ class WalltimeHandler(ErrorHandler):
         else:
             self.wall_time = None
         self.buffer_time = buffer_time
-        if "CUSTODIAN_START_TIME" in os.environ:
-            # Enables use of setting CUSTODIAN_START_TIME to `date` output
+        if "JOB_START_TIME" in os.environ:
+            # Enables use of setting JOB_START_TIME as the start
+            # time to use for the walltime handler.  The easiest
+            # way to use this is by executing export JOB_START_TIME=`date`
+            # in the environment (e. g. in a queue submission script)
             self.start_time = datetime.datetime.strptime(
-                os.environ["CUSTODIAN_START_TIME"], "%a %b %d %H:%M:%S %Z %Y")
+                os.environ["JOB_START_TIME"], "%a %b %d %H:%M:%S %Z %Y")
         else:
             self.start_time = datetime.datetime.now()
         self.electronic_step_stop = electronic_step_stop
