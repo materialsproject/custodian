@@ -28,7 +28,7 @@ __date__ = "Jun 1, 2012"
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
                         'test_files')
-pymatgen.SETTINGS["PMG_VASP_PSP_DIR"] = test_dir
+pymatgen.SETTINGS["PMG_VASP_PSP_DIR"] = os.path.abspath(test_dir)
 
 
 class VaspJobTest(unittest.TestCase):
@@ -71,29 +71,28 @@ class VaspJobTest(unittest.TestCase):
     def test_continue(self):
         # Test the continuation functionality
         with cd(os.path.join(test_dir, 'postprocess')):
+            # Test default functionality
             with ScratchDir('.', copy_from_current_on_enter=True) as d:
-
-            v = VaspJob("hello", auto_continue=True)
-            v.setup()
-            self.assertTrue(os.path.exists("continue.json"), "continue.json not created")
-            v.setup()
-            self.assertEqual(Poscar.from_file("CONTCAR").structure, 
-                             Poscar.from_file("POSCAR").structure)
-            self.assertEqual(Incar.from_file('INCAR')['ISTART'], 1)
-            v.postprocess()
-            self.assertFalse(os.path.exists("continue.json"),
-                             "continue.json not deleted after postprocessing")
+                v = VaspJob("hello", auto_continue=True)
+                v.setup()
+                self.assertTrue(os.path.exists("continue.json"), "continue.json not created")
+                v.setup()
+                self.assertEqual(Poscar.from_file("CONTCAR").structure, 
+                                 Poscar.from_file("POSCAR").structure)
+                self.assertEqual(Incar.from_file('INCAR')['ISTART'], 1)
+                v.postprocess()
+                self.assertFalse(os.path.exists("continue.json"),
+                                 "continue.json not deleted after postprocessing")
             # Test explicit action functionality
-            for f in ['INCAR', 'POSCAR', 'KPOINTS', 'POTCAR', 'CONTCAR']:
-                shutil.copy(os.path.join('..', file_loc, f), f)
-            v = VaspJob("hello", auto_continue=[{"dict": "INCAR", 
-                                                 "action": {"_set": {"ISTART": 1}}}])
-            v.setup()
-            v.setup()
-            self.assertNotEqual(Poscar.from_file("CONTCAR").structure, 
-                                Poscar.from_file("POSCAR").structure)
-            self.assertEqual(Incar.from_file('INCAR')['ISTART'], 1)
-            v.postprocess()
+            with ScratchDir('.', copy_from_current_on_enter=True) as d:
+                v = VaspJob("hello", auto_continue=[{"dict": "INCAR", 
+                                                     "action": {"_set": {"ISTART": 1}}}])
+                v.setup()
+                v.setup()
+                self.assertNotEqual(Poscar.from_file("CONTCAR").structure, 
+                                    Poscar.from_file("POSCAR").structure)
+                self.assertEqual(Incar.from_file('INCAR')['ISTART'], 1)
+                v.postprocess()
 
     def test_static(self):
         # Just a basic test of init.
