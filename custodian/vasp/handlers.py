@@ -12,14 +12,10 @@ from functools import reduce
 from collections import Counter
 import re
 
-from six.moves import map
-
 import numpy as np
 
 from monty.dev import deprecated
 from monty.serialization import loadfn
-
-from math import ceil
 
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
