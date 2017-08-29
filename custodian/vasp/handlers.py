@@ -90,7 +90,8 @@ class VaspErrorHandler(ErrorHandler):
             "EDWAV: internal error, the gradient is not orthogonal"],
         "nicht_konv": ["ERROR: SBESSELITER : nicht konvergent"],
         "zheev": ["ERROR EDDIAG: Call to routine ZHEEV failed!"],
-        "rhosyg": ["RHOSYG internal error"]
+        "rhosyg": ["RHOSYG internal error"],
+        "posmap":["POSMAP internal error: symmetry equivalent atom not found"]
     }
 
     def __init__(self, output_filename="vasp.out", natoms_large_cell=100):
@@ -366,6 +367,10 @@ class VaspErrorHandler(ErrorHandler):
                                 "action": {"_set": {"ISYM": 0}}})
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"SYMPREC": 1e-4}}})
+
+        if "posmap" in self.errors:
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"SYMPREC": 1e-6}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
