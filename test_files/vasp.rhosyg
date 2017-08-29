@@ -1,0 +1,91 @@
+ ----------------------------------------------------
+    OOO  PPPP  EEEEE N   N M   M PPPP
+   O   O P   P E     NN  N MM MM P   P
+   O   O PPPP  EEEEE N N N M M M PPPP   -- VERSION
+   O   O P     E     N  NN M   M P
+    OOO  P     EEEEE N   N M   M P
+ ----------------------------------------------------
+ running   32 mpi-ranks, with    8 threads/rank
+ distrk:  each k-point on   32 cores,    1 groups
+ distr:  one band on    1 cores,   32 groups
+ using from now: INCAR     
+ vasp.5.4.4 18Apr17 (build Jun 29 2017 14:33:36) complex                        
+  
+ POSCAR found type information on POSCAR  Dy Ni O 
+ POSCAR found :  3 types and      20 ions
+ scaLAPACK will be used
+ LDA part: xc-table for Pade appr. of Perdew
+ POSCAR, INCAR and KPOINTS ok, starting setup
+ FFT: planning ...
+ WAVECAR not read
+ WARNING: chargedensity file is incomplete
+ entering main loop
+       N       E                     dE             d eps       ncg     rms          rms(c)
+DAV:   1     0.167187216146E+04    0.16719E+04   -0.98543E+04 14976   0.150E+03
+DAV:   2    -0.214823167365E+02   -0.16934E+04   -0.16183E+04 13536   0.455E+02
+DAV:   3    -0.153677586730E+03   -0.13220E+03   -0.12878E+03 16672   0.128E+02
+DAV:   4    -0.157065907401E+03   -0.33883E+01   -0.33841E+01 14816   0.228E+01
+DAV:   5    -0.157143739151E+03   -0.77832E-01   -0.77815E-01 17760   0.342E+00 RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ 1E-4
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ 1E-4
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ 1E-4
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ 1E-4
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ 1E-4
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ 1E-4
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ 1E-4
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ 1E-4
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ 1E-4
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ 1E-4
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ 1E-4
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ 1E-4
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ 1E-4
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ 1E-4
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ 1E-4
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ 1E-4
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ RHOSYG internal error: stars are not distinct, try to increase SYMPREC to e.g. 
+ 1E-4
+ 1E-4
+ 1E-4
+ 1E-4
+ 1E-4
+ 1E-4
+ 1E-4
+ 1E-4
+ 1E-4
+ 1E-4
+ 1E-4
+ 1E-4
+ 1E-4
+ 1E-4
+ 1E-4
+ 1E-4

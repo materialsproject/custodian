@@ -223,6 +223,23 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ISMEAR"], 0)
 
+    def test_rhosyg(self):
+        h = VaspErrorHandler("vasp.rhosyg")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["rhosyg"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["SYMPREC"], 1e-4)
+        self.assertEqual(h.correct()["errors"], ["rhosyg"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ISYM"], 0)
+
+    def test_posmap(self):
+        h = VaspErrorHandler("vasp.posmap")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["posmap"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["SYMPREC"], 1e-6)
+
     def tearDown(self):
         os.chdir(test_dir)
         shutil.move("INCAR.orig", "INCAR")
