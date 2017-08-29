@@ -885,7 +885,7 @@ class NonConvergingErrorHandler(ErrorHandler):
         # if change_algo is True, change ALGO = Fast to Normal if ALGO is
         # Fast. If still not converging, following Kresse's
         # recommendation, we will try two iterations of different mixing
-        # parameters. If this error is caught again, then kil the job
+        # parameters. If this error is caught again, then kill the job
         vi = VaspInput.from_directory(".")
         algo = vi["INCAR"].get("ALGO", "Normal")
         amix = vi["INCAR"].get("AMIX", 0.4)
@@ -940,8 +940,7 @@ class WalltimeHandler(ErrorHandler):
     raises_runtime_error = False
 
     def __init__(self, wall_time=None, buffer_time=300,
-                 electronic_step_stop=False,
-                 auto_continue=False):
+                 electronic_step_stop=False):
         """
         Initializes the handler with a buffer time.
 
@@ -967,62 +966,48 @@ class WalltimeHandler(ErrorHandler):
                 Should be used with LWAVE = .True. to be useful. If this is
                 True, the STOPCAR is written with LABORT = .TRUE. instead of
                 LSTOP = .TRUE.
-            auto_continue (bool): Use the auto-continue functionality within the
-                VaspJob by ensuring Vasp doesn't delete the STOPCAR
         """
         if wall_time is not None:
             self.wall_time = wall_time
         elif "PBS_WALLTIME" in os.environ:
             self.wall_time = int(os.environ["PBS_WALLTIME"])
         elif "SBATCH_TIMELIMIT" in os.environ:
-            self.walltime = int(os.environ["SBATCH_TIMELIMIT"])
+            self.wall_time = int(os.environ["SBATCH_TIMELIMIT"]) 
         else:
             self.wall_time = None
         self.buffer_time = buffer_time
-        self.start_time = datetime.datetime.now()
+        # Sets CUSTODIAN_WALLTIME_START as the start time to use for
+        # future jobs in the same batch environment.  Can also be
+        # set manually be the user in the batch environment.
+        if "CUSTODIAN_WALLTIME_START" in os.environ:
+            self.start_time = datetime.datetime.strptime(
+                os.environ["CUSTODIAN_WALLTIME_START"], "%a %b %d %H:%M:%S %Z %Y")
+        else:
+            self.start_time = datetime.datetime.utcnow()
+            os.environ["CUSTODIAN_WALLTIME_START"] = datetime.datetime.strftime(
+                self.start_time, "%a %b %d %H:%M:%S UTC %Y")
+
         self.electronic_step_stop = electronic_step_stop
         self.electronic_steps_timings = [0]
         self.prev_check_time = self.start_time
-        self.prev_check_nscf_steps = 0
-        self.auto_continue = auto_continue
 
     def check(self):
         if self.wall_time:
             run_time = datetime.datetime.now() - self.start_time
             total_secs = run_time.total_seconds()
+            outcar = Outcar("OUTCAR")
             if not self.electronic_step_stop:
-                try:
-                    # Intelligently determine time per ionic step.
-                    o = Oszicar("OSZICAR")
-                    nsteps = len(o.ionic_steps)
-                    time_per_step = total_secs / nsteps
-                except Exception:
-                    time_per_step = 0
+                # Determine max time per ionic step.
+                outcar.read_pattern({"timings": "LOOP\+.+real time(.+)"},
+                                postprocess=float)
+                time_per_step = np.max(outcar.data.get('timings')) or 0
             else:
-                try:
-                    # Intelligently determine approximate time per electronic
-                    # step.
-                    o = Oszicar("OSZICAR")
-                    if len(o.ionic_steps) == 0:
-                        nsteps = 0
-                    else:
-                        nsteps = sum(map(len, o.electronic_steps))
-                    if nsteps > self.prev_check_nscf_steps:
-                        steps_time = datetime.datetime.now() - \
-                                     self.prev_check_time
-                        steps_secs = steps_time.total_seconds()
-                        step_timing = self.buffer_time * ceil(
-                            (steps_secs /
-                             (nsteps - self.prev_check_nscf_steps)) /
-                            self.buffer_time)
-                        self.electronic_steps_timings.append(step_timing)
-                        self.prev_check_nscf_steps = nsteps
-                        self.prev_check_time = datetime.datetime.now()
-                    time_per_step = max(self.electronic_steps_timings)
-                except Exception as ex:
-                    time_per_step = 0
+                # Determine max time per electronic step.
+                outcar.read_pattern({"timings": "LOOP:.+real time(.+)"},
+                                postprocess=float)
+                time_per_step = np.max(outcar.data['timings']) or 0
 
-            # If the remaining time is less than average time for 3 ionic
+            # If the remaining time is less than average time for 3 
             # steps or buffer_time.
             time_left = self.wall_time - total_secs
             if time_left < max(time_per_step * 3, self.buffer_time):
@@ -1038,15 +1023,9 @@ class WalltimeHandler(ErrorHandler):
         actions = [{"file": "STOPCAR",
                     "action": {"_file_create": {'content': content}}}]
 
-        if self.auto_continue:
-            actions.append({"file": "STOPCAR",
-                            "action": {"_file_modify": {'mode': 0o444}}})
-
         m = Modder(actions=[FileActions])
         for a in actions:
             m.modify(a["action"], a["file"])
-        # Actions is being returned as None so that custodian will stop after
-        # STOPCAR is written. We do not want subsequent jobs to proceed.
         return {"errors": ["Walltime reached"], "actions": None}
 
 
