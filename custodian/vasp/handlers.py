@@ -90,6 +90,8 @@ class VaspErrorHandler(ErrorHandler):
             "EDWAV: internal error, the gradient is not orthogonal"],
         "nicht_konv": ["ERROR: SBESSELITER : nicht konvergent"],
         "zheev": ["ERROR EDDIAG: Call to routine ZHEEV failed!"],
+        "elf_kpar": ["ELF: KPAR>1 not implemented"],
+        "elf_ncl": ["WARNING: ELF not implemented for non collinear case"]
         "rhosyg": ["RHOSYG internal error"],
         "posmap":["POSMAP internal error: symmetry equivalent atom not found"]
     }
@@ -360,6 +362,9 @@ class VaspErrorHandler(ErrorHandler):
             if vi["INCAR"].get("ALGO", "Fast").lower() != "exact":
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"ALGO": "Exact"}}})
+        if "elf_kpar" in self.errors:
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"KPAR": 1}}})
 
         if "rhosyg" in self.errors:
             if vi["INCAR"].get("SYMPREC", 1e-4) == 1e-4:
