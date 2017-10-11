@@ -615,7 +615,7 @@ class DriftErrorHandler(ErrorHandler):
         if len(outcar.data.get('drift', [])) < self.to_average:
             return False
         else:
-            return np.sum(outcar.data.get('drift')[-1 * self.to_average:]) / (3 * self.to_average) > self.max_drift
+            return np.sum(np.abs(outcar.data.get('drift')[-1 * self.to_average:])) / (3 * self.to_average) > self.max_drift
 
     def correct(self):
         backup(VASP_BACKUP_FILES)
