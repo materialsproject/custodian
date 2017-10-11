@@ -89,7 +89,7 @@ class VaspErrorHandler(ErrorHandler):
         "elf_kpar": ["ELF: KPAR>1 not implemented"],
         "elf_ncl": ["WARNING: ELF not implemented for non collinear case"],
         "rhosyg": ["RHOSYG internal error"],
-        "posmap":["POSMAP internal error: symmetry equivalent atom not found"]
+        "posmap": ["POSMAP internal error: symmetry equivalent atom not found"]
     }
 
     def __init__(self, output_filename="vasp.out", natoms_large_cell=100):
@@ -187,7 +187,7 @@ class VaspErrorHandler(ErrorHandler):
                     print("all_kpts_even = {}".format(all_kpts_even))
                     if all_kpts_even:
                         new_kpts = (
-                        tuple(n + 1 for n in vi["KPOINTS"].kpts[0]),)
+                            tuple(n + 1 for n in vi["KPOINTS"].kpts[0]),)
                         print("new_kpts = {}".format(new_kpts))
                         actions.append({"dict": "KPOINTS", "action": {"_set": {
                             "kpoints": new_kpts
@@ -588,6 +588,67 @@ class AliasingErrorHandler(ErrorHandler):
         return {"errors": list(self.errors), "actions": actions}
 
 
+class DriftErrorHandler(ErrorHandler):
+    """
+    Corrects for total drift exceeding the force convergence criteria.
+    """
+
+    def __init__(self, max_drift=None, to_average=3, enaug_multiply=2):
+        """
+        Initializes the handler with max drift
+        Args:
+            max_drift (float): This defines the max drift. Leaving this at the default of None gets the max_drift from EDFIFFG
+        """
+
+        self.max_drift = max_drift
+        self.to_average = to_average
+        self.enaug_multiply = enaug_multiply
+
+    def check(self):
+
+        if not self.max_drift:
+            incar = Incar("INCAR")
+            self.max_drift = incar.get("EDIFFG", -0.05) * -1
+
+        outcar = Outcar("OUTCAR")
+
+        if len(outcar.data.get('drift', [])) < self.to_average:
+            return False
+        else:
+            return np.sum(outcar.data.get('drift')[-1 * self.to_average:]) / (3 * self.to_average) > self.max_drift
+
+    def correct(self):
+        backup(VASP_BACKUP_FILES)
+        actions = []
+        vi = VaspInput.from_directory(".")
+
+        incar = vi["INCAR"]
+        outcar = vi["OUTCAR"]
+
+        # Move CONTCAR to POSCAR
+        actions.append({"file": "CONTCAR",
+                        "action": {"_file_copy": {"dest": "POSCAR"}}})
+
+        # First try adding ADDGRID
+        if not incar.get("ADDGRID", False):
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"ADDGRID": True}}})
+        # Otherwise set PREC to High so ENAUG can be used to control Augmentation Grid Size
+        elif incar.get("PREC", "Accurate").lower() != "high":
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"PREC": "High"}}})
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"ENAUG": incar.get("ENCUT", 520) * 4}}})
+        # PREC is already high and ENAUG set so just increase it
+        else:
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"ENAUG": incar.get("ENAUG", 2080) * self.enaug_multiply}}})
+
+        curr_drift = np.sum(outcar.data.get('drift')[-1 * self.to_average:]) / (3 * self.to_average)
+        VaspModder(vi=vi).apply_actions(actions)
+        return {"errors": "Excessive drift {} > {}".format(curr_drift, self.max_drift), "actions": actions}
+
+
 class MeshSymmetryErrorHandler(ErrorHandler):
     """
     Corrects the mesh symmetry error in VASP. This error is sometimes
@@ -968,7 +1029,7 @@ class WalltimeHandler(ErrorHandler):
         elif "PBS_WALLTIME" in os.environ:
             self.wall_time = int(os.environ["PBS_WALLTIME"])
         elif "SBATCH_TIMELIMIT" in os.environ:
-            self.wall_time = int(os.environ["SBATCH_TIMELIMIT"]) 
+            self.wall_time = int(os.environ["SBATCH_TIMELIMIT"])
         else:
             self.wall_time = None
         self.buffer_time = buffer_time
@@ -995,12 +1056,12 @@ class WalltimeHandler(ErrorHandler):
             if not self.electronic_step_stop:
                 # Determine max time per ionic step.
                 outcar.read_pattern({"timings": "LOOP\+.+real time(.+)"},
-                                postprocess=float)
+                                    postprocess=float)
                 time_per_step = np.max(outcar.data.get('timings')) or 0
             else:
                 # Determine max time per electronic step.
                 outcar.read_pattern({"timings": "LOOP:.+real time(.+)"},
-                                postprocess=float)
+                                    postprocess=float)
                 time_per_step = np.max(outcar.data['timings']) or 0
 
             # If the remaining time is less than average time for 3 
