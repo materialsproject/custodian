@@ -601,7 +601,7 @@ class DriftErrorHandler(ErrorHandler):
         """
 
         self.max_drift = max_drift
-        self.to_average = to_average
+        self.to_average = int(to_average)
         self.enaug_multiply = enaug_multiply
 
     def check(self):
@@ -644,7 +644,8 @@ class DriftErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ENAUG": int(incar.get("ENAUG", 1040) * self.enaug_multiply)}}})
 
-        curr_drift = np.sum(outcar.data.get('drift')[-1 * self.to_average:]) / (3 * self.to_average)
+
+        curr_drift = np.sum( outcar.data.get("drift",[])[::-1][:self.to_average]) / (3 * self.to_average)
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": "Excessive drift {} > {}".format(curr_drift, self.max_drift), "actions": actions}
 
