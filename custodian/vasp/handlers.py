@@ -607,7 +607,7 @@ class DriftErrorHandler(ErrorHandler):
     def check(self):
 
         if not self.max_drift:
-            incar = Incar("INCAR")
+            incar = Incar.from_file("INCAR")
             self.max_drift = incar.get("EDIFFG", -0.05) * -1
 
         outcar = Outcar("OUTCAR")
@@ -623,14 +623,14 @@ class DriftErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
 
         incar = vi["INCAR"]
-        outcar = vi["OUTCAR"]
+        outcar = Outcar("OUTCAR")
 
         # Move CONTCAR to POSCAR
         actions.append({"file": "CONTCAR",
                         "action": {"_file_copy": {"dest": "POSCAR"}}})
 
         # First try adding ADDGRID
-        if not incar.get("ADDGRID", False):
+        if not incar.get("ADDGRID", False) :
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ADDGRID": True}}})
         # Otherwise set PREC to High so ENAUG can be used to control Augmentation Grid Size
@@ -638,11 +638,11 @@ class DriftErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"PREC": "High"}}})
             actions.append({"dict": "INCAR",
-                            "action": {"_set": {"ENAUG": incar.get("ENCUT", 520) * 4}}})
+                            "action": {"_set": {"ENAUG": incar.get("ENCUT", 520) * 2}}})
         # PREC is already high and ENAUG set so just increase it
         else:
             actions.append({"dict": "INCAR",
-                            "action": {"_set": {"ENAUG": int(incar.get("ENAUG", 2080) * self.enaug_multiply)}}})
+                            "action": {"_set": {"ENAUG": int(incar.get("ENAUG", 1040) * self.enaug_multiply)}}})
 
         curr_drift = np.sum(outcar.data.get('drift')[-1 * self.to_average:]) / (3 * self.to_average)
         VaspModder(vi=vi).apply_actions(actions)
