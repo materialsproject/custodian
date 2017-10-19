@@ -682,13 +682,18 @@ class UnconvergedErrorHandler(ErrorHandler):
         actions = [{"file": "CONTCAR",
                     "action": {"_file_copy": {"dest": "POSCAR"}}}]
         if not v.converged_electronic:
+            new_settings = {"ISTART": 1,
+                            "ALGO": "Normal",
+                            "NELMDL": -6,
+                            "BMIX": 0.001,
+                            "AMIX_MAG": 0.8,
+                            "BMIX_MAG": 0.001} 
+
+            if all([v.incar.get(k,"") == val for k,val in new_settings.items()]):
+                return {"errors": ["Unconverged"], "actions": None}
+
             actions.append({"dict": "INCAR",
-                            "action": {"_set": {"ISTART": 1,
-                                                "ALGO": "Normal",
-                                                "NELMDL": -6,
-                                                "BMIX": 0.001,
-                                                "AMIX_MAG": 0.8,
-                                                "BMIX_MAG": 0.001}}})
+                            "action": {"_set": new_settings}})
         if not v.converged_ionic:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"IBRION": 1}}})
