@@ -37,7 +37,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         "TRUE"
         """
         try:
-            self._notconverge_check()
+            return self._notconverge_check()
         except:
             pass
         return False

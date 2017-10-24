@@ -10,9 +10,10 @@ from pymatgen.io.feff.sets import FEFFDirectoryInput
 class FeffModder(Modder):
     def __init__(self, actions=None, strict=True, feffinp=None):
         """
-        Initializes a Modder for VaspInput sets
+        Initializes a Modder for FeffInput sets
 
         Args:
+            actions ([Action]): A sequence of supported actions. See
             actions ([Action]): A sequence of supported actions. See
                 :mod:`custodian.ansible.actions`. Default is None,
                 which means DictActions and FileActions are supported.
@@ -30,11 +31,11 @@ class FeffModder(Modder):
 
     def apply_actions(self, actions):
         """
-        Applies a list of actions to the Vasp Input Set and rewrites modified
+        Applies a list of actions to the FEFF Input Set and rewrites modified
         files.
         Args:
             actions [dict]: A list of actions of the form {'file': filename,
-                'action': moddermodification} or {'dict': vaspinput_key,
+                'action': moddermodification} or {'dict': feffinput_key,
                 'action': moddermodification}
         """
         modified = []

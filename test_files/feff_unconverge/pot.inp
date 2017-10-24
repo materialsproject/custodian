@@ -1,0 +1,30 @@
+mpot, nph, ntitle, ihole, ipr1, iafolp, ixc,ispec
+   1   3   8   1   1   0   0   1
+nmix, nohole, jumprm, inters, nscmt, icoul, lfms1, iunf
+  10  -1   0   0 100   0   0   0
+comment: None given                                                             
+Source:                                                                         
+Structure Summary:  Li2 Ni1 O2                                                  
+Reduced formula:  Li2NiO2                                                       
+space group: (R-3m), space number:  (166)                                       
+abc:  3.069131   3.069131   6.639871                                            
+angles: 76.637352  90.000000  59.999994                                         
+sites: 5                                                                        
+gamach, rgrd, ca1, ecv, totvol, rfms1, corval_emin
+      1.57592      0.05000      0.01000    -40.00000      0.00000      7.00000    -70.00000
+ iz, lmaxsc, xnatph, xion, folp
+   28    2      1.00000      0.00000      1.15000
+    3    1    200.00000      0.00000      1.15000
+   28    2    100.00000      0.00000      1.15000
+    8    2    200.00000      0.00000      1.15000
+ExternalPot switch, StartFromFile switch
+ F F
+OVERLAP option: novr(iph)
+   0   0   0   0
+ iphovr  nnovr rovr 
+ChSh_Type:
+   0
+ConfigType:
+   1
+Temperature (in eV):
+  0.000000000000000E+000           1

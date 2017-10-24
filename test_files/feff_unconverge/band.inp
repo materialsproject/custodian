@@ -1,0 +1,10 @@
+mband : calculate bands if = 1
+   0
+emin, emax, estep : energy mesh
+      0.00000      0.00000      0.00000
+nkp : # points in k-path
+   0
+ikpath : type of k-path
+  -1
+freeprop :  empty lattice if = T
+ F

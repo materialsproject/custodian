@@ -1,0 +1,25 @@
+ Calculating LDOS ...
+              LDOS calculation for specified grid
+ Calculating energy and space dependent l-DOS.
+ It takes time ...
+     potential type  0
+     potential type  1
+     potential type  2
+     potential type  3
+ Number of energy points = 101
+ Doing FMS for a cluster of 165 atoms around iph =  0
+ Number of energy points = 101
+* * * WARNING preparing cluster for FMS calculation.
+      You specified a cluster of 172 atoms for the FMS calculation.
+      This exceeds the hard wired limit of 165 atoms.
+      The cluster size was reset to 165 and the calculation will continue.
+ Doing FMS for a cluster of 165 atoms around iph =  1
+ Number of energy points = 101
+ Doing FMS for a cluster of 165 atoms around iph =  2
+ Number of energy points = 101
+ Doing FMS for a cluster of 165 atoms around iph =  3
+ Calculating chi and rho...    0
+ Calculating chi and rho...    1
+ Calculating chi and rho...    2
+ Calculating chi and rho...    3
+ Done with LDOS.

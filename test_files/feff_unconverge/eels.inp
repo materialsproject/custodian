@@ -1,0 +1,20 @@
+calculate ELNES?
+   0
+average? relativistic? cross-terms? Which input?
+   0   1   1   1   4
+polarizations to be used ; min step max
+   1   1   1
+beam energy in eV
+      0.00000
+beam direction in arbitrary units
+      0.00000      0.00000      0.00000
+collection and convergence semiangle in rad
+      0.00000      0.00000
+qmesh - radial and angular grid size
+   0   0
+detector positions - two angles in rad
+      0.00000      0.00000
+calculate magic angle if magic=1
+   0
+energy for magic angle - eV above threshold
+      0.00000
