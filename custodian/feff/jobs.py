@@ -77,7 +77,7 @@ class FeffJob(Job):
         with open(self.output_file, "w") as f_std, \
                 open(self.stderr_file, "w", buffering=1) as f_err:
             # Use line buffering for stderr
-            p = subprocess.Popen(cmd, stdout=f_std, stderr=f_err)
+            p = subprocess.Popen(cmd, stdout=f_std, stderr=f_err, shell=True)
 
         return p
 
