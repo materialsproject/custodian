@@ -73,11 +73,12 @@ class FeffJob(Job):
         Returns:
             (subprocess.Popen) Used for monitoring.
         """
-        cmd = list(self.feff_cmd)
+        # cmd = list(self.feff_cmd)
         with open(self.output_file, "w") as f_std, \
                 open(self.stderr_file, "w", buffering=1) as f_err:
             # Use line buffering for stderr
-            p = subprocess.Popen(cmd, stdout=f_std, stderr=f_err, shell=True)
+            # On TSCC, need to run shell comm
+            p = subprocess.Popen(self.feff_cmd, stdout=f_std, stderr=f_err, shell=True)
 
         return p
 

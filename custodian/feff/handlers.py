@@ -7,8 +7,11 @@ from custodian.utils import backup
 from pymatgen.io.feff.sets import FEFFDirectoryInput
 from custodian.feff.interpreter import FeffModder
 import numpy as np
+import logging
 
 FEFF_BACKUP_FILES = {"ATOMS", "HEADER", "PARAMETERS", "POTENTIALS"}
+
+logger = logging.getLogger(__name__)
 
 
 class UnconvergedErrorHandler(ErrorHandler):
@@ -61,6 +64,8 @@ class UnconvergedErrorHandler(ErrorHandler):
         nmix = scf_values[4]
         actions = []
 
+        logger.info("SCF setting before correction: {}".format(scf_values_orig))
+
         nmix_values = [1, 3, 5, 10]
 
         if nscmt < 100:
@@ -79,6 +84,7 @@ class UnconvergedErrorHandler(ErrorHandler):
 
         if actions:
             FeffModder().apply_actions(actions)
+            logger.info("SCF setting after correction: {}".format(scf_values))
             return {"errors": ["Non-converging job"], "actions": actions}
 
         # Unfixable error. Just return None for actions.
