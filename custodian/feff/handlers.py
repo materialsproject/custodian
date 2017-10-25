@@ -9,7 +9,7 @@ from custodian.feff.interpreter import FeffModder
 import numpy as np
 import logging
 
-FEFF_BACKUP_FILES = ["ATOMS", "HEADER", "PARAMETERS", "POTENTIALS", 'feff.inp']
+FEFF_BACKUP_FILES = ["ATOMS", "HEADER", "PARAMETERS", "POTENTIALS", "feff.inp"]
 
 logger = logging.getLogger(__name__)
 
@@ -64,17 +64,22 @@ class UnconvergedErrorHandler(ErrorHandler):
         nmix = scf_values[4]
         actions = []
 
-        nmix_values = [1, 3, 5, 10]
+        nmix_values = np.array([1, 3, 5, 10])
 
         if nscmt < 100:
             scf_values[2] = 100
 
-        if ca >= 0.02:
-            ca = round(ca / 2, 2)
-            scf_values[3] = ca
+        if ca < 0.1 and nmix < 10:
+            scf_values[4] = nmix_values[np.argmax(nmix_values > nmix)]
 
-        if ca <= 0.05 and nmix < 10:
-            scf_values[4] = nmix_values[np.argmax(np.array(nmix_values))]
+        # When ca equals 0.1 and nmix equals 10, halve the ca value
+        if ca <= 0.1 and nmix == 10 and ca >= 0.01:
+            scf_values[3] = round(ca / 2, 2)
+            scf_values[4] = 3
+
+        if ca >= 0.1 and nmix < 10:
+            scf_values[3] = 0.1
+            scf_values[4] = nmix_values[np.argmax(nmix_values > nmix)]
 
         if scf_values_orig != scf_values:
             actions.append({"dict": "PARAMETERS",
