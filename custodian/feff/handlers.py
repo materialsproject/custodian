@@ -9,7 +9,7 @@ from custodian.feff.interpreter import FeffModder
 import numpy as np
 import logging
 
-FEFF_BACKUP_FILES = {"ATOMS", "HEADER", "PARAMETERS", "POTENTIALS"}
+FEFF_BACKUP_FILES = ["ATOMS", "HEADER", "PARAMETERS", "POTENTIALS", 'feff.inp']
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +64,6 @@ class UnconvergedErrorHandler(ErrorHandler):
         nmix = scf_values[4]
         actions = []
 
-        logger.info("SCF setting before correction: {}".format(scf_values_orig))
-
         nmix_values = [1, 3, 5, 10]
 
         if nscmt < 100:
@@ -76,7 +74,7 @@ class UnconvergedErrorHandler(ErrorHandler):
             scf_values[3] = ca
 
         if ca <= 0.05 and nmix < 10:
-            scf_values = nmix_values[np.argmax(np.array(nmix_values))]
+            scf_values[4] = nmix_values[np.argmax(np.array(nmix_values))]
 
         if scf_values_orig != scf_values:
             actions.append({"dict": "PARAMETERS",
@@ -84,7 +82,6 @@ class UnconvergedErrorHandler(ErrorHandler):
 
         if actions:
             FeffModder().apply_actions(actions)
-            logger.info("SCF setting after correction: {}".format(scf_values))
             return {"errors": ["Non-converging job"], "actions": actions}
 
         # Unfixable error. Just return None for actions.
