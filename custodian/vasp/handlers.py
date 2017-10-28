@@ -606,9 +606,14 @@ class DriftErrorHandler(ErrorHandler):
 
     def check(self):
 
+        incar = Incar.from_file("INCAR")
+        if incar.get("EDIFFG", 0.1) >= 0 or incar.get("NSW",0) == 0:
+            # Only activate when force relaxing and ionic steps
+            # NSW check prevents accidental effects when running DFPT
+            return False
+
         if not self.max_drift:
-            incar = Incar.from_file("INCAR")
-            self.max_drift = incar.get("EDIFFG", -0.05) * -1
+            self.max_drift = incar["EDIFFG"] * -1
 
         outcar = Outcar("OUTCAR")
 
