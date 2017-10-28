@@ -696,11 +696,14 @@ class DriftErrorHandlerTest(unittest.TestCase):
         self.assertFalse(h.check())
 
         h = DriftErrorHandler(max_drift=0.0001)
-        self.assertTrue(h.check())
+        self.assertFalse(h.check())
 
         incar = Incar.from_file("INCAR")
         incar["EDIFFG"] = -0.01
         incar.write_file("INCAR")
+
+        h = DriftErrorHandler(max_drift=0.0001)
+        self.assertTrue(h.check())
 
         h = DriftErrorHandler()
         h.check()
