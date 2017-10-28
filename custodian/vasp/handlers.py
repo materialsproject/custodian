@@ -618,9 +618,11 @@ class DriftErrorHandler(ErrorHandler):
         outcar = Outcar("OUTCAR")
 
         if len(outcar.data.get('drift', [])) < self.to_average:
+            # Ensure enough steps to get average drift
             return False
         else:
-            curr_drift = np.sum(np.abs(outcar.data.get("drift", [])[::-1][:self.to_average])) / (3 * self.to_average)
+            curr_drift = outcar.data.get("drift", [])[::-1][:self.to_average]
+            curr_drift = np.average([np.norm(d) for d in curr_drift])
             return curr_drift > self.max_drift
 
     def correct(self):
