@@ -606,16 +606,23 @@ class DriftErrorHandler(ErrorHandler):
 
     def check(self):
 
+        incar = Incar.from_file("INCAR")
+        if incar.get("EDIFFG", 0.1) >= 0 or incar.get("NSW",0) == 0:
+            # Only activate when force relaxing and ionic steps
+            # NSW check prevents accidental effects when running DFPT
+            return False
+
         if not self.max_drift:
-            incar = Incar.from_file("INCAR")
-            self.max_drift = incar.get("EDIFFG", -0.05) * -1
+            self.max_drift = incar["EDIFFG"] * -1
 
         outcar = Outcar("OUTCAR")
 
         if len(outcar.data.get('drift', [])) < self.to_average:
+            # Ensure enough steps to get average drift
             return False
         else:
-            curr_drift = np.sum(np.abs(outcar.data.get("drift", [])[::-1][:self.to_average])) / (3 * self.to_average)
+            curr_drift = outcar.data.get("drift", [])[::-1][:self.to_average]
+            curr_drift = np.average([np.linalg.norm(d) for d in curr_drift])
             return curr_drift > self.max_drift
 
     def correct(self):
@@ -646,7 +653,8 @@ class DriftErrorHandler(ErrorHandler):
                             "action": {"_set": {"ENAUG": int(incar.get("ENAUG", 1040) * self.enaug_multiply)}}})
 
 
-        curr_drift = np.sum(np.abs(outcar.data.get("drift",[])[::-1][:self.to_average])) / (3 * self.to_average)
+        curr_drift = outcar.data.get("drift", [])[::-1][:self.to_average]
+        curr_drift = np.average([np.linalg.norm(d) for d in curr_drift])
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": "Excessive drift {} > {}".format(curr_drift, self.max_drift), "actions": actions}
 
