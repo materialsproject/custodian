@@ -25,6 +25,10 @@ calculations.
 Change log
 ==========
 
+v1.1.1
+------
+* DriftErrorHandler (Shyam)
+
 v1.1.0
 ------
 * Improved error handling for Qchem calculations.

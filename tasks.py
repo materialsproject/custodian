@@ -57,7 +57,7 @@ def make_doc(ctx):
 
         # Avoid the use of jekyll so that _dir works as intended.
         ctx.run("touch .nojekyll")
-        
+
 
 @task
 def update_doc(ctx):
