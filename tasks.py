@@ -20,7 +20,7 @@ __date__ = "Apr 29, 2012"
 
 @task
 def make_doc(ctx):
-    with cd("docs"):
+    with cd("docs_rst"):
         ctx.run("sphinx-apidoc -d 6 -o . -f ../custodian")
         ctx.run("rm custodian*.tests.rst")
         for f in glob.glob("*.rst"):
@@ -49,11 +49,15 @@ def make_doc(ctx):
         ctx.run("make html")
         # ctx.run("cp _static/* _build/html/_static")
 
-        # This makes sure pymatgen.org works to redirect to the Gihub page
-        # ctx.run("echo \"pymatgen.org\" > _build/html/CNAME")
-        # Avoid ths use of jekyll so that _dir works as intended.
-        ctx.run("touch _build/html/.nojekyll")
+    with cd("docs"):
+        ctx.run("cp -r html/* .")
+        ctx.run("rm -r html")
+        ctx.run("rm -r doctrees")
+        ctx.run("rm -r _sources")
 
+        # Avoid the use of jekyll so that _dir works as intended.
+        ctx.run("touch .nojekyll")
+        
 
 @task
 def update_doc(ctx):
