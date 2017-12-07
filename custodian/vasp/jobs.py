@@ -319,14 +319,13 @@ class VaspJob(Job):
                                                 "LWAVE": True,
                                                 "NSW": 0}}}]
         jobs = [VaspJob(vasp_cmd, auto_npar=auto_npar,
-                        gamma_vasp_cmd=gamma_vasp_cmd,
                         final=False, suffix=".relax0",
                         settings_override=pre_opt_setings)]
 
         # Finish with regular double relaxation style run using SCAN
         jobs.extend(VaspJob.double_relaxation_run(vasp_cmd, auto_npar=auto_npar,
-                                                  ediffg=self.get("ediffg"),
-                                                  half_kpts_first_relax=self.get("half_kpts_first_relax", HALF_KPOINTS_FIRST_RELAX)))
+                                                  ediffg=ediffg,
+                                                  half_kpts_first_relax=half_kpts_first_relax))
 
         # Ensure the first relaxation doesn't overwrite the original inputs
         jobs[1].backup = False
