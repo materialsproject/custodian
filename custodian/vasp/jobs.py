@@ -341,6 +341,8 @@ class VaspJob(Job):
             post_opt_settings = jobs[1].settings_override + post_opt_settings
         jobs[1].settings_override = post_opt_settings
 
+        return jobs
+
     @classmethod
     def full_opt_run(cls, vasp_cmd, vol_change_tol=0.02,
                      max_steps=10, ediffg=-0.05, half_kpts_first_relax=False,
