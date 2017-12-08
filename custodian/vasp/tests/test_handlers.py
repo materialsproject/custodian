@@ -367,7 +367,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                            "action": {"_set": {"ALGO": "All"}}},d["actions"])
         os.remove("vasprun.xml")
 
-    def test_to_from_dict(self):2
+    def test_to_from_dict(self):
         h = UnconvergedErrorHandler("random_name.xml")
         h2 = UnconvergedErrorHandler.from_dict(h.as_dict())
         self.assertEqual(type(h2), UnconvergedErrorHandler)
