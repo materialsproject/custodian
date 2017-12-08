@@ -753,12 +753,17 @@ class UnconvergedErrorHandler(ErrorHandler):
         actions = [{"file": "CONTCAR",
                     "action": {"_file_copy": {"dest": "POSCAR"}}}]
         if not v.converged_electronic:
-            new_settings = {"ISTART": 1,
-                            "ALGO": "Normal",
-                            "NELMDL": -6,
-                            "BMIX": 0.001,
-                            "AMIX_MAG": 0.8,
-                            "BMIX_MAG": 0.001} 
+            # For SCAN try switching to CG for the electronic minimization
+            print(v.incar.get("METAGGA"))
+            if "SCAN" in v.incar.get("METAGGA","").upper():
+                new_settings = {"ALGO": "All"}
+            else:
+                new_settings = {"ISTART": 1,
+                                "ALGO": "Normal",
+                                "NELMDL": -6,
+                                "BMIX": 0.001,
+                                "AMIX_MAG": 0.8,
+                                "BMIX_MAG": 0.001} 
 
             if all([v.incar.get(k,"") == val for k,val in new_settings.items()]):
                 return {"errors": ["Unconverged"], "actions": None}
