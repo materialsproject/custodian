@@ -357,7 +357,17 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["errors"], ['Unconverged'])
         os.remove("vasprun.xml")
 
-    def test_to_from_dict(self):
+    def test_check_correct_scan(self):
+        shutil.copy("vasprun.xml.scan", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ['Unconverged'])
+        self.assertIn({"dict": "INCAR",
+                           "action": {"_set": {"ALGO": "All"}}},d["actions"])
+        os.remove("vasprun.xml")
+
+    def test_to_from_dict(self):2
         h = UnconvergedErrorHandler("random_name.xml")
         h2 = UnconvergedErrorHandler.from_dict(h.as_dict())
         self.assertEqual(type(h2), UnconvergedErrorHandler)
