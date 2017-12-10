@@ -1077,12 +1077,12 @@ class WalltimeHandler(ErrorHandler):
                 # Determine max time per ionic step.
                 outcar.read_pattern({"timings": "LOOP\+.+real time(.+)"},
                                     postprocess=float)
-                time_per_step = np.max(outcar.data.get('timings')) or 0
+                time_per_step = np.max(outcar.data.get('timings')) if outcar.data.get("timings",[]) else 0
             else:
                 # Determine max time per electronic step.
                 outcar.read_pattern({"timings": "LOOP:.+real time(.+)"},
                                     postprocess=float)
-                time_per_step = np.max(outcar.data['timings']) or 0
+                time_per_step = np.max(outcar.data.get('timings')) if outcar.data.get("timings",[]) else 0
 
             # If the remaining time is less than average time for 3 
             # steps or buffer_time.
