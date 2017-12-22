@@ -1,6 +1,32 @@
 Change Log
 ==========
 
+v1.1.1
+------
+* DriftErrorHandler (Shyam)
+
+v1.1.0
+------
+* Improved error handling for Qchem calculations.
+
+v1.0.4
+------
+* Improved handling of non-zero return codes.
+
+v1.0.2
+------
+* Interrupted run feature. (Shyam Dwaraknath)
+
+v1.0.1
+------
+* Pymatgen 4.0.0 compatible release.
+
+v1.0.0
+------
+* Custodian now comes with a "cstdn" script that enables the arbitrary creation
+  of simple job sequences using a yaml file, and the running of calculations
+  based on these yaml specifications.
+
 v0.8.8
 ------
 1. Fix setup.py.

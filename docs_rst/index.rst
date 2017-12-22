@@ -25,32 +25,12 @@ calculations.
 Change log
 ==========
 
-v1.1.1
-------
-* DriftErrorHandler (Shyam)
-
-v1.1.0
-------
-* Improved error handling for Qchem calculations.
-
-v1.0.4
-------
-* Improved handling of non-zero return codes.
-
-v1.0.2
-------
-* Interrupted run feature. (Shyam Dwaraknath)
-
-v1.0.1
-------
-* Pymatgen 4.0.0 compatible release.
-
-v1.0.0
-------
-* Custodian now comes with a "cstdn" script that enables the arbitrary creation
-  of simple job sequences using a yaml file, and the running of calculations
-  based on these yaml specifications.
-
+v2017.12.23
+-----------
+* cstdn command line tool is now official with docs.
+* Fine-grained control of VaspErrorHandler is now possible using
+  `errors_subset_to_catch`.
+* Switched to date-based versioning for custodian like pymatgen.
 
 :doc:`Older versions </changelog>`
 
@@ -261,6 +241,74 @@ converge_kpoints script in the scripts for an example.
     A new package for dealing with NwChem calculations has been added.
     NwChem is an open-source code for performing computational chemistry
     calculations.
+
+cstdn - A yaml-spec controlled job
+==================================
+
+Custodian now comes with a cstdn script, which allows you to do fine-grained
+control of a job using a yaml spec file. Below is an annotated example of how
+you can specify a double VASP relaxation followed by a static calculation.
+Minor modifications would allow very customizable calculations, though this is
+obviously not meant for highly complex workflows. For those, usage of `FireWorks
+<https://materialsproject.github.io/fireworks/>`_ is highly recommended.
+
+Sample yaml spec::
+
+    # Specifies a list of jobs to run.
+    # Each job is specified by a `jb: <full class path>` with parameters specified
+    # via the params dict.
+
+    jobs:
+    - jb: custodian.vasp.jobs.VaspJob
+      params:
+        final: False
+        suffix: .relax1
+    - jb: custodian.vasp.jobs.VaspJob
+      params:
+        final: False
+        suffix: .relax2
+        settings_override:
+        - {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
+    - jb: custodian.vasp.jobs.VaspJob
+      params:
+        final: True
+        suffix: .static3
+        settings_override:
+        - {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
+        - {"dict": "INCAR", "action": {"_set": {"NSW": 0}}}
+
+
+    # This key specifies parameters common to all jobs.
+    # Keys starting with $ are expanded to the environmental values.
+    # The example below means the parameter vasp_cmd is set to the value with
+    # $PBS_NODEFILE expanded.
+
+    jobs_common_params:
+      $vasp_cmd: ["mpirun", "-machinefile", "$PBS_NODEFILE", "-np", "24", "vasp"]
+
+
+    # Specifies a list of error handlers in the same format as jobs. Similarly,
+    # parameters passed to the handler __init__ can be configured the same
+    # way as for jobs.
+    handlers:
+    - hdlr: custodian.vasp.handlers.VaspErrorHandler
+    - hdlr: custodian.vasp.handlers.AliasingErrorHandler
+    - hdlr: custodian.vasp.handlers.MeshSymmetryErrorHandler
+
+    # Specifies a list of error handlers in the same format as jobs.
+    validators:
+    - vldr: custodian.vasp.validators.VasprunXMLValidator
+
+    #This sets all custodian running parameters.
+    custodian_params:
+      max_errors: 10
+      scratch_dir: /tmp
+      gzipped_output: True
+      checkpoint: True
+
+You can then run the job using the following command::
+
+    cstdn run <path to yaml file>
 
 API/Reference Docs
 ==================
