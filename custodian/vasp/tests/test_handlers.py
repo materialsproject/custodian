@@ -65,6 +65,10 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["actions"],
                          [{'action': {'_set': {'ISMEAR': 0}},
                            'dict': 'INCAR'}])
+
+        h = VaspErrorHandler("vasp.teterror", errors_subset_to_catch=["eddrmm"])
+        self.assertFalse(h.check())
+
         h = VaspErrorHandler("vasp.sgrcon")
         h.check()
         d = h.correct()

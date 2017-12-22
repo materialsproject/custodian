@@ -92,7 +92,8 @@ class VaspErrorHandler(ErrorHandler):
         "posmap": ["POSMAP internal error: symmetry equivalent atom not found"]
     }
 
-    def __init__(self, output_filename="vasp.out", natoms_large_cell=100):
+    def __init__(self, output_filename="vasp.out", natoms_large_cell=100,
+                 errors_subset_to_catch=None):
         """
         Initializes the handler with the output file to check.
 
@@ -101,12 +102,31 @@ class VaspErrorHandler(ErrorHandler):
                 is being redirected. The error messages that are checked are
                 present in the stdout. Defaults to "vasp.out", which is the
                 default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
+            natoms_large_cell (int): Number of atoms threshold to treat cell
+                as large. Affects the correction of certain errors. Defaults to
+                100.
+            errors_subset_to_detect (list): A subset of errors to catch. The
+                default is None, which means all supported errors are detected.
+                Use this to only catch only a subset of supported errors.
+                E.g., ["eddrrm", "zheev"] will only catch the eddrmm and zheev
+                errors, and not others. If you wish to only excluded one or
+                two of the errors, you can create this list by the following
+                lines:
+
+                ```
+                subset = list(VaspErrorHandler.error_msgs.keys())
+                subset.pop("eddrrm")
+
+                handler = VaspErrorHandler(errors_subset_to_catch=subset)
+                ```
         """
         self.output_filename = output_filename
         self.errors = set()
         self.error_count = Counter()
         # threshold of number of atoms to treat the cell as large.
         self.natoms_large_cell = natoms_large_cell
+        self.errors_subset_to_catch = errors_subset_to_catch or \
+            list(VaspErrorHandler.error_msgs.keys())
 
     def check(self):
         incar = Incar.from_file("INCAR")
@@ -115,15 +135,16 @@ class VaspErrorHandler(ErrorHandler):
             for line in f:
                 l = line.strip()
                 for err, msgs in VaspErrorHandler.error_msgs.items():
-                    for msg in msgs:
-                        if l.find(msg) != -1:
-                            # this checks if we want to run a charged
-                            # computation (e.g., defects) if yes we don't
-                            # want to kill it because there is a change in e-
-                            # density (brmix error)
-                            if err == "brmix" and 'NELECT' in incar:
-                                continue
-                            self.errors.add(err)
+                    if err in self.errors_subset_to_catch:
+                        for msg in msgs:
+                            if l.find(msg) != -1:
+                                # this checks if we want to run a charged
+                                # computation (e.g., defects) if yes we don't
+                                # want to kill it because there is a change in
+                                # e-density (brmix error)
+                                if err == "brmix" and 'NELECT' in incar:
+                                    continue
+                                self.errors.add(err)
         return len(self.errors) > 0
 
     def correct(self):
