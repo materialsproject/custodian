@@ -5,10 +5,17 @@ Deployment file to facilitate releases of custodian.
 from __future__ import division
 
 import glob
+import os
+import json
 
 from invoke import task
 from monty.os import cd
-from custodian import __version__ as ver
+import datetime
+import re
+import requests
+from custodian import __version__ as CURRENT_VER
+
+NEW_VER = datetime.datetime.today().strftime("%Y.%-m.%-d")
 
 __author__ = "Shyue Ping Ong"
 __copyright__ = "Copyright 2012, The Materials Project"
@@ -69,9 +76,32 @@ def update_doc(ctx):
 
 @task
 def publish(ctx):
+    ctx.run("rm dist/*.*", warn=True)
     ctx.run("python setup.py register sdist bdist_wheel")
     ctx.run("twine upload dist/*")
 
+
+@task
+def release_github(ctx):
+    with open("CHANGES.rst") as f:
+        contents = f.read()
+    toks = re.split("\-+", contents)
+    desc = toks[1].strip()
+    toks = desc.split("\n")
+    desc = "\n".join(toks[:-1]).strip()
+    payload = {
+        "tag_name": "v" + NEW_VER,
+        "target_commitish": "master",
+        "name": "v" + NEW_VER,
+        "body": desc,
+        "draft": False,
+        "prerelease": False
+    }
+    response = requests.post(
+        "https://api.github.com/repos/materialsproject/custodian/releases",
+        data=json.dumps(payload),
+        headers={"Authorization": "token " + os.environ["GITHUB_RELEASES_TOKEN"]})
+    print(response.text)
 
 @task
 def test(ctx):
@@ -79,14 +109,30 @@ def test(ctx):
 
 
 @task
-def setver(ctx):
-    ctx.run("sed s/version=.*,/version=\\\"{}\\\",/ setup.py > newsetup".format(ver))
-    ctx.run("mv newsetup setup.py")
+def set_ver(ctx):
+    lines = []
+    with open("custodian/__init__.py", "rt") as f:
+        for l in f:
+            if "__version__" in l:
+                lines.append('__version__ = "%s"' % NEW_VER)
+            else:
+                lines.append(l.rstrip())
+    with open("custodian/__init__.py", "wt") as f:
+        f.write("\n".join(lines))
+
+    lines = []
+    with open("setup.py", "rt") as f:
+        for l in f:
+            lines.append(re.sub(r'version=([^,]+),', 'version="%s",' % NEW_VER,
+                                l.rstrip()))
+    with open("setup.py", "wt") as f:
+        f.write("\n".join(lines))
 
 
 @task
 def release(ctx):
-    setver(ctx)
+    set_ver(ctx)
     # test(ctx)
     publish(ctx)
     update_doc(ctx)
+    release_github(ctx)
