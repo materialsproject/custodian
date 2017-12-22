@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian.vasp package &#8212; custodian 1.1.1 documentation</title>
+    <title>custodian.vasp package &#8212; custodian 2017.12.23 documentation</title>
     <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.1',
+        VERSION:     '2017.12.23',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -47,7 +47,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 1.1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 2017.12.23 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -563,7 +563,7 @@ this only if it is different from the default (unlikely).</td>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.VaspErrorHandler">
-<em class="property">class </em><code class="descname">VaspErrorHandler</code><span class="sig-paren">(</span><em>output_filename='vasp.out'</em>, <em>natoms_large_cell=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">VaspErrorHandler</code><span class="sig-paren">(</span><em>output_filename='vasp.out'</em>, <em>natoms_large_cell=100</em>, <em>errors_subset_to_catch=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Master VaspErrorHandler class that handles a number of common errors
 that occur during VASP runs.</p>
@@ -572,10 +572,29 @@ that occur during VASP runs.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output_filename</strong> (<em>str</em>) – This is the file where the stdout for vasp
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>output_filename</strong> (<em>str</em>) – This is the file where the stdout for vasp
 is being redirected. The error messages that are checked are
 present in the stdout. Defaults to “vasp.out”, which is the
-default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</td>
+default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</li>
+<li><strong>natoms_large_cell</strong> (<em>int</em>) – Number of atoms threshold to treat cell
+as large. Affects the correction of certain errors. Defaults to
+100.</li>
+<li><strong>errors_subset_to_detect</strong> (<em>list</em>) – <p>A subset of errors to catch. The
+default is None, which means all supported errors are detected.
+Use this to only catch only a subset of supported errors.
+E.g., [“eddrrm”, “zheev”] will only catch the eddrmm and zheev
+errors, and not others. If you wish to only excluded one or
+two of the errors, you can create this list by the following
+lines:</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a>`
+subset = list(VaspErrorHandler.error_msgs.keys())
+subset.pop(“eddrrm”)</p>
+<p>handler = VaspErrorHandler(errors_subset_to_catch=subset)
+<a href="#id3"><span class="problematic" id="id4">``</span></a><a href="#id5"><span class="problematic" id="id6">`</span></a></p>
+</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -935,6 +954,16 @@ considerably. Defaults to False.</li>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="custodian.vasp.jobs.VaspJob.metagga_opt_run">
+<em class="property">classmethod </em><code class="descname">metagga_opt_run</code><span class="sig-paren">(</span><em>vasp_cmd</em>, <em>auto_npar=True</em>, <em>ediffg=-0.05</em>, <em>half_kpts_first_relax=False</em>, <em>auto_continue=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.metagga_opt_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.metagga_opt_run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of thres jobs to perform an optimization for any
+metaGGA functional. There is an initial calculation of the
+GGA wavefunction which is fed into the initial metaGGA optimization
+to precondition the electronic structure optimizer. The metaGGA
+optimization is performed using the double relaxation scheme</p>
 </dd></dl>
 
 <dl class="method">

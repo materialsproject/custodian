@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian.vasp.handlers &#8212; custodian 1.1.1 documentation</title>
+    <title>custodian.vasp.handlers &#8212; custodian 2017.12.23 documentation</title>
     <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '1.1.1',
+        VERSION:     '2017.12.23',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -47,7 +47,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 1.1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2017.12.23 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -152,7 +152,8 @@
         <span class="s2">&quot;posmap&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POSMAP internal error: symmetry equivalent atom not found&quot;</span><span class="p">]</span>
     <span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="o">=</span><span class="s2">&quot;vasp.out&quot;</span><span class="p">,</span> <span class="n">natoms_large_cell</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="o">=</span><span class="s2">&quot;vasp.out&quot;</span><span class="p">,</span> <span class="n">natoms_large_cell</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                 <span class="n">errors_subset_to_catch</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes the handler with the output file to check.</span>
 
@@ -161,12 +162,31 @@
 <span class="sd">                is being redirected. The error messages that are checked are</span>
 <span class="sd">                present in the stdout. Defaults to &quot;vasp.out&quot;, which is the</span>
 <span class="sd">                default redirect used by :class:`custodian.vasp.jobs.VaspJob`.</span>
+<span class="sd">            natoms_large_cell (int): Number of atoms threshold to treat cell</span>
+<span class="sd">                as large. Affects the correction of certain errors. Defaults to</span>
+<span class="sd">                100.</span>
+<span class="sd">            errors_subset_to_detect (list): A subset of errors to catch. The</span>
+<span class="sd">                default is None, which means all supported errors are detected.</span>
+<span class="sd">                Use this to only catch only a subset of supported errors.</span>
+<span class="sd">                E.g., [&quot;eddrrm&quot;, &quot;zheev&quot;] will only catch the eddrmm and zheev</span>
+<span class="sd">                errors, and not others. If you wish to only excluded one or</span>
+<span class="sd">                two of the errors, you can create this list by the following</span>
+<span class="sd">                lines:</span>
+
+<span class="sd">                ```</span>
+<span class="sd">                subset = list(VaspErrorHandler.error_msgs.keys())</span>
+<span class="sd">                subset.pop(&quot;eddrrm&quot;)</span>
+
+<span class="sd">                handler = VaspErrorHandler(errors_subset_to_catch=subset)</span>
+<span class="sd">                ```</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span> <span class="o">=</span> <span class="n">output_filename</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
         <span class="c1"># threshold of number of atoms to treat the cell as large.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">natoms_large_cell</span> <span class="o">=</span> <span class="n">natoms_large_cell</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errors_subset_to_catch</span> <span class="o">=</span> <span class="n">errors_subset_to_catch</span> <span class="ow">or</span> \
+            <span class="nb">list</span><span class="p">(</span><span class="n">VaspErrorHandler</span><span class="o">.</span><span class="n">error_msgs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
 <div class="viewcode-block" id="VaspErrorHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -175,15 +195,16 @@
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">l</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                 <span class="k">for</span> <span class="n">err</span><span class="p">,</span> <span class="n">msgs</span> <span class="ow">in</span> <span class="n">VaspErrorHandler</span><span class="o">.</span><span class="n">error_msgs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">msgs</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                            <span class="c1"># this checks if we want to run a charged</span>
-                            <span class="c1"># computation (e.g., defects) if yes we don&#39;t</span>
-                            <span class="c1"># want to kill it because there is a change in e-</span>
-                            <span class="c1"># density (brmix error)</span>
-                            <span class="k">if</span> <span class="n">err</span> <span class="o">==</span> <span class="s2">&quot;brmix&quot;</span> <span class="ow">and</span> <span class="s1">&#39;NELECT&#39;</span> <span class="ow">in</span> <span class="n">incar</span><span class="p">:</span>
-                                <span class="k">continue</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">err</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors_subset_to_catch</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">msgs</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                                <span class="c1"># this checks if we want to run a charged</span>
+                                <span class="c1"># computation (e.g., defects) if yes we don&#39;t</span>
+                                <span class="c1"># want to kill it because there is a change in</span>
+                                <span class="c1"># e-density (brmix error)</span>
+                                <span class="k">if</span> <span class="n">err</span> <span class="o">==</span> <span class="s2">&quot;brmix&quot;</span> <span class="ow">and</span> <span class="s1">&#39;NELECT&#39;</span> <span class="ow">in</span> <span class="n">incar</span><span class="p">:</span>
+                                    <span class="k">continue</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="VaspErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -813,12 +834,17 @@
         <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}}]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">converged_electronic</span><span class="p">:</span>
-            <span class="n">new_settings</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-                            <span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Normal&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;NELMDL&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span>
-                            <span class="s2">&quot;BMIX&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span>
-                            <span class="s2">&quot;AMIX_MAG&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
-                            <span class="s2">&quot;BMIX_MAG&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">}</span> 
+            <span class="c1"># For SCAN try switching to CG for the electronic minimization</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;METAGGA&quot;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="s2">&quot;SCAN&quot;</span> <span class="ow">in</span> <span class="n">v</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;METAGGA&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+                <span class="n">new_settings</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;All&quot;</span><span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_settings</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                                <span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Normal&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;NELMDL&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span>
+                                <span class="s2">&quot;BMIX&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span>
+                                <span class="s2">&quot;AMIX_MAG&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
+                                <span class="s2">&quot;BMIX_MAG&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">}</span> 
 
             <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">v</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">val</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">new_settings</span><span class="o">.</span><span class="n">items</span><span class="p">()]):</span>
                 <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Unconverged&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
@@ -1132,12 +1158,12 @@
                 <span class="c1"># Determine max time per ionic step.</span>
                 <span class="n">outcar</span><span class="o">.</span><span class="n">read_pattern</span><span class="p">({</span><span class="s2">&quot;timings&quot;</span><span class="p">:</span> <span class="s2">&quot;LOOP\+.+real time(.+)&quot;</span><span class="p">},</span>
                                     <span class="n">postprocess</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-                <span class="n">time_per_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;timings&#39;</span><span class="p">))</span> <span class="ow">or</span> <span class="mi">0</span>
+                <span class="n">time_per_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;timings&#39;</span><span class="p">))</span> <span class="k">if</span> <span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timings&quot;</span><span class="p">,[])</span> <span class="k">else</span> <span class="mi">0</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Determine max time per electronic step.</span>
                 <span class="n">outcar</span><span class="o">.</span><span class="n">read_pattern</span><span class="p">({</span><span class="s2">&quot;timings&quot;</span><span class="p">:</span> <span class="s2">&quot;LOOP:.+real time(.+)&quot;</span><span class="p">},</span>
                                     <span class="n">postprocess</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-                <span class="n">time_per_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;timings&#39;</span><span class="p">])</span> <span class="ow">or</span> <span class="mi">0</span>
+                <span class="n">time_per_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;timings&#39;</span><span class="p">))</span> <span class="k">if</span> <span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timings&quot;</span><span class="p">,[])</span> <span class="k">else</span> <span class="mi">0</span>
 
             <span class="c1"># If the remaining time is less than average time for 3 </span>
             <span class="c1"># steps or buffer_time.</span>

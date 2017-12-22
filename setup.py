@@ -15,7 +15,7 @@ with open("README.rst") as f:
 setup(
     name="custodian",
     packages=find_packages(),
-    version="1.1.1",
+    version="2017.12.23",
     install_requires=["monty>=0.9.0", "six", "ruamel.yaml>=0.15.6"],
     extras_require={"vasp, nwchem, qchem": ["pymatgen>=3.3.1"]},
     package_data={},

@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Custodian &#8212; custodian 1.1.1 documentation</title>
+    <title>Custodian &#8212; custodian 2017.12.23 documentation</title>
     <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.1',
+        VERSION:     '2017.12.23',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -47,7 +47,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">custodian 1.1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="#">custodian 2017.12.23 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -78,42 +78,13 @@ calculations.</p>
 </div>
 <div class="section" id="change-log">
 <h1>Change log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="v1-1-1">
-<h2>v1.1.1<a class="headerlink" href="#v1-1-1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="v2017-12-23">
+<h2>v2017.12.23<a class="headerlink" href="#v2017-12-23" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>DriftErrorHandler (Shyam)</li>
-</ul>
-</div>
-<div class="section" id="v1-1-0">
-<h2>v1.1.0<a class="headerlink" href="#v1-1-0" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>Improved error handling for Qchem calculations.</li>
-</ul>
-</div>
-<div class="section" id="v1-0-4">
-<h2>v1.0.4<a class="headerlink" href="#v1-0-4" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>Improved handling of non-zero return codes.</li>
-</ul>
-</div>
-<div class="section" id="v1-0-2">
-<h2>v1.0.2<a class="headerlink" href="#v1-0-2" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>Interrupted run feature. (Shyam Dwaraknath)</li>
-</ul>
-</div>
-<div class="section" id="v1-0-1">
-<h2>v1.0.1<a class="headerlink" href="#v1-0-1" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>Pymatgen 4.0.0 compatible release.</li>
-</ul>
-</div>
-<div class="section" id="v1-0-0">
-<h2>v1.0.0<a class="headerlink" href="#v1-0-0" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>Custodian now comes with a “cstdn” script that enables the arbitrary creation
-of simple job sequences using a yaml file, and the running of calculations
-based on these yaml specifications.</li>
+<li>cstdn command line tool is now official with docs.</li>
+<li>Fine-grained control of VaspErrorHandler is now possible using
+<cite>errors_subset_to_catch</cite>.</li>
+<li>Switched to date-based versioning for custodian like pymatgen.</li>
 </ul>
 <p><a class="reference internal" href="changelog.html"><span class="doc">Older versions</span></a></p>
 </div>
@@ -299,6 +270,72 @@ calculations.</p>
 </div>
 </div>
 </div>
+<div class="section" id="cstdn-a-yaml-spec-controlled-job">
+<h1>cstdn - A yaml-spec controlled job<a class="headerlink" href="#cstdn-a-yaml-spec-controlled-job" title="Permalink to this headline">¶</a></h1>
+<p>Custodian now comes with a cstdn script, which allows you to do fine-grained
+control of a job using a yaml spec file. Below is an annotated example of how
+you can specify a double VASP relaxation followed by a static calculation.
+Minor modifications would allow very customizable calculations, though this is
+obviously not meant for highly complex workflows. For those, usage of <a class="reference external" href="https://materialsproject.github.io/fireworks/">FireWorks</a> is highly recommended.</p>
+<p>Sample yaml spec:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span># Specifies a list of jobs to run.
+# Each job is specified by a `jb: &lt;full class path&gt;` with parameters specified
+# via the params dict.
+
+jobs:
+- jb: custodian.vasp.jobs.VaspJob
+  params:
+    final: False
+    suffix: .relax1
+- jb: custodian.vasp.jobs.VaspJob
+  params:
+    final: False
+    suffix: .relax2
+    settings_override:
+    - {&quot;file&quot;: &quot;CONTCAR&quot;, &quot;action&quot;: {&quot;_file_copy&quot;: {&quot;dest&quot;: &quot;POSCAR&quot;}}}
+- jb: custodian.vasp.jobs.VaspJob
+  params:
+    final: True
+    suffix: .static3
+    settings_override:
+    - {&quot;file&quot;: &quot;CONTCAR&quot;, &quot;action&quot;: {&quot;_file_copy&quot;: {&quot;dest&quot;: &quot;POSCAR&quot;}}}
+    - {&quot;dict&quot;: &quot;INCAR&quot;, &quot;action&quot;: {&quot;_set&quot;: {&quot;NSW&quot;: 0}}}
+
+
+# This key specifies parameters common to all jobs.
+# Keys starting with $ are expanded to the environmental values.
+# The example below means the parameter vasp_cmd is set to the value with
+# $PBS_NODEFILE expanded.
+
+jobs_common_params:
+  $vasp_cmd: [&quot;mpirun&quot;, &quot;-machinefile&quot;, &quot;$PBS_NODEFILE&quot;, &quot;-np&quot;, &quot;24&quot;, &quot;vasp&quot;]
+
+
+# Specifies a list of error handlers in the same format as jobs. Similarly,
+# parameters passed to the handler __init__ can be configured the same
+# way as for jobs.
+handlers:
+- hdlr: custodian.vasp.handlers.VaspErrorHandler
+- hdlr: custodian.vasp.handlers.AliasingErrorHandler
+- hdlr: custodian.vasp.handlers.MeshSymmetryErrorHandler
+
+# Specifies a list of error handlers in the same format as jobs.
+validators:
+- vldr: custodian.vasp.validators.VasprunXMLValidator
+
+#This sets all custodian running parameters.
+custodian_params:
+  max_errors: 10
+  scratch_dir: /tmp
+  gzipped_output: True
+  checkpoint: True
+</pre></div>
+</div>
+<p>You can then run the job using the following command:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cstdn</span> <span class="n">run</span> <span class="o">&lt;</span><span class="n">path</span> <span class="n">to</span> <span class="n">yaml</span> <span class="n">file</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="api-reference-docs">
 <h1>API/Reference Docs<a class="headerlink" href="#api-reference-docs" title="Permalink to this headline">¶</a></h1>
 <p>The API docs are generated using Sphinx auto-doc and outlines the purpose of all
@@ -357,12 +394,7 @@ follows:</p>
   <ul>
 <li><a class="reference internal" href="#">Custodian</a></li>
 <li><a class="reference internal" href="#change-log">Change log</a><ul>
-<li><a class="reference internal" href="#v1-1-1">v1.1.1</a></li>
-<li><a class="reference internal" href="#v1-1-0">v1.1.0</a></li>
-<li><a class="reference internal" href="#v1-0-4">v1.0.4</a></li>
-<li><a class="reference internal" href="#v1-0-2">v1.0.2</a></li>
-<li><a class="reference internal" href="#v1-0-1">v1.0.1</a></li>
-<li><a class="reference internal" href="#v1-0-0">v1.0.0</a></li>
+<li><a class="reference internal" href="#v2017-12-23">v2017.12.23</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#getting-custodian">Getting custodian</a><ul>
@@ -379,6 +411,7 @@ follows:</p>
 <li><a class="reference internal" href="#practical-example-electronic-structure-calculations">Practical example: Electronic structure calculations</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#cstdn-a-yaml-spec-controlled-job">cstdn - A yaml-spec controlled job</a></li>
 <li><a class="reference internal" href="#api-reference-docs">API/Reference Docs</a></li>
 <li><a class="reference internal" href="#how-to-cite-custodian">How to cite custodian</a></li>
 <li><a class="reference internal" href="#license">License</a></li>

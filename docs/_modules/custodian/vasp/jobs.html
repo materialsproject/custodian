@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian.vasp.jobs &#8212; custodian 1.1.1 documentation</title>
+    <title>custodian.vasp.jobs &#8212; custodian 2017.12.23 documentation</title>
     <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '1.1.1',
+        VERSION:     '2017.12.23',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -47,7 +47,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 1.1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2017.12.23 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -357,6 +357,51 @@
                 <span class="n">VaspJob</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.relax2&quot;</span><span class="p">,</span>
                         <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">,</span> <span class="n">auto_continue</span><span class="o">=</span><span class="n">auto_continue</span><span class="p">,</span>
                         <span class="n">settings_override</span><span class="o">=</span><span class="n">settings_overide_2</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="VaspJob.metagga_opt_run"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.metagga_opt_run">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">metagga_opt_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ediffg</span><span class="o">=-</span><span class="mf">0.05</span><span class="p">,</span>
+                        <span class="n">half_kpts_first_relax</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_continue</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of thres jobs to perform an optimization for any</span>
+<span class="sd">        metaGGA functional. There is an initial calculation of the</span>
+<span class="sd">        GGA wavefunction which is fed into the initial metaGGA optimization</span>
+<span class="sd">        to precondition the electronic structure optimizer. The metaGGA </span>
+<span class="sd">        optimization is performed using the double relaxation scheme</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
+        <span class="c1"># Defaults to using the SCAN metaGGA</span>
+        <span class="n">metaGGA</span> <span class="o">=</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;METAGGA&quot;</span><span class="p">,</span> <span class="s2">&quot;SCAN&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Pre optimze WAVECAR and structure using regular GGA</span>
+        <span class="n">pre_opt_setings</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;METAGGA&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                                                <span class="s2">&quot;LWAVE&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                                                <span class="s2">&quot;NSW&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}}]</span>
+        <span class="n">jobs</span> <span class="o">=</span> <span class="p">[</span><span class="n">VaspJob</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">,</span>
+                        <span class="n">final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.relax0&quot;</span><span class="p">,</span>
+                        <span class="n">settings_override</span><span class="o">=</span><span class="n">pre_opt_setings</span><span class="p">)]</span>
+
+        <span class="c1"># Finish with regular double relaxation style run using SCAN</span>
+        <span class="n">jobs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">VaspJob</span><span class="o">.</span><span class="n">double_relaxation_run</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">,</span>
+                                                  <span class="n">ediffg</span><span class="o">=</span><span class="n">ediffg</span><span class="p">,</span>
+                                                  <span class="n">half_kpts_first_relax</span><span class="o">=</span><span class="n">half_kpts_first_relax</span><span class="p">))</span>
+
+        <span class="c1"># Ensure the first relaxation doesn&#39;t overwrite the original inputs</span>
+        <span class="n">jobs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">backup</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Update double_relaxation job to start from pre-optimized run</span>
+        <span class="n">post_opt_settings</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
+                              <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;METAGGA&quot;</span><span class="p">:</span> <span class="n">metaGGA</span><span class="p">,</span> <span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                                                  <span class="s2">&quot;NSW&quot;</span><span class="p">:</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NSW&quot;</span><span class="p">,</span> <span class="mi">99</span><span class="p">),</span>
+                                                  <span class="s2">&quot;LWAVE&quot;</span><span class="p">:</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;LWAVE&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)}}},</span>
+                             <span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span>
+                              <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}}]</span>
+        <span class="k">if</span> <span class="n">jobs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">settings_override</span><span class="p">:</span>
+            <span class="n">post_opt_settings</span> <span class="o">=</span> <span class="n">jobs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">settings_override</span> <span class="o">+</span> <span class="n">post_opt_settings</span>
+        <span class="n">jobs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">settings_override</span> <span class="o">=</span> <span class="n">post_opt_settings</span>
+
+        <span class="k">return</span> <span class="n">jobs</span></div>
 
 <div class="viewcode-block" id="VaspJob.full_opt_run"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.full_opt_run">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">full_opt_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">vol_change_tol</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>

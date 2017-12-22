@@ -87,6 +87,6 @@ def setver(ctx):
 @task
 def release(ctx):
     setver(ctx)
-    test(ctx)
+    # test(ctx)
     publish(ctx)
     update_doc(ctx)
