@@ -83,17 +83,11 @@ def publish(ctx):
 
 @task
 def release_github(ctx):
-    with open("CHANGES.rst") as f:
-        contents = f.read()
-    toks = re.split("\-+", contents)
-    desc = toks[1].strip()
-    toks = desc.split("\n")
-    desc = "\n".join(toks[:-1]).strip()
     payload = {
         "tag_name": "v" + NEW_VER,
         "target_commitish": "master",
         "name": "v" + NEW_VER,
-        "body": desc,
+        "body": "See changes at https://materialsproject.github.io/custodian",
         "draft": False,
         "prerelease": False
     }
