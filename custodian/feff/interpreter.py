@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from custodian.ansible.actions import FileActions, DictActions
 from custodian.ansible.interpreter import Modder
-from pymatgen.io.feff.sets import FEFFDirectoryInput
+from pymatgen.io.feff.sets import FEFFDictSet
 
 
 class FeffModder(Modder):
@@ -25,7 +25,7 @@ class FeffModder(Modder):
                 Initialized automatically if not passed (but passing it will
                 avoid having to reparse the directory).
         """
-        self.feffinp = feffinp or FEFFDirectoryInput.from_directory('.')
+        self.feffinp = feffinp or FEFFDictSet.from_directory('.')
         actions = actions or [FileActions, DictActions]
         super(FeffModder, self).__init__(actions, strict)
 
