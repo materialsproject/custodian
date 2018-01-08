@@ -57,7 +57,7 @@ class UnconvergedErrorHandler(ErrorHandler):
     def correct(self):
         backup(FEFF_BACKUP_FILES)
         feff_input = FEFFDictSet.from_directory(".")
-        scf_values = feff_input['PARAMETERS'].get("SCF")
+        scf_values = feff_input.tags.get("SCF")
         scf_values_orig = scf_values[:]
         nscmt = scf_values[2]
         ca = scf_values[3]
