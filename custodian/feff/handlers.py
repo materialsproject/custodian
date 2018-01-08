@@ -9,7 +9,7 @@ from custodian.feff.interpreter import FeffModder
 import numpy as np
 import logging
 
-FEFF_BACKUP_FILES = ["ATOMS", "HEADER", "PARAMETERS", "POTENTIALS", "feff.inp"]
+FEFF_BACKUP_FILES = ["ATOMS", "HEADER", "PARAMETERS", "POTENTIALS", "feff.inp", "*.cif"]
 
 logger = logging.getLogger(__name__)
 
