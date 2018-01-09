@@ -34,7 +34,7 @@ class FeffJob(Job):
 
     def __init__(self, feff_cmd, output_file="feff.out",
                  stderr_file="std_feff_err.txt", backup=True,
-                 gzipped = False):
+                 gzipped=False, gzipped_prefix='feff_out'):
         """
         This constructor is used for a standard FEFF initialization
         Args:
@@ -47,12 +47,16 @@ class FeffJob(Job):
                 If True, the feff.inp will be copied with a ".orig" appended.
                 Defaults to True.
             gzipped (bool): Whether to gzip the final output. Defaults to False.
+            gzipped_prefix (str): prefix to the feff output files archive. Defaults
+                to feff_out, which means a series of feff_out.1.tar.gz, feff_out.2.tar.gz, ...
+                will be generated.
         """
         self.feff_cmd = feff_cmd
         self.output_file = output_file
         self.stderr_file = stderr_file
         self.backup = backup
         self.gzipped = gzipped
+        self.gzipped_prefix = gzipped_prefix
 
     def setup(self):
         """
@@ -88,7 +92,7 @@ class FeffJob(Job):
 
     def postprocess(self):
         """
-        Renaming or gzipping as needed
+        Renaming or gzipping all the output as needed
         """
         if self.gzipped:
-            gzip_dir(".")
+            backup("*", prefix=self.gzipped_prefix)
