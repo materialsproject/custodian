@@ -8,6 +8,7 @@ from monty.shutil import decompress_dir
 
 from custodian.custodian import Job
 from custodian.utils import backup
+from monty.shutil import gzip_dir
 
 """
 This module implements basic kinds of jobs for FEFF runs
@@ -32,7 +33,8 @@ class FeffJob(Job):
     """
 
     def __init__(self, feff_cmd, output_file="feff.out",
-                 stderr_file="std_feff_err.txt", backup=True):
+                 stderr_file="std_feff_err.txt", backup=True,
+                 gzipped = False):
         """
         This constructor is used for a standard FEFF initialization
         Args:
@@ -44,11 +46,13 @@ class FeffJob(Job):
             backup (bool): Indicating whether to backup the initial input files.
                 If True, the feff.inp will be copied with a ".orig" appended.
                 Defaults to True.
+            gzipped (bool): Whether to gzip the final output. Defaults to False.
         """
         self.feff_cmd = feff_cmd
         self.output_file = output_file
         self.stderr_file = stderr_file
         self.backup = backup
+        self.gzipped = gzipped
 
     def setup(self):
         """
@@ -83,4 +87,8 @@ class FeffJob(Job):
         return p
 
     def postprocess(self):
-        pass
+        """
+        Renaming or gzipping as needed
+        """
+        if self.gzipped:
+            gzip_dir(".")
