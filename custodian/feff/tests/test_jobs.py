@@ -11,12 +11,10 @@ __date__ = "Oct 18, 2017"
 
 import unittest
 import os
-import shutil
-import glob
 from monty.os import cd
 from monty.tempfile import ScratchDir
 from custodian.feff.jobs import FeffJob
-from pymatgen.io.feff.inputs import Header, Atoms, Tags, Potential
+from pymatgen.io.feff.inputs import Atoms, Tags
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
                         "test_files", "feff_unconverge")

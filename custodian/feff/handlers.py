@@ -9,6 +9,19 @@ from custodian.feff.interpreter import FeffModder
 import numpy as np
 import logging
 
+"""
+This module implements specific error handler for FEFF runs. These handlers
+tries to detect common errors in FEFF runs and attempt to fix them by modifying
+the input files.
+"""
+
+__author__ = "Chen Zheng"
+__copyright__ = "Copyright 2012, The Materials Project"
+__version__ = "0.1"
+__maintainer__ = "Chen Zheng"
+__email__ = "chz022@ucsd.edu"
+__date__ = "Oct 18, 2017"
+
 FEFF_BACKUP_FILES = ["ATOMS", "HEADER", "PARAMETERS", "POTENTIALS", "feff.inp", "*.cif"]
 
 logger = logging.getLogger(__name__)
@@ -16,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 class UnconvergedErrorHandler(ErrorHandler):
     """
-    Check if a run's SCF is converged. If not
+    Correct the unconverged error of FEFF's SCF calculation.
     """
 
     is_monitor = False
