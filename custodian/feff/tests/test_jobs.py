@@ -29,7 +29,7 @@ class FeffJobTest(unittest.TestCase):
 
     def test_setup(self):
         with cd(test_dir):
-            with ScratchDir('.', copy_from_current_on_enter=True) as d:
+            with ScratchDir('.', copy_from_current_on_enter=True):
                 f = FeffJob("hello", backup=True)
                 f.setup()
 
@@ -43,7 +43,7 @@ class FeffJobTest(unittest.TestCase):
 
     def test_postprocess(self):
         with cd(test_dir):
-            with ScratchDir('.', copy_from_current_on_enter=True) as d:
+            with ScratchDir('.', copy_from_current_on_enter=True):
                 f = FeffJob("hello", backup=True, gzipped=True)
                 f.postprocess()
                 self.assertTrue(os.path.exists('feff_out.1.tar.gz'))

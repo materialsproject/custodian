@@ -6,14 +6,9 @@ import re
 from custodian.utils import backup
 from pymatgen.io.feff.sets import FEFFDictSet
 from custodian.feff.interpreter import FeffModder
-import numpy as np
 import logging
 
-"""
-This module implements specific error handler for FEFF runs. These handlers
-tries to detect common errors in FEFF runs and attempt to fix them by modifying
-the input files.
-"""
+""" This module implements specific error handler for FEFF runs. """
 
 __author__ = "Chen Zheng"
 __copyright__ = "Copyright 2012, The Materials Project"
@@ -49,11 +44,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         If the FEFF run does not converge, the check will return
         "TRUE"
         """
-        try:
-            return self._notconverge_check()
-        except:
-            pass
-        return False
+        return self._notconverge_check()
 
     def _notconverge_check(self):
 
@@ -71,7 +62,6 @@ class UnconvergedErrorHandler(ErrorHandler):
         backup(FEFF_BACKUP_FILES)
         feff_input = FEFFDictSet.from_directory(".")
         scf_values = feff_input.tags.get("SCF")
-        scf_values_orig = scf_values[:]
         nscmt = scf_values[2]
         ca = scf_values[3]
         nmix = scf_values[4]

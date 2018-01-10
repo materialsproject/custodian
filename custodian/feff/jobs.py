@@ -8,11 +8,8 @@ from monty.shutil import decompress_dir
 
 from custodian.custodian import Job
 from custodian.utils import backup
-from monty.shutil import gzip_dir
 
-"""
-This module implements basic kinds of jobs for FEFF runs
-"""
+""" This module implements basic kinds of jobs for FEFF runs."""
 
 logger = logging.getLogger(__name__)
 
