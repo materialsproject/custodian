@@ -1,5 +1,5 @@
-custodian.qchem package
-=======================
+custodian\.qchem package
+========================
 
 Subpackages
 -----------
@@ -10,16 +10,16 @@ Subpackages
 Submodules
 ----------
 
-custodian.qchem.handlers module
--------------------------------
+custodian\.qchem\.handlers module
+---------------------------------
 
 .. automodule:: custodian.qchem.handlers
     :members:
     :undoc-members:
     :show-inheritance:
 
-custodian.qchem.jobs module
----------------------------
+custodian\.qchem\.jobs module
+-----------------------------
 
 .. automodule:: custodian.qchem.jobs
     :members:

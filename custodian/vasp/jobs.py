@@ -299,6 +299,51 @@ class VaspJob(Job):
                         settings_override=settings_overide_2)]
 
     @classmethod
+    def metagga_opt_run(cls, vasp_cmd, auto_npar=True, ediffg=-0.05,
+                        half_kpts_first_relax=False, auto_continue=False):
+        """
+        Returns a list of thres jobs to perform an optimization for any
+        metaGGA functional. There is an initial calculation of the
+        GGA wavefunction which is fed into the initial metaGGA optimization
+        to precondition the electronic structure optimizer. The metaGGA 
+        optimization is performed using the double relaxation scheme
+        """
+
+        incar = Incar.from_file("INCAR")
+        # Defaults to using the SCAN metaGGA
+        metaGGA = incar.get("METAGGA", "SCAN")
+
+        # Pre optimze WAVECAR and structure using regular GGA
+        pre_opt_setings = [{"dict": "INCAR",
+                            "action": {"_set": {"METAGGA": None,
+                                                "LWAVE": True,
+                                                "NSW": 0}}}]
+        jobs = [VaspJob(vasp_cmd, auto_npar=auto_npar,
+                        final=False, suffix=".relax0",
+                        settings_override=pre_opt_setings)]
+
+        # Finish with regular double relaxation style run using SCAN
+        jobs.extend(VaspJob.double_relaxation_run(vasp_cmd, auto_npar=auto_npar,
+                                                  ediffg=ediffg,
+                                                  half_kpts_first_relax=half_kpts_first_relax))
+
+        # Ensure the first relaxation doesn't overwrite the original inputs
+        jobs[1].backup = False
+
+        # Update double_relaxation job to start from pre-optimized run
+        post_opt_settings = [{"dict": "INCAR",
+                              "action": {"_set": {"METAGGA": metaGGA, "ISTART": 1,
+                                                  "NSW": incar.get("NSW", 99),
+                                                  "LWAVE": incar.get("LWAVE", False)}}},
+                             {"file": "CONTCAR",
+                              "action": {"_file_copy": {"dest": "POSCAR"}}}]
+        if jobs[1].settings_override:
+            post_opt_settings = jobs[1].settings_override + post_opt_settings
+        jobs[1].settings_override = post_opt_settings
+
+        return jobs
+
+    @classmethod
     def full_opt_run(cls, vasp_cmd, vol_change_tol=0.02,
                      max_steps=10, ediffg=-0.05, half_kpts_first_relax=False,
                      **vasp_job_kwargs):

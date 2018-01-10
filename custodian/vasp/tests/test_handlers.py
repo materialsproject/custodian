@@ -65,6 +65,10 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["actions"],
                          [{'action': {'_set': {'ISMEAR': 0}},
                            'dict': 'INCAR'}])
+
+        h = VaspErrorHandler("vasp.teterror", errors_subset_to_catch=["eddrmm"])
+        self.assertFalse(h.check())
+
         h = VaspErrorHandler("vasp.sgrcon")
         h.check()
         d = h.correct()
@@ -355,6 +359,16 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         self.assertTrue(h.check())
         d = h.correct()
         self.assertEqual(d["errors"], ['Unconverged'])
+        os.remove("vasprun.xml")
+
+    def test_check_correct_scan(self):
+        shutil.copy("vasprun.xml.scan", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ['Unconverged'])
+        self.assertIn({"dict": "INCAR",
+                           "action": {"_set": {"ALGO": "All"}}},d["actions"])
         os.remove("vasprun.xml")
 
     def test_to_from_dict(self):
@@ -696,11 +710,14 @@ class DriftErrorHandlerTest(unittest.TestCase):
         self.assertFalse(h.check())
 
         h = DriftErrorHandler(max_drift=0.0001)
-        self.assertTrue(h.check())
+        self.assertFalse(h.check())
 
         incar = Incar.from_file("INCAR")
         incar["EDIFFG"] = -0.01
         incar.write_file("INCAR")
+
+        h = DriftErrorHandler(max_drift=0.0001)
+        self.assertTrue(h.check())
 
         h = DriftErrorHandler()
         h.check()

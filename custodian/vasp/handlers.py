@@ -92,7 +92,8 @@ class VaspErrorHandler(ErrorHandler):
         "posmap": ["POSMAP internal error: symmetry equivalent atom not found"]
     }
 
-    def __init__(self, output_filename="vasp.out", natoms_large_cell=100):
+    def __init__(self, output_filename="vasp.out", natoms_large_cell=100,
+                 errors_subset_to_catch=None):
         """
         Initializes the handler with the output file to check.
 
@@ -101,12 +102,31 @@ class VaspErrorHandler(ErrorHandler):
                 is being redirected. The error messages that are checked are
                 present in the stdout. Defaults to "vasp.out", which is the
                 default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
+            natoms_large_cell (int): Number of atoms threshold to treat cell
+                as large. Affects the correction of certain errors. Defaults to
+                100.
+            errors_subset_to_detect (list): A subset of errors to catch. The
+                default is None, which means all supported errors are detected.
+                Use this to only catch only a subset of supported errors.
+                E.g., ["eddrrm", "zheev"] will only catch the eddrmm and zheev
+                errors, and not others. If you wish to only excluded one or
+                two of the errors, you can create this list by the following
+                lines:
+
+                ```
+                subset = list(VaspErrorHandler.error_msgs.keys())
+                subset.pop("eddrrm")
+
+                handler = VaspErrorHandler(errors_subset_to_catch=subset)
+                ```
         """
         self.output_filename = output_filename
         self.errors = set()
         self.error_count = Counter()
         # threshold of number of atoms to treat the cell as large.
         self.natoms_large_cell = natoms_large_cell
+        self.errors_subset_to_catch = errors_subset_to_catch or \
+            list(VaspErrorHandler.error_msgs.keys())
 
     def check(self):
         incar = Incar.from_file("INCAR")
@@ -115,15 +135,16 @@ class VaspErrorHandler(ErrorHandler):
             for line in f:
                 l = line.strip()
                 for err, msgs in VaspErrorHandler.error_msgs.items():
-                    for msg in msgs:
-                        if l.find(msg) != -1:
-                            # this checks if we want to run a charged
-                            # computation (e.g., defects) if yes we don't
-                            # want to kill it because there is a change in e-
-                            # density (brmix error)
-                            if err == "brmix" and 'NELECT' in incar:
-                                continue
-                            self.errors.add(err)
+                    if err in self.errors_subset_to_catch:
+                        for msg in msgs:
+                            if l.find(msg) != -1:
+                                # this checks if we want to run a charged
+                                # computation (e.g., defects) if yes we don't
+                                # want to kill it because there is a change in
+                                # e-density (brmix error)
+                                if err == "brmix" and 'NELECT' in incar:
+                                    continue
+                                self.errors.add(err)
         return len(self.errors) > 0
 
     def correct(self):
@@ -606,16 +627,23 @@ class DriftErrorHandler(ErrorHandler):
 
     def check(self):
 
+        incar = Incar.from_file("INCAR")
+        if incar.get("EDIFFG", 0.1) >= 0 or incar.get("NSW",0) == 0:
+            # Only activate when force relaxing and ionic steps
+            # NSW check prevents accidental effects when running DFPT
+            return False
+
         if not self.max_drift:
-            incar = Incar.from_file("INCAR")
-            self.max_drift = incar.get("EDIFFG", -0.05) * -1
+            self.max_drift = incar["EDIFFG"] * -1
 
         outcar = Outcar("OUTCAR")
 
         if len(outcar.data.get('drift', [])) < self.to_average:
+            # Ensure enough steps to get average drift
             return False
         else:
-            curr_drift = np.sum(np.abs(outcar.data.get("drift", [])[::-1][:self.to_average])) / (3 * self.to_average)
+            curr_drift = outcar.data.get("drift", [])[::-1][:self.to_average]
+            curr_drift = np.average([np.linalg.norm(d) for d in curr_drift])
             return curr_drift > self.max_drift
 
     def correct(self):
@@ -646,7 +674,8 @@ class DriftErrorHandler(ErrorHandler):
                             "action": {"_set": {"ENAUG": int(incar.get("ENAUG", 1040) * self.enaug_multiply)}}})
 
 
-        curr_drift = np.sum(np.abs(outcar.data.get("drift",[])[::-1][:self.to_average])) / (3 * self.to_average)
+        curr_drift = outcar.data.get("drift", [])[::-1][:self.to_average]
+        curr_drift = np.average([np.linalg.norm(d) for d in curr_drift])
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": "Excessive drift {} > {}".format(curr_drift, self.max_drift), "actions": actions}
 
@@ -745,12 +774,17 @@ class UnconvergedErrorHandler(ErrorHandler):
         actions = [{"file": "CONTCAR",
                     "action": {"_file_copy": {"dest": "POSCAR"}}}]
         if not v.converged_electronic:
-            new_settings = {"ISTART": 1,
-                            "ALGO": "Normal",
-                            "NELMDL": -6,
-                            "BMIX": 0.001,
-                            "AMIX_MAG": 0.8,
-                            "BMIX_MAG": 0.001} 
+            # For SCAN try switching to CG for the electronic minimization
+            print(v.incar.get("METAGGA"))
+            if "SCAN" in v.incar.get("METAGGA","").upper():
+                new_settings = {"ALGO": "All"}
+            else:
+                new_settings = {"ISTART": 1,
+                                "ALGO": "Normal",
+                                "NELMDL": -6,
+                                "BMIX": 0.001,
+                                "AMIX_MAG": 0.8,
+                                "BMIX_MAG": 0.001} 
 
             if all([v.incar.get(k,"") == val for k,val in new_settings.items()]):
                 return {"errors": ["Unconverged"], "actions": None}
@@ -1064,12 +1098,12 @@ class WalltimeHandler(ErrorHandler):
                 # Determine max time per ionic step.
                 outcar.read_pattern({"timings": "LOOP\+.+real time(.+)"},
                                     postprocess=float)
-                time_per_step = np.max(outcar.data.get('timings')) or 0
+                time_per_step = np.max(outcar.data.get('timings')) if outcar.data.get("timings",[]) else 0
             else:
                 # Determine max time per electronic step.
                 outcar.read_pattern({"timings": "LOOP:.+real time(.+)"},
                                     postprocess=float)
-                time_per_step = np.max(outcar.data['timings']) or 0
+                time_per_step = np.max(outcar.data.get('timings')) if outcar.data.get("timings",[]) else 0
 
             # If the remaining time is less than average time for 3 
             # steps or buffer_time.
