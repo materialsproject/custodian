@@ -319,7 +319,7 @@ class VaspJob(Job):
                                                 "LWAVE": True,
                                                 "NSW": 0}}}]
         jobs = [VaspJob(vasp_cmd, auto_npar=auto_npar,
-                        final=False, suffix=".relax0",
+                        final=False, suffix=".precondition",
                         settings_override=pre_opt_setings)]
 
         # Finish with regular double relaxation style run using SCAN
