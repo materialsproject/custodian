@@ -775,7 +775,6 @@ class UnconvergedErrorHandler(ErrorHandler):
                     "action": {"_file_copy": {"dest": "POSCAR"}}}]
         if not v.converged_electronic:
             # For SCAN try switching to CG for the electronic minimization
-            print(v.incar.get("METAGGA"))
             if "SCAN" in v.incar.get("METAGGA","").upper():
                 new_settings = {"ALGO": "All"}
             else:
