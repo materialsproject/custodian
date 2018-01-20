@@ -57,6 +57,23 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d['errors'], ['Frozen job'])
         self.assertEqual(Incar.from_file("INCAR")['ALGO'], "Normal")
 
+    def test_subspace(self):
+        h = VaspErrorHandler("vasp.subspace")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ['subspacematrix'])
+        self.assertEqual(d["actions"],
+                         [{'action': {'_set': {'LREAL': False}},
+                           'dict': 'INCAR'}])
+
+        # 2nd error should set PREC to accurate.
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ['subspacematrix'])
+        self.assertEqual(d["actions"],
+                         [{'action': {'_set': {'PREC': 'Accurate'}},
+                           'dict': 'INCAR'}])
+
     def test_check_correct(self):
         h = VaspErrorHandler("vasp.teterror")
         h.check()
