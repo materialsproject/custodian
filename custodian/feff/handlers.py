@@ -17,7 +17,7 @@ __maintainer__ = "Chen Zheng"
 __email__ = "chz022@ucsd.edu"
 __date__ = "Oct 18, 2017"
 
-FEFF_BACKUP_FILES = ["ATOMS", "HEADER", "PARAMETERS", "POTENTIALS", "feff.inp", "*.cif"]
+FEFF_BACKUP_FILES = ["ATOMS", "HEADER", "PARAMETERS", "POTENTIALS", "feff.inp", "*.cif", "pot.bin"]
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +66,11 @@ class UnconvergedErrorHandler(ErrorHandler):
         ca = scf_values[3]
         nmix = scf_values[4]
         actions = []
+
+        #Add RESTART card to PARAMETERS
+        if not "RESTART" in feff_input.tags:
+            actions.append({"dict": "PARAMETERS",
+                            "action": {"_set": {"RESTART": []}}})
 
         if nscmt < 100 and ca == 0.2:
             scf_values[2] = 100
