@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian package &#8212; custodian 2017.12.23 documentation</title>
+    <title>custodian package &#8212; custodian 2018.3.10 documentation</title>
     <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '2017.12.23',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
@@ -36,8 +28,7 @@
   _gaq.push(['_trackPageview']);
 </script>
 
-  </head>
-  <body>
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -47,7 +38,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 2017.12.23 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 2018.3.10 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -125,7 +116,7 @@
 <dl class="class">
 <dt id="custodian.custodian.Custodian">
 <em class="property">class </em><code class="descname">Custodian</code><span class="sig-paren">(</span><em>handlers</em>, <em>jobs</em>, <em>validators=None</em>, <em>max_errors_per_job=None</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em>, <em>skip_over_errors=False</em>, <em>scratch_dir=None</em>, <em>gzipped_output=False</em>, <em>checkpoint=False</em>, <em>terminate_func=None</em>, <em>terminate_on_nonzero_returncode=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>The Custodian class is the manager for a list of jobs given a list of
 error handlers. The way it works is as follows:</p>
 <ol class="arabic simple">
@@ -288,7 +279,7 @@ validates jobs but doesn’t run the executable</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
 <li>CustodianError on unrecoverable errors, and jobs that fail</li>
-<li><code class="xref py py-exc docutils literal"><span class="pre">validation</span></code></li>
+<li><code class="xref py py-exc docutils literal notranslate"><span class="pre">validation</span></code></li>
 </ul>
 </td>
 </tr>
@@ -301,7 +292,7 @@ validates jobs but doesn’t run the executable</p>
 <dl class="exception">
 <dt id="custodian.custodian.CustodianError">
 <em class="property">exception </em><code class="descname">CustodianError</code><span class="sig-paren">(</span><em>message</em>, <em>raises=False</em>, <em>validator=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#CustodianError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.CustodianError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
 <p>Exception class for Custodian errors.</p>
 <p>Initializes the error with a message.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -323,7 +314,7 @@ caused the exception.</li>
 <dl class="class">
 <dt id="custodian.custodian.ErrorHandler">
 <em class="property">class </em><code class="descname">ErrorHandler</code><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">monty.json.MSONable</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">monty.json.MSONable</span></code></p>
 <p>Abstract base class defining the interface for an ErrorHandler.</p>
 <dl class="method">
 <dt id="custodian.custodian.ErrorHandler.check">
@@ -397,7 +388,7 @@ handle the error (i.e. if correct returns a dict with “actions”:None, or
 <dl class="class">
 <dt id="custodian.custodian.Job">
 <em class="property">class </em><code class="descname">Job</code><a class="reference internal" href="_modules/custodian/custodian.html#Job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">monty.json.MSONable</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">monty.json.MSONable</span></code></p>
 <p>Abstract base class defining the interface for a Job.</p>
 <dl class="attribute">
 <dt id="custodian.custodian.Job.name">
@@ -432,7 +423,7 @@ pre-processing.</p>
 <dl class="class">
 <dt id="custodian.custodian.Validator">
 <em class="property">class </em><code class="descname">Validator</code><a class="reference internal" href="_modules/custodian/custodian.html#Validator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Validator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">monty.json.MSONable</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">monty.json.MSONable</span></code></p>
 <p>Abstract base class defining the interface for a Validator. A Validator
 differs from an ErrorHandler in that it does not correct a run and is run
 only at the end of a Job. If errors are detected by a Validator, a run is
@@ -529,12 +520,14 @@ Doesn’t work for all queueing systems</p>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>

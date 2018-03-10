@@ -1,5 +1,5 @@
-custodian\.nwchem package
-=========================
+custodian.nwchem package
+========================
 
 Subpackages
 -----------
@@ -10,16 +10,16 @@ Subpackages
 Submodules
 ----------
 
-custodian\.nwchem\.handlers module
-----------------------------------
+custodian.nwchem.handlers module
+--------------------------------
 
 .. automodule:: custodian.nwchem.handlers
     :members:
     :undoc-members:
     :show-inheritance:
 
-custodian\.nwchem\.jobs module
-------------------------------
+custodian.nwchem.jobs module
+----------------------------
 
 .. automodule:: custodian.nwchem.jobs
     :members:
