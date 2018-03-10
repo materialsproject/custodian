@@ -1087,7 +1087,7 @@ class WalltimeHandler(ErrorHandler):
             self.start_time = datetime.datetime.strptime(
                 os.environ["CUSTODIAN_WALLTIME_START"], "%a %b %d %H:%M:%S %Z %Y")
         else:
-            self.start_time = datetime.datetime.utcnow()
+            self.start_time = datetime.datetime.now()
             os.environ["CUSTODIAN_WALLTIME_START"] = datetime.datetime.strftime(
                 self.start_time, "%a %b %d %H:%M:%S UTC %Y")
 
