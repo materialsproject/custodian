@@ -21,7 +21,8 @@ from pymatgen.io.qchem_io.inputs import QCInput
 from pymatgen.io.qchem_io.outputs import QCOutput
 from custodian.custodian import Job, gzip_dir
 
-__author__ = "Samuel Blau"
+__author__ = "Samuel Blau, Brandon Woods, Shyam Dwaraknath"
+__copyright__ = "Copyright 2018, The Materials Project"
 __version__ = "0.1"
 __maintainer__ = "Samuel Blau"
 __email__ = "samblau1@gmail.com"
@@ -73,7 +74,7 @@ class QCJob(Job):
         elif self.multimode == 'mpi':
             command[1] = "-np"
         else:
-            print "ERROR: Multimode should only be set to openmp or mpi"
+            print("ERROR: Multimode should only be set to openmp or mpi")
         return command
 
 
