@@ -143,18 +143,30 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(d["actions"],[{"geom_max_cycles:": 200}])
         self._check_equivalent_inputs("crowd_gradient.qin.2.fix","crowd_gradient.qin.3")
 
-    # def test_failed_to_read_input(self):
-    #     shutil.copyfile(os.path.join(test_dir, "unable_lamda_weird.qin"),
-    #                     os.path.join(scr_dir, "unable_lamda_weird.qin"))
-    #     shutil.copyfile(os.path.join(test_dir, "unable_lamda_weird.qout"),
-    #                     os.path.join(scr_dir, "unable_lamda_weird.qout"))
-    #     h = QChemErrorHandler(input_file="unable_lamda_weird.qin",
-    #                           output_file="unable_lamda_weird.qout")
-    #     h.check()
-    #     d = h.correct()
-    #     self.assertEqual(d["errors"],['failed_to_read_input'])
-    #     self.assertEqual(d["actions"],[{"rerun job as-is"}])
-    #     self._check_equivalent_inputs("unable_lamda_weird.qin.fix","unable_lamda_weird.qin")
+    def test_failed_to_read_input(self):
+        shutil.copyfile(os.path.join(test_dir, "unable_lamda_weird.qin"),
+                        os.path.join(scr_dir, "unable_lamda_weird.qin"))
+        shutil.copyfile(os.path.join(test_dir, "unable_lamda_weird.qout"),
+                        os.path.join(scr_dir, "unable_lamda_weird.qout"))
+        h = QChemErrorHandler(input_file="unable_lamda_weird.qin",
+                              output_file="unable_lamda_weird.qout")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"],['failed_to_read_input'])
+        self.assertEqual(d["actions"],[{"rerun job as-is"}])
+        self._check_equivalent_inputs("unable_lamda_weird.qin.fix","unable_lamda_weird.qin")
+
+    def test_input_file_error(self):
+        shutil.copyfile(os.path.join(test_dir, "bad_input.qin"),
+                        os.path.join(scr_dir, "bad_input.qin"))
+        shutil.copyfile(os.path.join(test_dir, "bad_input.qout"),
+                        os.path.join(scr_dir, "bad_input.qout"))
+        h = QChemErrorHandler(input_file="bad_input.qin",
+                              output_file="bad_input.qout")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"],['input_file_error'])
+        self.assertEqual(d["actions"],None)
 
     def tearDown(self):
         os.chdir(cwd)

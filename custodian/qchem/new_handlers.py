@@ -134,15 +134,11 @@ class QChemErrorHandler(ErrorHandler):
 
         elif "failed_to_read_input" in self.errors:
             # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is. 
-            return {"errors": self.errors, "actions": "rerun job as-is"}
+            actions.append({"rerun job as-is"})
 
         elif "IO_error" in self.errors:
             # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is. 
-            return {"errors": self.errors, "actions": "rerun job as-is"}
-
-        elif "cannot_read_charges" in self.errors:
-            print("This is almost always indicating that something went wrong when starting the job.")
-            return{"errors": self.errors, "actions": None}
+            actions.append({"rerun job as-is"})
 
         elif "unknown_error" in self.errors:
             print("Examine error message by hand.") 
