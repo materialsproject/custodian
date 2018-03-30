@@ -69,7 +69,7 @@ class QChemErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
-        # backup({self.input_file, self.output_file})
+        backup({self.input_file, self.output_file})
         actions = []
                           
         if "SCF_failed_to_converge" in self.errors:
@@ -77,7 +77,7 @@ class QChemErrorHandler(ErrorHandler):
             # increase to that value and rerun. If already set, check if 
             # scf_algorithm is unset or set to DIIS, in which case set to RCA-DIIS. 
             # Otherwise, tell user to call SCF error handler and do nothing. 
-            if self.qcinp.rem.get("max_scf_cycles") != self.scf_max_cycles:
+            if self.qcinp.rem.get("max_scf_cycles") != str(self.scf_max_cycles):
                 self.qcinp.rem["max_scf_cycles"] = self.scf_max_cycles
                 actions.append({"max_scf_cycles": self.scf_max_cycles})
             elif self.qcinp.rem.get("scf_algorithm","diis").lower() == "diis":
@@ -151,10 +151,10 @@ class QChemErrorHandler(ErrorHandler):
         else:
             # You should never get here. If correct is being called then errors should have at least one entry,
             # in which case it should have been caught by the if/elifs above. 
-            Print("If you get this message, something has gone terribly wrong!")
+            print("If you get this message, something has gone terribly wrong!")
             return {"errors": self.errors, "actions": None}
 
-        self.qcinp.write_file(self.input_file)
+        self.qcinp.write_file(self.input_file+'.fix')
         return {"errors": self.errors, "actions": actions}
 
 

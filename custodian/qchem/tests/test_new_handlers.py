@@ -22,6 +22,7 @@ import copy
 
 from custodian.qchem.new_handlers import QChemErrorHandler
 from custodian.qchem.new_jobs import QCJob
+from pymatgen.io.qchem_io.inputs import QCInput
 
 
 __author__ = "Samuel Blau, Brandon Woods, Shyam Dwaraknath"
@@ -34,140 +35,131 @@ __date__ = "3/26/18"
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
-                        "test_files", "qchem")
-# noinspection PyUnresolvedReferences
+                        "test_files", "qchem", "new_test_files")
+
 scr_dir = os.path.join(test_dir, "scr")
 cwd = os.getcwd()
 
+
 class QChemErrorHandlerTest(TestCase):
 
+    def setUp(self):
+        os.makedirs(scr_dir)
+        os.chdir(scr_dir)
 
-    def test(self):
-        h = QChemErrorHandler(input_file="/Users/samuelblau/Desktop/test.qin",
-                              output_file="/Users/samuelblau/Desktop/test.qout")
-        has_error = h.check()
-        self.assertTrue(has_error)
+    def _check_equivalent_inputs(self, input1, input2):
+        self.assertEqual(QCInput.from_file(input1).molecule,QCInput.from_file(input2).molecule)
+        self.assertEqual(QCInput.from_file(input1).rem,QCInput.from_file(input2).rem)
+
+    def test_unable_to_determine_lamda(self):
+        for ii in range(2):
+            shutil.copyfile(os.path.join(test_dir, "unable_to_determine_lamda.qin."+str(ii)),
+                            os.path.join(scr_dir, "unable_to_determine_lamda.qin."+str(ii)))
+            shutil.copyfile(os.path.join(test_dir, "unable_to_determine_lamda.qout."+str(ii)),
+                            os.path.join(scr_dir, "unable_to_determine_lamda.qout."+str(ii)))
+
+        h = QChemErrorHandler(input_file="unable_to_determine_lamda.qin.0",
+                              output_file="unable_to_determine_lamda.qout.0")
+        h.check()
         d = h.correct()
-        
-        # self.assertEqual(d, {'errors': ['Bad SCF convergence',
-        #                                 'Geometry optimization failed',
-        #                                 'Molecular charge is not found'],
-        #                      'actions': ['increase_iter']})
-        # with open(os.path.join(test_dir, "hf_rca_tried_0.inp")) as f:
-        #     ref = [line.strip() for line in f.readlines()]
-        # with open(os.path.join(scr_dir, "hf_rca.inp")) as f:
-        #     ans = [line.strip() for line in f.readlines()]
-        # ans = self._revert_scf_fix_strategy_to_version(ans, fix_version="1.0")
-        # self.assertEqual(ref, ans)
+        self.assertEqual(d["errors"],['unable_to_determine_lamda'])
+        self.assertEqual(d["actions"],[{'molecule': 'molecule_from_last_geometry'}])
+        self._check_equivalent_inputs("unable_to_determine_lamda.qin.0.fix","unable_to_determine_lamda.qin.1")
 
-        # shutil.copyfile(os.path.join(test_dir, "hf_rca_tried_0.inp"),
-        #                 os.path.join(scr_dir, "hf_rca_tried_0.inp"))
-        # shutil.copyfile(os.path.join(test_dir, "hf_rca.out"),
-        #                 os.path.join(scr_dir, "hf_rca.out"))
-        # h = QChemErrorHandler(input_file="hf_rca_tried_0.inp",
-        #                       output_file="hf_rca.out")
-        # has_error = h.check()
-        # self.assertTrue(has_error)
-        # d = h.correct()
-        # self.assertEqual(d, {'errors': ['Bad SCF convergence',
-        #                                 'Geometry optimization failed',
-        #                                 'Molecular charge is not found'],
-        #                      'actions': ['rca_diis']})
-        # with open(os.path.join(test_dir, "hf_rca_tried_1.inp")) as f:
-        #     ref = [line.strip() for line in f.readlines()]
-        # with open(os.path.join(scr_dir, "hf_rca_tried_0.inp")) as f:
-        #     ans = [line.strip() for line in f.readlines()]
-        # self.assertEqual(ref, ans)
+    def test_linear_dependent_basis(self):
+        for ii in range(1,3):
+            shutil.copyfile(os.path.join(test_dir, "unable_to_determine_lamda.qin."+str(ii)),
+                            os.path.join(scr_dir, "unable_to_determine_lamda.qin."+str(ii)))
+            shutil.copyfile(os.path.join(test_dir, "unable_to_determine_lamda.qout."+str(ii)),
+                            os.path.join(scr_dir, "unable_to_determine_lamda.qout."+str(ii)))
 
-        # shutil.copyfile(os.path.join(test_dir, "hf_rca_tried_1.inp"),
-        #                 os.path.join(scr_dir, "hf_rca_tried_1.inp"))
-        # shutil.copyfile(os.path.join(test_dir, "hf_rca.out"),
-        #                 os.path.join(scr_dir, "hf_rca.out"))
-        # h = QChemErrorHandler(input_file="hf_rca_tried_1.inp",
-        #                       output_file="hf_rca.out")
-        # has_error = h.check()
-        # self.assertTrue(has_error)
-        # d = h.correct()
-        # self.assertEqual(d, {'errors': ['Bad SCF convergence',
-        #                                 'Geometry optimization failed',
-        #                                 'Molecular charge is not found'],
-        #                      'actions': ['gwh']})
-        # with open(os.path.join(test_dir, "hf_rca_tried_2.inp")) as f:
-        #     ref = [line.strip() for line in f.readlines()]
-        # with open(os.path.join(scr_dir, "hf_rca_tried_1.inp")) as f:
-        #     ans = [line.strip() for line in f.readlines()]
-        # self.assertEqual(ref, ans)
+        h = QChemErrorHandler(input_file="unable_to_determine_lamda.qin.1",
+                              output_file="unable_to_determine_lamda.qout.1")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"],['linear_dependent_basis'])
+        self.assertEqual(d["actions"],[{"scf_algorithm": "rca_diis"}])
+        self._check_equivalent_inputs("unable_to_determine_lamda.qin.1.fix","unable_to_determine_lamda.qin.2")
 
-        # shutil.copyfile(os.path.join(test_dir, "hf_rca_tried_2.inp"),
-        #                 os.path.join(scr_dir, "hf_rca_tried_2.inp"))
-        # shutil.copyfile(os.path.join(test_dir, "hf_rca.out"),
-        #                 os.path.join(scr_dir, "hf_rca.out"))
-        # h = QChemErrorHandler(input_file="hf_rca_tried_2.inp",
-        #                       output_file="hf_rca.out")
-        # has_error = h.check()
-        # self.assertTrue(has_error)
-        # d = h.correct()
-        # self.assertEqual(d, {'errors': ['Bad SCF convergence',
-        #                                 'Geometry optimization failed',
-        #                                 'Molecular charge is not found'],
-        #                      'actions': ['gdm']})
-        # with open(os.path.join(test_dir, "hf_rca_tried_3.inp")) as f:
-        #     ref = [line.strip() for line in f.readlines()]
-        # with open(os.path.join(scr_dir, "hf_rca_tried_2.inp")) as f:
-        #     ans = [line.strip() for line in f.readlines()]
-        # self.assertEqual(ref, ans)
+        h = QChemErrorHandler(input_file="unable_to_determine_lamda.qin.2",
+                              output_file="unable_to_determine_lamda.qout.2")
+        self.assertEqual(h.check(),False)
 
-        # shutil.copyfile(os.path.join(test_dir, "hf_rca_tried_3.inp"),
-        #                 os.path.join(scr_dir, "hf_rca_tried_3.inp"))
-        # shutil.copyfile(os.path.join(test_dir, "hf_rca.out"),
-        #                 os.path.join(scr_dir, "hf_rca.out"))
-        # h = QChemErrorHandler(input_file="hf_rca_tried_3.inp",
-        #                       output_file="hf_rca.out")
-        # has_error = h.check()
-        # self.assertTrue(has_error)
-        # d = h.correct()
-        # self.assertEqual(d, {'errors': ['Bad SCF convergence',
-        #                                 'Geometry optimization failed',
-        #                                 'Molecular charge is not found'],
-        #                      'actions': ['rca']})
-        # with open(os.path.join(test_dir, "hf_rca_tried_4.inp")) as f:
-        #     ref = [line.strip() for line in f.readlines()]
-        # with open(os.path.join(scr_dir, "hf_rca_tried_3.inp")) as f:
-        #     ans = [line.strip() for line in f.readlines()]
-        # self.assertEqual(ref, ans)
+    def test_failed_to_transform(self):
+        for ii in range(2):
+            shutil.copyfile(os.path.join(test_dir, "qunino_vinyl.qin."+str(ii)),
+                            os.path.join(scr_dir, "qunino_vinyl.qin."+str(ii)))
+            shutil.copyfile(os.path.join(test_dir, "qunino_vinyl.qout."+str(ii)),
+                            os.path.join(scr_dir, "qunino_vinyl.qout."+str(ii)))
 
-        # shutil.copyfile(os.path.join(test_dir, "hf_rca_tried_4.inp"),
-        #                 os.path.join(scr_dir, "hf_rca_tried_4.inp"))
-        # shutil.copyfile(os.path.join(test_dir, "hf_rca.out"),
-        #                 os.path.join(scr_dir, "hf_rca.out"))
-        # h = QChemErrorHandler(input_file="hf_rca_tried_4.inp",
-        #                       output_file="hf_rca.out")
-        # has_error = h.check()
-        # self.assertTrue(has_error)
-        # d = h.correct()
-        # self.assertEqual(d, {'errors': ['Bad SCF convergence',
-        #                                 'Geometry optimization failed',
-        #                                 'Molecular charge is not found'],
-        #                      'actions': ['core+rca']})
-        # with open(os.path.join(test_dir, "hf_rca_tried_5.inp")) as f:
-        #     ref = [line.strip() for line in f.readlines()]
-        # with open(os.path.join(scr_dir, "hf_rca_tried_4.inp")) as f:
-        #     ans = [line.strip() for line in f.readlines()]
-        # self.assertEqual(ref, ans)
+        h = QChemErrorHandler(input_file="qunino_vinyl.qin.0",
+                              output_file="qunino_vinyl.qout.0")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"],['failed_to_transform_coords'])
+        self.assertEqual(d["actions"],[{"sym_ignore": True},{"symmetry": False}])
+        self._check_equivalent_inputs("qunino_vinyl.qin.0.fix","qunino_vinyl.qin.1")
 
-        # shutil.copyfile(os.path.join(test_dir, "hf_rca_tried_5.inp"),
-        #                 os.path.join(scr_dir, "hf_rca_tried_5.inp"))
-        # shutil.copyfile(os.path.join(test_dir, "hf_rca.out"),
-        #                 os.path.join(scr_dir, "hf_rca.out"))
-        # h = QChemErrorHandler(input_file="hf_rca_tried_5.inp",
-        #                       output_file="hf_rca.out")
-        # has_error = h.check()
-        # self.assertTrue(has_error)
-        # d = h.correct()
-        # self.assertEqual(d, {'errors': ['Bad SCF convergence',
-        #                                 'Geometry optimization failed',
-        #                                 'Molecular charge is not found'],
-        #                      'actions': None})
+        h = QChemErrorHandler(input_file="qunino_vinyl.qin.1",
+                              output_file="qunino_vinyl.qout.1")
+        self.assertEqual(h.check(),False)
+
+    def test_scf_failed_to_converge(self):
+        for ii in range(3):
+            shutil.copyfile(os.path.join(test_dir, "crowd_gradient.qin."+str(ii)),
+                            os.path.join(scr_dir, "crowd_gradient.qin."+str(ii)))
+            shutil.copyfile(os.path.join(test_dir, "crowd_gradient.qout."+str(ii)),
+                            os.path.join(scr_dir, "crowd_gradient.qout."+str(ii)))
+
+        h = QChemErrorHandler(input_file="crowd_gradient.qin.0",
+                              output_file="crowd_gradient.qout.0")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"],['SCF_failed_to_converge'])
+        self.assertEqual(d["actions"],[{"max_scf_cycles": 200}])
+        self._check_equivalent_inputs("crowd_gradient.qin.0.fix","crowd_gradient.qin.1")
+
+        h = QChemErrorHandler(input_file="crowd_gradient.qin.1",
+                              output_file="crowd_gradient.qout.1")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"],['SCF_failed_to_converge'])
+        self.assertEqual(d["actions"],[{"scf_algorithm": "rca_diis"}])
+        self._check_equivalent_inputs("crowd_gradient.qin.1.fix","crowd_gradient.qin.2")
+
+    def test_out_of_opt_cycles(self):
+        shutil.copyfile(os.path.join(test_dir, "crowd_gradient.qin.2"),
+                        os.path.join(scr_dir, "crowd_gradient.qin.2"))
+        shutil.copyfile(os.path.join(test_dir, "crowd_gradient.qout.2"),
+                        os.path.join(scr_dir, "crowd_gradient.qout.2"))
+        shutil.copyfile(os.path.join(test_dir, "crowd_gradient.qin.3"),
+                        os.path.join(scr_dir, "crowd_gradient.qin.3"))
+
+        h = QChemErrorHandler(input_file="crowd_gradient.qin.2",
+                              output_file="crowd_gradient.qout.2")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"],['out_of_opt_cycles'])
+        self.assertEqual(d["actions"],[{"geom_max_cycles:": 200}])
+        self._check_equivalent_inputs("crowd_gradient.qin.2.fix","crowd_gradient.qin.3")
+
+    # def test_failed_to_read_input(self):
+    #     shutil.copyfile(os.path.join(test_dir, "unable_lamda_weird.qin"),
+    #                     os.path.join(scr_dir, "unable_lamda_weird.qin"))
+    #     shutil.copyfile(os.path.join(test_dir, "unable_lamda_weird.qout"),
+    #                     os.path.join(scr_dir, "unable_lamda_weird.qout"))
+    #     h = QChemErrorHandler(input_file="unable_lamda_weird.qin",
+    #                           output_file="unable_lamda_weird.qout")
+    #     h.check()
+    #     d = h.correct()
+    #     self.assertEqual(d["errors"],['failed_to_read_input'])
+    #     self.assertEqual(d["actions"],[{"rerun job as-is"}])
+    #     self._check_equivalent_inputs("unable_lamda_weird.qin.fix","unable_lamda_weird.qin")
+
+    def tearDown(self):
+        os.chdir(cwd)
+        shutil.rmtree(scr_dir)
+        pass
 
 if __name__ == "__main__":
     unittest.main()
