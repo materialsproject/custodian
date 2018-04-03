@@ -89,6 +89,9 @@ class QCJob(Job):
 
 
     def postprocess(self):
+        if self.save_scratch:
+            shutil.copytree(os.path.join(self.scratch,self.save_name),
+                            os.path.join(os.path.dirname(self.input_file),self.save_name))
         if self.gzipped:
             gzip_dir(".")
 

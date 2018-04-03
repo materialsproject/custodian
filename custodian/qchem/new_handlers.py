@@ -41,7 +41,7 @@ class QChemErrorHandler(ErrorHandler):
     is_monitor = False
 
     def __init__(self, input_file="mol.qcin", output_file="mol.qcout", 
-                 scf_max_cycles=200, geom_max_cycles=200, qchem_job=None):
+                 scf_max_cycles=200, geom_max_cycles=200):
         """
         Initializes the error handler from a set of input and output files.
 
@@ -51,7 +51,6 @@ class QChemErrorHandler(ErrorHandler):
             scf_max_cycles (int): The max iterations to set to fix SCF failure.
             geom_max_cycles (int): The max iterations to set to fix geometry
                 optimization failure.
-            qchem_job (QchemJob): the managing object to run qchem.
         """
         self.input_file = input_file
         self.output_file = output_file
@@ -69,15 +68,7 @@ class QChemErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
-        if self.qchem_job.save_scratch:
-            if self.qchem_job.scratch[-1] == '/':
-                scratch_dir = self.qchem_job.scratch+self.qchem_job.save_name
-            else:
-                scratch_dir = self.qchem_job.scratch+'/'+self.qchem_job.save_name
-            backup({self.input_file,self.output_file,scratch_dir})
-        else:
-            backup({self.input_file, self.output_file})
-
+        backup({self.input_file, self.output_file})
         actions = []
         
         if "SCF_failed_to_converge" in self.errors:
