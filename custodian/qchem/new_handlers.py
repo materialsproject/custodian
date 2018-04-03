@@ -69,9 +69,17 @@ class QChemErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
-        backup({self.input_file, self.output_file})
+        if self.qchem_job.save_scratch:
+            if self.qchem_job.scratch[-1] == '/':
+                scratch_dir = self.qchem_job.scratch+self.qchem_job.save_name
+            else:
+                scratch_dir = self.qchem_job.scratch+'/'+self.qchem_job.save_name
+            backup({self.input_file,self.output_file,scratch_dir})
+        else:
+            backup({self.input_file, self.output_file})
+
         actions = []
-                          
+        
         if "SCF_failed_to_converge" in self.errors:
             # Check number of SCF cycles. If not set or less than scf_max_cycles, 
             # increase to that value and rerun. If already set, check if 
@@ -150,7 +158,7 @@ class QChemErrorHandler(ErrorHandler):
             print("If you get this message, something has gone terribly wrong!")
             return {"errors": self.errors, "actions": None}
 
-        os.rename(self.input_file,self.input_file+".orig")
+        os.rename(self.input_file,self.input_file+".last")
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "actions": actions}
 

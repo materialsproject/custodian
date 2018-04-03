@@ -35,7 +35,7 @@ class QCJob(Job):
     A basic QChem Job.
     """
 
-    def __init__(self, multimode="openmp", input_file="mol.qin", output_file="mol.qout", max_cores=32, qclog_file="mol.qclog", gzipped=False, backup=True, scratch="/dev/shm/qcscratch/", save=False, save_name="default_save_name"):
+    def __init__(self, multimode="openmp", input_file="mol.qin", output_file="mol.qout", max_cores=32, qclog_file="mol.qclog", gzipped=False, scratch="/dev/shm/qcscratch/", save_scratch=False, save_name="default_save_name"):
         """
         Args:
             multimode (str): Parallelization scheme, either openmp or mpi
@@ -47,14 +47,11 @@ class QCJob(Job):
                 to. None means not to record the standard output. Defaults to
                 None.
             gzipped (bool): Whether to gzip the final output. Defaults to False.
-            backup (bool): Whether to backup the initial input files. If True,
-                the input files will be copied with a ".orig" appended.
-                Defaults to True.
             scratch (str): QCSCRATCH directory. Defaults to "/dev/shm/qcscratch/".
-            save (bool): Whether to save scratch directory contents. Defaults
-                to False
+            save_scratch (bool): Whether to save scratch directory contents. 
+                Defaults to False.
             save_name (str): Name of the saved scratch directory. Defaults to
-                to "default_save_name"
+                to "default_save_name".
         """
         self.multimode = multimode
         self.input_file = input_file
@@ -62,16 +59,15 @@ class QCJob(Job):
         self.max_cores = max_cores
         self.qclog_file = qclog_file
         self.gzipped = gzipped
-        self.backup = backup
         self.scratch = scratch
-        self.save = save
+        self.save_scratch = save_scratch
         self.save_name = save_name
 
 
     @property
     def current_command(self):
         multimode_index = 1
-        if self.save:
+        if self.save_scratch:
             command = ["qchem","-save","",str(self.max_cores),self.input_file,self.output_file,self.save_name]
             multimode_index = 2
         else:
