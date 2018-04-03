@@ -70,22 +70,23 @@ class QCJob(Job):
 
     @property
     def current_command(self):
-        command = ["qchem","","",str(self.max_cores),self.input_file,self.output_file,""]
+        multimode_index = 1
         if self.save:
-            command[1] = "-save"
-            command[6] = self.save_name
+            command = ["qchem","-save","",str(self.max_cores),self.input_file,self.output_file,self.save_name]
+            multimode_index = 2
+        else:
+            command = ["qchem","",str(self.max_cores),self.input_file,self.output_file]
         if self.multimode == 'openmp':
-            command[2] = "-nt"
+            command[multimode_index] = "-nt"
         elif self.multimode == 'mpi':
-            command[2] = "-np"
+            command[multimode_index] = "-np"
         else:
             print("ERROR: Multimode should only be set to openmp or mpi")
-        
         return command
 
 
     def setup(self):
-        os.putenv("QCSCRATCH",temp_dir)
+        os.putenv("QCSCRATCH",self.scratch)
         if self.multimode == 'openmp':
             os.putenv('QCTHREADS',str(self.max_cores))
             os.putenv('OMP_NUM_THREADS',str(self.max_cores))
