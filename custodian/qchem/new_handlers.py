@@ -59,7 +59,6 @@ class QChemErrorHandler(ErrorHandler):
         self.qcinp = QCInput.from_file(self.input_file)
         self.outdata = None
         self.errors = None
-        self.qchem_job = qchem_job
 
     def check(self):
         # Checks output file for errors.
