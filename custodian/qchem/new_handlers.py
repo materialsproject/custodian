@@ -150,7 +150,8 @@ class QChemErrorHandler(ErrorHandler):
             print("If you get this message, something has gone terribly wrong!")
             return {"errors": self.errors, "actions": None}
 
-        self.qcinp.write_file(self.input_file+'.fix')
+        os.rename(self.input_file,self.input_file+".orig")
+        self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "actions": actions}
 
 

@@ -64,7 +64,7 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d["errors"],['unable_to_determine_lamda'])
         self.assertEqual(d["actions"],[{'molecule': 'molecule_from_last_geometry'}])
-        self._check_equivalent_inputs("unable_to_determine_lamda.qin.0.fix","unable_to_determine_lamda.qin.1")
+        self._check_equivalent_inputs("unable_to_determine_lamda.qin.0","unable_to_determine_lamda.qin.1")
 
     def test_linear_dependent_basis(self):
         for ii in range(1,3):
@@ -79,7 +79,7 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d["errors"],['linear_dependent_basis'])
         self.assertEqual(d["actions"],[{"scf_algorithm": "rca_diis"}])
-        self._check_equivalent_inputs("unable_to_determine_lamda.qin.1.fix","unable_to_determine_lamda.qin.2")
+        self._check_equivalent_inputs("unable_to_determine_lamda.qin.1","unable_to_determine_lamda.qin.2")
 
         h = QChemErrorHandler(input_file="unable_to_determine_lamda.qin.2",
                               output_file="unable_to_determine_lamda.qout.2")
@@ -98,7 +98,7 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d["errors"],['failed_to_transform_coords'])
         self.assertEqual(d["actions"],[{"sym_ignore": True},{"symmetry": False}])
-        self._check_equivalent_inputs("qunino_vinyl.qin.0.fix","qunino_vinyl.qin.1")
+        self._check_equivalent_inputs("qunino_vinyl.qin.0","qunino_vinyl.qin.1")
 
         h = QChemErrorHandler(input_file="qunino_vinyl.qin.1",
                               output_file="qunino_vinyl.qout.1")
@@ -117,7 +117,7 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d["errors"],['SCF_failed_to_converge'])
         self.assertEqual(d["actions"],[{"max_scf_cycles": 200}])
-        self._check_equivalent_inputs("crowd_gradient.qin.0.fix","crowd_gradient.qin.1")
+        self._check_equivalent_inputs("crowd_gradient.qin.0","crowd_gradient.qin.1")
 
         h = QChemErrorHandler(input_file="crowd_gradient.qin.1",
                               output_file="crowd_gradient.qout.1")
@@ -125,7 +125,7 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d["errors"],['SCF_failed_to_converge'])
         self.assertEqual(d["actions"],[{"scf_algorithm": "rca_diis"}])
-        self._check_equivalent_inputs("crowd_gradient.qin.1.fix","crowd_gradient.qin.2")
+        self._check_equivalent_inputs("crowd_gradient.qin.1","crowd_gradient.qin.2")
 
     def test_out_of_opt_cycles(self):
         shutil.copyfile(os.path.join(test_dir, "crowd_gradient.qin.2"),
@@ -141,7 +141,7 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d["errors"],['out_of_opt_cycles'])
         self.assertEqual(d["actions"],[{"geom_max_cycles:": 200}])
-        self._check_equivalent_inputs("crowd_gradient.qin.2.fix","crowd_gradient.qin.3")
+        self._check_equivalent_inputs("crowd_gradient.qin.2","crowd_gradient.qin.3")
 
     def test_failed_to_read_input(self):
         shutil.copyfile(os.path.join(test_dir, "unable_lamda_weird.qin"),
@@ -154,7 +154,7 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d["errors"],['failed_to_read_input'])
         self.assertEqual(d["actions"],[{"rerun job as-is"}])
-        self._check_equivalent_inputs("unable_lamda_weird.qin.fix","unable_lamda_weird.qin")
+        self._check_equivalent_inputs("unable_lamda_weird.qin","unable_lamda_weird.qin")
 
     def test_input_file_error(self):
         shutil.copyfile(os.path.join(test_dir, "bad_input.qin"),

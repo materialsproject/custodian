@@ -35,13 +35,13 @@ class QCJob(Job):
     A basic QChem Job.
     """
 
-    def __init__(self, multimode="openmp", input_file="mol.qin", output_file="mol.qout", max_cores=32, qclog_file=None, gzipped=False, backup=True, scratch="/dev/shm/qcscratch/", save=False):
+    def __init__(self, multimode="openmp", input_file="mol.qin", output_file="mol.qout", max_cores=32, qclog_file="mol.qclog", gzipped=False, backup=True, scratch="/dev/shm/qcscratch/", save=False, save_name="default_save_name"):
         """
         Args:
             multimode (str): Parallelization scheme, either openmp or mpi
             input_file (str): Name of the QChem input file.
             output_file (str): Name of the QChem output file.
-            max_cores (str): Maximum number of cores to parallelize over. 
+            max_cores (int): Maximum number of cores to parallelize over. 
                 Defaults to 32.
             qclog_file (str): Name of the file to redirect the standard output
                 to. None means not to record the standard output. Defaults to
@@ -51,8 +51,10 @@ class QCJob(Job):
                 the input files will be copied with a ".orig" appended.
                 Defaults to True.
             scratch (str): QCSCRATCH directory. Defaults to "/dev/shm/qcscratch/".
-            save (bool): Whether to save scratch directory contents. 
-                Defaults to False
+            save (bool): Whether to save scratch directory contents. Defaults
+                to False
+            save_name (str): Name of the saved scratch directory. Defaults to
+                to "default_save_name"
         """
         self.multimode = multimode
         self.input_file = input_file
@@ -63,34 +65,30 @@ class QCJob(Job):
         self.backup = backup
         self.scratch = scratch
         self.save = save
+        self.save_name = save_name
 
 
     @property
     def current_command(self):
-        command = ["qchem","",str(self.max_cores),self.input_file,self.output_file]
+        command = ["qchem","","",str(self.max_cores),self.input_file,self.output_file,""]
+        if self.save:
+            command[1] = "-save"
+            command[6] = self.save_name
         if self.multimode == 'openmp':
-            os.putenv('QCTHREADS',str(self.max_cores))
-            command[1] = "-nt"
+            command[2] = "-nt"
         elif self.multimode == 'mpi':
-            command[1] = "-np"
+            command[2] = "-np"
         else:
             print("ERROR: Multimode should only be set to openmp or mpi")
+        
         return command
 
 
     def setup(self):
-        if self.backup:
-            i = 0
-            while os.path.exists("{}.{}.orig".format(self.input_file, i)):
-                i += 1
-            shutil.copy(self.input_file,
-                        "{}.{}.orig".format(self.input_file, i))
-            if os.path.exists(self.output_file):
-                shutil.copy(self.output_file,
-                            "{}.{}.orig".format(self.output_file, i))
-            if self.qclog_file and os.path.exists(self.qclog_file):
-                shutil.copy(self.qclog_file,
-                            "{}.{}.orig".format(self.qclog_file, i))
+        os.putenv("QCSCRATCH",temp_dir)
+        if self.multimode == 'openmp':
+            os.putenv('QCTHREADS',str(self.max_cores))
+            os.putenv('OMP_NUM_THREADS',str(self.max_cores))
 
 
     def postprocess(self):
@@ -99,18 +97,6 @@ class QCJob(Job):
 
 
     def run(self):
-        """
-        Sets up a symbolic link to a scratch directory, sets the
-        QCSCRATCH environment variable, and calls _run_qchem().
-        """
-        with ScratchDir(self.scratch, create_symbolic_link=True,
-                        copy_to_current_on_exit=self.save,
-                        copy_from_current_on_enter=False) as temp_dir:
-            os.putenv("QCSCRATCH",temp_dir)
-            self._run_qchem()
-
-
-    def _run_qchem(self):
         """
         Perform the actual QChem run.
 
