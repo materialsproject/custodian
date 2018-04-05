@@ -395,14 +395,12 @@ class Custodian(object):
                                                        terminate)
                         if terminate is not None and terminate != p.terminate:
                             time.sleep(self.polling_time_step)
-                        job.terminate()
                 else:
                     p.wait()
                     if self.terminate_func is not None and \
                             self.terminate_func != p.terminate:
                         self.terminate_func()
                         time.sleep(self.polling_time_step)
-                    job.terminate()
 
                 zero_return_code = p.returncode == 0
 
@@ -416,6 +414,10 @@ class Custodian(object):
                                 if not h.is_monitor])
             else:
                 has_error = self._do_check(self.handlers)
+
+            if has_error:
+                # This makes sure the job is killed cleanly for certain systems.
+                job.terminate()
 
             # If there are no errors detected, perform
             # postprocessing and exit.
