@@ -6,7 +6,6 @@ import os
 import shutil
 import math
 import logging
-import itertools
 
 import numpy as np
 
@@ -591,7 +590,6 @@ class VaspJob(Job):
                 f.write("%f %f\n" % (k, energies[k]))
 
     def terminate(self):
-        import os
         for k in self.vasp_cmd:
             if "vasp" in k:
                 try:
