@@ -590,6 +590,15 @@ class VaspJob(Job):
             for k in sorted(energies.keys()):
                 f.write("%f %f\n" % (k, energies[k]))
 
+    def terminate(self):
+        import os
+        for k in self.vasp_cmd:
+            if "vasp" in k:
+                try:
+                    os.system("killall %s" % k)
+                except:
+                    pass
+
 
 class VaspNEBJob(Job):
     """

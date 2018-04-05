@@ -395,12 +395,14 @@ class Custodian(object):
                                                        terminate)
                         if terminate is not None and terminate != p.terminate:
                             time.sleep(self.polling_time_step)
+                        job.terminate()
                 else:
                     p.wait()
                     if self.terminate_func is not None and \
                             self.terminate_func != p.terminate:
                         self.terminate_func()
                         time.sleep(self.polling_time_step)
+                    job.terminate()
 
                 zero_return_code = p.returncode == 0
 
@@ -619,6 +621,9 @@ class Job(six.with_metaclass(ABCMeta, MSONable)):
         etc.
         """
         pass
+
+    def terminate(self):
+        return None
 
     @property
     def name(self):
