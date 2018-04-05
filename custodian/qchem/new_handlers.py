@@ -101,17 +101,23 @@ class QChemErrorHandler(ErrorHandler):
                 assert self.qcinp.molecule.charge == self.outdata.get("molecule_from_last_geometry").charge
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
-            elif self.qcinp.rem.get("scf_algorithm","diis").lower() != "rca_diis":
+            elif self.qcinp.rem.get("scf_algorithm","diis").lower() == "diis":
                 self.qcinp.rem["scf_algorithm"] = "rca_diis"
                 actions.append({"scf_algorithm": "rca_diis"})
+                if self.qcinp.rem.get("gen_scfman"):
+                    self.qcinp.rem["gen_scfman"] = False
+                    actions.append({"gen_scfman": False})
             else:
                 print("Use a different initial guess? Perhaps a different basis?")
 
         elif "linear_dependent_basis" in self.errors:
             # DIIS -> RCA_DIIS. If already RCA_DIIS, change basis?
-            if self.qcinp.rem.get("scf_algorithm") != "rca_diis":
+            if self.qcinp.rem.get("scf_algorithm","diis").lower() == "diis":
                 self.qcinp.rem["scf_algorithm"] = "rca_diis"
                 actions.append({"scf_algorithm": "rca_diis"})
+                if self.qcinp.rem.get("gen_scfman"):
+                    self.qcinp.rem["gen_scfman"] = False
+                    actions.append({"gen_scfman": False})
             else:
                 print("Perhaps use a better basis?")
 

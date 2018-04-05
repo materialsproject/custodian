@@ -35,7 +35,7 @@ class QCJob(Job):
     A basic QChem Job.
     """
 
-    def __init__(self, multimode="openmp", input_file="mol.qin", output_file="mol.qout", max_cores=32, qclog_file="mol.qclog", gzipped=False, scratch="/dev/shm/qcscratch/", save_scratch=False, save_name="default_save_name"):
+    def __init__(self, multimode="openmp", input_file="mol.qin", output_file="mol.qout", max_cores=32, qclog_file="mol.qclog", gzipped=False, scratch="/dev/shm/qcscratch/", save_scratch=False, save_name="default_save_name", new_cori=False):
         """
         Args:
             multimode (str): Parallelization scheme, either openmp or mpi
@@ -52,6 +52,8 @@ class QCJob(Job):
                 Defaults to False.
             save_name (str): Name of the saved scratch directory. Defaults to
                 to "default_save_name".
+            new_cori (bool): Whether you are using the new QChem build on Cori
+                that requires a -slurm flag in the QChem call. Defaults to False.
         """
         self.multimode = multimode
         self.input_file = input_file
@@ -67,9 +69,15 @@ class QCJob(Job):
     @property
     def current_command(self):
         multimode_index = 1
-        if self.save_scratch:
+        if self.save_scratch and not self.new_cori:
             command = ["qchem","-save","",str(self.max_cores),self.input_file,self.output_file,self.save_name]
             multimode_index = 2
+        elif self.new_cori and not self.save_scratch:
+            command = ["qchem","-slurm","",str(self.max_cores),self.input_file,self.output_file]
+            multimode_index = 2
+        elif self.new_cori and self.save_scratch:
+            command = ["qchem","-slurm","-save","",str(self.max_cores),self.input_file,self.output_file,self.save_name]
+            multimode_index = 3
         else:
             command = ["qchem","",str(self.max_cores),self.input_file,self.output_file]
         if self.multimode == 'openmp':
