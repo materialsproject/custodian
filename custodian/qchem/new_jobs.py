@@ -68,18 +68,19 @@ class QCJob(Job):
 
     @property
     def current_command(self):
-        multimode_index = 1
+        multimode_index = 0
         if self.save_scratch:
-            command = self.qchem_command+["-save","",str(self.max_cores),self.input_file,self.output_file,self.save_name]
-            multimode_index = 2
+            command = ["-save","",str(self.max_cores),self.input_file,self.output_file,self.save_name]
+            multimode_index = 1
         else:
-            command = self.qchem_command+["",str(self.max_cores),self.input_file,self.output_file]
+            command = ["",str(self.max_cores),self.input_file,self.output_file]
         if self.multimode == 'openmp':
             command[multimode_index] = "-nt"
         elif self.multimode == 'mpi':
             command[multimode_index] = "-np"
         else:
             print("ERROR: Multimode should only be set to openmp or mpi")
+        command = self.qchem_command+command
         return command
 
 
