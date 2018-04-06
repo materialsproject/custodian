@@ -54,7 +54,7 @@ class QCJob(Job):
             save_name (str): Name of the saved scratch directory. Defaults to
                 to "default_save_name".
         """
-        self.qchem_command = qchem_command
+        self.qchem_command = qchem_command.split(" ")
         self.multimode = multimode
         self.input_file = input_file
         self.output_file = output_file
@@ -70,10 +70,10 @@ class QCJob(Job):
     def current_command(self):
         multimode_index = 1
         if self.save_scratch:
-            command = [self.qchem_command,"-save","",str(self.max_cores),self.input_file,self.output_file,self.save_name]
+            command = self.qchem_command+["-save","",str(self.max_cores),self.input_file,self.output_file,self.save_name]
             multimode_index = 2
         else:
-            command = [self.qchem_command,"",str(self.max_cores),self.input_file,self.output_file]
+            command = self.qchem_command+["",str(self.max_cores),self.input_file,self.output_file]
         if self.multimode == 'openmp':
             command[multimode_index] = "-nt"
         elif self.multimode == 'mpi':
