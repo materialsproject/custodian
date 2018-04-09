@@ -154,7 +154,7 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d["errors"],['failed_to_read_input'])
         self.assertEqual(d["actions"],[{"rerun job as-is"}])
-        self._check_equivalent_inputs("unable_lamda_weird.qin","unable_lamda_weird.qin")
+        self._check_equivalent_inputs("unable_lamda_weird.qin.last","unable_lamda_weird.qin")
 
     def test_input_file_error(self):
         shutil.copyfile(os.path.join(test_dir, "bad_input.qin"),
