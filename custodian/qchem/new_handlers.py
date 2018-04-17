@@ -167,7 +167,7 @@ class QChemSCFErrorHandler(ErrorHandler):
     is_monitor = False
 
     def __init__(self, input_file="mol.qcin", output_file="mol.qcout", 
-                 rca_gdm_thresh=1.0E-3, scf_max_cycles=200, qchem_job=None):
+                 rca_gdm_thresh=1.0E-3, scf_max_cycles=200):
         """
         Initializes the error handler from a set of input and output files.
 
@@ -178,7 +178,6 @@ class QChemSCFErrorHandler(ErrorHandler):
                 If last deltaE is larger than the threshold try RCA_DIIS
                 first, else, try DIIS_GDM first.
             scf_max_cycles (int): The max iterations to set to fix SCF failure.
-            qchem_job (QchemJob): the managing object to run qchem.
         """
         self.input_file = input_file
         self.output_file = output_file
