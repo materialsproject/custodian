@@ -174,7 +174,7 @@ class QCJob(Job):
                         qclog_file=qclog_file,
                         suffix=".freq_"+str(ii),
                         **QCJob_kwargs))
-            outdata = QCOutput(output_file+".freq_"+str(ii))
+            outdata = QCOutput(output_file+".freq_"+str(ii)).data
             errors = outdata.get("errors")
             assert len(errors) == 0
             if float(outdata.get('frequencies')[0][0]) > 0.0:
