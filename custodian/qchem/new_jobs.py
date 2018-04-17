@@ -32,6 +32,7 @@ __maintainer__ = "Samuel Blau"
 __email__ = "samblau1@gmail.com"
 __status__ = "Alpha"
 __date__ = "3/20/18"
+__credits__ = "Xiaohui Qu"
 
 
 class QCJob(Job):
@@ -39,7 +40,7 @@ class QCJob(Job):
     A basic QChem Job.
     """
 
-    def __init__(self, qchem_command, multimode="openmp", input_file="mol.qin", output_file="mol.qout", max_cores=32, qclog_file="mol.qclog", gzipped=False, scratch="/dev/shm/qcscratch/", save_scratch=False, save_name="default_save_name"):
+    def __init__(self, qchem_command, multimode="openmp", input_file="mol.qin", output_file="mol.qout", max_cores=32, qclog_file="mol.qclog", suffix="", scratch="/dev/shm/qcscratch/", save_scratch=False, save_name="default_save_name"):
         """
         Args:
             qchem_command (str): Command to run QChem.
@@ -51,7 +52,7 @@ class QCJob(Job):
             qclog_file (str): Name of the file to redirect the standard output
                 to. None means not to record the standard output. Defaults to
                 None.
-            gzipped (bool): Whether to gzip the final output. Defaults to False.
+            suffix (str): String to append to the file in postprocess. 
             scratch (str): QCSCRATCH directory. Defaults to "/dev/shm/qcscratch/".
             save_scratch (bool): Whether to save scratch directory contents. 
                 Defaults to False.
@@ -64,7 +65,7 @@ class QCJob(Job):
         self.output_file = output_file
         self.max_cores = max_cores
         self.qclog_file = qclog_file
-        self.gzipped = gzipped
+        self.suffix = suffix
         self.scratch = scratch
         self.save_scratch = save_scratch
         self.save_name = save_name
@@ -99,8 +100,10 @@ class QCJob(Job):
         if self.save_scratch:
             shutil.copytree(os.path.join(self.scratch,self.save_name),
                             os.path.join(os.path.dirname(self.input_file),self.save_name))
-        if self.gzipped:
-            gzip_dir(".")
+        if self.suffix != "":
+            shutil.move(self.input_file, self.input_file+self.suffix)
+            shutil.move(self.output_file, self.output_file+self.suffix)
+            shutil.move(self.qclog_file, self.qclog_file+self.suffix)
 
 
     def run(self):
@@ -147,23 +150,24 @@ class QCJob(Job):
         orig_opt_rem = orig_opt_input.rem
         orig_freq_rem = orig_opt_input.rem
         orig_freq_rem["job_type"] = "freq"
-        shutil.copyfile(input_file, input_file+'.opt_0')
 
         for ii in range(max_iterations):
             yield(QCJob(qchem_command=qchem_command, 
                         multimode=multimode, 
-                        input_file=input_file+".opt_"+str(ii),
-                        output_file=output_file+".opt_"+str(ii), 
-                        qclog_file=qclog_file+".opt_"+str(ii), 
+                        input_file=input_file,
+                        output_file=output_file, 
+                        qclog_file=qclog_file,
+                        suffix=".opt_"+str(ii), 
                         **QCJob_kwargs))
             opt_outdata = QCOutput(output_file+".opt_"+str(ii)).data
             freq_QCInput = QCInput(molecule=opt_outdata.get("molecule_from_optimized_geometry"), rem=orig_freq_rem)
-            freq_QCInput.write_file(input_file+".freq_"+str(ii))
+            freq_QCInput.write_file(input_file)
             yield(QCJob(qchem_command=qchem_command, 
                         multimode=multimode, 
-                        input_file=input_file+".freq_"+str(ii), 
-                        output_file=output_file+".freq_"+str(ii), 
-                        qclog_file=qclog_file+".freq_"+str(ii), 
+                        input_file=input_file, 
+                        output_file=output_file, 
+                        qclog_file=qclog_file,
+                        suffix=".freq_"+str(ii),
                         **QCJob_kwargs))
             outdata = QCOutput(output_file+".freq_"+str(ii))
             errors = outdata.get("errors")
@@ -196,7 +200,7 @@ class QCJob(Job):
                     raise Exception("Unable to perturb coordinates to remove negative frequency without changing the bonding structure")
 
                 new_opt_QCInput = QCInput(molecule=new_molecule, rem=orig_opt_rem)
-                new_opt_QCInput.write_file(input_file+".opt_"+str(ii+1))
+                new_opt_QCInput.write_file(input_file)
 
 
 def perturb_coordinates(old_coords, negative_freq_vecs, molecule_perturb_scale, reversed_direction = False):
