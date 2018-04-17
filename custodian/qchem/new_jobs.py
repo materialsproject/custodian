@@ -149,7 +149,12 @@ class QCJob(Job):
         orig_opt_input = QCInput.from_file(input_file)
         orig_opt_rem = orig_opt_input.rem
         orig_freq_rem = orig_opt_input.rem
-        orig_freq_rem["job_type"] = "freq"
+        if "job_type" in orig_freq_rem:
+            orig_freq_rem["job_type"] = "freq"
+        elif "JOB_TYPE" in orig_freq_rem:
+            orig_freq_rem["JOB_TYPE"] = "freq"
+        else:
+            raise Exception("Can't find the job_type key in the input rem dictionary!")
 
         for ii in range(max_iterations):
             yield(QCJob(qchem_command=qchem_command, 
