@@ -147,7 +147,7 @@ class QCJob(Job):
         orig_opt_rem = orig_opt_input.rem
         orig_freq_rem = orig_opt_input.rem
         orig_freq_rem["job_type"] = "freq"
-        shutil.copyfile(input_file, input_file+'.opt0')
+        shutil.copyfile(input_file, input_file+'.opt_0')
 
         for ii in range(max_iterations):
             yield(QCJob(qchem_command=qchem_command, 
