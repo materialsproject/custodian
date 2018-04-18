@@ -962,7 +962,7 @@ class NonConvergingErrorHandler(ErrorHandler):
     is_monitor = True
 
     def __init__(self, output_filename="OSZICAR", nionic_steps=10,
-                 change_algo=False):
+                 change_algo=True):
         """
         Initializes the handler with the output file to check.
 
@@ -993,40 +993,25 @@ class NonConvergingErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
-        # if change_algo is True, change ALGO = Fast to Normal if ALGO is
-        # Fast. If still not converging, following Kresse's
-        # recommendation, we will try two iterations of different mixing
-        # parameters. If this error is caught again, then kill the job
         vi = VaspInput.from_directory(".")
         algo = vi["INCAR"].get("ALGO", "Normal")
-        amix = vi["INCAR"].get("AMIX", 0.4)
-        bmix = vi["INCAR"].get("BMIX", 1.0)
-        amin = vi["INCAR"].get("AMIN", 0.1)
-        actions = []
-        if self.change_algo:
-            if algo == "Fast":
-                backup(VASP_BACKUP_FILES)
-                actions.append({"dict": "INCAR",
-                                "action": {"_set": {"ALGO": "Normal"}}})
 
-            elif amix > 0.1 and bmix > 0.01:
-                # Try linear mixing
-                backup(VASP_BACKUP_FILES)
-                actions.append({"dict": "INCAR",
-                                "action": {"_set": {"AMIX": 0.1, "BMIX": 0.01,
-                                                    "ICHARG": 2}}})
-
-            elif bmix < 3.0 and amin > 0.01:
-                # Try increasing bmix
-                backup(VASP_BACKUP_FILES)
-                actions.append({"dict": "INCAR",
-                                "action": {"_set": {"AMIN": 0.01, "BMIX": 3.0,
-                                                    "ICHARG": 2}}})
+        # Ladder from VeryFast to Fast to Fast to All
+        # These progressively switches to more stable but more 
+        # expensive algorithms
+        if algo == "VeryFast":
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"ALGO": "Fast"}}})
+        elif algo == "Fast":
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"ALGO": "Normal"}}})
+        elif algo == "Normal":
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"ALGO": "All"}}})
 
         if actions:
             VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Non-converging job"], "actions": actions}
-
         # Unfixable error. Just return None for actions.
         else:
             return {"errors": ["Non-converging job"], "actions": None}
