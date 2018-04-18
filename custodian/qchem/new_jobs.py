@@ -147,8 +147,8 @@ class QCJob(Job):
 
         assert os.path.exists(input_file)
         orig_opt_input = QCInput.from_file(input_file)
-        orig_opt_rem = orig_opt_input.rem
-        orig_freq_rem = orig_opt_input.rem
+        orig_opt_rem = copy.deepcopy(orig_opt_input.rem)
+        orig_freq_rem = copy.deepcopy(orig_opt_input.rem)
         if "job_type" in orig_freq_rem:
             orig_freq_rem["job_type"] = "freq"
         elif "JOB_TYPE" in orig_freq_rem:
