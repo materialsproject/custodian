@@ -784,6 +784,7 @@ class UnconvergedErrorHandler(ErrorHandler):
             # Ladder from VeryFast to Fast to Fast to All
             # These progressively switches to more stable but more 
             # expensive algorithms
+            algo = v.incar.get("ALGO", "Normal")
             if algo == "VeryFast":
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"ALGO": "Fast"}}})
