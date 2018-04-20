@@ -962,8 +962,7 @@ class NonConvergingErrorHandler(ErrorHandler):
     """
     is_monitor = True
 
-    def __init__(self, output_filename="OSZICAR", nionic_steps=10,
-                 change_algo=True):
+    def __init__(self, output_filename="OSZICAR", nionic_steps=10):
         """
         Initializes the handler with the output file to check.
 
@@ -973,8 +972,6 @@ class NonConvergingErrorHandler(ErrorHandler):
             nionic_steps (int): The threshold number of ionic steps that
                 needs to hit the maximum number of electronic steps for the
                 run to be considered non-converging.
-            change_algo (bool): Whether to attempt to correct the job by
-                changing the ALGO from Fast to Normal.
         """
         self.output_filename = output_filename
         self.nionic_steps = nionic_steps
