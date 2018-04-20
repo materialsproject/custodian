@@ -367,7 +367,9 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         h = UnconvergedErrorHandler()
         self.assertTrue(h.check())
         d = h.correct()
-        self.assertEqual(d, {"errors": ["Unconverged"], "actions": None})
+        self.assertEqual(d, {'actions': [{'action': {'_file_copy': {'dest': 'POSCAR'}}, 'file': 'CONTCAR'},
+                                         {'action': {'_set': {'ALGO': 'All'}}, 'dict': 'INCAR'}],
+                            'errors': ['Unconverged']})
         os.remove("vasprun.xml")
 
     def test_check_correct_ionic(self):
