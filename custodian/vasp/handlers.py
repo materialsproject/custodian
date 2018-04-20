@@ -807,6 +807,7 @@ class UnconvergedErrorHandler(ErrorHandler):
             vi = VaspInput.from_directory(".")
             backup(VASP_BACKUP_FILES)
             VaspModder(vi=vi).apply_actions(actions)
+            return {"errors": ["Unconverged"], "actions": actions}
         else:
             # Unfixable error. Just return None for actions.
             return {"errors": ["Unconverged"], "actions": None}
