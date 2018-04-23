@@ -415,6 +415,10 @@ class Custodian(object):
             else:
                 has_error = self._do_check(self.handlers)
 
+            if has_error:
+                # This makes sure the job is killed cleanly for certain systems.
+                job.terminate()
+
             # If there are no errors detected, perform
             # postprocessing and exit.
             if not has_error:
@@ -619,6 +623,9 @@ class Job(six.with_metaclass(ABCMeta, MSONable)):
         etc.
         """
         pass
+
+    def terminate(self):
+        return None
 
     @property
     def name(self):

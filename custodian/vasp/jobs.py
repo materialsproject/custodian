@@ -6,7 +6,6 @@ import os
 import shutil
 import math
 import logging
-import itertools
 
 import numpy as np
 
@@ -589,6 +588,14 @@ class VaspJob(Job):
             f.write("# %s energy\n" % lattice_direction)
             for k in sorted(energies.keys()):
                 f.write("%f %f\n" % (k, energies[k]))
+
+    def terminate(self):
+        for k in self.vasp_cmd:
+            if "vasp" in k:
+                try:
+                    os.system("killall %s" % k)
+                except:
+                    pass
 
 
 class VaspNEBJob(Job):
