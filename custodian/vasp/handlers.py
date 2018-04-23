@@ -791,6 +791,18 @@ class UnconvergedErrorHandler(ErrorHandler):
             elif algo == "Normal":
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"ALGO": "All"}}})
+            else:
+                # Try mixing as last resort
+                new_settings = {"ISTART": 1,
+                                "ALGO": "Normal",
+                                "NELMDL": -6,
+                                "BMIX": 0.001,
+                                "AMIX_MAG": 0.8,
+                                "BMIX_MAG": 0.001}
+
+                if not all([v.incar.get(k, "") == val for k, val in new_settings.items()]):
+                    actions.append({"dict": "INCAR",
+                                    "action": {"_set": new_settings}})
 
         elif not v.converged_ionic:
             # Just continue optimizing and let other handles fix ionic
@@ -991,7 +1003,10 @@ class NonConvergingErrorHandler(ErrorHandler):
     def correct(self):
         vi = VaspInput.from_directory(".")
         algo = vi["INCAR"].get("ALGO", "Normal")
-
+        amix = vi["INCAR"].get("AMIX", 0.4)
+        bmix = vi["INCAR"].get("BMIX", 1.0)
+        amin = vi["INCAR"].get("AMIN", 0.1)
+        actions = []
         # Ladder from VeryFast to Fast to Fast to All
         # These progressively switches to more stable but more
         # expensive algorithms
@@ -1004,6 +1019,16 @@ class NonConvergingErrorHandler(ErrorHandler):
         elif algo == "Normal":
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ALGO": "All"}}})
+        elif amix > 0.1 and bmix > 0.01:
+            # Try linear mixing
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"AMIX": 0.1, "BMIX": 0.01,
+                                                "ICHARG": 2}}})
+        elif bmix < 3.0 and amin > 0.01:
+            # Try increasing bmix
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"AMIN": 0.01, "BMIX": 3.0,
+                                                "ICHARG": 2}}})
 
         if actions:
             backup(VASP_BACKUP_FILES)
