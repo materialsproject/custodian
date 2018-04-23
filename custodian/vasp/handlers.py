@@ -775,10 +775,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
-        backup(VASP_BACKUP_FILES)
         v = Vasprun(self.output_filename)
-        actions = [{"file": "CONTCAR",
-                    "action": {"_file_copy": {"dest": "POSCAR"}}}]
         if not v.converged_electronic:
             # Ladder from VeryFast to Fast to Fast to All
             # These progressively switches to more stable but more
@@ -1008,6 +1005,7 @@ class NonConvergingErrorHandler(ErrorHandler):
                             "action": {"_set": {"ALGO": "All"}}})
 
         if actions:
+            backup(VASP_BACKUP_FILES)
             VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Non-converging job"], "actions": actions}
         # Unfixable error. Just return None for actions.
