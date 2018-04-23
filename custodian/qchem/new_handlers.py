@@ -1,12 +1,11 @@
 # coding: utf-8
 
 from __future__ import unicode_literals, division
-"""
-This module implements new error handlers for QChem runs.
-"""
+
+# This module implements new error handlers for QChem runs.
+
 
 import os
-import numpy as np
 from pymatgen.io.qchem_io.inputs import QCInput
 from pymatgen.io.qchem_io.outputs import QCOutput
 from custodian.custodian import ErrorHandler

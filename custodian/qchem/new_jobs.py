@@ -2,9 +2,9 @@
 
 from __future__ import unicode_literals, division
 import math
-"""
-New QChem job module
-"""
+
+# New QChem job module
+
 
 import os
 import shutil
@@ -139,7 +139,7 @@ class QCJob(Job):
         perturbe the geometry, optimize, and recalculate frequencies until all are
         positive, aka a true minima has been found.
 
-        Args:   
+        Args:
             qchem_command (str): Command to run QChem.
             multimode (str): Parallelization scheme, either openmp or mpi.
             input_file (str): Name of the QChem input file.

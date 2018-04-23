@@ -209,8 +209,6 @@ class QChemErrorHandlerTest(TestCase):
     def tearDown(self):
         os.chdir(cwd)
         shutil.rmtree(scr_dir)
-        pass
-
 
 if __name__ == "__main__":
     unittest.main()
