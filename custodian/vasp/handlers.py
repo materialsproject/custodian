@@ -776,6 +776,7 @@ class UnconvergedErrorHandler(ErrorHandler):
 
     def correct(self):
         v = Vasprun(self.output_filename)
+        actions = []
         if not v.converged_electronic:
             # Ladder from VeryFast to Fast to Fast to All
             # These progressively switches to more stable but more
