@@ -187,7 +187,7 @@ class VaspErrorHandler(ErrorHandler):
                     == Kpoints.supported_modes.Gamma:
                 actions.append({"dict": "KPOINTS",
                                 "action": {"_set": {"generation_style":
-                                                        "Monkhorst"}}})
+                                                    "Monkhorst"}}})
                 actions.append({"dict": "INCAR",
                                 "action": {"_unset": {"IMIX": 1}}})
                 self.error_count['brmix'] += 1
@@ -196,7 +196,7 @@ class VaspErrorHandler(ErrorHandler):
                     == Kpoints.supported_modes.Monkhorst:
                 actions.append({"dict": "KPOINTS",
                                 "action": {"_set": {"generation_style":
-                                                        "Gamma"}}})
+                                                    "Gamma"}}})
                 actions.append({"dict": "INCAR",
                                 "action": {"_unset": {"IMIX": 1}}})
                 self.error_count['brmix'] += 1
@@ -354,12 +354,12 @@ class VaspErrorHandler(ErrorHandler):
 
         if "pssyevx" in self.errors:
             actions.append({"dict": "INCAR", "action":
-                {"_set": {"ALGO": "Normal"}}})
+                            {"_set": {"ALGO": "Normal"}}})
         if "eddrmm" in self.errors:
             # RMM algorithm is not stable for this calculation
             if vi["INCAR"].get("ALGO", "Normal") in ["Fast", "VeryFast"]:
                 actions.append({"dict": "INCAR", "action":
-                    {"_set": {"ALGO": "Normal"}}})
+                                {"_set": {"ALGO": "Normal"}}})
             else:
                 potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
                 actions.append({"dict": "INCAR",
@@ -375,7 +375,7 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"file": "CHGCAR",
                                 "action": {"_file_delete": {'mode': "actual"}}})
             actions.append({"dict": "INCAR", "action":
-                {"_set": {"ALGO": "All"}}})
+                            {"_set": {"ALGO": "All"}}})
 
         if "grad_not_orth" in self.errors:
             if vi["INCAR"].get("ISMEAR", 1) < 0:
@@ -635,7 +635,7 @@ class DriftErrorHandler(ErrorHandler):
     def check(self):
 
         incar = Incar.from_file("INCAR")
-        if incar.get("EDIFFG", 0.1) >= 0 or incar.get("NSW",0) == 0:
+        if incar.get("EDIFFG", 0.1) >= 0 or incar.get("NSW", 0) == 0:
             # Only activate when force relaxing and ionic steps
             # NSW check prevents accidental effects when running DFPT
             return False
@@ -666,7 +666,7 @@ class DriftErrorHandler(ErrorHandler):
                         "action": {"_file_copy": {"dest": "POSCAR"}}})
 
         # First try adding ADDGRID
-        if not incar.get("ADDGRID", False) :
+        if not incar.get("ADDGRID", False):
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ADDGRID": True}}})
         # Otherwise set PREC to High so ENAUG can be used to control Augmentation Grid Size
@@ -679,7 +679,6 @@ class DriftErrorHandler(ErrorHandler):
         else:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ENAUG": int(incar.get("ENAUG", 1040) * self.enaug_multiply)}}})
-
 
         curr_drift = outcar.data.get("drift", [])[::-1][:self.to_average]
         curr_drift = np.average([np.linalg.norm(d) for d in curr_drift])
@@ -720,8 +719,8 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         # if symmetry is off
         # Also disregard if automatic KPOINT generation is used
         if (not vi["INCAR"].get('ISYM', True)) or \
-                        vi[
-                            "KPOINTS"].style == Kpoints.supported_modes.Automatic:
+                vi[
+                "KPOINTS"].style == Kpoints.supported_modes.Automatic:
             return False
 
         try:
@@ -782,7 +781,7 @@ class UnconvergedErrorHandler(ErrorHandler):
                     "action": {"_file_copy": {"dest": "POSCAR"}}}]
         if not v.converged_electronic:
             # Ladder from VeryFast to Fast to Fast to All
-            # These progressively switches to more stable but more 
+            # These progressively switches to more stable but more
             # expensive algorithms
             algo = v.incar.get("ALGO", "Normal")
             if algo == "VeryFast":
@@ -996,7 +995,7 @@ class NonConvergingErrorHandler(ErrorHandler):
         algo = vi["INCAR"].get("ALGO", "Normal")
 
         # Ladder from VeryFast to Fast to Fast to All
-        # These progressively switches to more stable but more 
+        # These progressively switches to more stable but more
         # expensive algorithms
         if algo == "VeryFast":
             actions.append({"dict": "INCAR",
@@ -1095,14 +1094,14 @@ class WalltimeHandler(ErrorHandler):
                 # Determine max time per ionic step.
                 outcar.read_pattern({"timings": "LOOP\+.+real time(.+)"},
                                     postprocess=float)
-                time_per_step = np.max(outcar.data.get('timings')) if outcar.data.get("timings",[]) else 0
+                time_per_step = np.max(outcar.data.get('timings')) if outcar.data.get("timings", []) else 0
             else:
                 # Determine max time per electronic step.
                 outcar.read_pattern({"timings": "LOOP:.+real time(.+)"},
                                     postprocess=float)
-                time_per_step = np.max(outcar.data.get('timings')) if outcar.data.get("timings",[]) else 0
+                time_per_step = np.max(outcar.data.get('timings')) if outcar.data.get("timings", []) else 0
 
-            # If the remaining time is less than average time for 3 
+            # If the remaining time is less than average time for 3
             # steps or buffer_time.
             time_left = self.wall_time - total_secs
             if time_left < max(time_per_step * 3, self.buffer_time):
@@ -1126,6 +1125,7 @@ class WalltimeHandler(ErrorHandler):
 
 @deprecated(replacement=WalltimeHandler)
 class PBSWalltimeHandler(WalltimeHandler):
+
     def __init__(self, buffer_time=300):
         super(PBSWalltimeHandler, self).__init__(None, buffer_time=buffer_time)
 
