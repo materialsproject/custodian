@@ -2,7 +2,6 @@
 
 from __future__ import unicode_literals, division
 import math
-
 """
 New QChem job module
 """
@@ -33,7 +32,17 @@ class QCJob(Job):
     A basic QChem Job.
     """
 
-    def __init__(self, qchem_command, multimode="openmp", input_file="mol.qin", output_file="mol.qout", max_cores=32, qclog_file="mol.qclog", suffix="", scratch="/dev/shm/qcscratch/", save_scratch=False, save_name="default_save_name"):
+    def __init__(self,
+                 qchem_command,
+                 multimode="openmp",
+                 input_file="mol.qin",
+                 output_file="mol.qout",
+                 max_cores=32,
+                 qclog_file="mol.qclog",
+                 suffix="",
+                 scratch="/dev/shm/qcscratch/",
+                 save_scratch=False,
+                 save_name="default_save_name"):
         """
         Args:
             qchem_command (str): Command to run QChem.
@@ -63,41 +72,44 @@ class QCJob(Job):
         self.save_scratch = save_scratch
         self.save_name = save_name
 
-
     @property
     def current_command(self):
         multimode_index = 0
         if self.save_scratch:
-            command = ["-save","",str(self.max_cores),self.input_file,self.output_file,self.save_name]
+            command = [
+                "-save", "",
+                str(self.max_cores), self.input_file, self.output_file,
+                self.save_name
+            ]
             multimode_index = 1
         else:
-            command = ["",str(self.max_cores),self.input_file,self.output_file]
+            command = [
+                "", str(self.max_cores), self.input_file, self.output_file
+            ]
         if self.multimode == 'openmp':
             command[multimode_index] = "-nt"
         elif self.multimode == 'mpi':
             command[multimode_index] = "-np"
         else:
             print("ERROR: Multimode should only be set to openmp or mpi")
-        command = self.qchem_command+command
+        command = self.qchem_command + command
         return command
 
-
     def setup(self):
-        os.putenv("QCSCRATCH",self.scratch)
+        os.putenv("QCSCRATCH", self.scratch)
         if self.multimode == 'openmp':
-            os.putenv('QCTHREADS',str(self.max_cores))
-            os.putenv('OMP_NUM_THREADS',str(self.max_cores))
-
+            os.putenv('QCTHREADS', str(self.max_cores))
+            os.putenv('OMP_NUM_THREADS', str(self.max_cores))
 
     def postprocess(self):
         if self.save_scratch:
-            shutil.copytree(os.path.join(self.scratch,self.save_name),
-                            os.path.join(os.path.dirname(self.input_file),self.save_name))
+            shutil.copytree(
+                os.path.join(self.scratch, self.save_name),
+                os.path.join(os.path.dirname(self.input_file), self.save_name))
         if self.suffix != "":
-            shutil.move(self.input_file, self.input_file+self.suffix)
-            shutil.move(self.output_file, self.output_file+self.suffix)
-            shutil.move(self.qclog_file, self.qclog_file+self.suffix)
-
+            shutil.move(self.input_file, self.input_file + self.suffix)
+            shutil.move(self.output_file, self.output_file + self.suffix)
+            shutil.move(self.qclog_file, self.qclog_file + self.suffix)
 
     def run(self):
         """
@@ -110,9 +122,17 @@ class QCJob(Job):
         p = subprocess.Popen(self.current_command, stdout=qclog)
         return p
 
-
     @classmethod
-    def opt_with_frequency_flattener(cls, qchem_command, multimode="openmp", input_file="mol.qin", output_file="mol.qout", qclog_file="mol.qclog", max_iterations=10, max_molecule_perturb_scale=0.3, reversed_direction=False, **QCJob_kwargs):
+    def opt_with_frequency_flattener(cls,
+                                     qchem_command,
+                                     multimode="openmp",
+                                     input_file="mol.qin",
+                                     output_file="mol.qout",
+                                     qclog_file="mol.qclog",
+                                     max_iterations=10,
+                                     max_molecule_perturb_scale=0.3,
+                                     reversed_direction=False,
+                                     **QCJob_kwargs):
         """
         Optimize a structure and calculate vibrational frequencies to check if the
         structure is in a true minima. If a frequency is negative, iteratively
@@ -136,7 +156,9 @@ class QCJob(Job):
 
         min_molecule_perturb_scale = 0.1
         scale_grid = 10
-        perturb_scale_grid = (max_molecule_perturb_scale - min_molecule_perturb_scale) / scale_grid
+        perturb_scale_grid = (
+            max_molecule_perturb_scale - min_molecule_perturb_scale
+        ) / scale_grid
         msc = MoleculeStructureComparator()
 
         assert os.path.exists(input_file)
@@ -146,24 +168,31 @@ class QCJob(Job):
         orig_freq_rem["job_type"] = "freq"
 
         for ii in range(max_iterations):
-            yield(QCJob(qchem_command=qchem_command,
-                        multimode=multimode,
-                        input_file=input_file,
-                        output_file=output_file,
-                        qclog_file=qclog_file,
-                        suffix=".opt_"+str(ii),
-                        **QCJob_kwargs))
-            opt_outdata = QCOutput(output_file+".opt_"+str(ii)).data
-            freq_QCInput = QCInput(molecule=opt_outdata.get("molecule_from_optimized_geometry"), rem=orig_freq_rem, opt=orig_opt_input.opt, pcm=orig_opt_input.pcm, solvent=orig_opt_input.solvent)
+            yield (QCJob(
+                qchem_command=qchem_command,
+                multimode=multimode,
+                input_file=input_file,
+                output_file=output_file,
+                qclog_file=qclog_file,
+                suffix=".opt_" + str(ii),
+                **QCJob_kwargs))
+            opt_outdata = QCOutput(output_file + ".opt_" + str(ii)).data
+            freq_QCInput = QCInput(
+                molecule=opt_outdata.get("molecule_from_optimized_geometry"),
+                rem=orig_freq_rem,
+                opt=orig_opt_input.opt,
+                pcm=orig_opt_input.pcm,
+                solvent=orig_opt_input.solvent)
             freq_QCInput.write_file(input_file)
-            yield(QCJob(qchem_command=qchem_command,
-                        multimode=multimode,
-                        input_file=input_file,
-                        output_file=output_file,
-                        qclog_file=qclog_file,
-                        suffix=".freq_"+str(ii),
-                        **QCJob_kwargs))
-            outdata = QCOutput(output_file+".freq_"+str(ii)).data
+            yield (QCJob(
+                qchem_command=qchem_command,
+                multimode=multimode,
+                input_file=input_file,
+                output_file=output_file,
+                qclog_file=qclog_file,
+                suffix=".freq_" + str(ii),
+                **QCJob_kwargs))
+            outdata = QCOutput(output_file + ".freq_" + str(ii)).data
             errors = outdata.get("errors")
             assert len(errors) == 0
             if float(outdata.get('frequencies')[0][0]) > 0.0:
@@ -172,37 +201,52 @@ class QCJob(Job):
             else:
                 negative_freq_vecs = outdata.get("negative_freq_vecs")
                 old_coords = outdata.get("freq_geometry")
-                old_molecule = Molecule(species=outdata.get('freq_species'),
-                                        coords=old_coords, 
-                                        charge=outdata.get('charge'),
-                                        spin_multiplicity=outdata.get('multiplicity'))
+                old_molecule = Molecule(
+                    species=outdata.get('freq_species'),
+                    coords=old_coords,
+                    charge=outdata.get('charge'),
+                    spin_multiplicity=outdata.get('multiplicity'))
                 structure_successfully_perturbed = False
 
-                for molecule_perturb_scale in np.arange(max_molecule_perturb_scale, min_molecule_perturb_scale, -perturb_scale_grid):
-                    new_coords = perturb_coordinates(old_coords=old_coords,
-                                                     negative_freq_vecs=negative_freq_vecs,
-                                                     molecule_perturb_scale=molecule_perturb_scale,
-                                                     reversed_direction=reversed_direction)
-                    new_molecule = Molecule(species=outdata.get('freq_species'),
-                                            coords=new_coords,
-                                            charge=outdata.get('charge'),
-                                            spin_multiplicity=outdata.get('multiplicity'))
+                for molecule_perturb_scale in np.arange(
+                        max_molecule_perturb_scale, min_molecule_perturb_scale,
+                        -perturb_scale_grid):
+                    new_coords = perturb_coordinates(
+                        old_coords=old_coords,
+                        negative_freq_vecs=negative_freq_vecs,
+                        molecule_perturb_scale=molecule_perturb_scale,
+                        reversed_direction=reversed_direction)
+                    new_molecule = Molecule(
+                        species=outdata.get('freq_species'),
+                        coords=new_coords,
+                        charge=outdata.get('charge'),
+                        spin_multiplicity=outdata.get('multiplicity'))
                     if msc.are_equal(old_molecule, new_molecule):
                         structure_successfully_perturbed = True
                         break
 
                 if not structure_successfully_perturbed:
-                    raise Exception("Unable to perturb coordinates to remove negative frequency without changing the bonding structure")
+                    raise Exception(
+                        "Unable to perturb coordinates to remove negative frequency without changing the bonding structure"
+                    )
 
-                new_opt_QCInput = QCInput(molecule=new_molecule, rem=orig_opt_rem, opt=orig_opt_input.opt, pcm=orig_opt_input.pcm, solvent=orig_opt_input.solvent)
+                new_opt_QCInput = QCInput(
+                    molecule=new_molecule,
+                    rem=orig_opt_rem,
+                    opt=orig_opt_input.opt,
+                    pcm=orig_opt_input.pcm,
+                    solvent=orig_opt_input.solvent)
                 new_opt_QCInput.write_file(input_file)
 
 
-def perturb_coordinates(old_coords, negative_freq_vecs, molecule_perturb_scale, reversed_direction):
-    max_dis = max([math.sqrt(sum([x ** 2 for x in vec])) for vec in negative_freq_vecs])
+def perturb_coordinates(old_coords, negative_freq_vecs, molecule_perturb_scale,
+                        reversed_direction):
+    max_dis = max(
+        [math.sqrt(sum([x**2 for x in vec])) for vec in negative_freq_vecs])
     scale = molecule_perturb_scale / max_dis
     normalized_vecs = [[x * scale for x in vec] for vec in negative_freq_vecs]
     direction = 1.0
     if reversed_direction:
         direction = -1.0
-    return [[c + v * direction for c, v in zip(coord, vec)] for coord, vec in zip(old_coords, normalized_vecs)]
+    return [[c + v * direction for c, v in zip(coord, vec)]
+            for coord, vec in zip(old_coords, normalized_vecs)]

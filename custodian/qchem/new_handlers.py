@@ -1,7 +1,6 @@
 # coding: utf-8
 
 from __future__ import unicode_literals, division
-
 """
 This module implements new error handlers for QChem runs.
 """
@@ -31,8 +30,11 @@ class QChemErrorHandler(ErrorHandler):
 
     is_monitor = False
 
-    def __init__(self, input_file="mol.qcin", output_file="mol.qcout",
-                 scf_max_cycles=200, geom_max_cycles=200):
+    def __init__(self,
+                 input_file="mol.qcin",
+                 output_file="mol.qcout",
+                 scf_max_cycles=200,
+                 geom_max_cycles=200):
         """
         Initializes the error handler from a set of input and output files.
 
@@ -60,55 +62,69 @@ class QChemErrorHandler(ErrorHandler):
     def correct(self):
         backup({self.input_file, self.output_file})
         actions = []
-        
+
         if "SCF_failed_to_converge" in self.errors:
             # Check number of SCF cycles. If not set or less than scf_max_cycles,
-            # increase to that value and rerun. If already set, check if 
+            # increase to that value and rerun. If already set, check if
             # scf_algorithm is unset or set to DIIS, in which case set to RCA-DIIS.
-            # Otherwise, tell user to call SCF error handler and do nothing. 
-            if self.qcinp.rem.get("max_scf_cycles") != str(self.scf_max_cycles):
+            # Otherwise, tell user to call SCF error handler and do nothing.
+            if self.qcinp.rem.get("max_scf_cycles") != str(
+                    self.scf_max_cycles):
                 self.qcinp.rem["max_scf_cycles"] = self.scf_max_cycles
                 actions.append({"max_scf_cycles": self.scf_max_cycles})
-            elif self.qcinp.rem.get("scf_algorithm","diis").lower() == "diis":
+            elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
                 self.qcinp.rem["scf_algorithm"] = "rca_diis"
                 actions.append({"scf_algorithm": "rca_diis"})
             else:
-                print("More advanced changes may impact the SCF result. Use the SCF error handler")
+                print(
+                    "More advanced changes may impact the SCF result. Use the SCF error handler"
+                )
 
         elif "out_of_opt_cycles" in self.errors:
             # Check number of opt cycles. If less than geom_max_cycles, increase
             # to that value, set last geom as new starting geom and rerun.
-            if self.qcinp.rem.get("geom_opt_max_cycles") != self.geom_max_cycles:
+            if self.qcinp.rem.get(
+                    "geom_opt_max_cycles") != self.geom_max_cycles:
                 self.qcinp.rem["geom_opt_max_cycles"] = self.geom_max_cycles
                 actions.append({"geom_max_cycles:": self.scf_max_cycles})
                 if len(self.outdata.get("energy_trajectory")) > 1:
-                    assert self.qcinp.molecule.spin_multiplicity == self.outdata.get("molecule_from_last_geometry").spin_multiplicity
-                    assert self.qcinp.molecule.charge == self.outdata.get("molecule_from_last_geometry").charge
-                    self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
+                    assert self.qcinp.molecule.spin_multiplicity == self.outdata.get(
+                        "molecule_from_last_geometry").spin_multiplicity
+                    assert self.qcinp.molecule.charge == self.outdata.get(
+                        "molecule_from_last_geometry").charge
+                    self.qcinp.molecule = self.outdata.get(
+                        "molecule_from_last_geometry")
                     actions.append({"molecule": "molecule_from_last_geometry"})
             else:
-                print("How do I get the geometry optimization converged when already at the maximum number of cycles?")
+                print(
+                    "How do I get the geometry optimization converged when already at the maximum number of cycles?"
+                )
 
         elif "unable_to_determine_lamda" in self.errors:
             # Set last geom as new starting geom and rerun. If no opt cycles,
             # use diff SCF strat? Diff initial guess? Change basis?
             if len(self.outdata.get("energy_trajectory")) > 1:
-                assert self.qcinp.molecule.spin_multiplicity == self.outdata.get("molecule_from_last_geometry").spin_multiplicity
-                assert self.qcinp.molecule.charge == self.outdata.get("molecule_from_last_geometry").charge
-                self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
+                assert self.qcinp.molecule.spin_multiplicity == self.outdata.get(
+                    "molecule_from_last_geometry").spin_multiplicity
+                assert self.qcinp.molecule.charge == self.outdata.get(
+                    "molecule_from_last_geometry").charge
+                self.qcinp.molecule = self.outdata.get(
+                    "molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
-            elif self.qcinp.rem.get("scf_algorithm","diis").lower() == "diis":
+            elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
                 self.qcinp.rem["scf_algorithm"] = "rca_diis"
                 actions.append({"scf_algorithm": "rca_diis"})
                 if self.qcinp.rem.get("gen_scfman"):
                     self.qcinp.rem["gen_scfman"] = False
                     actions.append({"gen_scfman": False})
             else:
-                print("Use a different initial guess? Perhaps a different basis?")
+                print(
+                    "Use a different initial guess? Perhaps a different basis?"
+                )
 
         elif "linear_dependent_basis" in self.errors:
             # DIIS -> RCA_DIIS. If already RCA_DIIS, change basis?
-            if self.qcinp.rem.get("scf_algorithm","diis").lower() == "diis":
+            if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
                 self.qcinp.rem["scf_algorithm"] = "rca_diis"
                 actions.append({"scf_algorithm": "rca_diis"})
                 if self.qcinp.rem.get("gen_scfman"):
@@ -120,7 +136,8 @@ class QChemErrorHandler(ErrorHandler):
         elif "failed_to_transform_coords" in self.errors:
             # Check for symmetry flag in rem. If not False, set to False and rerun.
             # If already False, increase threshold?
-            if not self.qcinp.rem.get("sym_ignore") or self.qcinp.rem.get("symmetry"):
+            if not self.qcinp.rem.get("sym_ignore") or self.qcinp.rem.get(
+                    "symmetry"):
                 self.qcinp.rem["sym_ignore"] = True
                 self.qcinp.rem["symmetry"] = False
                 actions.append({"sym_ignore": True})
@@ -129,7 +146,9 @@ class QChemErrorHandler(ErrorHandler):
                 print("Perhaps increase the threshold?")
 
         elif "input_file_error" in self.errors:
-            print("Something is wrong with the input file. Examine error message by hand.") 
+            print(
+                "Something is wrong with the input file. Examine error message by hand."
+            )
             return {"errors": self.errors, "actions": None}
 
         elif "failed_to_read_input" in self.errors:
@@ -147,10 +166,11 @@ class QChemErrorHandler(ErrorHandler):
         else:
             # You should never get here. If correct is being called then errors should have at least one entry,
             # in which case it should have been caught by the if/elifs above.
-            print("If you get this message, something has gone terribly wrong!")
+            print(
+                "If you get this message, something has gone terribly wrong!")
             return {"errors": self.errors, "actions": None}
 
-        os.rename(self.input_file,self.input_file+".last")
+        os.rename(self.input_file, self.input_file + ".last")
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "actions": actions}
 
@@ -162,8 +182,11 @@ class QChemSCFErrorHandler(ErrorHandler):
 
     is_monitor = False
 
-    def __init__(self, input_file="mol.qcin", output_file="mol.qcout",
-                 rca_gdm_thresh=1.0E-3, scf_max_cycles=200):
+    def __init__(self,
+                 input_file="mol.qcin",
+                 output_file="mol.qcout",
+                 rca_gdm_thresh=1.0E-3,
+                 scf_max_cycles=200):
         """
         Initializes the error handler from a set of input and output files.
 
@@ -193,6 +216,3 @@ class QChemSCFErrorHandler(ErrorHandler):
     def correct(self):
         print("This hasn't been implemented yet!")
         return {"errors": self.errors, "actions": None}
-
-
-
