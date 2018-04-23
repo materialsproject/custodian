@@ -32,6 +32,7 @@ __maintainer__ = "Samuel Blau"
 __email__ = "samblau1@gmail.com"
 __status__ = "Alpha"
 __date__ = "3/26/18"
+__credits__ = "Xiaohui Qu"
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
@@ -140,7 +141,7 @@ class QChemErrorHandlerTest(TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"],['out_of_opt_cycles'])
-        self.assertEqual(d["actions"],[{"geom_max_cycles:": 200}])
+        self.assertEqual(d["actions"],[{"geom_max_cycles:": 200}, {"molecule": "molecule_from_last_geometry"}])
         self._check_equivalent_inputs("crowd_gradient.qin.2","crowd_gradient.qin.3")
 
     def test_failed_to_read_input(self):
