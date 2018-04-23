@@ -4,7 +4,6 @@ from __future__ import unicode_literals, division
 
 # This module implements new error handlers for QChem runs.
 
-
 import os
 from pymatgen.io.qchem_io.inputs import QCInput
 from pymatgen.io.qchem_io.outputs import QCOutput
@@ -87,10 +86,12 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.rem["geom_opt_max_cycles"] = self.geom_max_cycles
                 actions.append({"geom_max_cycles:": self.scf_max_cycles})
                 if len(self.outdata.get("energy_trajectory")) > 1:
-                    assert self.qcinp.molecule.spin_multiplicity == self.outdata.get(
-                        "molecule_from_last_geometry").spin_multiplicity
-                    assert self.qcinp.molecule.charge == self.outdata.get(
-                        "molecule_from_last_geometry").charge
+                    if self.qcinp.molecule.spin_multiplicity != self.outdata.get(
+                            "molecule_from_last_geometry").spin_multiplicity:
+                        raise AssertionError('Multiplicities should match!')
+                    if self.qcinp.molecule.charge != self.outdata.get(
+                            "molecule_from_last_geometry").charge:
+                        raise AssertionError('Charges should match!')
                     self.qcinp.molecule = self.outdata.get(
                         "molecule_from_last_geometry")
                     actions.append({"molecule": "molecule_from_last_geometry"})
@@ -103,10 +104,12 @@ class QChemErrorHandler(ErrorHandler):
             # Set last geom as new starting geom and rerun. If no opt cycles,
             # use diff SCF strat? Diff initial guess? Change basis?
             if len(self.outdata.get("energy_trajectory")) > 1:
-                assert self.qcinp.molecule.spin_multiplicity == self.outdata.get(
-                    "molecule_from_last_geometry").spin_multiplicity
-                assert self.qcinp.molecule.charge == self.outdata.get(
-                    "molecule_from_last_geometry").charge
+                if self.qcinp.molecule.spin_multiplicity != self.outdata.get(
+                        "molecule_from_last_geometry").spin_multiplicity:
+                    raise AssertionError('Multiplicities should match!')
+                if self.qcinp.molecule.charge != self.outdata.get(
+                        "molecule_from_last_geometry").charge:
+                    raise AssertionError('Charges should match!')
                 self.qcinp.molecule = self.outdata.get(
                     "molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})

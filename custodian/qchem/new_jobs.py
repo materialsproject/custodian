@@ -161,7 +161,8 @@ class QCJob(Job):
         ) / scale_grid
         msc = MoleculeStructureComparator()
 
-        assert os.path.exists(input_file)
+        if not os.path.exists(input_file):
+            raise AssertionError('Input file must be present!')
         orig_opt_input = QCInput.from_file(input_file)
         orig_opt_rem = copy.deepcopy(orig_opt_input.rem)
         orig_freq_rem = copy.deepcopy(orig_opt_input.rem)
@@ -194,7 +195,8 @@ class QCJob(Job):
                 **QCJob_kwargs))
             outdata = QCOutput(output_file + ".freq_" + str(ii)).data
             errors = outdata.get("errors")
-            assert len(errors) == 0
+            if len(errors) != 0:
+                raise AssertionError('No errors should be encountered while flattening frequencies!')
             if float(outdata.get('frequencies')[0][0]) > 0.0:
                 print("All frequencies positive!")
                 break
