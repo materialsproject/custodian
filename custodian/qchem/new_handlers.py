@@ -49,7 +49,7 @@ class QChemErrorHandler(ErrorHandler):
         self.geom_max_cycles = geom_max_cycles
         self.qcinp = QCInput.from_file(self.input_file)
         self.outdata = None
-        self.errors = None
+        self.errors = []
 
     def check(self):
         # Checks output file for errors.
