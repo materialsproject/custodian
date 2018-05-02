@@ -197,17 +197,13 @@ class QCJob(Job):
             errors = outdata.get("errors")
             if len(errors) != 0:
                 raise AssertionError('No errors should be encountered while flattening frequencies!')
-            if float(outdata.get('frequencies')[0][0]) > 0.0:
+            if outdata.get('frequencies')[0] > 0.0:
                 print("All frequencies positive!")
                 break
             else:
-                negative_freq_vecs = outdata.get("negative_freq_vecs")
-                old_coords = outdata.get("freq_geometry")
-                old_molecule = Molecule(
-                    species=outdata.get('freq_species'),
-                    coords=old_coords,
-                    charge=outdata.get('charge'),
-                    spin_multiplicity=outdata.get('multiplicity'))
+                negative_freq_vecs = outdata.get("frequency_mode_vectors")[0]
+                old_coords = outdata.get("initial_geometry")
+                old_molecule = outdata.get("initial_molecule")
                 structure_successfully_perturbed = False
 
                 for molecule_perturb_scale in np.arange(
@@ -219,7 +215,7 @@ class QCJob(Job):
                         molecule_perturb_scale=molecule_perturb_scale,
                         reversed_direction=reversed_direction)
                     new_molecule = Molecule(
-                        species=outdata.get('freq_species'),
+                        species=outdata.get('species'),
                         coords=new_coords,
                         charge=outdata.get('charge'),
                         spin_multiplicity=outdata.get('multiplicity'))
