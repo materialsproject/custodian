@@ -144,7 +144,7 @@ class QCJob(Job):
             multimode (str): Parallelization scheme, either openmp or mpi.
             input_file (str): Name of the QChem input file.
             output_file (str): Name of the QChem output file
-            max_iterations (int): Number of perturbation -> optimization -> freqency
+            max_iterations (int): Number of perturbation -> optimization -> frequency
                 iterations to perform. Defaults to 10.
             max_molecule_perturb_scale (float): The maximum scaled perturbation that
                 can be applied to the molecule. Defaults to 0.3.
