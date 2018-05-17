@@ -40,7 +40,7 @@ class QCJob(Job):
                  max_cores=32,
                  qclog_file="mol.qclog",
                  suffix="",
-                 scratch="/dev/shm/qcscratch/",
+                 scratch_dir="/dev/shm/qcscratch/",
                  save_scratch=False,
                  save_name="default_save_name"):
         """
@@ -55,7 +55,7 @@ class QCJob(Job):
                 to. None means not to record the standard output. Defaults to
                 None.
             suffix (str): String to append to the file in postprocess.
-            scratch (str): QCSCRATCH directory. Defaults to "/dev/shm/qcscratch/".
+            scratch_dir (str): QCSCRATCH directory. Defaults to "/dev/shm/qcscratch/".
             save_scratch (bool): Whether to save scratch directory contents.
                 Defaults to False.
             save_name (str): Name of the saved scratch directory. Defaults to
@@ -68,7 +68,7 @@ class QCJob(Job):
         self.max_cores = max_cores
         self.qclog_file = qclog_file
         self.suffix = suffix
-        self.scratch = scratch
+        self.scratch_dir = scratch_dir
         self.save_scratch = save_scratch
         self.save_name = save_name
 
@@ -96,7 +96,7 @@ class QCJob(Job):
         return command
 
     def setup(self):
-        os.putenv("QCSCRATCH", self.scratch)
+        os.putenv("QCSCRATCH", self.scratch_dir)
         if self.multimode == 'openmp':
             os.putenv('QCTHREADS', str(self.max_cores))
             os.putenv('OMP_NUM_THREADS', str(self.max_cores))
@@ -104,7 +104,7 @@ class QCJob(Job):
     def postprocess(self):
         if self.save_scratch:
             shutil.copytree(
-                os.path.join(self.scratch, self.save_name),
+                os.path.join(self.scratch_dir, self.save_name),
                 os.path.join(os.path.dirname(self.input_file), self.save_name))
         if self.suffix != "":
             shutil.move(self.input_file, self.input_file + self.suffix)
