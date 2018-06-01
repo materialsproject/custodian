@@ -132,6 +132,7 @@ class QCJob(Job):
                                      max_iterations=10,
                                      max_molecule_perturb_scale=0.3,
                                      reversed_direction=False,
+                                     ignore_connectivity=False,
                                      **QCJob_kwargs):
         """
         Optimize a structure and calculate vibrational frequencies to check if the
@@ -150,7 +151,9 @@ class QCJob(Job):
                 can be applied to the molecule. Defaults to 0.3.
             reversed_direction (bool): Whether to reverse the direction of the
                 vibrational frequency vectors. Defaults to False.
-            \*\*QCJob_kwargs: Passthrough kwargs to QCJob. See
+            ignore_connectivity (bool): Whether to ignore differences in connectivity
+                introduced by structural perturbation. Defaults to False.
+            **QCJob_kwargs: Passthrough kwargs to QCJob. See
                 :class:`custodian.qchem.new_jobs.QCJob`.
         """
 
@@ -222,8 +225,10 @@ class QCJob(Job):
                     if msc.are_equal(old_molecule, new_molecule):
                         structure_successfully_perturbed = True
                         break
-
-                if not structure_successfully_perturbed:
+                if ignore_connectivity:
+                    structure_successfully_perturbed = True
+                    break
+                elif not structure_successfully_perturbed:
                     raise Exception(
                         "Unable to perturb coordinates to remove negative frequency without changing the bonding structure"
                     )
