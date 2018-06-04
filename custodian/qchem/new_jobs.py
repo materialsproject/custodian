@@ -222,10 +222,7 @@ class QCJob(Job):
                         coords=new_coords,
                         charge=outdata.get('charge'),
                         spin_multiplicity=outdata.get('multiplicity'))
-                    if msc.are_equal(old_molecule, new_molecule):
-                        structure_successfully_perturbed = True
-                        break
-                    elif ignore_connectivity:
+                    if msc.are_equal(old_molecule, new_molecule) or ignore_connectivity:
                         structure_successfully_perturbed = True
                         break
                 if not structure_successfully_perturbed:
