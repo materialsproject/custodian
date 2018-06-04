@@ -225,10 +225,10 @@ class QCJob(Job):
                     if msc.are_equal(old_molecule, new_molecule):
                         structure_successfully_perturbed = True
                         break
-                if ignore_connectivity:
-                    structure_successfully_perturbed = True
-                    break
-                elif not structure_successfully_perturbed:
+                    elif ignore_connectivity:
+                        structure_successfully_perturbed = True
+                        break
+                if not structure_successfully_perturbed:
                     raise Exception(
                         "Unable to perturb coordinates to remove negative frequency without changing the bonding structure"
                     )
