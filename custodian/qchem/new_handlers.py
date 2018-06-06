@@ -29,8 +29,8 @@ class QChemErrorHandler(ErrorHandler):
     is_monitor = False
 
     def __init__(self,
-                 input_file="mol.qcin",
-                 output_file="mol.qcout",
+                 input_file="mol.qin",
+                 output_file="mol.qout",
                  scf_max_cycles=200,
                  geom_max_cycles=200):
         """
@@ -73,6 +73,9 @@ class QChemErrorHandler(ErrorHandler):
             elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
                 self.qcinp.rem["scf_algorithm"] = "rca_diis"
                 actions.append({"scf_algorithm": "rca_diis"})
+                if self.qcinp.rem.get("gen_scfman"):
+                    self.qcinp.rem["gen_scfman"] = False
+                    actions.append({"gen_scfman": False})
             else:
                 print(
                     "More advanced changes may impact the SCF result. Use the SCF error handler"
@@ -185,8 +188,8 @@ class QChemSCFErrorHandler(ErrorHandler):
     is_monitor = False
 
     def __init__(self,
-                 input_file="mol.qcin",
-                 output_file="mol.qcout",
+                 input_file="mol.qin",
+                 output_file="mol.qout",
                  rca_gdm_thresh=1.0E-3,
                  scf_max_cycles=200):
         """

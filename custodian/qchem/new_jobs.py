@@ -40,7 +40,7 @@ class QCJob(Job):
                  max_cores=32,
                  qclog_file="mol.qclog",
                  suffix="",
-                 scratch="/dev/shm/qcscratch/",
+                 scratch_dir="/dev/shm/qcscratch/",
                  save_scratch=False,
                  save_name="default_save_name"):
         """
@@ -55,7 +55,7 @@ class QCJob(Job):
                 to. None means not to record the standard output. Defaults to
                 None.
             suffix (str): String to append to the file in postprocess.
-            scratch (str): QCSCRATCH directory. Defaults to "/dev/shm/qcscratch/".
+            scratch_dir (str): QCSCRATCH directory. Defaults to "/dev/shm/qcscratch/".
             save_scratch (bool): Whether to save scratch directory contents.
                 Defaults to False.
             save_name (str): Name of the saved scratch directory. Defaults to
@@ -68,7 +68,7 @@ class QCJob(Job):
         self.max_cores = max_cores
         self.qclog_file = qclog_file
         self.suffix = suffix
-        self.scratch = scratch
+        self.scratch_dir = scratch_dir
         self.save_scratch = save_scratch
         self.save_name = save_name
 
@@ -96,7 +96,7 @@ class QCJob(Job):
         return command
 
     def setup(self):
-        os.putenv("QCSCRATCH", self.scratch)
+        os.putenv("QCSCRATCH", self.scratch_dir)
         if self.multimode == 'openmp':
             os.putenv('QCTHREADS', str(self.max_cores))
             os.putenv('OMP_NUM_THREADS', str(self.max_cores))
@@ -104,7 +104,7 @@ class QCJob(Job):
     def postprocess(self):
         if self.save_scratch:
             shutil.copytree(
-                os.path.join(self.scratch, self.save_name),
+                os.path.join(self.scratch_dir, self.save_name),
                 os.path.join(os.path.dirname(self.input_file), self.save_name))
         if self.suffix != "":
             shutil.move(self.input_file, self.input_file + self.suffix)
@@ -132,6 +132,7 @@ class QCJob(Job):
                                      max_iterations=10,
                                      max_molecule_perturb_scale=0.3,
                                      reversed_direction=False,
+                                     ignore_connectivity=False,
                                      **QCJob_kwargs):
         """
         Optimize a structure and calculate vibrational frequencies to check if the
@@ -144,13 +145,15 @@ class QCJob(Job):
             multimode (str): Parallelization scheme, either openmp or mpi.
             input_file (str): Name of the QChem input file.
             output_file (str): Name of the QChem output file
-            max_iterations (int): Number of perturbation -> optimization -> freqency
+            max_iterations (int): Number of perturbation -> optimization -> frequency
                 iterations to perform. Defaults to 10.
             max_molecule_perturb_scale (float): The maximum scaled perturbation that
                 can be applied to the molecule. Defaults to 0.3.
             reversed_direction (bool): Whether to reverse the direction of the
                 vibrational frequency vectors. Defaults to False.
-            \*\*QCJob_kwargs: Passthrough kwargs to QCJob. See
+            ignore_connectivity (bool): Whether to ignore differences in connectivity
+                introduced by structural perturbation. Defaults to False.
+            **QCJob_kwargs: Passthrough kwargs to QCJob. See
                 :class:`custodian.qchem.new_jobs.QCJob`.
         """
 
@@ -197,17 +200,13 @@ class QCJob(Job):
             errors = outdata.get("errors")
             if len(errors) != 0:
                 raise AssertionError('No errors should be encountered while flattening frequencies!')
-            if float(outdata.get('frequencies')[0][0]) > 0.0:
+            if outdata.get('frequencies')[0] > 0.0:
                 print("All frequencies positive!")
                 break
             else:
-                negative_freq_vecs = outdata.get("negative_freq_vecs")
-                old_coords = outdata.get("freq_geometry")
-                old_molecule = Molecule(
-                    species=outdata.get('freq_species'),
-                    coords=old_coords,
-                    charge=outdata.get('charge'),
-                    spin_multiplicity=outdata.get('multiplicity'))
+                negative_freq_vecs = outdata.get("frequency_mode_vectors")[0]
+                old_coords = outdata.get("initial_geometry")
+                old_molecule = outdata.get("initial_molecule")
                 structure_successfully_perturbed = False
 
                 for molecule_perturb_scale in np.arange(
@@ -219,14 +218,13 @@ class QCJob(Job):
                         molecule_perturb_scale=molecule_perturb_scale,
                         reversed_direction=reversed_direction)
                     new_molecule = Molecule(
-                        species=outdata.get('freq_species'),
+                        species=outdata.get('species'),
                         coords=new_coords,
                         charge=outdata.get('charge'),
                         spin_multiplicity=outdata.get('multiplicity'))
-                    if msc.are_equal(old_molecule, new_molecule):
+                    if msc.are_equal(old_molecule, new_molecule) or ignore_connectivity:
                         structure_successfully_perturbed = True
                         break
-
                 if not structure_successfully_perturbed:
                     raise Exception(
                         "Unable to perturb coordinates to remove negative frequency without changing the bonding structure"
