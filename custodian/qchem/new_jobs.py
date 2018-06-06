@@ -17,7 +17,7 @@ from pymatgen.io.qchem_io.outputs import QCOutput
 from custodian.custodian import Job
 from pymatgen.analysis.molecule_structure_comparator import MoleculeStructureComparator
 
-__author__ = "Samuel Blau, Brandon Woods, Shyam Dwaraknath"
+__author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath"
 __copyright__ = "Copyright 2018, The Materials Project"
 __version__ = "0.1"
 __maintainer__ = "Samuel Blau"
