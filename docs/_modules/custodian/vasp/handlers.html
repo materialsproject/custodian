@@ -6,10 +6,10 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian.vasp.handlers &#8212; custodian 2018.3.10 documentation</title>
+    <title>custodian.vasp.handlers &#8212; custodian 2018.6.11 documentation</title>
     <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
@@ -38,7 +38,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2018.3.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2018.6.11 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -195,8 +195,8 @@
                                 <span class="c1"># e-density (brmix error)</span>
                                 <span class="k">if</span> <span class="n">err</span> <span class="o">==</span> <span class="s2">&quot;brmix&quot;</span> <span class="ow">and</span> <span class="s1">&#39;NELECT&#39;</span> <span class="ow">in</span> <span class="n">incar</span><span class="p">:</span>
                                     <span class="k">continue</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">err</span><span class="p">)</span></div>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="VaspErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">backup</span><span class="p">(</span><span class="n">VASP_BACKUP_FILES</span> <span class="o">|</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">})</span>
@@ -452,8 +452,8 @@
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                             <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;SYMPREC&quot;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">}}})</span>
 
-        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span></div></div>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">),</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">),</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="LrfCommutatorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.LrfCommutatorHandler">[docs]</a><span class="k">class</span> <span class="nc">LrfCommutatorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
@@ -491,8 +491,8 @@
                 <span class="k">for</span> <span class="n">err</span><span class="p">,</span> <span class="n">msgs</span> <span class="ow">in</span> <span class="n">LrfCommutatorHandler</span><span class="o">.</span><span class="n">error_msgs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">msgs</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">err</span><span class="p">)</span></div>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="LrfCommutatorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.LrfCommutatorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">backup</span><span class="p">(</span><span class="n">VASP_BACKUP_FILES</span> <span class="o">|</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">})</span>
@@ -506,8 +506,8 @@
                     <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                                     <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;LPEAD&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}}})</span>
 
-        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span></div></div>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">),</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">),</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="StdErrHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.StdErrHandler">[docs]</a><span class="k">class</span> <span class="nc">StdErrHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
@@ -547,8 +547,8 @@
                 <span class="k">for</span> <span class="n">err</span><span class="p">,</span> <span class="n">msgs</span> <span class="ow">in</span> <span class="n">StdErrHandler</span><span class="o">.</span><span class="n">error_msgs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">msgs</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">err</span><span class="p">)</span></div>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="StdErrHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.StdErrHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">backup</span><span class="p">(</span><span class="n">VASP_BACKUP_FILES</span> <span class="o">|</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">})</span>
@@ -571,8 +571,8 @@
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;KPAR&quot;</span><span class="p">:</span> <span class="n">reduced_kpar</span><span class="p">}}})</span>
 
-        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span></div></div>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">),</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">),</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="AliasingErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.AliasingErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">AliasingErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
@@ -618,8 +618,8 @@
                             <span class="c1"># density (brmix error)</span>
                             <span class="k">if</span> <span class="n">err</span> <span class="o">==</span> <span class="s2">&quot;brmix&quot;</span> <span class="ow">and</span> <span class="s1">&#39;NELECT&#39;</span> <span class="ow">in</span> <span class="n">incar</span><span class="p">:</span>
                                 <span class="k">continue</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">err</span><span class="p">)</span></div>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="AliasingErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.AliasingErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">backup</span><span class="p">(</span><span class="n">VASP_BACKUP_FILES</span> <span class="o">|</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">})</span>
@@ -663,8 +663,8 @@
                                  <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span>
                                      <span class="s2">&quot;_file_delete&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="s2">&quot;actual&quot;</span><span class="p">}}}])</span>
 
-        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span></div></div>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">),</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">),</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="DriftErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.DriftErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">DriftErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
@@ -701,8 +701,8 @@
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">curr_drift</span> <span class="o">=</span> <span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;drift&quot;</span><span class="p">,</span> <span class="p">[])[::</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="bp">self</span><span class="o">.</span><span class="n">to_average</span><span class="p">]</span>
-            <span class="n">curr_drift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">curr_drift</span><span class="p">])</span></div>
-            <span class="k">return</span> <span class="n">curr_drift</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_drift</span>
+            <span class="n">curr_drift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">curr_drift</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">curr_drift</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_drift</span></div>
 
 <div class="viewcode-block" id="DriftErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.DriftErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">backup</span><span class="p">(</span><span class="n">VASP_BACKUP_FILES</span><span class="p">)</span>
@@ -734,8 +734,8 @@
 
         <span class="n">curr_drift</span> <span class="o">=</span> <span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;drift&quot;</span><span class="p">,</span> <span class="p">[])[::</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="bp">self</span><span class="o">.</span><span class="n">to_average</span><span class="p">]</span>
         <span class="n">curr_drift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">curr_drift</span><span class="p">])</span>
-        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span></div></div>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="s2">&quot;Excessive drift </span><span class="si">{}</span><span class="s2"> &gt; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">curr_drift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_drift</span><span class="p">),</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="s2">&quot;Excessive drift </span><span class="si">{}</span><span class="s2"> &gt; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">curr_drift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_drift</span><span class="p">),</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="MeshSymmetryErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.MeshSymmetryErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">MeshSymmetryErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
@@ -785,8 +785,8 @@
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">l</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                 <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="kc">True</span></div>
-        <span class="k">return</span> <span class="kc">False</span>
+                    <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="MeshSymmetryErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.MeshSymmetryErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">backup</span><span class="p">(</span><span class="n">VASP_BACKUP_FILES</span> <span class="o">|</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">})</span>
@@ -797,8 +797,8 @@
             <span class="n">m</span> <span class="o">+=</span> <span class="n">m</span> <span class="o">%</span> <span class="mi">2</span>
         <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;kpoints&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="n">m</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">]}}}]</span>
-        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span></div></div>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mesh_symmetry&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mesh_symmetry&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="UnconvergedErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.UnconvergedErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">UnconvergedErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
@@ -823,8 +823,8 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">converged</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">pass</span></div>
-        <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="UnconvergedErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.UnconvergedErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">backup</span><span class="p">(</span><span class="n">VASP_BACKUP_FILES</span><span class="p">)</span>
@@ -851,8 +851,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">converged_ionic</span><span class="p">:</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                             <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;IBRION&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}})</span>
-        <span class="n">VaspModder</span><span class="p">()</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span></div></div>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Unconverged&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+        <span class="n">VaspModder</span><span class="p">()</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Unconverged&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="MaxForceErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.MaxForceErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">MaxForceErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
@@ -884,8 +884,8 @@
             <span class="k">if</span> <span class="n">max_force</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_force_threshold</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">converged</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">pass</span></div>
-        <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="MaxForceErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.MaxForceErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">backup</span><span class="p">(</span><span class="n">VASP_BACKUP_FILES</span> <span class="o">|</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">})</span>
@@ -897,8 +897,8 @@
                    <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;EDIFFG&quot;</span><span class="p">:</span> <span class="n">ediffg</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">}}}]</span>
         <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
-</div></div>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;MaxForce&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;MaxForce&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="PotimErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">PotimErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
@@ -934,8 +934,8 @@
             <span class="n">max_dE</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">s</span><span class="p">[</span><span class="s1">&#39;dE&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">oszicar</span><span class="o">.</span><span class="n">ionic_steps</span><span class="p">[</span><span class="mi">1</span><span class="p">:]])</span> <span class="o">/</span> <span class="n">n</span>
             <span class="k">if</span> <span class="n">max_dE</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">dE_threshold</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">except</span><span class="p">:</span></div>
-            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="PotimErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">backup</span><span class="p">(</span><span class="n">VASP_BACKUP_FILES</span><span class="p">)</span>
@@ -950,8 +950,8 @@
             <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                         <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;POTIM&quot;</span><span class="p">:</span> <span class="n">potim</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">}}}]</span>
 
-        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span></div></div>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POTIM&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+        <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POTIM&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="FrozenJobErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.FrozenJobErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">FrozenJobErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
@@ -980,8 +980,8 @@
 
 <div class="viewcode-block" id="FrozenJobErrorHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.FrozenJobErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">st</span><span class="o">.</span><span class="n">st_mtime</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">:</span></div>
-            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">st</span><span class="o">.</span><span class="n">st_mtime</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="FrozenJobErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.FrozenJobErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">backup</span><span class="p">(</span><span class="n">VASP_BACKUP_FILES</span> <span class="o">|</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">})</span>
@@ -993,8 +993,8 @@
                             <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Normal&quot;</span><span class="p">}}})</span>
 
         <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
-</div></div>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Frozen job&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Frozen job&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="NonConvergingErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.NonConvergingErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">NonConvergingErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
@@ -1033,8 +1033,8 @@
                 <span class="k">return</span> <span class="nb">all</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">==</span> <span class="n">nelm</span>
                             <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">esteps</span><span class="p">[</span><span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nionic_steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">pass</span></div>
-        <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="NonConvergingErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.NonConvergingErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># if change_algo is True, change ALGO = Fast to Normal if ALGO is</span>
@@ -1072,8 +1072,8 @@
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Non-converging job&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 
         <span class="c1"># Unfixable error. Just return None for actions.</span>
-        <span class="k">else</span><span class="p">:</span></div></div>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Non-converging job&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Non-converging job&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="WalltimeHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.WalltimeHandler">[docs]</a><span class="k">class</span> <span class="nc">WalltimeHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
@@ -1167,8 +1167,8 @@
             <span class="n">time_left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wall_time</span> <span class="o">-</span> <span class="n">total_secs</span>
             <span class="k">if</span> <span class="n">time_left</span> <span class="o">&lt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">time_per_step</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer_time</span><span class="p">):</span>
                 <span class="k">return</span> <span class="kc">True</span>
-</div>
-        <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="WalltimeHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.WalltimeHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -1180,8 +1180,8 @@
 
         <span class="n">m</span> <span class="o">=</span> <span class="n">Modder</span><span class="p">(</span><span class="n">actions</span><span class="o">=</span><span class="p">[</span><span class="n">FileActions</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
-            <span class="n">m</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="s2">&quot;file&quot;</span><span class="p">])</span></div></div>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Walltime reached&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="s2">&quot;file&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Walltime reached&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span></div></div>
 
 
 <span class="nd">@deprecated</span><span class="p">(</span><span class="n">replacement</span><span class="o">=</span><span class="n">WalltimeHandler</span><span class="p">)</span>
@@ -1223,8 +1223,8 @@
         <span class="n">run_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span>
         <span class="n">total_secs</span> <span class="o">=</span> <span class="n">run_time</span><span class="o">.</span><span class="n">seconds</span> <span class="o">+</span> <span class="n">run_time</span><span class="o">.</span><span class="n">days</span> <span class="o">*</span> <span class="mi">3600</span> <span class="o">*</span> <span class="mi">24</span>
         <span class="k">if</span> <span class="n">total_secs</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span></div>
-        <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="CheckpointHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.CheckpointHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">content</span> <span class="o">=</span> <span class="s2">&quot;LSTOP = .TRUE.&quot;</span>
@@ -1244,11 +1244,11 @@
 
         <span class="c1"># Reset the clock.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
-</div>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Checkpoint reached&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></div>
-        <span class="k">return</span> <span class="s2">&quot;CheckpointHandler with interval </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Checkpoint reached&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;CheckpointHandler with interval </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span></div>
 
 
 <div class="viewcode-block" id="StoppedRunHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.StoppedRunHandler">[docs]</a><span class="k">class</span> <span class="nc">StoppedRunHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
@@ -1271,8 +1271,8 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
-<div class="viewcode-block" id="StoppedRunHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.StoppedRunHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></div>
-        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;chkpt.yaml&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="StoppedRunHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.StoppedRunHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;chkpt.yaml&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="StoppedRunHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.StoppedRunHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">d</span> <span class="o">=</span> <span class="n">loadfn</span><span class="p">(</span><span class="s2">&quot;chkpt.yaml&quot;</span><span class="p">)</span>
@@ -1289,8 +1289,8 @@
 
         <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;Checkpoint&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">})</span>
 
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Stopped run.&quot;</span><span class="p">],</span></div></div>
-                <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Stopped run.&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="PositiveEnergyErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PositiveEnergyErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">PositiveEnergyErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
@@ -1316,8 +1316,8 @@
             <span class="k">if</span> <span class="n">oszicar</span><span class="o">.</span><span class="n">final_energy</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">pass</span></div>
-        <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="PositiveEnergyErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PositiveEnergyErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># change ALGO = Fast to Normal if ALGO is !Normal</span>
@@ -1330,8 +1330,8 @@
             <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Positive energy&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
         <span class="c1"># Unfixable error. Just return None for actions.</span>
-        <span class="k">else</span><span class="p">:</span></div></div>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Positive energy&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Positive energy&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span></div></div>
 </pre></div>
 
           </div>

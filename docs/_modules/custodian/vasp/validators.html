@@ -6,10 +6,10 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian.vasp.validators &#8212; custodian 2018.3.10 documentation</title>
+    <title>custodian.vasp.validators &#8212; custodian 2018.6.11 documentation</title>
     <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
@@ -38,7 +38,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2018.3.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2018.6.11 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -69,8 +69,8 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">Vasprun</span><span class="p">(</span><span class="s2">&quot;vasprun.xml&quot;</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span></div></div>
-        <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div></div>
 
 
 <div class="viewcode-block" id="VaspFilesValidator"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VaspFilesValidator">[docs]</a><span class="k">class</span> <span class="nc">VaspFilesValidator</span><span class="p">(</span><span class="n">Validator</span><span class="p">):</span>
@@ -85,8 +85,8 @@
 <div class="viewcode-block" id="VaspFilesValidator.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VaspFilesValidator.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">vfile</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;OSZICAR&quot;</span><span class="p">,</span> <span class="s2">&quot;OUTCAR&quot;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">vfile</span><span class="p">):</span>
-                <span class="k">return</span> <span class="kc">True</span></div></div>
-        <span class="k">return</span> <span class="kc">False</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div></div>
 
 
 <div class="viewcode-block" id="VaspNpTMDValidator"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VaspNpTMDValidator">[docs]</a><span class="k">class</span> <span class="nc">VaspNpTMDValidator</span><span class="p">(</span><span class="n">Validator</span><span class="p">):</span>
@@ -109,8 +109,8 @@
         <span class="n">outcar</span><span class="o">.</span><span class="n">read_pattern</span><span class="p">(</span><span class="n">patterns</span><span class="o">=</span><span class="n">patterns</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;MDALGO&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="p">[[</span><span class="s1">&#39;3&#39;</span><span class="p">]]:</span>
             <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">else</span><span class="p">:</span></div></div>
-            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span></div></div>
 </pre></div>
 
           </div>

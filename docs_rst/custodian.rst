@@ -8,6 +8,7 @@ Subpackages
 
     custodian.ansible
     custodian.cli
+    custodian.feff
     custodian.nwchem
     custodian.qchem
     custodian.vasp
