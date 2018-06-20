@@ -1,0 +1,352 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>custodian.qchem.new_jobs &#8212; custodian 2018.6.11 documentation</title>
+    <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="../../../_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39574369-1']);
+  _gaq.push(['_trackPageview']);
+</script>
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2018.6.11 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for custodian.qchem.new_jobs</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding: utf-8</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="c1"># New QChem job module</span>
+
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="k">import</span> <span class="n">Molecule</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.qchem_io.inputs</span> <span class="k">import</span> <span class="n">QCInput</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.qchem_io.outputs</span> <span class="k">import</span> <span class="n">QCOutput</span>
+<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="k">import</span> <span class="n">Job</span>
+<span class="kn">from</span> <span class="nn">pymatgen.analysis.molecule_structure_comparator</span> <span class="k">import</span> <span class="n">MoleculeStructureComparator</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Samuel Blau, Brandon Woods, Shyam Dwaraknath&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2018, The Materials Project&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.1&quot;</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Samuel Blau&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;samblau1@gmail.com&quot;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Alpha&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;3/20/18&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Xiaohui Qu&quot;</span>
+
+
+<div class="viewcode-block" id="QCJob"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.new_jobs.QCJob">[docs]</a><span class="k">class</span> <span class="nc">QCJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A basic QChem Job.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">qchem_command</span><span class="p">,</span>
+                 <span class="n">multimode</span><span class="o">=</span><span class="s2">&quot;openmp&quot;</span><span class="p">,</span>
+                 <span class="n">input_file</span><span class="o">=</span><span class="s2">&quot;mol.qin&quot;</span><span class="p">,</span>
+                 <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;mol.qout&quot;</span><span class="p">,</span>
+                 <span class="n">max_cores</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+                 <span class="n">qclog_file</span><span class="o">=</span><span class="s2">&quot;mol.qclog&quot;</span><span class="p">,</span>
+                 <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                 <span class="n">scratch_dir</span><span class="o">=</span><span class="s2">&quot;/dev/shm/qcscratch/&quot;</span><span class="p">,</span>
+                 <span class="n">save_scratch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">save_name</span><span class="o">=</span><span class="s2">&quot;default_save_name&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            qchem_command (str): Command to run QChem.</span>
+<span class="sd">            multimode (str): Parallelization scheme, either openmp or mpi.</span>
+<span class="sd">            input_file (str): Name of the QChem input file.</span>
+<span class="sd">            output_file (str): Name of the QChem output file.</span>
+<span class="sd">            max_cores (int): Maximum number of cores to parallelize over.</span>
+<span class="sd">                Defaults to 32.</span>
+<span class="sd">            qclog_file (str): Name of the file to redirect the standard output</span>
+<span class="sd">                to. None means not to record the standard output. Defaults to</span>
+<span class="sd">                None.</span>
+<span class="sd">            suffix (str): String to append to the file in postprocess.</span>
+<span class="sd">            scratch_dir (str): QCSCRATCH directory. Defaults to &quot;/dev/shm/qcscratch/&quot;.</span>
+<span class="sd">            save_scratch (bool): Whether to save scratch directory contents.</span>
+<span class="sd">                Defaults to False.</span>
+<span class="sd">            save_name (str): Name of the saved scratch directory. Defaults to</span>
+<span class="sd">                to &quot;default_save_name&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qchem_command</span> <span class="o">=</span> <span class="n">qchem_command</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multimode</span> <span class="o">=</span> <span class="n">multimode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_file</span> <span class="o">=</span> <span class="n">input_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span> <span class="o">=</span> <span class="n">output_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_cores</span> <span class="o">=</span> <span class="n">max_cores</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qclog_file</span> <span class="o">=</span> <span class="n">qclog_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span> <span class="o">=</span> <span class="n">suffix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scratch_dir</span> <span class="o">=</span> <span class="n">scratch_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_scratch</span> <span class="o">=</span> <span class="n">save_scratch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_name</span> <span class="o">=</span> <span class="n">save_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">current_command</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">multimode_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_scratch</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s2">&quot;-save&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_cores</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">save_name</span>
+            <span class="p">]</span>
+            <span class="n">multimode_index</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_cores</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span>
+            <span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multimode</span> <span class="o">==</span> <span class="s1">&#39;openmp&#39;</span><span class="p">:</span>
+            <span class="n">command</span><span class="p">[</span><span class="n">multimode_index</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-nt&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">multimode</span> <span class="o">==</span> <span class="s1">&#39;mpi&#39;</span><span class="p">:</span>
+            <span class="n">command</span><span class="p">[</span><span class="n">multimode_index</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-np&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: Multimode should only be set to openmp or mpi&quot;</span><span class="p">)</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qchem_command</span> <span class="o">+</span> <span class="n">command</span>
+        <span class="k">return</span> <span class="n">command</span>
+
+<div class="viewcode-block" id="QCJob.setup"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.new_jobs.QCJob.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">putenv</span><span class="p">(</span><span class="s2">&quot;QCSCRATCH&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scratch_dir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multimode</span> <span class="o">==</span> <span class="s1">&#39;openmp&#39;</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">putenv</span><span class="p">(</span><span class="s1">&#39;QCTHREADS&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_cores</span><span class="p">))</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">putenv</span><span class="p">(</span><span class="s1">&#39;OMP_NUM_THREADS&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_cores</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="QCJob.postprocess"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.new_jobs.QCJob.postprocess">[docs]</a>    <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_scratch</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scratch_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_name</span><span class="p">),</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_name</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_file</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="p">)</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="p">)</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qclog_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qclog_file</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="QCJob.run"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.new_jobs.QCJob.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform the actual QChem run.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (subprocess.Popen) Used for monitoring.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">qclog</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qclog_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_command</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">qclog</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">p</span></div>
+
+<div class="viewcode-block" id="QCJob.opt_with_frequency_flattener"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.new_jobs.QCJob.opt_with_frequency_flattener">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">opt_with_frequency_flattener</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
+                                     <span class="n">qchem_command</span><span class="p">,</span>
+                                     <span class="n">multimode</span><span class="o">=</span><span class="s2">&quot;openmp&quot;</span><span class="p">,</span>
+                                     <span class="n">input_file</span><span class="o">=</span><span class="s2">&quot;mol.qin&quot;</span><span class="p">,</span>
+                                     <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;mol.qout&quot;</span><span class="p">,</span>
+                                     <span class="n">qclog_file</span><span class="o">=</span><span class="s2">&quot;mol.qclog&quot;</span><span class="p">,</span>
+                                     <span class="n">max_iterations</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                     <span class="n">max_molecule_perturb_scale</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+                                     <span class="n">reversed_direction</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                     <span class="n">ignore_connectivity</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                     <span class="o">**</span><span class="n">QCJob_kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Optimize a structure and calculate vibrational frequencies to check if the</span>
+<span class="sd">        structure is in a true minima. If a frequency is negative, iteratively</span>
+<span class="sd">        perturbe the geometry, optimize, and recalculate frequencies until all are</span>
+<span class="sd">        positive, aka a true minima has been found.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            qchem_command (str): Command to run QChem.</span>
+<span class="sd">            multimode (str): Parallelization scheme, either openmp or mpi.</span>
+<span class="sd">            input_file (str): Name of the QChem input file.</span>
+<span class="sd">            output_file (str): Name of the QChem output file</span>
+<span class="sd">            max_iterations (int): Number of perturbation -&gt; optimization -&gt; frequency</span>
+<span class="sd">                iterations to perform. Defaults to 10.</span>
+<span class="sd">            max_molecule_perturb_scale (float): The maximum scaled perturbation that</span>
+<span class="sd">                can be applied to the molecule. Defaults to 0.3.</span>
+<span class="sd">            reversed_direction (bool): Whether to reverse the direction of the</span>
+<span class="sd">                vibrational frequency vectors. Defaults to False.</span>
+<span class="sd">            ignore_connectivity (bool): Whether to ignore differences in connectivity</span>
+<span class="sd">                introduced by structural perturbation. Defaults to False.</span>
+<span class="sd">            **QCJob_kwargs: Passthrough kwargs to QCJob. See</span>
+<span class="sd">                :class:`custodian.qchem.new_jobs.QCJob`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">min_molecule_perturb_scale</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="n">scale_grid</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="n">perturb_scale_grid</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">max_molecule_perturb_scale</span> <span class="o">-</span> <span class="n">min_molecule_perturb_scale</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="n">scale_grid</span>
+        <span class="n">msc</span> <span class="o">=</span> <span class="n">MoleculeStructureComparator</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">input_file</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s1">&#39;Input file must be present!&#39;</span><span class="p">)</span>
+        <span class="n">orig_opt_input</span> <span class="o">=</span> <span class="n">QCInput</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
+        <span class="n">orig_opt_rem</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">orig_opt_input</span><span class="o">.</span><span class="n">rem</span><span class="p">)</span>
+        <span class="n">orig_freq_rem</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">orig_opt_input</span><span class="o">.</span><span class="n">rem</span><span class="p">)</span>
+        <span class="n">orig_freq_rem</span><span class="p">[</span><span class="s2">&quot;job_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;freq&quot;</span>
+
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_iterations</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="p">(</span><span class="n">QCJob</span><span class="p">(</span>
+                <span class="n">qchem_command</span><span class="o">=</span><span class="n">qchem_command</span><span class="p">,</span>
+                <span class="n">multimode</span><span class="o">=</span><span class="n">multimode</span><span class="p">,</span>
+                <span class="n">input_file</span><span class="o">=</span><span class="n">input_file</span><span class="p">,</span>
+                <span class="n">output_file</span><span class="o">=</span><span class="n">output_file</span><span class="p">,</span>
+                <span class="n">qclog_file</span><span class="o">=</span><span class="n">qclog_file</span><span class="p">,</span>
+                <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.opt_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ii</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">QCJob_kwargs</span><span class="p">))</span>
+            <span class="n">opt_outdata</span> <span class="o">=</span> <span class="n">QCOutput</span><span class="p">(</span><span class="n">output_file</span> <span class="o">+</span> <span class="s2">&quot;.opt_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ii</span><span class="p">))</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">freq_QCInput</span> <span class="o">=</span> <span class="n">QCInput</span><span class="p">(</span>
+                <span class="n">molecule</span><span class="o">=</span><span class="n">opt_outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;molecule_from_optimized_geometry&quot;</span><span class="p">),</span>
+                <span class="n">rem</span><span class="o">=</span><span class="n">orig_freq_rem</span><span class="p">,</span>
+                <span class="n">opt</span><span class="o">=</span><span class="n">orig_opt_input</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span>
+                <span class="n">pcm</span><span class="o">=</span><span class="n">orig_opt_input</span><span class="o">.</span><span class="n">pcm</span><span class="p">,</span>
+                <span class="n">solvent</span><span class="o">=</span><span class="n">orig_opt_input</span><span class="o">.</span><span class="n">solvent</span><span class="p">)</span>
+            <span class="n">freq_QCInput</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="p">(</span><span class="n">QCJob</span><span class="p">(</span>
+                <span class="n">qchem_command</span><span class="o">=</span><span class="n">qchem_command</span><span class="p">,</span>
+                <span class="n">multimode</span><span class="o">=</span><span class="n">multimode</span><span class="p">,</span>
+                <span class="n">input_file</span><span class="o">=</span><span class="n">input_file</span><span class="p">,</span>
+                <span class="n">output_file</span><span class="o">=</span><span class="n">output_file</span><span class="p">,</span>
+                <span class="n">qclog_file</span><span class="o">=</span><span class="n">qclog_file</span><span class="p">,</span>
+                <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.freq_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ii</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">QCJob_kwargs</span><span class="p">))</span>
+            <span class="n">outdata</span> <span class="o">=</span> <span class="n">QCOutput</span><span class="p">(</span><span class="n">output_file</span> <span class="o">+</span> <span class="s2">&quot;.freq_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ii</span><span class="p">))</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">errors</span> <span class="o">=</span> <span class="n">outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;errors&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s1">&#39;No errors should be encountered while flattening frequencies!&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;frequencies&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;All frequencies positive!&quot;</span><span class="p">)</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">negative_freq_vecs</span> <span class="o">=</span> <span class="n">outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;frequency_mode_vectors&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">old_coords</span> <span class="o">=</span> <span class="n">outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;initial_geometry&quot;</span><span class="p">)</span>
+                <span class="n">old_molecule</span> <span class="o">=</span> <span class="n">outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;initial_molecule&quot;</span><span class="p">)</span>
+                <span class="n">structure_successfully_perturbed</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="k">for</span> <span class="n">molecule_perturb_scale</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
+                        <span class="n">max_molecule_perturb_scale</span><span class="p">,</span> <span class="n">min_molecule_perturb_scale</span><span class="p">,</span>
+                        <span class="o">-</span><span class="n">perturb_scale_grid</span><span class="p">):</span>
+                    <span class="n">new_coords</span> <span class="o">=</span> <span class="n">perturb_coordinates</span><span class="p">(</span>
+                        <span class="n">old_coords</span><span class="o">=</span><span class="n">old_coords</span><span class="p">,</span>
+                        <span class="n">negative_freq_vecs</span><span class="o">=</span><span class="n">negative_freq_vecs</span><span class="p">,</span>
+                        <span class="n">molecule_perturb_scale</span><span class="o">=</span><span class="n">molecule_perturb_scale</span><span class="p">,</span>
+                        <span class="n">reversed_direction</span><span class="o">=</span><span class="n">reversed_direction</span><span class="p">)</span>
+                    <span class="n">new_molecule</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span>
+                        <span class="n">species</span><span class="o">=</span><span class="n">outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;species&#39;</span><span class="p">),</span>
+                        <span class="n">coords</span><span class="o">=</span><span class="n">new_coords</span><span class="p">,</span>
+                        <span class="n">charge</span><span class="o">=</span><span class="n">outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;charge&#39;</span><span class="p">),</span>
+                        <span class="n">spin_multiplicity</span><span class="o">=</span><span class="n">outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;multiplicity&#39;</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">msc</span><span class="o">.</span><span class="n">are_equal</span><span class="p">(</span><span class="n">old_molecule</span><span class="p">,</span> <span class="n">new_molecule</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ignore_connectivity</span><span class="p">:</span>
+                        <span class="n">structure_successfully_perturbed</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">break</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">structure_successfully_perturbed</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Unable to perturb coordinates to remove negative frequency without changing the bonding structure&quot;</span>
+                    <span class="p">)</span>
+
+                <span class="n">new_opt_QCInput</span> <span class="o">=</span> <span class="n">QCInput</span><span class="p">(</span>
+                    <span class="n">molecule</span><span class="o">=</span><span class="n">new_molecule</span><span class="p">,</span>
+                    <span class="n">rem</span><span class="o">=</span><span class="n">orig_opt_rem</span><span class="p">,</span>
+                    <span class="n">opt</span><span class="o">=</span><span class="n">orig_opt_input</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span>
+                    <span class="n">pcm</span><span class="o">=</span><span class="n">orig_opt_input</span><span class="o">.</span><span class="n">pcm</span><span class="p">,</span>
+                    <span class="n">solvent</span><span class="o">=</span><span class="n">orig_opt_input</span><span class="o">.</span><span class="n">solvent</span><span class="p">)</span>
+                <span class="n">new_opt_QCInput</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="perturb_coordinates"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.new_jobs.perturb_coordinates">[docs]</a><span class="k">def</span> <span class="nf">perturb_coordinates</span><span class="p">(</span><span class="n">old_coords</span><span class="p">,</span> <span class="n">negative_freq_vecs</span><span class="p">,</span> <span class="n">molecule_perturb_scale</span><span class="p">,</span>
+                        <span class="n">reversed_direction</span><span class="p">):</span>
+    <span class="n">max_dis</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">vec</span><span class="p">]))</span> <span class="k">for</span> <span class="n">vec</span> <span class="ow">in</span> <span class="n">negative_freq_vecs</span><span class="p">])</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">molecule_perturb_scale</span> <span class="o">/</span> <span class="n">max_dis</span>
+    <span class="n">normalized_vecs</span> <span class="o">=</span> <span class="p">[[</span><span class="n">x</span> <span class="o">*</span> <span class="n">scale</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">vec</span><span class="p">]</span> <span class="k">for</span> <span class="n">vec</span> <span class="ow">in</span> <span class="n">negative_freq_vecs</span><span class="p">]</span>
+    <span class="n">direction</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">if</span> <span class="n">reversed_direction</span><span class="p">:</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+    <span class="k">return</span> <span class="p">[[</span><span class="n">c</span> <span class="o">+</span> <span class="n">v</span> <span class="o">*</span> <span class="n">direction</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">vec</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">coord</span><span class="p">,</span> <span class="n">vec</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">old_coords</span><span class="p">,</span> <span class="n">normalized_vecs</span><span class="p">)]</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+      &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+<script type="text/javascript">
+  (function() {
+    var ga = document.createElement('script');
+    ga.src = ('https:' == document.location.protocol ?
+              'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    ga.setAttribute('async', 'true');
+    document.documentElement.firstChild.appendChild(ga);
+  })();
+</script>
+</div>
+
+  </body>
+</html>
