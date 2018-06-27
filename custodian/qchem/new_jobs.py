@@ -170,6 +170,7 @@ class QCJob(Job):
         orig_opt_rem = copy.deepcopy(orig_opt_input.rem)
         orig_freq_rem = copy.deepcopy(orig_opt_input.rem)
         orig_freq_rem["job_type"] = "freq"
+        orig_freq_rem["doraman"] = "true"
 
         for ii in range(max_iterations):
             yield (QCJob(
