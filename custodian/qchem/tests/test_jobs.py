@@ -32,7 +32,7 @@ cwd = os.getcwd()
 class QCJobTest(TestCase):
 
     def test_defaults(self):
-        with patch("custodian.qchem.new_jobs.os.putenv") as putenv_patch:
+        with patch("custodian.qchem.jobs.os.putenv") as putenv_patch:
             myjob = QCJob(qchem_command="qchem")
             self.assertEqual(myjob.current_command, ["qchem", "-nt", "32", "mol.qin", "mol.qout"])
             myjob.setup()
@@ -44,7 +44,7 @@ class QCJobTest(TestCase):
             self.assertEqual(putenv_patch.call_args_list[2][0][1], "32")
 
     def test_not_defaults(self):
-        with patch("custodian.qchem.new_jobs.os.putenv") as putenv_patch:
+        with patch("custodian.qchem.jobs.os.putenv") as putenv_patch:
             myjob = QCJob(qchem_command="qchem -slurm", multimode="mpi", input_file="different.qin", output_file="not_default.qout", max_cores=12, scratch_dir="/not/default/scratch/")
             self.assertEqual(myjob.current_command, ["qchem", "-slurm", "-np", "12", "different.qin", "not_default.qout"])
             myjob.setup()
