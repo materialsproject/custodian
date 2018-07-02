@@ -18,7 +18,7 @@ import os
 import shutil
 import copy
 import subprocess
-from pymatgen.io.qchem import QcInput, QcOutput
+from pymatgen.io.qchem_deprecated import QcInput, QcOutput
 from custodian.custodian import Job, gzip_dir
 
 __author__ = "Xiaohui Qu"

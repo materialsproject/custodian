@@ -18,7 +18,7 @@ import os
 import re
 import tarfile
 from pymatgen.core.structure import Molecule
-from pymatgen.io.qchem import QcOutput, QcInput, QcTask
+from pymatgen.io.qchem_deprecated import QcOutput, QcInput, QcTask
 from custodian.custodian import ErrorHandler
 
 __author__ = "Xiaohui Qu"
