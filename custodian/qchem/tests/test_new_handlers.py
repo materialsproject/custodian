@@ -8,7 +8,7 @@ from unittest import TestCase
 import unittest
 
 from custodian.qchem.new_handlers import QChemErrorHandler
-from pymatgen.io.qchem_io.inputs import QCInput
+from pymatgen.io.qchem.inputs import QCInput
 
 __author__ = "Samuel Blau, Brandon Woods, Shyam Dwaraknath"
 __copyright__ = "Copyright 2018, The Materials Project"

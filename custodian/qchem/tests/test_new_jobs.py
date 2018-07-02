@@ -9,8 +9,8 @@ from unittest.mock import patch
 import unittest
 
 from custodian.qchem.new_jobs import QCJob
-from pymatgen.io.qchem_io.inputs import QCInput
-from pymatgen.io.qchem_io.outputs import QCOutput
+from pymatgen.io.qchem.inputs import QCInput
+from pymatgen.io.qchem.outputs import QCOutput
 
 __author__ = "Samuel Blau"
 __copyright__ = "Copyright 2018, The Materials Project"

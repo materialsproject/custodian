@@ -12,8 +12,8 @@ import copy
 import subprocess
 import numpy as np
 from pymatgen.core import Molecule
-from pymatgen.io.qchem_io.inputs import QCInput
-from pymatgen.io.qchem_io.outputs import QCOutput
+from pymatgen.io.qchem.inputs import QCInput
+from pymatgen.io.qchem.outputs import QCOutput
 from custodian.custodian import Job
 from pymatgen.analysis.molecule_structure_comparator import MoleculeStructureComparator
 
