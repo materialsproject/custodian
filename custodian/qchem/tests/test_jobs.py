@@ -8,7 +8,7 @@ from unittest import TestCase
 from unittest.mock import patch
 import unittest
 
-from custodian.qchem.new_jobs import QCJob
+from custodian.qchem.jobs import QCJob
 from pymatgen.io.qchem.inputs import QCInput
 from pymatgen.io.qchem.outputs import QCOutput
 
