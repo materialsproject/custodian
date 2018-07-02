@@ -333,7 +333,7 @@ class QChemErrorHandler(ErrorHandler):
                 self.set_last_input_geom(od["molecules"][-1])
             else:
                 assert od["jobtype"] == "aimd"
-                from pymatgen.io.qchem import QcNucVeloc
+                from pymatgen.io.qchem_deprecated import QcNucVeloc
                 from pymatgen.io.xyz import XYZ
                 scr_dir = od["scratch_dir"]
                 qcnv_filepath = os.path.join(scr_dir, "AIMD", "NucVeloc")
