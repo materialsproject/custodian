@@ -20,8 +20,8 @@ from pkg_resources import parse_version
 import pymatgen
 import copy
 
-from custodian.qchem.handlers import QChemErrorHandler
-from custodian.qchem.jobs import QchemJob
+from custodian.qchem.deprecated_handlers import QChemErrorHandler
+from custodian.qchem.deprecated_jobs import QchemJob
 
 
 __author__ = "Xiaohui Qu"
