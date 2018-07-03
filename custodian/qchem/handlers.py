@@ -71,11 +71,13 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.rem["max_scf_cycles"] = self.scf_max_cycles
                 actions.append({"max_scf_cycles": self.scf_max_cycles})
             elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
-                self.qcinp.rem["scf_algorithm"] = "rca_diis"
-                actions.append({"scf_algorithm": "rca_diis"})
-                if self.qcinp.rem.get("gen_scfman"):
-                    self.qcinp.rem["gen_scfman"] = False
-                    actions.append({"gen_scfman": False})
+                # self.qcinp.rem["scf_algorithm"] = "rca_diis"
+                # actions.append({"scf_algorithm": "rca_diis"})
+                self.qcinp.rem["scf_algorithm"] = "gdm"
+                actions.append({"scf_algorithm": "gdm"})
+                # if self.qcinp.rem.get("gen_scfman"):
+                #     self.qcinp.rem["gen_scfman"] = False
+                #     actions.append({"gen_scfman": False})
             else:
                 print(
                     "More advanced changes may impact the SCF result. Use the SCF error handler"
