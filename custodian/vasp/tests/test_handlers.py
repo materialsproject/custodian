@@ -19,13 +19,14 @@ import os
 import glob
 import shutil
 import datetime
+import numpy as np
 
 from custodian.vasp.handlers import VaspErrorHandler, \
     UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler, \
     MaxForceErrorHandler, PositiveEnergyErrorHandler, PotimErrorHandler, \
     FrozenJobErrorHandler, AliasingErrorHandler, StdErrHandler, LrfCommutatorHandler, \
     DriftErrorHandler
-from pymatgen.io.vasp import Incar, Poscar, Structure, Kpoints, VaspInput
+from pymatgen.io.vasp import Incar, Poscar, Structure, Kpoints, VaspInput, Vasprun
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
