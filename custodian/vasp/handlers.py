@@ -790,7 +790,7 @@ class UnconvergedErrorHandler(ErrorHandler):
                                 "NELMDL": -6,
                                 "BMIX": 0.001,
                                 "AMIX_MAG": 0.8,
-                                "BMIX_MAG": 0.001} 
+                                "BMIX_MAG": 0.001}
 
             if all([v.incar.get(k,"") == val for k,val in new_settings.items()]):
                 return {"errors": ["Unconverged"], "actions": None}
@@ -1114,7 +1114,7 @@ class WalltimeHandler(ErrorHandler):
                                     postprocess=float)
                 time_per_step = np.max(outcar.data.get('timings')) if outcar.data.get("timings",[]) else 0
 
-            # If the remaining time is less than average time for 3 
+            # If the remaining time is less than average time for 3
             # steps or buffer_time.
             time_left = self.wall_time - total_secs
             if time_left < max(time_per_step * 3, self.buffer_time):
