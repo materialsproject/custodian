@@ -66,15 +66,16 @@ class QChemErrorHandler(ErrorHandler):
             # increase to that value and rerun. If already set, check if
             # scf_algorithm is unset or set to DIIS, in which case set to RCA-DIIS.
             # Otherwise, tell user to call SCF error handler and do nothing.
-            if self.qcinp.rem.get("max_scf_cycles") != str(
+            if str(self.qcinp.rem.get("max_scf_cycles")) != str(
                     self.scf_max_cycles):
                 self.qcinp.rem["max_scf_cycles"] = self.scf_max_cycles
                 actions.append({"max_scf_cycles": self.scf_max_cycles})
-            elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
+            # elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
+            elif self.qcinp.rem.get("scf_algorithm", "gdm").lower() == "gdm":
                 # self.qcinp.rem["scf_algorithm"] = "rca_diis"
                 # actions.append({"scf_algorithm": "rca_diis"})
-                self.qcinp.rem["scf_algorithm"] = "gdm"
-                actions.append({"scf_algorithm": "gdm"})
+                self.qcinp.rem["scf_algorithm"] = "diis_gdm"
+                actions.append({"scf_algorithm": "diis_gdm"})
                 # if self.qcinp.rem.get("gen_scfman"):
                 #     self.qcinp.rem["gen_scfman"] = False
                 #     actions.append({"gen_scfman": False})
@@ -86,8 +87,8 @@ class QChemErrorHandler(ErrorHandler):
         elif "out_of_opt_cycles" in self.errors:
             # Check number of opt cycles. If less than geom_max_cycles, increase
             # to that value, set last geom as new starting geom and rerun.
-            if self.qcinp.rem.get(
-                    "geom_opt_max_cycles") != self.geom_max_cycles:
+            if str(self.qcinp.rem.get(
+                    "geom_opt_max_cycles")) != str(self.geom_max_cycles):
                 self.qcinp.rem["geom_opt_max_cycles"] = self.geom_max_cycles
                 actions.append({"geom_max_cycles:": self.scf_max_cycles})
                 if len(self.outdata.get("energy_trajectory")) > 1:
