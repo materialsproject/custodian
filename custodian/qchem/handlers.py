@@ -47,7 +47,6 @@ class QChemErrorHandler(ErrorHandler):
         self.output_file = output_file
         self.scf_max_cycles = scf_max_cycles
         self.geom_max_cycles = geom_max_cycles
-        self.qcinp = QCInput.from_file(self.input_file)
         self.outdata = None
         self.errors = []
 
@@ -60,7 +59,8 @@ class QChemErrorHandler(ErrorHandler):
     def correct(self):
         backup({self.input_file, self.output_file})
         actions = []
-
+        self.qcinp = QCInput.from_file(self.input_file)
+        
         if "SCF_failed_to_converge" in self.errors:
             # Check number of SCF cycles. If not set or less than scf_max_cycles,
             # increase to that value and rerun. If already set, check if
