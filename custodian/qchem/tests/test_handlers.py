@@ -145,10 +145,8 @@ class QChemErrorHandlerTest(TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ['SCF_failed_to_converge'])
-        self.assertEqual(d["actions"], [{"scf_algorithm": "rca_diis"}])
-        self._check_equivalent_inputs("crowd_gradient.qin.1",
-                                      "crowd_gradient.qin.2")
-
+        self.assertEqual(d["actions"], [{"scf_algorithm": "gdm"}])
+        
     def test_out_of_opt_cycles(self):
         shutil.copyfile(
             os.path.join(test_dir, "crowd_gradient.qin.2"),
