@@ -60,7 +60,7 @@ class QChemErrorHandler(ErrorHandler):
         backup({self.input_file, self.output_file})
         actions = []
         self.qcinp = QCInput.from_file(self.input_file)
-        
+
         if "SCF_failed_to_converge" in self.errors:
             # Check number of SCF cycles. If not set or less than scf_max_cycles,
             # increase to that value and rerun. If already set, check if
@@ -164,6 +164,14 @@ class QChemErrorHandler(ErrorHandler):
             # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
             actions.append({"rerun job as-is"})
 
+        elif "read_molecule_error" in self.errors:
+            # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
+            actions.append({"rerun job as-is"})
+
+        elif "never_called_qchem" in self.errors:
+            # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
+            actions.append({"rerun job as-is"})
+            
         elif "unknown_error" in self.errors:
             print("Examine error message by hand.")
             return {"errors": self.errors, "actions": None}

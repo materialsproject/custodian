@@ -1,0 +1,26 @@
+/global/u2/s/sblau/pymatgen/pymatgen/io/cif.py:44: UserWarning: Please install optional dependency pybtex if youwant to extract references from CIF files.
+  warnings.warn("Please install optional dependency pybtex if you"
+DEBUG:launchpad:FW with id: 1652 is unique!
+DEBUG:launchpad:Created/updated Launch with launch_id: 3318
+DEBUG:launchpad:RUNNING FW with id: 1652
+INFO:rocket.launcher:RUNNING fw_id: 1652 in directory: /scratch2/scratchdirs/sblau/fragment_wf/block_2018-07-04-03-30-43-540608/launcher_2018-07-09-03-32-28-071648
+INFO:rocket.launcher:Task started: {{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}}.
+INFO:rocket.launcher:Task completed: {{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}} 
+INFO:rocket.launcher:Task started: {{atomate.qchem.firetasks.run_calc.RunQChemCustodian}}.
+INFO:custodian.custodian:Run started at 2018-07-08 20:33:29.036169 in /scratch2/scratchdirs/sblau/fragment_wf/block_2018-07-04-03-30-43-540608/launcher_2018-07-09-03-32-28-071648.
+INFO:custodian.custodian:Custodian running on Python version 3.6.4 |Anaconda, Inc.| (default, Jan 16 2018, 18:10:19)  [GCC 7.2.0]
+INFO:custodian.custodian:Hostname: nid03124, Cluster: unknown
+INFO:custodian.custodian:Starting job no. 1 (QCJob) attempt no. 1. Total errors and errors in job thus far = 0, 0.
+[0] MPI startup(): ofi fabric is not available and fallback fabric is not exist
+srun: error: nid03124: task 0: Exited with exit code 254
+srun: Terminating job step 9784997.0
+INFO:custodian.custodian:QCJob.run has completed. Checking remaining handlers
+INFO:root:Backing up run to error.1.tar.gz.
+ERROR:custodian.custodian:
+{ 'actions': None,
+  'errors': [ 'unknown_error'],
+  'handler': <custodian.qchem.handlers.QChemErrorHandler object at 0x2aaabd46ad30>}
+ERROR:custodian.custodian:Unrecoverable error for handler: <custodian.qchem.handlers.QChemErrorHandler object at 0x2aaabd46ad30>. Raising RuntimeError
+INFO:custodian.custodian:Logging to custodian.json...
+INFO:custodian.custodian:Run ended at 2018-07-08 20:33:39.461284.
+INFO:custodian.custodian:Run completed. Total time taken = 0:00:10.425115.

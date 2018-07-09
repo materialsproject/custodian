@@ -146,7 +146,7 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ['SCF_failed_to_converge'])
         self.assertEqual(d["actions"], [{"scf_algorithm": "gdm"}])
-        
+
     def test_out_of_opt_cycles(self):
         shutil.copyfile(
             os.path.join(test_dir, "crowd_gradient.qin.2"),
@@ -203,6 +203,38 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ['input_file_error'])
         self.assertEqual(d["actions"], None)
+
+    def test_read_error(self):
+        shutil.copyfile(
+            os.path.join(test_dir, "molecule_read_error/mol.qin"),
+            os.path.join(scr_dir, "mol.qin"))
+        shutil.copyfile(
+            os.path.join(test_dir, "molecule_read_error/mol.qout"),
+            os.path.join(scr_dir, "mol.qout"))
+        h = QChemErrorHandler(
+            input_file="mol.qin", output_file="mol.qout")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ['read_molecule_error'])
+        self.assertEqual(d["actions"], [{"rerun job as-is"}])
+        self._check_equivalent_inputs("mol.qin.last",
+                                      "mol.qin")
+
+    def test_never_called_qchem_error(self):
+        shutil.copyfile(
+            os.path.join(test_dir, "mpi_error/mol.qin"),
+            os.path.join(scr_dir, "mol.qin"))
+        shutil.copyfile(
+            os.path.join(test_dir, "mpi_error/mol.qout"),
+            os.path.join(scr_dir, "mol.qout"))
+        h = QChemErrorHandler(
+            input_file="mol.qin", output_file="mol.qout")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ['never_called_qchem'])
+        self.assertEqual(d["actions"], [{"rerun job as-is"}])
+        self._check_equivalent_inputs("mol.qin.last",
+                                      "mol.qin")
 
     def tearDown(self):
         os.chdir(cwd)
