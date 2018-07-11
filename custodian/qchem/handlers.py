@@ -5,10 +5,13 @@ from __future__ import unicode_literals, division
 # This module implements new error handlers for QChem runs.
 
 import os
+from monty.serialization import loadfn, dumpfn
 from pymatgen.io.qchem.inputs import QCInput
 from pymatgen.io.qchem.outputs import QCOutput
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
+from pymatgen.analysis.graphs import MoleculeGraph
+import networkx as nx
 
 __author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath"
 __copyright__ = "Copyright 2018, The Materials Project"
@@ -54,7 +57,13 @@ class QChemErrorHandler(ErrorHandler):
         # Checks output file for errors.
         self.outdata = QCOutput(self.output_file).data
         self.errors = self.outdata.get("errors")
-        return len(self.errors) > 0
+        if "out_of_opt_cycles" in self.errors:
+            first_mol_graph = build_MoleculeGraph(self.outdata["initial_molecule"])
+            last_mol_graph = build_MoleculeGraph(self.outdata["molecule_from_last_geometry"])
+            if not is_isomorphic(first_mol_graph.graph, last_mol_graph.graph):
+                return False
+        else:
+            return len(self.errors) > 0
 
     def correct(self):
         backup({self.input_file, self.output_file})
@@ -64,7 +73,7 @@ class QChemErrorHandler(ErrorHandler):
         if "SCF_failed_to_converge" in self.errors:
             # Check number of SCF cycles. If not set or less than scf_max_cycles,
             # increase to that value and rerun. If already set, check if
-            # scf_algorithm is unset or set to DIIS, in which case set to RCA-DIIS.
+            # scf_algorithm is unset or set to DIIS, in which case set to GDM.
             # Otherwise, tell user to call SCF error handler and do nothing.
             if str(self.qcinp.rem.get("max_scf_cycles")) != str(
                     self.scf_max_cycles):
@@ -89,30 +98,26 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.rem["geom_opt_max_cycles"] = self.geom_max_cycles
                 actions.append({"geom_max_cycles:": self.scf_max_cycles})
                 if len(self.outdata.get("energy_trajectory")) > 1:
-                    if self.qcinp.molecule.spin_multiplicity != self.outdata.get(
-                            "molecule_from_last_geometry").spin_multiplicity:
-                        raise AssertionError('Multiplicities should match!')
-                    if self.qcinp.molecule.charge != self.outdata.get(
-                            "molecule_from_last_geometry").charge:
-                        raise AssertionError('Charges should match!')
                     self.qcinp.molecule = self.outdata.get(
                         "molecule_from_last_geometry")
                     actions.append({"molecule": "molecule_from_last_geometry"})
             else:
-                print(
-                    "How do I get the geometry optimization converged when already at the maximum number of cycles?"
-                )
+                if os.path.exists(os.path.join(os.path.split(os.path.abspath(self.input_file))[0], "/error_history.json")):
+                    error_history = loadfn(os.path.join(os.path.split(os.path.abspath(self.input_file))[0], "/error_history.json"))
+                    if "last_ten" in error_history:
+                        return {"errors": self.errors, "actions": None}
+                else:
+                    self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
+                    actions.append({"molecule": "molecule_from_last_geometry"})
+                    error_history = {}
+                    error_history["last_ten"] = np.mean(self.outdata["energy_trajectory"][-10:])
+                    dumpfn(error_history, "error_history.json")
+
 
         elif "unable_to_determine_lamda" in self.errors:
             # Set last geom as new starting geom and rerun. If no opt cycles,
             # use diff SCF strat? Diff initial guess? Change basis?
             if len(self.outdata.get("energy_trajectory")) > 1:
-                if self.qcinp.molecule.spin_multiplicity != self.outdata.get(
-                        "molecule_from_last_geometry").spin_multiplicity:
-                    raise AssertionError('Multiplicities should match!')
-                if self.qcinp.molecule.charge != self.outdata.get(
-                        "molecule_from_last_geometry").charge:
-                    raise AssertionError('Charges should match!')
                 self.qcinp.molecule = self.outdata.get(
                     "molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
@@ -186,6 +191,40 @@ class QChemErrorHandler(ErrorHandler):
         os.rename(self.input_file, self.input_file + ".last")
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "actions": actions}
+
+
+def edges_from_babel(molecule):
+    babel_mol = BabelMolAdaptor(molecule).openbabel_mol
+    edges = []
+    for obbond in ob.OBMolBondIter(babel_mol):
+        edges += [[obbond.GetBeginAtomIdx() - 1, obbond.GetEndAtomIdx() - 1]]
+    return edges
+
+
+def build_MoleculeGraph(molecule, edges=None):
+    if edges == None:
+        edges = edges_from_babel(molecule)
+    mol_graph = MoleculeGraph.with_empty_graph(molecule)
+    for edge in edges:
+        mol_graph.add_edge(edge[0], edge[1])
+    mol_graph.graph = mol_graph.graph.to_undirected()
+    species = {}
+    coords = {}
+    for node in mol_graph.graph:
+        species[node] = mol_graph.molecule[node].specie.symbol
+        coords[node] = mol_graph.molecule[node].coords
+    nx.set_node_attributes(mol_graph.graph, species, "specie")
+    nx.set_node_attributes(mol_graph.graph, coords, "coords")
+    return mol_graph
+
+
+def _node_match(node, othernode):
+    return node["specie"] == othernode["specie"]
+
+
+def is_isomorphic(graph1, graph2):
+    return nx.is_isomorphic(graph1, graph2, node_match=_node_match)
+
 
 
 class QChemSCFErrorHandler(ErrorHandler):
