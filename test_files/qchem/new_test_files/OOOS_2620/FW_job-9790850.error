@@ -1,0 +1,25 @@
+/global/u2/s/sblau/pymatgen/pymatgen/io/cif.py:44: UserWarning: Please install optional dependency pybtex if youwant to extract references from CIF files.
+  warnings.warn("Please install optional dependency pybtex if you"
+DEBUG:launchpad:FW with id: 2620 is unique!
+DEBUG:launchpad:Created/updated Launch with launch_id: 3704
+DEBUG:launchpad:RUNNING FW with id: 2620
+INFO:rocket.launcher:RUNNING fw_id: 2620 in directory: /scratch2/scratchdirs/sblau/fragment_wf/block_2018-07-04-03-30-43-540608/launcher_2018-07-09-18-37-34-935575
+INFO:rocket.launcher:Task started: {{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}}.
+INFO:rocket.launcher:Task completed: {{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}} 
+INFO:rocket.launcher:Task started: {{atomate.qchem.firetasks.run_calc.RunQChemCustodian}}.
+INFO:custodian.custodian:Run started at 2018-07-09 13:57:08.954978 in /scratch2/scratchdirs/sblau/fragment_wf/block_2018-07-04-03-30-43-540608/launcher_2018-07-09-18-37-34-935575.
+INFO:custodian.custodian:Custodian running on Python version 3.6.4 |Anaconda, Inc.| (default, Jan 16 2018, 18:10:19)  [GCC 7.2.0]
+INFO:custodian.custodian:Hostname: nid06038, Cluster: unknown
+INFO:custodian.custodian:Starting job no. 1 (QCJob) attempt no. 1. Total errors and errors in job thus far = 0, 0.
+srun: error: nid06038: task 0: Aborted
+srun: Terminating job step 9790850.0
+INFO:custodian.custodian:QCJob.run has completed. Checking remaining handlers
+INFO:root:Backing up run to error.1.tar.gz.
+ERROR:custodian.custodian:
+{ 'actions': [ ],
+  'errors': [ 'out_of_opt_cycles'],
+  'handler': <custodian.qchem.handlers.QChemErrorHandler object at 0x2aaab2d5ef98>}
+ERROR:custodian.custodian:Unrecoverable error for handler: <custodian.qchem.handlers.QChemErrorHandler object at 0x2aaab2d5ef98>. Raising RuntimeError
+INFO:custodian.custodian:Logging to custodian.json...
+INFO:custodian.custodian:Run ended at 2018-07-09 14:55:47.875412.
+INFO:custodian.custodian:Run completed. Total time taken = 0:58:38.920434.
