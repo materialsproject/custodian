@@ -118,7 +118,7 @@ class QChemErrorHandler(ErrorHandler):
                     actions.append({"molecule": "molecule_from_last_geometry"})
                     error_history = {}
                     error_history["last_ten"] = np.mean(self.outdata["energy_trajectory"][-10:])
-                    dumpfn(error_history, "error_history.json")
+                    dumpfn(error_history, er_hist_path)
 
 
         elif "unable_to_determine_lamda" in self.errors:
