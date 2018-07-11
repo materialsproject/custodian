@@ -19,13 +19,14 @@ import os
 import glob
 import shutil
 import datetime
+import numpy as np
 
 from custodian.vasp.handlers import VaspErrorHandler, \
     UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler, \
     MaxForceErrorHandler, PositiveEnergyErrorHandler, PotimErrorHandler, \
     FrozenJobErrorHandler, AliasingErrorHandler, StdErrHandler, LrfCommutatorHandler, \
     DriftErrorHandler
-from pymatgen.io.vasp import Incar, Poscar, Structure, Kpoints, VaspInput
+from pymatgen.io.vasp import Incar, Poscar, Structure, Kpoints, VaspInput, Vasprun
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
@@ -501,6 +502,16 @@ class MaxForceErrorHandlerTest(unittest.TestCase):
 
         self.assertEqual(poscar.structure, contcar.structure)
         self.assertAlmostEqual(incar['EDIFFG'], 0.005)
+
+    def test_selective_dynamics(self):
+        output_filename = os.path.join(test_dir, "vasprun.xml.indirect.gz")
+        vr = Vasprun(output_filename)
+        # assert that the max force is above the threshold
+        max_constrained = np.max(np.linalg.norm(vr.ionic_steps[-1]['forces'],
+                                                axis=1))
+        self.assertTrue(max_constrained > 0.5)
+        handler = MaxForceErrorHandler(output_filename, max_force_threshold=0.5)
+        self.assertFalse(handler.check())
 
     def tearDown(self):
         os.chdir(cwd)

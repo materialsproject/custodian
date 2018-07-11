@@ -790,7 +790,7 @@ class UnconvergedErrorHandler(ErrorHandler):
                                 "NELMDL": -6,
                                 "BMIX": 0.001,
                                 "AMIX_MAG": 0.8,
-                                "BMIX_MAG": 0.001} 
+                                "BMIX_MAG": 0.001}
 
             if all([v.incar.get(k,"") == val for k,val in new_settings.items()]):
                 return {"errors": ["Unconverged"], "actions": None}
@@ -828,8 +828,11 @@ class MaxForceErrorHandler(ErrorHandler):
     def check(self):
         try:
             v = Vasprun(self.output_filename)
-            max_force = max([np.linalg.norm(a) for a
-                             in v.ionic_steps[-1]["forces"]])
+            forces = np.array(v.ionic_steps[-1]['forces'])
+            sdyn = v.final_structure.site_properties.get('selective_dynamics')
+            if sdyn:
+                forces[np.logical_not(sdyn)] = 0
+            max_force = max(np.linalg.norm(forces, axis=1))
             if max_force > self.max_force_threshold and v.converged is True:
                 return True
         except:
@@ -1111,7 +1114,7 @@ class WalltimeHandler(ErrorHandler):
                                     postprocess=float)
                 time_per_step = np.max(outcar.data.get('timings')) if outcar.data.get("timings",[]) else 0
 
-            # If the remaining time is less than average time for 3 
+            # If the remaining time is less than average time for 3
             # steps or buffer_time.
             time_left = self.wall_time - total_secs
             if time_left < max(time_per_step * 3, self.buffer_time):
