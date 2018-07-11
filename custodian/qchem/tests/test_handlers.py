@@ -210,10 +210,10 @@ class QChemErrorHandlerTest(TestCase):
 
     def test_strange_opt(self):
         shutil.copyfile(
-            os.path.join(test_dir, "OOOS_1746/mol.qin"),
+            os.path.join(test_dir, "OOOS_1746/mol.qin.opt_0"),
             os.path.join(scr_dir, "mol.qin"))
         shutil.copyfile(
-            os.path.join(test_dir, "OOOS_1746/mol.qout"),
+            os.path.join(test_dir, "OOOS_1746/mol.qout.opt_0"),
             os.path.join(scr_dir, "mol.qout"))
         h = QChemErrorHandler(
             input_file="mol.qin", output_file="mol.qout")
