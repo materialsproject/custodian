@@ -11,6 +11,7 @@ from pymatgen.io.qchem.outputs import QCOutput
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from pymatgen.analysis.graphs import MoleculeGraph
+from pymatgen.io.babel import BabelMolAdaptor
 import networkx as nx
 
 __author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath"
