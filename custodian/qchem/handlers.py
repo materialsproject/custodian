@@ -66,7 +66,10 @@ class QChemErrorHandler(ErrorHandler):
             if not is_isomorphic(first_mol_graph.graph, last_mol_graph.graph):
                 return False
         else:
-            return len(self.errors) > 0
+            er_hist_path = os.path.join(os.path.split(os.path.abspath(self.input_file))[0], "/error_history.json")
+            if os.path.exists(er_hist_path):
+                os.remove(er_hist_path)
+        return len(self.errors) > 0
 
     def correct(self):
         backup({self.input_file, self.output_file})
@@ -105,8 +108,9 @@ class QChemErrorHandler(ErrorHandler):
                         "molecule_from_last_geometry")
                     actions.append({"molecule": "molecule_from_last_geometry"})
             else:
-                if os.path.exists(os.path.join(os.path.split(os.path.abspath(self.input_file))[0], "/error_history.json")):
-                    error_history = loadfn(os.path.join(os.path.split(os.path.abspath(self.input_file))[0], "/error_history.json"))
+                er_hist_path = os.path.join(os.path.split(os.path.abspath(self.input_file))[0], "/error_history.json")
+                if os.path.exists(er_hist_path):
+                    error_history = loadfn(er_hist_path)
                     if "last_ten" in error_history:
                         return {"errors": self.errors, "actions": None}
                 else:
