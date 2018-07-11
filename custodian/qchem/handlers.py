@@ -66,9 +66,8 @@ class QChemErrorHandler(ErrorHandler):
             if not is_isomorphic(first_mol_graph.graph, last_mol_graph.graph):
                 return False
         else:
-            er_hist_path = os.path.join(os.path.split(os.path.abspath(self.input_file))[0], "/error_history.json")
-            if os.path.exists(er_hist_path):
-                os.remove(er_hist_path)
+            if os.path.exists("error_history.json"):
+                os.remove("error_history.json")
         return len(self.errors) > 0
 
     def correct(self):
@@ -108,10 +107,8 @@ class QChemErrorHandler(ErrorHandler):
                         "molecule_from_last_geometry")
                     actions.append({"molecule": "molecule_from_last_geometry"})
             else:
-                er_hist_path = os.path.join(os.path.split(os.path.abspath(self.input_file))[0], "/error_history.json")
-                print(er_hist_path)
-                if os.path.exists(er_hist_path):
-                    error_history = loadfn(er_hist_path)
+                if os.path.exists("error_history.json"):
+                    error_history = loadfn("error_history.json")
                     if "last_ten" in error_history:
                         return {"errors": self.errors, "actions": None}
                 else:
@@ -119,7 +116,7 @@ class QChemErrorHandler(ErrorHandler):
                     actions.append({"molecule": "molecule_from_last_geometry"})
                     error_history = {}
                     error_history["last_ten"] = np.mean(self.outdata["energy_trajectory"][-10:])
-                    dumpfn(error_history, er_hist_path)
+                    dumpfn(error_history, "error_history.json")
 
 
         elif "unable_to_determine_lamda" in self.errors:
