@@ -109,6 +109,7 @@ class QChemErrorHandler(ErrorHandler):
                     actions.append({"molecule": "molecule_from_last_geometry"})
             else:
                 er_hist_path = os.path.join(os.path.split(os.path.abspath(self.input_file))[0], "/error_history.json")
+                print(er_hist_path)
                 if os.path.exists(er_hist_path):
                     error_history = loadfn(er_hist_path)
                     if "last_ten" in error_history:
