@@ -208,6 +208,20 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(h.check(),False)
 
 
+    def test_strange_opt(self):
+        shutil.copyfile(
+            os.path.join(test_dir, "OOOS_1746/mol.qin"),
+            os.path.join(scr_dir, "mol.qin"))
+        shutil.copyfile(
+            os.path.join(test_dir, "OOOS_1746/mol.qout"),
+            os.path.join(scr_dir, "mol.qout"))
+        h = QChemErrorHandler(
+            input_file="mol.qin", output_file="mol.qout")
+        h.check()
+        d = h.correct()
+        print(d)
+
+
     def test_failed_to_read_input(self):
         shutil.copyfile(
             os.path.join(test_dir, "unable_lamda_weird.qin"),
