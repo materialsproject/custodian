@@ -173,6 +173,28 @@ class QChemErrorHandlerTest(TestCase):
         self._check_equivalent_inputs("crowd_gradient.qin.2",
                                       "crowd_gradient.qin.3")
 
+    def test_advanced_out_of_opt_cycles(self):
+        shutil.copyfile(
+            os.path.join(test_dir, "OOOS_2564/mol.qin"),
+            os.path.join(scr_dir, "mol.qin"))
+        shutil.copyfile(
+            os.path.join(test_dir, "OOOS_2564/mol.qout"),
+            os.path.join(scr_dir, "mol.qout"))
+        shutil.copyfile(
+            os.path.join(test_dir, "OOOS_2564/mol.qin.next"),
+            os.path.join(scr_dir, "mol.qin.next"))
+        h = QChemErrorHandler(
+            input_file="mol.qin", output_file="mol.qout")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ['out_of_opt_cycles'])
+        self.assertEqual(d["actions"], [{"molecule": "molecule_from_last_geometry"}])
+        self._check_equivalent_inputs("mol.qin.next",
+                                      "mol.qin")
+        error_history = loadfn("error_history.json")
+        self.assertEqual(error_history["last_ten"], -741.0739550461001)
+
+
     def test_failed_to_read_input(self):
         shutil.copyfile(
             os.path.join(test_dir, "unable_lamda_weird.qin"),

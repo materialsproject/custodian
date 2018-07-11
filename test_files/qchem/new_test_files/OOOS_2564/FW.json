@@ -1,0 +1,166 @@
+{
+    "spec": {
+        "_tasks": [
+            {
+                "molecule": {
+                    "@module": "pymatgen.core.structure",
+                    "@class": "Molecule",
+                    "charge": 0,
+                    "spin_multiplicity": 1,
+                    "sites": [
+                        {
+                            "name": "S",
+                            "species": [
+                                {
+                                    "element": "S",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                -1.1408748192,
+                                0.8527464235,
+                                -0.0736155869
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "O",
+                            "species": [
+                                {
+                                    "element": "O",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                -1.623763636,
+                                1.8516556037,
+                                -1.0049437043
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "O",
+                            "species": [
+                                {
+                                    "element": "O",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                -0.9033934562,
+                                1.2359696697,
+                                1.3038265288
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "C",
+                            "species": [
+                                {
+                                    "element": "C",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                -2.551743776,
+                                -0.3740075232,
+                                0.0238755927
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "F",
+                            "species": [
+                                {
+                                    "element": "F",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                -3.608894004,
+                                0.2018451156,
+                                0.6082322384
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "N",
+                            "species": [
+                                {
+                                    "element": "N",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                -3.06574e-05,
+                                1.38173e-05,
+                                -0.7905593654
+                            ],
+                            "properties": {}
+                        }
+                    ]
+                },
+                "qchem_input_set": "OptSet",
+                "input_file": "mol.qin",
+                "qchem_input_params": {},
+                "_fw_name": "{{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}}"
+            },
+            {
+                "qchem_cmd": ">>qchem_cmd<<",
+                "multimode": "openmp",
+                "input_file": "mol.qin",
+                "output_file": "mol.qout",
+                "max_cores": 24,
+                "job_type": "opt_with_frequency_flattener",
+                "max_iterations": 10,
+                "max_molecule_perturb_scale": 0.3,
+                "reversed_direction": false,
+                "_fw_name": "{{atomate.qchem.firetasks.run_calc.RunQChemCustodian}}"
+            },
+            {
+                "db_file": ">>db_file<<",
+                "input_file": "mol.qin",
+                "output_file": "mol.qout",
+                "additional_fields": {
+                    "task_label": "fragment_142",
+                    "special_run_type": "frequency_flattener"
+                },
+                "_fw_name": "{{atomate.qchem.firetasks.parse_outputs.QChemToDb}}"
+            }
+        ]
+    },
+    "fw_id": 2564,
+    "created_on": "2018-07-06T18:04:27.080879",
+    "updated_on": "2018-07-09T23:50:55.089500",
+    "launches": [
+        {
+            "fworker": {
+                "name": "cori_qchem_dev",
+                "category": "",
+                "query": "{}",
+                "env": {
+                    "db_file": "/global/homes/s/sblau/config/db.json",
+                    "qchem_cmd": "qchem -slurm",
+                    "scratch_dir": "/dev/shm/qcscratch/"
+                }
+            },
+            "fw_id": 2564,
+            "launch_dir": "/global/cscratch1/sd/sblau/fragment_wf/block_2018-07-08-04-34-46-956497/launcher_2018-07-09-23-38-02-906894",
+            "host": "nid02301",
+            "ip": "10.128.9.16",
+            "trackers": [],
+            "action": null,
+            "state": "RUNNING",
+            "state_history": [
+                {
+                    "state": "RUNNING",
+                    "created_on": "2018-07-09T23:50:55.088108",
+                    "updated_on": "2018-07-09T23:50:55.088112"
+                }
+            ],
+            "launch_id": 3759
+        }
+    ],
+    "state": "RUNNING",
+    "name": "fragment_142"
+}
