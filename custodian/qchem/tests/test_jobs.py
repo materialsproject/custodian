@@ -33,19 +33,22 @@ class QCJobTest(TestCase):
 
     def test_defaults(self):
         with patch("custodian.qchem.jobs.os.putenv") as putenv_patch:
-            myjob = QCJob(qchem_command="qchem")
-            self.assertEqual(myjob.current_command, ["qchem", "-nt", "32", "mol.qin", "mol.qout"])
-            myjob.setup()
-            self.assertEqual(putenv_patch.call_args_list[0][0][0], "QCSCRATCH")
-            self.assertEqual(putenv_patch.call_args_list[0][0][1], "/dev/shm/qcscratch/")
-            self.assertEqual(putenv_patch.call_args_list[1][0][0], "QCTHREADS")
-            self.assertEqual(putenv_patch.call_args_list[1][0][1], "32")
-            self.assertEqual(putenv_patch.call_args_list[2][0][0], "OMP_NUM_THREADS")
-            self.assertEqual(putenv_patch.call_args_list[2][0][1], "32")
+            with patch("custodian.qchem.jobs.shutil.copy") as copy_patch:
+                myjob = QCJob(qchem_command="qchem")
+                self.assertEqual(myjob.current_command, ["qchem", "-nt", "32", "mol.qin", "mol.qout"])
+                myjob.setup()
+                self.assertEqual(copy_patch.call_args_list[0][0][0], "mol.qin")
+                self.assertEqual(copy_patch.call_args_list[0][0][1], "mol.qin.orig")
+                self.assertEqual(putenv_patch.call_args_list[0][0][0], "QCSCRATCH")
+                self.assertEqual(putenv_patch.call_args_list[0][0][1], "/dev/shm/qcscratch/")
+                self.assertEqual(putenv_patch.call_args_list[1][0][0], "QCTHREADS")
+                self.assertEqual(putenv_patch.call_args_list[1][0][1], "32")
+                self.assertEqual(putenv_patch.call_args_list[2][0][0], "OMP_NUM_THREADS")
+                self.assertEqual(putenv_patch.call_args_list[2][0][1], "32")
 
     def test_not_defaults(self):
         with patch("custodian.qchem.jobs.os.putenv") as putenv_patch:
-            myjob = QCJob(qchem_command="qchem -slurm", multimode="mpi", input_file="different.qin", output_file="not_default.qout", max_cores=12, scratch_dir="/not/default/scratch/")
+            myjob = QCJob(qchem_command="qchem -slurm", multimode="mpi", input_file="different.qin", output_file="not_default.qout", max_cores=12, scratch_dir="/not/default/scratch/", backup=False)
             self.assertEqual(myjob.current_command, ["qchem", "-slurm", "-np", "12", "different.qin", "not_default.qout"])
             myjob.setup()
             self.assertEqual(putenv_patch.call_args_list[0][0][0], "QCSCRATCH")
@@ -72,14 +75,16 @@ class OptFFTest(TestCase):
                         multimode="openmp",
                         input_file="test.qin",
                         output_file="test.qout",
-                        suffix=".opt_0").as_dict()
+                        suffix=".opt_0",
+                        backup=True).as_dict()
         self.assertEqual(next(myjob).as_dict(),expected_next)
         expected_next = QCJob(
                         qchem_command="qchem",
                         multimode="openmp",
                         input_file="test.qin",
                         output_file="test.qout",
-                        suffix=".freq_0").as_dict()
+                        suffix=".freq_0",
+                        backup=False).as_dict()
         self.assertEqual(next(myjob).as_dict(),expected_next)
         self.assertEqual(QCInput.from_file(os.path.join(test_dir,"test.qin.freq_0")).as_dict(),QCInput.from_file(os.path.join(scr_dir,"test.qin")).as_dict())
         expected_next = QCJob(
@@ -87,7 +92,8 @@ class OptFFTest(TestCase):
                         multimode="openmp",
                         input_file="test.qin",
                         output_file="test.qout",
-                        suffix=".opt_1").as_dict()
+                        suffix=".opt_1",
+                        backup=False).as_dict()
         self.assertEqual(next(myjob).as_dict(),expected_next)
         self.assertEqual(QCInput.from_file(os.path.join(test_dir,"test.qin.opt_1")).as_dict(),QCInput.from_file(os.path.join(scr_dir,"test.qin")).as_dict())
         expected_next = QCJob(
@@ -95,7 +101,8 @@ class OptFFTest(TestCase):
                         multimode="openmp",
                         input_file="test.qin",
                         output_file="test.qout",
-                        suffix=".freq_1").as_dict()
+                        suffix=".freq_1",
+                        backup=False).as_dict()
         self.assertEqual(next(myjob).as_dict(),expected_next)
         self.assertEqual(QCInput.from_file(os.path.join(test_dir,"test.qin.freq_1")).as_dict(),QCInput.from_file(os.path.join(scr_dir,"test.qin")).as_dict())
         self.assertRaises(StopIteration,myjob.__next__)

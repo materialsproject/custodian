@@ -42,7 +42,8 @@ class QCJob(Job):
                  suffix="",
                  scratch_dir="/dev/shm/qcscratch/",
                  save_scratch=False,
-                 save_name="default_save_name"):
+                 save_name="default_save_name",
+                 backup=True):
         """
         Args:
             qchem_command (str): Command to run QChem.
@@ -60,6 +61,8 @@ class QCJob(Job):
                 Defaults to False.
             save_name (str): Name of the saved scratch directory. Defaults to
                 to "default_save_name".
+            backup (bool): Whether to backup the initial input file. If True, the
+                input will be copied with a ".orig" appended. Defaults to True.
         """
         self.qchem_command = qchem_command.split(" ")
         self.multimode = multimode
@@ -71,6 +74,7 @@ class QCJob(Job):
         self.scratch_dir = scratch_dir
         self.save_scratch = save_scratch
         self.save_name = save_name
+        self.backup = backup
 
     @property
     def current_command(self):
@@ -96,6 +100,8 @@ class QCJob(Job):
         return command
 
     def setup(self):
+        if self.backup:
+            shutil.copy(self.input_file, "{}.orig".format(self.input_file))
         os.putenv("QCSCRATCH", self.scratch_dir)
         if self.multimode == 'openmp':
             os.putenv('QCTHREADS', str(self.max_cores))
@@ -170,6 +176,7 @@ class QCJob(Job):
         orig_opt_rem = copy.deepcopy(orig_opt_input.rem)
         orig_freq_rem = copy.deepcopy(orig_opt_input.rem)
         orig_freq_rem["job_type"] = "freq"
+        first = True
 
         for ii in range(max_iterations):
             yield (QCJob(
@@ -179,7 +186,9 @@ class QCJob(Job):
                 output_file=output_file,
                 qclog_file=qclog_file,
                 suffix=".opt_" + str(ii),
+                backup=first,
                 **QCJob_kwargs))
+            first = False
             opt_outdata = QCOutput(output_file + ".opt_" + str(ii)).data
             freq_QCInput = QCInput(
                 molecule=opt_outdata.get("molecule_from_optimized_geometry"),
@@ -195,6 +204,7 @@ class QCJob(Job):
                 output_file=output_file,
                 qclog_file=qclog_file,
                 suffix=".freq_" + str(ii),
+                backup=first,
                 **QCJob_kwargs))
             outdata = QCOutput(output_file + ".freq_" + str(ii)).data
             errors = outdata.get("errors")
