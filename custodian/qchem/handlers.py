@@ -55,13 +55,14 @@ class QChemErrorHandler(ErrorHandler):
         self.geom_max_cycles = geom_max_cycles
         self.outdata = None
         self.errors = []
+        self.opt_error_history = {}
 
     def check(self):
         # Checks output file for errors.
         self.outdata = QCOutput(self.output_file).data
         self.errors = self.outdata.get("errors")
-        if "out_of_opt_cycles" not in self.errors and os.path.exists("error_history.json"):
-            os.remove("error_history.json")
+        if "out_of_opt_cycles" not in self.errors and self.opt_error_history != {}:
+            opt_error_history = {}
         return len(self.errors) > 0
 
     def correct(self):
@@ -101,17 +102,13 @@ class QChemErrorHandler(ErrorHandler):
                         "molecule_from_last_geometry")
                     actions.append({"molecule": "molecule_from_last_geometry"})
             else:
-                if os.path.exists("error_history.json"):
-                    error_history = loadfn("error_history.json")
-                    if "last_ten" in error_history:
+                if self.opt_error_history != {}:
+                    if "last_ten" in self.opt_error_history:
                         return {"errors": self.errors, "actions": None}
                 else:
                     self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                     actions.append({"molecule": "molecule_from_last_geometry"})
-                    error_history = {}
-                    error_history["last_ten"] = np.mean(self.outdata["energy_trajectory"][-10:])
-                    dumpfn(error_history, "error_history.json")
-
+                    self.opt_error_history["last_ten"] = np.mean(self.outdata["energy_trajectory"][-10:])
 
         elif "unable_to_determine_lamda" in self.errors:
             # Set last geom as new starting geom and rerun. If no opt cycles,

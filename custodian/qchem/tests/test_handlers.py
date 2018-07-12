@@ -192,35 +192,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(d["actions"], [{"molecule": "molecule_from_last_geometry"}])
         self._check_equivalent_inputs("mol.qin.next",
                                       "mol.qin")
-        error_history = loadfn("error_history.json")
-        self.assertEqual(error_history["last_ten"], -741.0739550461001)
-
-
-    def test_advanced_out_of_opt_cycles1(self):
-        shutil.copyfile(
-            os.path.join(test_dir, "OOOS_2620/mol.qin"),
-            os.path.join(scr_dir, "mol.qin"))
-        shutil.copyfile(
-            os.path.join(test_dir, "OOOS_2620/mol.qout"),
-            os.path.join(scr_dir, "mol.qout"))
-        h = QChemErrorHandler(
-            input_file="mol.qin", output_file="mol.qout")
-        self.assertEqual(h.check(),False)
-
-
-    def test_strange_opt(self):
-        shutil.copyfile(
-            os.path.join(test_dir, "OOOS_1746/mol.qin.opt_0"),
-            os.path.join(scr_dir, "mol.qin"))
-        shutil.copyfile(
-            os.path.join(test_dir, "OOOS_1746/mol.qout.opt_0"),
-            os.path.join(scr_dir, "mol.qout"))
-        h = QChemErrorHandler(
-            input_file="mol.qin", output_file="mol.qout")
-        h.check()
-        d = h.correct()
-        print(d)
-
+        self.assertEqual(h.opt_error_history["last_ten"], -741.0739550461001)
 
     def test_failed_to_read_input(self):
         shutil.copyfile(
