@@ -60,14 +60,8 @@ class QChemErrorHandler(ErrorHandler):
         # Checks output file for errors.
         self.outdata = QCOutput(self.output_file).data
         self.errors = self.outdata.get("errors")
-        if "out_of_opt_cycles" in self.errors:
-            first_mol_graph = build_MoleculeGraph(self.outdata["initial_molecule"])
-            last_mol_graph = build_MoleculeGraph(self.outdata["molecule_from_last_geometry"])
-            if not is_isomorphic(first_mol_graph.graph, last_mol_graph.graph):
-                return False
-        else:
-            if os.path.exists("error_history.json"):
-                os.remove("error_history.json")
+        if "out_of_opt_cycles" not in self.errors and os.path.exists("error_history.json"):
+            os.remove("error_history.json")
         return len(self.errors) > 0
 
     def correct(self):
@@ -196,40 +190,6 @@ class QChemErrorHandler(ErrorHandler):
         os.rename(self.input_file, self.input_file + ".last")
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "actions": actions}
-
-
-def edges_from_babel(molecule):
-    babel_mol = BabelMolAdaptor(molecule).openbabel_mol
-    edges = []
-    for obbond in ob.OBMolBondIter(babel_mol):
-        edges += [[obbond.GetBeginAtomIdx() - 1, obbond.GetEndAtomIdx() - 1]]
-    return edges
-
-
-def build_MoleculeGraph(molecule, edges=None):
-    if edges == None:
-        edges = edges_from_babel(molecule)
-    mol_graph = MoleculeGraph.with_empty_graph(molecule)
-    for edge in edges:
-        mol_graph.add_edge(edge[0], edge[1])
-    mol_graph.graph = mol_graph.graph.to_undirected()
-    species = {}
-    coords = {}
-    for node in mol_graph.graph:
-        species[node] = mol_graph.molecule[node].specie.symbol
-        coords[node] = mol_graph.molecule[node].coords
-    nx.set_node_attributes(mol_graph.graph, species, "specie")
-    nx.set_node_attributes(mol_graph.graph, coords, "coords")
-    return mol_graph
-
-
-def _node_match(node, othernode):
-    return node["specie"] == othernode["specie"]
-
-
-def is_isomorphic(graph1, graph2):
-    return nx.is_isomorphic(graph1, graph2, node_match=_node_match)
-
 
 
 class QChemSCFErrorHandler(ErrorHandler):
