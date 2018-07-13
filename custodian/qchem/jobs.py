@@ -53,8 +53,7 @@ class QCJob(Job):
             max_cores (int): Maximum number of cores to parallelize over.
                 Defaults to 32.
             qclog_file (str): Name of the file to redirect the standard output
-                to. None means not to record the standard output. Defaults to
-                None.
+                to. None means not to record the standard output. 
             suffix (str): String to append to the file in postprocess.
             scratch_dir (str): QCSCRATCH directory. Defaults to "/dev/shm/qcscratch/".
             save_scratch (bool): Whether to save scratch directory contents.
@@ -150,7 +149,7 @@ class QCJob(Job):
             qchem_command (str): Command to run QChem.
             multimode (str): Parallelization scheme, either openmp or mpi.
             input_file (str): Name of the QChem input file.
-            output_file (str): Name of the QChem output file
+            output_file (str): Name of the QChem output file.
             max_iterations (int): Number of perturbation -> optimization -> frequency
                 iterations to perform. Defaults to 10.
             max_molecule_perturb_scale (float): The maximum scaled perturbation that
