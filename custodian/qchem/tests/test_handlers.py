@@ -182,7 +182,7 @@ class QChemErrorHandlerTest(TestCase):
             os.path.join(test_dir, "2564_complete/error1/mol.qout"),
             os.path.join(scr_dir, "mol.qout"))
         shutil.copyfile(
-            os.path.join(test_dir, "O2564_complete/mol.qin.opt_0"),
+            os.path.join(test_dir, "2564_complete/mol.qin.opt_0"),
             os.path.join(scr_dir, "mol.qin.opt_0"))
         h = QChemErrorHandler(
             input_file="mol.qin", output_file="mol.qout")
