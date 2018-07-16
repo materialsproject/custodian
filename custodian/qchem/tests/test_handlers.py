@@ -193,6 +193,25 @@ class QChemErrorHandlerTest(TestCase):
         self._check_equivalent_inputs("mol.qin.opt_0",
                                       "mol.qin")
         self.assertEqual(h.opt_error_history[0], "more_bonds")
+        shutil.copyfile(
+            os.path.join(test_dir, "2564_complete/mol.qin.opt_0"),
+            os.path.join(scr_dir, "mol.qin"))
+        shutil.copyfile(
+            os.path.join(test_dir, "2564_complete/mol.qout.opt_0"),
+            os.path.join(scr_dir, "mol.qout"))
+        h.check()
+        self.assertEqual(h.opt_error_history, [])
+
+    def test_advanced_out_of_opt_cycles1(self):
+        shutil.copyfile(
+            os.path.join(test_dir, "OOOS_2620/mol.qin"),
+            os.path.join(scr_dir, "mol.qin"))
+        shutil.copyfile(
+            os.path.join(test_dir, "OOOS_2620/mol.qout"),
+            os.path.join(scr_dir, "mol.qout"))
+        h = QChemErrorHandler(
+            input_file="mol.qin", output_file="mol.qout")
+        self.assertEqual(h.check(), False)
 
     def test_failed_to_read_input(self):
         shutil.copyfile(
