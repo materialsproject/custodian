@@ -192,7 +192,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(d["actions"], [{"molecule": "molecule_from_last_geometry"}])
         self._check_equivalent_inputs("mol.qin.next",
                                       "mol.qin")
-        self.assertEqual(h.opt_error_history["last_ten"], -741.0739550461001)
+        self.assertEqual(h.opt_error_history[0], "no_change")
 
     def test_failed_to_read_input(self):
         shutil.copyfile(
