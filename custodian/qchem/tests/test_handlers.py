@@ -176,23 +176,23 @@ class QChemErrorHandlerTest(TestCase):
 
     def test_advanced_out_of_opt_cycles(self):
         shutil.copyfile(
-            os.path.join(test_dir, "OOOS_2564/mol.qin"),
+            os.path.join(test_dir, "2564_complete/error1/mol.qin"),
             os.path.join(scr_dir, "mol.qin"))
         shutil.copyfile(
-            os.path.join(test_dir, "OOOS_2564/mol.qout"),
+            os.path.join(test_dir, "2564_complete/error1/mol.qout"),
             os.path.join(scr_dir, "mol.qout"))
         shutil.copyfile(
-            os.path.join(test_dir, "OOOS_2564/mol.qin.next"),
-            os.path.join(scr_dir, "mol.qin.next"))
+            os.path.join(test_dir, "O2564_complete/mol.qin.opt_0"),
+            os.path.join(scr_dir, "mol.qin.opt_0"))
         h = QChemErrorHandler(
             input_file="mol.qin", output_file="mol.qout")
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ['out_of_opt_cycles'])
         self.assertEqual(d["actions"], [{"molecule": "molecule_from_last_geometry"}])
-        self._check_equivalent_inputs("mol.qin.next",
+        self._check_equivalent_inputs("mol.qin.opt_0",
                                       "mol.qin")
-        self.assertEqual(h.opt_error_history[0], "no_change")
+        self.assertEqual(h.opt_error_history[0], "more_bonds")
 
     def test_failed_to_read_input(self):
         shutil.copyfile(
