@@ -56,10 +56,8 @@ class QChemErrorHandler(ErrorHandler):
         # Checks output file for errors.
         self.outdata = QCOutput(self.output_file).data
         self.errors = self.outdata.get("errors")
-        print(self.errors)
-        print(self.opt_error_history)
         if "out_of_opt_cycles" not in self.errors and len(self.opt_error_history) > 0:
-            opt_error_history = []
+            self.opt_error_history = []
         if "out_of_opt_cycles" in self.errors:
             if self.outdata["structure_change"] == "unconnected_fragments":
                 return False
