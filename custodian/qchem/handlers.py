@@ -50,14 +50,17 @@ class QChemErrorHandler(ErrorHandler):
         self.geom_max_cycles = geom_max_cycles
         self.outdata = None
         self.errors = []
-        self.opt_error_history = {}
+        self.opt_error_history = []
 
     def check(self):
         # Checks output file for errors.
         self.outdata = QCOutput(self.output_file).data
         self.errors = self.outdata.get("errors")
-        if "out_of_opt_cycles" not in self.errors and self.opt_error_history != {}:
-            opt_error_history = {}
+        if "out_of_opt_cycles" not in self.errors and len(self.opt_error_history) > 0:
+            opt_error_history = []
+        if "out_of_opt_cycles" in self.errors:
+            if self.outdata["structure_change"] == "unconnected_fragments":
+                return False
         return len(self.errors) > 0
 
     def correct(self):
@@ -97,13 +100,12 @@ class QChemErrorHandler(ErrorHandler):
                         "molecule_from_last_geometry")
                     actions.append({"molecule": "molecule_from_last_geometry"})
             else:
-                if self.opt_error_history != {}:
-                    if "last_ten" in self.opt_error_history:
-                        return {"errors": self.errors, "actions": None}
-                else:
-                    self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
-                    actions.append({"molecule": "molecule_from_last_geometry"})
-                    self.opt_error_history["last_ten"] = np.mean(self.outdata["energy_trajectory"][-10:])
+                self.opt_error_history += [self.outdata["structure_change"]]
+                if len(self.opt_error_history) > 1:
+                    if self.opt_error_history[-1] == "no_change":
+                        return {"errors": self.errors, "actions": None, "opt_error_history": self.opt_error_history}
+                self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
+                actions.append({"molecule": "molecule_from_last_geometry"})
 
         elif "unable_to_determine_lamda" in self.errors:
             # Set last geom as new starting geom and rerun. If no opt cycles,
