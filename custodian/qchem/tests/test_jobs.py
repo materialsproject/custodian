@@ -86,7 +86,7 @@ class OptFFTest(TestCase):
                         suffix=".freq_0",
                         backup=False).as_dict()
         self.assertEqual(next(myjob).as_dict(),expected_next)
-        self.assertEqual(QCInput.from_file(os.path.join(test_dir,"test.qin.freq_0")).as_dict(),QCInput.from_file(os.path.join(scr_dir,"test.qin")).as_dict())
+        self.assertEqual(QCInput.from_file(os.path.join(test_dir,"FF_working/test.qin.freq_0")).as_dict(),QCInput.from_file(os.path.join(scr_dir,"test.qin")).as_dict())
         expected_next = QCJob(
                         qchem_command="qchem",
                         multimode="openmp",
@@ -95,7 +95,7 @@ class OptFFTest(TestCase):
                         suffix=".opt_1",
                         backup=False).as_dict()
         self.assertEqual(next(myjob).as_dict(),expected_next)
-        self.assertEqual(QCInput.from_file(os.path.join(test_dir,"test.qin.opt_1")).as_dict(),QCInput.from_file(os.path.join(scr_dir,"test.qin")).as_dict())
+        self.assertEqual(QCInput.from_file(os.path.join(test_dir,"FF_working/test.qin.opt_1")).as_dict(),QCInput.from_file(os.path.join(scr_dir,"test.qin")).as_dict())
         expected_next = QCJob(
                         qchem_command="qchem",
                         multimode="openmp",
@@ -104,7 +104,7 @@ class OptFFTest(TestCase):
                         suffix=".freq_1",
                         backup=False).as_dict()
         self.assertEqual(next(myjob).as_dict(),expected_next)
-        self.assertEqual(QCInput.from_file(os.path.join(test_dir,"test.qin.freq_1")).as_dict(),QCInput.from_file(os.path.join(scr_dir,"test.qin")).as_dict())
+        self.assertEqual(QCInput.from_file(os.path.join(test_dir,"FF_working/test.qin.freq_1")).as_dict(),QCInput.from_file(os.path.join(scr_dir,"test.qin")).as_dict())
         self.assertRaises(StopIteration,myjob.__next__)
 
 class OptFFTest1(TestCase):
