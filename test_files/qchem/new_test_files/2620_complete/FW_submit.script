@@ -9,7 +9,7 @@
 #SBATCH --error=FW_job-%j.error
 
 module load qchem
-cd /scratch2/scratchdirs/sblau/fragment_wf/block_2018-07-04-03-30-43-540608/launcher_2018-07-09-18-37-34-935575
+cd /scratch2/scratchdirs/sblau/fragment_wf/block_2018-07-09-23-50-25-765742/launcher_2018-07-16-21-54-12-831723
 rlaunch -c /global/homes/s/sblau/config_edison singleshot
 
 # CommonAdapter (SLURM) completed writing Template
