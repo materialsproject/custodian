@@ -23,7 +23,7 @@ __credits__ = "Shyam Dwaraknath"
 
 test_dir = os.path.join(
     os.path.dirname(__file__), "..", "..", "..", "test_files", "qchem",
-    "new_test_files", "FF_working")
+    "new_test_files")
 
 scr_dir = os.path.join(test_dir, "scr")
 cwd = os.getcwd()
@@ -57,11 +57,10 @@ class QCJobTest(TestCase):
 class OptFFTest(TestCase):
     def setUp(self):
         os.makedirs(scr_dir)
-        shutil.copyfile(os.path.join(test_dir,"test.qin"),os.path.join(scr_dir,"test.qin"))
-        shutil.copyfile(os.path.join(test_dir,"test.qout.opt_0"),os.path.join(scr_dir,"test.qout.opt_0"))
-        shutil.copyfile(os.path.join(test_dir,"test.qout.freq_0"),os.path.join(scr_dir,"test.qout.freq_0"))
-        shutil.copyfile(os.path.join(test_dir,"test.qout.opt_1"),os.path.join(scr_dir,"test.qout.opt_1"))
-        shutil.copyfile(os.path.join(test_dir,"test.qout.freq_1"),os.path.join(scr_dir,"test.qout.freq_1"))
+        shutil.copyfile(os.path.join(test_dir,"FF_working/test.qout.opt_0"),os.path.join(scr_dir,"test.qout.opt_0"))
+        shutil.copyfile(os.path.join(test_dir,"FF_working/test.qout.freq_0"),os.path.join(scr_dir,"test.qout.freq_0"))
+        shutil.copyfile(os.path.join(test_dir,"FF_working/test.qout.opt_1"),os.path.join(scr_dir,"test.qout.opt_1"))
+        shutil.copyfile(os.path.join(test_dir,"FF_working/test.qout.freq_1"),os.path.join(scr_dir,"test.qout.freq_1"))
         os.chdir(scr_dir)
 
     def tearDown(self):
@@ -110,7 +109,6 @@ class OptFFTest(TestCase):
 class OptFFTest1(TestCase):
     def setUp(self):
         os.makedirs(scr_dir)
-        shutil.copyfile(os.path.join(test_dir,"2620_complete/mol.qin.orig"),os.path.join(scr_dir,"mol.qin"))
         shutil.copyfile(os.path.join(test_dir,"2620_complete/mol.qout.opt_0"),os.path.join(scr_dir,"mol.qout.opt_0"))
         os.chdir(scr_dir)
 
