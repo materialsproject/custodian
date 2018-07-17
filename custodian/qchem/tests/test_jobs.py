@@ -57,6 +57,7 @@ class QCJobTest(TestCase):
 class OptFFTest(TestCase):
     def setUp(self):
         os.makedirs(scr_dir)
+        shutil.copyfile(os.path.join(test_dir,"FF_working/test.qin"),os.path.join(scr_dir,"test.qin"))
         shutil.copyfile(os.path.join(test_dir,"FF_working/test.qout.opt_0"),os.path.join(scr_dir,"test.qout.opt_0"))
         shutil.copyfile(os.path.join(test_dir,"FF_working/test.qout.freq_0"),os.path.join(scr_dir,"test.qout.freq_0"))
         shutil.copyfile(os.path.join(test_dir,"FF_working/test.qout.opt_1"),os.path.join(scr_dir,"test.qout.opt_1"))
@@ -109,6 +110,7 @@ class OptFFTest(TestCase):
 class OptFFTest1(TestCase):
     def setUp(self):
         os.makedirs(scr_dir)
+        shutil.copyfile(os.path.join(test_dir,"2620_complete/mol.qin.orig"),os.path.join(scr_dir,"mol.qin"))
         shutil.copyfile(os.path.join(test_dir,"2620_complete/mol.qout.opt_0"),os.path.join(scr_dir,"mol.qout.opt_0"))
         os.chdir(scr_dir)
 
