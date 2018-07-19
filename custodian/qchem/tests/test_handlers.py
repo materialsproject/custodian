@@ -9,7 +9,6 @@ import unittest
 
 from custodian.qchem.handlers import QChemErrorHandler
 from pymatgen.io.qchem.inputs import QCInput
-from monty.serialization import loadfn
 
 __author__ = "Samuel Blau, Brandon Woods, Shyam Dwaraknath"
 __copyright__ = "Copyright 2018, The Materials Project"

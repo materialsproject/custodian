@@ -53,7 +53,7 @@ class QCJob(Job):
             max_cores (int): Maximum number of cores to parallelize over.
                 Defaults to 32.
             qclog_file (str): Name of the file to redirect the standard output
-                to. None means not to record the standard output. 
+                to. None means not to record the standard output.
             suffix (str): String to append to the file in postprocess.
             scratch_dir (str): QCSCRATCH directory. Defaults to "/dev/shm/qcscratch/".
             save_scratch (bool): Whether to save scratch directory contents.

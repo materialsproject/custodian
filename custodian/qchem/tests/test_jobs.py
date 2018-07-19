@@ -10,7 +10,6 @@ import unittest
 
 from custodian.qchem.jobs import QCJob
 from pymatgen.io.qchem.inputs import QCInput
-from pymatgen.io.qchem.outputs import QCOutput
 
 __author__ = "Samuel Blau"
 __copyright__ = "Copyright 2018, The Materials Project"

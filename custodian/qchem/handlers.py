@@ -9,7 +9,6 @@ from pymatgen.io.qchem.inputs import QCInput
 from pymatgen.io.qchem.outputs import QCOutput
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
-import numpy as np
 
 __author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath"
 __copyright__ = "Copyright 2018, The Materials Project"
@@ -169,7 +168,7 @@ class QChemErrorHandler(ErrorHandler):
         elif "never_called_qchem" in self.errors:
             # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
             actions.append({"rerun job as-is"})
-            
+
         elif "unknown_error" in self.errors:
             print("Examine error message by hand.")
             return {"errors": self.errors, "actions": None}
