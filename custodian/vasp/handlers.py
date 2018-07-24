@@ -988,7 +988,6 @@ class NonConvergingErrorHandler(ErrorHandler):
         """
         self.output_filename = output_filename
         self.nionic_steps = nionic_steps
-        self.change_algo = change_algo
 
     def check(self):
         vi = VaspInput.from_directory(".")
