@@ -6,10 +6,10 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian.ansible.actions &#8212; custodian 2018.3.10 documentation</title>
+    <title>custodian.ansible.actions &#8212; custodian 2018.6.11 documentation</title>
     <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
@@ -38,7 +38,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2018.3.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2018.6.11 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -77,8 +77,8 @@
         <span class="k">if</span> <span class="n">tok</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">current</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">current</span><span class="p">[</span><span class="n">tok</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">current</span><span class="p">,</span> <span class="n">toks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
-        <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="p">[</span><span class="n">tok</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">current</span><span class="p">,</span> <span class="n">toks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="p">[</span><span class="n">tok</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="DictActions"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.actions.DictActions">[docs]</a><span class="k">class</span> <span class="nc">DictActions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -107,14 +107,14 @@
 <div class="viewcode-block" id="DictActions.set"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.actions.DictActions.set">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">=</span> <span class="n">get_nested_dict</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span></div>
-            <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">=</span> <span class="n">get_nested_dict</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span></div>
 
 <div class="viewcode-block" id="DictActions.unset"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.actions.DictActions.unset">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">unset</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">=</span> <span class="n">get_nested_dict</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span></div>
-            <span class="k">del</span> <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">=</span> <span class="n">get_nested_dict</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="DictActions.push"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.actions.DictActions.push">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">push</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
@@ -122,8 +122,8 @@
             <span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">=</span> <span class="n">get_nested_dict</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
                 <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span></div>
-                <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="DictActions.push_all"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.actions.DictActions.push_all">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">push_all</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
@@ -131,8 +131,8 @@
             <span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">=</span> <span class="n">get_nested_dict</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
                 <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span></div>
-                <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span></div>
 
 <div class="viewcode-block" id="DictActions.inc"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.actions.DictActions.inc">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">inc</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
@@ -140,15 +140,15 @@
             <span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">=</span> <span class="n">get_nested_dict</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
                 <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="n">v</span>
-            <span class="k">else</span><span class="p">:</span></div>
-                <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span></div>
 
 <div class="viewcode-block" id="DictActions.rename"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.actions.DictActions.rename">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">input_dict</span><span class="p">:</span>
-                <span class="n">input_dict</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">input_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span></div>
-                <span class="k">del</span> <span class="n">input_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">input_dict</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">input_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="k">del</span> <span class="n">input_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="DictActions.add_to_set"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.actions.DictActions.add_to_set">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">add_to_set</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
@@ -159,8 +159,8 @@
                                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">d</span> <span class="ow">and</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
                 <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span></div>
-                <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="k">elif</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span></div>
 
 <div class="viewcode-block" id="DictActions.pull"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.actions.DictActions.pull">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">pull</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
@@ -169,8 +169,8 @@
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">d</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">list</span><span class="p">)):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Keyword </span><span class="si">{}</span><span class="s2"> does not refer to an array.&quot;</span>
                                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span></div>
-                <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">v</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">v</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="DictActions.pull_all"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.actions.DictActions.pull_all">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">pull_all</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
@@ -178,8 +178,8 @@
             <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">input_dict</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_dict</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="nb">list</span><span class="p">)):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Keyword </span><span class="si">{}</span><span class="s2"> does not refer to an array.&quot;</span>
                                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span></div>
-                <span class="n">DictActions</span><span class="o">.</span><span class="n">pull</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">i</span><span class="p">})</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+                <span class="n">DictActions</span><span class="o">.</span><span class="n">pull</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">i</span><span class="p">})</span></div>
 
 <div class="viewcode-block" id="DictActions.pop"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.actions.DictActions.pop">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
@@ -190,8 +190,8 @@
                                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span></div></div>
-                <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="FileActions"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.actions.FileActions">[docs]</a><span class="k">class</span> <span class="nc">FileActions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -215,8 +215,8 @@
                              <span class="s2">&quot;&#39;content&#39;.&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span></div>
-                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="FileActions.file_move"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.actions.FileActions.file_move">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">file_move</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
@@ -231,8 +231,8 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Settings must only contain one item with key &quot;</span>
                              <span class="s2">&quot;&#39;dest&#39;.&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;dest&quot;</span><span class="p">:</span></div>
-                <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;dest&quot;</span><span class="p">:</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="FileActions.file_delete"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.actions.FileActions.file_delete">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">file_delete</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
@@ -254,8 +254,8 @@
                 <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
                     <span class="c1">#Skip file not found error.</span>
                     <span class="k">pass</span>
-            <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;mode&quot;</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">==</span> <span class="s2">&quot;simulated&quot;</span><span class="p">:</span></div>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Simulated removal of </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;mode&quot;</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">==</span> <span class="s2">&quot;simulated&quot;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Simulated removal of </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="FileActions.file_copy"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.actions.FileActions.file_copy">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">file_copy</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
@@ -267,8 +267,8 @@
 <span class="sd">            settings (dict): Must be {&quot;dest&quot;: path of new file}</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;dest&quot;</span><span class="p">):</span></div>
-                <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;dest&quot;</span><span class="p">):</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="FileActions.file_modify"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.actions.FileActions.file_modify">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">file_modify</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
@@ -282,8 +282,8 @@
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;mode&quot;</span><span class="p">:</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;owners&quot;</span><span class="p">:</span></div></div>
-                <span class="n">os</span><span class="o">.</span><span class="n">chown</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;owners&quot;</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chown</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">v</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>

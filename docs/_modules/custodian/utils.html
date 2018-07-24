@@ -6,10 +6,10 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian.utils &#8212; custodian 2018.3.10 documentation</title>
+    <title>custodian.utils &#8212; custodian 2018.6.11 documentation</title>
     <link rel="stylesheet" href="../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
@@ -38,7 +38,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">custodian 2018.3.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">custodian 2018.6.11 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -88,8 +88,8 @@
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Backing up run to </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
     <span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w:gz&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tar</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span></div>
-                <span class="n">tar</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+                <span class="n">tar</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="get_execution_host_info"><a class="viewcode-back" href="../../custodian.html#custodian.utils.get_execution_host_info">[docs]</a><span class="k">def</span> <span class="nf">get_execution_host_info</span><span class="p">():</span>
@@ -107,8 +107,8 @@
             <span class="kn">import</span> <span class="nn">socket</span>
             <span class="n">host</span> <span class="o">=</span> <span class="n">host</span> <span class="ow">or</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">pass</span></div>
-    <span class="k">return</span> <span class="n">host</span> <span class="ow">or</span> <span class="s1">&#39;unknown&#39;</span><span class="p">,</span> <span class="n">cluster</span> <span class="ow">or</span> <span class="s1">&#39;unknown&#39;</span>
+            <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">host</span> <span class="ow">or</span> <span class="s1">&#39;unknown&#39;</span><span class="p">,</span> <span class="n">cluster</span> <span class="ow">or</span> <span class="s1">&#39;unknown&#39;</span></div>
 </pre></div>
 
           </div>

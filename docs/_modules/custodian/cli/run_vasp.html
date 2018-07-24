@@ -6,10 +6,10 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian.cli.run_vasp &#8212; custodian 2018.3.10 documentation</title>
+    <title>custodian.cli.run_vasp &#8212; custodian 2018.6.11 documentation</title>
     <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
@@ -38,7 +38,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2018.3.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2018.6.11 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -84,8 +84,8 @@
     <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">toks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Bad handler specification&quot;</span><span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">mod</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="nb">locals</span><span class="p">(),</span> <span class="p">[</span><span class="n">toks</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="mi">0</span><span class="p">)</span></div>
-    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">toks</span><span class="p">[</span><span class="mi">0</span><span class="p">])(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+    <span class="n">mod</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="nb">locals</span><span class="p">(),</span> <span class="p">[</span><span class="n">toks</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">toks</span><span class="p">[</span><span class="mi">0</span><span class="p">])(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="get_jobs"><a class="viewcode-back" href="../../../custodian.cli.html#custodian.cli.run_vasp.get_jobs">[docs]</a><span class="k">def</span> <span class="nf">get_jobs</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
@@ -244,8 +244,8 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">job_type</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;full_relax&quot;</span><span class="p">):</span>
             <span class="k">yield</span> <span class="n">VaspJob</span><span class="p">(</span><span class="n">vasp_command</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="n">final</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span>
-                          <span class="n">backup</span><span class="o">=</span><span class="n">backup</span><span class="p">,</span> <span class="n">settings_override</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span></div>
-                          <span class="n">copy_magmom</span><span class="o">=</span><span class="n">copy_magmom</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">)</span>
+                          <span class="n">backup</span><span class="o">=</span><span class="n">backup</span><span class="p">,</span> <span class="n">settings_override</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
+                          <span class="n">copy_magmom</span><span class="o">=</span><span class="n">copy_magmom</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="do_run"><a class="viewcode-back" href="../../../custodian.cli.html#custodian.cli.run_vasp.do_run">[docs]</a><span class="k">def</span> <span class="nf">do_run</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
@@ -260,8 +260,8 @@
     <span class="n">c</span> <span class="o">=</span> <span class="n">Custodian</span><span class="p">(</span><span class="n">handlers</span><span class="p">,</span> <span class="n">get_jobs</span><span class="p">(</span><span class="n">args</span><span class="p">),</span> <span class="n">validators</span><span class="p">,</span>
                   <span class="n">max_errors</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">max_errors</span><span class="p">,</span> <span class="n">scratch_dir</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">scratch</span><span class="p">,</span>
                   <span class="n">gzipped_output</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">gzip</span><span class="p">,</span>
-                  <span class="n">checkpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
-    <span class="n">c</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+                  <span class="n">checkpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../custodian.cli.html#custodian.cli.run_vasp.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
@@ -351,8 +351,8 @@
              <span class="s2">&quot;but this can be overrridden by adding a number to the job&quot;</span>
              <span class="s2">&quot;type, e.g. relax5 relax6 relax7&quot;</span><span class="p">)</span>
 
-    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span></div>
-    <span class="n">do_run</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">do_run</span><span class="p">(</span><span class="n">args</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
