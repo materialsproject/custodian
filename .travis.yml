@@ -12,6 +12,9 @@ addons:
     - liblapack-dev
     - gfortran
     - python-pip
+    - python-openbabel
+virtualenv:
+    system_site_packages: true
 before_install:
   - sudo apt-get install -qq -y swig python-dev
   - wget http://mirrors.kernel.org/ubuntu/pool/universe/o/openbabel/libopenbabel4_2.3.2+dfsg-1.1_amd64.deb
@@ -21,6 +24,7 @@ before_install:
 install:
   - "easy_install -U setuptools"
   - travis_wait pip install -r requirements-ci.txt --upgrade
+  - pip install openbabel
 # This is needed, otherwise, nosetests can't find the installed pymatgen C
 # extensions.
 before_script:
