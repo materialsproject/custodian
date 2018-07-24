@@ -12,6 +12,7 @@ addons:
     - liblapack-dev
     - gfortran
     - python-pip
+    - python-openbabel
 install:
   - "easy_install -U setuptools"
   - travis_wait pip install -r requirements-ci.txt --upgrade
