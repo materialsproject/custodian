@@ -1,6 +1,5 @@
 language: python
 python:
-  - "2.7"
   - "3.6"
 # command to install dependencies
 sudo: false
@@ -12,9 +11,17 @@ addons:
     - liblapack-dev
     - gfortran
     - python-pip
+    - python-openbabel
+before_install:
+  - sudo apt-get install -qq -y swig python-dev
+  - wget http://mirrors.kernel.org/ubuntu/pool/universe/o/openbabel/libopenbabel4_2.3.2+dfsg-1.1_amd64.deb
+  - sudo dpkg -i libopenbabel4_2.3.2+dfsg-1.1_amd64.deb
+  - wget http://mirrors.kernel.org/ubuntu/pool/universe/o/openbabel/libopenbabel-dev_2.3.2+dfsg-1.1_amd64.deb
+  - sudo dpkg -i libopenbabel-dev_2.3.2+dfsg-1.1_amd64.deb
 install:
   - "easy_install -U setuptools"
   - travis_wait pip install -r requirements-ci.txt --upgrade
+  - pip install openbabel
 # This is needed, otherwise, nosetests can't find the installed pymatgen C
 # extensions.
 before_script:

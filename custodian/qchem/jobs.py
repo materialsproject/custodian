@@ -1,392 +1,265 @@
 # coding: utf-8
 
 from __future__ import unicode_literals, division
-import glob
-import logging
-import shlex
-import socket
-import re
-import time
+import math
 
-from pkg_resources import parse_version
+# New QChem job module
 
-"""
-This module implements basic kinds of jobs for QChem runs.
-"""
 
 import os
 import shutil
 import copy
 import subprocess
-from pymatgen.io.qchem import QcInput, QcOutput
-from custodian.custodian import Job, gzip_dir
+import numpy as np
+from pymatgen.core import Molecule
+from pymatgen.io.qchem.inputs import QCInput
+from pymatgen.io.qchem.outputs import QCOutput
+from custodian.custodian import Job
+from pymatgen.analysis.molecule_structure_comparator import MoleculeStructureComparator
 
-__author__ = "Xiaohui Qu"
+__author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath"
+__copyright__ = "Copyright 2018, The Materials Project"
 __version__ = "0.1"
-__maintainer__ = "Xiaohui Qu"
-__email__ = "xhqu1981@gmail.com"
+__maintainer__ = "Samuel Blau"
+__email__ = "samblau1@gmail.com"
 __status__ = "Alpha"
-__date__ = "12/03/13"
+__date__ = "3/20/18"
+__credits__ = "Xiaohui Qu"
 
 
-class QchemJob(Job):
+class QCJob(Job):
     """
     A basic QChem Job.
     """
 
-    def __init__(self, qchem_cmd, input_file="mol.qcinp",
-                 output_file="mol.qcout", chk_file=None, qclog_file=None,
-                 gzipped=False, backup=True, alt_cmd=None,
-                 large_static_mem=False, total_physical_memory=100,
-                 run_name=None):
+    def __init__(self,
+                 qchem_command,
+                 multimode="openmp",
+                 input_file="mol.qin",
+                 output_file="mol.qout",
+                 max_cores=32,
+                 qclog_file="mol.qclog",
+                 suffix="",
+                 scratch_dir="/dev/shm/qcscratch/",
+                 save_scratch=False,
+                 save_name="default_save_name",
+                 backup=True):
         """
-        This constructor is necessarily complex due to the need for
-        flexibility. For standard kinds of runs, it's often better to use one
-        of the static constructors.
-
         Args:
-            qchem_cmd ([str]): Command to run QChem as a list args (without
-                input/output file name). For example: ["qchem", "-np", "24"]
+            qchem_command (str): Command to run QChem.
+            multimode (str): Parallelization scheme, either openmp or mpi.
             input_file (str): Name of the QChem input file.
             output_file (str): Name of the QChem output file.
-            chk_file (str): Name of the QChem check point file. None means no
-                checkpoint point file. Defaults to None.
+            max_cores (int): Maximum number of cores to parallelize over.
+                Defaults to 32.
             qclog_file (str): Name of the file to redirect the standard output
-                to. None means not to record the standard output. Defaults to
-                None.
-            gzipped (bool): Whether to gzip the final output. Defaults to False.
-            backup (bool): Whether to backup the initial input files. If True,
-                the input files will be copied with a ".orig" appended.
-                Defaults to True.
-            alt_cmd (dict of list): Alternate commands.
-                For example: {"openmp": ["qchem", "-seq", "-nt", "24"]
-                              "half_cpus": ["qchem", "-np", "12"]}
-            large_static_mem: use ultra large static memory
-            total_physical_memory (int): The total physical memory available to
-                the QChem job in unit of GB.
-            run_name (str): the name to save scratch files.
+                to. None means not to record the standard output.
+            suffix (str): String to append to the file in postprocess.
+            scratch_dir (str): QCSCRATCH directory. Defaults to "/dev/shm/qcscratch/".
+            save_scratch (bool): Whether to save scratch directory contents.
+                Defaults to False.
+            save_name (str): Name of the saved scratch directory. Defaults to
+                to "default_save_name".
+            backup (bool): Whether to backup the initial input file. If True, the
+                input will be copied with a ".orig" appended. Defaults to True.
         """
-        self.qchem_cmd = self._modify_qchem_according_to_version(copy.deepcopy(qchem_cmd))
-        self.run_name = "" if run_name is None else run_name
+        self.qchem_command = qchem_command.split(" ")
+        self.multimode = multimode
         self.input_file = input_file
         self.output_file = output_file
-        self.chk_file = chk_file
+        self.max_cores = max_cores
         self.qclog_file = qclog_file
-        self.gzipped = gzipped
+        self.suffix = suffix
+        self.scratch_dir = scratch_dir
+        self.save_scratch = save_scratch
+        self.save_name = save_name
         self.backup = backup
-        self.current_command = self.qchem_cmd
-        self.current_command_name = "general"
-        self.total_physical_memory = total_physical_memory
-        self.large_static_mem = large_static_mem
-        self.alt_cmd = {k: self._modify_qchem_according_to_version(c)
-                        for k, c in copy.deepcopy(alt_cmd).items()}
-        available_commands = ["general"]
-        if self.alt_cmd:
-            available_commands.extend(self.alt_cmd.keys())
-        self._set_qchem_memory()
 
-
-    @classmethod
-    def _modify_qchem_according_to_version(cls, qchem_cmd):
-        cmd2 = copy.deepcopy(qchem_cmd)
-        try:
-            from rubicon.utils.qchem_info import get_qchem_version
-            cur_version = get_qchem_version()
-        except:
-            cur_version = parse_version("4.3.0")
-        if cmd2 is not None:
-            if cur_version >= parse_version("4.3.0"):
-                if cmd2[0] == "qchem":
-                    if "-seq" in cmd2:
-                        cmd2.remove("-seq")
-                    if "NERSC_HOST" in os.environ and \
-                            os.environ["NERSC_HOST"] in ["cori", "edison"]:
-                        if "-dbg" not in cmd2:
-                            cmd2.insert(1, "-dbg")
-                        if "-seq" in cmd2:
-                            cmd2.remove("-seq")
-                    elif "NERSC_HOST" in os.environ and \
-                            os.environ["NERSC_HOST"] == "matgen":
-                        if "-dbg" not in cmd2:
-                            cmd2.insert(1, "-dbg")
-                        if "-seq" in cmd2:
-                            cmd2.remove("-seq")
-            else:
-                if "-dbg" in cmd2:
-                    cmd2.remove("-dbg")
-                if "-pbs" in cmd2:
-                    cmd2.remove("-pbs")
-        return cmd2
-
-    def _set_qchem_memory(self, qcinp=None):
-        instance_ratio = 1.0
-        if "QCSCRATCH" in os.environ and \
-            ("/tmp" in os.environ["QCSCRATCH"] or
-             "/dev/shm" in os.environ["QCSCRATCH"]):
-            instance_ratio = 0.5
-
-        nprocs = 1
-        if "-np" in self.current_command:
-            nprocs = int(self.current_command[self.current_command.index("-np") + 1])
-        mem_per_proc = self.total_physical_memory * 1000 // nprocs
-
-        if self.large_static_mem:
-            static_ratio = 0.4
+    @property
+    def current_command(self):
+        multimode_index = 0
+        if self.save_scratch:
+            command = [
+                "-save", "",
+                str(self.max_cores), self.input_file, self.output_file,
+                self.save_name
+            ]
+            multimode_index = 1
         else:
-            static_ratio = 0.1
-        total_mem = int(mem_per_proc * instance_ratio)
-        static_mem = int(total_mem * static_ratio)
-        if not qcinp:
-            qcinp = QcInput.from_file(self.input_file)
-        for j in qcinp.jobs:
-            j.set_memory(total=total_mem, static=static_mem)
-        qcinp.write_file(self.input_file)
-
-    @staticmethod
-    def is_openmp_compatible(qcinp):
-        for j in qcinp.jobs:
-            if j.params["rem"]["jobtype"] == "freq":
-                return False
-            try:
-                from rubicon.utils.qchem_info import get_qchem_version
-                cur_version = get_qchem_version()
-            except:
-                cur_version = parse_version("4.3.0")
-            if cur_version < parse_version("4.3.0"):
-                if j.params["rem"]["exchange"] in ["pbe", "b"] \
-                    and "correlation" in j.params['rem'] \
-                        and j.params["rem"]["correlation"] in ["pbe", "lyp"]:
-                    return False
-        return True
-
-    def command_available(self, cmd_name):
-        available_commands = ["general"]
-        if self.alt_cmd:
-            available_commands.extend(self.alt_cmd.keys())
-        return cmd_name in available_commands
-
-    def select_command(self, cmd_name, qcinp=None):
-        """
-        Set the command to run QChem by name. "general" set to the default one.
-            Args:
-                cmd_name: the command name to change to.
-                qcinp: the QcInput object to operate on.
-
-        Returns:
-            True: success
-            False: failed
-        """
-        if not self.command_available(cmd_name):
-            raise Exception("Command mode \"{cmd_name}\" is not available".format(cmd_name=cmd_name))
-        if cmd_name == "general":
-            self.current_command = self.qchem_cmd
+            command = [
+                "", str(self.max_cores), self.input_file, self.output_file
+            ]
+        if self.multimode == 'openmp':
+            command[multimode_index] = "-nt"
+        elif self.multimode == 'mpi':
+            command[multimode_index] = "-np"
         else:
-            self.current_command = self.alt_cmd[cmd_name]
-        self.current_command_name = cmd_name
-        self._set_qchem_memory(qcinp)
-        return True
+            print("ERROR: Multimode should only be set to openmp or mpi")
+        command = self.qchem_command + command
+        return command
 
     def setup(self):
         if self.backup:
-            i = 0
-            while os.path.exists("{}.{}.orig".format(self.input_file, i)):
-                i += 1
-            shutil.copy(self.input_file,
-                        "{}.{}.orig".format(self.input_file, i))
-            if self.chk_file and os.path.exists(self.chk_file):
-                shutil.copy(self.chk_file,
-                            "{}.{}.orig".format(self.chk_file, i))
-            if os.path.exists(self.output_file):
-                shutil.copy(self.output_file,
-                            "{}.{}.orig".format(self.output_file, i))
-            if self.qclog_file and os.path.exists(self.qclog_file):
-                shutil.copy(self.qclog_file,
-                            "{}.{}.orig".format(self.qclog_file, i))
-
-    def _run_qchem(self, log_file_object=None):
-        if 'vesta' in socket.gethostname():
-            # on ALCF
-            returncode = self._run_qchem_on_alcf(log_file_object=log_file_object)
-        else:
-            qc_cmd = copy.deepcopy(self.current_command)
-            if len(self.run_name.strip()) > 0:
-                qc_cmd.insert(1, "-save")
-            qc_cmd += [self.input_file, self.output_file]
-            qc_cmd = shlex.split(" ".join(qc_cmd + [self.run_name]))
-            qc_cmd = [str(t) for t in qc_cmd]
-            if self.chk_file:
-                qc_cmd.append(self.chk_file)
-            if log_file_object:
-                returncode = subprocess.call(qc_cmd, stdout=log_file_object)
-            else:
-                returncode = subprocess.call(qc_cmd)
-        return returncode
-
-    def _run_qchem_on_alcf(self, log_file_object=None):
-        parent_qcinp = QcInput.from_file(self.input_file)
-        njobs = len(parent_qcinp.jobs)
-        return_codes = []
-        alcf_cmds = []
-        qc_jobids = []
-        for i, j in enumerate(parent_qcinp.jobs):
-            qsub_cmd = copy.deepcopy(self.current_command)
-            sub_input_filename = "alcf_{}_{}".format(i+1, self.input_file)
-            sub_output_filename = "alcf_{}_{}".format(i+1, self.output_file)
-            sub_log_filename = "alcf_{}_{}".format(i+1, self.qclog_file)
-            qsub_cmd[-2] = sub_input_filename
-            sub_qcinp = QcInput([copy.deepcopy(j)])
-            if "scf_guess" in sub_qcinp.jobs[0].params["rem"] and \
-                    sub_qcinp.jobs[0].params["rem"]["scf_guess"] == "read":
-                sub_qcinp.jobs[0].params["rem"].pop("scf_guess")
-            if i > 0:
-                if isinstance(j.mol, str) and j.mol == "read":
-                    prev_qcout_filename = "alcf_{}_{}".format(i+1-1, self.output_file)
-                    prev_qcout = QcOutput(prev_qcout_filename)
-                    prev_final_mol = prev_qcout.data[0]["molecules"][-1]
-                    j.mol = prev_final_mol
-            sub_qcinp.write_file(sub_input_filename)
-            logging.info("The command to run QChem is {}".format(' '.join(qsub_cmd)))
-            alcf_cmds.append(qsub_cmd)
-            p = subprocess.Popen(qsub_cmd,
-                                 stdin=subprocess.PIPE,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE)
-            out, err = p.communicate()
-            qc_jobid = int(out.strip())
-            qc_jobids.append(qc_jobid)
-            cqwait_cmd = shlex.split("cqwait {}".format(qc_jobid))
-            subprocess.call(cqwait_cmd)
-            output_file_name = "{}.output".format(qc_jobid)
-            cobaltlog_file_name = "{}.cobaltlog".format(qc_jobid)
-            with open(cobaltlog_file_name) as f:
-                cobaltlog_last_line = f.readlines()[-1]
-                exit_code_pattern = re.compile("an exit code of (?P<code>\d+);")
-                m = exit_code_pattern.search(cobaltlog_last_line)
-                if m:
-                    rc = float(m.group("code"))
-                else:
-                    rc = -99999
-                return_codes.append(rc)
-            for name_change_trial in range(10):
-                if not os.path.exists(output_file_name):
-                    message = "{} is not found in {}, {}th wait " \
-                              "for 5 mins\n".format(
-                                    output_file_name,
-                                    os.getcwd(), name_change_trial)
-                    logging.info(message)
-                    if log_file_object:
-                        log_file_object.writelines([message])
-                    time.sleep(60 * 5)
-                    pass
-                else:
-                    message = "Found qchem output file {} in {}, change file " \
-                              "name\n".format(output_file_name,
-                                              os.getcwd(),
-                                              name_change_trial)
-                    logging.info(message)
-                    if log_file_object:
-                        log_file_object.writelines([message])
-                    break
-            log_file_object.flush()
-            os.fsync(log_file_object.fileno())
-            shutil.move(output_file_name, sub_output_filename)
-            shutil.move(cobaltlog_file_name, sub_log_filename)
-        overall_return_code = min(return_codes)
-        with open(self.output_file, "w") as out_file_object:
-            for i, job_cmd, rc, qc_jobid in zip(range(njobs), alcf_cmds, return_codes, qc_jobids):
-                sub_output_filename = "alcf_{}_{}".format(i+1, self.output_file)
-                sub_log_filename = "alcf_{}_{}".format(i+1, self.qclog_file)
-                with open(sub_output_filename) as sub_out_file_object:
-                    header_lines = ["Running Job {} of {} {}\n".format(i + 1, njobs, self.input_file),
-                                    " ".join(job_cmd) + "\n"]
-                    if i > 0:
-                        header_lines = ['', ''] + header_lines
-                    sub_out = sub_out_file_object.readlines()
-                    out_file_object.writelines(header_lines)
-                    out_file_object.writelines(sub_out)
-                    if rc < 0 and rc != -99999:
-                        out_file_object.writelines(["Application {} exit codes: {}\n".format(qc_jobid, rc), '\n', '\n'])
-                if log_file_object:
-                    with open(sub_log_filename) as sub_log_file_object:
-                        sub_log = sub_log_file_object.readlines()
-                        log_file_object.writelines(sub_log)
-        return overall_return_code
-
-    def run(self):
-        if "NERSC_HOST" in os.environ and (os.environ["NERSC_HOST"] in ["cori", "edison"]):
-            nodelist = os.environ["QCNODE"]
-            num_nodes = len(nodelist.split(","))
-            tmp_creation_cmd = shlex.split("srun -N {} --ntasks-per-node 1 --nodelist {}  mkdir /dev/shm/eg_qchem".format(num_nodes, nodelist))
-            tmp_clean_cmd = shlex.split("srun -N {} --ntasks-per-node 1 --nodelist {} rm -rf /dev/shm/eg_qchem".format(num_nodes, nodelist))
-        elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "matgen":
-            nodelist = os.environ["QCNODE"]
-            num_nodes = len(nodelist.split(","))
-            tmp_creation_cmd = shlex.split("mpirun -np {} --npernode 1 --host {}  mkdir /dev/shm/eg_qchem".format(num_nodes, nodelist))
-            tmp_clean_cmd = shlex.split("mpirun -np {} --npernode 1 --host {} rm -rf /dev/shm/eg_qchem".format(num_nodes, nodelist))
-        else:
-            tmp_clean_cmd = None
-            tmp_creation_cmd = None
-        logging.info("Scratch dir creation command is {}".format(tmp_creation_cmd))
-        logging.info("Scratch dir deleting command is {}".format(tmp_clean_cmd))
-        if self.qclog_file:
-            with open(self.qclog_file, "a") as filelog:
-                if tmp_clean_cmd:
-                    filelog.write("delete scratch before running qchem using command {}\n".format(tmp_clean_cmd))
-                    subprocess.call(tmp_clean_cmd, stdout=filelog)
-                if tmp_creation_cmd:
-                    filelog.write("Create scratch dir before running qchem using command {}\n".format(tmp_creation_cmd))
-                    subprocess.call(tmp_creation_cmd, stdout=filelog)
-                returncode = self._run_qchem(log_file_object=filelog)
-                if tmp_clean_cmd:
-                    filelog.write("Finished running qchem using command {}\n, "
-                                  "no clean of SCRATCH will be performed".format(tmp_clean_cmd))
-                    # subprocess.call(tmp_clean_cmd, stdout=filelog)
-        else:
-            if tmp_clean_cmd:
-                subprocess.call(tmp_clean_cmd)
-            if tmp_creation_cmd:
-                subprocess.call(tmp_creation_cmd)
-            returncode = self._run_qchem()
-            if tmp_clean_cmd:
-                subprocess.call(tmp_clean_cmd)
-        return returncode
-
-    def as_dict(self):
-        d = {"@module": self.__class__.__module__,
-             "@class": self.__class__.__name__,
-             "qchem_cmd": self.qchem_cmd,
-             "input_file": self.input_file,
-             "output_file": self.output_file,
-             "chk_file": self.chk_file,
-             "qclog_file": self.qclog_file,
-             "gzipped": self.gzipped,
-             "backup": self.backup,
-             "large_static_mem": self.large_static_mem,
-             "alt_cmd": self.alt_cmd,
-             "run_name": self.run_name}
-        return d
-
-    @classmethod
-    def from_dict(cls, d):
-        return QchemJob(qchem_cmd=d["qchem_cmd"],
-                        input_file=d["input_file"],
-                        output_file=d["output_file"],
-                        chk_file=d["chk_file"],
-                        qclog_file=d["qclog_file"],
-                        gzipped=d["gzipped"],
-                        backup=d["backup"],
-                        alt_cmd=d["alt_cmd"],
-                        large_static_mem=d["large_static_mem"],
-                        run_name=d["run_name"])
+            shutil.copy(self.input_file, "{}.orig".format(self.input_file))
+        os.putenv("QCSCRATCH", self.scratch_dir)
+        if self.multimode == 'openmp':
+            os.putenv('QCTHREADS', str(self.max_cores))
+            os.putenv('OMP_NUM_THREADS', str(self.max_cores))
 
     def postprocess(self):
-        if self.gzipped:
-            if "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "edison":
-                cur_dir = os.getcwd()
-                file_list = [os.path.join(cur_dir, name) for name in glob.glob("*")]
-                nodelist = os.environ["QCNODE"]
-                gzip_cmd = shlex.split("srun -N 1 --ntasks-per-node 1 --nodelist  "
-                                       "{} gzip".format(nodelist)) + file_list
-                subprocess.call(gzip_cmd)
+        if self.save_scratch:
+            shutil.copytree(
+                os.path.join(self.scratch_dir, self.save_name),
+                os.path.join(os.path.dirname(self.input_file), self.save_name))
+        if self.suffix != "":
+            shutil.move(self.input_file, self.input_file + self.suffix)
+            shutil.move(self.output_file, self.output_file + self.suffix)
+            shutil.move(self.qclog_file, self.qclog_file + self.suffix)
+
+    def run(self):
+        """
+        Perform the actual QChem run.
+
+        Returns:
+            (subprocess.Popen) Used for monitoring.
+        """
+        qclog = open(self.qclog_file, 'w')
+        p = subprocess.Popen(self.current_command, stdout=qclog)
+        return p
+
+    @classmethod
+    def opt_with_frequency_flattener(cls,
+                                     qchem_command,
+                                     multimode="openmp",
+                                     input_file="mol.qin",
+                                     output_file="mol.qout",
+                                     qclog_file="mol.qclog",
+                                     max_iterations=10,
+                                     max_molecule_perturb_scale=0.3,
+                                     reversed_direction=False,
+                                     ignore_connectivity=False,
+                                     **QCJob_kwargs):
+        """
+        Optimize a structure and calculate vibrational frequencies to check if the
+        structure is in a true minima. If a frequency is negative, iteratively
+        perturbe the geometry, optimize, and recalculate frequencies until all are
+        positive, aka a true minima has been found.
+
+        Args:
+            qchem_command (str): Command to run QChem.
+            multimode (str): Parallelization scheme, either openmp or mpi.
+            input_file (str): Name of the QChem input file.
+            output_file (str): Name of the QChem output file.
+            max_iterations (int): Number of perturbation -> optimization -> frequency
+                iterations to perform. Defaults to 10.
+            max_molecule_perturb_scale (float): The maximum scaled perturbation that
+                can be applied to the molecule. Defaults to 0.3.
+            reversed_direction (bool): Whether to reverse the direction of the
+                vibrational frequency vectors. Defaults to False.
+            ignore_connectivity (bool): Whether to ignore differences in connectivity
+                introduced by structural perturbation. Defaults to False.
+            **QCJob_kwargs: Passthrough kwargs to QCJob. See
+                :class:`custodian.qchem.jobs.QCJob`.
+        """
+
+        min_molecule_perturb_scale = 0.1
+        scale_grid = 10
+        perturb_scale_grid = (
+            max_molecule_perturb_scale - min_molecule_perturb_scale
+        ) / scale_grid
+        msc = MoleculeStructureComparator()
+
+        if not os.path.exists(input_file):
+            raise AssertionError('Input file must be present!')
+        orig_opt_input = QCInput.from_file(input_file)
+        orig_opt_rem = copy.deepcopy(orig_opt_input.rem)
+        orig_freq_rem = copy.deepcopy(orig_opt_input.rem)
+        orig_freq_rem["job_type"] = "freq"
+        first = True
+
+        for ii in range(max_iterations):
+            yield (QCJob(
+                qchem_command=qchem_command,
+                multimode=multimode,
+                input_file=input_file,
+                output_file=output_file,
+                qclog_file=qclog_file,
+                suffix=".opt_" + str(ii),
+                backup=first,
+                **QCJob_kwargs))
+            first = False
+            opt_outdata = QCOutput(output_file + ".opt_" + str(ii)).data
+            if opt_outdata["structure_change"] == "unconnected_fragments":
+                print("Unstable molecule broke into unconnected fragments! Exiting...")
+                break
             else:
-                gzip_dir(".")
+                freq_QCInput = QCInput(
+                    molecule=opt_outdata.get("molecule_from_optimized_geometry"),
+                    rem=orig_freq_rem,
+                    opt=orig_opt_input.opt,
+                    pcm=orig_opt_input.pcm,
+                    solvent=orig_opt_input.solvent)
+                freq_QCInput.write_file(input_file)
+                yield (QCJob(
+                    qchem_command=qchem_command,
+                    multimode=multimode,
+                    input_file=input_file,
+                    output_file=output_file,
+                    qclog_file=qclog_file,
+                    suffix=".freq_" + str(ii),
+                    backup=first,
+                    **QCJob_kwargs))
+                outdata = QCOutput(output_file + ".freq_" + str(ii)).data
+                errors = outdata.get("errors")
+                if len(errors) != 0:
+                    raise AssertionError('No errors should be encountered while flattening frequencies!')
+                if outdata.get('frequencies')[0] > 0.0:
+                    print("All frequencies positive!")
+                    break
+                else:
+                    negative_freq_vecs = outdata.get("frequency_mode_vectors")[0]
+                    old_coords = outdata.get("initial_geometry")
+                    old_molecule = outdata.get("initial_molecule")
+                    structure_successfully_perturbed = False
+
+                    for molecule_perturb_scale in np.arange(
+                            max_molecule_perturb_scale, min_molecule_perturb_scale,
+                            -perturb_scale_grid):
+                        new_coords = perturb_coordinates(
+                            old_coords=old_coords,
+                            negative_freq_vecs=negative_freq_vecs,
+                            molecule_perturb_scale=molecule_perturb_scale,
+                            reversed_direction=reversed_direction)
+                        new_molecule = Molecule(
+                            species=outdata.get('species'),
+                            coords=new_coords,
+                            charge=outdata.get('charge'),
+                            spin_multiplicity=outdata.get('multiplicity'))
+                        if msc.are_equal(old_molecule, new_molecule) or ignore_connectivity:
+                            structure_successfully_perturbed = True
+                            break
+                    if not structure_successfully_perturbed:
+                        raise Exception(
+                            "Unable to perturb coordinates to remove negative frequency without changing the bonding structure"
+                        )
+
+                    new_opt_QCInput = QCInput(
+                        molecule=new_molecule,
+                        rem=orig_opt_rem,
+                        opt=orig_opt_input.opt,
+                        pcm=orig_opt_input.pcm,
+                        solvent=orig_opt_input.solvent)
+                    new_opt_QCInput.write_file(input_file)
+
+
+def perturb_coordinates(old_coords, negative_freq_vecs, molecule_perturb_scale,
+                        reversed_direction):
+    max_dis = max(
+        [math.sqrt(sum([x**2 for x in vec])) for vec in negative_freq_vecs])
+    scale = molecule_perturb_scale / max_dis
+    normalized_vecs = [[x * scale for x in vec] for vec in negative_freq_vecs]
+    direction = 1.0
+    if reversed_direction:
+        direction = -1.0
+    return [[c + v * direction for c, v in zip(coord, vec)]
+            for coord, vec in zip(old_coords, normalized_vecs)]
