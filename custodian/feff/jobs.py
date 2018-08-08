@@ -34,6 +34,7 @@ class FeffJob(Job):
                  gzipped=False, gzipped_prefix='feff_out'):
         """
         This constructor is used for a standard FEFF initialization
+
         Args:
             feff_cmd (str): the name of the full executable for running FEFF
             output_file (str): Name of file to direct standard out to.
