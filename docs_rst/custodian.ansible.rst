@@ -1,5 +1,5 @@
-custodian.ansible package
-=========================
+custodian\.ansible package
+==========================
 
 Subpackages
 -----------
@@ -10,16 +10,16 @@ Subpackages
 Submodules
 ----------
 
-custodian.ansible.actions module
---------------------------------
+custodian\.ansible\.actions module
+----------------------------------
 
 .. automodule:: custodian.ansible.actions
     :members:
     :undoc-members:
     :show-inheritance:
 
-custodian.ansible.interpreter module
-------------------------------------
+custodian\.ansible\.interpreter module
+--------------------------------------
 
 .. automodule:: custodian.ansible.interpreter
     :members:

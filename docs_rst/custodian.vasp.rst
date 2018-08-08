@@ -1,5 +1,5 @@
-custodian.vasp package
-======================
+custodian\.vasp package
+=======================
 
 Subpackages
 -----------
@@ -10,32 +10,32 @@ Subpackages
 Submodules
 ----------
 
-custodian.vasp.handlers module
-------------------------------
+custodian\.vasp\.handlers module
+--------------------------------
 
 .. automodule:: custodian.vasp.handlers
     :members:
     :undoc-members:
     :show-inheritance:
 
-custodian.vasp.interpreter module
----------------------------------
+custodian\.vasp\.interpreter module
+-----------------------------------
 
 .. automodule:: custodian.vasp.interpreter
     :members:
     :undoc-members:
     :show-inheritance:
 
-custodian.vasp.jobs module
---------------------------
+custodian\.vasp\.jobs module
+----------------------------
 
 .. automodule:: custodian.vasp.jobs
     :members:
     :undoc-members:
     :show-inheritance:
 
-custodian.vasp.validators module
---------------------------------
+custodian\.vasp\.validators module
+----------------------------------
 
 .. automodule:: custodian.vasp.validators
     :members:

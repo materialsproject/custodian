@@ -16,16 +16,16 @@ Subpackages
 Submodules
 ----------
 
-custodian.custodian module
---------------------------
+custodian\.custodian module
+---------------------------
 
 .. automodule:: custodian.custodian
     :members:
     :undoc-members:
     :show-inheritance:
 
-custodian.utils module
-----------------------
+custodian\.utils module
+-----------------------
 
 .. automodule:: custodian.utils
     :members:
