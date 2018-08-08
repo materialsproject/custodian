@@ -21,7 +21,6 @@ jobs:
             export MPLBACKEND=Agg
             pip install --quiet -e .
             nosetests --config=nose.cfg --cover-html --cover-html-dir=coverage_reports
-            if [ "$CI_PULL_REQUEST" == "" ]; then coveralls; fi
           no_output_timeout: 3600
       - store_artifacts:
           path: coverage_reports/
