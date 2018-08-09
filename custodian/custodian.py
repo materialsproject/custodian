@@ -209,7 +209,7 @@ class Custodian(object):
 
         Args:
             spec (dict): A dict specifying job. A sample of the dict in
-                YAML format for the usual MP workflow is given as follows:
+                YAML format for the usual MP workflow is given as follows
 
                 ```
                 jobs:
