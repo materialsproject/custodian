@@ -177,7 +177,7 @@ class VaspJob(Job):
                 # Default functionality is to copy CONTCAR to POSCAR and set
                 # ISTART to 1 in the INCAR, but other actions can be specified
                 if self.auto_continue is True:
-                    actions = [{"file": "CONTCAR", 
+                    actions = [{"file": "CONTCAR",
                                 "action": {"_file_copy": {"dest": "POSCAR"}}},
                                {"dict": "INCAR",
                                 "action": {"_set": {"ISTART": 1}}}]
@@ -304,7 +304,7 @@ class VaspJob(Job):
         Returns a list of thres jobs to perform an optimization for any
         metaGGA functional. There is an initial calculation of the
         GGA wavefunction which is fed into the initial metaGGA optimization
-        to precondition the electronic structure optimizer. The metaGGA 
+        to precondition the electronic structure optimizer. The metaGGA
         optimization is performed using the double relaxation scheme
         """
 
@@ -797,9 +797,9 @@ class GenerateVaspInputJob(Job):
         """
         Generates a VASP input based on an existing directory. This is typically
         used to modify the VASP input files before the next VaspJob.
-        
+
         Args:
-            input_set (str): Full path to the input set. E.g., 
+            input_set (str): Full path to the input set. E.g.,
                 "pymatgen.io.vasp.sets.MPNonSCFSet".
             contcar_only (bool): If True (default), only CONTCAR structures
                 are used as input to the input set.
