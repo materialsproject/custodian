@@ -43,11 +43,11 @@ class VaspJobTest(unittest.TestCase):
             with ScratchDir('.', copy_from_current_on_enter=True) as d:
                 v = VaspJob("hello")
                 v.setup()
-                # Broke when updating Travis to work with OpenBabel. Will open an issue!
-                # incar = Incar.from_file("INCAR")
-                # count = multiprocessing.cpu_count()
-                # if count > 1:
-                #     self.assertGreater(incar["NPAR"], 1)
+                incar = Incar.from_file("INCAR")
+                count = multiprocessing.cpu_count()
+                # Need at least 3 CPUs for NPAR to be greater than 1
+                if count > 3:
+                    self.assertGreater(incar["NPAR"], 1)
 
     def test_postprocess(self):
         with cd(os.path.join(test_dir, 'postprocess')):
@@ -113,7 +113,6 @@ class VaspNEBJobTest(unittest.TestCase):
                 v = VaspNEBJob("hello", half_kpts=True)
                 v.setup()
 
-                # Broke when updating Travis to work with OpenBabel. Will open an issue!
                 incar = Incar.from_file("INCAR")
                 count = multiprocessing.cpu_count()
                 if count > 3:
