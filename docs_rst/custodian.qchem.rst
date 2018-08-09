@@ -26,22 +26,6 @@ custodian.qchem.jobs module
     :undoc-members:
     :show-inheritance:
 
-custodian.qchem.new\_handlers module
-------------------------------------
-
-.. automodule:: custodian.qchem.new_handlers
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-custodian.qchem.new\_jobs module
---------------------------------
-
-.. automodule:: custodian.qchem.new_jobs
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 
 Module contents
 ---------------

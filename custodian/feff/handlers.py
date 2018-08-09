@@ -32,10 +32,11 @@ class UnconvergedErrorHandler(ErrorHandler):
     def __init__(self, output_filename='log1.dat'):
         """
         Initializes the handler with the output file to check
+
         Args:
             output_filename (str): Filename for the log1.dat file. log1.dat file
-             contains the SCF calculation convergence information. Change this only
-             if it is different from the default (unlikely).
+                contains the SCF calculation convergence information. Change this only
+                if it is different from the default (unlikely).
         """
         self.output_filename = output_filename
 
