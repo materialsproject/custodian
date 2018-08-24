@@ -132,6 +132,39 @@ class OptFFTest1(TestCase):
         self.assertEqual(next(myjob).as_dict(),expected_next)
         self.assertRaises(StopIteration,myjob.__next__)
 
+class OptFFTest2(TestCase):
+    def setUp(self):
+        os.makedirs(scr_dir)
+        shutil.copyfile(os.path.join(test_dir,"disconnected_but_converged/mol.qin.orig"),os.path.join(scr_dir,"mol.qin"))
+        shutil.copyfile(os.path.join(test_dir,"disconnected_but_converged/mol.qout.opt_0"),os.path.join(scr_dir,"mol.qout.opt_0"))
+        shutil.copyfile(os.path.join(test_dir,"disconnected_but_converged/mol.qout.freq_0"),os.path.join(scr_dir,"mol.qout.freq_0"))
+        os.chdir(scr_dir)
+
+    def tearDown(self):
+        os.chdir(cwd)
+        shutil.rmtree(scr_dir)
+
+    def test_OptFF(self):
+        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", input_file="mol.qin", output_file="mol.qout")
+        expected_next = QCJob(
+                        qchem_command="qchem -slurm",
+                        multimode="openmp",
+                        input_file="mol.qin",
+                        output_file="mol.qout",
+                        suffix=".opt_0",
+                        backup=True).as_dict()
+        self.assertEqual(next(myjob).as_dict(),expected_next)
+        expected_next = QCJob(
+                        qchem_command="qchem -slurm",
+                        multimode="openmp",
+                        input_file="mol.qin",
+                        output_file="mol.qout",
+                        suffix=".freq_0",
+                        backup=False).as_dict()
+        self.assertEqual(next(myjob).as_dict(),expected_next)
+        self.assertEqual(QCInput.from_file(os.path.join(test_dir,"disconnected_but_converged/mol.qin.freq_0")).as_dict(),QCInput.from_file(os.path.join(scr_dir,"mol.qin")).as_dict())
+        self.assertRaises(StopIteration,myjob.__next__)
+
 
 if __name__ == "__main__":
     unittest.main()
