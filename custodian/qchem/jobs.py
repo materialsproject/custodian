@@ -189,8 +189,8 @@ class QCJob(Job):
                 **QCJob_kwargs))
             first = False
             opt_outdata = QCOutput(output_file + ".opt_" + str(ii)).data
-            if opt_outdata["structure_change"] == "unconnected_fragments":
-                print("Unstable molecule broke into unconnected fragments! Exiting...")
+            if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
+                print("Unstable molecule broke into unconnected fragments which failed to optimize! Exiting...")
                 break
             else:
                 freq_QCInput = QCInput(
