@@ -100,14 +100,14 @@ class QChemErrorHandler(ErrorHandler):
                         "molecule_from_last_geometry")
                     actions.append({"molecule": "molecule_from_last_geometry"})
             # If already at geom_max_cycles, often can just get convergence by restarting
-            # from the geometry of the last cycle. But we'll also save any structural 
+            # from the geometry of the last cycle. But we'll also save any structural
             # changes that happened along the way.
             else:
                 self.opt_error_history += [self.outdata["structure_change"]]
                 if len(self.opt_error_history) > 1:
                     if self.opt_error_history[-1] == "no_change":
                         # If no structural changes occured in two consecutive optimizations,
-                        # and we still haven't converged, then just exit. 
+                        # and we still haven't converged, then just exit.
                         return {"errors": self.errors, "actions": None, "opt_error_history": self.opt_error_history}
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
