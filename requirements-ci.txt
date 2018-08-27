@@ -1,4 +1,4 @@
 nose==1.3.7
-pymatgen==2018.8.7
+-e git://github.com/samblau/pymatgen@qchem#egg=pymatgen
 coverage==4.5.1
 coveralls==1.3.0
