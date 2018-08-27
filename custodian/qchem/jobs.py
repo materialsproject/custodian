@@ -14,8 +14,10 @@ import numpy as np
 from pymatgen.core import Molecule
 from pymatgen.io.qchem.inputs import QCInput
 from pymatgen.io.qchem.outputs import QCOutput
+from pymatgen.analysis.graphs import build_MoleculeGraph
+from pymatgen.analysis.local_env import OpenBabelNN
 from custodian.custodian import Job
-from pymatgen.analysis.molecule_structure_comparator import MoleculeStructureComparator
+
 
 __author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath"
 __copyright__ = "Copyright 2018, The Materials Project"
@@ -136,8 +138,7 @@ class QCJob(Job):
                                      qclog_file="mol.qclog",
                                      max_iterations=10,
                                      max_molecule_perturb_scale=0.3,
-                                     reversed_direction=False,
-                                     ignore_connectivity=False,
+                                     check_connectivity=True,
                                      **QCJob_kwargs):
         """
         Optimize a structure and calculate vibrational frequencies to check if the
@@ -154,10 +155,8 @@ class QCJob(Job):
                 iterations to perform. Defaults to 10.
             max_molecule_perturb_scale (float): The maximum scaled perturbation that
                 can be applied to the molecule. Defaults to 0.3.
-            reversed_direction (bool): Whether to reverse the direction of the
-                vibrational frequency vectors. Defaults to False.
-            ignore_connectivity (bool): Whether to ignore differences in connectivity
-                introduced by structural perturbation. Defaults to False.
+            check_connectivity (bool): Whether to check differences in connectivity
+                introduced by structural perturbation. Defaults to True.
             **QCJob_kwargs: Passthrough kwargs to QCJob. See
                 :class:`custodian.qchem.jobs.QCJob`.
         """
@@ -167,7 +166,6 @@ class QCJob(Job):
         perturb_scale_grid = (
             max_molecule_perturb_scale - min_molecule_perturb_scale
         ) / scale_grid
-        msc = MoleculeStructureComparator()
 
         if not os.path.exists(input_file):
             raise AssertionError('Input file must be present!')
@@ -176,6 +174,8 @@ class QCJob(Job):
         orig_freq_rem = copy.deepcopy(orig_opt_input.rem)
         orig_freq_rem["job_type"] = "freq"
         first = True
+        reversed_direction = False
+        num_neg_freqs = []
 
         for ii in range(max_iterations):
             yield (QCJob(
@@ -217,16 +217,26 @@ class QCJob(Job):
                     print("All frequencies positive!")
                     break
                 else:
+                    num_neg_freqs += [sum(1 for freq in outdata.get('frequencies') if freq < 0)]
+                    if len(num_neg_freqs) > 1:
+                        if num_neg_freqs[-1] == num_neg_freqs[-2] and not reversed_direction:
+                            reversed_direction = True
+                        elif num_neg_freqs[-1] == num_neg_freqs[-2] and reversed_direction:
+                            if len(num_neg_freqs) < 3:
+                                raise AssertionError("ERROR: This should only be possible after at least three frequency flattening iterations! Exiting...")
+                            else:
+                                raise Exception("ERROR: Reversing the perturbation direction still could not flatten any frequencies. Exiting...")
+                        elif num_neg_freqs[-1] != num_neg_freqs[-2] and reversed_direction:
+                            reversed_direction = False
+
                     negative_freq_vecs = outdata.get("frequency_mode_vectors")[0]
-                    old_coords = outdata.get("initial_geometry")
-                    old_molecule = outdata.get("initial_molecule")
                     structure_successfully_perturbed = False
 
                     for molecule_perturb_scale in np.arange(
                             max_molecule_perturb_scale, min_molecule_perturb_scale,
                             -perturb_scale_grid):
                         new_coords = perturb_coordinates(
-                            old_coords=old_coords,
+                            old_coords=outdata.get("initial_geometry"),
                             negative_freq_vecs=negative_freq_vecs,
                             molecule_perturb_scale=molecule_perturb_scale,
                             reversed_direction=reversed_direction)
@@ -235,12 +245,21 @@ class QCJob(Job):
                             coords=new_coords,
                             charge=outdata.get('charge'),
                             spin_multiplicity=outdata.get('multiplicity'))
-                        if msc.are_equal(old_molecule, new_molecule) or ignore_connectivity:
-                            structure_successfully_perturbed = True
-                            break
+                        if check_connectivity:
+                            old_molgraph = build_MoleculeGraph(outdata.get("initial_molecule"),
+                                                               strategy=OpenBabelNN,
+                                                               reorder=False,
+                                                               extend_structure=False)
+                            new_molgraph = build_MoleculeGraph(new_molecule,
+                                                               strategy=OpenBabelNN,
+                                                               reorder=False,
+                                                               extend_structure=False)
+                            if old_molgraph.isomorphic_to(new_molgraph):
+                                structure_successfully_perturbed = True
+                                break
                     if not structure_successfully_perturbed:
                         raise Exception(
-                            "Unable to perturb coordinates to remove negative frequency without changing the bonding structure"
+                            "ERROR: Unable to perturb coordinates to remove negative frequency without changing the connectivity! Exiting..."
                         )
 
                     new_opt_QCInput = QCInput(
