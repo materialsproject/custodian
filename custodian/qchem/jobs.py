@@ -36,10 +36,10 @@ class QCJob(Job):
 
     def __init__(self,
                  qchem_command,
+                 max_cores,
                  multimode="openmp",
                  input_file="mol.qin",
                  output_file="mol.qout",
-                 max_cores=32,
                  qclog_file="mol.qclog",
                  suffix="",
                  scratch_dir="/dev/shm/qcscratch/",
@@ -49,11 +49,10 @@ class QCJob(Job):
         """
         Args:
             qchem_command (str): Command to run QChem.
+            max_cores (int): Maximum number of cores to parallelize over.
             multimode (str): Parallelization scheme, either openmp or mpi.
             input_file (str): Name of the QChem input file.
             output_file (str): Name of the QChem output file.
-            max_cores (int): Maximum number of cores to parallelize over.
-                Defaults to 32.
             qclog_file (str): Name of the file to redirect the standard output
                 to. None means not to record the standard output.
             suffix (str): String to append to the file in postprocess.

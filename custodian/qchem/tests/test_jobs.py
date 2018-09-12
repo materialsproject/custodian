@@ -36,7 +36,7 @@ class QCJobTest(TestCase):
     def test_defaults(self):
         with patch("custodian.qchem.jobs.os.putenv") as putenv_patch:
             with patch("custodian.qchem.jobs.shutil.copy") as copy_patch:
-                myjob = QCJob(qchem_command="qchem")
+                myjob = QCJob(qchem_command="qchem", max_cores=32)
                 self.assertEqual(myjob.current_command, ["qchem", "-nt", "32", "mol.qin", "mol.qout"])
                 myjob.setup()
                 self.assertEqual(copy_patch.call_args_list[0][0][0], "mol.qin")
@@ -71,9 +71,10 @@ class OptFFTest(TestCase):
         shutil.rmtree(scr_dir)
 
     def test_OptFF(self):
-        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem", input_file="test.qin", output_file="test.qout")
+        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem", max_cores=32, input_file="test.qin", output_file="test.qout")
         expected_next = QCJob(
                         qchem_command="qchem",
+                        max_cores=32,
                         multimode="openmp",
                         input_file="test.qin",
                         output_file="test.qout",
@@ -82,6 +83,7 @@ class OptFFTest(TestCase):
         self.assertEqual(next(myjob).as_dict(),expected_next)
         expected_next = QCJob(
                         qchem_command="qchem",
+                        max_cores=32,
                         multimode="openmp",
                         input_file="test.qin",
                         output_file="test.qout",
@@ -91,6 +93,7 @@ class OptFFTest(TestCase):
         self.assertEqual(QCInput.from_file(os.path.join(test_dir,"FF_working/test.qin.freq_0")).as_dict(),QCInput.from_file(os.path.join(scr_dir,"test.qin")).as_dict())
         expected_next = QCJob(
                         qchem_command="qchem",
+                        max_cores=32,
                         multimode="openmp",
                         input_file="test.qin",
                         output_file="test.qout",
@@ -100,6 +103,7 @@ class OptFFTest(TestCase):
         self.assertEqual(QCInput.from_file(os.path.join(test_dir,"FF_working/test.qin.opt_1")).as_dict(),QCInput.from_file(os.path.join(scr_dir,"test.qin")).as_dict())
         expected_next = QCJob(
                         qchem_command="qchem",
+                        max_cores=32,
                         multimode="openmp",
                         input_file="test.qin",
                         output_file="test.qout",
@@ -121,9 +125,10 @@ class OptFFTest1(TestCase):
         shutil.rmtree(scr_dir)
 
     def test_OptFF(self):
-        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", input_file="mol.qin", output_file="mol.qout")
+        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", max_cores=32, input_file="mol.qin", output_file="mol.qout")
         expected_next = QCJob(
                         qchem_command="qchem -slurm",
+                        max_cores=32,
                         multimode="openmp",
                         input_file="mol.qin",
                         output_file="mol.qout",
@@ -145,9 +150,10 @@ class OptFFTest2(TestCase):
         shutil.rmtree(scr_dir)
 
     def test_OptFF(self):
-        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", input_file="mol.qin", output_file="mol.qout")
+        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", max_cores=32, input_file="mol.qin", output_file="mol.qout")
         expected_next = QCJob(
                         qchem_command="qchem -slurm",
+                        max_cores=32,
                         multimode="openmp",
                         input_file="mol.qin",
                         output_file="mol.qout",
@@ -156,6 +162,7 @@ class OptFFTest2(TestCase):
         self.assertEqual(next(myjob).as_dict(),expected_next)
         expected_next = QCJob(
                         qchem_command="qchem -slurm",
+                        max_cores=32,
                         multimode="openmp",
                         input_file="mol.qin",
                         output_file="mol.qout",
@@ -182,9 +189,10 @@ class OptFFTestSwitching(TestCase):
         shutil.rmtree(scr_dir)
 
     def test_OptFF(self):
-        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", input_file="mol.qin", output_file="mol.qout")
+        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", max_cores=32,input_file="mol.qin", output_file="mol.qout")
         expected_next = QCJob(
                         qchem_command="qchem -slurm",
+                        max_cores=32,
                         multimode="openmp",
                         input_file="mol.qin",
                         output_file="mol.qout",
@@ -193,6 +201,7 @@ class OptFFTestSwitching(TestCase):
         self.assertEqual(next(myjob).as_dict(),expected_next)
         expected_next = QCJob(
                         qchem_command="qchem -slurm",
+                        max_cores=32,
                         multimode="openmp",
                         input_file="mol.qin",
                         output_file="mol.qout",
@@ -202,6 +211,7 @@ class OptFFTestSwitching(TestCase):
         self.assertEqual(QCInput.from_file(os.path.join(test_dir,"FF_switching/mol.qin.freq_0")).as_dict(),QCInput.from_file(os.path.join(scr_dir,"mol.qin")).as_dict())
         expected_next = QCJob(
                         qchem_command="qchem -slurm",
+                        max_cores=32,
                         multimode="openmp",
                         input_file="mol.qin",
                         output_file="mol.qout",
@@ -211,6 +221,7 @@ class OptFFTestSwitching(TestCase):
         self.assertEqual(QCInput.from_file(os.path.join(test_dir,"FF_switching/mol.qin.opt_1")).as_dict(),QCInput.from_file(os.path.join(scr_dir,"mol.qin")).as_dict())
         expected_next = QCJob(
                         qchem_command="qchem -slurm",
+                        max_cores=32,
                         multimode="openmp",
                         input_file="mol.qin",
                         output_file="mol.qout",
@@ -220,6 +231,7 @@ class OptFFTestSwitching(TestCase):
         self.assertEqual(QCInput.from_file(os.path.join(test_dir,"FF_switching/mol.qin.freq_1")).as_dict(),QCInput.from_file(os.path.join(scr_dir,"mol.qin")).as_dict())
         expected_next = QCJob(
                         qchem_command="qchem -slurm",
+                        max_cores=32,
                         multimode="openmp",
                         input_file="mol.qin",
                         output_file="mol.qout",
@@ -229,6 +241,7 @@ class OptFFTestSwitching(TestCase):
         self.assertEqual(QCInput.from_file(os.path.join(test_dir,"FF_switching/mol.qin.opt_2")).as_dict(),QCInput.from_file(os.path.join(scr_dir,"mol.qin")).as_dict())
         expected_next = QCJob(
                         qchem_command="qchem -slurm",
+                        max_cores=32,
                         multimode="openmp",
                         input_file="mol.qin",
                         output_file="mol.qout",
