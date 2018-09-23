@@ -643,7 +643,11 @@ class DriftErrorHandler(ErrorHandler):
         if not self.max_drift:
             self.max_drift = incar["EDIFFG"] * -1
 
-        outcar = Outcar("OUTCAR")
+        try:
+            outcar = Outcar("OUTCAR")
+        except:
+            # Can't perform check if Outcar not valid
+            return False
 
         if len(outcar.data.get('drift', [])) < self.to_average:
             # Ensure enough steps to get average drift
