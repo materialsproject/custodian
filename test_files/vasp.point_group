@@ -1,0 +1,49 @@
+ ----------------------------------------------------
+    OOO  PPPP  EEEEE N   N M   M PPPP
+   O   O P   P E     NN  N MM MM P   P
+   O   O PPPP  EEEEE N N N M M M PPPP   -- VERSION
+   O   O P     E     N  NN M   M P
+    OOO  P     EEEEE N   N M   M P
+ ----------------------------------------------------
+ running   16 mpi-ranks, with    4 threads/rank
+ distrk:  each k-point on    2 cores,    8 groups
+ distr:  one band on    1 cores,    2 groups
+ using from now: INCAR
+ vasp.5.4.4 18Apr17 (build Mar 19 2018 15:56:49) complex
+
+ POSCAR found type information on POSCAR  Sr Ca Mn Fe O
+ POSCAR found :  5 types and      40 ions
+ scaLAPACK will be used
+
+ -----------------------------------------------------------------------------
+|                                                                             |
+|           W    W    AA    RRRRR   N    N  II  N    N   GGGG   !!!           |
+|           W    W   A  A   R    R  NN   N  II  NN   N  G    G  !!!           |
+|           W    W  A    A  R    R  N N  N  II  N N  N  G       !!!           |
+|           W WW W  AAAAAA  RRRRR   N  N N  II  N  N N  G  GGG   !            |
+|           WW  WW  A    A  R   R   N   NN  II  N   NN  G    G                |
+|           W    W  A    A  R    R  N    N  II  N    N   GGGG   !!!           |
+|                                                                             |
+|      You have enabled k-point parallelism (KPAR>1).                         |
+|      This developmental code was originally  written by Paul Kent at ORNL,  |
+|      and carefully double checked in Vienna.                                |
+|      GW as well as linear response parallelism added by Martijn Marsman     |
+|      and Georg Kresse.                                                      |
+|      Carefully verify results versus KPAR=1.                                |
+|      Report problems to Paul Kent and Vienna.                               |
+|                                                                             |
+ -----------------------------------------------------------------------------
+
+ LDA part: xc-table for Pade appr. of Perdew
+
+
+ VERY BAD NEWS! internal error in subroutine IBZKPT:
+ Error: point group operation missing       2
+
+
+ VERY BAD NEWS! internal error in subroutine IBZKPT:
+ Error: point group operation missing       2
+
+
+ VERY BAD NEWS! internal error in subroutine IBZKPT:
+ Error: point group operation missing       2
