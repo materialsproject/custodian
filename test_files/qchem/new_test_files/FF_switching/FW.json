@@ -1,0 +1,342 @@
+{
+    "spec": {
+        "_tasks": [
+            {
+                "molecule": {
+                    "@module": "pymatgen.core.structure",
+                    "@class": "Molecule",
+                    "charge": 0,
+                    "spin_multiplicity": 2,
+                    "sites": [
+                        {
+                            "name": "O",
+                            "species": [
+                                {
+                                    "element": "O",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                1.0779352922,
+                                0.408799886,
+                                1.59844e-05
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "O",
+                            "species": [
+                                {
+                                    "element": "O",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                -1.077936034,
+                                0.408799489,
+                                1.34467e-05
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "O",
+                            "species": [
+                                {
+                                    "element": "O",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                1.906e-07,
+                                -1.5728550611,
+                                -3.8293e-06
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "C",
+                            "species": [
+                                {
+                                    "element": "C",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                2.3378449908,
+                                -0.2808963917,
+                                1.26462e-05
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "C",
+                            "species": [
+                                {
+                                    "element": "C",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                -2.3378435749,
+                                -0.2808955684,
+                                5.647e-06
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "C",
+                            "species": [
+                                {
+                                    "element": "C",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                3.4279169549,
+                                0.7642371238,
+                                -1.24127e-05
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "C",
+                            "species": [
+                                {
+                                    "element": "C",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                -3.427917452,
+                                0.7642366136,
+                                -7.2696e-06
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "C",
+                            "species": [
+                                {
+                                    "element": "C",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                3.75e-07,
+                                -0.3689053184,
+                                -2.86356e-05
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "H",
+                            "species": [
+                                {
+                                    "element": "H",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                2.3882776626,
+                                -0.9218045668,
+                                0.883403022
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "H",
+                            "species": [
+                                {
+                                    "element": "H",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                2.3882540516,
+                                -0.9218317127,
+                                -0.8833585025
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "H",
+                            "species": [
+                                {
+                                    "element": "H",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                -2.3882556324,
+                                -0.9218230244,
+                                -0.8833714492
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "H",
+                            "species": [
+                                {
+                                    "element": "H",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                4.4045968651,
+                                0.2736482674,
+                                -2.15776e-05
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "H",
+                            "species": [
+                                {
+                                    "element": "H",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                3.3637001568,
+                                1.3988332854,
+                                -0.8862525014
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "H",
+                            "species": [
+                                {
+                                    "element": "H",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                -4.4045964871,
+                                0.2736460975,
+                                -1.86087e-05
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "H",
+                            "species": [
+                                {
+                                    "element": "H",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                -3.363732366,
+                                1.398841338,
+                                0.8862290354
+                            ],
+                            "properties": {}
+                        }
+                    ]
+                },
+                "qchem_input_set": "OptSet",
+                "input_file": "mol.qin",
+                "qchem_input_params": {},
+                "_fw_name": "{{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}}"
+            },
+            {
+                "qchem_cmd": ">>qchem_cmd<<",
+                "multimode": "openmp",
+                "input_file": "mol.qin",
+                "output_file": "mol.qout",
+                "max_cores": 32,
+                "job_type": "opt_with_frequency_flattener",
+                "max_iterations": 10,
+                "max_molecule_perturb_scale": 0.3,
+                "reversed_direction": false,
+                "_fw_name": "{{atomate.qchem.firetasks.run_calc.RunQChemCustodian}}"
+            },
+            {
+                "db_file": ">>db_file<<",
+                "input_file": "mol.qin",
+                "output_file": "mol.qout",
+                "additional_fields": {
+                    "task_label": "fragment_879",
+                    "special_run_type": "frequency_flattener"
+                },
+                "_fw_name": "{{atomate.qchem.firetasks.parse_outputs.QChemToDb}}"
+            }
+        ]
+    },
+    "fw_id": 3753,
+    "created_on": "2018-07-17T17:16:09.835070",
+    "updated_on": "2018-08-27T18:39:27.062340",
+    "launches": [
+        {
+            "fworker": {
+                "name": "cori_qchem_dev",
+                "category": "",
+                "query": "{}",
+                "env": {
+                    "db_file": "/global/homes/s/sblau/config/db.json",
+                    "qchem_cmd": "qchem -slurm",
+                    "scratch_dir": "/dev/shm/qcscratch/"
+                }
+            },
+            "fw_id": 3753,
+            "launch_dir": "/global/cscratch1/sd/sblau/fragment_wf/block_2018-07-21-08-46-01-522462/launcher_2018-08-27-17-54-04-357522",
+            "host": "nid00761",
+            "ip": "10.128.2.254",
+            "trackers": [],
+            "action": null,
+            "state": "RUNNING",
+            "state_history": [
+                {
+                    "state": "RESERVED",
+                    "created_on": "2018-08-27T17:54:04.319396",
+                    "updated_on": "2018-08-27T17:54:04.319400",
+                    "reservation_id": "14392702"
+                },
+                {
+                    "state": "RUNNING",
+                    "created_on": "2018-08-27T18:39:27.060273",
+                    "updated_on": "2018-08-27T18:39:27.060288"
+                }
+            ],
+            "launch_id": 5961
+        }
+    ],
+    "archived_launches": [
+        {
+            "fworker": {
+                "name": "cori_qchem_dev",
+                "category": "",
+                "query": "{}",
+                "env": {
+                    "db_file": "/global/homes/s/sblau/config/db.json",
+                    "qchem_cmd": "qchem -slurm",
+                    "scratch_dir": "/dev/shm/qcscratch/"
+                }
+            },
+            "fw_id": 3753,
+            "launch_dir": "/global/cscratch1/sd/sblau/fragment_wf/block_2018-07-21-08-46-01-522462/launcher_2018-07-21-16-16-03-974162",
+            "host": "nid02101",
+            "ip": "10.128.8.70",
+            "trackers": [],
+            "action": null,
+            "state": "RUNNING",
+            "state_history": [
+                {
+                    "state": "RUNNING",
+                    "created_on": "2018-07-21T16:20:22.243736",
+                    "updated_on": "2018-07-21T19:20:22.352325",
+                    "checkpoint": {
+                        "_task_n": 1,
+                        "_all_stored_data": {},
+                        "_all_update_spec": {},
+                        "_all_mod_spec": []
+                    }
+                }
+            ],
+            "launch_id": 5850
+        }
+    ],
+    "state": "RUNNING",
+    "name": "fragment_879"
+}
