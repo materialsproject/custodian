@@ -74,6 +74,22 @@ class ExampleHandler(ErrorHandler):
         return {"errors": "total < 50", "actions": "increment by 1"}
 
 
+class ExampleHandler1b(ExampleHandler):
+    """
+    This handler always can apply a correction, but will only apply it twice before raising.
+    """
+    max_num_corrections = 2
+    raise_on_max = True
+
+
+class ExampleHandler1c(ExampleHandler):
+    """
+    This handler always can apply a correction, but will only apply it twice and then not anymore.
+    """
+    max_num_corrections = 2
+    raise_on_max = False
+
+
 class ExampleHandler2(ErrorHandler):
     """
     This handler always result in an error.
@@ -180,6 +196,26 @@ class CustodianTest(unittest.TestCase):
                       [ExampleJob(i, params) for i in range(njobs)],
                       max_errors=njobs, max_errors_per_job=1)
         self.assertRaises(RuntimeError, c.run)
+
+    def test_max_errors_per_handler_raise(self):
+        njobs = 100
+        params = {"initial": 0, "total": 0}
+        h = ExampleHandler1b(params)
+        c = Custodian([h],
+                      [ExampleJob(i, params) for i in range(njobs)],
+                      max_errors=njobs*10, max_errors_per_job=1000)
+        self.assertRaises(RuntimeError, c.run)
+        self.assertEqual(h.n_applied_corrections, 2)
+        self.assertEqual(len(c.run_log[-1]["corrections"]), 2)
+
+    def test_max_errors_per_handler_warning(self):
+        njobs = 100
+        params = {"initial": 0, "total": 0}
+        c = Custodian([ExampleHandler1c(params)],
+                      [ExampleJob(i, params) for i in range(njobs)],
+                      max_errors=njobs*10, max_errors_per_job=1000)
+        c.run()
+        self.assertTrue(all(len(r["corrections"]) <= 2 for r in c.run_log))
 
     def test_validators(self):
         njobs = 100

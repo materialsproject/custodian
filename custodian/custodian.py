@@ -361,6 +361,11 @@ class Custodian(object):
         """
         self.run_log.append({"job": job.as_dict(), "corrections": []})
         self.errors_current_job = 0
+        # reset the counters of the number of times a correction has been
+        # applied for each handler
+        for h in self.handlers:
+            h.n_applied_corrections = 0
+
         job.setup()
 
         attempt = 0
@@ -569,6 +574,15 @@ class Custodian(object):
         for h in handlers:
             try:
                 if h.check():
+                    if h.max_num_corrections is not None \
+                            and h.n_applied_corrections >= h.max_num_corrections:
+                        msg = "Maximum number of corrections {} reached " \
+                              "for {}".format(h.max_num_corrections, h)
+                        if h.raise_on_max:
+                            raise CustodianError(msg, True, h)
+                        else:
+                            logger.warning(msg+" Correction not applied.")
+                            continue
                     if terminate_func is not None and h.is_terminating:
                         logger.info("Terminating job")
                         terminate_func()
@@ -578,6 +592,7 @@ class Custodian(object):
                     d["handler"] = h
                     logger.error("\n" + pformat(d, indent=2, width=-1))
                     corrections.append(d)
+                    h.n_applied_corrections += 1
             except Exception:
                 if not self.skip_over_errors:
                     raise
@@ -670,6 +685,19 @@ class ErrorHandler(MSONable):
     "actions":[])
     """
 
+    max_num_corrections = None
+    raise_on_max = False
+    """
+    Whether corrections from this specific handler should be applied only a
+    fixed maximum number of times on a single job (i.e. the counter is reset
+    at the beginning of each job). If the maximum number is reached the code
+    will either raise a CustodianError (raise_on_max==True) or just stops
+    considering the correction (raise_on_max==False). If max_num_corrections 
+    is None this option is not considered. These options can be overridden
+    as class attributes of the subclass or as customizable options setting
+    an instance attribute from __init__.
+    """
+
     @abstractmethod
     def check(self):
         """
@@ -695,6 +723,31 @@ class ErrorHandler(MSONable):
             If this is an unfixable error, actions should be set to None.
         """
         pass
+
+    @property
+    def n_applied_corrections(self):
+        """
+        The number of times the handler has given a correction and this
+        has been applied.
+
+        Returns:
+            (int): the number of corrections applied.
+        """
+        try:
+            return self._num_applied_corrections
+        except AttributeError:
+            self._num_applied_corrections = 0
+            return self._num_applied_corrections
+
+    @n_applied_corrections.setter
+    def n_applied_corrections(self, value):
+        """
+        Setter for the number of corrections applied.
+
+        Args:
+             value(int): the number of corrections applied
+        """
+        self._num_applied_corrections = value
 
 
 class Validator(six.with_metaclass(ABCMeta, MSONable)):
