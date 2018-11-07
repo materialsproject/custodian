@@ -55,11 +55,12 @@ class QChemErrorHandler(ErrorHandler):
         # Checks output file for errors.
         self.outdata = QCOutput(self.output_file).data
         self.errors = self.outdata.get("errors")
+        # If we aren't out of optimization cycles, but we were in the past, reset the history
         if "out_of_opt_cycles" not in self.errors and len(self.opt_error_history) > 0:
             self.opt_error_history = []
-        if "out_of_opt_cycles" in self.errors:
-            if self.outdata["structure_change"] == "unconnected_fragments":
-                return False
+        # If we're out of optimization cycles and we have unconnected fragments, no need to handle any errors
+        if "out_of_opt_cycles" in self.errors and self.outdata["structure_change"] == "unconnected_fragments":
+            return False
         return len(self.errors) > 0
 
     def correct(self):
@@ -98,10 +99,15 @@ class QChemErrorHandler(ErrorHandler):
                     self.qcinp.molecule = self.outdata.get(
                         "molecule_from_last_geometry")
                     actions.append({"molecule": "molecule_from_last_geometry"})
+            # If already at geom_max_cycles, often can just get convergence by restarting
+            # from the geometry of the last cycle. But we'll also save any structural
+            # changes that happened along the way.
             else:
                 self.opt_error_history += [self.outdata["structure_change"]]
                 if len(self.opt_error_history) > 1:
                     if self.opt_error_history[-1] == "no_change":
+                        # If no structural changes occured in two consecutive optimizations,
+                        # and we still haven't converged, then just exit.
                         return {"errors": self.errors, "actions": None, "opt_error_history": self.opt_error_history}
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})

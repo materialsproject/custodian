@@ -263,6 +263,13 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertEqual(i["SYMPREC"], 1e-6)
 
+    def test_point_group(self):
+        h = VaspErrorHandler("vasp.point_group")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["point_group"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ISYM"], 0)
+
     def tearDown(self):
         os.chdir(test_dir)
         shutil.move("INCAR.orig", "INCAR")
