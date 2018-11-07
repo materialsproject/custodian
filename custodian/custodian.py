@@ -298,6 +298,14 @@ class Custodian(object):
         Returns:
             All errors encountered as a list of list.
             [[error_dicts for job 1], [error_dicts for job 2], ....]
+
+        Raises:
+            ValidationError: if a job fails validation
+            ReturnCodeError: if the process has a return code different from 0
+            HandlerError: if an unrecoverable occurs
+            MaxErrorsPerJobError: if max_errors_per_job is reached
+            MaxErrorsError: if max_errors is reached
+            MaxErrorsPerHandlerError: if max_errors_per_handler is reached
         """
         cwd = os.getcwd()
 
@@ -326,8 +334,7 @@ class Custodian(object):
             except CustodianError as ex:
                 logger.error(ex.message)
                 if ex.raises:
-                    raise RuntimeError("{} errors reached: {}. Exited..."
-                                       .format(self.total_errors, ex))
+                    raise
             finally:
                 # Log the corrections to a json file.
                 logger.info("Logging to {}...".format(Custodian.LOG_FILE))
@@ -356,8 +363,12 @@ class Custodian(object):
 
 
         Raises:
-            CustodianError on unrecoverable errors, max errors, and jobs
-            that fail validation
+            ValidationError: if a job fails validation
+            ReturnCodeError: if the process has a return code different from 0
+            HandlerError: if an unrecoverable occurs
+            MaxErrorsPerJobError: if max_errors_per_job is reached
+            MaxErrorsError: if max_errors is reached
+            MaxErrorsPerHandlerError: if max_errors_per_handler is reached
         """
         self.run_log.append({"job": job.as_dict(), "corrections": [],
                              "handler": None, "validator": None,
@@ -435,14 +446,14 @@ class Custodian(object):
                     if v.check():
                         self.run_log[-1]["validator"] = v
                         s = "Validation failed: {}".format(v)
-                        raise CustodianError(s, True, v)
+                        raise ValidationError(s, True, v)
                 if not zero_return_code:
                     if self.terminate_on_nonzero_returncode:
                         self.run_log[-1]["nonzero_return_code"] = True
                         s = "Job return code is %d. Terminating..." % \
                             p.returncode
                         logger.info(s)
-                        raise CustodianError(s, True)
+                        raise ReturnCodeError(s, True)
                     else:
                         warnings.warn("subprocess returned a non-zero return "
                                       "code. Check outputs carefully...")
@@ -453,23 +464,24 @@ class Custodian(object):
             for x in self.run_log[-1]["corrections"]:
                 if not x["actions"] and x["handler"].raises_runtime_error:
                     self.run_log[-1]["handler"] = x["handler"]
-                    s = "Unrecoverable error for handler: {}. " \
-                        "Raising RuntimeError".format(x["handler"])
-                    raise CustodianError(s, True, x["handler"])
+                    s = "Unrecoverable error for handler: {}".format(x["handler"])
+                    raise HandlerError(s, True, x["handler"])
             for x in self.run_log[-1]["corrections"]:
                 if not x["actions"]:
                     self.run_log[-1]["handler"] = x["handler"]
                     s = "Unrecoverable error for handler: %s" % x["handler"]
-                    raise CustodianError(s, False, x["handler"])
+                    raise HandlerError(s, False, x["handler"])
 
         if self.errors_current_job >= self.max_errors_per_job:
             self.run_log[-1]["max_errors_per_job"] = True
-            logger.info("Max errors per job reached.")
-            raise CustodianError("MaxErrorsPerJob", True)
+            msg = "Max errors per job reached: {}.".format(self.max_errors_per_job)
+            logger.info(msg)
+            raise MaxErrorsPerJobError(msg, True, self.max_errors_per_job, job)
         else:
             self.run_log[-1]["max_errors"] = True
-            logger.info("Max errors reached.")
-            raise CustodianError("MaxErrors", True)
+            msg = "Max errors reached: {}.".format(self.max_errors)
+            logger.info(msg)
+            raise MaxErrorsError(msg, True, self.max_errors)
 
     def run_interrupted(self):
         """
@@ -480,8 +492,12 @@ class Custodian(object):
             number of remaining jobs
 
         Raises:
-            CustodianError on unrecoverable errors, and jobs that fail
-            validation
+            ValidationError: if a job fails validation
+            ReturnCodeError: if the process has a return code different from 0
+            HandlerError: if an unrecoverable occurs
+            MaxErrorsPerJobError: if max_errors_per_job is reached
+            MaxErrorsError: if max_errors is reached
+            MaxErrorsPerHandlerError: if max_errors_per_handler is reached
         """
         start = datetime.datetime.now()
         try:
@@ -526,7 +542,7 @@ class Custodian(object):
                             self.run_log[-1]["handler"] = x["handler"]
                             s = "Unrecoverable error for handler: {}. " \
                                 "Raising RuntimeError".format(x["handler"])
-                            raise CustodianError(s, True, x["handler"])
+                            raise HandlerError(s, True, x["handler"])
                     logger.info("Corrected input based on error handlers")
                     # Return with more jobs to run if recoverable error caught
                     # and corrected for
@@ -539,7 +555,7 @@ class Custodian(object):
                         self.run_log[-1]["validator"] = v
                         logger.info("Failed validation based on validator")
                         s = "Validation failed: {}".format(v)
-                        raise CustodianError(s, True, v)
+                        raise ValidationError(s, True, v)
 
                 logger.info("Postprocessing for {}.run".format(job.name))
                 job.postprocess()
@@ -561,9 +577,7 @@ class Custodian(object):
         except CustodianError as ex:
             logger.error(ex.message)
             if ex.raises:
-                raise RuntimeError(
-                    "{} errors / {} errors per job reached: {}. Exited..."
-                    .format(self.total_errors, self.errors_current_job, ex))
+                raise
 
         finally:
             # Log the corrections to a json file.
@@ -593,7 +607,7 @@ class Custodian(object):
                         if h.raise_on_max:
                             self.run_log[-1]["handler"] = h
                             self.run_log[-1]["max_errors_per_handler"] = True
-                            raise CustodianError(msg, True, h)
+                            raise MaxErrorsPerHandlerError(msg, True, h.max_num_corrections, h)
                         else:
                             logger.warning(msg+" Correction not applied.")
                             continue
@@ -705,7 +719,7 @@ class ErrorHandler(MSONable):
     Whether corrections from this specific handler should be applied only a
     fixed maximum number of times on a single job (i.e. the counter is reset
     at the beginning of each job). If the maximum number is reached the code
-    will either raise a CustodianError (raise_on_max==True) or just stops
+    will either raise a MaxErrorsPerHandlerError (raise_on_max==True) or stops
     considering the correction (raise_on_max==False). If max_num_corrections 
     is None this option is not considered. These options can be overridden
     as class attributes of the subclass or as customizable options setting
@@ -783,22 +797,110 @@ class Validator(six.with_metaclass(ABCMeta, MSONable)):
         pass
 
 
-class CustodianError(Exception):
+class CustodianError(RuntimeError):
     """
     Exception class for Custodian errors.
     """
 
-    def __init__(self, message, raises=False, validator=None):
+    def __init__(self, message, raises=False):
         """
         Initializes the error with a message.
 
         Args:
             message (str): Message passed to Exception
-            raises (bool): Whether this should raise a runtime error when caught
-            validator (Validator/ErrorHandler): Validator or ErrorHandler that
-                caused the exception.
+            raises (bool): Whether this should be raised outside custodian
         """
-        super(CustodianError, self).__init__(self, message)
+        super(CustodianError, self).__init__(message)
         self.raises = raises
-        self.validator = validator
         self.message = message
+
+
+class ValidationError(CustodianError):
+    """
+    Error raised when a validator does not pass the check
+    """
+
+    def __init__(self, message, raises, validator):
+        """
+        Args:
+            message (str): Message passed to Exception
+            raises (bool): Whether this should be raised outside custodian
+            validator (Validator): Validator that caused the exception.
+        """
+        super(ValidationError, self).__init__(message, raises)
+        self.validator = validator
+
+
+class HandlerError(CustodianError):
+    """
+    Error raised when a handler found an error but could not fix it
+    """
+
+    def __init__(self, message, raises, handler):
+        """
+        Args:
+            message (str): Message passed to Exception
+            raises (bool): Whether this should be raised outside custodian
+            handler (Handler): Handler that caused the exception.
+        """
+        super(HandlerError, self).__init__(message, raises)
+        self.handler = handler
+
+
+class ReturnCodeError(CustodianError):
+    """
+    Error raised when the process gave non zero return code
+    """
+    pass
+
+
+class MaxErrorsError(CustodianError):
+    """
+    Error raised when the maximum allowed number of errors is reached
+    """
+
+    def __init__(self, message, raises, max_errors):
+        """
+        Args:
+            message (str): Message passed to Exception
+            raises (bool): Whether this should be raised outside custodian
+            max_errors (int): the number of errors reached
+        """
+        super(MaxErrorsError, self).__init__(message, raises)
+        self.max_errors = max_errors
+
+
+class MaxErrorsPerJobError(CustodianError):
+    """
+    Error raised when the maximum allowed number of errors per job is reached
+    """
+
+    def __init__(self, message, raises, max_errors_per_job, job):
+        """
+        Args:
+            message (str): Message passed to Exception
+            raises (bool): Whether this should be raised outside custodian
+            max_errors_per_job (int): the number of errors per job reached
+            job (Job): the job that was stopped
+        """
+        super(MaxErrorsPerJobError, self).__init__(message, raises)
+        self.max_errors_per_job = max_errors_per_job
+        self.job = job
+
+
+class MaxErrorsPerHandlerError(CustodianError):
+    """
+    Error raised when the maximum allowed number of errors per handler is reached
+    """
+
+    def __init__(self, message, raises, max_errors_per_handler, handler):
+        """
+        Args:
+            message (str): Message passed to Exception
+            raises (bool): Whether this should be raised outside custodian
+            max_errors_per_handler (int): the number of errors per job reached
+            handler (Handler): the handler that caused the exception
+        """
+        super(MaxErrorsPerHandlerError, self).__init__(message, raises)
+        self.max_errors_per_handler = max_errors_per_handler
+        self.handler = handler
