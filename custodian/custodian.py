@@ -359,7 +359,11 @@ class Custodian(object):
             CustodianError on unrecoverable errors, max errors, and jobs
             that fail validation
         """
-        self.run_log.append({"job": job.as_dict(), "corrections": []})
+        self.run_log.append({"job": job.as_dict(), "corrections": [],
+                             "handler": None, "validator": None,
+                             "max_errors": False, "max_errors_per_job": False,
+                             "max_errors_per_handler": False,
+                             "nonzero_return_code": False})
         self.errors_current_job = 0
         # reset the counters of the number of times a correction has been
         # applied for each handler
@@ -429,10 +433,12 @@ class Custodian(object):
             if not has_error:
                 for v in self.validators:
                     if v.check():
+                        self.run_log[-1]["validator"] = v
                         s = "Validation failed: {}".format(v)
                         raise CustodianError(s, True, v)
                 if not zero_return_code:
                     if self.terminate_on_nonzero_returncode:
+                        self.run_log[-1]["nonzero_return_code"] = True
                         s = "Job return code is %d. Terminating..." % \
                             p.returncode
                         logger.info(s)
@@ -446,18 +452,22 @@ class Custodian(object):
             # Check that all errors could be handled
             for x in self.run_log[-1]["corrections"]:
                 if not x["actions"] and x["handler"].raises_runtime_error:
+                    self.run_log[-1]["handler"] = x["handler"]
                     s = "Unrecoverable error for handler: {}. " \
                         "Raising RuntimeError".format(x["handler"])
                     raise CustodianError(s, True, x["handler"])
             for x in self.run_log[-1]["corrections"]:
                 if not x["actions"]:
+                    self.run_log[-1]["handler"] = x["handler"]
                     s = "Unrecoverable error for handler: %s" % x["handler"]
                     raise CustodianError(s, False, x["handler"])
 
         if self.errors_current_job >= self.max_errors_per_job:
+            self.run_log[-1]["max_errors_per_job"] = True
             logger.info("Max errors per job reached.")
             raise CustodianError("MaxErrorsPerJob", True)
         else:
+            self.run_log[-1]["max_errors"] = True
             logger.info("Max errors reached.")
             raise CustodianError("MaxErrors", True)
 
@@ -513,6 +523,7 @@ class Custodian(object):
                     # raise an error for an unrecoverable error
                     for x in self.run_log[-1]["corrections"]:
                         if not x["actions"] and x["handler"].raises_runtime_error:
+                            self.run_log[-1]["handler"] = x["handler"]
                             s = "Unrecoverable error for handler: {}. " \
                                 "Raising RuntimeError".format(x["handler"])
                             raise CustodianError(s, True, x["handler"])
@@ -525,6 +536,7 @@ class Custodian(object):
                 logger.info("Checking validator for {}.run".format(job.name))
                 for v in self.validators:
                     if v.check():
+                        self.run_log[-1]["validator"] = v
                         logger.info("Failed validation based on validator")
                         s = "Validation failed: {}".format(v)
                         raise CustodianError(s, True, v)
@@ -577,8 +589,10 @@ class Custodian(object):
                     if h.max_num_corrections is not None \
                             and h.n_applied_corrections >= h.max_num_corrections:
                         msg = "Maximum number of corrections {} reached " \
-                              "for {}".format(h.max_num_corrections, h)
+                              "for handler {}".format(h.max_num_corrections, h)
                         if h.raise_on_max:
+                            self.run_log[-1]["handler"] = h
+                            self.run_log[-1]["max_errors_per_handler"] = True
                             raise CustodianError(msg, True, h)
                         else:
                             logger.warning(msg+" Correction not applied.")

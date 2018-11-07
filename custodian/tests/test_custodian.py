@@ -141,6 +141,7 @@ class CustodianTest(unittest.TestCase):
         c.run()
         c = Custodian([], [ExitCodeJob(1)])
         self.assertRaises(RuntimeError, c.run)
+        self.assertTrue(c.run_log[-1]["nonzero_return_code"])
         c = Custodian([], [ExitCodeJob(1)],
                       terminate_on_nonzero_returncode=False)
         c.run()
@@ -187,6 +188,17 @@ class CustodianTest(unittest.TestCase):
                       max_errors=njobs)
         c.run()
         self.assertTrue(h.has_error)
+        self.assertEqual(c.run_log[-1]["handler"], h)
+
+    def test_max_errors(self):
+        njobs = 100
+        params = {"initial": 0, "total": 0}
+        h = ExampleHandler(params)
+        c = Custodian([h],
+                      [ExampleJob(i, params) for i in range(njobs)],
+                      max_errors=1, max_errors_per_job=10)
+        self.assertRaises(RuntimeError, c.run)
+        self.assertTrue(c.run_log[-1]["max_errors"])
 
     def test_max_errors_per_job(self):
         njobs = 100
@@ -196,6 +208,7 @@ class CustodianTest(unittest.TestCase):
                       [ExampleJob(i, params) for i in range(njobs)],
                       max_errors=njobs, max_errors_per_job=1)
         self.assertRaises(RuntimeError, c.run)
+        self.assertTrue(c.run_log[-1]["max_errors_per_job"])
 
     def test_max_errors_per_handler_raise(self):
         njobs = 100
@@ -207,6 +220,8 @@ class CustodianTest(unittest.TestCase):
         self.assertRaises(RuntimeError, c.run)
         self.assertEqual(h.n_applied_corrections, 2)
         self.assertEqual(len(c.run_log[-1]["corrections"]), 2)
+        self.assertTrue(c.run_log[-1]["max_errors_per_handler"])
+        self.assertEqual(c.run_log[-1]["handler"], h)
 
     def test_max_errors_per_handler_warning(self):
         njobs = 100
@@ -229,11 +244,13 @@ class CustodianTest(unittest.TestCase):
 
         njobs = 100
         params = {"initial": 0, "total": 0}
+        v = ExampleValidator2()
         c = Custodian([ExampleHandler(params)],
                       [ExampleJob(i, params) for i in range(njobs)],
-                      [ExampleValidator2()],
+                      [v],
                       max_errors=njobs)
         self.assertRaises(RuntimeError, c.run)
+        self.assertEqual(c.run_log[-1]["validator"], v)
 
     def test_from_spec(self):
         spec = """jobs:
