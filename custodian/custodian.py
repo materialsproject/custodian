@@ -302,10 +302,10 @@ class Custodian(object):
         Raises:
             ValidationError: if a job fails validation
             ReturnCodeError: if the process has a return code different from 0
-            HandlerError: if an unrecoverable occurs
-            MaxErrorsPerJobError: if max_errors_per_job is reached
-            MaxErrorsError: if max_errors is reached
-            MaxErrorsPerHandlerError: if max_errors_per_handler is reached
+            NonRecoverableError: if an unrecoverable occurs
+            MaxCorrectionsPerJobError: if max_errors_per_job is reached
+            MaxCorrectionsError: if max_errors is reached
+            MaxCorrectionsPerHandlerError: if max_errors_per_handler is reached
         """
         cwd = os.getcwd()
 
@@ -365,10 +365,10 @@ class Custodian(object):
         Raises:
             ValidationError: if a job fails validation
             ReturnCodeError: if the process has a return code different from 0
-            HandlerError: if an unrecoverable occurs
-            MaxErrorsPerJobError: if max_errors_per_job is reached
-            MaxErrorsError: if max_errors is reached
-            MaxErrorsPerHandlerError: if max_errors_per_handler is reached
+            NonRecoverableError: if an unrecoverable occurs
+            MaxCorrectionsPerJobError: if max_errors_per_job is reached
+            MaxCorrectionsError: if max_errors is reached
+            MaxCorrectionsPerHandlerError: if max_errors_per_handler is reached
         """
         self.run_log.append({"job": job.as_dict(), "corrections": [],
                              "handler": None, "validator": None,
@@ -465,23 +465,23 @@ class Custodian(object):
                 if not x["actions"] and x["handler"].raises_runtime_error:
                     self.run_log[-1]["handler"] = x["handler"]
                     s = "Unrecoverable error for handler: {}".format(x["handler"])
-                    raise HandlerError(s, True, x["handler"])
+                    raise NonRecoverableError(s, True, x["handler"])
             for x in self.run_log[-1]["corrections"]:
                 if not x["actions"]:
                     self.run_log[-1]["handler"] = x["handler"]
                     s = "Unrecoverable error for handler: %s" % x["handler"]
-                    raise HandlerError(s, False, x["handler"])
+                    raise NonRecoverableError(s, False, x["handler"])
 
         if self.errors_current_job >= self.max_errors_per_job:
             self.run_log[-1]["max_errors_per_job"] = True
             msg = "Max errors per job reached: {}.".format(self.max_errors_per_job)
             logger.info(msg)
-            raise MaxErrorsPerJobError(msg, True, self.max_errors_per_job, job)
+            raise MaxCorrectionsPerJobError(msg, True, self.max_errors_per_job, job)
         else:
             self.run_log[-1]["max_errors"] = True
             msg = "Max errors reached: {}.".format(self.max_errors)
             logger.info(msg)
-            raise MaxErrorsError(msg, True, self.max_errors)
+            raise MaxCorrectionsError(msg, True, self.max_errors)
 
     def run_interrupted(self):
         """
@@ -494,10 +494,10 @@ class Custodian(object):
         Raises:
             ValidationError: if a job fails validation
             ReturnCodeError: if the process has a return code different from 0
-            HandlerError: if an unrecoverable occurs
-            MaxErrorsPerJobError: if max_errors_per_job is reached
-            MaxErrorsError: if max_errors is reached
-            MaxErrorsPerHandlerError: if max_errors_per_handler is reached
+            NonRecoverableError: if an unrecoverable occurs
+            MaxCorrectionsPerJobError: if max_errors_per_job is reached
+            MaxCorrectionsError: if max_errors is reached
+            MaxCorrectionsPerHandlerError: if max_errors_per_handler is reached
         """
         start = datetime.datetime.now()
         try:
@@ -542,7 +542,7 @@ class Custodian(object):
                             self.run_log[-1]["handler"] = x["handler"]
                             s = "Unrecoverable error for handler: {}. " \
                                 "Raising RuntimeError".format(x["handler"])
-                            raise HandlerError(s, True, x["handler"])
+                            raise NonRecoverableError(s, True, x["handler"])
                     logger.info("Corrected input based on error handlers")
                     # Return with more jobs to run if recoverable error caught
                     # and corrected for
@@ -607,7 +607,7 @@ class Custodian(object):
                         if h.raise_on_max:
                             self.run_log[-1]["handler"] = h
                             self.run_log[-1]["max_errors_per_handler"] = True
-                            raise MaxErrorsPerHandlerError(msg, True, h.max_num_corrections, h)
+                            raise MaxCorrectionsPerHandlerError(msg, True, h.max_num_corrections, h)
                         else:
                             logger.warning(msg+" Correction not applied.")
                             continue
@@ -719,7 +719,7 @@ class ErrorHandler(MSONable):
     Whether corrections from this specific handler should be applied only a
     fixed maximum number of times on a single job (i.e. the counter is reset
     at the beginning of each job). If the maximum number is reached the code
-    will either raise a MaxErrorsPerHandlerError (raise_on_max==True) or stops
+    will either raise a MaxCorrectionsPerHandlerError (raise_on_max==True) or stops
     considering the correction (raise_on_max==False). If max_num_corrections 
     is None this option is not considered. These options can be overridden
     as class attributes of the subclass or as customizable options setting
@@ -831,7 +831,7 @@ class ValidationError(CustodianError):
         self.validator = validator
 
 
-class HandlerError(CustodianError):
+class NonRecoverableError(CustodianError):
     """
     Error raised when a handler found an error but could not fix it
     """
@@ -843,7 +843,7 @@ class HandlerError(CustodianError):
             raises (bool): Whether this should be raised outside custodian
             handler (Handler): Handler that caused the exception.
         """
-        super(HandlerError, self).__init__(message, raises)
+        super(NonRecoverableError, self).__init__(message, raises)
         self.handler = handler
 
 
@@ -854,7 +854,7 @@ class ReturnCodeError(CustodianError):
     pass
 
 
-class MaxErrorsError(CustodianError):
+class MaxCorrectionsError(CustodianError):
     """
     Error raised when the maximum allowed number of errors is reached
     """
@@ -866,11 +866,11 @@ class MaxErrorsError(CustodianError):
             raises (bool): Whether this should be raised outside custodian
             max_errors (int): the number of errors reached
         """
-        super(MaxErrorsError, self).__init__(message, raises)
+        super(MaxCorrectionsError, self).__init__(message, raises)
         self.max_errors = max_errors
 
 
-class MaxErrorsPerJobError(CustodianError):
+class MaxCorrectionsPerJobError(CustodianError):
     """
     Error raised when the maximum allowed number of errors per job is reached
     """
@@ -883,12 +883,12 @@ class MaxErrorsPerJobError(CustodianError):
             max_errors_per_job (int): the number of errors per job reached
             job (Job): the job that was stopped
         """
-        super(MaxErrorsPerJobError, self).__init__(message, raises)
+        super(MaxCorrectionsPerJobError, self).__init__(message, raises)
         self.max_errors_per_job = max_errors_per_job
         self.job = job
 
 
-class MaxErrorsPerHandlerError(CustodianError):
+class MaxCorrectionsPerHandlerError(CustodianError):
     """
     Error raised when the maximum allowed number of errors per handler is reached
     """
@@ -901,6 +901,6 @@ class MaxErrorsPerHandlerError(CustodianError):
             max_errors_per_handler (int): the number of errors per job reached
             handler (Handler): the handler that caused the exception
         """
-        super(MaxErrorsPerHandlerError, self).__init__(message, raises)
+        super(MaxCorrectionsPerHandlerError, self).__init__(message, raises)
         self.max_errors_per_handler = max_errors_per_handler
         self.handler = handler

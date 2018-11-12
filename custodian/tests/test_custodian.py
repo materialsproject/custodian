@@ -4,8 +4,8 @@ from __future__ import unicode_literals, division, print_function
 import unittest
 import random
 from custodian.custodian import Job, ErrorHandler, Custodian, Validator
-from custodian.custodian import ValidationError, HandlerError, ReturnCodeError
-from custodian.custodian import MaxErrorsError, MaxErrorsPerJobError, MaxErrorsPerHandlerError
+from custodian.custodian import ValidationError, NonRecoverableError, ReturnCodeError
+from custodian.custodian import MaxCorrectionsError, MaxCorrectionsPerJobError, MaxCorrectionsPerHandlerError
 import os
 import glob
 import shutil
@@ -122,11 +122,17 @@ class ExampleHandler2b(ExampleHandler2):
 
 class ExampleValidator1(Validator):
 
+    def __init__(self):
+        pass
+
     def check(self):
         return False
 
 
 class ExampleValidator2(Validator):
+
+    def __init__(self):
+        pass
 
     def check(self):
         return True
@@ -182,7 +188,7 @@ class CustodianTest(unittest.TestCase):
         c = Custodian([h],
                       [ExampleJob(i, params) for i in range(njobs)],
                       max_errors=njobs)
-        self.assertRaises(HandlerError, c.run)
+        self.assertRaises(NonRecoverableError, c.run)
         self.assertTrue(h.has_error)
         h = ExampleHandler2b(params)
         c = Custodian([h],
@@ -199,7 +205,7 @@ class CustodianTest(unittest.TestCase):
         c = Custodian([h],
                       [ExampleJob(i, params) for i in range(njobs)],
                       max_errors=1, max_errors_per_job=10)
-        self.assertRaises(MaxErrorsError, c.run)
+        self.assertRaises(MaxCorrectionsError, c.run)
         self.assertTrue(c.run_log[-1]["max_errors"])
 
     def test_max_errors_per_job(self):
@@ -209,7 +215,7 @@ class CustodianTest(unittest.TestCase):
         c = Custodian([h],
                       [ExampleJob(i, params) for i in range(njobs)],
                       max_errors=njobs, max_errors_per_job=1)
-        self.assertRaises(MaxErrorsPerJobError, c.run)
+        self.assertRaises(MaxCorrectionsPerJobError, c.run)
         self.assertTrue(c.run_log[-1]["max_errors_per_job"])
 
     def test_max_errors_per_handler_raise(self):
@@ -219,7 +225,7 @@ class CustodianTest(unittest.TestCase):
         c = Custodian([h],
                       [ExampleJob(i, params) for i in range(njobs)],
                       max_errors=njobs*10, max_errors_per_job=1000)
-        self.assertRaises(MaxErrorsPerHandlerError, c.run)
+        self.assertRaises(MaxCorrectionsPerHandlerError, c.run)
         self.assertEqual(h.n_applied_corrections, 2)
         self.assertEqual(len(c.run_log[-1]["corrections"]), 2)
         self.assertTrue(c.run_log[-1]["max_errors_per_handler"])
