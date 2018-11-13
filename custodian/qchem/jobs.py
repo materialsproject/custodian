@@ -173,8 +173,7 @@ class QCJob(Job):
         orig_freq_rem = copy.deepcopy(orig_opt_input.rem)
         orig_freq_rem["job_type"] = "freq"
         first = True
-        reversed_direction = False
-        num_neg_freqs = []
+        history = []
 
         for ii in range(max_iterations):
             yield (QCJob(
@@ -186,8 +185,12 @@ class QCJob(Job):
                 suffix=".opt_" + str(ii),
                 backup=first,
                 **QCJob_kwargs))
-            first = False
             opt_outdata = QCOutput(output_file + ".opt_" + str(ii)).data
+            if first:
+                orig_species = copy.deepcopy(opt_outdata.get('species'))
+                orig_charge = copy.deepcopy(opt_outdata.get('charge'))
+                orig_multiplicity = copy.deepcopy(opt_outdata.get('multiplicity'))
+            first = False
             if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
                 print("Unstable molecule broke into unconnected fragments which failed to optimize! Exiting...")
                 break
@@ -216,42 +219,70 @@ class QCJob(Job):
                     print("All frequencies positive!")
                     break
                 else:
-                    num_neg_freqs += [sum(1 for freq in outdata.get('frequencies') if freq < 0)]
+                    hist = {}
+                    hist["molecule"] = copy.deepcopy(outdata.get("initial_molecule"))
+                    hist["geometry"] = copy.deepcopy(outdata.get("initial_geometry"))
+                    hist["frequencies"] = copy.deepcopy(outdata.get("frequencies")) #Unnecessary??
+                    hist["frequency_mode_vectors"] = copy.deepcopy(outdata.get("frequency_mode_vectors"))
+                    hist["num_neg_freqs"] = sum(1 for freq in outdata.get("frequencies") if freq < 0)
+                    hist["index"] = len(history)
+                    hist["children"] = []
+                    history.append(hist)
+
+                    ref_mol = history[-1]["molecule"]
+                    geom_to_perturb = history[-1]["geometry"]
+                    negative_freq_vecs = history[-1]["frequency_mode_vectors"][0]
+                    reversed_direction = False
+                    standard = True
+
                     # If we've found one or more negative frequencies in two consecutive iterations, let's dig in deeper:
-                    if len(num_neg_freqs) > 1:
-                        # if the number of negative frequencies has remained constant and we haven't yet reversed,
-                        # then reverse the direction of the perturbation:
-                        if num_neg_freqs[-1] == num_neg_freqs[-2] and not reversed_direction:
-                            reversed_direction = True
-                        # If we have already reversed and still have a constant number of negative frequencies, exit.
-                        elif num_neg_freqs[-1] == num_neg_freqs[-2] and reversed_direction:
-                            if len(num_neg_freqs) < 3:
-                                raise AssertionError("ERROR: This should only be possible after at least three frequency flattening iterations! Exiting...")
+                    if len(history) > 1:
+                        # Start by finding the latest iteration's parent:
+                        if history[-1]["index"] in history[-2]["children"]:
+                            parent_index = history[-2]["index"]
+                            history[-1]["parent"] = history[-2]["index"]
+                        elif history[-1]["index"] in history[-3]["children"]:
+                            parent_index = history[-3]["index"]
+                            history[-1]["parent"] = history[-3]["index"]
+                        else:
+                            raise AssertionError("ERROR: your parent should always be one or two iterations behind you! Exiting...")
+
+                        # if the number of negative frequencies has remained constant or increased from parent to child,
+                        if history[-1]["num_neg_freqs"] >= history[parent_index]["num_neg_freqs"]:
+                            # check to see if the parent only has one child, aka only the positive perturbation has been tried,
+                            # in which case just try the negative perturbation from the same parent
+                            if len(history[parent_index]["children"]) == 1:
+                                ref_mol = history[parent_index]["molecule"]
+                                geom_to_perturb = history[parent_index]["geometry"]
+                                negative_freq_vecs = history[parent_index]["frequency_mode_vectors"][0]
+                                reversed_direction = True
+                                standard = False
+                                history[parent_index]["children"].append(len(history))
+                            # If the parent has two children, aka both directions have been tried, then.......?
+                            elif len(history[parent_index]["children"]) == 2:
+                                raise Exception("ERROR: Neither direction reduced the number of negative frequencies! Exiting...")
                             else:
-                                raise Exception("ERROR: Reversing the perturbation direction still could not flatten any frequencies. Exiting...")
-                        # If we reversed and the number of negative frequencies changed, un-reverse and continue:
-                        elif num_neg_freqs[-1] != num_neg_freqs[-2] and reversed_direction:
-                            reversed_direction = False
-                        # Implicitly, if the numbber of negative frequencies changed and we hadn't reversed, just continue on normally.
+                                raise AssertionError("ERROR: How the hell can a parent have three children yet?!?! Exiting...")
+                        # Implicitly, if the number of negative frequencies decreased from parent to child, continue normally.
+                    if standard:
+                        history[-1]["children"].append(len(history))
 
-                    negative_freq_vecs = outdata.get("frequency_mode_vectors")[0]
                     structure_successfully_perturbed = False
-
                     for molecule_perturb_scale in np.arange(
                             max_molecule_perturb_scale, min_molecule_perturb_scale,
                             -perturb_scale_grid):
                         new_coords = perturb_coordinates(
-                            old_coords=outdata.get("initial_geometry"),
+                            old_coords=geom_to_perturb,
                             negative_freq_vecs=negative_freq_vecs,
                             molecule_perturb_scale=molecule_perturb_scale,
                             reversed_direction=reversed_direction)
                         new_molecule = Molecule(
-                            species=outdata.get('species'),
+                            species=orig_species,
                             coords=new_coords,
-                            charge=outdata.get('charge'),
-                            spin_multiplicity=outdata.get('multiplicity'))
+                            charge=orig_charge,
+                            spin_multiplicity=orig_multiplicity)
                         if check_connectivity:
-                            old_molgraph = MoleculeGraph.with_local_env_strategy(outdata.get("initial_molecule"),
+                            old_molgraph = MoleculeGraph.with_local_env_strategy(ref_mol,
                                                                OpenBabelNN(),
                                                                reorder=False,
                                                                extend_structure=False)

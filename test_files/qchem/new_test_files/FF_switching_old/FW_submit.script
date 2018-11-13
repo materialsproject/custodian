@@ -1,0 +1,17 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1
+#SBATCH --qos=premium
+#SBATCH --time=03:00:00
+#SBATCH --partition=regular
+#SBATCH --account=jcesr
+#SBATCH --job-name=fragment_879
+#SBATCH --output=fragment_879-%j.out
+#SBATCH --error=fragment_879-%j.error
+#SBATCH --constraint=haswell
+
+module load qchem
+cd /global/cscratch1/sd/sblau/fragment_wf/block_2018-07-21-08-46-01-522462/launcher_2018-08-27-17-54-04-357522
+rlaunch -c /global/homes/s/sblau/config singleshot --fw_id 3753
+
+# CommonAdapter (SLURM) completed writing Template
