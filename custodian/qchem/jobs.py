@@ -217,16 +217,22 @@ class QCJob(Job):
                     break
                 else:
                     num_neg_freqs += [sum(1 for freq in outdata.get('frequencies') if freq < 0)]
+                    # If we've found one or more negative frequencies in two consecutive iterations, let's dig in deeper:
                     if len(num_neg_freqs) > 1:
+                        # if the number of negative frequencies has remained constant and we haven't yet reversed,
+                        # then reverse the direction of the perturbation:
                         if num_neg_freqs[-1] == num_neg_freqs[-2] and not reversed_direction:
                             reversed_direction = True
+                        # If we have already reversed and still have a constant number of negative frequencies, exit.
                         elif num_neg_freqs[-1] == num_neg_freqs[-2] and reversed_direction:
                             if len(num_neg_freqs) < 3:
                                 raise AssertionError("ERROR: This should only be possible after at least three frequency flattening iterations! Exiting...")
                             else:
                                 raise Exception("ERROR: Reversing the perturbation direction still could not flatten any frequencies. Exiting...")
+                        # If we reversed and the number of negative frequencies changed, un-reverse and continue:
                         elif num_neg_freqs[-1] != num_neg_freqs[-2] and reversed_direction:
                             reversed_direction = False
+                        # Implicitly, if the numbber of negative frequencies changed and we hadn't reversed, just continue on normally.
 
                     negative_freq_vecs = outdata.get("frequency_mode_vectors")[0]
                     structure_successfully_perturbed = False
