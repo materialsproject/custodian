@@ -355,6 +355,8 @@ class QCJob(Job):
         orig_opt_rem["job_type"] = "opt"
         orig_opt_rem["SCF_GUESS"] = "read"
         orig_opt_rem["GEOM_OPT_HESSIAN"] = "read"
+        later_freq_rem = copy.deepcopy(orig_freq_input.rem)
+        later_freq_rem["SCF_GUESS"] = "read"
         first = True
 
         for ii in range(max_iterations):
@@ -367,10 +369,10 @@ class QCJob(Job):
                 suffix=".freq_" + str(ii),
                 scratch_dir=os.getcwd(),
                 save_scratch=True,
-                save_name="freq_scratch",
+                save_name="chain_scratch",
                 backup=first,
                 **QCJob_kwargs))
-            freq_outdata = QCOutput(output_file + ".freq_" + str(ii)).data
+            # freq_outdata = QCOutput(output_file + ".freq_" + str(ii)).data
             first = False
             opt_QCInput = QCInput(
                 molecule="read",
@@ -387,13 +389,33 @@ class QCJob(Job):
                 qclog_file=qclog_file,
                 suffix=".opt_" + str(ii),
                 scratch_dir=os.getcwd(),
-                read_scratch=True,
-                save_name="freq_scratch",
+                save_scratch=True,
+                save_name="chain_scratch",
                 backup=first,
                 **QCJob_kwargs))
-            opt_outdata = QCOutput(output_file + ".opt_" + str(ii)).data
-            errors = opt_outdata.get("errors")
+            # opt_outdata = QCOutput(output_file + ".opt_" + str(ii)).data
+            # errors = opt_outdata.get("errors")
+            freq_QCInput = QCInput(
+                molecule="read",
+                rem=later_freq_rem,
+                opt=orig_freq_input.opt,
+                pcm=orig_freq_input.pcm,
+                solvent=orig_freq_input.solvent)
+            freq_QCInput.write_file(input_file)
+            yield (QCJob(
+                qchem_command=qchem_command,
+                multimode=multimode,
+                input_file=input_file,
+                output_file=output_file,
+                qclog_file=qclog_file,
+                suffix=".freq_" + str(ii+1),
+                scratch_dir=os.getcwd(),
+                save_scratch=True,
+                save_name="chain_scratch",
+                backup=first,
+                **QCJob_kwargs))
             break
+        shutil.rmtree(os.path.join(os.getcwd(),"chain_scratch"))
 
 
 def perturb_coordinates(old_coords, negative_freq_vecs, molecule_perturb_scale,
