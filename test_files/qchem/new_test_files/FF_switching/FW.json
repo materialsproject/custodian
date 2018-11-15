@@ -266,40 +266,36 @@
     },
     "fw_id": 3753,
     "created_on": "2018-07-17T17:16:09.835070",
-    "updated_on": "2018-08-27T18:39:27.062340",
+    "updated_on": "2018-11-13T22:21:29.339361",
     "launches": [
         {
             "fworker": {
-                "name": "cori_qchem_dev",
+                "name": "edison_qchem_dev",
                 "category": "",
                 "query": "{}",
                 "env": {
-                    "db_file": "/global/homes/s/sblau/config/db.json",
+                    "db_file": "/global/homes/s/sblau/config_edison/db.json",
                     "qchem_cmd": "qchem -slurm",
-                    "scratch_dir": "/dev/shm/qcscratch/"
+                    "scratch_dir": "/dev/shm/qcscratch/",
+                    "max_cores": 24,
+                    "multimode": "openmp"
                 }
             },
             "fw_id": 3753,
-            "launch_dir": "/global/cscratch1/sd/sblau/fragment_wf/block_2018-07-21-08-46-01-522462/launcher_2018-08-27-17-54-04-357522",
-            "host": "nid00761",
-            "ip": "10.128.2.254",
+            "launch_dir": "/scratch2/scratchdirs/sblau/ion_placement/block_2018-11-13-02-29-44-974177/launcher_2018-11-13-22-17-41-574824",
+            "host": "nid03485",
+            "ip": "10.128.13.184",
             "trackers": [],
             "action": null,
             "state": "RUNNING",
             "state_history": [
                 {
-                    "state": "RESERVED",
-                    "created_on": "2018-08-27T17:54:04.319396",
-                    "updated_on": "2018-08-27T17:54:04.319400",
-                    "reservation_id": "14392702"
-                },
-                {
                     "state": "RUNNING",
-                    "created_on": "2018-08-27T18:39:27.060273",
-                    "updated_on": "2018-08-27T18:39:27.060288"
+                    "created_on": "2018-11-13T22:21:29.310565",
+                    "updated_on": "2018-11-13T22:21:29.310571"
                 }
             ],
-            "launch_id": 5961
+            "launch_id": 7662
         }
     ],
     "archived_launches": [
@@ -320,7 +316,7 @@
             "ip": "10.128.8.70",
             "trackers": [],
             "action": null,
-            "state": "RUNNING",
+            "state": "FIZZLED",
             "state_history": [
                 {
                     "state": "RUNNING",
@@ -332,9 +328,307 @@
                         "_all_update_spec": {},
                         "_all_mod_spec": []
                     }
+                },
+                {
+                    "state": "FIZZLED",
+                    "created_on": "2018-10-18T18:44:40.852480",
+                    "checkpoint": {
+                        "_task_n": 1,
+                        "_all_stored_data": {},
+                        "_all_update_spec": {},
+                        "_all_mod_spec": []
+                    }
                 }
             ],
             "launch_id": 5850
+        },
+        {
+            "fworker": {
+                "name": "cori_qchem_dev",
+                "category": "",
+                "query": "{}",
+                "env": {
+                    "db_file": "/global/homes/s/sblau/config/db.json",
+                    "qchem_cmd": "qchem -slurm",
+                    "scratch_dir": "/dev/shm/qcscratch/"
+                }
+            },
+            "fw_id": 3753,
+            "launch_dir": "/global/cscratch1/sd/sblau/fragment_wf/block_2018-07-21-08-46-01-522462/launcher_2018-08-27-17-54-04-357522",
+            "host": "nid00761",
+            "ip": "10.128.2.254",
+            "trackers": [],
+            "action": {
+                "stored_data": {
+                    "task_id": 4453
+                },
+                "exit": false,
+                "update_spec": {
+                    "prev_calc_molecule": {
+                        "@module": "pymatgen.core.structure",
+                        "@class": "Molecule",
+                        "charge": 0,
+                        "spin_multiplicity": 2,
+                        "sites": [
+                            {
+                                "name": "O",
+                                "species": [
+                                    {
+                                        "element": "O",
+                                        "occu": 1
+                                    }
+                                ],
+                                "xyz": [
+                                    1.0359156404,
+                                    0.438496728,
+                                    0.0301453481
+                                ],
+                                "properties": {}
+                            },
+                            {
+                                "name": "O",
+                                "species": [
+                                    {
+                                        "element": "O",
+                                        "occu": 1
+                                    }
+                                ],
+                                "xyz": [
+                                    -1.1133006315,
+                                    0.4732022841,
+                                    0.015430676
+                                ],
+                                "properties": {}
+                            },
+                            {
+                                "name": "O",
+                                "species": [
+                                    {
+                                        "element": "O",
+                                        "occu": 1
+                                    }
+                                ],
+                                "xyz": [
+                                    -0.0569432005,
+                                    -1.5319525687,
+                                    -0.0310932429
+                                ],
+                                "properties": {}
+                            },
+                            {
+                                "name": "C",
+                                "species": [
+                                    {
+                                        "element": "C",
+                                        "occu": 1
+                                    }
+                                ],
+                                "xyz": [
+                                    2.2934705567,
+                                    -0.2581050719,
+                                    0.0118136474
+                                ],
+                                "properties": {}
+                            },
+                            {
+                                "name": "C",
+                                "species": [
+                                    {
+                                        "element": "C",
+                                        "occu": 1
+                                    }
+                                ],
+                                "xyz": [
+                                    -2.3575598009,
+                                    -0.1212925651,
+                                    -0.0075075759
+                                ],
+                                "properties": {}
+                            },
+                            {
+                                "name": "C",
+                                "species": [
+                                    {
+                                        "element": "C",
+                                        "occu": 1
+                                    }
+                                ],
+                                "xyz": [
+                                    3.3778573127,
+                                    0.7431071273,
+                                    -0.0048889083
+                                ],
+                                "properties": {}
+                            },
+                            {
+                                "name": "C",
+                                "species": [
+                                    {
+                                        "element": "C",
+                                        "occu": 1
+                                    }
+                                ],
+                                "xyz": [
+                                    -3.4455286196,
+                                    0.628255373,
+                                    0.0072467538
+                                ],
+                                "properties": {}
+                            },
+                            {
+                                "name": "C",
+                                "species": [
+                                    {
+                                        "element": "C",
+                                        "occu": 1
+                                    }
+                                ],
+                                "xyz": [
+                                    -0.0401733013,
+                                    -0.3323026493,
+                                    0.0015188081
+                                ],
+                                "properties": {}
+                            },
+                            {
+                                "name": "H",
+                                "species": [
+                                    {
+                                        "element": "H",
+                                        "occu": 1
+                                    }
+                                ],
+                                "xyz": [
+                                    2.3534367404,
+                                    -0.916042487,
+                                    0.8848087964
+                                ],
+                                "properties": {}
+                            },
+                            {
+                                "name": "H",
+                                "species": [
+                                    {
+                                        "element": "H",
+                                        "occu": 1
+                                    }
+                                ],
+                                "xyz": [
+                                    2.3130658394,
+                                    -0.9076361007,
+                                    -0.8750596083
+                                ],
+                                "properties": {}
+                            },
+                            {
+                                "name": "H",
+                                "species": [
+                                    {
+                                        "element": "H",
+                                        "occu": 1
+                                    }
+                                ],
+                                "xyz": [
+                                    -2.3420080132,
+                                    -1.2035861152,
+                                    -0.0372584196
+                                ],
+                                "properties": {}
+                            },
+                            {
+                                "name": "H",
+                                "species": [
+                                    {
+                                        "element": "H",
+                                        "occu": 1
+                                    }
+                                ],
+                                "xyz": [
+                                    4.3816583137,
+                                    0.444789821,
+                                    0.2686357168
+                                ],
+                                "properties": {}
+                            },
+                            {
+                                "name": "H",
+                                "species": [
+                                    {
+                                        "element": "H",
+                                        "occu": 1
+                                    }
+                                ],
+                                "xyz": [
+                                    3.2121092193,
+                                    1.7232349956,
+                                    -0.4326567036
+                                ],
+                                "properties": {}
+                            },
+                            {
+                                "name": "H",
+                                "species": [
+                                    {
+                                        "element": "H",
+                                        "occu": 1
+                                    }
+                                ],
+                                "xyz": [
+                                    -4.4173466448,
+                                    0.1529283526,
+                                    -0.01103632
+                                ],
+                                "properties": {}
+                            },
+                            {
+                                "name": "H",
+                                "species": [
+                                    {
+                                        "element": "H",
+                                        "occu": 1
+                                    }
+                                ],
+                                "xyz": [
+                                    -3.3946868086,
+                                    1.7103667024,
+                                    0.0376079375
+                                ],
+                                "properties": {}
+                            }
+                        ]
+                    }
+                },
+                "mod_spec": [],
+                "additions": [],
+                "detours": [],
+                "defuse_children": false,
+                "defuse_workflow": false
+            },
+            "state": "COMPLETED",
+            "state_history": [
+                {
+                    "state": "RESERVED",
+                    "created_on": "2018-08-27T17:54:04.319396",
+                    "updated_on": "2018-08-27T17:54:04.319400",
+                    "reservation_id": "14392702"
+                },
+                {
+                    "state": "RUNNING",
+                    "created_on": "2018-08-27T18:39:27.060273",
+                    "updated_on": "2018-08-27T19:36:49.007408",
+                    "checkpoint": {
+                        "_task_n": 2,
+                        "_all_stored_data": {},
+                        "_all_update_spec": {},
+                        "_all_mod_spec": []
+                    }
+                },
+                {
+                    "state": "COMPLETED",
+                    "created_on": "2018-08-27T19:36:49.009604"
+                }
+            ],
+            "launch_id": 5961
         }
     ],
     "state": "RUNNING",

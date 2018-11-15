@@ -160,12 +160,6 @@ class QCJob(Job):
                 :class:`custodian.qchem.jobs.QCJob`.
         """
 
-        min_molecule_perturb_scale = 0.1
-        scale_grid = 10
-        perturb_scale_grid = (
-            max_molecule_perturb_scale - min_molecule_perturb_scale
-        ) / scale_grid
-
         if not os.path.exists(input_file):
             raise AssertionError('Input file must be present!')
         orig_opt_input = QCInput.from_file(input_file)
@@ -190,6 +184,7 @@ class QCJob(Job):
                 orig_species = copy.deepcopy(opt_outdata.get('species'))
                 orig_charge = copy.deepcopy(opt_outdata.get('charge'))
                 orig_multiplicity = copy.deepcopy(opt_outdata.get('multiplicity'))
+                orig_energy = copy.deepcopy(opt_outdata.get('final_energy'))
             first = False
             if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
                 print("Unstable molecule broke into unconnected fragments which failed to optimize! Exiting...")
@@ -217,14 +212,17 @@ class QCJob(Job):
                     raise AssertionError('No errors should be encountered while flattening frequencies!')
                 if outdata.get('frequencies')[0] > 0.0:
                     print("All frequencies positive!")
+                    if opt_outdata.get('final_energy') > orig_energy:
+                        print("WARNING: Energy increased during frequency flattening!")
                     break
                 else:
                     hist = {}
                     hist["molecule"] = copy.deepcopy(outdata.get("initial_molecule"))
                     hist["geometry"] = copy.deepcopy(outdata.get("initial_geometry"))
-                    hist["frequencies"] = copy.deepcopy(outdata.get("frequencies")) #Unnecessary??
+                    hist["frequencies"] = copy.deepcopy(outdata.get("frequencies"))
                     hist["frequency_mode_vectors"] = copy.deepcopy(outdata.get("frequency_mode_vectors"))
                     hist["num_neg_freqs"] = sum(1 for freq in outdata.get("frequencies") if freq < 0)
+                    hist["energy"] = copy.deepcopy(opt_outdata.get("final_energy"))
                     hist["index"] = len(history)
                     hist["children"] = []
                     history.append(hist)
@@ -239,33 +237,61 @@ class QCJob(Job):
                     if len(history) > 1:
                         # Start by finding the latest iteration's parent:
                         if history[-1]["index"] in history[-2]["children"]:
-                            parent_index = history[-2]["index"]
-                            history[-1]["parent"] = history[-2]["index"]
+                            parent_hist = history[-2]
+                            history[-1]["parent"] = parent_hist["index"]
                         elif history[-1]["index"] in history[-3]["children"]:
-                            parent_index = history[-3]["index"]
-                            history[-1]["parent"] = history[-3]["index"]
+                            parent_hist = history[-3]
+                            history[-1]["parent"] = parent_hist["index"]
                         else:
                             raise AssertionError("ERROR: your parent should always be one or two iterations behind you! Exiting...")
 
                         # if the number of negative frequencies has remained constant or increased from parent to child,
-                        if history[-1]["num_neg_freqs"] >= history[parent_index]["num_neg_freqs"]:
+                        if history[-1]["num_neg_freqs"] >= parent_hist["num_neg_freqs"]:
                             # check to see if the parent only has one child, aka only the positive perturbation has been tried,
                             # in which case just try the negative perturbation from the same parent
-                            if len(history[parent_index]["children"]) == 1:
-                                ref_mol = history[parent_index]["molecule"]
-                                geom_to_perturb = history[parent_index]["geometry"]
-                                negative_freq_vecs = history[parent_index]["frequency_mode_vectors"][0]
+                            if len(parent_hist["children"]) == 1:
+                                ref_mol = parent_hist["molecule"]
+                                geom_to_perturb = parent_hist["geometry"]
+                                negative_freq_vecs = parent_hist["frequency_mode_vectors"][0]
                                 reversed_direction = True
                                 standard = False
-                                history[parent_index]["children"].append(len(history))
-                            # If the parent has two children, aka both directions have been tried, then.......?
-                            elif len(history[parent_index]["children"]) == 2:
-                                raise Exception("ERROR: Neither direction reduced the number of negative frequencies! Exiting...")
+                                parent_hist["children"].append(len(history))
+                            # If the parent has two children, aka both directions have been tried, then we have to get creative:
+                            elif len(parent_hist["children"]) == 2:
+                                # If we're dealing with just one negative frequency, 
+                                if parent_hist["num_neg_freqs"] == 1:
+                                    make_good_child_next_parent = False
+                                    if history[parent_hist["children"][0]]["energy"] < history[-1]["energy"]:
+                                        good_child = copy.deepcopy(history[parent_hist["children"][0]])
+                                    else:
+                                        good_child = copy.deepcopy(history[-1])
+                                    if good_child["num_neg_freqs"] > 1:
+                                        raise Exception("ERROR: Child with lower energy has more negative frequencies! Exiting...")
+                                    elif good_child["energy"] < parent_hist["energy"]:
+                                        make_good_child_next_parent = True
+                                    elif vector_list_diff(good_child["frequency_mode_vectors"][0],parent_hist["frequency_mode_vectors"][0]) > 0.2:
+                                        make_good_child_next_parent = True
+                                    else:
+                                        raise Exception("ERROR: Good child not good enough! Exiting...")
+                                    if make_good_child_next_parent:
+                                        good_child["index"] = len(history)
+                                        history.append(good_child)
+                                        ref_mol = history[-1]["molecule"]
+                                        geom_to_perturb = history[-1]["geometry"]
+                                        negative_freq_vecs = history[-1]["frequency_mode_vectors"][0]
+                                else:
+                                    raise Exception("ERROR: Can't deal with multiple neg frequencies yet! Exiting...")
                             else:
-                                raise AssertionError("ERROR: How the hell can a parent have three children yet?!?! Exiting...")
+                                raise AssertionError("ERROR: Parent cannot have more than two childen! Exiting...")
                         # Implicitly, if the number of negative frequencies decreased from parent to child, continue normally.
                     if standard:
                         history[-1]["children"].append(len(history))
+
+                    min_molecule_perturb_scale = 0.1
+                    scale_grid = 10
+                    perturb_scale_grid = (
+                        max_molecule_perturb_scale - min_molecule_perturb_scale
+                    ) / scale_grid
 
                     structure_successfully_perturbed = False
                     for molecule_perturb_scale in np.arange(
@@ -318,3 +344,11 @@ def perturb_coordinates(old_coords, negative_freq_vecs, molecule_perturb_scale,
         direction = -1.0
     return [[c + v * direction for c, v in zip(coord, vec)]
             for coord, vec in zip(old_coords, normalized_vecs)]
+
+def vector_list_diff(vecs1, vecs2):
+    diff = 0.0
+    if len(vecs1) != len(vecs2):
+        raise AssertionError("ERROR: Vectors must be of equal length! Exiting...")
+    for ii, vec1 in enumerate(vecs1):
+        diff += np.linalg.norm(vecs2[ii] - vec1)
+    return diff
