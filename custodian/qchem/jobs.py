@@ -389,7 +389,7 @@ class QCJob(Job):
                 input_file=input_file,
                 output_file=output_file,
                 qclog_file=qclog_file,
-                suffix=".freq_" + str(ii),
+                suffix=".opt_" + str(ii),
                 scratch_dir=os.getcwd(),
                 read_scratch=True,
                 save_name="freq_scratch",
