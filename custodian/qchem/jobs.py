@@ -117,10 +117,6 @@ class QCJob(Job):
             os.putenv('OMP_NUM_THREADS', str(self.max_cores))
 
     def postprocess(self):
-        if self.save_scratch:
-            shutil.copytree(
-                os.path.join(self.scratch_dir, self.save_name),
-                os.path.join(os.path.dirname(self.input_file), self.save_name))
         if self.suffix != "":
             shutil.move(self.input_file, self.input_file + self.suffix)
             shutil.move(self.output_file, self.output_file + self.suffix)
