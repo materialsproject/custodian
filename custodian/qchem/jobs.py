@@ -44,6 +44,7 @@ class QCJob(Job):
                  suffix="",
                  scratch_dir="/dev/shm/qcscratch/",
                  save_scratch=False,
+                 read_scratch=False,
                  save_name="default_save_name",
                  backup=True):
         """
@@ -59,6 +60,8 @@ class QCJob(Job):
             scratch_dir (str): QCSCRATCH directory. Defaults to "/dev/shm/qcscratch/".
             save_scratch (bool): Whether to save scratch directory contents.
                 Defaults to False.
+            read_scratch (bool): Whether to read saved scratch directory contents.
+                Defaults to False.
             save_name (str): Name of the saved scratch directory. Defaults to
                 to "default_save_name".
             backup (bool): Whether to backup the initial input file. If True, the
@@ -73,6 +76,7 @@ class QCJob(Job):
         self.suffix = suffix
         self.scratch_dir = scratch_dir
         self.save_scratch = save_scratch
+        self.read_scratch = read_scratch
         self.save_name = save_name
         self.backup = backup
 
@@ -86,6 +90,11 @@ class QCJob(Job):
                 self.save_name
             ]
             multimode_index = 1
+        elif self.read_scratch:
+            command = [
+                "", str(self.max_cores), self.input_file, self.output_file,
+                self.save_name
+            ]
         else:
             command = [
                 "", str(self.max_cores), self.input_file, self.output_file
@@ -331,6 +340,64 @@ class QCJob(Job):
                         pcm=orig_opt_input.pcm,
                         solvent=orig_opt_input.solvent)
                     new_opt_QCInput.write_file(input_file)
+
+    @classmethod
+    def chained_freq_opt(cls,
+                         qchem_command,
+                         multimode="openmp",
+                         input_file="mol.qin",
+                         output_file="mol.qout",
+                         qclog_file="mol.qclog",
+                         max_iterations=10,
+                         **QCJob_kwargs):
+
+        if not os.path.exists(input_file):
+            raise AssertionError('Input file must be present!')
+        orig_freq_input = QCInput.from_file(input_file)
+        orig_freq_rem = copy.deepcopy(orig_freq_input.rem)
+        orig_opt_rem = copy.deepcopy(orig_freq_input.rem)
+        orig_opt_rem["job_type"] = "opt"
+        orig_opt_rem["SCF_GUESS"] = "read"
+        orig_opt_rem["GEOM_OPT_HESSIAN"] = "read"
+        first = True
+
+        for ii in range(max_iterations):
+            yield (QCJob(
+                qchem_command=qchem_command,
+                multimode=multimode,
+                input_file=input_file,
+                output_file=output_file,
+                qclog_file=qclog_file,
+                suffix=".freq_" + str(ii),
+                scratch_dir=os.getcwd(),
+                save_scratch=True,
+                save_name="freq_scratch",
+                backup=first,
+                **QCJob_kwargs))
+            freq_outdata = QCOutput(output_file + ".freq_" + str(ii)).data
+            first = False
+            opt_QCInput = QCInput(
+                molecule="read",
+                rem=orig_opt_rem,
+                opt=orig_freq_input.opt,
+                pcm=orig_freq_input.pcm,
+                solvent=orig_freq_input.solvent)
+            opt_QCInput.write_file(input_file)
+            yield (QCJob(
+                qchem_command=qchem_command,
+                multimode=multimode,
+                input_file=input_file,
+                output_file=output_file,
+                qclog_file=qclog_file,
+                suffix=".freq_" + str(ii),
+                scratch_dir=os.getcwd(),
+                read_scratch=True,
+                save_name="freq_scratch",
+                backup=first,
+                **QCJob_kwargs))
+            opt_outdata = QCOutput(output_file + ".opt_" + str(ii)).data
+            errors = opt_outdata.get("errors")
+            break
 
 
 def perturb_coordinates(old_coords, negative_freq_vecs, molecule_perturb_scale,
