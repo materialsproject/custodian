@@ -956,7 +956,7 @@ class FrozenJobErrorHandler(ErrorHandler):
         if vi["INCAR"].get("ALGO", "Normal") == "Fast":
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ALGO": "Normal"}}})
-        elif vi["INCAR"].get("ALGO", "Normal") == "Normal":
+        else:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"SYMPREC": 1e-8}}})
 
@@ -1034,6 +1034,11 @@ class NonConvergingErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"AMIN": 0.01, "BMIX": 3.0,
                                                     "ICHARG": 2}}})
+            else:
+                # Try decreasing AMIX
+                backup(VASP_BACKUP_FILES)
+                actions.append({"dict": "INCAR",
+                                "action": {"_set": {"AMIX": 0.01}}})
 
         if actions:
             VaspModder(vi=vi).apply_actions(actions)
