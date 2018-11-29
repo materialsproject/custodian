@@ -908,9 +908,6 @@ class PotimErrorHandler(ErrorHandler):
             actions = [{"dict": "INCAR",
                         "action": {"_set": {"IBRION": 3,
                                             "SMASS": 0.75}}}]
-        elif potim < 0.1:
-            actions = [{"dict": "INCAR",
-                        "action": {"_set": {"SYMPREC": 1e-8}}}]
         else:
             actions = [{"dict": "INCAR",
                         "action": {"_set": {"POTIM": potim * 0.5}}}]
