@@ -956,6 +956,9 @@ class FrozenJobErrorHandler(ErrorHandler):
         if vi["INCAR"].get("ALGO", "Normal") == "Fast":
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ALGO": "Normal"}}})
+        elif vi["INCAR"].get("ALGO", "Normal") == "Normal":
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"SYMPREC": 1e-8}}})
 
         VaspModder(vi=vi).apply_actions(actions)
 
