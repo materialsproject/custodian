@@ -1302,6 +1302,12 @@ class PositiveEnergyErrorHandler(ErrorHandler):
                         "action": {"_set": {"ALGO": "Normal"}}}]
             VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Positive energy"], "actions": actions}
+        elif algo == "Normal":
+            potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
+            actions = [{"dict": "INCAR",
+                        "action": {"_set": {"POTIM": potim}}}]
+            VaspModder(vi=vi).apply_actions(actions)
+            return {"errors": ["Positive energy"], "actions": actions}
         # Unfixable error. Just return None for actions.
         else:
             return {"errors": ["Positive energy"], "actions": None}
