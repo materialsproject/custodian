@@ -1034,11 +1034,6 @@ class NonConvergingErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"AMIN": 0.01, "BMIX": 3.0,
                                                     "ICHARG": 2}}})
-            else:
-                # Try decreasing AMIX
-                backup(VASP_BACKUP_FILES)
-                actions.append({"dict": "INCAR",
-                                "action": {"_set": {"AMIX": 0.01}}})
 
         if actions:
             VaspModder(vi=vi).apply_actions(actions)
@@ -1047,7 +1042,6 @@ class NonConvergingErrorHandler(ErrorHandler):
         # Unfixable error. Just return None for actions.
         else:
             return {"errors": ["Non-converging job"], "actions": None}
-
 
 class WalltimeHandler(ErrorHandler):
     """
