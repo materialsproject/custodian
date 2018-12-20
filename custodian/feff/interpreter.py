@@ -36,6 +36,7 @@ class FeffModder(Modder):
         """
         Applies a list of actions to the FEFF Input Set and rewrites modified
         files.
+
         Args:
             actions [dict]: A list of actions of the form {'file': filename,
                 'action': moddermodification} or {'dict': feffinput_key,

@@ -58,7 +58,8 @@ class VaspErrorHandler(ErrorHandler):
         "tet": ["Tetrahedron method fails for NKPT<4",
                 "Fatal error detecting k-mesh",
                 "Fatal error: unable to match k-point",
-                "Routine TETIRR needs special values"],
+                "Routine TETIRR needs special values",
+                "Tetrahedron method fails (number of k-points < 4)"],
         "inv_rot_mat": ["inverse of rotation matrix was not found (increase "
                         "SYMPREC)"],
         "brmix": ["BRMIX: very serious problems"],
@@ -89,7 +90,8 @@ class VaspErrorHandler(ErrorHandler):
         "elf_kpar": ["ELF: KPAR>1 not implemented"],
         "elf_ncl": ["WARNING: ELF not implemented for non collinear case"],
         "rhosyg": ["RHOSYG internal error"],
-        "posmap": ["POSMAP internal error: symmetry equivalent atom not found"]
+        "posmap": ["POSMAP internal error: symmetry equivalent atom not found"],
+        "point_group": ["Error: point group operation missing"]
     }
 
     def __init__(self, output_filename="vasp.out", natoms_large_cell=100,
@@ -400,6 +402,10 @@ class VaspErrorHandler(ErrorHandler):
         if "posmap" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"SYMPREC": 1e-6}}})
+        
+        if "point_group" in self.errors:
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"ISYM": 0}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
@@ -643,7 +649,11 @@ class DriftErrorHandler(ErrorHandler):
         if not self.max_drift:
             self.max_drift = incar["EDIFFG"] * -1
 
-        outcar = Outcar("OUTCAR")
+        try:
+            outcar = Outcar("OUTCAR")
+        except:
+            # Can't perform check if Outcar not valid
+            return False
 
         if len(outcar.data.get('drift', [])) < self.to_average:
             # Ensure enough steps to get average drift

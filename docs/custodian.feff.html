@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian.feff package &#8212; custodian 2018.6.11 documentation</title>
+    <title>custodian.feff package &#8212; custodian 2018.8.10 documentation</title>
     <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -38,7 +38,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 2018.6.11 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 2018.8.10 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -64,15 +64,15 @@
 <em class="property">class </em><code class="descname">UnconvergedErrorHandler</code><span class="sig-paren">(</span><em>output_filename='log1.dat'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/handlers.html#UnconvergedErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.feff.handlers.UnconvergedErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Correct the unconverged error of FEFF’s SCF calculation.</p>
-<p>Initializes the handler with the output file to check
-:param output_filename: Filename for the log1.dat file. log1.dat file</p>
-<blockquote>
-<div>contains the SCF calculation convergence information. Change this only
-if it is different from the default (unlikely).</div></blockquote>
+<p>Initializes the handler with the output file to check</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output_filename</strong> (<em>str</em>) – Filename for the log1.dat file. log1.dat file
+contains the SCF calculation convergence information. Change this only
+if it is different from the default (unlikely).</td>
+</tr>
 </tbody>
 </table>
 <dl class="method">
@@ -141,11 +141,17 @@ avoid having to reparse the directory).</li>
 <dt id="custodian.feff.interpreter.FeffModder.apply_actions">
 <code class="descname">apply_actions</code><span class="sig-paren">(</span><em>actions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/interpreter.html#FeffModder.apply_actions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.feff.interpreter.FeffModder.apply_actions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies a list of actions to the FEFF Input Set and rewrites modified
-files.
-:param actions [dict]: A list of actions of the form {‘file’: filename,</p>
-<blockquote>
-<div>‘action’: moddermodification} or {‘dict’: feffinput_key,
-‘action’: moddermodification}</div></blockquote>
+files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>[</strong><strong>dict</strong><strong>]</strong> (<em>actions</em>) – A list of actions of the form {‘file’: filename,
+‘action’: moddermodification} or {‘dict’: feffinput_key,
+‘action’: moddermodification}</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -158,17 +164,15 @@ files.
 <em class="property">class </em><code class="descname">FeffJob</code><span class="sig-paren">(</span><em>feff_cmd</em>, <em>output_file='feff.out'</em>, <em>stderr_file='std_feff_err.txt'</em>, <em>backup=True</em>, <em>gzipped=False</em>, <em>gzipped_prefix='feff_out'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/jobs.html#FeffJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.feff.jobs.FeffJob" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.Job</span></code></a></p>
 <p>A basic FEFF job, run whatever is in the directory.</p>
-<p>This constructor is used for a standard FEFF initialization
-:param feff_cmd: the name of the full executable for running FEFF
-:type feff_cmd: str
-:param output_file: Name of file to direct standard out to.</p>
-<blockquote>
-<div>Defaults to “feff.out”.</div></blockquote>
+<p>This constructor is used for a standard FEFF initialization</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>feff_cmd</strong> (<em>str</em>) – the name of the full executable for running FEFF</li>
+<li><strong>output_file</strong> (<em>str</em>) – Name of file to direct standard out to.
+Defaults to “feff.out”.</li>
 <li><strong>stderr_file</strong> (<em>str</em>) – Name of file direct standard error to.
 Defaults to “std_feff_err.txt”.</li>
 <li><strong>backup</strong> (<em>bool</em>) – Indicating whether to backup the initial input files.

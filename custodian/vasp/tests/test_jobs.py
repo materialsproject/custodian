@@ -45,7 +45,8 @@ class VaspJobTest(unittest.TestCase):
                 v.setup()
                 incar = Incar.from_file("INCAR")
                 count = multiprocessing.cpu_count()
-                if count > 1:
+                # Need at least 3 CPUs for NPAR to be greater than 1
+                if count > 3:
                     self.assertGreater(incar["NPAR"], 1)
 
     def test_postprocess(self):
@@ -76,7 +77,7 @@ class VaspJobTest(unittest.TestCase):
                 v.setup()
                 self.assertTrue(os.path.exists("continue.json"), "continue.json not created")
                 v.setup()
-                self.assertEqual(Poscar.from_file("CONTCAR").structure, 
+                self.assertEqual(Poscar.from_file("CONTCAR").structure,
                                  Poscar.from_file("POSCAR").structure)
                 self.assertEqual(Incar.from_file('INCAR')['ISTART'], 1)
                 v.postprocess()
@@ -84,11 +85,11 @@ class VaspJobTest(unittest.TestCase):
                                  "continue.json not deleted after postprocessing")
             # Test explicit action functionality
             with ScratchDir('.', copy_from_current_on_enter=True) as d:
-                v = VaspJob("hello", auto_continue=[{"dict": "INCAR", 
+                v = VaspJob("hello", auto_continue=[{"dict": "INCAR",
                                                      "action": {"_set": {"ISTART": 1}}}])
                 v.setup()
                 v.setup()
-                self.assertNotEqual(Poscar.from_file("CONTCAR").structure, 
+                self.assertNotEqual(Poscar.from_file("CONTCAR").structure,
                                     Poscar.from_file("POSCAR").structure)
                 self.assertEqual(Incar.from_file('INCAR')['ISTART'], 1)
                 v.postprocess()
@@ -114,21 +115,21 @@ class VaspNEBJobTest(unittest.TestCase):
 
                 incar = Incar.from_file("INCAR")
                 count = multiprocessing.cpu_count()
-                if count > 1:
+                if count > 3:
                     self.assertGreater(incar["NPAR"], 1)
 
                 kpt = Kpoints.from_file("KPOINTS")
                 kpt_pre = Kpoints.from_file("KPOINTS.orig")
                 self.assertEqual(kpt_pre.style.name, "Monkhorst")
                 self.assertEqual(kpt.style.name, "Gamma")
- 
+
     def test_postprocess(self):
         neb_outputs = ['INCAR', 'KPOINTS', 'POTCAR', 'vasprun.xml']
         neb_sub_outputs = ['CHG', 'CHGCAR', 'CONTCAR', 'DOSCAR',
                            'EIGENVAL', 'IBZKPT', 'PCDAT', 'POSCAR',
                            'REPORT', 'PROCAR', 'OSZICAR', 'OUTCAR',
                            'WAVECAR', 'XDATCAR']
-        
+
         with cd(os.path.join(test_dir, 'postprocess_neb')):
             postprocess_neb = os.path.abspath(".")
 

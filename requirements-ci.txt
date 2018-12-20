@@ -1,2 +1,4 @@
 nose==1.3.7
-pymatgen==2018.7.15
+pymatgen==2018.11.6
+coverage==4.5.1
+coveralls==1.3.0

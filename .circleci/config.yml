@@ -1,0 +1,35 @@
+version: 2
+jobs:
+  py3test:
+    working_directory: ~/custodian
+    docker:
+        - image: materialsvirtuallab/circle-ci-pmg-py3:0.0.2
+    steps:
+      - checkout
+      - run:
+          command: |
+            export PATH=$HOME/miniconda3/bin:$PATH
+            conda create --quiet --yes --name test_env python=3.6
+            source activate test_env
+            conda install --quiet --yes numpy scipy matplotlib sympy pandas
+            conda install --quiet --yes -c openbabel openbabel
+            conda update --quiet --all
+            mkdir coverage_reports
+            pip install --upgrade pip
+            pip install --quiet --ignore-installed -r requirements.txt -r requirements-ci.txt
+            # Add executables and path.
+            export MPLBACKEND=Agg
+            pip install --quiet -e .
+            nosetests --config=nose.cfg --cover-html --cover-html-dir=coverage_reports
+          no_output_timeout: 3600
+      - store_artifacts:
+          path: coverage_reports/
+          destination: tr1
+      - store_test_results:
+          path: coverage_reports/
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - py3test
