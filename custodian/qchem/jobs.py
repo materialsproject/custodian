@@ -207,7 +207,8 @@ class QCJob(Job):
                         rem=freq_rem,
                         opt=orig_input.opt,
                         pcm=orig_input.pcm,
-                        solvent=orig_input.solvent)
+                        solvent=orig_input.solvent,
+                        smx=orig_input.smx)
                     freq_QCInput.write_file(input_file)
                     yield (QCJob(
                         qchem_command=qchem_command,
@@ -238,7 +239,8 @@ class QCJob(Job):
                             rem=opt_rem,
                             opt=orig_input.opt,
                             pcm=orig_input.pcm,
-                            solvent=orig_input.solvent)
+                            solvent=orig_input.solvent,
+                            smx=orig_input.smx)
                         opt_QCInput.write_file(input_file)
             shutil.rmtree(os.path.join(os.getcwd(),"chain_scratch"))
 
@@ -278,7 +280,8 @@ class QCJob(Job):
                         rem=orig_freq_rem,
                         opt=orig_opt_input.opt,
                         pcm=orig_opt_input.pcm,
-                        solvent=orig_opt_input.solvent)
+                        solvent=orig_opt_input.solvent,
+                        smx=orig_opt_input.smx)
                     freq_QCInput.write_file(input_file)
                     yield (QCJob(
                         qchem_command=qchem_command,
@@ -412,7 +415,8 @@ class QCJob(Job):
                             rem=orig_opt_rem,
                             opt=orig_opt_input.opt,
                             pcm=orig_opt_input.pcm,
-                            solvent=orig_opt_input.solvent)
+                            solvent=orig_opt_input.solvent,
+                            smx=orig_opt_input.smx)
                         new_opt_QCInput.write_file(input_file)
 
 
