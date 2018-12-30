@@ -55,6 +55,7 @@ class QChemErrorHandler(ErrorHandler):
         # Checks output file for errors.
         self.outdata = QCOutput(self.output_file).data
         self.errors = self.outdata.get("errors")
+        self.warnings = self.outdata.get("warnings")
         # If we aren't out of optimization cycles, but we were in the past, reset the history
         if "out_of_opt_cycles" not in self.errors and len(self.opt_error_history) > 0:
             self.opt_error_history = []
@@ -130,7 +131,7 @@ class QChemErrorHandler(ErrorHandler):
                     "Use a different initial guess? Perhaps a different basis?"
                 )
 
-        elif "linear_dependent_basis" in self.errors:
+        elif "premature_end_FileMan_error" in self.errors and "linear_dependence" in self.warnings:
             # DIIS -> RCA_DIIS. If already RCA_DIIS, change basis?
             if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
                 self.qcinp.rem["scf_algorithm"] = "rca_diis"
@@ -163,10 +164,6 @@ class QChemErrorHandler(ErrorHandler):
             # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
             actions.append({"rerun job as-is"})
 
-        elif "IO_error" in self.errors:
-            # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
-            actions.append({"rerun job as-is"})
-
         elif "read_molecule_error" in self.errors:
             # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
             actions.append({"rerun job as-is"})
@@ -188,7 +185,7 @@ class QChemErrorHandler(ErrorHandler):
 
         os.rename(self.input_file, self.input_file + ".last")
         self.qcinp.write_file(self.input_file)
-        return {"errors": self.errors, "actions": actions}
+        return {"errors": self.errors, "warnings": self.warnings, "actions": actions}
 
 
 class QChemSCFErrorHandler(ErrorHandler):
