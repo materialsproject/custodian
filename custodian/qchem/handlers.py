@@ -133,7 +133,7 @@ class QChemErrorHandler(ErrorHandler):
 
         elif "premature_end_FileMan_error" in self.errors and "linear_dependence" in self.warnings:
             # DIIS -> RCA_DIIS. If already RCA_DIIS, change basis?
-            if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
+            if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis" or self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis_gdm":
                 self.qcinp.rem["scf_algorithm"] = "rca_diis"
                 actions.append({"scf_algorithm": "rca_diis"})
                 if self.qcinp.rem.get("gen_scfman"):
