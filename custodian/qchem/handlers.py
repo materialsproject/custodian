@@ -133,14 +133,17 @@ class QChemErrorHandler(ErrorHandler):
 
         elif "premature_end_FileMan_error" in self.errors and "linear_dependence" in self.warnings:
             # DIIS -> RCA_DIIS. If already RCA_DIIS, change basis?
-            if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis" or self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis_gdm":
+            if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
                 self.qcinp.rem["scf_algorithm"] = "rca_diis"
                 actions.append({"scf_algorithm": "rca_diis"})
                 if self.qcinp.rem.get("gen_scfman"):
                     self.qcinp.rem["gen_scfman"] = False
                     actions.append({"gen_scfman": False})
+            elif self.qcinp.rem.get("scf_guess_always", "none") != True:
+                self.qcinp.rem["scf_guess_always"] = True
+                actions.append({"scf_guess_always": True})
             else:
-                print("Perhaps use a better basis?")
+                print("We're in a bad spot if we get a FileMan error while always generating a new SCF guess...")
 
         elif "failed_to_transform_coords" in self.errors:
             # Check for symmetry flag in rem. If not False, set to False and rerun.
@@ -180,7 +183,7 @@ class QChemErrorHandler(ErrorHandler):
             # You should never get here. If correct is being called then errors should have at least one entry,
             # in which case it should have been caught by the if/elifs above.
             print(
-                "If you get this message, something has gone terribly wrong!")
+                "Must have gotten an error which is correctly parsed but not included in the handler. FIX!!!")
             return {"errors": self.errors, "actions": None}
 
         os.rename(self.input_file, self.input_file + ".last")
