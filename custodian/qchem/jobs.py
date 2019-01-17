@@ -13,7 +13,7 @@ import subprocess
 import numpy as np
 from pymatgen.core import Molecule
 from pymatgen.io.qchem.inputs import QCInput
-from pymatgen.io.qchem.outputs import QCOutput
+from pymatgen.io.qchem.outputs import QCOutput, check_for_structure_changes
 from pymatgen.analysis.graphs import MoleculeGraph
 from pymatgen.analysis.local_env import OpenBabelNN
 from custodian.custodian import Job
@@ -394,16 +394,8 @@ class QCJob(Job):
                                 charge=orig_charge,
                                 spin_multiplicity=orig_multiplicity)
                             if check_connectivity:
-                                old_molgraph = MoleculeGraph.with_local_env_strategy(ref_mol,
-                                                                   OpenBabelNN(),
-                                                                   reorder=False,
-                                                                   extend_structure=False)
-                                new_molgraph = MoleculeGraph.with_local_env_strategy(new_molecule,
-                                                                   OpenBabelNN(),
-                                                                   reorder=False,
-                                                                   extend_structure=False)
-                                if old_molgraph.isomorphic_to(new_molgraph):
-                                    structure_successfully_perturbed = True
+                                structure_successfully_perturbed = check_for_structure_changes(ref_mol, new_molecule) == "no_change"
+                                if structure_successfully_perturbed:
                                     break
                         if not structure_successfully_perturbed:
                             raise Exception(

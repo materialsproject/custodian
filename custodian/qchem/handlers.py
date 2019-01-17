@@ -132,16 +132,15 @@ class QChemErrorHandler(ErrorHandler):
                 )
 
         elif "premature_end_FileMan_error" in self.errors and "linear_dependence" in self.warnings:
-            # DIIS -> RCA_DIIS. If already RCA_DIIS, change basis?
             if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
                 self.qcinp.rem["scf_algorithm"] = "rca_diis"
                 actions.append({"scf_algorithm": "rca_diis"})
                 if self.qcinp.rem.get("gen_scfman"):
                     self.qcinp.rem["gen_scfman"] = False
                     actions.append({"gen_scfman": False})
-            elif self.qcinp.rem.get("scf_algorithm", "diis_gdm").lower() == "diis_gdm":
-                self.qcinp.rem["scf_algorithm"] = "adiis"
-                actions.append({"scf_algorithm": "adiis"})
+            # elif self.qcinp.rem.get("scf_algorithm", "diis_gdm").lower() == "diis_gdm":
+            #     self.qcinp.rem["scf_algorithm"] = "adiis"
+            #     actions.append({"scf_algorithm": "adiis"})
             elif self.qcinp.rem.get("scf_guess_always", "none") != True:
                 self.qcinp.rem["scf_guess_always"] = True
                 actions.append({"scf_guess_always": True})
@@ -189,6 +188,9 @@ class QChemErrorHandler(ErrorHandler):
                 "Must have gotten an error which is correctly parsed but not included in the handler. FIX!!!")
             return {"errors": self.errors, "actions": None}
 
+        if {"molecule": "molecule_from_last_geometry"} in actions and str(self.qcinp.rem.get("geom_opt_hessian")).lower() == "read":
+            del self.qcinp.rem["geom_opt_hessian"]
+            actions.append({"geom_opt_hessian": "deleted"})
         os.rename(self.input_file, self.input_file + ".last")
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "warnings": self.warnings, "actions": actions}

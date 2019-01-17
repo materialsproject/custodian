@@ -276,6 +276,21 @@ class QChemErrorHandlerTest(TestCase):
         self._check_equivalent_inputs("mol.qin.last",
                                       "mol.qin")
 
+    def test_OOS_read_hess(self):
+        shutil.copyfile(
+            os.path.join(test_dir, "OOS_read_hess.qin"),
+            os.path.join(scr_dir, "mol.qin"))
+        shutil.copyfile(
+            os.path.join(test_dir, "OOS_read_hess.qout"),
+            os.path.join(scr_dir, "mol.qout"))
+        h = QChemErrorHandler(
+            input_file="mol.qin", output_file="mol.qout")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ['out_of_opt_cycles'])
+        self.assertEqual(d["actions"], [{"molecule": "molecule_from_last_geometry"}, {"geom_opt_hessian": "deleted"}])
+        self._check_equivalent_inputs(os.path.join(test_dir, "OOS_read_hess_next.qin"),"mol.qin")
+
     def tearDown(self):
         os.chdir(cwd)
         shutil.rmtree(scr_dir)
