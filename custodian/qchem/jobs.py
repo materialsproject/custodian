@@ -143,7 +143,7 @@ class QCJob(Job):
                                      max_iterations=10,
                                      max_molecule_perturb_scale=0.3,
                                      check_connectivity=True,
-                                     linked=False,
+                                     linked=True,
                                      **QCJob_kwargs):
         """
         Optimize a structure and calculate vibrational frequencies to check if the
