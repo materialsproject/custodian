@@ -26,6 +26,7 @@ $rem
    solvent_method = smd
    ideriv = 1
    scf_guess = read
+   thresh = 14
 $end
 
 $smx

@@ -84,6 +84,12 @@ class QChemErrorHandler(ErrorHandler):
             elif self.qcinp.rem.get("scf_algorithm", "gdm").lower() == "gdm":
                 self.qcinp.rem["scf_algorithm"] = "diis_gdm"
                 actions.append({"scf_algorithm": "diis_gdm"})
+            elif self.qcinp.rem.get("thresh", "10") != "14":
+                self.qcinp.rem["thresh"] = "14"
+                actions.append({"thresh": "14"})
+            elif self.qcinp.rem.get("scf_guess_always", "none").lower() != "true":
+                self.qcinp.rem["scf_guess_always"] = True
+                actions.append({"scf_guess_always": True})
             else:
                 print(
                     "More advanced changes may impact the SCF result. Use the SCF error handler"
@@ -100,8 +106,11 @@ class QChemErrorHandler(ErrorHandler):
                     self.qcinp.molecule = self.outdata.get(
                         "molecule_from_last_geometry")
                     actions.append({"molecule": "molecule_from_last_geometry"})
-            # If already at geom_max_cycles, often can just get convergence by restarting
-            # from the geometry of the last cycle. But we'll also save any structural
+            elif self.qcinp.rem.get("thresh", "10") != "14":
+                self.qcinp.rem["thresh"] = "14"
+                actions.append({"thresh": "14"})
+            # If already at geom_max_cycles and thresh 14, often can just get convergence by
+            # restarting from the geometry of the last cycle. But we'll also save any structural
             # changes that happened along the way.
             else:
                 self.opt_error_history += [self.outdata["structure_change"]]
@@ -126,6 +135,9 @@ class QChemErrorHandler(ErrorHandler):
                 if self.qcinp.rem.get("gen_scfman"):
                     self.qcinp.rem["gen_scfman"] = False
                     actions.append({"gen_scfman": False})
+            elif self.qcinp.rem.get("thresh", "10") != "14":
+                self.qcinp.rem["thresh"] = "14"
+                actions.append({"thresh": "14"})
             else:
                 print(
                     "Use a different initial guess? Perhaps a different basis?"
@@ -138,7 +150,10 @@ class QChemErrorHandler(ErrorHandler):
                 if self.qcinp.rem.get("gen_scfman"):
                     self.qcinp.rem["gen_scfman"] = False
                     actions.append({"gen_scfman": False})
-            elif self.qcinp.rem.get("scf_guess_always", "none") != True:
+            elif self.qcinp.rem.get("thresh", "10") != "14":
+                self.qcinp.rem["thresh"] = "14"
+                actions.append({"thresh": "14"})
+            elif self.qcinp.rem.get("scf_guess_always", "none").lower() != "true":
                 self.qcinp.rem["scf_guess_always"] = True
                 actions.append({"scf_guess_always": True})
             else:
@@ -175,14 +190,21 @@ class QChemErrorHandler(ErrorHandler):
             actions.append({"rerun job as-is"})
 
         elif "unknown_error" in self.errors:
-            print("Examine error message by hand.")
-            return {"errors": self.errors, "actions": None}
+            if self.qcinp.rem.get("scf_guess", "none").lower() == "read":
+                del self.qcinp.rem["scf_guess"]
+                actions.append({"scf_guess": "deleted"})
+            elif self.qcinp.rem.get("thresh", "10") != "14":
+                self.qcinp.rem["thresh"] = "14"
+                actions.append({"thresh": "14"})
+            else:
+                print("Unknown error. Examine output and log files by hand.")
+                return {"errors": self.errors, "actions": None}
 
         else:
             # You should never get here. If correct is being called then errors should have at least one entry,
             # in which case it should have been caught by the if/elifs above.
-            print(
-                "Must have gotten an error which is correctly parsed but not included in the handler. FIX!!!")
+            print("Errors:", self.errors)
+            print("Must have gotten an error which is correctly parsed but not included in the handler. FIX!!!")
             return {"errors": self.errors, "actions": None}
 
         if {"molecule": "molecule_from_last_geometry"} in actions and str(self.qcinp.rem.get("geom_opt_hessian")).lower() == "read":

@@ -15,6 +15,7 @@ solvent_method = smd
 ideriv = 1
 scf_guess = read
 geom_opt_hessian = read
+thresh = 14
 $end
 
 $smx
