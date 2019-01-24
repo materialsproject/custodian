@@ -175,9 +175,7 @@ class QCJob(Job):
             orig_input = QCInput.from_file(input_file)
             freq_rem = copy.deepcopy(orig_input.rem)
             freq_rem["job_type"] = "freq"
-            freq_rem["SCF_GUESS"] = "read"
             opt_rem = copy.deepcopy(orig_input.rem)
-            opt_rem["SCF_GUESS"] = "read"
             opt_rem["GEOM_OPT_HESSIAN"] = "read"
             first = True
             energy_history = []
@@ -203,7 +201,7 @@ class QCJob(Job):
                 else:
                     energy_history.append(opt_outdata.get("final_energy"))
                     freq_QCInput = QCInput(
-                        molecule="read",
+                        molecule=opt_outdata.get("molecule_from_optimized_geometry"),
                         rem=freq_rem,
                         opt=orig_input.opt,
                         pcm=orig_input.pcm,
@@ -235,7 +233,7 @@ class QCJob(Job):
                                 print("Energy change below cutoff!")
                                 break
                         opt_QCInput = QCInput(
-                            molecule="read",
+                            molecule=opt_outdata.get("molecule_from_optimized_geometry"),
                             rem=opt_rem,
                             opt=orig_input.opt,
                             pcm=orig_input.pcm,
