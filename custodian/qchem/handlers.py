@@ -159,6 +159,13 @@ class QChemErrorHandler(ErrorHandler):
             else:
                 print("We're in a bad spot if we get a FileMan error while always generating a new SCF guess...")
 
+        elif "hessian_eigenvalue_error" in self.errors:
+            if self.qcinp.rem.get("thresh", "10") != "14":
+                self.qcinp.rem["thresh"] = "14"
+                actions.append({"thresh": "14"})
+            else:
+                print("Not sure how to fix hessian_eigenvalue_error if thresh is already 14!")
+
         elif "failed_to_transform_coords" in self.errors:
             # Check for symmetry flag in rem. If not False, set to False and rerun.
             # If already False, increase threshold?
