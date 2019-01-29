@@ -92,9 +92,7 @@ class QCJob(Job):
             shutil.copy(self.input_file, "{}.orig".format(self.input_file))
         os.environ["QCSCRATCH"] = self.scratch_dir
         if self.save_scratch:
-            os.system("echo $QCSAVEDIR")
             os.environ["QCSAVEDIR"] = os.path.join(self.scratch_dir,self.save_name)
-            os.system("echo $QCSAVEDIR")
         if self.multimode == 'openmp':
             os.environ['QCTHREADS'] = str(self.max_cores)
             os.environ['OMP_NUM_THREADS'] = str(self.max_cores)
@@ -113,7 +111,7 @@ class QCJob(Job):
             (subprocess.Popen) Used for monitoring.
         """
         qclog = open(self.qclog_file, 'w')
-        p = subprocess.Popen(self.current_command, stdout=qclog)
+        p = subprocess.Popen(self.current_command, stdout=qclog, env=os.environ)
         return p
 
     @classmethod
