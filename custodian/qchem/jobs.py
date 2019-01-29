@@ -82,9 +82,9 @@ class QCJob(Job):
         if self.multimode not in multi:
             raise RuntimeError("ERROR: Multimode should only be set to openmp or mpi")
         command = [multi[self.multimode], str(self.max_cores), self.input_file, self.output_file]
-        if self.save_scratch:
-            command.append(self.save_name)
-        command = self.qchem_command + command
+        # if self.save_scratch:
+        #     command.append(self.save_name)
+        # command = self.qchem_command + command
         return command
 
     def setup(self):
@@ -93,10 +93,12 @@ class QCJob(Job):
         os.environ["QCSCRATCH"] = self.scratch_dir
         if self.save_scratch:
             os.environ["QCSAVEDIR"] = os.path.join(self.scratch_dir,self.save_name)
+            os.system("echo $QCSAVEDIR")
+            os.system("export QCSAVEDIR="+os.path.join(self.scratch_dir,self.save_name))
+            os.system("echo $QCSAVEDIR")
         if self.multimode == 'openmp':
             os.environ['QCTHREADS'] = str(self.max_cores)
             os.environ['OMP_NUM_THREADS'] = str(self.max_cores)
-        print(os.environ)
 
     def postprocess(self):
         if self.suffix != "":
