@@ -82,8 +82,8 @@ class QCJob(Job):
         if self.multimode not in multi:
             raise RuntimeError("ERROR: Multimode should only be set to openmp or mpi")
         command = [multi[self.multimode], str(self.max_cores), self.input_file, self.output_file]
-        # if self.save_scratch:
-        #     command.append(self.save_name)
+        if self.save_scratch:
+            command.append(self.save_name)
         command = self.qchem_command + command
         return command
 
