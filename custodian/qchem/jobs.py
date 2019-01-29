@@ -95,8 +95,8 @@ class QCJob(Job):
             os.system("echo $QCSAVEDIR")
             os.environ["QCSAVEDIR"] = os.path.join(self.scratch_dir,self.save_name)
             os.system("echo $QCSAVEDIR")
-            os.system("export QCSAVEDIR="+os.path.join(self.scratch_dir,self.save_name))
-            os.system("echo $QCSAVEDIR")
+            # os.system("export QCSAVEDIR="+os.path.join(self.scratch_dir,self.save_name))
+            # os.system("echo $QCSAVEDIR")
         if self.multimode == 'openmp':
             os.environ['QCTHREADS'] = str(self.max_cores)
             os.environ['OMP_NUM_THREADS'] = str(self.max_cores)
