@@ -42,10 +42,9 @@ class QCJob(Job):
                  output_file="mol.qout",
                  qclog_file="mol.qclog",
                  suffix="",
-                 scratch_dir="/dev/shm/qcscratch/",
+                 scratch_dir=os.getcwd(),
                  save_scratch=False,
-                 read_scratch=False,
-                 save_name="default_save_name",
+                 save_name="saved_scratch",
                  backup=True):
         """
         Args:
@@ -57,13 +56,11 @@ class QCJob(Job):
             qclog_file (str): Name of the file to redirect the standard output
                 to. None means not to record the standard output.
             suffix (str): String to append to the file in postprocess.
-            scratch_dir (str): QCSCRATCH directory. Defaults to "/dev/shm/qcscratch/".
-            save_scratch (bool): Whether to save scratch directory contents.
-                Defaults to False.
-            read_scratch (bool): Whether to read saved scratch directory contents.
+            scratch_dir (str): QCSCRATCH directory. Defaults to current directory.
+            save_scratch (bool): Whether to save basic scratch directory contents.
                 Defaults to False.
             save_name (str): Name of the saved scratch directory. Defaults to
-                to "default_save_name".
+                to "saved_scratch".
             backup (bool): Whether to backup the initial input file. If True, the
                 input will be copied with a ".orig" appended. Defaults to True.
         """
@@ -76,35 +73,17 @@ class QCJob(Job):
         self.suffix = suffix
         self.scratch_dir = scratch_dir
         self.save_scratch = save_scratch
-        self.read_scratch = read_scratch
         self.save_name = save_name
         self.backup = backup
 
     @property
     def current_command(self):
-        multimode_index = 0
+        multi = {"openmp": "-nt", "mpi": "-np"}
+        if self.multimode not in multi:
+            raise RuntimeError("ERROR: Multimode should only be set to openmp or mpi")
+        command = [multi[self.multimode], str(self.max_cores), self.input_file, self.output_file]
         if self.save_scratch:
-            command = [
-                "-save", "",
-                str(self.max_cores), self.input_file, self.output_file,
-                self.save_name
-            ]
-            multimode_index = 1
-        elif self.read_scratch:
-            command = [
-                "", str(self.max_cores), self.input_file, self.output_file,
-                self.save_name
-            ]
-        else:
-            command = [
-                "", str(self.max_cores), self.input_file, self.output_file
-            ]
-        if self.multimode == 'openmp':
-            command[multimode_index] = "-nt"
-        elif self.multimode == 'mpi':
-            command[multimode_index] = "-np"
-        else:
-            print("ERROR: Multimode should only be set to openmp or mpi")
+            command.append(self.save_name)
         command = self.qchem_command + command
         return command
 

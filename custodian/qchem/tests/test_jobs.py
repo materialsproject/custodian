@@ -42,7 +42,7 @@ class QCJobTest(TestCase):
                 self.assertEqual(copy_patch.call_args_list[0][0][0], "mol.qin")
                 self.assertEqual(copy_patch.call_args_list[0][0][1], "mol.qin.orig")
                 self.assertEqual(putenv_patch.call_args_list[0][0][0], "QCSCRATCH")
-                self.assertEqual(putenv_patch.call_args_list[0][0][1], "/dev/shm/qcscratch/")
+                self.assertEqual(putenv_patch.call_args_list[0][0][1], os.getcwd())
                 self.assertEqual(putenv_patch.call_args_list[1][0][0], "QCTHREADS")
                 self.assertEqual(putenv_patch.call_args_list[1][0][1], "32")
                 self.assertEqual(putenv_patch.call_args_list[2][0][0], "OMP_NUM_THREADS")
@@ -60,21 +60,6 @@ class QCJobTest(TestCase):
         with patch("custodian.qchem.jobs.os.putenv") as putenv_patch:
             with patch("custodian.qchem.jobs.shutil.copy") as copy_patch:
                 myjob = QCJob(qchem_command="qchem -slurm", max_cores=32, scratch_dir=os.getcwd(), save_scratch=True, save_name="freq_scratch")
-                self.assertEqual(myjob.current_command, ["qchem", "-slurm", "-save", "-nt", "32", "mol.qin", "mol.qout", "freq_scratch"])
-                myjob.setup()
-                self.assertEqual(copy_patch.call_args_list[0][0][0], "mol.qin")
-                self.assertEqual(copy_patch.call_args_list[0][0][1], "mol.qin.orig")
-                self.assertEqual(putenv_patch.call_args_list[0][0][0], "QCSCRATCH")
-                self.assertEqual(putenv_patch.call_args_list[0][0][1], os.getcwd())
-                self.assertEqual(putenv_patch.call_args_list[1][0][0], "QCTHREADS")
-                self.assertEqual(putenv_patch.call_args_list[1][0][1], "32")
-                self.assertEqual(putenv_patch.call_args_list[2][0][0], "OMP_NUM_THREADS")
-                self.assertEqual(putenv_patch.call_args_list[2][0][1], "32")
-
-    def test_read_scratch(self):
-        with patch("custodian.qchem.jobs.os.putenv") as putenv_patch:
-            with patch("custodian.qchem.jobs.shutil.copy") as copy_patch:
-                myjob = QCJob(qchem_command="qchem -slurm", max_cores=32, scratch_dir=os.getcwd(), read_scratch=True, save_name="freq_scratch")
                 self.assertEqual(myjob.current_command, ["qchem", "-slurm", "-nt", "32", "mol.qin", "mol.qout", "freq_scratch"])
                 myjob.setup()
                 self.assertEqual(copy_patch.call_args_list[0][0][0], "mol.qin")
@@ -101,7 +86,7 @@ class OptFFTest(TestCase):
         shutil.rmtree(scr_dir)
 
     def test_OptFF(self):
-        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem", max_cores=32, input_file="test.qin", output_file="test.qout")
+        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem", max_cores=32, input_file="test.qin", output_file="test.qout", linked=False)
         expected_next = QCJob(
                         qchem_command="qchem",
                         max_cores=32,
@@ -155,7 +140,7 @@ class OptFFTest1(TestCase):
         shutil.rmtree(scr_dir)
 
     def test_OptFF(self):
-        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", max_cores=32, input_file="mol.qin", output_file="mol.qout")
+        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", max_cores=32, input_file="mol.qin", output_file="mol.qout", linked=False)
         expected_next = QCJob(
                         qchem_command="qchem -slurm",
                         max_cores=32,
@@ -180,7 +165,7 @@ class OptFFTest2(TestCase):
         shutil.rmtree(scr_dir)
 
     def test_OptFF(self):
-        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", max_cores=32, input_file="mol.qin", output_file="mol.qout")
+        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", max_cores=32, input_file="mol.qin", output_file="mol.qout", linked=False)
         expected_next = QCJob(
                         qchem_command="qchem -slurm",
                         max_cores=32,
@@ -219,7 +204,7 @@ class OptFFTestSwitching(TestCase):
         shutil.rmtree(scr_dir)
 
     def test_OptFF(self):
-        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", max_cores=32,input_file="mol.qin", output_file="mol.qout")
+        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", max_cores=32,input_file="mol.qin", output_file="mol.qout", linked=False)
         expected_next = QCJob(
                         qchem_command="qchem -slurm",
                         max_cores=32,
@@ -298,7 +283,7 @@ class OptFFTest6004(TestCase):
         shutil.rmtree(scr_dir)
 
     def test_OptFF(self):
-        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", max_cores=32,input_file="mol.qin", output_file="mol.qout")
+        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", max_cores=32,input_file="mol.qin", output_file="mol.qout", linked=False)
         expected_next = QCJob(
                         qchem_command="qchem -slurm",
                         max_cores=32,
@@ -377,7 +362,7 @@ class OptFFTest5952(TestCase):
         shutil.rmtree(scr_dir)
 
     def test_OptFF(self):
-        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", max_cores=32,input_file="mol.qin", output_file="mol.qout")
+        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", max_cores=32,input_file="mol.qin", output_file="mol.qout", linked=False)
         expected_next = QCJob(
                         qchem_command="qchem -slurm",
                         max_cores=32,
@@ -456,7 +441,7 @@ class OptFFTest5690(TestCase):
         shutil.rmtree(scr_dir)
 
     def test_OptFF(self):
-        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", max_cores=32,input_file="mol.qin", output_file="mol.qout")
+        myjob = QCJob.opt_with_frequency_flattener(qchem_command="qchem -slurm", max_cores=32,input_file="mol.qin", output_file="mol.qout", linked=False)
         expected_next = QCJob(
                         qchem_command="qchem -slurm",
                         max_cores=32,
