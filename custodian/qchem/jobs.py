@@ -85,7 +85,10 @@ class QCJob(Job):
         # if self.save_scratch:
         #     command.append(self.save_name)
         command = self.qchem_command + command
-        return command
+        com_str = ""
+        for part in command:
+            com_str = com_str + " " + part
+        return com_str
 
     def setup(self):
         if self.backup:
