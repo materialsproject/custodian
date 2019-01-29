@@ -111,7 +111,7 @@ class QCJob(Job):
             (subprocess.Popen) Used for monitoring.
         """
         qclog = open(self.qclog_file, 'w')
-        p = subprocess.Popen(self.current_command, stdout=qclog, env=os.environ)
+        p = subprocess.Popen(self.current_command, stdout=qclog, shell=True, env=os.environ)
         return p
 
     @classmethod
