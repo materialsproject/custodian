@@ -82,8 +82,8 @@ class QCJob(Job):
         if self.multimode not in multi:
             raise RuntimeError("ERROR: Multimode should only be set to openmp or mpi")
         command = [multi[self.multimode], str(self.max_cores), self.input_file, self.output_file]
-        if self.save_scratch:
-            command.append(self.save_name)
+        # if self.save_scratch:
+        #     command.append(self.save_name)
         command = self.qchem_command + command
         return command
 
@@ -91,6 +91,8 @@ class QCJob(Job):
         if self.backup:
             shutil.copy(self.input_file, "{}.orig".format(self.input_file))
         os.putenv("QCSCRATCH", self.scratch_dir)
+        if self.save_scratch:
+            os.putenv("QCSAVEDIR", os.path.join(self.scratch_dir,self.save_name))
         if self.multimode == 'openmp':
             os.putenv('QCTHREADS', str(self.max_cores))
             os.putenv('OMP_NUM_THREADS', str(self.max_cores))
