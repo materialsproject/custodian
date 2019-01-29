@@ -96,6 +96,7 @@ class QCJob(Job):
         if self.multimode == 'openmp':
             os.environ['QCTHREADS'] = str(self.max_cores)
             os.environ['OMP_NUM_THREADS'] = str(self.max_cores)
+        print(os.environ)
 
     def postprocess(self):
         if self.suffix != "":
