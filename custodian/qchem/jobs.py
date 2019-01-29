@@ -91,8 +91,8 @@ class QCJob(Job):
         if self.backup:
             shutil.copy(self.input_file, "{}.orig".format(self.input_file))
         os.environ["QCSCRATCH"] = self.scratch_dir
-        if self.save_scratch:
-            os.environ["QCSAVEDIR"] = os.path.join(self.scratch_dir,self.save_name)
+        # if self.save_scratch:
+        #     os.environ["QCSAVEDIR"] = os.path.join(self.scratch_dir,self.save_name)
         if self.multimode == 'openmp':
             os.environ['QCTHREADS'] = str(self.max_cores)
             os.environ['OMP_NUM_THREADS'] = str(self.max_cores)
