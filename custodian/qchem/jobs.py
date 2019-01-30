@@ -112,14 +112,10 @@ class QCJob(Job):
         Returns:
             (subprocess.Popen) Used for monitoring.
         """
-        print("command", self.current_command)
         myrand = str(random.randint(1,1000000000))
         mydir = os.path.join("/tmp","qchem"+myrand)
-        print("mydir", mydir)
         os.mkdir(mydir)
-        print("QCLOCALSCR", os.environ["QCLOCALSCR"])
         os.environ["QCLOCALSCR"] = mydir
-        print("QCLOCALSCR", os.environ["QCLOCALSCR"])
         qclog = open(self.qclog_file, 'w')
         p = subprocess.Popen(self.current_command, stdout=qclog, shell=True)
         return p
