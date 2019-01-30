@@ -85,23 +85,23 @@ class QCJob(Job):
         # if self.save_scratch:
         #     command.append(self.save_name)
         command = self.qchem_command + command
-        com_str = ""
-        for part in command:
-            com_str = com_str + " " + part
-        return com_str
+        # com_str = ""
+        # for part in command:
+        #     com_str = com_str + " " + part
+        return command
 
     def setup(self):
         if self.backup:
             shutil.copy(self.input_file, "{}.orig".format(self.input_file))
         os.environ["QCSCRATCH"] = self.scratch_dir
-        if self.save_scratch:
-            print(os.environ["QCLOCALSCR"])
-            print("Setting variables!")
-            os.system('export QCSAVEDIR='+os.path.join(self.scratch_dir,self.save_name))
-            os.system('export QCLOCALSCR=/dev/shm')
-            print(os.environ["QCLOCALSCR"])
-            print(os.environ["QCSAVEDIR"])
-            # os.environ["QCSAVEDIR"] = os.path.join(self.scratch_dir,self.save_name)
+        # if self.save_scratch:
+        #     print(os.environ["QCLOCALSCR"])
+        #     print("Setting variables!")
+        #     os.system('export QCSAVEDIR='+os.path.join(self.scratch_dir,self.save_name))
+        #     os.system('export QCLOCALSCR=/dev/shm')
+        #     print(os.environ["QCLOCALSCR"])
+        #     print(os.environ["QCSAVEDIR"])
+        #    # os.environ["QCSAVEDIR"] = os.path.join(self.scratch_dir,self.save_name)
         if self.multimode == 'openmp':
             os.environ['QCTHREADS'] = str(self.max_cores)
             os.environ['OMP_NUM_THREADS'] = str(self.max_cores)
@@ -120,7 +120,7 @@ class QCJob(Job):
             (subprocess.Popen) Used for monitoring.
         """
         qclog = open(self.qclog_file, 'w')
-        p = subprocess.Popen(self.current_command, stdout=qclog, shell=True, env=os.environ)
+        p = subprocess.Popen(self.current_command, stdout=qclog)
         return p
 
     @classmethod
