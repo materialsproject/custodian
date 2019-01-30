@@ -10,6 +10,7 @@ import os
 import shutil
 import copy
 import subprocess
+import random
 import numpy as np
 from pymatgen.core import Molecule
 from pymatgen.io.qchem.inputs import QCInput
@@ -44,7 +45,7 @@ class QCJob(Job):
                  suffix="",
                  scratch_dir=os.getcwd(),
                  save_scratch=False,
-                 save_name='saved_scratch',
+                 save_name="saved_scratch",
                  backup=True):
         """
         Args:
@@ -82,12 +83,12 @@ class QCJob(Job):
         if self.multimode not in multi:
             raise RuntimeError("ERROR: Multimode should only be set to openmp or mpi")
         command = [multi[self.multimode], str(self.max_cores), self.input_file, self.output_file]
-        # if self.save_scratch:
-        #     command.append(self.save_name)
+        if self.save_scratch:
+            command.append(self.save_name)
         command = self.qchem_command + command
-        # com_str = ""
-        # for part in command:
-        #     com_str = com_str + " " + part
+        com_str = ""
+        for part in command:
+            com_str = com_str + " " + part
         return command
 
     def setup(self):
@@ -119,8 +120,13 @@ class QCJob(Job):
         Returns:
             (subprocess.Popen) Used for monitoring.
         """
+        myrand = str(random.rand(1,1000000000))
+        mydir = os.path.join("/tmp","qchem"+myrand)
+        print(mydir)
+        os.mkdir(mydir)
+        os.environ["QCLOCALSCR"] = mydir
         qclog = open(self.qclog_file, 'w')
-        p = subprocess.Popen(self.current_command, stdout=qclog)
+        p = subprocess.Popen(self.current_command, stdout=qclog, shell=True)
         return p
 
     @classmethod
