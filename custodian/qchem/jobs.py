@@ -97,8 +97,8 @@ class QCJob(Job):
         if self.save_scratch:
             print(os.environ["QCLOCALSCR"])
             print("Setting variables!")
-            os.system("export QCSAVEDIR="+os.path.join(self.scratch_dir,self.save_name))
-            os.system("export QCLOCALSCR=/dev/shm")
+            os.system('export QCSAVEDIR='+os.path.join(self.scratch_dir,self.save_name))
+            os.system('export QCLOCALSCR=/dev/shm')
             print(os.environ["QCSAVEDIR"])
             print(os.environ["QCLOCALSCR"])
             # os.environ["QCSAVEDIR"] = os.path.join(self.scratch_dir,self.save_name)
