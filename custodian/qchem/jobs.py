@@ -44,7 +44,7 @@ class QCJob(Job):
                  suffix="",
                  scratch_dir=os.getcwd(),
                  save_scratch=False,
-                 save_name="saved_scratch",
+                 save_name='saved_scratch',
                  backup=True):
         """
         Args:
@@ -99,8 +99,8 @@ class QCJob(Job):
             print("Setting variables!")
             os.system('export QCSAVEDIR='+os.path.join(self.scratch_dir,self.save_name))
             os.system('export QCLOCALSCR=/dev/shm')
-            print(os.environ["QCSAVEDIR"])
             print(os.environ["QCLOCALSCR"])
+            print(os.environ["QCSAVEDIR"])
             # os.environ["QCSAVEDIR"] = os.path.join(self.scratch_dir,self.save_name)
         if self.multimode == 'openmp':
             os.environ['QCTHREADS'] = str(self.max_cores)
