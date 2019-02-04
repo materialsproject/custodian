@@ -163,7 +163,8 @@ class QCJob(Job):
             freq_rem = copy.deepcopy(orig_input.rem)
             freq_rem["job_type"] = "freq"
             opt_rem = copy.deepcopy(orig_input.rem)
-            opt_rem["GEOM_OPT_HESSIAN"] = "read"
+            opt_rem["geom_opt_hessian"] = "read"
+            opt_rem["scf_guess_always"] = True
             first = True
             energy_history = []
 
