@@ -13,7 +13,7 @@ jobs:
             source activate test_env
             conda install --quiet --yes numpy scipy matplotlib sympy pandas
             conda install --quiet --yes -c openbabel openbabel
-            conda update --quiet --all
+            conda upgrade --quiet --all
             mkdir coverage_reports
             pip install --upgrade pip
             pip install --quiet --ignore-installed -r requirements.txt -r requirements-ci.txt
