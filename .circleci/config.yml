@@ -9,6 +9,7 @@ jobs:
       - run:
           command: |
             export PATH=$HOME/miniconda3/bin:$PATH
+            rm -rf /root/miniconda3/envs/test_env/lib/python3.7/site-packages/numpy
             conda create --quiet --yes --name test_env python=3.7
             source activate test_env
             conda install --quiet --yes numpy scipy matplotlib sympy pandas
