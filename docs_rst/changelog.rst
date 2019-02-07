@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+v2017.12.23
+-----------
+* cstdn command line tool is now official with docs.
+* Fine-grained control of VaspErrorHandler is now possible using
+  `errors_subset_to_catch`.
+* Switched to date-based versioning for custodian like pymatgen.
+
 v1.1.1
 ------
 * DriftErrorHandler (Shyam)
