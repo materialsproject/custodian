@@ -293,7 +293,7 @@ class Custodian(object):
 
     def run(self):
         """
-        Runs all the jobs jobs.
+        Runs all jobs.
 
         Returns:
             All errors encountered as a list of list.
@@ -318,6 +318,9 @@ class Custodian(object):
                 for job_n, job in islice(enumerate(self.jobs, 1),
                                          self.restart, None):
                     self._run_job(job_n, job)
+                    # We do a dump of the run log after each job.
+                    dumpfn(self.run_log, Custodian.LOG_FILE, cls=MontyEncoder,
+                           indent=4)
                     # Checkpoint after each job so that we can recover from last
                     # point and remove old checkpoints
                     if self.checkpoint:
@@ -591,6 +594,9 @@ class Custodian(object):
         self.total_errors += len(corrections)
         self.errors_current_job += len(corrections)
         self.run_log[-1]["corrections"].extend(corrections)
+        # We do a dump of the run log after each check.
+        dumpfn(self.run_log, Custodian.LOG_FILE, cls=MontyEncoder,
+               indent=4)
         return len(corrections) > 0
 
 
