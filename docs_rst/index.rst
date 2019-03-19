@@ -25,6 +25,10 @@ calculations.
 Change log
 ==========
 
+v2019.2.10
+----------
+* Improved slow convergence handling. (@shyamd)
+
 v2019.2.7
 ---------
 * Improved error logging.

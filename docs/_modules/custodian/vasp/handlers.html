@@ -6,13 +6,14 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian.vasp.handlers &#8212; custodian 2019.2.7 documentation</title>
+    <title>custodian.vasp.handlers &#8212; custodian 2019.2.10 documentation</title>
     <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -38,7 +39,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2019.2.7 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2019.2.10 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -240,7 +241,7 @@
                     <span class="o">==</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">supported_modes</span><span class="o">.</span><span class="n">Gamma</span><span class="p">:</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;generation_style&quot;</span><span class="p">:</span>
-                                                        <span class="s2">&quot;Monkhorst&quot;</span><span class="p">}}})</span>
+                                                    <span class="s2">&quot;Monkhorst&quot;</span><span class="p">}}})</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_unset&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;IMIX&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}})</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span><span class="p">[</span><span class="s1">&#39;brmix&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -249,7 +250,7 @@
                     <span class="o">==</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">supported_modes</span><span class="o">.</span><span class="n">Monkhorst</span><span class="p">:</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;generation_style&quot;</span><span class="p">:</span>
-                                                        <span class="s2">&quot;Gamma&quot;</span><span class="p">}}})</span>
+                                                    <span class="s2">&quot;Gamma&quot;</span><span class="p">}}})</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_unset&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;IMIX&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}})</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span><span class="p">[</span><span class="s1">&#39;brmix&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -407,12 +408,12 @@
 
         <span class="k">if</span> <span class="s2">&quot;pssyevx&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span>
-                <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Normal&quot;</span><span class="p">}}})</span>
+                            <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Normal&quot;</span><span class="p">}}})</span>
         <span class="k">if</span> <span class="s2">&quot;eddrmm&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="c1"># RMM algorithm is not stable for this calculation</span>
             <span class="k">if</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ALGO&quot;</span><span class="p">,</span> <span class="s2">&quot;Normal&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;Fast&quot;</span><span class="p">,</span> <span class="s2">&quot;VeryFast&quot;</span><span class="p">]:</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span>
-                    <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Normal&quot;</span><span class="p">}}})</span>
+                                <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Normal&quot;</span><span class="p">}}})</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">potim</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;POTIM&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
@@ -428,7 +429,7 @@
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_delete&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="s2">&quot;actual&quot;</span><span class="p">}}})</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span>
-                <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;All&quot;</span><span class="p">}}})</span>
+                            <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;All&quot;</span><span class="p">}}})</span>
 
         <span class="k">if</span> <span class="s2">&quot;grad_not_orth&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ISMEAR&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -692,7 +693,7 @@
 <div class="viewcode-block" id="DriftErrorHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.DriftErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="n">incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;EDIFFG&quot;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NSW&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;EDIFFG&quot;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NSW&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># Only activate when force relaxing and ionic steps</span>
             <span class="c1"># NSW check prevents accidental effects when running DFPT</span>
             <span class="k">return</span> <span class="kc">False</span>
@@ -727,7 +728,7 @@
                         <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}})</span>
 
         <span class="c1"># First try adding ADDGRID</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ADDGRID&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ADDGRID&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                             <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ADDGRID&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}}})</span>
         <span class="c1"># Otherwise set PREC to High so ENAUG can be used to control Augmentation Grid Size</span>
@@ -740,7 +741,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                             <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ENAUG&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ENAUG&quot;</span><span class="p">,</span> <span class="mi">1040</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">enaug_multiply</span><span class="p">)}}})</span>
-
 
         <span class="n">curr_drift</span> <span class="o">=</span> <span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;drift&quot;</span><span class="p">,</span> <span class="p">[])[::</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="bp">self</span><span class="o">.</span><span class="n">to_average</span><span class="p">]</span>
         <span class="n">curr_drift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">curr_drift</span><span class="p">])</span>
@@ -781,8 +781,8 @@
         <span class="c1"># if symmetry is off</span>
         <span class="c1"># Also disregard if automatic KPOINT generation is used</span>
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ISYM&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span> <span class="ow">or</span> \
-                        <span class="n">vi</span><span class="p">[</span>
-                            <span class="s2">&quot;KPOINTS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">supported_modes</span><span class="o">.</span><span class="n">Automatic</span><span class="p">:</span>
+                <span class="n">vi</span><span class="p">[</span>
+                <span class="s2">&quot;KPOINTS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">supported_modes</span><span class="o">.</span><span class="n">Automatic</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -813,7 +813,7 @@
 
 <div class="viewcode-block" id="UnconvergedErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.UnconvergedErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">UnconvergedErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Check if a run is converged. Switches to ALGO = Normal.</span>
+<span class="sd">    Check if a run is converged.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -837,15 +837,24 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="UnconvergedErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.UnconvergedErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">backup</span><span class="p">(</span><span class="n">VASP_BACKUP_FILES</span><span class="p">)</span>
         <span class="n">v</span> <span class="o">=</span> <span class="n">Vasprun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">)</span>
-        <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}}]</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">converged_electronic</span><span class="p">:</span>
-            <span class="c1"># For SCAN try switching to CG for the electronic minimization</span>
-            <span class="k">if</span> <span class="s2">&quot;SCAN&quot;</span> <span class="ow">in</span> <span class="n">v</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;METAGGA&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
-                <span class="n">new_settings</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;All&quot;</span><span class="p">}</span>
+            <span class="c1"># Ladder from VeryFast to Fast to Fast to All</span>
+            <span class="c1"># These progressively switches to more stable but more</span>
+            <span class="c1"># expensive algorithms</span>
+            <span class="n">algo</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ALGO&quot;</span><span class="p">,</span> <span class="s2">&quot;Normal&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">algo</span> <span class="o">==</span> <span class="s2">&quot;VeryFast&quot;</span><span class="p">:</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Fast&quot;</span><span class="p">}}})</span>
+            <span class="k">elif</span> <span class="n">algo</span> <span class="o">==</span> <span class="s2">&quot;Fast&quot;</span><span class="p">:</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Normal&quot;</span><span class="p">}}})</span>
+            <span class="k">elif</span> <span class="n">algo</span> <span class="o">==</span> <span class="s2">&quot;Normal&quot;</span><span class="p">:</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;All&quot;</span><span class="p">}}})</span>
             <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Try mixing as last resort</span>
                 <span class="n">new_settings</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
                                 <span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Normal&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;NELMDL&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span>
@@ -853,16 +862,26 @@
                                 <span class="s2">&quot;AMIX_MAG&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
                                 <span class="s2">&quot;BMIX_MAG&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">}</span>
 
-            <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">v</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">val</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">new_settings</span><span class="o">.</span><span class="n">items</span><span class="p">()]):</span>
-                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Unconverged&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">v</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">val</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">new_settings</span><span class="o">.</span><span class="n">items</span><span class="p">()]):</span>
+                    <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
+                                    <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">new_settings</span><span class="p">}})</span>
 
-            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">new_settings</span><span class="p">}})</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">converged_ionic</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">converged_ionic</span><span class="p">:</span>
+            <span class="c1"># Just continue optimizing and let other handles fix ionic</span>
+            <span class="c1"># optimizer parameters</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                             <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;IBRION&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}})</span>
-        <span class="n">VaspModder</span><span class="p">()</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Unconverged&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div></div>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}})</span>
+
+        <span class="k">if</span> <span class="n">actions</span><span class="p">:</span>
+            <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="n">backup</span><span class="p">(</span><span class="n">VASP_BACKUP_FILES</span><span class="p">)</span>
+            <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Unconverged&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Unfixable error. Just return None for actions.</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Unconverged&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="MaxForceErrorHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.MaxForceErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">MaxForceErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
@@ -1024,8 +1043,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="o">=</span><span class="s2">&quot;OSZICAR&quot;</span><span class="p">,</span> <span class="n">nionic_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                 <span class="n">change_algo</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="o">=</span><span class="s2">&quot;OSZICAR&quot;</span><span class="p">,</span> <span class="n">nionic_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes the handler with the output file to check.</span>
 
@@ -1035,12 +1053,9 @@
 <span class="sd">            nionic_steps (int): The threshold number of ionic steps that</span>
 <span class="sd">                needs to hit the maximum number of electronic steps for the</span>
 <span class="sd">                run to be considered non-converging.</span>
-<span class="sd">            change_algo (bool): Whether to attempt to correct the job by</span>
-<span class="sd">                changing the ALGO from Fast to Normal.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span> <span class="o">=</span> <span class="n">output_filename</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nionic_steps</span> <span class="o">=</span> <span class="n">nionic_steps</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">change_algo</span> <span class="o">=</span> <span class="n">change_algo</span>
 
 <div class="viewcode-block" id="NonConvergingErrorHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.NonConvergingErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
@@ -1056,40 +1071,39 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="NonConvergingErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.NonConvergingErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># if change_algo is True, change ALGO = Fast to Normal if ALGO is</span>
-        <span class="c1"># Fast. If still not converging, following Kresse&#39;s</span>
-        <span class="c1"># recommendation, we will try two iterations of different mixing</span>
-        <span class="c1"># parameters. If this error is caught again, then kill the job</span>
         <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
         <span class="n">algo</span> <span class="o">=</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ALGO&quot;</span><span class="p">,</span> <span class="s2">&quot;Normal&quot;</span><span class="p">)</span>
         <span class="n">amix</span> <span class="o">=</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;AMIX&quot;</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">)</span>
         <span class="n">bmix</span> <span class="o">=</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;BMIX&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
         <span class="n">amin</span> <span class="o">=</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;AMIN&quot;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
         <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">change_algo</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">algo</span> <span class="o">==</span> <span class="s2">&quot;Fast&quot;</span><span class="p">:</span>
-                <span class="n">backup</span><span class="p">(</span><span class="n">VASP_BACKUP_FILES</span><span class="p">)</span>
-                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
-                                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Normal&quot;</span><span class="p">}}})</span>
-
-            <span class="k">elif</span> <span class="n">amix</span> <span class="o">&gt;</span> <span class="mf">0.1</span> <span class="ow">and</span> <span class="n">bmix</span> <span class="o">&gt;</span> <span class="mf">0.01</span><span class="p">:</span>
-                <span class="c1"># Try linear mixing</span>
-                <span class="n">backup</span><span class="p">(</span><span class="n">VASP_BACKUP_FILES</span><span class="p">)</span>
-                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
-                                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;AMIX&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span> <span class="s2">&quot;BMIX&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
-                                                    <span class="s2">&quot;ICHARG&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}}})</span>
-
-            <span class="k">elif</span> <span class="n">bmix</span> <span class="o">&lt;</span> <span class="mf">3.0</span> <span class="ow">and</span> <span class="n">amin</span> <span class="o">&gt;</span> <span class="mf">0.01</span><span class="p">:</span>
-                <span class="c1"># Try increasing bmix</span>
-                <span class="n">backup</span><span class="p">(</span><span class="n">VASP_BACKUP_FILES</span><span class="p">)</span>
-                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
-                                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;AMIN&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span> <span class="s2">&quot;BMIX&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>
-                                                    <span class="s2">&quot;ICHARG&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}}})</span>
+        <span class="c1"># Ladder from VeryFast to Fast to Fast to All</span>
+        <span class="c1"># These progressively switches to more stable but more</span>
+        <span class="c1"># expensive algorithms</span>
+        <span class="k">if</span> <span class="n">algo</span> <span class="o">==</span> <span class="s2">&quot;VeryFast&quot;</span><span class="p">:</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Fast&quot;</span><span class="p">}}})</span>
+        <span class="k">elif</span> <span class="n">algo</span> <span class="o">==</span> <span class="s2">&quot;Fast&quot;</span><span class="p">:</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Normal&quot;</span><span class="p">}}})</span>
+        <span class="k">elif</span> <span class="n">algo</span> <span class="o">==</span> <span class="s2">&quot;Normal&quot;</span><span class="p">:</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;All&quot;</span><span class="p">}}})</span>
+        <span class="k">elif</span> <span class="n">amix</span> <span class="o">&gt;</span> <span class="mf">0.1</span> <span class="ow">and</span> <span class="n">bmix</span> <span class="o">&gt;</span> <span class="mf">0.01</span><span class="p">:</span>
+            <span class="c1"># Try linear mixing</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;AMIX&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span> <span class="s2">&quot;BMIX&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
+                                                <span class="s2">&quot;ICHARG&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}}})</span>
+        <span class="k">elif</span> <span class="n">bmix</span> <span class="o">&lt;</span> <span class="mf">3.0</span> <span class="ow">and</span> <span class="n">amin</span> <span class="o">&gt;</span> <span class="mf">0.01</span><span class="p">:</span>
+            <span class="c1"># Try increasing bmix</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;AMIN&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span> <span class="s2">&quot;BMIX&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>
+                                                <span class="s2">&quot;ICHARG&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}}})</span>
 
         <span class="k">if</span> <span class="n">actions</span><span class="p">:</span>
+            <span class="n">backup</span><span class="p">(</span><span class="n">VASP_BACKUP_FILES</span><span class="p">)</span>
             <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Non-converging job&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
-
         <span class="c1"># Unfixable error. Just return None for actions.</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Non-converging job&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span></div></div>
@@ -1173,12 +1187,12 @@
                 <span class="c1"># Determine max time per ionic step.</span>
                 <span class="n">outcar</span><span class="o">.</span><span class="n">read_pattern</span><span class="p">({</span><span class="s2">&quot;timings&quot;</span><span class="p">:</span> <span class="s2">&quot;LOOP\+.+real time(.+)&quot;</span><span class="p">},</span>
                                     <span class="n">postprocess</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-                <span class="n">time_per_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;timings&#39;</span><span class="p">))</span> <span class="k">if</span> <span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timings&quot;</span><span class="p">,[])</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="n">time_per_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;timings&#39;</span><span class="p">))</span> <span class="k">if</span> <span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timings&quot;</span><span class="p">,</span> <span class="p">[])</span> <span class="k">else</span> <span class="mi">0</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Determine max time per electronic step.</span>
                 <span class="n">outcar</span><span class="o">.</span><span class="n">read_pattern</span><span class="p">({</span><span class="s2">&quot;timings&quot;</span><span class="p">:</span> <span class="s2">&quot;LOOP:.+real time(.+)&quot;</span><span class="p">},</span>
                                     <span class="n">postprocess</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-                <span class="n">time_per_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;timings&#39;</span><span class="p">))</span> <span class="k">if</span> <span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timings&quot;</span><span class="p">,[])</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="n">time_per_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;timings&#39;</span><span class="p">))</span> <span class="k">if</span> <span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timings&quot;</span><span class="p">,</span> <span class="p">[])</span> <span class="k">else</span> <span class="mi">0</span>
 
             <span class="c1"># If the remaining time is less than average time for 3</span>
             <span class="c1"># steps or buffer_time.</span>
@@ -1204,6 +1218,7 @@
 
 <span class="nd">@deprecated</span><span class="p">(</span><span class="n">replacement</span><span class="o">=</span><span class="n">WalltimeHandler</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">PBSWalltimeHandler</span><span class="p">(</span><span class="n">WalltimeHandler</span><span class="p">):</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer_time</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PBSWalltimeHandler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">buffer_time</span><span class="o">=</span><span class="n">buffer_time</span><span class="p">)</span>
 
