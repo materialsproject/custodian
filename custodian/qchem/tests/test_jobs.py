@@ -37,7 +37,7 @@ class QCJobTest(TestCase):
         with patch("custodian.qchem.jobs.os.putenv") as putenv_patch:
             with patch("custodian.qchem.jobs.shutil.copy") as copy_patch:
                 myjob = QCJob(qchem_command="qchem", max_cores=32)
-                self.assertEqual(myjob.current_command, ["qchem", "-nt", "32", "mol.qin", "mol.qout"])
+                self.assertEqual(myjob.current_command, ' qchem -nt 32 mol.qin mol.qout')
                 myjob.setup()
                 self.assertEqual(copy_patch.call_args_list[0][0][0], "mol.qin")
                 self.assertEqual(copy_patch.call_args_list[0][0][1], "mol.qin.orig")
@@ -51,7 +51,7 @@ class QCJobTest(TestCase):
     def test_not_defaults(self):
         with patch("custodian.qchem.jobs.os.putenv") as putenv_patch:
             myjob = QCJob(qchem_command="qchem -slurm", multimode="mpi", input_file="different.qin", output_file="not_default.qout", max_cores=12, scratch_dir="/not/default/scratch/", backup=False)
-            self.assertEqual(myjob.current_command, ["qchem", "-slurm", "-np", "12", "different.qin", "not_default.qout"])
+            self.assertEqual(myjob.current_command, ' qchem -slurm -np 12 different.qin not_default.qout')
             myjob.setup()
             self.assertEqual(putenv_patch.call_args_list[0][0][0], "QCSCRATCH")
             self.assertEqual(putenv_patch.call_args_list[0][0][1], "/not/default/scratch/")
@@ -60,7 +60,7 @@ class QCJobTest(TestCase):
         with patch("custodian.qchem.jobs.os.putenv") as putenv_patch:
             with patch("custodian.qchem.jobs.shutil.copy") as copy_patch:
                 myjob = QCJob(qchem_command="qchem -slurm", max_cores=32, scratch_dir=os.getcwd(), save_scratch=True, save_name="freq_scratch")
-                self.assertEqual(myjob.current_command, ["qchem", "-slurm", "-nt", "32", "mol.qin", "mol.qout", "freq_scratch"])
+                self.assertEqual(myjob.current_command, ' qchem -slurm -nt 32 mol.qin mol.qout freq_scratch')
                 myjob.setup()
                 self.assertEqual(copy_patch.call_args_list[0][0][0], "mol.qin")
                 self.assertEqual(copy_patch.call_args_list[0][0][1], "mol.qin.orig")
