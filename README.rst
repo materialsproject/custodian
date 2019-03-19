@@ -1,5 +1,6 @@
-.. image:: https://circleci.com/gh/materialsproject/custodian/tree/master.png?circle-token=:circle-token
-
+.. image:: https://circleci.com/gh/materialsproject/custodian/tree/master.svg?style=svg
+    :target: https://circleci.com/gh/materialsproject/custodian/tree/master
+    
 Custodian is a simple, robust and flexible just-in-time (JIT) job management
 framework written in Python. Using custodian, you can create wrappers that
 perform error checking, job management and error recovery. It has a simple
@@ -28,12 +29,7 @@ Stable version
 --------------
 
 The version at the Python Package Index (PyPI) is always the latest stable
-release that will be hopefully, be relatively bug-free. The easiest way to
-install custodian on any system is to use easy_install or pip, as follows::
-
-    easy_install custodian
-
-or::
+release that will be hopefully, be relatively bug-free. Install as follows::
 
     pip install custodian
 
@@ -58,14 +54,16 @@ or to install the package in developmental mode::
 Requirements
 ============
 
-Custodian requires Python 2.7+. There are no other required dependencies.
+Custodian supports Python 2.7+ and 3+. There are no other required dependencies.
+However, if you wish to use many of the built-in error handlers and Jobs for
+VASP, NWChem, QChem, etc., you will likely need pymatgen to be install as well.
 
 Optional dependencies
 ---------------------
 
 Optional libraries that are required if you need certain features:
 
-1. pymatgen 2.8.10+: To use the plugins for VASP, NwChem and Qchem. Please
+1. pymatgen 2018.+: To use the plugins for VASP, NwChem and Qchem. Please
    install using::
 
     pip install pymatgen
@@ -74,7 +72,7 @@ Optional libraries that are required if you need certain features:
 2. nose - For complete unittesting.
 
 Usage
-===========
+=====
 
 Please refer to the `official custodian docs
 <http://pythonhosted.org//custodian>`_ for details on how to use
