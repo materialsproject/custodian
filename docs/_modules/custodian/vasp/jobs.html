@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian.vasp.jobs &#8212; custodian 2018.8.10 documentation</title>
+    <title>custodian.vasp.jobs &#8212; custodian 2019.2.7 documentation</title>
     <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -38,7 +38,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2018.8.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2019.2.7 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -228,7 +228,7 @@
                 <span class="c1"># Default functionality is to copy CONTCAR to POSCAR and set</span>
                 <span class="c1"># ISTART to 1 in the INCAR, but other actions can be specified</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_continue</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                    <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span> 
+                    <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}},</span>
                                <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}}]</span>
@@ -355,7 +355,7 @@
 <span class="sd">        Returns a list of thres jobs to perform an optimization for any</span>
 <span class="sd">        metaGGA functional. There is an initial calculation of the</span>
 <span class="sd">        GGA wavefunction which is fed into the initial metaGGA optimization</span>
-<span class="sd">        to precondition the electronic structure optimizer. The metaGGA </span>
+<span class="sd">        to precondition the electronic structure optimizer. The metaGGA</span>
 <span class="sd">        optimization is performed using the double relaxation scheme</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -848,9 +848,9 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates a VASP input based on an existing directory. This is typically</span>
 <span class="sd">        used to modify the VASP input files before the next VaspJob.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            input_set (str): Full path to the input set. E.g., </span>
+<span class="sd">            input_set (str): Full path to the input set. E.g.,</span>
 <span class="sd">                &quot;pymatgen.io.vasp.sets.MPNonSCFSet&quot;.</span>
 <span class="sd">            contcar_only (bool): If True (default), only CONTCAR structures</span>
 <span class="sd">                are used as input to the input set.</span>

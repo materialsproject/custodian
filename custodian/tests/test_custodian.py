@@ -4,6 +4,8 @@ from __future__ import unicode_literals, division, print_function
 import unittest
 import random
 from custodian.custodian import Job, ErrorHandler, Custodian, Validator
+from custodian.custodian import ValidationError, NonRecoverableError, ReturnCodeError
+from custodian.custodian import MaxCorrectionsError, MaxCorrectionsPerJobError, MaxCorrectionsPerHandlerError
 import os
 import glob
 import shutil
@@ -74,6 +76,22 @@ class ExampleHandler(ErrorHandler):
         return {"errors": "total < 50", "actions": "increment by 1"}
 
 
+class ExampleHandler1b(ExampleHandler):
+    """
+    This handler always can apply a correction, but will only apply it twice before raising.
+    """
+    max_num_corrections = 2
+    raise_on_max = True
+
+
+class ExampleHandler1c(ExampleHandler):
+    """
+    This handler always can apply a correction, but will only apply it twice and then not anymore.
+    """
+    max_num_corrections = 2
+    raise_on_max = False
+
+
 class ExampleHandler2(ErrorHandler):
     """
     This handler always result in an error.
@@ -104,11 +122,17 @@ class ExampleHandler2b(ExampleHandler2):
 
 class ExampleValidator1(Validator):
 
+    def __init__(self):
+        pass
+
     def check(self):
         return False
 
 
 class ExampleValidator2(Validator):
+
+    def __init__(self):
+        pass
 
     def check(self):
         return True
@@ -124,7 +148,8 @@ class CustodianTest(unittest.TestCase):
         c = Custodian([], [ExitCodeJob(0)])
         c.run()
         c = Custodian([], [ExitCodeJob(1)])
-        self.assertRaises(RuntimeError, c.run)
+        self.assertRaises(ReturnCodeError, c.run)
+        self.assertTrue(c.run_log[-1]["nonzero_return_code"])
         c = Custodian([], [ExitCodeJob(1)],
                       terminate_on_nonzero_returncode=False)
         c.run()
@@ -163,7 +188,7 @@ class CustodianTest(unittest.TestCase):
         c = Custodian([h],
                       [ExampleJob(i, params) for i in range(njobs)],
                       max_errors=njobs)
-        self.assertRaises(RuntimeError, c.run)
+        self.assertRaises(NonRecoverableError, c.run)
         self.assertTrue(h.has_error)
         h = ExampleHandler2b(params)
         c = Custodian([h],
@@ -171,6 +196,17 @@ class CustodianTest(unittest.TestCase):
                       max_errors=njobs)
         c.run()
         self.assertTrue(h.has_error)
+        self.assertEqual(c.run_log[-1]["handler"], h)
+
+    def test_max_errors(self):
+        njobs = 100
+        params = {"initial": 0, "total": 0}
+        h = ExampleHandler(params)
+        c = Custodian([h],
+                      [ExampleJob(i, params) for i in range(njobs)],
+                      max_errors=1, max_errors_per_job=10)
+        self.assertRaises(MaxCorrectionsError, c.run)
+        self.assertTrue(c.run_log[-1]["max_errors"])
 
     def test_max_errors_per_job(self):
         njobs = 100
@@ -179,7 +215,30 @@ class CustodianTest(unittest.TestCase):
         c = Custodian([h],
                       [ExampleJob(i, params) for i in range(njobs)],
                       max_errors=njobs, max_errors_per_job=1)
-        self.assertRaises(RuntimeError, c.run)
+        self.assertRaises(MaxCorrectionsPerJobError, c.run)
+        self.assertTrue(c.run_log[-1]["max_errors_per_job"])
+
+    def test_max_errors_per_handler_raise(self):
+        njobs = 100
+        params = {"initial": 0, "total": 0}
+        h = ExampleHandler1b(params)
+        c = Custodian([h],
+                      [ExampleJob(i, params) for i in range(njobs)],
+                      max_errors=njobs*10, max_errors_per_job=1000)
+        self.assertRaises(MaxCorrectionsPerHandlerError, c.run)
+        self.assertEqual(h.n_applied_corrections, 2)
+        self.assertEqual(len(c.run_log[-1]["corrections"]), 2)
+        self.assertTrue(c.run_log[-1]["max_errors_per_handler"])
+        self.assertEqual(c.run_log[-1]["handler"], h)
+
+    def test_max_errors_per_handler_warning(self):
+        njobs = 100
+        params = {"initial": 0, "total": 0}
+        c = Custodian([ExampleHandler1c(params)],
+                      [ExampleJob(i, params) for i in range(njobs)],
+                      max_errors=njobs*10, max_errors_per_job=1000)
+        c.run()
+        self.assertTrue(all(len(r["corrections"]) <= 2 for r in c.run_log))
 
     def test_validators(self):
         njobs = 100
@@ -193,11 +252,13 @@ class CustodianTest(unittest.TestCase):
 
         njobs = 100
         params = {"initial": 0, "total": 0}
+        v = ExampleValidator2()
         c = Custodian([ExampleHandler(params)],
                       [ExampleJob(i, params) for i in range(njobs)],
-                      [ExampleValidator2()],
+                      [v],
                       max_errors=njobs)
-        self.assertRaises(RuntimeError, c.run)
+        self.assertRaises(ValidationError, c.run)
+        self.assertEqual(c.run_log[-1]["validator"], v)
 
     def test_from_spec(self):
         spec = """jobs:

@@ -908,6 +908,9 @@ class PotimErrorHandler(ErrorHandler):
             actions = [{"dict": "INCAR",
                         "action": {"_set": {"IBRION": 3,
                                             "SMASS": 0.75}}}]
+        elif potim < 0.1:
+            actions = [{"dict": "INCAR",
+                        "action": {"_set": {"SYMPREC": 1e-8}}}]
         else:
             actions = [{"dict": "INCAR",
                         "action": {"_set": {"POTIM": potim * 0.5}}}]
@@ -953,6 +956,9 @@ class FrozenJobErrorHandler(ErrorHandler):
         if vi["INCAR"].get("ALGO", "Normal") == "Fast":
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ALGO": "Normal"}}})
+        else:
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"SYMPREC": 1e-8}}})
 
         VaspModder(vi=vi).apply_actions(actions)
 
@@ -1036,7 +1042,6 @@ class NonConvergingErrorHandler(ErrorHandler):
         # Unfixable error. Just return None for actions.
         else:
             return {"errors": ["Non-converging job"], "actions": None}
-
 
 class WalltimeHandler(ErrorHandler):
     """
@@ -1289,6 +1294,12 @@ class PositiveEnergyErrorHandler(ErrorHandler):
             backup(VASP_BACKUP_FILES)
             actions = [{"dict": "INCAR",
                         "action": {"_set": {"ALGO": "Normal"}}}]
+            VaspModder(vi=vi).apply_actions(actions)
+            return {"errors": ["Positive energy"], "actions": actions}
+        elif algo == "Normal":
+            potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
+            actions = [{"dict": "INCAR",
+                        "action": {"_set": {"POTIM": potim}}}]
             VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Positive energy"], "actions": actions}
         # Unfixable error. Just return None for actions.

@@ -9,13 +9,15 @@ jobs:
       - run:
           command: |
             export PATH=$HOME/miniconda3/bin:$PATH
-            conda create --quiet --yes --name test_env python=3.6
+            rm -rf /root/miniconda3/envs/test_env/lib/python3.7/site-packages/numpy
+            conda create --quiet --yes --name test_env python=3.7
             source activate test_env
             conda install --quiet --yes numpy scipy matplotlib sympy pandas
             conda install --quiet --yes -c openbabel openbabel
-            conda update --quiet --all
+            conda upgrade --quiet --all
             mkdir coverage_reports
             pip install --upgrade pip
+            pip install --upgrade numpy
             pip install --quiet --ignore-installed -r requirements.txt -r requirements-ci.txt
             # Add executables and path.
             export MPLBACKEND=Agg
