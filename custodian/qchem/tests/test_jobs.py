@@ -34,42 +34,32 @@ cwd = os.getcwd()
 class QCJobTest(TestCase):
 
     def test_defaults(self):
-        with patch("custodian.qchem.jobs.os.putenv") as putenv_patch:
-            with patch("custodian.qchem.jobs.shutil.copy") as copy_patch:
-                myjob = QCJob(qchem_command="qchem", max_cores=32)
-                self.assertEqual(myjob.current_command, ' qchem -nt 32 mol.qin mol.qout')
-                myjob.setup()
-                self.assertEqual(copy_patch.call_args_list[0][0][0], "mol.qin")
-                self.assertEqual(copy_patch.call_args_list[0][0][1], "mol.qin.orig")
-                self.assertEqual(putenv_patch.call_args_list[0][0][0], "QCSCRATCH")
-                self.assertEqual(putenv_patch.call_args_list[0][0][1], os.getcwd())
-                self.assertEqual(putenv_patch.call_args_list[1][0][0], "QCTHREADS")
-                self.assertEqual(putenv_patch.call_args_list[1][0][1], "32")
-                self.assertEqual(putenv_patch.call_args_list[2][0][0], "OMP_NUM_THREADS")
-                self.assertEqual(putenv_patch.call_args_list[2][0][1], "32")
+        with patch("custodian.qchem.jobs.shutil.copy") as copy_patch:
+            myjob = QCJob(qchem_command="qchem", max_cores=32)
+            self.assertEqual(myjob.current_command, ' qchem -nt 32 mol.qin mol.qout')
+            myjob.setup()
+            self.assertEqual(copy_patch.call_args_list[0][0][0], "mol.qin")
+            self.assertEqual(copy_patch.call_args_list[0][0][1], "mol.qin.orig")
+            self.assertEqual(os.environ["QCSCRATCH"],os.getcwd())
+            self.assertEqual(os.environ["QCTHREADS"],"32")
+            self.assertEqual(os.environ["OMP_NUM_THREADS"],"32")
 
     def test_not_defaults(self):
-        with patch("custodian.qchem.jobs.os.putenv") as putenv_patch:
-            myjob = QCJob(qchem_command="qchem -slurm", multimode="mpi", input_file="different.qin", output_file="not_default.qout", max_cores=12, scratch_dir="/not/default/scratch/", backup=False)
-            self.assertEqual(myjob.current_command, ' qchem -slurm -np 12 different.qin not_default.qout')
-            myjob.setup()
-            self.assertEqual(putenv_patch.call_args_list[0][0][0], "QCSCRATCH")
-            self.assertEqual(putenv_patch.call_args_list[0][0][1], "/not/default/scratch/")
+        myjob = QCJob(qchem_command="qchem -slurm", multimode="mpi", input_file="different.qin", output_file="not_default.qout", max_cores=12, scratch_dir="/not/default/scratch/", backup=False)
+        self.assertEqual(myjob.current_command, ' qchem -slurm -np 12 different.qin not_default.qout')
+        myjob.setup()
+        self.assertEqual(os.environ["QCSCRATCH"],"/not/default/scratch/")
 
     def test_save_scratch(self):
-        with patch("custodian.qchem.jobs.os.putenv") as putenv_patch:
-            with patch("custodian.qchem.jobs.shutil.copy") as copy_patch:
-                myjob = QCJob(qchem_command="qchem -slurm", max_cores=32, scratch_dir=os.getcwd(), save_scratch=True, save_name="freq_scratch")
-                self.assertEqual(myjob.current_command, ' qchem -slurm -nt 32 mol.qin mol.qout freq_scratch')
-                myjob.setup()
-                self.assertEqual(copy_patch.call_args_list[0][0][0], "mol.qin")
-                self.assertEqual(copy_patch.call_args_list[0][0][1], "mol.qin.orig")
-                self.assertEqual(putenv_patch.call_args_list[0][0][0], "QCSCRATCH")
-                self.assertEqual(putenv_patch.call_args_list[0][0][1], os.getcwd())
-                self.assertEqual(putenv_patch.call_args_list[1][0][0], "QCTHREADS")
-                self.assertEqual(putenv_patch.call_args_list[1][0][1], "32")
-                self.assertEqual(putenv_patch.call_args_list[2][0][0], "OMP_NUM_THREADS")
-                self.assertEqual(putenv_patch.call_args_list[2][0][1], "32")
+        with patch("custodian.qchem.jobs.shutil.copy") as copy_patch:
+            myjob = QCJob(qchem_command="qchem -slurm", max_cores=32, scratch_dir=os.getcwd(), save_scratch=True, save_name="freq_scratch")
+            self.assertEqual(myjob.current_command, ' qchem -slurm -nt 32 mol.qin mol.qout freq_scratch')
+            myjob.setup()
+            self.assertEqual(copy_patch.call_args_list[0][0][0], "mol.qin")
+            self.assertEqual(copy_patch.call_args_list[0][0][1], "mol.qin.orig")
+            self.assertEqual(os.environ["QCSCRATCH"],os.getcwd())
+            self.assertEqual(os.environ["QCTHREADS"],"32")
+            self.assertEqual(os.environ["OMP_NUM_THREADS"],"32")
 
 class OptFFTest(TestCase):
     def setUp(self):
