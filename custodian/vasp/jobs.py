@@ -60,7 +60,7 @@ class VaspJob(Job):
 
     def __init__(self, vasp_cmd, output_file="vasp.out",
                  stderr_file="std_err.txt", suffix="", final=True,
-                 backup=True, auto_npar=True, auto_gamma=True,
+                 backup=True, auto_npar=False, auto_gamma=True,
                  settings_override=None, gamma_vasp_cmd=None,
                  copy_magmom=False, auto_continue=False):
         """
@@ -111,7 +111,7 @@ class VaspJob(Job):
                 where the CHGCAR and WAVECAR are sometimes deleted (due to
                 changes in fft grid, etc.). Only applies to non-final runs.
             auto_continue (bool): Whether to automatically continue a run
-                if a STOPCAR is present. This is very usefull if using the
+                if a STOPCAR is present. This is very useful if using the
                 wall-time handler which will write a read-only STOPCAR to
                 prevent VASP from deleting it once it finishes
         """
