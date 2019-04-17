@@ -1,7 +1,7 @@
 import os, shutil
 import unittest
 from custodian.vasp.validators import VasprunXMLValidator, VaspFilesValidator, \
-    VaspNpTMDValidator
+    VaspNpTMDValidator, VaspAECCARValidator
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
                         'test_files')
@@ -75,6 +75,19 @@ class VaspNpTMDValidatorTest(unittest.TestCase):
         d = h.as_dict()
         h2 = VaspNpTMDValidator.from_dict(d)
         self.assertIsInstance(h2, VaspNpTMDValidator)
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cwd)
+
+class VaspAECCARValidatorTest(unittest.TestCase):
+
+    def test_check_and_correct(self):
+        # NPT-AIMD using correct VASP
+        os.chdir(os.path.join(test_dir, "bad_aeccar"))
+        h = VaspAECCARValidator()
+        self.assertTrue(h.check())
+
 
     @classmethod
     def tearDownClass(cls):

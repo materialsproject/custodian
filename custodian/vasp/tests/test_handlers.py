@@ -81,7 +81,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ['tet'])
         self.assertEqual(d["actions"],
-                         [{'action': {'_set': {'ISMEAR': 0}},
+                         [{'action': {'_set': {'ISMEAR': 0, 'SIGMA': 0.05}},
                            'dict': 'INCAR'}])
 
         h = VaspErrorHandler("vasp.teterror", errors_subset_to_catch=["eddrmm"])
@@ -137,7 +137,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ['dentet'])
         self.assertEqual(d["actions"],
-                         [{'action': {'_set': {'ISMEAR': 0}},
+                         [{'action': {'_set': {'ISMEAR': 0, 'SIGMA': 0.05}},
                            'dict': 'INCAR'}])
 
     def test_brmix(self):
@@ -375,7 +375,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         h = UnconvergedErrorHandler()
         self.assertTrue(h.check())
         d = h.correct()
-        print(d)
         self.assertEqual(d, {'actions': [{'action': {'_set': {'ALGO': 'All'}}, 'dict': 'INCAR'}],
                             'errors': ['Unconverged']})
         os.remove("vasprun.xml")
