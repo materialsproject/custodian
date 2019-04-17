@@ -41,7 +41,7 @@ class VaspJobTest(unittest.TestCase):
     def test_setup(self):
         with cd(test_dir):
             with ScratchDir('.', copy_from_current_on_enter=True) as d:
-                v = VaspJob("hello")
+                v = VaspJob("hello", auto_npar=True)
                 v.setup()
                 incar = Incar.from_file("INCAR")
                 count = multiprocessing.cpu_count()

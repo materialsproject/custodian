@@ -38,3 +38,5 @@ nosetests.xml
 
 .DS_Store
 docs/_build
+
+\.cache/v/cache/

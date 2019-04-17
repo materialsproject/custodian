@@ -156,7 +156,7 @@ class VaspErrorHandler(ErrorHandler):
 
         if self.errors.intersection(["tet", "dentet"]):
             actions.append({"dict": "INCAR",
-                            "action": {"_set": {"ISMEAR": 0}}})
+                            "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
 
         if "inv_rot_mat" in self.errors:
             actions.append({"dict": "INCAR",
@@ -207,11 +207,9 @@ class VaspErrorHandler(ErrorHandler):
                     all_kpts_even = all([
                         bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0]
                     ])
-                    print("all_kpts_even = {}".format(all_kpts_even))
                     if all_kpts_even:
                         new_kpts = (
                             tuple(n + 1 for n in vi["KPOINTS"].kpts[0]),)
-                        print("new_kpts = {}".format(new_kpts))
                         actions.append({"dict": "KPOINTS", "action": {"_set": {
                             "kpoints": new_kpts
                         }}})
@@ -382,7 +380,7 @@ class VaspErrorHandler(ErrorHandler):
         if "grad_not_orth" in self.errors:
             if vi["INCAR"].get("ISMEAR", 1) < 0:
                 actions.append({"dict": "INCAR",
-                                "action": {"_set": {"ISMEAR": "0"}}})
+                                "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
 
         if "zheev" in self.errors:
             if vi["INCAR"].get("ALGO", "Fast").lower() != "exact":
