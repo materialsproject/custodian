@@ -146,7 +146,7 @@ class QChemErrorHandlerTest(TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ['SCF_failed_to_converge'])
-        self.assertEqual(d["actions"], [{"scf_algorithm": "gdm"}])
+        self.assertEqual(d["actions"], [{"thresh": "14"}])
 
     def test_out_of_opt_cycles(self):
         shutil.copyfile(
