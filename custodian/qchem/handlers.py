@@ -129,12 +129,6 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.molecule = self.outdata.get(
                     "molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
-            elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
-                self.qcinp.rem["scf_algorithm"] = "rca_diis"
-                actions.append({"scf_algorithm": "rca_diis"})
-                if self.qcinp.rem.get("gen_scfman"):
-                    self.qcinp.rem["gen_scfman"] = False
-                    actions.append({"gen_scfman": False})
             elif self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
@@ -144,13 +138,7 @@ class QChemErrorHandler(ErrorHandler):
                 )
 
         elif "premature_end_FileMan_error" in self.errors and "linear_dependence" in self.warnings:
-            if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
-                self.qcinp.rem["scf_algorithm"] = "rca_diis"
-                actions.append({"scf_algorithm": "rca_diis"})
-                if self.qcinp.rem.get("gen_scfman"):
-                    self.qcinp.rem["gen_scfman"] = False
-                    actions.append({"gen_scfman": False})
-            elif self.qcinp.rem.get("thresh", "10") != "14":
+            if self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
             elif self.qcinp.rem.get("scf_guess_always", "none").lower() != "true":
