@@ -40,6 +40,25 @@ __date__ = "Sep 17 2014"
 
 logger = logging.getLogger(__name__)
 
+if "SENTRY_DSN" in os.environ:
+    # Sentry.io is a service to aggregate logs remotely, this is useful
+    # for Custodian to get statistics on which errors are most common.
+    # If you do not have a SENTRY_DSN environment variable set, Sentry
+    # will not be used.
+
+    import sentry_sdk
+    from sentry_sdk.integrations.logging import LoggingIntegration
+
+    # All of this is already happening by default!
+    sentry_logging = LoggingIntegration(
+        level=logging.INFO,  # Capture info and above as breadcrumbs
+        event_level=logging.ERROR  # Send errors as events
+    )
+    sentry_sdk.init(
+        dsn=os.environ["SENTRY_DSN"],
+        integrations=[sentry_logging]
+    )
+
 
 class Custodian(object):
     """
