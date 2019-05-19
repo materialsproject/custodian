@@ -47,10 +47,7 @@ if "SENTRY_DSN" in os.environ:
     # will not be used.
 
     import sentry_sdk
-    sentry_sdk.init(
-        dsn=os.environ["SENTRY_DSN"],
-        integrations=[sentry_logging]
-    )
+    sentry_sdk.init(dsn=os.environ["SENTRY_DSN"])
 
 
 class Custodian(object):
