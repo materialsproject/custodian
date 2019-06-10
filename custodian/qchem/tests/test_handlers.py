@@ -86,14 +86,7 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ['premature_end_FileMan_error'])
         self.assertEqual(d["warnings"]["linear_dependence"], True)
-        self.assertEqual(d["actions"], [{"scf_algorithm": "rca_diis"}])
-        self._check_equivalent_inputs("unable_to_determine_lamda.qin.1",
-                                      "unable_to_determine_lamda.qin.2")
-
-        h = QChemErrorHandler(
-            input_file="unable_to_determine_lamda.qin.2",
-            output_file="unable_to_determine_lamda.qout.2")
-        self.assertEqual(h.check(), False)
+        self.assertEqual(d["actions"], [{"thresh": "14"}])
 
     def test_failed_to_transform(self):
         for ii in range(2):

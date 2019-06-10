@@ -81,15 +81,15 @@ class QChemErrorHandler(ErrorHandler):
             elif self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
+            elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
+                self.qcinp.rem["scf_algorithm"] = "diis_gdm"
+                actions.append({"scf_algorithm": "diis_gdm"})
+            elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis_gdm":
+                self.qcinp.rem["scf_algorithm"] = "gdm"
+                actions.append({"scf_algorithm": "gdm"})
             elif self.qcinp.rem.get("scf_guess_always", "none").lower() != "true":
                 self.qcinp.rem["scf_guess_always"] = True
                 actions.append({"scf_guess_always": True})
-            elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
-                self.qcinp.rem["scf_algorithm"] = "gdm"
-                actions.append({"scf_algorithm": "gdm"})
-            elif self.qcinp.rem.get("scf_algorithm", "gdm").lower() == "gdm":
-                self.qcinp.rem["scf_algorithm"] = "diis_gdm"
-                actions.append({"scf_algorithm": "diis_gdm"})
             else:
                 print(
                     "More advanced changes may impact the SCF result. Use the SCF error handler"
@@ -109,8 +109,13 @@ class QChemErrorHandler(ErrorHandler):
             elif self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
-            # If already at geom_max_cycles and thresh 14, often can just get convergence by
-            # restarting from the geometry of the last cycle. But we'll also save any structural
+            # Will need to try and implement this dmax handler below when I have more time
+            # to fix the tests and the general handling procedure.
+            # elif self.qcinp.rem.get("geom_opt_dmax",300) != 150:
+            #     self.qcinp.rem["geom_opt_dmax"] = 150
+            #     actions.append({"geom_opt_dmax": "150"})
+            # If already at geom_max_cycles, thresh 14, and dmax 150, often can just get convergence
+            # by restarting from the geometry of the last cycle. But we'll also save any structural
             # changes that happened along the way.
             else:
                 self.opt_error_history += [self.outdata["structure_change"]]
