@@ -22,7 +22,7 @@ from custodian.utils import backup
 from pymatgen.io.vasp import Poscar, VaspInput, Incar, Kpoints, Vasprun, \
     Oszicar, Outcar
 from pymatgen.transformations.standard_transformations import \
-    SupercellTransformation
+    SupercellTransformation, PerturbStructureTransformation
 
 from custodian.ansible.interpreter import Modder
 from custodian.ansible.actions import FileActions
@@ -322,8 +322,18 @@ class VaspErrorHandler(ErrorHandler):
                             "transformation": trans.as_dict()})
 
         if "pricel" in self.errors:
-            actions.append({"dict": "INCAR",
-                            "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}})
+            if self.error_count['pricel'] == 0:
+                actions.append({"dict": "INCAR",
+                                "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}})
+                self.error_count['pricel'] += 1
+
+            elif self.error_count['pricel'] == 1:
+                s = vi["POSCAR"].structure
+                trans = PerturbStructureTransformation(amplitude=0.01)
+                new_s = trans.apply_transformation(s)
+                actions.append({"dict": "POSCAR",
+                                "action": {"_set": {"structure": new_s.as_dict()}},
+                                "transformation": trans.as_dict()})
 
         if "brions" in self.errors:
             potim = float(vi["INCAR"].get("POTIM", 0.5)) + 0.1
