@@ -322,12 +322,9 @@ class VaspErrorHandler(ErrorHandler):
                             "transformation": trans.as_dict()})
 
         if "pricel" in self.errors:
-            if self.error_count['pricel'] == 0:
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}})
                 self.error_count['pricel'] += 1
-
-            elif self.error_count['pricel'] == 1:
                 s = vi["POSCAR"].structure
                 trans = PerturbStructureTransformation(amplitude=0.01)
                 new_s = trans.apply_transformation(s)
