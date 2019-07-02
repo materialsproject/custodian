@@ -189,6 +189,10 @@ class QChemErrorHandler(ErrorHandler):
             # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
             actions.append({"rerun job as-is"})
 
+        elif "licensing_error" in self.errors:
+            # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
+            actions.append({"rerun job as-is"})
+
         elif "unknown_error" in self.errors:
             if self.qcinp.rem.get("scf_guess", "none").lower() == "read":
                 del self.qcinp.rem["scf_guess"]
