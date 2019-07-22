@@ -1,0 +1,236 @@
+[
+    {
+        "job": {
+            "@module": "custodian.qchem.jobs",
+            "@class": "QCJob",
+            "qchem_command": [
+                "qchem"
+            ],
+            "max_cores": 32,
+            "multimode": "openmp",
+            "input_file": "mol.qin",
+            "output_file": "mol.qout",
+            "qclog_file": "mol.qclog",
+            "suffix": ".opt_0",
+            "scratch_dir": "/global/cscratch1/sd/sblau/smd_production/launcher_2019-07-16-21-51-10-872618/launcher_2019-07-17-10-52-35-313716",
+            "save_scratch": true,
+            "save_name": "chain_scratch",
+            "backup": true
+        },
+        "corrections": [],
+        "handler": null,
+        "validator": null,
+        "max_errors": false,
+        "max_errors_per_job": false,
+        "max_errors_per_handler": false,
+        "nonzero_return_code": false
+    },
+    {
+        "job": {
+            "@module": "custodian.qchem.jobs",
+            "@class": "QCJob",
+            "qchem_command": [
+                "qchem"
+            ],
+            "max_cores": 32,
+            "multimode": "openmp",
+            "input_file": "mol.qin",
+            "output_file": "mol.qout",
+            "qclog_file": "mol.qclog",
+            "suffix": ".freq_0",
+            "scratch_dir": "/global/cscratch1/sd/sblau/smd_production/launcher_2019-07-16-21-51-10-872618/launcher_2019-07-17-10-52-35-313716",
+            "save_scratch": true,
+            "save_name": "chain_scratch",
+            "backup": false
+        },
+        "corrections": [],
+        "handler": null,
+        "validator": null,
+        "max_errors": false,
+        "max_errors_per_job": false,
+        "max_errors_per_handler": false,
+        "nonzero_return_code": false
+    },
+    {
+        "job": {
+            "@module": "custodian.qchem.jobs",
+            "@class": "QCJob",
+            "qchem_command": [
+                "qchem"
+            ],
+            "max_cores": 32,
+            "multimode": "openmp",
+            "input_file": "mol.qin",
+            "output_file": "mol.qout",
+            "qclog_file": "mol.qclog",
+            "suffix": ".opt_1",
+            "scratch_dir": "/global/cscratch1/sd/sblau/smd_production/launcher_2019-07-16-21-51-10-872618/launcher_2019-07-17-10-52-35-313716",
+            "save_scratch": true,
+            "save_name": "chain_scratch",
+            "backup": false
+        },
+        "corrections": [],
+        "handler": null,
+        "validator": null,
+        "max_errors": false,
+        "max_errors_per_job": false,
+        "max_errors_per_handler": false,
+        "nonzero_return_code": false
+    },
+    {
+        "job": {
+            "@module": "custodian.qchem.jobs",
+            "@class": "QCJob",
+            "qchem_command": [
+                "qchem"
+            ],
+            "max_cores": 32,
+            "multimode": "openmp",
+            "input_file": "mol.qin",
+            "output_file": "mol.qout",
+            "qclog_file": "mol.qclog",
+            "suffix": ".freq_1",
+            "scratch_dir": "/global/cscratch1/sd/sblau/smd_production/launcher_2019-07-16-21-51-10-872618/launcher_2019-07-17-10-52-35-313716",
+            "save_scratch": true,
+            "save_name": "chain_scratch",
+            "backup": false
+        },
+        "corrections": [],
+        "handler": null,
+        "validator": null,
+        "max_errors": false,
+        "max_errors_per_job": false,
+        "max_errors_per_handler": false,
+        "nonzero_return_code": false
+    },
+    {
+        "job": {
+            "@module": "custodian.qchem.jobs",
+            "@class": "QCJob",
+            "qchem_command": [
+                "qchem"
+            ],
+            "max_cores": 32,
+            "multimode": "openmp",
+            "input_file": "mol.qin",
+            "output_file": "mol.qout",
+            "qclog_file": "mol.qclog",
+            "suffix": ".opt_2",
+            "scratch_dir": "/global/cscratch1/sd/sblau/smd_production/launcher_2019-07-16-21-51-10-872618/launcher_2019-07-17-10-52-35-313716",
+            "save_scratch": true,
+            "save_name": "chain_scratch",
+            "backup": false
+        },
+        "corrections": [],
+        "handler": null,
+        "validator": null,
+        "max_errors": false,
+        "max_errors_per_job": false,
+        "max_errors_per_handler": false,
+        "nonzero_return_code": false
+    },
+    {
+        "job": {
+            "@module": "custodian.qchem.jobs",
+            "@class": "QCJob",
+            "qchem_command": [
+                "qchem"
+            ],
+            "max_cores": 32,
+            "multimode": "openmp",
+            "input_file": "mol.qin",
+            "output_file": "mol.qout",
+            "qclog_file": "mol.qclog",
+            "suffix": ".freq_2",
+            "scratch_dir": "/global/cscratch1/sd/sblau/smd_production/launcher_2019-07-16-21-51-10-872618/launcher_2019-07-17-10-52-35-313716",
+            "save_scratch": true,
+            "save_name": "chain_scratch",
+            "backup": false
+        },
+        "corrections": [],
+        "handler": null,
+        "validator": null,
+        "max_errors": false,
+        "max_errors_per_job": false,
+        "max_errors_per_handler": false,
+        "nonzero_return_code": false
+    },
+    {
+        "job": {
+            "@module": "custodian.qchem.jobs",
+            "@class": "QCJob",
+            "qchem_command": [
+                "qchem"
+            ],
+            "max_cores": 32,
+            "multimode": "openmp",
+            "input_file": "mol.qin",
+            "output_file": "mol.qout",
+            "qclog_file": "mol.qclog",
+            "suffix": ".opt_3",
+            "scratch_dir": "/global/cscratch1/sd/sblau/smd_production/launcher_2019-07-16-21-51-10-872618/launcher_2019-07-17-10-52-35-313716",
+            "save_scratch": true,
+            "save_name": "chain_scratch",
+            "backup": false
+        },
+        "corrections": [],
+        "handler": null,
+        "validator": null,
+        "max_errors": false,
+        "max_errors_per_job": false,
+        "max_errors_per_handler": false,
+        "nonzero_return_code": false
+    },
+    {
+        "job": {
+            "@module": "custodian.qchem.jobs",
+            "@class": "QCJob",
+            "qchem_command": [
+                "qchem"
+            ],
+            "max_cores": 32,
+            "multimode": "openmp",
+            "input_file": "mol.qin",
+            "output_file": "mol.qout",
+            "qclog_file": "mol.qclog",
+            "suffix": ".freq_3",
+            "scratch_dir": "/global/cscratch1/sd/sblau/smd_production/launcher_2019-07-16-21-51-10-872618/launcher_2019-07-17-10-52-35-313716",
+            "save_scratch": true,
+            "save_name": "chain_scratch",
+            "backup": false
+        },
+        "corrections": [],
+        "handler": null,
+        "validator": null,
+        "max_errors": false,
+        "max_errors_per_job": false,
+        "max_errors_per_handler": false,
+        "nonzero_return_code": false
+    },
+    {
+        "job": {
+            "@module": "custodian.qchem.jobs",
+            "@class": "QCJob",
+            "qchem_command": [
+                "qchem"
+            ],
+            "max_cores": 32,
+            "multimode": "openmp",
+            "input_file": "mol.qin",
+            "output_file": "mol.qout",
+            "qclog_file": "mol.qclog",
+            "suffix": ".opt_4",
+            "scratch_dir": "/global/cscratch1/sd/sblau/smd_production/launcher_2019-07-16-21-51-10-872618/launcher_2019-07-17-10-52-35-313716",
+            "save_scratch": true,
+            "save_name": "chain_scratch",
+            "backup": false
+        },
+        "corrections": [],
+        "handler": null,
+        "validator": null,
+        "max_errors": false,
+        "max_errors_per_job": false,
+        "max_errors_per_handler": false,
+        "nonzero_return_code": false
+    }
+]

@@ -215,6 +215,9 @@ class QCJob(Job):
                     if outdata.get('frequencies')[0] > 0.0:
                         print("All frequencies positive!")
                         break
+                    elif abs(outdata.get('frequencies')[0]) < 15.0 and outdata.get('frequencies')[1] > 0.0:
+                        print("One negative frequency smaller than 15.0 - not worth further flattening!")
+                        break
                     else:
                         if len(energy_history) > 1:
                             if abs(energy_history[-1]-energy_history[-2]) < energy_diff_cutoff:
@@ -228,7 +231,8 @@ class QCJob(Job):
                             solvent=orig_input.solvent,
                             smx=orig_input.smx)
                         opt_QCInput.write_file(input_file)
-            shutil.rmtree(os.path.join(os.getcwd(),"chain_scratch"))
+            if os.path.exists(os.path.join(os.getcwd(),"chain_scratch")):
+                shutil.rmtree(os.path.join(os.getcwd(),"chain_scratch"))
 
         else:
             if not os.path.exists(input_file):
