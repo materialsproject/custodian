@@ -219,7 +219,7 @@ class QChemErrorHandlerTest(TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ['failed_to_read_input'])
-        self.assertEqual(d["actions"], [{"rerun job as-is"}])
+        self.assertEqual(d["actions"], [{"rerun_job_no_changes": True}])
         self._check_equivalent_inputs("unable_lamda_weird.qin.last",
                                       "unable_lamda_weird.qin")
 
@@ -249,7 +249,7 @@ class QChemErrorHandlerTest(TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ['read_molecule_error'])
-        self.assertEqual(d["actions"], [{"rerun job as-is"}])
+        self.assertEqual(d["actions"], [{"rerun_job_no_changes": True}])
         self._check_equivalent_inputs("mol.qin.last",
                                       "mol.qin")
 
@@ -265,7 +265,7 @@ class QChemErrorHandlerTest(TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ['never_called_qchem'])
-        self.assertEqual(d["actions"], [{"rerun job as-is"}])
+        self.assertEqual(d["actions"], [{"rerun_job_no_changes": True}])
         self._check_equivalent_inputs("mol.qin.last",
                                       "mol.qin")
 
