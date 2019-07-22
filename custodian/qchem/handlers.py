@@ -142,7 +142,7 @@ class QChemErrorHandler(ErrorHandler):
                     "Use a different initial guess? Perhaps a different basis?"
                 )
 
-        elif "premature_end_FileMan_error" in self.errors and "linear_dependence" in self.warnings:
+        elif "premature_end_FileMan_error" in self.errors:
             if self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
@@ -179,19 +179,19 @@ class QChemErrorHandler(ErrorHandler):
 
         elif "failed_to_read_input" in self.errors:
             # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
-            actions.append({"rerun job as-is"})
+            actions.append({"rerun_job_no_changes": True})
 
         elif "read_molecule_error" in self.errors:
             # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
-            actions.append({"rerun job as-is"})
+            actions.append({"rerun_job_no_changes": True})
 
         elif "never_called_qchem" in self.errors:
             # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
-            actions.append({"rerun job as-is"})
+            actions.append({"rerun_job_no_changes": True})
 
         elif "licensing_error" in self.errors:
             # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
-            actions.append({"rerun job as-is"})
+            actions.append({"rerun_job_no_changes": True})
 
         elif "unknown_error" in self.errors:
             if self.qcinp.rem.get("scf_guess", "none").lower() == "read":
