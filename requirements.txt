@@ -1,4 +1,4 @@
 monty==2.0.4
 six==1.12.0
-ruamel.yaml==0.15.94
+ruamel.yaml==0.15.96
 sentry-sdk>=0.8.0
