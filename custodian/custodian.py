@@ -632,7 +632,7 @@ class Custodian(object):
                     d["handler"] = h
                     logger_d = d.copy()
                     logger_d["handler"] = h.__class__.__name__
-                    logger.error("\n" + pformat(logger_d, indent=2, width=-1))
+                    logger.error(h.__class__.__name__, extra="\n" + pformat(logger_d, indent=2, width=-1))
                     corrections.append(d)
                     h.n_applied_corrections += 1
             except Exception:
