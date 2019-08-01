@@ -630,7 +630,9 @@ class Custodian(object):
                         terminate_func = None
                     d = h.correct()
                     d["handler"] = h
-                    logger.error("\n" + pformat(d, indent=2, width=-1))
+                    logger_d = d.copy()
+                    logger_d["handler"] = h.__class__.__name__
+                    logger.error("\n" + pformat(logger_d, indent=2, width=-1))
                     corrections.append(d)
                     h.n_applied_corrections += 1
             except Exception:
