@@ -457,7 +457,7 @@ class Custodian(object):
                 for v in self.validators:
                     if v.check():
                         self.run_log[-1]["validator"] = v
-                        s = "Validation failed: {}".format(v)
+                        s = "Validation failed: {}".format(v.__class__.__name__)
                         raise ValidationError(s, True, v)
                 if not zero_return_code:
                     if self.terminate_on_nonzero_returncode:
