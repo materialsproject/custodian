@@ -49,15 +49,14 @@ if "SENTRY_DSN" in os.environ:
     import sentry_sdk
     sentry_sdk.init(dsn=os.environ["SENTRY_DSN"])
     
-    from getpass import getusre
-    try:
-        user = getuser()
-    except:
-        user = None
-    
     with sentry_sdk.configure_scope() as scope:
-        if user:
-            scope.user = {"username": user}
+        
+        from getpass import getuser
+        try:
+            scope.user = {"username": getuser()}
+        except:
+            pass
+            
 
 
 class Custodian(object):
