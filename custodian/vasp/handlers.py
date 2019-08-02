@@ -149,7 +149,7 @@ class VaspErrorHandler(ErrorHandler):
                                 if err == "brmix" and 'NELECT' in incar:
                                     continue
                                 self.errors.add(err)
-                                self.logger.error(self.error_messages["err"], extra={"incar": incar.as_dict()})
+                                self.logger.error(self.error_msgs["err"], extra={"incar": incar.as_dict()})
         return len(self.errors) > 0
 
     def correct(self):
