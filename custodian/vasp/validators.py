@@ -5,6 +5,8 @@ from __future__ import unicode_literals, division
 from custodian.custodian import Validator
 from pymatgen.io.vasp import Vasprun, Incar, Outcar, Chgcar
 import os
+import logging
+
 
 class VasprunXMLValidator(Validator):
     """
@@ -12,12 +14,13 @@ class VasprunXMLValidator(Validator):
     """
 
     def __init__(self):
-        pass
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def check(self):
         try:
             Vasprun("vasprun.xml")
         except:
+            self.logger.error("Failed to load vasprun.xml", exc_info=True)
             return True
         return False
 
