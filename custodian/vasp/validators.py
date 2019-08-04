@@ -33,9 +33,9 @@ class VasprunXMLValidator(Validator):
         except:
             exception_context = {}
             
-            if os.path.exists(self.outputfile):
-                with open(self.outputfile, "r") as outputfile:
-                    exception_context["outputfile"] = outputfile.read()
+            if os.path.exists(self.output_file):
+                with open(self.output_file, "r") as output_file:
+                    exception_context["output_file"] = output_file.read()
             
             if os.path.exists(self.stderr_file):
                 with open(self.stderr_file, "r") as stderr_file:
