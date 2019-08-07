@@ -60,7 +60,7 @@ elif "CUSTODIAN_REPORTING_OPT_IN" in os.environ:
 if SENTRY_DSN:
 
     import sentry_sdk
-    sentry_sdk.init(dsn=os.environ["SENTRY_DSN"])
+    sentry_sdk.init(dsn=SENTRY_DSN)
     
     with sentry_sdk.configure_scope() as scope:
         
