@@ -15,7 +15,7 @@ from monty.os.path import which
 from monty.shutil import decompress_dir
 from monty.serialization import dumpfn, loadfn
 
-from custodian.custodian import Job
+from custodian.custodian import Job, SENTRY_DSN
 from custodian.utils import backup
 from custodian.vasp.interpreter import VaspModder
 from custodian.vasp.handlers import VASP_BACKUP_FILES
@@ -127,6 +127,12 @@ class VaspJob(Job):
         self.gamma_vasp_cmd = gamma_vasp_cmd
         self.copy_magmom = copy_magmom
         self.auto_continue = auto_continue
+        
+        if SENTRY_DSN:
+          # if using Sentry logging, add specific VASP executable to scope
+          from sentry_sdk import configure_scope
+          with configure_scope() as scope:
+              scope.set_tag("vasp_cmd", which(vasp_cmd))
 
     def setup(self):
         """

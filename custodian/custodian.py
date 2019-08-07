@@ -14,6 +14,7 @@ from abc import ABCMeta, abstractmethod
 from itertools import islice
 import warnings
 from pprint import pformat
+from ast import literal_eval
 
 import six
 
@@ -57,6 +58,38 @@ if "SENTRY_DSN" in os.environ:
         except:
             pass
             
+
+
+# Sentry.io is a service to aggregate logs remotely, this is useful
+# for Custodian to get statistics on which errors are most common.
+# If you do not have a SENTRY_DSN environment variable set, or do
+# not have CUSTODIAN_ERROR_REPORTING_OPT_IN set to True, then
+# Sentry will not be enabled.
+
+SENTRY_DSN = None
+if "SENTRY_DSN" in os.environ:
+    SENTRY_DSN = os.environ["SENTRY_DSN"]
+elif "CUSTODIAN_REPORTING_OPT_IN" in os.environ:
+    # check for environment variable to automatically set SENTRY_DSN
+    # will set for True, true, TRUE, etc.
+    if literal_eval(os.environ.get("CUSTODIAN_REPORTING_OPT_IN", "False").title()):
+        SENTRY_DSN = "https://0f7291738eb042a3af671df9fc68ae2a@sentry.io/1470881"
+
+if SENTRY_DSN:
+
+    import sentry_sdk
+    sentry_sdk.init(dsn=SENTRY_DSN)
+    
+    with sentry_sdk.configure_scope() as scope:
+        
+        from getpass import getuser
+        try:
+            scope.user = {"username": getuser()}
+        except:
+            pass
+        
+        import socket
+        scope.set_tag("hostname", socket.gethostname())
 
 
 class Custodian(object):
