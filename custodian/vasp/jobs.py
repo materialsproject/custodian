@@ -132,7 +132,16 @@ class VaspJob(Job):
           # if using Sentry logging, add specific VASP executable to scope
           from sentry_sdk import configure_scope
           with configure_scope() as scope:
-              scope.set_tag("vasp_cmd", which(vasp_cmd))
+              try:
+                  if isinstance(vasp_cmd, str):
+                      vasp_path = which(vasp_cmd.split(' ')[-1])
+                  elif isinstance(vasp_cmd, list):
+                      vasp_path = which(vasp_cmd[-1])
+                  scope.set_tag("vasp_path", vasp_path)
+                  scope.set_tag("vasp_cmd", vasp_cmd)
+              except:
+                  logger.error("Failed to detect VASP path: {}".format(vasp_cmd), exc_info=True)
+                  scope.set_tag("vasp_cmd", vasp_cmd)
 
     def setup(self):
         """
