@@ -35,11 +35,13 @@ class VasprunXMLValidator(Validator):
             
             if os.path.exists(self.output_file):
                 with open(self.output_file, "r") as output_file:
-                    exception_context["output_file"] = output_file.read()
+                    output_file_tail = deque(output_file, maxlen=10)
+                exception_context["output_file_tail"] = "".join(output_file_tail)
             
             if os.path.exists(self.stderr_file):
                 with open(self.stderr_file, "r") as stderr_file:
-                    exception_context["stderr_file"] = stderr_file.read()
+                    stderr_file_tail = deque(stderr_file, maxlen=10)
+                exception_context["stderr_file_tail"] = "".join(stderr_file_tail)
             
             if os.path.exists("vasprun.xml"):
                 
