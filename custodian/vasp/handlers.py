@@ -8,6 +8,7 @@ import time
 import datetime
 import operator
 import shutil
+import logging
 from functools import reduce
 from collections import Counter
 import re
@@ -129,6 +130,7 @@ class VaspErrorHandler(ErrorHandler):
         self.natoms_large_cell = natoms_large_cell
         self.errors_subset_to_catch = errors_subset_to_catch or \
             list(VaspErrorHandler.error_msgs.keys())
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def check(self):
         incar = Incar.from_file("INCAR")
@@ -147,6 +149,7 @@ class VaspErrorHandler(ErrorHandler):
                                 if err == "brmix" and 'NELECT' in incar:
                                     continue
                                 self.errors.add(err)
+                                self.logger.error(msg, extra={"incar": incar.as_dict()})
         return len(self.errors) > 0
 
     def correct(self):
