@@ -1,0 +1,46 @@
+You are running Q-Chem version: 5.2.0
+withsave === 1
+
+#
+# job setting
+#
+local host:  nid01744
+current dir: /global/cscratch1/sd/sblau/smd_production/launcher_2019-07-16-21-51-10-872618/launcher_2019-07-17-10-52-35-313716
+input file:  mol.qin
+output file: mol.qout
+nprocs     : 0
+nthreads   : 32
+#
+# qchem installation setting
+#
+QC:          /global/common/cori/software/qchem/5.2
+QCAUX:       /global/common/cori/software/qchem/5.2/qcaux
+QCPROG:      /global/project/projectdirs/jcesr/qchem_sblau/qc521_exe/qcprog.LINUX_Ix86_64.20190628.exe
+QCPROG_S:    /global/project/projectdirs/jcesr/qchem_sblau/qc521_exe/qcprog.LINUX_Ix86_64.20190628.exe
+PARALLEL:    -DSERIAL
+QCMPI:       mpich3
+#
+# qchem directory setting
+#
+qcrun:       chain_scratch
+QCSCRATCH:   /global/cscratch1/sd/sblau/smd_production/launcher_2019-07-16-21-51-10-872618/launcher_2019-07-17-10-52-35-313716
+QCLOCALSCR:  /tmp/qchem288122015
+QCTMPDIR:    /tmp/qchem288122015
+QCFILEPREF:  /tmp/qchem288122015/chain_scratch
+QCSAVEDIR:   /global/cscratch1/sd/sblau/smd_production/launcher_2019-07-16-21-51-10-872618/launcher_2019-07-17-10-52-35-313716/chain_scratch
+workdirs:    /tmp/qchem288122015/chain_scratch
+workdir0:    /tmp/qchem288122015/chain_scratch
+partmpdirs =  
+#
+# parallel setting
+#
+QCRSH:           ssh
+QCMPI:           mpich3
+QCMPIRUN:        mpirun
+QCMACHINEFILE:   /tmp/qchem288122015/chain_scratch/hostfile
+
+#
+# env setting
+#
+exported envs:   QC QCAUX QCSCRATCH QCRUNNAME QCFILEPREF QCPROG QCPROG_S GUIFILE
+copy savedir ...

@@ -16,4 +16,5 @@ $rem
    scf_algorithm = gdm
    method = wb97xd
    geom_opt_max_cycles = 200
+   thresh = 14
 $end
