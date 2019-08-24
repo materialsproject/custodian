@@ -23,7 +23,7 @@ jobs:
             pip install --quiet -e .
             pytest --cov=custodian --cov-report html:coverage_reports custodian
             echo "pycodestyle checks..."
-            pycodestyle custodian/custodian.py custodian/vasp
+            pycodestyle custodian
             echo "--- Done ---"
           no_output_timeout: 3600
       - store_artifacts:

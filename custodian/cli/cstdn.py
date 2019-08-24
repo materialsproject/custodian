@@ -12,7 +12,6 @@ from monty.serialization import loadfn
 from custodian.custodian import Custodian
 import logging
 
-
 example_yaml = """
 # This is an example of a Custodian yaml spec file. It shows how you can specify
 # a double relaxation followed by a static calculation. Minor modifications

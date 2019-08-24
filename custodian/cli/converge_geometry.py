@@ -21,13 +21,11 @@ from custodian.vasp.handlers import VaspErrorHandler, UnconvergedErrorHandler, \
 from custodian.vasp.jobs import VaspJob
 from pymatgen.io.vasp.outputs import Vasprun
 
-
 FORMAT = '%(asctime)s %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
 
 
 def get_runs(args):
-
     vasp_command = args.command.split()
     converged = False
     job_number = 0
@@ -38,8 +36,8 @@ def get_runs(args):
 
         if job_number == 0:
             backup = True
-            #assume the initial guess is poor,
-            #start with conjugate gradients
+            # assume the initial guess is poor,
+            # start with conjugate gradients
             settings = [
                 {"dict": "INCAR",
                  "action": {"_set": {"IBRION": 2}}}
@@ -60,8 +58,8 @@ def get_runs(args):
                     {"file": "CONTCAR",
                      "action": {"_file_copy": {"dest": "POSCAR"}}}]
 
-            #switch to RMM-DIIS once we are near the
-            #local minimum (assumed after 2 runs of CG)
+            # switch to RMM-DIIS once we are near the
+            # local minimum (assumed after 2 runs of CG)
             else:
                 settings = [
                     {"dict": "INCAR",

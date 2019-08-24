@@ -22,7 +22,6 @@ from custodian.vasp.handlers import VaspErrorHandler, \
 from custodian.vasp.jobs import VaspJob
 from pymatgen.io.vasp import VaspInput, Vasprun
 
-
 FORMAT = '%(asctime)s %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
 

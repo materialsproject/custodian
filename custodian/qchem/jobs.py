@@ -19,7 +19,6 @@ from pymatgen.analysis.graphs import MoleculeGraph
 from pymatgen.analysis.local_env import OpenBabelNN
 from custodian.custodian import Job
 
-
 __author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath"
 __copyright__ = "Copyright 2018, The Materials Project"
 __version__ = "0.1"
@@ -112,8 +111,8 @@ class QCJob(Job):
         Returns:
             (subprocess.Popen) Used for monitoring.
         """
-        myrand = str(random.randint(1,1000000000))
-        mydir = os.path.join("/tmp","qchem"+myrand)
+        myrand = str(random.randint(1, 1000000000))
+        mydir = os.path.join("/tmp", "qchem" + myrand)
         os.mkdir(mydir)
         os.environ["QCLOCALSCR"] = mydir
         qclog = open(self.qclog_file, 'w')
@@ -170,17 +169,17 @@ class QCJob(Job):
 
             for ii in range(max_iterations):
                 yield (QCJob(
-                qchem_command=qchem_command,
-                multimode=multimode,
-                input_file=input_file,
-                output_file=output_file,
-                qclog_file=qclog_file,
-                suffix=".opt_" + str(ii),
-                scratch_dir=os.getcwd(),
-                save_scratch=True,
-                save_name="chain_scratch",
-                backup=first,
-                **QCJob_kwargs))
+                    qchem_command=qchem_command,
+                    multimode=multimode,
+                    input_file=input_file,
+                    output_file=output_file,
+                    qclog_file=qclog_file,
+                    suffix=".opt_" + str(ii),
+                    scratch_dir=os.getcwd(),
+                    save_scratch=True,
+                    save_name="chain_scratch",
+                    backup=first,
+                    **QCJob_kwargs))
                 opt_outdata = QCOutput(output_file + ".opt_" + str(ii)).data
                 first = False
                 if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
@@ -220,7 +219,7 @@ class QCJob(Job):
                         break
                     else:
                         if len(energy_history) > 1:
-                            if abs(energy_history[-1]-energy_history[-2]) < energy_diff_cutoff:
+                            if abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
                                 print("Energy change below cutoff!")
                                 break
                         opt_QCInput = QCInput(
@@ -231,8 +230,8 @@ class QCJob(Job):
                             solvent=orig_input.solvent,
                             smx=orig_input.smx)
                         opt_QCInput.write_file(input_file)
-            if os.path.exists(os.path.join(os.getcwd(),"chain_scratch")):
-                shutil.rmtree(os.path.join(os.getcwd(),"chain_scratch"))
+            if os.path.exists(os.path.join(os.getcwd(), "chain_scratch")):
+                shutil.rmtree(os.path.join(os.getcwd(), "chain_scratch"))
 
         else:
             if not os.path.exists(input_file):
@@ -309,7 +308,8 @@ class QCJob(Job):
                         reversed_direction = False
                         standard = True
 
-                        # If we've found one or more negative frequencies in two consecutive iterations, let's dig in deeper:
+                        # If we've found one or more negative frequencies in two consecutive iterations, let's dig in
+                        # deeper:
                         if len(history) > 1:
                             # Start by finding the latest iteration's parent:
                             if history[-1]["index"] in history[-2]["children"]:
@@ -319,11 +319,14 @@ class QCJob(Job):
                                 parent_hist = history[-3]
                                 history[-1]["parent"] = parent_hist["index"]
                             else:
-                                raise AssertionError("ERROR: your parent should always be one or two iterations behind you! Exiting...")
+                                raise AssertionError(
+                                    "ERROR: your parent should always be one or two iterations behind you! Exiting...")
 
-                            # if the number of negative frequencies has remained constant or increased from parent to child,
+                            # if the number of negative frequencies has remained constant or increased from parent to
+                            # child,
                             if history[-1]["num_neg_freqs"] >= parent_hist["num_neg_freqs"]:
-                                # check to see if the parent only has one child, aka only the positive perturbation has been tried,
+                                # check to see if the parent only has one child, aka only the positive perturbation has
+                                # been tried,
                                 # in which case just try the negative perturbation from the same parent
                                 if len(parent_hist["children"]) == 1:
                                     ref_mol = parent_hist["molecule"]
@@ -332,9 +335,10 @@ class QCJob(Job):
                                     reversed_direction = True
                                     standard = False
                                     parent_hist["children"].append(len(history))
-                                # If the parent has two children, aka both directions have been tried, then we have to get creative:
+                                # If the parent has two children, aka both directions have been tried, then we have to
+                                # get creative:
                                 elif len(parent_hist["children"]) == 2:
-                                    # If we're dealing with just one negative frequency, 
+                                    # If we're dealing with just one negative frequency,
                                     if parent_hist["num_neg_freqs"] == 1:
                                         make_good_child_next_parent = False
                                         if history[parent_hist["children"][0]]["energy"] < history[-1]["energy"]:
@@ -342,10 +346,13 @@ class QCJob(Job):
                                         else:
                                             good_child = copy.deepcopy(history[-1])
                                         if good_child["num_neg_freqs"] > 1:
-                                            raise Exception("ERROR: Child with lower energy has more negative frequencies! Exiting...")
+                                            raise Exception(
+                                                "ERROR: Child with lower energy has more negative frequencies! "
+                                                "Exiting...")
                                         elif good_child["energy"] < parent_hist["energy"]:
                                             make_good_child_next_parent = True
-                                        elif vector_list_diff(good_child["frequency_mode_vectors"][0],parent_hist["frequency_mode_vectors"][0]) > 0.2:
+                                        elif vector_list_diff(good_child["frequency_mode_vectors"][0],
+                                                              parent_hist["frequency_mode_vectors"][0]) > 0.2:
                                             make_good_child_next_parent = True
                                         else:
                                             raise Exception("ERROR: Good child not good enough! Exiting...")
@@ -356,18 +363,20 @@ class QCJob(Job):
                                             geom_to_perturb = history[-1]["geometry"]
                                             negative_freq_vecs = history[-1]["frequency_mode_vectors"][0]
                                     else:
-                                        raise Exception("ERROR: Can't deal with multiple neg frequencies yet! Exiting...")
+                                        raise Exception(
+                                            "ERROR: Can't deal with multiple neg frequencies yet! Exiting...")
                                 else:
                                     raise AssertionError("ERROR: Parent cannot have more than two childen! Exiting...")
-                            # Implicitly, if the number of negative frequencies decreased from parent to child, continue normally.
+                            # Implicitly, if the number of negative frequencies decreased from parent to child,
+                            # continue normally.
                         if standard:
                             history[-1]["children"].append(len(history))
 
                         min_molecule_perturb_scale = 0.1
                         scale_grid = 10
                         perturb_scale_grid = (
-                            max_molecule_perturb_scale - min_molecule_perturb_scale
-                        ) / scale_grid
+                                                     max_molecule_perturb_scale - min_molecule_perturb_scale
+                                             ) / scale_grid
 
                         structure_successfully_perturbed = False
                         for molecule_perturb_scale in np.arange(
@@ -384,12 +393,14 @@ class QCJob(Job):
                                 charge=orig_charge,
                                 spin_multiplicity=orig_multiplicity)
                             if check_connectivity:
-                                structure_successfully_perturbed = check_for_structure_changes(ref_mol, new_molecule) == "no_change"
+                                structure_successfully_perturbed = check_for_structure_changes(
+                                    ref_mol, new_molecule) == "no_change"
                                 if structure_successfully_perturbed:
                                     break
                         if not structure_successfully_perturbed:
                             raise Exception(
-                                "ERROR: Unable to perturb coordinates to remove negative frequency without changing the connectivity! Exiting..."
+                                "ERROR: Unable to perturb coordinates to remove negative frequency without changing "
+                                "the connectivity! Exiting..."
                             )
 
                         new_opt_QCInput = QCInput(
@@ -405,7 +416,7 @@ class QCJob(Job):
 def perturb_coordinates(old_coords, negative_freq_vecs, molecule_perturb_scale,
                         reversed_direction):
     max_dis = max(
-        [math.sqrt(sum([x**2 for x in vec])) for vec in negative_freq_vecs])
+        [math.sqrt(sum([x ** 2 for x in vec])) for vec in negative_freq_vecs])
     scale = molecule_perturb_scale / max_dis
     normalized_vecs = [[x * scale for x in vec] for vec in negative_freq_vecs]
     direction = 1.0
@@ -413,6 +424,7 @@ def perturb_coordinates(old_coords, negative_freq_vecs, molecule_perturb_scale,
         direction = -1.0
     return [[c + v * direction for c, v in zip(coord, vec)]
             for coord, vec in zip(old_coords, normalized_vecs)]
+
 
 def vector_list_diff(vecs1, vecs2):
     diff = 0.0
