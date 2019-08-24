@@ -44,11 +44,7 @@ Stable version
 
 The version at the Python Package Index (PyPI) is always the latest stable
 release that will be hopefully, be relatively bug-free. The easiest way to
-install custodian on any system is to use easy_install or pip, as follows::
-
-    easy_install custodian
-
-or::
+install custodian on any system is to use pip, as follows::
 
     pip install custodian
 
