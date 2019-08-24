@@ -11,6 +11,7 @@ addons:
     - liblapack-dev
     - gfortran
     - python-pip
+    - libopenbabel-dev
     - python-openbabel
 before_install:
   - sudo apt-get install -qq -y swig python-dev
