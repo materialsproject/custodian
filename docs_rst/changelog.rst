@@ -1,6 +1,15 @@
 Change Log
 ==========
 
+v2019.8.24
+----------
+* Cleanup codestyle, which is now enforced.
+* Py3k support only, in line with pymatgen.
+* Update dependencies.
+* Sentry support (@mkhorton).
+* Complete qchem overhaul (frequency flattening optimization, refined error
+  handlers) (@samblau)
+
 v2017.12.23
 -----------
 * cstdn command line tool is now official with docs.
