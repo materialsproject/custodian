@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>custodian.custodian &#8212; custodian 2019.8.23 documentation</title>
+    <title>custodian.custodian &#8212; custodian 2019.8.24 documentation</title>
     <link rel="stylesheet" href="../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">custodian 2019.8.23 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">custodian 2019.8.24 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -63,10 +63,7 @@
 <span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">islice</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">pprint</span> <span class="k">import</span> <span class="n">pformat</span>
 <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
-
-<span class="kn">import</span> <span class="nn">six</span>
 
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">get_execution_host_info</span>
 
@@ -88,7 +85,6 @@
 <span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;ongsp@ucsd.edu&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;Sep 17 2014&quot;</span>
 
-
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="s2">&quot;SENTRY_DSN&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
@@ -98,17 +94,17 @@
     <span class="c1"># will not be used.</span>
 
     <span class="kn">import</span> <span class="nn">sentry_sdk</span>
+
     <span class="n">sentry_sdk</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">dsn</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;SENTRY_DSN&quot;</span><span class="p">])</span>
-    
+
     <span class="k">with</span> <span class="n">sentry_sdk</span><span class="o">.</span><span class="n">configure_scope</span><span class="p">()</span> <span class="k">as</span> <span class="n">scope</span><span class="p">:</span>
-        
+
         <span class="kn">from</span> <span class="nn">getpass</span> <span class="k">import</span> <span class="n">getuser</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="n">scope</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">getuser</span><span class="p">()}</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">pass</span>
-            
-
 
 <span class="c1"># Sentry.io is a service to aggregate logs remotely, this is useful</span>
 <span class="c1"># for Custodian to get statistics on which errors are most common.</span>
@@ -128,17 +124,20 @@
 <span class="k">if</span> <span class="n">SENTRY_DSN</span><span class="p">:</span>
 
     <span class="kn">import</span> <span class="nn">sentry_sdk</span>
+
     <span class="n">sentry_sdk</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">dsn</span><span class="o">=</span><span class="n">SENTRY_DSN</span><span class="p">)</span>
-    
+
     <span class="k">with</span> <span class="n">sentry_sdk</span><span class="o">.</span><span class="n">configure_scope</span><span class="p">()</span> <span class="k">as</span> <span class="n">scope</span><span class="p">:</span>
-        
+
         <span class="kn">from</span> <span class="nn">getpass</span> <span class="k">import</span> <span class="n">getuser</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="n">scope</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">getuser</span><span class="p">()}</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">pass</span>
-        
+
         <span class="kn">import</span> <span class="nn">socket</span>
+
         <span class="n">scope</span><span class="o">.</span><span class="n">set_tag</span><span class="p">(</span><span class="s2">&quot;hostname&quot;</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">())</span>
 
 
@@ -293,7 +292,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">Custodian</span><span class="o">.</span><span class="n">_delete_checkpoints</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
             <span class="n">n</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cwd</span><span class="p">,</span> <span class="s2">&quot;custodian.chk.</span><span class="si">{}</span><span class="s2">.tar.gz&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
-            <span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">n</span><span class="p">,</span>  <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w:gz&quot;</span><span class="p">,</span> <span class="n">compresslevel</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w:gz&quot;</span><span class="p">,</span> <span class="n">compresslevel</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cwd</span><span class="p">,</span> <span class="n">arcname</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Checkpoint written to </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
@@ -713,7 +712,7 @@
                             <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;max_errors_per_handler&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
                             <span class="k">raise</span> <span class="n">MaxCorrectionsPerHandlerError</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">max_num_corrections</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="o">+</span><span class="s2">&quot; Correction not applied.&quot;</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span> <span class="o">+</span> <span class="s2">&quot; Correction not applied.&quot;</span><span class="p">)</span>
                             <span class="k">continue</span>
                     <span class="k">if</span> <span class="n">terminate_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">h</span><span class="o">.</span><span class="n">is_terminating</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Terminating job&quot;</span><span class="p">)</span>
@@ -744,7 +743,7 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">corrections</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 
-<div class="viewcode-block" id="Job"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Job">[docs]</a><span class="k">class</span> <span class="nc">Job</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">with_metaclass</span><span class="p">(</span><span class="n">ABCMeta</span><span class="p">,</span> <span class="n">MSONable</span><span class="p">)):</span>
+<div class="viewcode-block" id="Job"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Job">[docs]</a><span class="k">class</span> <span class="nc">Job</span><span class="p">(</span><span class="n">MSONable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract base class defining the interface for a Job.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -827,7 +826,7 @@
 <span class="sd">    fixed maximum number of times on a single job (i.e. the counter is reset</span>
 <span class="sd">    at the beginning of each job). If the maximum number is reached the code</span>
 <span class="sd">    will either raise a MaxCorrectionsPerHandlerError (raise_on_max==True) or stops</span>
-<span class="sd">    considering the correction (raise_on_max==False). If max_num_corrections </span>
+<span class="sd">    considering the correction (raise_on_max==False). If max_num_corrections</span>
 <span class="sd">    is None this option is not considered. These options can be overridden</span>
 <span class="sd">    as class attributes of the subclass or as customizable options setting</span>
 <span class="sd">    an instance attribute from __init__.</span>
@@ -885,7 +884,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_num_applied_corrections</span> <span class="o">=</span> <span class="n">value</span></div>
 
 
-<div class="viewcode-block" id="Validator"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Validator">[docs]</a><span class="k">class</span> <span class="nc">Validator</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">with_metaclass</span><span class="p">(</span><span class="n">ABCMeta</span><span class="p">,</span> <span class="n">MSONable</span><span class="p">)):</span>
+<div class="viewcode-block" id="Validator"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Validator">[docs]</a><span class="k">class</span> <span class="nc">Validator</span><span class="p">(</span><span class="n">MSONable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract base class defining the interface for a Validator. A Validator</span>
 <span class="sd">    differs from an ErrorHandler in that it does not correct a run and is run</span>
