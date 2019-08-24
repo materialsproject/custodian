@@ -13,10 +13,7 @@ import os
 from abc import ABCMeta, abstractmethod
 from itertools import islice
 import warnings
-from pprint import pformat
 from ast import literal_eval
-
-import six
 
 from .utils import get_execution_host_info
 
@@ -696,7 +693,7 @@ class Custodian(object):
         return len(corrections) > 0
 
 
-class Job(six.with_metaclass(ABCMeta, MSONable)):
+class Job(metaclass=MSONable):
     """
     Abstract base class defining the interface for a Job.
     """
@@ -837,7 +834,7 @@ class ErrorHandler(MSONable):
         self._num_applied_corrections = value
 
 
-class Validator(six.with_metaclass(ABCMeta, MSONable)):
+class Validator(metaclass=MSONable):
     """
     Abstract base class defining the interface for a Validator. A Validator
     differs from an ErrorHandler in that it does not correct a run and is run
