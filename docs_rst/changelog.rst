@@ -1,14 +1,15 @@
 Change Log
 ==========
 
-v2019.8.24
+v2019.2.10
 ----------
-* Cleanup codestyle, which is now enforced.
-* Py3k support only, in line with pymatgen.
-* Update dependencies.
-* Sentry support (@mkhorton).
-* Complete qchem overhaul (frequency flattening optimization, refined error
-  handlers) (@samblau)
+* Improved slow convergence handling. (@shyamd)
+
+v2019.2.7
+---------
+* Improved error logging.
+* Improved handling of frozen jobs and potim errors.
+* Improved Exceptino handling. (Guido Petretto)
 
 v2017.12.23
 -----------

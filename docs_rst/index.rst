@@ -25,16 +25,14 @@ calculations.
 Change log
 ==========
 
-v2019.2.10
+v2019.8.24
 ----------
-* Improved slow convergence handling. (@shyamd)
-
-v2019.2.7
----------
-* Improved error logging.
-* Improved handling of frozen jobs and potim errors.
-* Improved Exceptino handling. (Guido Petretto)
-
+* Cleanup codestyle, which is now enforced.
+* Py3k support only, in line with pymatgen.
+* Update dependencies.
+* Sentry support (@mkhorton).
+* Complete qchem overhaul (frequency flattening optimization, refined error
+  handlers) (@samblau)
 
 :doc:`Older versions </changelog>`
 
@@ -75,20 +73,21 @@ or to install the package in developmental mode::
 Requirements
 ============
 
-Custodian requires Python 2.7+. There are no other required dependencies.
+Custodian requires Python 3.5+. There are no other required dependencies.
 
 Optional dependencies
 ---------------------
 
 Optional libraries that are required if you need certain features:
 
-1. Python Materials Genomics (`pymatgen`_) 2.8.10+: To use the plugin for
+1. Python Materials Genomics (`pymatgen`_) 2019.8.23+: To use the plugin for
    VASP, NwChem and Qchem. Please install using::
 
     pip install pymatgen
 
    For more information, please consult `pymatgen's documentation`_.
-2. nose - For complete unittesting.
+2. pytest - For complete unittesting.
+3. pycodestyle - For checking pep8 compliance.
 
 Usage
 =====
