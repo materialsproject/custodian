@@ -55,6 +55,6 @@ def get_execution_host_info():
         try:
             import socket
             host = host or socket.gethostname()
-        except:
+        except Exception:
             pass
     return host or 'unknown', cluster or 'unknown'

@@ -7,14 +7,12 @@ This module implements a Modder class that performs modifications on objects
 using support actions.
 """
 
-
 __author__ = "Shyue Ping Ong"
 __copyright__ = "Copyright 2012, The Materials Project"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
 __email__ = "ongsp@ucsd.edu"
 __date__ = "Jun 1, 2012"
-
 
 import re
 
@@ -42,6 +40,7 @@ class Modder(object):
     >>> d['Hello']
     'Universe'
     """
+
     def __init__(self, actions=None, strict=True):
         """
         Initializes a Modder from a list of supported actions.
@@ -100,4 +99,5 @@ class Modder(object):
 
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()
