@@ -134,6 +134,7 @@ class VaspErrorHandler(ErrorHandler):
     def check(self):
         incar = Incar.from_file("INCAR")
         self.errors = set()
+        error_msgs = set()
         with open(self.output_filename, "r") as f:
             for line in f:
                 l = line.strip()
@@ -148,7 +149,9 @@ class VaspErrorHandler(ErrorHandler):
                                 if err == "brmix" and 'NELECT' in incar:
                                     continue
                                 self.errors.add(err)
-                                self.logger.error(msg, extra={"incar": incar.as_dict()})
+                                error_msgs.add(msg)
+        for msg in error_msgs:
+            self.logger.error(msg, extra={"incar": incar.as_dict()})
         return len(self.errors) > 0
 
     def correct(self):
