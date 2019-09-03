@@ -830,6 +830,8 @@ class UnconvergedErrorHandler(ErrorHandler):
             return {"errors": ["Unconverged"], "actions": None}
 
 
+@deprecated(message="This handler is no longer supported and its use is no "
+                    "longer recommended. It will be removed in v2020.x.")
 class MaxForceErrorHandler(ErrorHandler):
     """
     Checks that the desired force convergence has been achieved. Otherwise
