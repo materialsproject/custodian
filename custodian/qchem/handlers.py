@@ -55,6 +55,7 @@ class QChemErrorHandler(ErrorHandler):
         # Checks output file for errors.
         self.outdata = QCOutput(self.output_file).data
         self.errors = self.outdata.get("errors")
+        self.warnings = self.outdata.get("warnings")
         # If we aren't out of optimization cycles, but we were in the past, reset the history
         if "out_of_opt_cycles" not in self.errors and len(self.opt_error_history) > 0:
             self.opt_error_history = []
@@ -77,12 +78,18 @@ class QChemErrorHandler(ErrorHandler):
                     self.scf_max_cycles):
                 self.qcinp.rem["max_scf_cycles"] = self.scf_max_cycles
                 actions.append({"max_scf_cycles": self.scf_max_cycles})
+            elif self.qcinp.rem.get("thresh", "10") != "14":
+                self.qcinp.rem["thresh"] = "14"
+                actions.append({"thresh": "14"})
             elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
-                self.qcinp.rem["scf_algorithm"] = "gdm"
-                actions.append({"scf_algorithm": "gdm"})
-            elif self.qcinp.rem.get("scf_algorithm", "gdm").lower() == "gdm":
                 self.qcinp.rem["scf_algorithm"] = "diis_gdm"
                 actions.append({"scf_algorithm": "diis_gdm"})
+            elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis_gdm":
+                self.qcinp.rem["scf_algorithm"] = "gdm"
+                actions.append({"scf_algorithm": "gdm"})
+            elif self.qcinp.rem.get("scf_guess_always", "none").lower() != "true":
+                self.qcinp.rem["scf_guess_always"] = True
+                actions.append({"scf_guess_always": True})
             else:
                 print(
                     "More advanced changes may impact the SCF result. Use the SCF error handler"
@@ -99,8 +106,16 @@ class QChemErrorHandler(ErrorHandler):
                     self.qcinp.molecule = self.outdata.get(
                         "molecule_from_last_geometry")
                     actions.append({"molecule": "molecule_from_last_geometry"})
-            # If already at geom_max_cycles, often can just get convergence by restarting
-            # from the geometry of the last cycle. But we'll also save any structural
+            elif self.qcinp.rem.get("thresh", "10") != "14":
+                self.qcinp.rem["thresh"] = "14"
+                actions.append({"thresh": "14"})
+            # Will need to try and implement this dmax handler below when I have more time
+            # to fix the tests and the general handling procedure.
+            # elif self.qcinp.rem.get("geom_opt_dmax",300) != 150:
+            #     self.qcinp.rem["geom_opt_dmax"] = 150
+            #     actions.append({"geom_opt_dmax": "150"})
+            # If already at geom_max_cycles, thresh 14, and dmax 150, often can just get convergence
+            # by restarting from the geometry of the last cycle. But we'll also save any structural
             # changes that happened along the way.
             else:
                 self.opt_error_history += [self.outdata["structure_change"]]
@@ -119,27 +134,30 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.molecule = self.outdata.get(
                     "molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
-            elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
-                self.qcinp.rem["scf_algorithm"] = "rca_diis"
-                actions.append({"scf_algorithm": "rca_diis"})
-                if self.qcinp.rem.get("gen_scfman"):
-                    self.qcinp.rem["gen_scfman"] = False
-                    actions.append({"gen_scfman": False})
+            elif self.qcinp.rem.get("thresh", "10") != "14":
+                self.qcinp.rem["thresh"] = "14"
+                actions.append({"thresh": "14"})
             else:
                 print(
                     "Use a different initial guess? Perhaps a different basis?"
                 )
 
-        elif "linear_dependent_basis" in self.errors:
-            # DIIS -> RCA_DIIS. If already RCA_DIIS, change basis?
-            if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
-                self.qcinp.rem["scf_algorithm"] = "rca_diis"
-                actions.append({"scf_algorithm": "rca_diis"})
-                if self.qcinp.rem.get("gen_scfman"):
-                    self.qcinp.rem["gen_scfman"] = False
-                    actions.append({"gen_scfman": False})
+        elif "premature_end_FileMan_error" in self.errors:
+            if self.qcinp.rem.get("thresh", "10") != "14":
+                self.qcinp.rem["thresh"] = "14"
+                actions.append({"thresh": "14"})
+            elif self.qcinp.rem.get("scf_guess_always", "none").lower() != "true":
+                self.qcinp.rem["scf_guess_always"] = True
+                actions.append({"scf_guess_always": True})
             else:
-                print("Perhaps use a better basis?")
+                print("We're in a bad spot if we get a FileMan error while always generating a new SCF guess...")
+
+        elif "hessian_eigenvalue_error" in self.errors:
+            if self.qcinp.rem.get("thresh", "10") != "14":
+                self.qcinp.rem["thresh"] = "14"
+                actions.append({"thresh": "14"})
+            else:
+                print("Not sure how to fix hessian_eigenvalue_error if thresh is already 14!")
 
         elif "failed_to_transform_coords" in self.errors:
             # Check for symmetry flag in rem. If not False, set to False and rerun.
@@ -161,34 +179,45 @@ class QChemErrorHandler(ErrorHandler):
 
         elif "failed_to_read_input" in self.errors:
             # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
-            actions.append({"rerun job as-is"})
-
-        elif "IO_error" in self.errors:
-            # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
-            actions.append({"rerun job as-is"})
+            actions.append({"rerun_job_no_changes": True})
 
         elif "read_molecule_error" in self.errors:
             # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
-            actions.append({"rerun job as-is"})
+            actions.append({"rerun_job_no_changes": True})
 
         elif "never_called_qchem" in self.errors:
             # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
-            actions.append({"rerun job as-is"})
+            actions.append({"rerun_job_no_changes": True})
+
+        elif "licensing_error" in self.errors:
+            # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
+            actions.append({"rerun_job_no_changes": True})
 
         elif "unknown_error" in self.errors:
-            print("Examine error message by hand.")
-            return {"errors": self.errors, "actions": None}
+            if self.qcinp.rem.get("scf_guess", "none").lower() == "read":
+                del self.qcinp.rem["scf_guess"]
+                actions.append({"scf_guess": "deleted"})
+            elif self.qcinp.rem.get("thresh", "10") != "14":
+                self.qcinp.rem["thresh"] = "14"
+                actions.append({"thresh": "14"})
+            else:
+                print("Unknown error. Examine output and log files by hand.")
+                return {"errors": self.errors, "actions": None}
 
         else:
             # You should never get here. If correct is being called then errors should have at least one entry,
             # in which case it should have been caught by the if/elifs above.
-            print(
-                "If you get this message, something has gone terribly wrong!")
+            print("Errors:", self.errors)
+            print("Must have gotten an error which is correctly parsed but not included in the handler. FIX!!!")
             return {"errors": self.errors, "actions": None}
 
+        if {"molecule": "molecule_from_last_geometry"} in actions and \
+                str(self.qcinp.rem.get("geom_opt_hessian")).lower() == "read":
+            del self.qcinp.rem["geom_opt_hessian"]
+            actions.append({"geom_opt_hessian": "deleted"})
         os.rename(self.input_file, self.input_file + ".last")
         self.qcinp.write_file(self.input_file)
-        return {"errors": self.errors, "actions": actions}
+        return {"errors": self.errors, "warnings": self.warnings, "actions": actions}
 
 
 class QChemSCFErrorHandler(ErrorHandler):

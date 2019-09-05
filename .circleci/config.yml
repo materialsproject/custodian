@@ -3,7 +3,7 @@ jobs:
   py3test:
     working_directory: ~/custodian
     docker:
-        - image: materialsvirtuallab/circle-ci-pmg-py3:0.0.2
+        - image: materialsvirtuallab/circle-ci-pmg-py3:3.7.3
     steps:
       - checkout
       - run:
@@ -16,13 +16,13 @@ jobs:
             conda install --quiet --yes -c openbabel openbabel
             conda upgrade --quiet --all
             mkdir coverage_reports
-            pip install --upgrade pip
-            pip install --upgrade numpy
             pip install --quiet --ignore-installed -r requirements.txt -r requirements-ci.txt
             # Add executables and path.
-            export MPLBACKEND=Agg
             pip install --quiet -e .
-            nosetests --config=nose.cfg --cover-html --cover-html-dir=coverage_reports
+            pytest --cov=custodian --cov-report html:coverage_reports custodian
+            echo "pycodestyle checks..."
+            pycodestyle custodian
+            echo "--- Done ---"
           no_output_timeout: 3600
       - store_artifacts:
           path: coverage_reports/

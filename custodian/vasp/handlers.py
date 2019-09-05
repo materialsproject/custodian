@@ -8,6 +8,7 @@ import time
 import datetime
 import operator
 import shutil
+import logging
 from functools import reduce
 from collections import Counter
 import re
@@ -127,12 +128,13 @@ class VaspErrorHandler(ErrorHandler):
         self.error_count = Counter()
         # threshold of number of atoms to treat the cell as large.
         self.natoms_large_cell = natoms_large_cell
-        self.errors_subset_to_catch = errors_subset_to_catch or \
-            list(VaspErrorHandler.error_msgs.keys())
+        self.errors_subset_to_catch = errors_subset_to_catch or list(VaspErrorHandler.error_msgs.keys())
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def check(self):
         incar = Incar.from_file("INCAR")
         self.errors = set()
+        error_msgs = set()
         with open(self.output_filename, "r") as f:
             for line in f:
                 l = line.strip()
@@ -147,6 +149,9 @@ class VaspErrorHandler(ErrorHandler):
                                 if err == "brmix" and 'NELECT' in incar:
                                     continue
                                 self.errors.add(err)
+                                error_msgs.add(msg)
+        for msg in error_msgs:
+            self.logger.error(msg, extra={"incar": incar.as_dict()})
         return len(self.errors) > 0
 
     def correct(self):
@@ -169,7 +174,7 @@ class VaspErrorHandler(ErrorHandler):
                 try:
                     assert (Outcar(zpath(os.path.join(
                         os.getcwd(), "OUTCAR"))).is_stopped is False)
-                except:
+                except Exception:
                     self.error_count['brmix'] += 1
 
             if self.error_count['brmix'] == 0:
@@ -188,17 +193,14 @@ class VaspErrorHandler(ErrorHandler):
             elif self.error_count['brmix'] == 2 and vi["KPOINTS"].style \
                     == Kpoints.supported_modes.Gamma:
                 actions.append({"dict": "KPOINTS",
-                                "action": {"_set": {"generation_style":
-                                                    "Monkhorst"}}})
+                                "action": {"_set": {"generation_style": "Monkhorst"}}})
                 actions.append({"dict": "INCAR",
                                 "action": {"_unset": {"IMIX": 1}}})
                 self.error_count['brmix'] += 1
 
-            elif self.error_count['brmix'] in [2, 3] and vi["KPOINTS"].style \
-                    == Kpoints.supported_modes.Monkhorst:
+            elif self.error_count['brmix'] in [2, 3] and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
                 actions.append({"dict": "KPOINTS",
-                                "action": {"_set": {"generation_style":
-                                                    "Gamma"}}})
+                                "action": {"_set": {"generation_style": "Gamma"}}})
                 actions.append({"dict": "INCAR",
                                 "action": {"_unset": {"IMIX": 1}}})
                 self.error_count['brmix'] += 1
@@ -241,7 +243,7 @@ class VaspErrorHandler(ErrorHandler):
             try:
                 oszicar = Oszicar("OSZICAR")
                 nsteps = len(oszicar.ionic_steps)
-            except:
+            except Exception:
                 nsteps = 0
 
             if nsteps >= 1:
@@ -353,13 +355,11 @@ class VaspErrorHandler(ErrorHandler):
                             "action": {"_set": {"NBANDS": int(1.1 * nbands)}}})
 
         if "pssyevx" in self.errors:
-            actions.append({"dict": "INCAR", "action":
-                            {"_set": {"ALGO": "Normal"}}})
+            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
         if "eddrmm" in self.errors:
             # RMM algorithm is not stable for this calculation
             if vi["INCAR"].get("ALGO", "Normal") in ["Fast", "VeryFast"]:
-                actions.append({"dict": "INCAR", "action":
-                                {"_set": {"ALGO": "Normal"}}})
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
             else:
                 potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
                 actions.append({"dict": "INCAR",
@@ -374,8 +374,7 @@ class VaspErrorHandler(ErrorHandler):
             if vi["INCAR"].get("ICHARG", 0) < 10:
                 actions.append({"file": "CHGCAR",
                                 "action": {"_file_delete": {'mode': "actual"}}})
-            actions.append({"dict": "INCAR", "action":
-                            {"_set": {"ALGO": "All"}}})
+            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
 
         if "grad_not_orth" in self.errors:
             if vi["INCAR"].get("ISMEAR", 1) < 0:
@@ -400,7 +399,7 @@ class VaspErrorHandler(ErrorHandler):
         if "posmap" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"SYMPREC": 1e-6}}})
-        
+
         if "point_group" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"ISYM": 0}}})
@@ -629,7 +628,8 @@ class DriftErrorHandler(ErrorHandler):
         """
         Initializes the handler with max drift
         Args:
-            max_drift (float): This defines the max drift. Leaving this at the default of None gets the max_drift from EDFIFFG
+            max_drift (float): This defines the max drift. Leaving this at the default of None gets the max_drift from
+                EDFIFFG
         """
 
         self.max_drift = max_drift
@@ -649,7 +649,7 @@ class DriftErrorHandler(ErrorHandler):
 
         try:
             outcar = Outcar("OUTCAR")
-        except:
+        except Exception:
             # Can't perform check if Outcar not valid
             return False
 
@@ -728,14 +728,14 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         # Also disregard if automatic KPOINT generation is used
         if (not vi["INCAR"].get('ISYM', True)) or \
                 vi[
-                "KPOINTS"].style == Kpoints.supported_modes.Automatic:
+                    "KPOINTS"].style == Kpoints.supported_modes.Automatic:
             return False
 
         try:
             v = Vasprun(self.output_vasprun)
             if v.converged:
                 return False
-        except:
+        except Exception:
             pass
         with open(self.output_filename, "r") as f:
             for line in f:
@@ -778,7 +778,7 @@ class UnconvergedErrorHandler(ErrorHandler):
             v = Vasprun(self.output_filename)
             if not v.converged:
                 return True
-        except:
+        except Exception:
             pass
         return False
 
@@ -830,6 +830,8 @@ class UnconvergedErrorHandler(ErrorHandler):
             return {"errors": ["Unconverged"], "actions": None}
 
 
+@deprecated(message="This handler is no longer supported and its use is no "
+                    "longer recommended. It will be removed in v2020.x.")
 class MaxForceErrorHandler(ErrorHandler):
     """
     Checks that the desired force convergence has been achieved. Otherwise
@@ -861,7 +863,7 @@ class MaxForceErrorHandler(ErrorHandler):
             max_force = max(np.linalg.norm(forces, axis=1))
             if max_force > self.max_force_threshold and v.converged is True:
                 return True
-        except:
+        except Exception:
             pass
         return False
 
@@ -912,7 +914,7 @@ class PotimErrorHandler(ErrorHandler):
             max_dE = max([s['dE'] for s in oszicar.ionic_steps[1:]]) / n
             if max_dE > self.dE_threshold:
                 return True
-        except:
+        except Exception:
             return False
 
     def correct(self):
@@ -1012,7 +1014,7 @@ class NonConvergingErrorHandler(ErrorHandler):
             if len(esteps) > self.nionic_steps:
                 return all([len(e) == nelm
                             for e in esteps[-(self.nionic_steps + 1):-1]])
-        except:
+        except Exception:
             pass
         return False
 
@@ -1053,6 +1055,7 @@ class NonConvergingErrorHandler(ErrorHandler):
         # Unfixable error. Just return None for actions.
         else:
             return {"errors": ["Non-converging job"], "actions": None}
+
 
 class WalltimeHandler(ErrorHandler):
     """
@@ -1294,7 +1297,7 @@ class PositiveEnergyErrorHandler(ErrorHandler):
             oszicar = Oszicar(self.output_filename)
             if oszicar.final_energy > 0:
                 return True
-        except:
+        except Exception:
             pass
         return False
 

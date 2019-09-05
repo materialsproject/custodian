@@ -1,0 +1,34 @@
+$molecule
+ -1 3
+ S      1.3646206188     -0.5897013915     -1.0052055543
+ C      0.6622528382      1.6338437335      1.3787906116
+ O      1.0436577853     -0.9798350930      0.4434608194
+ O      2.8708571595     -0.2655549844     -1.2212702349
+ F      0.6635376757      2.7707646382      0.6968865129
+ F     -0.5039862309      1.4565788911      1.9746264829
+ F      1.6432134260      1.6273137965      2.2633910128
+$end
+
+$rem
+   job_type = opt
+   basis = 6-311++g*
+   max_scf_cycles = 200
+   gen_scfman = true
+   scf_algorithm = gdm
+   method = wb97xd
+   geom_opt_max_cycles = 200
+   solvent_method = pcm
+   xc_grid = 3
+$end
+
+$pcm
+   heavypoints 194
+   hpoints 194
+   radii uff
+   theory cpcm
+   vdwscale 1.1
+$end
+
+$solvent
+   dielectric 30.0
+$end

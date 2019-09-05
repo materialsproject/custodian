@@ -1,12 +1,10 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian.vasp package &#8212; custodian 2019.2.10 documentation</title>
+    <meta charset="utf-8" />
+    <title>custodian.vasp package &#8212; custodian 2019.8.24 documentation</title>
     <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -39,7 +37,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 2019.2.10 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 2019.8.24 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -62,71 +60,62 @@
 <span id="custodian-vasp-handlers-module"></span><h2>custodian.vasp.handlers module<a class="headerlink" href="#module-custodian.vasp.handlers" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="custodian.vasp.handlers.AliasingErrorHandler">
-<em class="property">class </em><code class="descname">AliasingErrorHandler</code><span class="sig-paren">(</span><em>output_filename='vasp.out'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#AliasingErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">AliasingErrorHandler</code><span class="sig-paren">(</span><em class="sig-param">output_filename='vasp.out'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#AliasingErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Master VaspErrorHandler class that handles a number of common errors
 that occur during VASP runs.</p>
 <p>Initializes the handler with the output file to check.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output_filename</strong> (<em>str</em>) – This is the file where the stdout for vasp
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_filename</strong> (<em>str</em>) – This is the file where the stdout for vasp
 is being redirected. The error messages that are checked are
 present in the stdout. Defaults to “vasp.out”, which is the
-default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</td>
-</tr>
-</tbody>
-</table>
+default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</p>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.handlers.AliasingErrorHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#AliasingErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#AliasingErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.AliasingErrorHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#AliasingErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#AliasingErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.AliasingErrorHandler.error_msgs">
-<code class="descname">error_msgs</code><em class="property"> = {'aliasing': ['WARNING: small aliasing (wrap around) errors must be expected'], 'aliasing_incar': ['Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate']}</em><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">error_msgs</code><em class="property"> = {'aliasing': ['WARNING: small aliasing (wrap around) errors must be expected'], 'aliasing_incar': ['Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate']}</em><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.AliasingErrorHandler.is_monitor">
-<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.AliasingErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.CheckpointHandler">
-<em class="property">class </em><code class="descname">CheckpointHandler</code><span class="sig-paren">(</span><em>interval=3600</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#CheckpointHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">CheckpointHandler</code><span class="sig-paren">(</span><em class="sig-param">interval=3600</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#CheckpointHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>This is not an error handler per se, but rather a checkpointer. What this
 does is that every X seconds, a STOPCAR and CHKPT will be written. This
@@ -137,621 +126,532 @@ probably wouldn’t want to use any standard VASP error handlers. The
 checkpoint will be stored in subdirs chk_#. This should be used in
 combiantion with the StoppedRunHandler.</p>
 <p>Initializes the handler with an interval.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>interval</strong> (<em>int</em>) – Interval at which to checkpoint in seconds.</li>
-<li><strong>to 3600</strong> (<em>Defaults</em>) – </li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>interval</strong> (<em>int</em>) – Interval at which to checkpoint in seconds.</p></li>
+<li><p><strong>to 3600</strong> (<em>Defaults</em>) – </p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.handlers.CheckpointHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#CheckpointHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#CheckpointHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.CheckpointHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#CheckpointHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#CheckpointHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.CheckpointHandler.is_monitor">
-<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.CheckpointHandler.is_terminating">
-<code class="descname">is_terminating</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_terminating</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.CheckpointHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.DriftErrorHandler">
-<em class="property">class </em><code class="descname">DriftErrorHandler</code><span class="sig-paren">(</span><em>max_drift=None</em>, <em>to_average=3</em>, <em>enaug_multiply=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DriftErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DriftErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">DriftErrorHandler</code><span class="sig-paren">(</span><em class="sig-param">max_drift=None</em>, <em class="sig-param">to_average=3</em>, <em class="sig-param">enaug_multiply=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DriftErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DriftErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Corrects for total drift exceeding the force convergence criteria.</p>
 <p>Initializes the handler with max drift
-:param max_drift: This defines the max drift. Leaving this at the default of None gets the max_drift from EDFIFFG
-:type max_drift: float</p>
+:param max_drift: This defines the max drift. Leaving this at the default of None gets the max_drift from</p>
+<blockquote>
+<div><p>EDFIFFG</p>
+</div></blockquote>
+<dl class="field-list simple">
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.handlers.DriftErrorHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DriftErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DriftErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DriftErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DriftErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.DriftErrorHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DriftErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DriftErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#DriftErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.DriftErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.FrozenJobErrorHandler">
-<em class="property">class </em><code class="descname">FrozenJobErrorHandler</code><span class="sig-paren">(</span><em>output_filename='vasp.out'</em>, <em>timeout=21600</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">FrozenJobErrorHandler</code><span class="sig-paren">(</span><em class="sig-param">output_filename='vasp.out'</em>, <em class="sig-param">timeout=21600</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Detects an error when the output file has not been updated
 in timeout seconds. Changes ALGO to Normal from Fast</p>
 <p>Initializes the handler with the output file to check.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>output_filename</strong> (<em>str</em>) – This is the file where the stdout for vasp
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_filename</strong> (<em>str</em>) – This is the file where the stdout for vasp
 is being redirected. The error messages that are checked are
 present in the stdout. Defaults to “vasp.out”, which is the
-default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</li>
-<li><strong>timeout</strong> (<em>int</em>) – The time in seconds between checks where if there
+default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</p></li>
+<li><p><strong>timeout</strong> (<em>int</em>) – The time in seconds between checks where if there
 is no activity on the output file, the run is considered
-frozen. Defaults to 3600 seconds, i.e., 1 hour.</li>
+frozen. Defaults to 3600 seconds, i.e., 1 hour.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.handlers.FrozenJobErrorHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.FrozenJobErrorHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#FrozenJobErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.FrozenJobErrorHandler.is_monitor">
-<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.FrozenJobErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.LrfCommutatorHandler">
-<em class="property">class </em><code class="descname">LrfCommutatorHandler</code><span class="sig-paren">(</span><em>output_filename='std_err.txt'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#LrfCommutatorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.LrfCommutatorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">LrfCommutatorHandler</code><span class="sig-paren">(</span><em class="sig-param">output_filename='std_err.txt'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#LrfCommutatorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.LrfCommutatorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Corrects LRF_COMMUTATOR errors by setting LPEAD=True if not already set.
 Note that switching LPEAD=T can slightly change results versus the
 default due to numerical evaluation of derivatives.</p>
 <p>Initializes the handler with the output file to check.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output_filename</strong> (<em>str</em>) – This is the file where the stderr for vasp
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_filename</strong> (<em>str</em>) – This is the file where the stderr for vasp
 is being redirected. The error messages that are checked are
 present in the stderr. Defaults to “std_err.txt”, which is the
-default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</td>
-</tr>
-</tbody>
-</table>
+default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</p>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.handlers.LrfCommutatorHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#LrfCommutatorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.LrfCommutatorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#LrfCommutatorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.LrfCommutatorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.LrfCommutatorHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#LrfCommutatorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.LrfCommutatorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#LrfCommutatorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.LrfCommutatorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.LrfCommutatorHandler.error_msgs">
-<code class="descname">error_msgs</code><em class="property"> = {'lrf_comm': ['LRF_COMMUTATOR internal error']}</em><a class="headerlink" href="#custodian.vasp.handlers.LrfCommutatorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">error_msgs</code><em class="property"> = {'lrf_comm': ['LRF_COMMUTATOR internal error']}</em><a class="headerlink" href="#custodian.vasp.handlers.LrfCommutatorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.LrfCommutatorHandler.is_monitor">
-<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.LrfCommutatorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.LrfCommutatorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.MaxForceErrorHandler">
-<em class="property">class </em><code class="descname">MaxForceErrorHandler</code><span class="sig-paren">(</span><em>output_filename='vasprun.xml'</em>, <em>max_force_threshold=0.25</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">MaxForceErrorHandler</code><span class="sig-paren">(</span><em class="sig-param">output_filename='vasprun.xml'</em>, <em class="sig-param">max_force_threshold=0.25</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Checks that the desired force convergence has been achieved. Otherwise
 restarts the run with smaller EDIFF. (This is necessary since energy
 and force convergence criteria cannot be set simultaneously)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>input_filename</strong> (<em>str</em>) – name of the vasp INCAR file</li>
-<li><strong>output_filename</strong> (<em>str</em>) – name to look for the vasprun</li>
-<li><strong>max_force_threshold</strong> (<em>float</em>) – Threshold for max force for
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_filename</strong> (<em>str</em>) – name of the vasp INCAR file</p></li>
+<li><p><strong>output_filename</strong> (<em>str</em>) – name to look for the vasprun</p></li>
+<li><p><strong>max_force_threshold</strong> (<em>float</em>) – Threshold for max force for
 restarting the run. (typically should be set to the value
-that the creator looks for)</li>
+that the creator looks for)</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.handlers.MaxForceErrorHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.MaxForceErrorHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.MaxForceErrorHandler.is_monitor">
-<code class="descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler">
-<em class="property">class </em><code class="descname">MeshSymmetryErrorHandler</code><span class="sig-paren">(</span><em>output_filename='vasp.out'</em>, <em>output_vasprun='vasprun.xml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MeshSymmetryErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">MeshSymmetryErrorHandler</code><span class="sig-paren">(</span><em class="sig-param">output_filename='vasp.out'</em>, <em class="sig-param">output_vasprun='vasprun.xml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MeshSymmetryErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Corrects the mesh symmetry error in VASP. This error is sometimes
 non-fatal. So this error handler only checks at the end of the run,
 and if the run has converged, no error is recorded.</p>
 <p>Initializes the handler with the output files to check.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>output_filename</strong> (<em>str</em>) – This is the file where the stdout for vasp
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_filename</strong> (<em>str</em>) – This is the file where the stdout for vasp
 is being redirected. The error messages that are checked are
 present in the stdout. Defaults to “vasp.out”, which is the
-default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</li>
-<li><strong>output_vasprun</strong> (<em>str</em>) – Filename for the vasprun.xml file. Change
-this only if it is different from the default (unlikely).</li>
+default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</p></li>
+<li><p><strong>output_vasprun</strong> (<em>str</em>) – Filename for the vasprun.xml file. Change
+this only if it is different from the default (unlikely).</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MeshSymmetryErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MeshSymmetryErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MeshSymmetryErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MeshSymmetryErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler.is_monitor">
-<code class="descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.NonConvergingErrorHandler">
-<em class="property">class </em><code class="descname">NonConvergingErrorHandler</code><span class="sig-paren">(</span><em>output_filename='OSZICAR'</em>, <em>nionic_steps=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#NonConvergingErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">NonConvergingErrorHandler</code><span class="sig-paren">(</span><em class="sig-param">output_filename='OSZICAR'</em>, <em class="sig-param">nionic_steps=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#NonConvergingErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Check if a run is hitting the maximum number of electronic steps at the
 last nionic_steps ionic steps (default=10). If so, change ALGO from Fast to
 Normal or kill the job.</p>
 <p>Initializes the handler with the output file to check.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>output_filename</strong> (<em>str</em>) – This is the OSZICAR file. Change
-this only if it is different from the default (unlikely).</li>
-<li><strong>nionic_steps</strong> (<em>int</em>) – The threshold number of ionic steps that
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_filename</strong> (<em>str</em>) – This is the OSZICAR file. Change
+this only if it is different from the default (unlikely).</p></li>
+<li><p><strong>nionic_steps</strong> (<em>int</em>) – The threshold number of ionic steps that
 needs to hit the maximum number of electronic steps for the
-run to be considered non-converging.</li>
+run to be considered non-converging.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.handlers.NonConvergingErrorHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#NonConvergingErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#NonConvergingErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.NonConvergingErrorHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#NonConvergingErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#NonConvergingErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.NonConvergingErrorHandler.is_monitor">
-<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.PositiveEnergyErrorHandler">
-<em class="property">class </em><code class="descname">PositiveEnergyErrorHandler</code><span class="sig-paren">(</span><em>output_filename='OSZICAR'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PositiveEnergyErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">PositiveEnergyErrorHandler</code><span class="sig-paren">(</span><em class="sig-param">output_filename='OSZICAR'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PositiveEnergyErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Check if a run has positive absolute energy.
 If so, change ALGO from Fast to Normal or kill the job.</p>
 <p>Initializes the handler with the output file to check.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output_filename</strong> (<em>str</em>) – This is the OSZICAR file. Change
-this only if it is different from the default (unlikely).</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_filename</strong> (<em>str</em>) – This is the OSZICAR file. Change
+this only if it is different from the default (unlikely).</p>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.handlers.PositiveEnergyErrorHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PositiveEnergyErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PositiveEnergyErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.PositiveEnergyErrorHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PositiveEnergyErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PositiveEnergyErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.PositiveEnergyErrorHandler.is_monitor">
-<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.PositiveEnergyErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.PotimErrorHandler">
-<em class="property">class </em><code class="descname">PotimErrorHandler</code><span class="sig-paren">(</span><em>input_filename='POSCAR'</em>, <em>output_filename='OSZICAR'</em>, <em>dE_threshold=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PotimErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">PotimErrorHandler</code><span class="sig-paren">(</span><em class="sig-param">input_filename='POSCAR'</em>, <em class="sig-param">output_filename='OSZICAR'</em>, <em class="sig-param">dE_threshold=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PotimErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Check if a run has excessively large positive energy changes.
 This is typically caused by too large a POTIM. Runs typically
 end up crashing with some other error (e.g. BRMIX) as the geometry
 gets progressively worse.</p>
 <p>Initializes the handler with the input and output files to check.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>input_filename</strong> (<em>str</em>) – This is the POSCAR file that the run
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_filename</strong> (<em>str</em>) – This is the POSCAR file that the run
 started from. Defaults to “POSCAR”. Change
-this only if it is different from the default (unlikely).</li>
-<li><strong>output_filename</strong> (<em>str</em>) – This is the OSZICAR file. Change
-this only if it is different from the default (unlikely).</li>
-<li><strong>dE_threshold</strong> (<em>float</em>) – The threshold energy change. Defaults to 1eV.</li>
+this only if it is different from the default (unlikely).</p></li>
+<li><p><strong>output_filename</strong> (<em>str</em>) – This is the OSZICAR file. Change
+this only if it is different from the default (unlikely).</p></li>
+<li><p><strong>dE_threshold</strong> (<em>float</em>) – The threshold energy change. Defaults to 1eV.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.handlers.PotimErrorHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PotimErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PotimErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.PotimErrorHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PotimErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#PotimErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.PotimErrorHandler.is_monitor">
-<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.PotimErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.StdErrHandler">
-<em class="property">class </em><code class="descname">StdErrHandler</code><span class="sig-paren">(</span><em>output_filename='std_err.txt'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StdErrHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StdErrHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">StdErrHandler</code><span class="sig-paren">(</span><em class="sig-param">output_filename='std_err.txt'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StdErrHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StdErrHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Master StdErr class that handles a number of common errors
 that occur during VASP runs with error messages only in
 the standard error.</p>
 <p>Initializes the handler with the output file to check.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output_filename</strong> (<em>str</em>) – This is the file where the stderr for vasp
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_filename</strong> (<em>str</em>) – This is the file where the stderr for vasp
 is being redirected. The error messages that are checked are
 present in the stderr. Defaults to “std_err.txt”, which is the
-default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</td>
-</tr>
-</tbody>
-</table>
+default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</p>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.handlers.StdErrHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StdErrHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StdErrHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StdErrHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StdErrHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.StdErrHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StdErrHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StdErrHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StdErrHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StdErrHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.StdErrHandler.error_msgs">
-<code class="descname">error_msgs</code><em class="property"> = {'kpoints_trans': ['internal error in GENERATE_KPOINTS_TRANS: number of G-vector changed in star'], 'out_of_memory': ['Allocation would exceed memory limit']}</em><a class="headerlink" href="#custodian.vasp.handlers.StdErrHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">error_msgs</code><em class="property"> = {'kpoints_trans': ['internal error in GENERATE_KPOINTS_TRANS: number of G-vector changed in star'], 'out_of_memory': ['Allocation would exceed memory limit']}</em><a class="headerlink" href="#custodian.vasp.handlers.StdErrHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.StdErrHandler.is_monitor">
-<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.StdErrHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.StdErrHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.StoppedRunHandler">
-<em class="property">class </em><code class="descname">StoppedRunHandler</code><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StoppedRunHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">StoppedRunHandler</code><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StoppedRunHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>This is not an error handler per se, but rather a checkpointer. What this
 does is that every X seconds, a STOPCAR will be written. This forces VASP to
@@ -763,126 +663,109 @@ stored in subdirs chk_#. This should be used in combination with the
 StoppedRunHandler.</p>
 <dl class="method">
 <dt id="custodian.vasp.handlers.StoppedRunHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StoppedRunHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StoppedRunHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.StoppedRunHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StoppedRunHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#StoppedRunHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.StoppedRunHandler.is_monitor">
-<code class="descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.StoppedRunHandler.is_terminating">
-<code class="descname">is_terminating</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_terminating</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.StoppedRunHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.UnconvergedErrorHandler">
-<em class="property">class </em><code class="descname">UnconvergedErrorHandler</code><span class="sig-paren">(</span><em>output_filename='vasprun.xml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">UnconvergedErrorHandler</code><span class="sig-paren">(</span><em class="sig-param">output_filename='vasprun.xml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Check if a run is converged.</p>
 <p>Initializes the handler with the output file to check.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output_vasprun</strong> (<em>str</em>) – Filename for the vasprun.xml file. Change
-this only if it is different from the default (unlikely).</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_vasprun</strong> (<em>str</em>) – Filename for the vasprun.xml file. Change
+this only if it is different from the default (unlikely).</p>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.handlers.UnconvergedErrorHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.UnconvergedErrorHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#UnconvergedErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.UnconvergedErrorHandler.is_monitor">
-<code class="descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.UnconvergedErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.VaspErrorHandler">
-<em class="property">class </em><code class="descname">VaspErrorHandler</code><span class="sig-paren">(</span><em>output_filename='vasp.out'</em>, <em>natoms_large_cell=100</em>, <em>errors_subset_to_catch=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">VaspErrorHandler</code><span class="sig-paren">(</span><em class="sig-param">output_filename='vasp.out'</em>, <em class="sig-param">natoms_large_cell=100</em>, <em class="sig-param">errors_subset_to_catch=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Master VaspErrorHandler class that handles a number of common errors
 that occur during VASP runs.</p>
 <p>Initializes the handler with the output file to check.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>output_filename</strong> (<em>str</em>) – This is the file where the stdout for vasp
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_filename</strong> (<em>str</em>) – This is the file where the stdout for vasp
 is being redirected. The error messages that are checked are
 present in the stdout. Defaults to “vasp.out”, which is the
-default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</li>
-<li><strong>natoms_large_cell</strong> (<em>int</em>) – Number of atoms threshold to treat cell
+default redirect used by <a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</p></li>
+<li><p><strong>natoms_large_cell</strong> (<em>int</em>) – Number of atoms threshold to treat cell
 as large. Affects the correction of certain errors. Defaults to
-100.</li>
-<li><strong>errors_subset_to_detect</strong> (<em>list</em>) – <p>A subset of errors to catch. The
+100.</p></li>
+<li><p><strong>errors_subset_to_detect</strong> (<em>list</em>) – <p>A subset of errors to catch. The
 default is None, which means all supported errors are detected.
 Use this to only catch only a subset of supported errors.
 E.g., [“eddrrm”, “zheev”] will only catch the eddrmm and zheev
@@ -894,61 +777,53 @@ subset = list(VaspErrorHandler.error_msgs.keys())
 subset.pop(“eddrrm”)</p>
 <p>handler = VaspErrorHandler(errors_subset_to_catch=subset)
 <a href="#id3"><span class="problematic" id="id4">``</span></a><a href="#id5"><span class="problematic" id="id6">`</span></a></p>
-</li>
+</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#VaspErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.error_msgs">
-<code class="descname">error_msgs</code><em class="property"> = {'amin': ['One of the lattice vectors is very long (&gt;50 A), but AMIN'], 'brions': ['BRIONS problems: POTIM should be increased'], 'brmix': ['BRMIX: very serious problems'], 'dentet': ['DENTET'], 'edddav': ['Error EDDDAV: Call to ZHEGV failed'], 'eddrmm': ['WARNING in EDDRMM: call to ZHEGV failed'], 'elf_kpar': ['ELF: KPAR&gt;1 not implemented'], 'elf_ncl': ['WARNING: ELF not implemented for non collinear case'], 'grad_not_orth': ['EDWAV: internal error, the gradient is not orthogonal'], 'incorrect_shift': ['Could not get correct shifts'], 'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'nicht_konv': ['ERROR: SBESSELITER : nicht konvergent'], 'point_group': ['Error: point group operation missing'], 'posmap': ['POSMAP internal error: symmetry equivalent atom not found'], 'pricel': ['internal error in subroutine PRICEL'], 'pssyevx': ['ERROR in subspace rotation PSSYEVX'], 'real_optlay': ['REAL_OPTLAY: internal error', 'REAL_OPT: internal ERROR'], 'rhosyg': ['RHOSYG internal error'], 'rot_matrix': ['Found some non-integer element in rotation matrix'], 'rspher': ['ERROR RSPHER'], 'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values', 'Tetrahedron method fails (number of k-points &lt; 4)'], 'tetirr': ['Routine TETIRR needs special values'], 'too_few_bands': ['TOO FEW BANDS'], 'triple_product': ['ERROR: the triple product of the basis vectors'], 'zbrent': ['ZBRENT: fatal internal in', 'ZBRENT: fatal error in bracketing'], 'zheev': ['ERROR EDDIAG: Call to routine ZHEEV failed!'], 'zpotrf': ['LAPACK: Routine ZPOTRF failed']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">error_msgs</code><em class="property"> = {'amin': ['One of the lattice vectors is very long (&gt;50 A), but AMIN'], 'brions': ['BRIONS problems: POTIM should be increased'], 'brmix': ['BRMIX: very serious problems'], 'dentet': ['DENTET'], 'edddav': ['Error EDDDAV: Call to ZHEGV failed'], 'eddrmm': ['WARNING in EDDRMM: call to ZHEGV failed'], 'elf_kpar': ['ELF: KPAR&gt;1 not implemented'], 'elf_ncl': ['WARNING: ELF not implemented for non collinear case'], 'grad_not_orth': ['EDWAV: internal error, the gradient is not orthogonal'], 'incorrect_shift': ['Could not get correct shifts'], 'inv_rot_mat': ['inverse of rotation matrix was not found (increase SYMPREC)'], 'nicht_konv': ['ERROR: SBESSELITER : nicht konvergent'], 'point_group': ['Error: point group operation missing'], 'posmap': ['POSMAP internal error: symmetry equivalent atom not found'], 'pricel': ['internal error in subroutine PRICEL'], 'pssyevx': ['ERROR in subspace rotation PSSYEVX'], 'real_optlay': ['REAL_OPTLAY: internal error', 'REAL_OPT: internal ERROR'], 'rhosyg': ['RHOSYG internal error'], 'rot_matrix': ['Found some non-integer element in rotation matrix'], 'rspher': ['ERROR RSPHER'], 'subspacematrix': ['WARNING: Sub-Space-Matrix is not hermitian in DAV'], 'tet': ['Tetrahedron method fails for NKPT&lt;4', 'Fatal error detecting k-mesh', 'Fatal error: unable to match k-point', 'Routine TETIRR needs special values', 'Tetrahedron method fails (number of k-points &lt; 4)'], 'tetirr': ['Routine TETIRR needs special values'], 'too_few_bands': ['TOO FEW BANDS'], 'triple_product': ['ERROR: the triple product of the basis vectors'], 'zbrent': ['ZBRENT: fatal internal in', 'ZBRENT: fatal error in bracketing'], 'zheev': ['ERROR EDDIAG: Call to routine ZHEEV failed!'], 'zpotrf': ['LAPACK: Routine ZPOTRF failed']}</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.error_msgs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.VaspErrorHandler.is_monitor">
-<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.VaspErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.handlers.WalltimeHandler">
-<em class="property">class </em><code class="descname">WalltimeHandler</code><span class="sig-paren">(</span><em>wall_time=None</em>, <em>buffer_time=300</em>, <em>electronic_step_stop=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">WalltimeHandler</code><span class="sig-paren">(</span><em class="sig-param">wall_time=None</em>, <em class="sig-param">buffer_time=300</em>, <em class="sig-param">electronic_step_stop=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Check if a run is nearing the walltime. If so, write a STOPCAR with
 LSTOP or LABORT = .True.. You can specify the walltime either in the init (
@@ -956,17 +831,15 @@ which is unfortunately necessary for SGE and SLURM systems. If you happen
 to be running on a PBS system and the PBS_WALLTIME variable is in the run
 environment, the wall time will be automatically determined if not set.</p>
 <p>Initializes the handler with a buffer time.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>wall_time</strong> (<em>int</em>) – Total walltime in seconds. If this is None and
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wall_time</strong> (<em>int</em>) – Total walltime in seconds. If this is None and
 the job is running on a PBS system, the handler will attempt to
 determine the walltime from the PBS_WALLTIME environment
 variable. If the wall time cannot be determined or is not
-set, this handler will have no effect.</li>
-<li><strong>buffer_time</strong> (<em>int</em>) – The min amount of buffer time in secs at the
+set, this handler will have no effect.</p></li>
+<li><p><strong>buffer_time</strong> (<em>int</em>) – The min amount of buffer time in secs at the
 end that the STOPCAR will be written. The STOPCAR is written
 when the time remaining is &lt; the higher of 3 x the average
 time for each ionic step and the buffer time. Defaults to
@@ -974,66 +847,58 @@ time for each ionic step and the buffer time. Defaults to
 This is typically sufficient for the current ionic step to
 complete. But if other operations are being performed after
 the run has stopped, the buffer time may need to be increased
-accordingly.</li>
-<li><strong>electronic_step_stop</strong> (<em>bool</em>) – Whether to check for electronic steps
+accordingly.</p></li>
+<li><p><strong>electronic_step_stop</strong> (<em>bool</em>) – Whether to check for electronic steps
 instead of ionic steps (e.g. for static runs on large systems or
 static HSE runs, …). Be careful that results such as density
 or wavefunctions might not be converged at the electronic level.
 Should be used with LWAVE = .True. to be useful. If this is
 True, the STOPCAR is written with LABORT = .TRUE. instead of
-LSTOP = .TRUE.</li>
+LSTOP = .TRUE.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.handlers.WalltimeHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.handlers.WalltimeHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#WalltimeHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.WalltimeHandler.is_monitor">
-<code class="descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_monitor</code><em class="property"> = True</em><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.WalltimeHandler.is_terminating">
-<code class="descname">is_terminating</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_terminating</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.vasp.handlers.WalltimeHandler.raises_runtime_error">
-<code class="descname">raises_runtime_error</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.raises_runtime_error" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">raises_runtime_error</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.WalltimeHandler.raises_runtime_error" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1043,38 +908,35 @@ If this is an unfixable error, actions should be set to None.</td>
 <span id="custodian-vasp-interpreter-module"></span><h2>custodian.vasp.interpreter module<a class="headerlink" href="#module-custodian.vasp.interpreter" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="custodian.vasp.interpreter.VaspModder">
-<em class="property">class </em><code class="descname">VaspModder</code><span class="sig-paren">(</span><em>actions=None</em>, <em>strict=True</em>, <em>vi=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/interpreter.html#VaspModder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.interpreter.VaspModder" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">VaspModder</code><span class="sig-paren">(</span><em class="sig-param">actions=None</em>, <em class="sig-param">strict=True</em>, <em class="sig-param">vi=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/interpreter.html#VaspModder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.interpreter.VaspModder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.ansible.html#custodian.ansible.interpreter.Modder" title="custodian.ansible.interpreter.Modder"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.ansible.interpreter.Modder</span></code></a></p>
 <p>Initializes a Modder for VaspInput sets</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>actions</strong> (<em>[</em><em>Action</em><em>]</em>) – A sequence of supported actions. See
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>actions</strong> (<em>[</em><em>Action</em><em>]</em>) – A sequence of supported actions. See
 <a class="reference internal" href="custodian.ansible.html#module-custodian.ansible.actions" title="custodian.ansible.actions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">custodian.ansible.actions</span></code></a>. Default is None,
-which means DictActions and FileActions are supported.</li>
-<li><strong>strict</strong> (<em>bool</em>) – Indicating whether to use strict mode. In non-strict
+which means DictActions and FileActions are supported.</p></li>
+<li><p><strong>strict</strong> (<em>bool</em>) – Indicating whether to use strict mode. In non-strict
 mode, unsupported actions are simply ignored without any
 errors raised. In strict mode, if an unsupported action is
-supplied, a ValueError is raised. Defaults to True.</li>
-<li><strong>vi</strong> (<em>VaspInput</em>) – A VaspInput object from the current directory.
+supplied, a ValueError is raised. Defaults to True.</p></li>
+<li><p><strong>vi</strong> (<em>VaspInput</em>) – A VaspInput object from the current directory.
 Initialized automatically if not passed (but passing it will
-avoid having to reparse the directory).</li>
+avoid having to reparse the directory).</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.interpreter.VaspModder.apply_actions">
-<code class="descname">apply_actions</code><span class="sig-paren">(</span><em>actions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/interpreter.html#VaspModder.apply_actions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.interpreter.VaspModder.apply_actions" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">apply_actions</code><span class="sig-paren">(</span><em class="sig-param">actions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/interpreter.html#VaspModder.apply_actions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.interpreter.VaspModder.apply_actions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies a list of actions to the Vasp Input Set and rewrites modified
 files.
 :param actions [dict]: A list of actions of the form {‘file’: filename,</p>
 <blockquote>
-<div>‘action’: moddermodification} or {‘dict’: vaspinput_key,
-‘action’: moddermodification}</div></blockquote>
+<div><p>‘action’: moddermodification} or {‘dict’: vaspinput_key,
+‘action’: moddermodification}</p>
+</div></blockquote>
 </dd></dl>
 
 </dd></dl>
@@ -1084,27 +946,23 @@ files.
 <span id="custodian-vasp-jobs-module"></span><h2>custodian.vasp.jobs module<a class="headerlink" href="#module-custodian.vasp.jobs" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="custodian.vasp.jobs.GenerateVaspInputJob">
-<em class="property">class </em><code class="descname">GenerateVaspInputJob</code><span class="sig-paren">(</span><em>input_set</em>, <em>contcar_only=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#GenerateVaspInputJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.GenerateVaspInputJob" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">GenerateVaspInputJob</code><span class="sig-paren">(</span><em class="sig-param">input_set</em>, <em class="sig-param">contcar_only=True</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#GenerateVaspInputJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.GenerateVaspInputJob" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.Job</span></code></a></p>
 <p>Generates a VASP input based on an existing directory. This is typically
 used to modify the VASP input files before the next VaspJob.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>input_set</strong> (<em>str</em>) – Full path to the input set. E.g.,
-“pymatgen.io.vasp.sets.MPNonSCFSet”.</li>
-<li><strong>contcar_only</strong> (<em>bool</em>) – If True (default), only CONTCAR structures
-are used as input to the input set.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_set</strong> (<em>str</em>) – Full path to the input set. E.g.,
+“pymatgen.io.vasp.sets.MPNonSCFSet”.</p></li>
+<li><p><strong>contcar_only</strong> (<em>bool</em>) – If True (default), only CONTCAR structures
+are used as input to the input set.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.jobs.GenerateVaspInputJob.postprocess">
-<code class="descname">postprocess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#GenerateVaspInputJob.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.GenerateVaspInputJob.postprocess" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">postprocess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#GenerateVaspInputJob.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.GenerateVaspInputJob.postprocess" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job, <em>after</em> error detection.
 This allows post-processing, such as cleanup, analysis of results,
 etc.</p>
@@ -1112,14 +970,14 @@ etc.</p>
 
 <dl class="method">
 <dt id="custodian.vasp.jobs.GenerateVaspInputJob.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#GenerateVaspInputJob.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.GenerateVaspInputJob.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#GenerateVaspInputJob.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.GenerateVaspInputJob.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method perform the actual work for the job. If parallel error
 checking (monitoring) is desired, this must return a Popen process.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.jobs.GenerateVaspInputJob.setup">
-<code class="descname">setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#GenerateVaspInputJob.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.GenerateVaspInputJob.setup" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#GenerateVaspInputJob.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.GenerateVaspInputJob.setup" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is run before the start of a job. Allows for some
 pre-processing.</p>
 </dd></dl>
@@ -1128,45 +986,43 @@ pre-processing.</p>
 
 <dl class="class">
 <dt id="custodian.vasp.jobs.VaspJob">
-<em class="property">class </em><code class="descname">VaspJob</code><span class="sig-paren">(</span><em>vasp_cmd</em>, <em>output_file='vasp.out'</em>, <em>stderr_file='std_err.txt'</em>, <em>suffix=''</em>, <em>final=True</em>, <em>backup=True</em>, <em>auto_npar=True</em>, <em>auto_gamma=True</em>, <em>settings_override=None</em>, <em>gamma_vasp_cmd=None</em>, <em>copy_magmom=False</em>, <em>auto_continue=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">VaspJob</code><span class="sig-paren">(</span><em class="sig-param">vasp_cmd</em>, <em class="sig-param">output_file='vasp.out'</em>, <em class="sig-param">stderr_file='std_err.txt'</em>, <em class="sig-param">suffix=''</em>, <em class="sig-param">final=True</em>, <em class="sig-param">backup=True</em>, <em class="sig-param">auto_npar=False</em>, <em class="sig-param">auto_gamma=True</em>, <em class="sig-param">settings_override=None</em>, <em class="sig-param">gamma_vasp_cmd=None</em>, <em class="sig-param">copy_magmom=False</em>, <em class="sig-param">auto_continue=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.Job</span></code></a></p>
 <p>A basic vasp job. Just runs whatever is in the directory. But conceivably
 can be a complex processing of inputs etc. with initialization.</p>
 <p>This constructor is necessarily complex due to the need for
 flexibility. For standard kinds of runs, it’s often better to use one
 of the static constructors. The defaults are usually fine too.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>vasp_cmd</strong> (<em>str</em>) – Command to run vasp as a list of args. For example,
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vasp_cmd</strong> (<em>str</em>) – Command to run vasp as a list of args. For example,
 if you are using mpirun, it can be something like
-[“mpirun”, “pvasp.5.2.11”]</li>
-<li><strong>output_file</strong> (<em>str</em>) – Name of file to direct standard out to.
-Defaults to “vasp.out”.</li>
-<li><strong>stderr_file</strong> (<em>str</em>) – Name of file to direct standard error to.
-Defaults to “std_err.txt”.</li>
-<li><strong>suffix</strong> (<em>str</em>) – A suffix to be appended to the final output. E.g.,
+[“mpirun”, “pvasp.5.2.11”]</p></li>
+<li><p><strong>output_file</strong> (<em>str</em>) – Name of file to direct standard out to.
+Defaults to “vasp.out”.</p></li>
+<li><p><strong>stderr_file</strong> (<em>str</em>) – Name of file to direct standard error to.
+Defaults to “std_err.txt”.</p></li>
+<li><p><strong>suffix</strong> (<em>str</em>) – A suffix to be appended to the final output. E.g.,
 to rename all VASP output from say vasp.out to
-vasp.out.relax1, provide “.relax1” as the suffix.</li>
-<li><strong>final</strong> (<em>bool</em>) – Indicating whether this is the final vasp job in a
-series. Defaults to True.</li>
-<li><strong>backup</strong> (<em>bool</em>) – Whether to backup the initial input files. If True,
+vasp.out.relax1, provide “.relax1” as the suffix.</p></li>
+<li><p><strong>final</strong> (<em>bool</em>) – Indicating whether this is the final vasp job in a
+series. Defaults to True.</p></li>
+<li><p><strong>backup</strong> (<em>bool</em>) – Whether to backup the initial input files. If True,
 the INCAR, KPOINTS, POSCAR and POTCAR will be copied with a
-“.orig” appended. Defaults to True.</li>
-<li><strong>auto_npar</strong> (<em>bool</em>) – Whether to automatically tune NPAR to be sqrt(
+“.orig” appended. Defaults to True.</p></li>
+<li><p><strong>auto_npar</strong> (<em>bool</em>) – Whether to automatically tune NPAR to be sqrt(
 number of cores) as recommended by VASP for DFT calculations.
 Generally, this results in significant speedups. Defaults to
-True. Set to False for HF, GW and RPA calculations.</li>
-<li><strong>auto_gamma</strong> (<em>bool</em>) – Whether to automatically check if run is a
+True. Set to False for HF, GW and RPA calculations.</p></li>
+<li><p><strong>auto_gamma</strong> (<em>bool</em>) – Whether to automatically check if run is a
 Gamma 1x1x1 run, and whether a Gamma optimized version of
 VASP exists with “.gamma” appended to the name of the VASP
 executable (typical setup in many systems). If so, run the
 gamma optimized version of VASP instead of regular VASP. You
 can also specify the gamma vasp command using the
-gamma_vasp_cmd argument if the command is named differently.</li>
-<li><strong>settings_override</strong> (<em>[</em><em>dict</em><em>]</em>) – <p>An ansible style list of dict to
+gamma_vasp_cmd argument if the command is named differently.</p></li>
+<li><p><strong>settings_override</strong> (<em>[</em><em>dict</em><em>]</em>) – <p>An ansible style list of dict to
 override changes. For example, to set ISTART=1 for subsequent
 runs and to copy the CONTCAR to the POSCAR, you will provide:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}},</span>
@@ -1174,27 +1030,25 @@ runs and to copy the CONTCAR to the POSCAR, you will provide:</p>
   <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}}]</span>
 </pre></div>
 </div>
-</li>
-<li><strong>gamma_vasp_cmd</strong> (<em>str</em>) – Command for gamma vasp version when
+</p></li>
+<li><p><strong>gamma_vasp_cmd</strong> (<em>str</em>) – Command for gamma vasp version when
 auto_gamma is True. Should follow the list style of
 subprocess. Defaults to None, which means “.gamma” is added
-to the last argument of the standard vasp_cmd.</li>
-<li><strong>copy_magmom</strong> (<em>bool</em>) – Whether to copy the final magmom from the
+to the last argument of the standard vasp_cmd.</p></li>
+<li><p><strong>copy_magmom</strong> (<em>bool</em>) – Whether to copy the final magmom from the
 OUTCAR to the next INCAR. Useful for multi-relaxation runs
 where the CHGCAR and WAVECAR are sometimes deleted (due to
-changes in fft grid, etc.). Only applies to non-final runs.</li>
-<li><strong>auto_continue</strong> (<em>bool</em>) – Whether to automatically continue a run
-if a STOPCAR is present. This is very usefull if using the
+changes in fft grid, etc.). Only applies to non-final runs.</p></li>
+<li><p><strong>auto_continue</strong> (<em>bool</em>) – Whether to automatically continue a run
+if a STOPCAR is present. This is very useful if using the
 wall-time handler which will write a read-only STOPCAR to
-prevent VASP from deleting it once it finishes</li>
+prevent VASP from deleting it once it finishes</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
-<dl class="classmethod">
+</dd>
+</dl>
+<dl class="method">
 <dt id="custodian.vasp.jobs.VaspJob.constrained_opt_run">
-<em class="property">classmethod </em><code class="descname">constrained_opt_run</code><span class="sig-paren">(</span><em>vasp_cmd</em>, <em>lattice_direction</em>, <em>initial_strain</em>, <em>atom_relax=True</em>, <em>max_steps=20</em>, <em>algo='bfgs'</em>, <em>**vasp_job_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.constrained_opt_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.constrained_opt_run" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">constrained_opt_run</code><span class="sig-paren">(</span><em class="sig-param">vasp_cmd</em>, <em class="sig-param">lattice_direction</em>, <em class="sig-param">initial_strain</em>, <em class="sig-param">atom_relax=True</em>, <em class="sig-param">max_steps=20</em>, <em class="sig-param">algo='bfgs'</em>, <em class="sig-param">**vasp_job_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.constrained_opt_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.constrained_opt_run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a generator of jobs for a constrained optimization run. Typical
 use case is when you want to approximate a biaxial strain situation,
 e.g., you apply a defined strain to a and b directions of the lattice,
@@ -1202,120 +1056,109 @@ but allows the c-direction to relax.</p>
 <p>Some guidelines on the use of this method:
 i.  It is recommended you do not use the Auto kpoint generation. The</p>
 <blockquote>
-<div>grid generated via Auto may fluctuate with changes in lattice
-param, resulting in numerical noise.</div></blockquote>
+<div><p>grid generated via Auto may fluctuate with changes in lattice
+param, resulting in numerical noise.</p>
+</div></blockquote>
 <ol class="lowerroman simple" start="2">
-<li>Make sure your EDIFF/EDIFFG is properly set in your INCAR. The
-optimization relies on these values to determine convergence.</li>
+<li><p>Make sure your EDIFF/EDIFFG is properly set in your INCAR. The
+optimization relies on these values to determine convergence.</p></li>
 </ol>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>vasp_cmd</strong> (<em>str</em>) – Command to run vasp as a list of args. For example,
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vasp_cmd</strong> (<em>str</em>) – Command to run vasp as a list of args. For example,
 if you are using mpirun, it can be something like
-[“mpirun”, “pvasp.5.2.11”]</li>
-<li><strong>lattice_direction</strong> (<em>str</em>) – Which direction to relax. Valid values are
-“a”, “b” or “c”.</li>
-<li><strong>initial_strain</strong> (<em>float</em>) – An initial strain to be applied to the
+[“mpirun”, “pvasp.5.2.11”]</p></li>
+<li><p><strong>lattice_direction</strong> (<em>str</em>) – Which direction to relax. Valid values are
+“a”, “b” or “c”.</p></li>
+<li><p><strong>initial_strain</strong> (<em>float</em>) – An initial strain to be applied to the
 lattice_direction. This can usually be estimated as the
 negative of the strain applied in the other two directions.
 E.g., if you apply a tensile strain of 0.05 to the a and b
 directions, you can use -0.05 as a reasonable first guess for
-initial strain.</li>
-<li><strong>atom_relax</strong> (<em>bool</em>) – Whether to relax atomic positions.</li>
-<li><strong>max_steps</strong> (<em>int</em>) – The maximum number of runs. Defaults to 20 (
-highly unlikely that this limit is ever reached).</li>
-<li><strong>algo</strong> (<em>str</em>) – Algorithm to use to find minimum. Default is “bfgs”,
+initial strain.</p></li>
+<li><p><strong>atom_relax</strong> (<em>bool</em>) – Whether to relax atomic positions.</p></li>
+<li><p><strong>max_steps</strong> (<em>int</em>) – The maximum number of runs. Defaults to 20 (
+highly unlikely that this limit is ever reached).</p></li>
+<li><p><strong>algo</strong> (<em>str</em>) – Algorithm to use to find minimum. Default is “bfgs”,
 which is fast, but can be sensitive to numerical noise
 in energy calculations. The alternative is “bisection”,
 which is more robust but can be a bit slow. The code does fall
 back on the bisection when bfgs gives a non-sensical result,
-e.g., negative lattice params.</li>
-<li><strong>**vasp_job_kwargs</strong> – Passthrough kwargs to VaspJob. See
-<a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</li>
+e.g., negative lattice params.</p></li>
+<li><p><strong>**vasp_job_kwargs</strong> – Passthrough kwargs to VaspJob. See
+<a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Generator of jobs. At the end of the run, an “EOS.txt” is written
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Generator of jobs. At the end of the run, an “EOS.txt” is written
 which provides a quick look at the E vs lattice parameter.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="custodian.vasp.jobs.VaspJob.double_relaxation_run">
-<em class="property">classmethod </em><code class="descname">double_relaxation_run</code><span class="sig-paren">(</span><em>vasp_cmd</em>, <em>auto_npar=True</em>, <em>ediffg=-0.05</em>, <em>half_kpts_first_relax=False</em>, <em>auto_continue=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.double_relaxation_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.double_relaxation_run" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">double_relaxation_run</code><span class="sig-paren">(</span><em class="sig-param">vasp_cmd</em>, <em class="sig-param">auto_npar=True</em>, <em class="sig-param">ediffg=-0.05</em>, <em class="sig-param">half_kpts_first_relax=False</em>, <em class="sig-param">auto_continue=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.double_relaxation_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.double_relaxation_run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of two jobs corresponding to an AFLOW style double
 relaxation run.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>vasp_cmd</strong> (<em>str</em>) – Command to run vasp as a list of args. For example,
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vasp_cmd</strong> (<em>str</em>) – Command to run vasp as a list of args. For example,
 if you are using mpirun, it can be something like
-[“mpirun”, “pvasp.5.2.11”]</li>
-<li><strong>auto_npar</strong> (<em>bool</em>) – Whether to automatically tune NPAR to be sqrt(
+[“mpirun”, “pvasp.5.2.11”]</p></li>
+<li><p><strong>auto_npar</strong> (<em>bool</em>) – Whether to automatically tune NPAR to be sqrt(
 number of cores) as recommended by VASP for DFT calculations.
 Generally, this results in significant speedups. Defaults to
-True. Set to False for HF, GW and RPA calculations.</li>
-<li><strong>ediffg</strong> (<em>float</em>) – Force convergence criteria for subsequent runs (
-ignored for the initial run.)</li>
-<li><strong>half_kpts_first_relax</strong> (<em>bool</em>) – Whether to halve the kpoint grid
+True. Set to False for HF, GW and RPA calculations.</p></li>
+<li><p><strong>ediffg</strong> (<em>float</em>) – Force convergence criteria for subsequent runs (
+ignored for the initial run.)</p></li>
+<li><p><strong>half_kpts_first_relax</strong> (<em>bool</em>) – Whether to halve the kpoint grid
 for the first relaxation. Speeds up difficult convergence
-considerably. Defaults to False.</li>
+considerably. Defaults to False.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">List of two jobs corresponding to an AFLOW style run.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of two jobs corresponding to an AFLOW style run.</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="custodian.vasp.jobs.VaspJob.full_opt_run">
-<em class="property">classmethod </em><code class="descname">full_opt_run</code><span class="sig-paren">(</span><em>vasp_cmd</em>, <em>vol_change_tol=0.02</em>, <em>max_steps=10</em>, <em>ediffg=-0.05</em>, <em>half_kpts_first_relax=False</em>, <em>**vasp_job_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.full_opt_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.full_opt_run" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">full_opt_run</code><span class="sig-paren">(</span><em class="sig-param">vasp_cmd</em>, <em class="sig-param">vol_change_tol=0.02</em>, <em class="sig-param">max_steps=10</em>, <em class="sig-param">ediffg=-0.05</em>, <em class="sig-param">half_kpts_first_relax=False</em>, <em class="sig-param">**vasp_job_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.full_opt_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.full_opt_run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a generator of jobs for a full optimization run. Basically,
 this runs an infinite series of geometry optimization jobs until the
 % vol change in a particular optimization is less than vol_change_tol.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>vasp_cmd</strong> (<em>str</em>) – Command to run vasp as a list of args. For example,
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vasp_cmd</strong> (<em>str</em>) – Command to run vasp as a list of args. For example,
 if you are using mpirun, it can be something like
-[“mpirun”, “pvasp.5.2.11”]</li>
-<li><strong>vol_change_tol</strong> (<em>float</em>) – The tolerance at which to stop a run.
-Defaults to 0.05, i.e., 5%.</li>
-<li><strong>max_steps</strong> (<em>int</em>) – The maximum number of runs. Defaults to 10 (
-highly unlikely that this limit is ever reached).</li>
-<li><strong>ediffg</strong> (<em>float</em>) – Force convergence criteria for subsequent runs (
-ignored for the initial run.)</li>
-<li><strong>half_kpts_first_relax</strong> (<em>bool</em>) – Whether to halve the kpoint grid
+[“mpirun”, “pvasp.5.2.11”]</p></li>
+<li><p><strong>vol_change_tol</strong> (<em>float</em>) – The tolerance at which to stop a run.
+Defaults to 0.05, i.e., 5%.</p></li>
+<li><p><strong>max_steps</strong> (<em>int</em>) – The maximum number of runs. Defaults to 10 (
+highly unlikely that this limit is ever reached).</p></li>
+<li><p><strong>ediffg</strong> (<em>float</em>) – Force convergence criteria for subsequent runs (
+ignored for the initial run.)</p></li>
+<li><p><strong>half_kpts_first_relax</strong> (<em>bool</em>) – Whether to halve the kpoint grid
 for the first relaxation. Speeds up difficult convergence
-considerably. Defaults to False.</li>
-<li><strong>**vasp_job_kwargs</strong> – Passthrough kwargs to VaspJob. See
-<a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</li>
+considerably. Defaults to False.</p></li>
+<li><p><strong>**vasp_job_kwargs</strong> – Passthrough kwargs to VaspJob. See
+<a class="reference internal" href="#custodian.vasp.jobs.VaspJob" title="custodian.vasp.jobs.VaspJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.vasp.jobs.VaspJob</span></code></a>.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Generator of jobs.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Generator of jobs.</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="custodian.vasp.jobs.VaspJob.metagga_opt_run">
-<em class="property">classmethod </em><code class="descname">metagga_opt_run</code><span class="sig-paren">(</span><em>vasp_cmd</em>, <em>auto_npar=True</em>, <em>ediffg=-0.05</em>, <em>half_kpts_first_relax=False</em>, <em>auto_continue=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.metagga_opt_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.metagga_opt_run" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">metagga_opt_run</code><span class="sig-paren">(</span><em class="sig-param">vasp_cmd</em>, <em class="sig-param">auto_npar=True</em>, <em class="sig-param">ediffg=-0.05</em>, <em class="sig-param">half_kpts_first_relax=False</em>, <em class="sig-param">auto_continue=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.metagga_opt_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.metagga_opt_run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of thres jobs to perform an optimization for any
 metaGGA functional. There is an initial calculation of the
 GGA wavefunction which is fed into the initial metaGGA optimization
@@ -1325,42 +1168,39 @@ optimization is performed using the double relaxation scheme</p>
 
 <dl class="method">
 <dt id="custodian.vasp.jobs.VaspJob.postprocess">
-<code class="descname">postprocess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.postprocess" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">postprocess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.postprocess" title="Permalink to this definition">¶</a></dt>
 <dd><p>Postprocessing includes renaming and gzipping where necessary.
 Also copies the magmom to the incar if necessary</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.jobs.VaspJob.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the actual VASP run.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(subprocess.Popen) Used for monitoring.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(subprocess.Popen) Used for monitoring.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.jobs.VaspJob.setup">
-<code class="descname">setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.setup" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.setup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs initial setup for VaspJob, including overriding any settings
 and backing up.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.jobs.VaspJob.terminate">
-<code class="descname">terminate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.terminate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.terminate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">terminate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspJob.terminate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspJob.terminate" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.jobs.VaspNEBJob">
-<em class="property">class </em><code class="descname">VaspNEBJob</code><span class="sig-paren">(</span><em>vasp_cmd</em>, <em>output_file='neb_vasp.out'</em>, <em>stderr_file='neb_std_err.txt'</em>, <em>suffix=''</em>, <em>final=True</em>, <em>backup=True</em>, <em>auto_npar=True</em>, <em>half_kpts=False</em>, <em>auto_gamma=True</em>, <em>auto_continue=False</em>, <em>gamma_vasp_cmd=None</em>, <em>settings_override=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspNEBJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspNEBJob" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">VaspNEBJob</code><span class="sig-paren">(</span><em class="sig-param">vasp_cmd</em>, <em class="sig-param">output_file='neb_vasp.out'</em>, <em class="sig-param">stderr_file='neb_std_err.txt'</em>, <em class="sig-param">suffix=''</em>, <em class="sig-param">final=True</em>, <em class="sig-param">backup=True</em>, <em class="sig-param">auto_npar=True</em>, <em class="sig-param">half_kpts=False</em>, <em class="sig-param">auto_gamma=True</em>, <em class="sig-param">auto_continue=False</em>, <em class="sig-param">gamma_vasp_cmd=None</em>, <em class="sig-param">settings_override=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspNEBJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspNEBJob" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.Job</span></code></a></p>
 <p>A NEB vasp job, especially for CI-NEB running at PBS clusters.
 The class is added for the purpose of handling a different folder
@@ -1369,48 +1209,46 @@ arrangement in NEB calculation.</p>
 the need for flexibility. For standard kinds of runs, it’s often
 better to use one of the static constructors. The defaults are
 usually fine too.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>vasp_cmd</strong> (<em>str</em>) – Command to run vasp as a list of args. For example,
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vasp_cmd</strong> (<em>str</em>) – Command to run vasp as a list of args. For example,
 if you are using mpirun, it can be something like
-[“mpirun”, “pvasp.5.2.11”]</li>
-<li><strong>output_file</strong> (<em>str</em>) – Name of file to direct standard out to.
-Defaults to “vasp.out”.</li>
-<li><strong>stderr_file</strong> (<em>str</em>) – Name of file to direct standard error to.
-Defaults to “std_err.txt”.</li>
-<li><strong>suffix</strong> (<em>str</em>) – A suffix to be appended to the final output. E.g.,
+[“mpirun”, “pvasp.5.2.11”]</p></li>
+<li><p><strong>output_file</strong> (<em>str</em>) – Name of file to direct standard out to.
+Defaults to “vasp.out”.</p></li>
+<li><p><strong>stderr_file</strong> (<em>str</em>) – Name of file to direct standard error to.
+Defaults to “std_err.txt”.</p></li>
+<li><p><strong>suffix</strong> (<em>str</em>) – A suffix to be appended to the final output. E.g.,
 to rename all VASP output from say vasp.out to
-vasp.out.relax1, provide “.relax1” as the suffix.</li>
-<li><strong>final</strong> (<em>bool</em>) – Indicating whether this is the final vasp job in a
-series. Defaults to True.</li>
-<li><strong>backup</strong> (<em>bool</em>) – Whether to backup the initial input files. If True,
+vasp.out.relax1, provide “.relax1” as the suffix.</p></li>
+<li><p><strong>final</strong> (<em>bool</em>) – Indicating whether this is the final vasp job in a
+series. Defaults to True.</p></li>
+<li><p><strong>backup</strong> (<em>bool</em>) – Whether to backup the initial input files. If True,
 the INCAR, KPOINTS, POSCAR and POTCAR will be copied with a
-“.orig” appended. Defaults to True.</li>
-<li><strong>auto_npar</strong> (<em>bool</em>) – Whether to automatically tune NPAR to be sqrt(
+“.orig” appended. Defaults to True.</p></li>
+<li><p><strong>auto_npar</strong> (<em>bool</em>) – Whether to automatically tune NPAR to be sqrt(
 number of cores) as recommended by VASP for DFT calculations.
 Generally, this results in significant speedups. Defaults to
-True. Set to False for HF, GW and RPA calculations.</li>
-<li><strong>half_kpts</strong> (<em>bool</em>) – Whether to halve the kpoint grid for NEB.
-Speeds up convergence considerably. Defaults to False.</li>
-<li><strong>auto_gamma</strong> (<em>bool</em>) – Whether to automatically check if run is a
+True. Set to False for HF, GW and RPA calculations.</p></li>
+<li><p><strong>half_kpts</strong> (<em>bool</em>) – Whether to halve the kpoint grid for NEB.
+Speeds up convergence considerably. Defaults to False.</p></li>
+<li><p><strong>auto_gamma</strong> (<em>bool</em>) – Whether to automatically check if run is a
 Gamma 1x1x1 run, and whether a Gamma optimized version of
 VASP exists with “.gamma” appended to the name of the VASP
 executable (typical setup in many systems). If so, run the
 gamma optimized version of VASP instead of regular VASP. You
 can also specify the gamma vasp command using the
-gamma_vasp_cmd argument if the command is named differently.</li>
-<li><strong>auto_continue</strong> (<em>bool</em>) – Whether to automatically continue a run
+gamma_vasp_cmd argument if the command is named differently.</p></li>
+<li><p><strong>auto_continue</strong> (<em>bool</em>) – Whether to automatically continue a run
 if a STOPCAR is present. This is very useful if using the
 wall-time handler which will write a read-only STOPCAR to
-prevent VASP from deleting it once it finishes.</li>
-<li><strong>gamma_vasp_cmd</strong> (<em>str</em>) – Command for gamma vasp version when
+prevent VASP from deleting it once it finishes.</p></li>
+<li><p><strong>gamma_vasp_cmd</strong> (<em>str</em>) – Command for gamma vasp version when
 auto_gamma is True. Should follow the list style of
 subprocess. Defaults to None, which means “.gamma” is added
-to the last argument of the standard vasp_cmd.</li>
-<li><strong>settings_override</strong> (<em>[</em><em>dict</em><em>]</em>) – <p>An ansible style list of dict to
+to the last argument of the standard vasp_cmd.</p></li>
+<li><p><strong>settings_override</strong> (<em>[</em><em>dict</em><em>]</em>) – <p>An ansible style list of dict to
 override changes. For example, to set ISTART=1 for subsequent
 runs and to copy the CONTCAR to the POSCAR, you will provide:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}},</span>
@@ -1418,35 +1256,30 @@ runs and to copy the CONTCAR to the POSCAR, you will provide:</p>
   <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}}]</span>
 </pre></div>
 </div>
-</li>
+</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.jobs.VaspNEBJob.postprocess">
-<code class="descname">postprocess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspNEBJob.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspNEBJob.postprocess" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">postprocess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspNEBJob.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspNEBJob.postprocess" title="Permalink to this definition">¶</a></dt>
 <dd><p>Postprocessing includes renaming and gzipping where necessary.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.jobs.VaspNEBJob.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspNEBJob.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspNEBJob.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspNEBJob.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspNEBJob.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the actual VASP run.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(subprocess.Popen) Used for monitoring.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(subprocess.Popen) Used for monitoring.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.vasp.jobs.VaspNEBJob.setup">
-<code class="descname">setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspNEBJob.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspNEBJob.setup" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/jobs.html#VaspNEBJob.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.jobs.VaspNEBJob.setup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs initial setup for VaspNEBJob, including overriding any settings
 and backing up.</p>
 </dd></dl>
@@ -1457,71 +1290,95 @@ and backing up.</p>
 <div class="section" id="module-custodian.vasp.validators">
 <span id="custodian-vasp-validators-module"></span><h2>custodian.vasp.validators module<a class="headerlink" href="#module-custodian.vasp.validators" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="custodian.vasp.validators.VaspFilesValidator">
-<em class="property">class </em><code class="descname">VaspFilesValidator</code><a class="reference internal" href="_modules/custodian/vasp/validators.html#VaspFilesValidator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VaspFilesValidator" title="Permalink to this definition">¶</a></dt>
+<dt id="custodian.vasp.validators.VaspAECCARValidator">
+<em class="property">class </em><code class="sig-name descname">VaspAECCARValidator</code><a class="reference internal" href="_modules/custodian/vasp/validators.html#VaspAECCARValidator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VaspAECCARValidator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Validator" title="custodian.custodian.Validator"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.Validator</span></code></a></p>
-<dl class="docutils">
-<dt>Check for existence of some of the files that VASP</dt>
-<dd>normally create upon running.</dd>
+<p>Check if the data in the AECCAR is corrupted</p>
+<dl class="method">
+<dt id="custodian.vasp.validators.VaspAECCARValidator.check">
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/validators.html#VaspAECCARValidator.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VaspAECCARValidator.check" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is called at the end of a job.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="custodian.vasp.validators.VaspFilesValidator">
+<em class="property">class </em><code class="sig-name descname">VaspFilesValidator</code><a class="reference internal" href="_modules/custodian/vasp/validators.html#VaspFilesValidator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VaspFilesValidator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Validator" title="custodian.custodian.Validator"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.Validator</span></code></a></p>
+<dl class="simple">
+<dt>Check for existence of some of the files that VASP</dt><dd><p>normally create upon running.</p>
+</dd>
 </dl>
 <dl class="method">
 <dt id="custodian.vasp.validators.VaspFilesValidator.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/validators.html#VaspFilesValidator.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VaspFilesValidator.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/validators.html#VaspFilesValidator.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VaspFilesValidator.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.validators.VaspNpTMDValidator">
-<em class="property">class </em><code class="descname">VaspNpTMDValidator</code><a class="reference internal" href="_modules/custodian/vasp/validators.html#VaspNpTMDValidator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VaspNpTMDValidator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">VaspNpTMDValidator</code><a class="reference internal" href="_modules/custodian/vasp/validators.html#VaspNpTMDValidator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VaspNpTMDValidator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Validator" title="custodian.custodian.Validator"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.Validator</span></code></a></p>
 <p>Check NpT-AIMD settings is loaded by VASP compiled with -Dtbdyn.
 Currently, VASP only have Langevin thermostat (MDALGO = 3) for NpT ensemble.</p>
 <dl class="method">
 <dt id="custodian.vasp.validators.VaspNpTMDValidator.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/validators.html#VaspNpTMDValidator.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VaspNpTMDValidator.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/validators.html#VaspNpTMDValidator.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VaspNpTMDValidator.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.vasp.validators.VasprunXMLValidator">
-<em class="property">class </em><code class="descname">VasprunXMLValidator</code><a class="reference internal" href="_modules/custodian/vasp/validators.html#VasprunXMLValidator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VasprunXMLValidator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">VasprunXMLValidator</code><span class="sig-paren">(</span><em class="sig-param">output_file='vasp.out'</em>, <em class="sig-param">stderr_file='std_err.txt'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/validators.html#VasprunXMLValidator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VasprunXMLValidator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Validator" title="custodian.custodian.Validator"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.Validator</span></code></a></p>
 <p>Checks that a valid vasprun.xml was generated</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_file</strong> (<em>str</em>) – Name of file VASP standard output is directed to.
+Defaults to “vasp.out”.</p></li>
+<li><p><strong>stderr_file</strong> (<em>str</em>) – Name of file VASP standard error is direct to.
+Defaults to “std_err.txt”.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.vasp.validators.VasprunXMLValidator.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/validators.html#VasprunXMLValidator.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VasprunXMLValidator.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/validators.html#VasprunXMLValidator.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.VasprunXMLValidator.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
+
+<dl class="function">
+<dt id="custodian.vasp.validators.check_broken_chgcar">
+<code class="sig-name descname">check_broken_chgcar</code><span class="sig-paren">(</span><em class="sig-param">chgcar</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/validators.html#check_broken_chgcar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.check_broken_chgcar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="module-custodian.vasp">
@@ -1561,13 +1418,11 @@ Currently, VASP only have Langevin thermostat (MDALGO = 3) for NpT ensemble.</p>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>

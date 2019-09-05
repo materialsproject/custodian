@@ -1,12 +1,10 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian.qchem.handlers &#8212; custodian 2019.2.10 documentation</title>
+    <meta charset="utf-8" />
+    <title>custodian.qchem.handlers &#8212; custodian 2019.8.24 documentation</title>
     <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -39,7 +37,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2019.2.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2019.8.24 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -107,6 +105,7 @@
         <span class="c1"># Checks output file for errors.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span> <span class="o">=</span> <span class="n">QCOutput</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;errors&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">warnings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;warnings&quot;</span><span class="p">)</span>
         <span class="c1"># If we aren&#39;t out of optimization cycles, but we were in the past, reset the history</span>
         <span class="k">if</span> <span class="s2">&quot;out_of_opt_cycles&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_error_history</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">opt_error_history</span> <span class="o">=</span> <span class="p">[]</span>
@@ -129,12 +128,18 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;max_scf_cycles&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;max_scf_cycles&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span><span class="p">})</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;thresh&quot;</span><span class="p">,</span> <span class="s2">&quot;10&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;14&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;thresh&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;14&quot;</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;thresh&quot;</span><span class="p">:</span> <span class="s2">&quot;14&quot;</span><span class="p">})</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scf_algorithm&quot;</span><span class="p">,</span> <span class="s2">&quot;diis&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;diis&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;scf_algorithm&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;gdm&quot;</span>
-                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;scf_algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;gdm&quot;</span><span class="p">})</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scf_algorithm&quot;</span><span class="p">,</span> <span class="s2">&quot;gdm&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;gdm&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;scf_algorithm&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;diis_gdm&quot;</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;scf_algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;diis_gdm&quot;</span><span class="p">})</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scf_algorithm&quot;</span><span class="p">,</span> <span class="s2">&quot;diis&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;diis_gdm&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;scf_algorithm&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;gdm&quot;</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;scf_algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;gdm&quot;</span><span class="p">})</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scf_guess_always&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;true&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;scf_guess_always&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;scf_guess_always&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="s2">&quot;More advanced changes may impact the SCF result. Use the SCF error handler&quot;</span>
@@ -151,8 +156,16 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">molecule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                         <span class="s2">&quot;molecule_from_last_geometry&quot;</span><span class="p">)</span>
                     <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;molecule&quot;</span><span class="p">:</span> <span class="s2">&quot;molecule_from_last_geometry&quot;</span><span class="p">})</span>
-            <span class="c1"># If already at geom_max_cycles, often can just get convergence by restarting</span>
-            <span class="c1"># from the geometry of the last cycle. But we&#39;ll also save any structural</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;thresh&quot;</span><span class="p">,</span> <span class="s2">&quot;10&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;14&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;thresh&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;14&quot;</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;thresh&quot;</span><span class="p">:</span> <span class="s2">&quot;14&quot;</span><span class="p">})</span>
+            <span class="c1"># Will need to try and implement this dmax handler below when I have more time</span>
+            <span class="c1"># to fix the tests and the general handling procedure.</span>
+            <span class="c1"># elif self.qcinp.rem.get(&quot;geom_opt_dmax&quot;,300) != 150:</span>
+            <span class="c1">#     self.qcinp.rem[&quot;geom_opt_dmax&quot;] = 150</span>
+            <span class="c1">#     actions.append({&quot;geom_opt_dmax&quot;: &quot;150&quot;})</span>
+            <span class="c1"># If already at geom_max_cycles, thresh 14, and dmax 150, often can just get convergence</span>
+            <span class="c1"># by restarting from the geometry of the last cycle. But we&#39;ll also save any structural</span>
             <span class="c1"># changes that happened along the way.</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">opt_error_history</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">outdata</span><span class="p">[</span><span class="s2">&quot;structure_change&quot;</span><span class="p">]]</span>
@@ -171,27 +184,30 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">molecule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                     <span class="s2">&quot;molecule_from_last_geometry&quot;</span><span class="p">)</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;molecule&quot;</span><span class="p">:</span> <span class="s2">&quot;molecule_from_last_geometry&quot;</span><span class="p">})</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scf_algorithm&quot;</span><span class="p">,</span> <span class="s2">&quot;diis&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;diis&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;scf_algorithm&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;rca_diis&quot;</span>
-                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;scf_algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;rca_diis&quot;</span><span class="p">})</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gen_scfman&quot;</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;gen_scfman&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-                    <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;gen_scfman&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;thresh&quot;</span><span class="p">,</span> <span class="s2">&quot;10&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;14&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;thresh&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;14&quot;</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;thresh&quot;</span><span class="p">:</span> <span class="s2">&quot;14&quot;</span><span class="p">})</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="s2">&quot;Use a different initial guess? Perhaps a different basis?&quot;</span>
                 <span class="p">)</span>
 
-        <span class="k">elif</span> <span class="s2">&quot;linear_dependent_basis&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="c1"># DIIS -&gt; RCA_DIIS. If already RCA_DIIS, change basis?</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scf_algorithm&quot;</span><span class="p">,</span> <span class="s2">&quot;diis&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;diis&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;scf_algorithm&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;rca_diis&quot;</span>
-                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;scf_algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;rca_diis&quot;</span><span class="p">})</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gen_scfman&quot;</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;gen_scfman&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-                    <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;gen_scfman&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
+        <span class="k">elif</span> <span class="s2">&quot;premature_end_FileMan_error&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;thresh&quot;</span><span class="p">,</span> <span class="s2">&quot;10&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;14&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;thresh&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;14&quot;</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;thresh&quot;</span><span class="p">:</span> <span class="s2">&quot;14&quot;</span><span class="p">})</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scf_guess_always&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;true&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;scf_guess_always&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;scf_guess_always&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Perhaps use a better basis?&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;We&#39;re in a bad spot if we get a FileMan error while always generating a new SCF guess...&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="s2">&quot;hessian_eigenvalue_error&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;thresh&quot;</span><span class="p">,</span> <span class="s2">&quot;10&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;14&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;thresh&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;14&quot;</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;thresh&quot;</span><span class="p">:</span> <span class="s2">&quot;14&quot;</span><span class="p">})</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not sure how to fix hessian_eigenvalue_error if thresh is already 14!&quot;</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="s2">&quot;failed_to_transform_coords&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="c1"># Check for symmetry flag in rem. If not False, set to False and rerun.</span>
@@ -213,34 +229,45 @@
 
         <span class="k">elif</span> <span class="s2">&quot;failed_to_read_input&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="c1"># Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.</span>
-            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;rerun job as-is&quot;</span><span class="p">})</span>
-
-        <span class="k">elif</span> <span class="s2">&quot;IO_error&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="c1"># Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.</span>
-            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;rerun job as-is&quot;</span><span class="p">})</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;rerun_job_no_changes&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
 
         <span class="k">elif</span> <span class="s2">&quot;read_molecule_error&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="c1"># Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.</span>
-            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;rerun job as-is&quot;</span><span class="p">})</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;rerun_job_no_changes&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
 
         <span class="k">elif</span> <span class="s2">&quot;never_called_qchem&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="c1"># Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.</span>
-            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;rerun job as-is&quot;</span><span class="p">})</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;rerun_job_no_changes&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+
+        <span class="k">elif</span> <span class="s2">&quot;licensing_error&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="c1"># Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;rerun_job_no_changes&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
 
         <span class="k">elif</span> <span class="s2">&quot;unknown_error&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Examine error message by hand.&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scf_guess&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;read&quot;</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;scf_guess&quot;</span><span class="p">]</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;scf_guess&quot;</span><span class="p">:</span> <span class="s2">&quot;deleted&quot;</span><span class="p">})</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;thresh&quot;</span><span class="p">,</span> <span class="s2">&quot;10&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;14&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;thresh&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;14&quot;</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;thresh&quot;</span><span class="p">:</span> <span class="s2">&quot;14&quot;</span><span class="p">})</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unknown error. Examine output and log files by hand.&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># You should never get here. If correct is being called then errors should have at least one entry,</span>
             <span class="c1"># in which case it should have been caught by the if/elifs above.</span>
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="s2">&quot;If you get this message, something has gone terribly wrong!&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Errors:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Must have gotten an error which is correctly parsed but not included in the handler. FIX!!!&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
 
+        <span class="k">if</span> <span class="p">{</span><span class="s2">&quot;molecule&quot;</span><span class="p">:</span> <span class="s2">&quot;molecule_from_last_geometry&quot;</span><span class="p">}</span> <span class="ow">in</span> <span class="n">actions</span> <span class="ow">and</span> \
+                <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;geom_opt_hessian&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;read&quot;</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">rem</span><span class="p">[</span><span class="s2">&quot;geom_opt_hessian&quot;</span><span class="p">]</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;geom_opt_hessian&quot;</span><span class="p">:</span> <span class="s2">&quot;deleted&quot;</span><span class="p">})</span>
         <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_file</span> <span class="o">+</span> <span class="s2">&quot;.last&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;warnings&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">warnings</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="QChemSCFErrorHandler"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemSCFErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">QChemSCFErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
@@ -298,13 +325,11 @@
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>

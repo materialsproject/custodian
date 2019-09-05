@@ -1,12 +1,10 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian package &#8212; custodian 2019.2.10 documentation</title>
+    <meta charset="utf-8" />
+    <title>custodian package &#8212; custodian 2019.8.24 documentation</title>
     <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -39,7 +37,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 2019.2.10 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 2019.8.24 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -127,53 +125,51 @@
 <span id="custodian-custodian-module"></span><h2>custodian.custodian module<a class="headerlink" href="#module-custodian.custodian" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="custodian.custodian.Custodian">
-<em class="property">class </em><code class="descname">Custodian</code><span class="sig-paren">(</span><em>handlers</em>, <em>jobs</em>, <em>validators=None</em>, <em>max_errors_per_job=None</em>, <em>max_errors=1</em>, <em>polling_time_step=10</em>, <em>monitor_freq=30</em>, <em>skip_over_errors=False</em>, <em>scratch_dir=None</em>, <em>gzipped_output=False</em>, <em>checkpoint=False</em>, <em>terminate_func=None</em>, <em>terminate_on_nonzero_returncode=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">Custodian</code><span class="sig-paren">(</span><em class="sig-param">handlers</em>, <em class="sig-param">jobs</em>, <em class="sig-param">validators=None</em>, <em class="sig-param">max_errors_per_job=None</em>, <em class="sig-param">max_errors=1</em>, <em class="sig-param">polling_time_step=10</em>, <em class="sig-param">monitor_freq=30</em>, <em class="sig-param">skip_over_errors=False</em>, <em class="sig-param">scratch_dir=None</em>, <em class="sig-param">gzipped_output=False</em>, <em class="sig-param">checkpoint=False</em>, <em class="sig-param">terminate_func=None</em>, <em class="sig-param">terminate_on_nonzero_returncode=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Custodian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>The Custodian class is the manager for a list of jobs given a list of
 error handlers. The way it works is as follows:</p>
 <ol class="arabic simple">
-<li>Let’s say you have defined a list of jobs as [job1, job2, job3, …] and
-you have defined a list of possible error handlers as [err1, err2, …]</li>
-<li>Custodian will run the jobs in the order of job1, job2, … During each
+<li><p>Let’s say you have defined a list of jobs as [job1, job2, job3, …] and
+you have defined a list of possible error handlers as [err1, err2, …]</p></li>
+<li><p>Custodian will run the jobs in the order of job1, job2, … During each
 job, custodian will monitor for errors using the handlers that have
 is_monitor == True. If an error is detected, corrective measures are
-taken and the particular job is rerun.</li>
-<li>At the end of each individual job, Custodian will run through the list
+taken and the particular job is rerun.</p></li>
+<li><p>At the end of each individual job, Custodian will run through the list
 error handlers that have is_monitor == False. If an error is detected,
-corrective measures are taken and the particular job is rerun.</li>
+corrective measures are taken and the particular job is rerun.</p></li>
 </ol>
 <p>Initializes a Custodian from a list of jobs and error handler.s</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>handlers</strong> (<em>[</em><a class="reference internal" href="#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><em>ErrorHandler</em></a><em>]</em>) – Error handlers. In order of priority of
-fixing.</li>
-<li><strong>jobs</strong> (<em>[</em><a class="reference internal" href="#custodian.custodian.Job" title="custodian.custodian.Job"><em>Job</em></a><em>]</em>) – Sequence of Jobs to be run. Note that this can be
-any sequence or even a generator yielding jobs.</li>
-<li><strong>validators</strong> (<em>[</em><a class="reference internal" href="#custodian.custodian.Validator" title="custodian.custodian.Validator"><em>Validator</em></a><em>]</em>) – Validators to ensure job success</li>
-<li><strong>max_errors_per_job</strong> (<em>int</em>) – Maximum number of errors per job allowed
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>handlers</strong> (<em>[</em><a class="reference internal" href="#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><em>ErrorHandler</em></a><em>]</em>) – Error handlers. In order of priority of
+fixing.</p></li>
+<li><p><strong>jobs</strong> (<em>[</em><a class="reference internal" href="#custodian.custodian.Job" title="custodian.custodian.Job"><em>Job</em></a><em>]</em>) – Sequence of Jobs to be run. Note that this can be
+any sequence or even a generator yielding jobs.</p></li>
+<li><p><strong>validators</strong> (<em>[</em><a class="reference internal" href="#custodian.custodian.Validator" title="custodian.custodian.Validator"><em>Validator</em></a><em>]</em>) – Validators to ensure job success</p></li>
+<li><p><strong>max_errors_per_job</strong> (<em>int</em>) – Maximum number of errors per job allowed
 before exiting. Defaults to None, which means it is set to be
-equal to max_errors..</li>
-<li><strong>max_errors</strong> (<em>int</em>) – Maximum number of total errors allowed before
-exiting. Defaults to 1.</li>
-<li><strong>polling_time_step</strong> (<em>int</em>) – The length of time in seconds between
+equal to max_errors..</p></li>
+<li><p><strong>max_errors</strong> (<em>int</em>) – Maximum number of total errors allowed before
+exiting. Defaults to 1.</p></li>
+<li><p><strong>polling_time_step</strong> (<em>int</em>) – The length of time in seconds between
 steps in which a job is checked for completion. Defaults to
-10 secs.</li>
-<li><strong>monitor_freq</strong> (<em>int</em>) – The number of polling steps before monitoring
+10 secs.</p></li>
+<li><p><strong>monitor_freq</strong> (<em>int</em>) – The number of polling steps before monitoring
 occurs. For example, if you have a polling_time_step of 10
 seconds and a monitor_freq of 30, this means that Custodian
 uses the monitors to check for errors every 30 x 10 = 300
-seconds, i.e., 5 minutes.</li>
-<li><strong>skip_over_errors</strong> (<em>bool</em>) – If set to True, custodian will skip over
+seconds, i.e., 5 minutes.</p></li>
+<li><p><strong>skip_over_errors</strong> (<em>bool</em>) – If set to True, custodian will skip over
 error handlers that failed (raised an Exception of some sort).
 Otherwise, custodian will simply exit on unrecoverable errors.
 The former will lead to potentially more robust performance,
 but may make it difficult to improve handlers. The latter
 will allow one to catch potentially bad error handler
-implementations. Defaults to False.</li>
-<li><strong>scratch_dir</strong> (<em>str</em>) – If this is set, any files in the current
+implementations. Defaults to False.</p></li>
+<li><p><strong>scratch_dir</strong> (<em>str</em>) – If this is set, any files in the current
 directory are copied to a temporary directory in a scratch
 space first before any jobs are performed, and moved back to
 the current directory upon completion of all jobs. This is
@@ -185,59 +181,57 @@ mechanisms. A symbolic link is created during the course of
 the run in the working directory called “scratch_link” as
 users may want to sometimes check the output during the
 course of a run. If this is None (the default), the run is
-performed in the current working directory.</li>
-<li><strong>gzipped_output</strong> (<em>bool</em>) – Whether to gzip the final output to save
-space. Defaults to False.</li>
-<li><strong>checkpoint</strong> (<em>bool</em>) – Whether to checkpoint after each successful Job.
+performed in the current working directory.</p></li>
+<li><p><strong>gzipped_output</strong> (<em>bool</em>) – Whether to gzip the final output to save
+space. Defaults to False.</p></li>
+<li><p><strong>checkpoint</strong> (<em>bool</em>) – Whether to checkpoint after each successful Job.
 Checkpoints are stored as custodian.chk.#.tar.gz files. Defaults
-to False.</li>
-<li><strong>terminate_func</strong> (<em>callable</em>) – A function to be called to terminate a
-running job. If None, the default is to call Popen.terminate.</li>
-<li><strong>terminate_on_nonzero_returncode</strong> (<em>bool</em>) – If True, a non-zero return
-code on any Job will result in a termination. Defaults to True.</li>
+to False.</p></li>
+<li><p><strong>terminate_func</strong> (<em>callable</em>) – A function to be called to terminate a
+running job. If None, the default is to call Popen.terminate.</p></li>
+<li><p><strong>terminate_on_nonzero_returncode</strong> (<em>bool</em>) – If True, a non-zero return
+code on any Job will result in a termination. Defaults to True.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="attribute">
 <dt id="custodian.custodian.Custodian.LOG_FILE">
-<code class="descname">LOG_FILE</code><em class="property"> = 'custodian.json'</em><a class="headerlink" href="#custodian.custodian.Custodian.LOG_FILE" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">LOG_FILE</code><em class="property"> = 'custodian.json'</em><a class="headerlink" href="#custodian.custodian.Custodian.LOG_FILE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="custodian.custodian.Custodian.from_spec">
-<em class="property">classmethod </em><code class="descname">from_spec</code><span class="sig-paren">(</span><em>spec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Custodian.from_spec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian.from_spec" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_spec</code><span class="sig-paren">(</span><em class="sig-param">spec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Custodian.from_spec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian.from_spec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load a Custodian instance where the jobs are specified from a
 structure and a spec dict. This allows simple
 custom job sequences to be constructed quickly via a YAML file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>spec</strong> (<em>dict</em>) – <p>A dict specifying job. A sample of the dict in
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>spec</strong> (<em>dict</em>) – <p>A dict specifying job. A sample of the dict in
 YAML format for the usual MP workflow is given as follows</p>
 <p><a href="#id1"><span class="problematic" id="id2">``</span></a>`
 jobs:
 - jb: custodian.vasp.jobs.VaspJob</p>
 <blockquote>
-<div><dl class="docutils">
-<dt>params:</dt>
-<dd>final: False
-suffix: .relax1</dd>
+<div><dl class="simple">
+<dt>params:</dt><dd><p>final: False
+suffix: .relax1</p>
+</dd>
 </dl>
 </div></blockquote>
 <ul>
-<li>jb: custodian.vasp.jobs.VaspJob
-params:<blockquote>
-<div>final: True
+<li><p>jb: custodian.vasp.jobs.VaspJob
+params:</p>
+<blockquote>
+<div><p>final: True
 suffix: .relax2
-settings_override: {“file”: “CONTCAR”, “action”: {“_file_copy”: {“dest”: “POSCAR”}}</div></blockquote>
+settings_override: {“file”: “CONTCAR”, “action”: {“_file_copy”: {“dest”: “POSCAR”}}</p>
+</div></blockquote>
 </li>
 </ul>
-<dl class="docutils">
-<dt>jobs_common_params:</dt>
-<dd>vasp_cmd: /opt/vasp</dd>
+<dl class="simple">
+<dt>jobs_common_params:</dt><dd><p>vasp_cmd: /opt/vasp</p>
+</dd>
 </dl>
 <p>handlers:
 - hdlr: custodian.vasp.handlers.VaspErrorHandler
@@ -247,137 +241,120 @@ validators:
 - vldr: custodian.vasp.validators.VasprunXMLValidator
 custodian_params:</p>
 <blockquote>
-<div>scratch_dir: /tmp</div></blockquote>
+<div><p>scratch_dir: /tmp</p>
+</div></blockquote>
 <p><a href="#id3"><span class="problematic" id="id4">``</span></a><a href="#id5"><span class="problematic" id="id6">`</span></a></p>
 <p>The <cite>jobs</cite> key is a list of jobs. Each job is
 specified via “job”: &lt;explicit path&gt;, and all parameters are
 specified via <cite>params</cite> which is a dict.</p>
 <p><cite>common_params</cite> specify a common set of parameters that are
 passed to all jobs, e.g., vasp_cmd.</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Custodian instance.</td>
-</tr>
-</tbody>
-</table>
+</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Custodian instance.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.custodian.Custodian.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Custodian.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Custodian.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runs all jobs.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">All errors encountered as a list of list.
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>All errors encountered as a list of list.
 [[error_dicts for job 1], [error_dicts for job 2], ….]</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
-<li><a class="reference internal" href="#custodian.custodian.ValidationError" title="custodian.custodian.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> – if a job fails validation</li>
-<li><a class="reference internal" href="#custodian.custodian.ReturnCodeError" title="custodian.custodian.ReturnCodeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ReturnCodeError</span></code></a> – if the process has a return code different from 0</li>
-<li><a class="reference internal" href="#custodian.custodian.NonRecoverableError" title="custodian.custodian.NonRecoverableError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">NonRecoverableError</span></code></a> – if an unrecoverable occurs</li>
-<li><a class="reference internal" href="#custodian.custodian.MaxCorrectionsPerJobError" title="custodian.custodian.MaxCorrectionsPerJobError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">MaxCorrectionsPerJobError</span></code></a> – if max_errors_per_job is reached</li>
-<li><a class="reference internal" href="#custodian.custodian.MaxCorrectionsError" title="custodian.custodian.MaxCorrectionsError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">MaxCorrectionsError</span></code></a> – if max_errors is reached</li>
-<li><a class="reference internal" href="#custodian.custodian.MaxCorrectionsPerHandlerError" title="custodian.custodian.MaxCorrectionsPerHandlerError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">MaxCorrectionsPerHandlerError</span></code></a> – if max_errors_per_handler is reached</li>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="#custodian.custodian.ValidationError" title="custodian.custodian.ValidationError"><strong>ValidationError</strong></a> – if a job fails validation</p></li>
+<li><p><a class="reference internal" href="#custodian.custodian.ReturnCodeError" title="custodian.custodian.ReturnCodeError"><strong>ReturnCodeError</strong></a> – if the process has a return code different from 0</p></li>
+<li><p><a class="reference internal" href="#custodian.custodian.NonRecoverableError" title="custodian.custodian.NonRecoverableError"><strong>NonRecoverableError</strong></a> – if an unrecoverable occurs</p></li>
+<li><p><a class="reference internal" href="#custodian.custodian.MaxCorrectionsPerJobError" title="custodian.custodian.MaxCorrectionsPerJobError"><strong>MaxCorrectionsPerJobError</strong></a> – if max_errors_per_job is reached</p></li>
+<li><p><a class="reference internal" href="#custodian.custodian.MaxCorrectionsError" title="custodian.custodian.MaxCorrectionsError"><strong>MaxCorrectionsError</strong></a> – if max_errors is reached</p></li>
+<li><p><a class="reference internal" href="#custodian.custodian.MaxCorrectionsPerHandlerError" title="custodian.custodian.MaxCorrectionsPerHandlerError"><strong>MaxCorrectionsPerHandlerError</strong></a> – if max_errors_per_handler is reached</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.custodian.Custodian.run_interrupted">
-<code class="descname">run_interrupted</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Custodian.run_interrupted"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian.run_interrupted" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run_interrupted</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Custodian.run_interrupted"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Custodian.run_interrupted" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runs custodian in a interuppted mode, which sets up and
 validates jobs but doesn’t run the executable</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">number of remaining jobs</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
-<li><a class="reference internal" href="#custodian.custodian.ValidationError" title="custodian.custodian.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> – if a job fails validation</li>
-<li><a class="reference internal" href="#custodian.custodian.ReturnCodeError" title="custodian.custodian.ReturnCodeError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ReturnCodeError</span></code></a> – if the process has a return code different from 0</li>
-<li><a class="reference internal" href="#custodian.custodian.NonRecoverableError" title="custodian.custodian.NonRecoverableError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">NonRecoverableError</span></code></a> – if an unrecoverable occurs</li>
-<li><a class="reference internal" href="#custodian.custodian.MaxCorrectionsPerJobError" title="custodian.custodian.MaxCorrectionsPerJobError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">MaxCorrectionsPerJobError</span></code></a> – if max_errors_per_job is reached</li>
-<li><a class="reference internal" href="#custodian.custodian.MaxCorrectionsError" title="custodian.custodian.MaxCorrectionsError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">MaxCorrectionsError</span></code></a> – if max_errors is reached</li>
-<li><a class="reference internal" href="#custodian.custodian.MaxCorrectionsPerHandlerError" title="custodian.custodian.MaxCorrectionsPerHandlerError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">MaxCorrectionsPerHandlerError</span></code></a> – if max_errors_per_handler is reached</li>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>number of remaining jobs</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="#custodian.custodian.ValidationError" title="custodian.custodian.ValidationError"><strong>ValidationError</strong></a> – if a job fails validation</p></li>
+<li><p><a class="reference internal" href="#custodian.custodian.ReturnCodeError" title="custodian.custodian.ReturnCodeError"><strong>ReturnCodeError</strong></a> – if the process has a return code different from 0</p></li>
+<li><p><a class="reference internal" href="#custodian.custodian.NonRecoverableError" title="custodian.custodian.NonRecoverableError"><strong>NonRecoverableError</strong></a> – if an unrecoverable occurs</p></li>
+<li><p><a class="reference internal" href="#custodian.custodian.MaxCorrectionsPerJobError" title="custodian.custodian.MaxCorrectionsPerJobError"><strong>MaxCorrectionsPerJobError</strong></a> – if max_errors_per_job is reached</p></li>
+<li><p><a class="reference internal" href="#custodian.custodian.MaxCorrectionsError" title="custodian.custodian.MaxCorrectionsError"><strong>MaxCorrectionsError</strong></a> – if max_errors is reached</p></li>
+<li><p><a class="reference internal" href="#custodian.custodian.MaxCorrectionsPerHandlerError" title="custodian.custodian.MaxCorrectionsPerHandlerError"><strong>MaxCorrectionsPerHandlerError</strong></a> – if max_errors_per_handler is reached</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="exception">
 <dt id="custodian.custodian.CustodianError">
-<em class="property">exception </em><code class="descname">CustodianError</code><span class="sig-paren">(</span><em>message</em>, <em>raises=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#CustodianError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.CustodianError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="sig-name descname">CustodianError</code><span class="sig-paren">(</span><em class="sig-param">message</em>, <em class="sig-param">raises=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#CustodianError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.CustodianError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeError</span></code></p>
 <p>Exception class for Custodian errors.</p>
 <p>Initializes the error with a message.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>message</strong> (<em>str</em>) – Message passed to Exception</li>
-<li><strong>raises</strong> (<em>bool</em>) – Whether this should be raised outside custodian</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> (<em>str</em>) – Message passed to Exception</p></li>
+<li><p><strong>raises</strong> (<em>bool</em>) – Whether this should be raised outside custodian</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.custodian.ErrorHandler">
-<em class="property">class </em><code class="descname">ErrorHandler</code><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">ErrorHandler</code><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">monty.json.MSONable</span></code></p>
 <p>Abstract base class defining the interface for an ErrorHandler.</p>
 <dl class="method">
 <dt id="custodian.custodian.ErrorHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.custodian.ErrorHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#ErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.custodian.ErrorHandler.is_monitor">
-<code class="descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class property indicates whether the error handler is a monitor,
 i.e., a handler that monitors a job as it is running. If a
 monitor-type handler notices an error, the job will be sent a
@@ -388,7 +365,7 @@ that occur early in the run but do not cause immediate failure.</p>
 
 <dl class="attribute">
 <dt id="custodian.custodian.ErrorHandler.is_terminating">
-<code class="descname">is_terminating</code><em class="property"> = True</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_terminating</code><em class="property"> = True</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.is_terminating" title="Permalink to this definition">¶</a></dt>
 <dd><p>Whether this handler terminates a job upon error detection. By
 default, this is True, which means that the current Job will be
 terminated upon error detection, corrections applied,
@@ -402,29 +379,27 @@ not terminate the job.</p>
 
 <dl class="attribute">
 <dt id="custodian.custodian.ErrorHandler.max_num_corrections">
-<code class="descname">max_num_corrections</code><em class="property"> = None</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.max_num_corrections" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">max_num_corrections</code><em class="property"> = None</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.max_num_corrections" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="custodian.custodian.ErrorHandler.n_applied_corrections">
-<code class="descname">n_applied_corrections</code><a class="headerlink" href="#custodian.custodian.ErrorHandler.n_applied_corrections" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">n_applied_corrections</code><a class="headerlink" href="#custodian.custodian.ErrorHandler.n_applied_corrections" title="Permalink to this definition">¶</a></dt>
 <dd><p>The number of times the handler has given a correction and this
 has been applied.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the number of corrections applied.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(int)</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the number of corrections applied.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>(int)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.custodian.ErrorHandler.raise_on_max">
-<code class="descname">raise_on_max</code><em class="property"> = False</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.raise_on_max" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">raise_on_max</code><em class="property"> = False</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.raise_on_max" title="Permalink to this definition">¶</a></dt>
 <dd><p>Whether corrections from this specific handler should be applied only a
 fixed maximum number of times on a single job (i.e. the counter is reset
 at the beginning of each job). If the maximum number is reached the code
@@ -437,7 +412,7 @@ an instance attribute from __init__.</p>
 
 <dl class="attribute">
 <dt id="custodian.custodian.ErrorHandler.raises_runtime_error">
-<code class="descname">raises_runtime_error</code><em class="property"> = True</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.raises_runtime_error" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">raises_runtime_error</code><em class="property"> = True</em><a class="headerlink" href="#custodian.custodian.ErrorHandler.raises_runtime_error" title="Permalink to this definition">¶</a></dt>
 <dd><p>Whether this handler causes custodian to raise a runtime error if it cannot
 handle the error (i.e. if correct returns a dict with “actions”:None, or
 “actions”:[])</p>
@@ -447,18 +422,18 @@ handle the error (i.e. if correct returns a dict with “actions”:None, or
 
 <dl class="class">
 <dt id="custodian.custodian.Job">
-<em class="property">class </em><code class="descname">Job</code><a class="reference internal" href="_modules/custodian/custodian.html#Job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">Job</code><a class="reference internal" href="_modules/custodian/custodian.html#Job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">monty.json.MSONable</span></code></p>
 <p>Abstract base class defining the interface for a Job.</p>
-<dl class="attribute">
+<dl class="method">
 <dt id="custodian.custodian.Job.name">
-<code class="descname">name</code><a class="headerlink" href="#custodian.custodian.Job.name" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">name</code><a class="headerlink" href="#custodian.custodian.Job.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>A nice string name for the job.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.custodian.Job.postprocess">
-<code class="descname">postprocess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Job.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.postprocess" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">postprocess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Job.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.postprocess" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job, <em>after</em> error detection.
 This allows post-processing, such as cleanup, analysis of results,
 etc.</p>
@@ -466,150 +441,126 @@ etc.</p>
 
 <dl class="method">
 <dt id="custodian.custodian.Job.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Job.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.run" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Job.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method perform the actual work for the job. If parallel error
 checking (monitoring) is desired, this must return a Popen process.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.custodian.Job.setup">
-<code class="descname">setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Job.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.setup" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Job.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.setup" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is run before the start of a job. Allows for some
 pre-processing.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.custodian.Job.terminate">
-<code class="descname">terminate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Job.terminate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.terminate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">terminate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Job.terminate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Job.terminate" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="exception">
 <dt id="custodian.custodian.MaxCorrectionsError">
-<em class="property">exception </em><code class="descname">MaxCorrectionsError</code><span class="sig-paren">(</span><em>message</em>, <em>raises</em>, <em>max_errors</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#MaxCorrectionsError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.MaxCorrectionsError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="sig-name descname">MaxCorrectionsError</code><span class="sig-paren">(</span><em class="sig-param">message</em>, <em class="sig-param">raises</em>, <em class="sig-param">max_errors</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#MaxCorrectionsError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.MaxCorrectionsError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#custodian.custodian.CustodianError" title="custodian.custodian.CustodianError"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.CustodianError</span></code></a></p>
 <p>Error raised when the maximum allowed number of errors is reached</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>message</strong> (<em>str</em>) – Message passed to Exception</li>
-<li><strong>raises</strong> (<em>bool</em>) – Whether this should be raised outside custodian</li>
-<li><strong>max_errors</strong> (<em>int</em>) – the number of errors reached</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> (<em>str</em>) – Message passed to Exception</p></li>
+<li><p><strong>raises</strong> (<em>bool</em>) – Whether this should be raised outside custodian</p></li>
+<li><p><strong>max_errors</strong> (<em>int</em>) – the number of errors reached</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="exception">
 <dt id="custodian.custodian.MaxCorrectionsPerHandlerError">
-<em class="property">exception </em><code class="descname">MaxCorrectionsPerHandlerError</code><span class="sig-paren">(</span><em>message</em>, <em>raises</em>, <em>max_errors_per_handler</em>, <em>handler</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#MaxCorrectionsPerHandlerError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.MaxCorrectionsPerHandlerError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="sig-name descname">MaxCorrectionsPerHandlerError</code><span class="sig-paren">(</span><em class="sig-param">message</em>, <em class="sig-param">raises</em>, <em class="sig-param">max_errors_per_handler</em>, <em class="sig-param">handler</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#MaxCorrectionsPerHandlerError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.MaxCorrectionsPerHandlerError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#custodian.custodian.CustodianError" title="custodian.custodian.CustodianError"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.CustodianError</span></code></a></p>
 <p>Error raised when the maximum allowed number of errors per handler is reached</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>message</strong> (<em>str</em>) – Message passed to Exception</li>
-<li><strong>raises</strong> (<em>bool</em>) – Whether this should be raised outside custodian</li>
-<li><strong>max_errors_per_handler</strong> (<em>int</em>) – the number of errors per job reached</li>
-<li><strong>handler</strong> (<em>Handler</em>) – the handler that caused the exception</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> (<em>str</em>) – Message passed to Exception</p></li>
+<li><p><strong>raises</strong> (<em>bool</em>) – Whether this should be raised outside custodian</p></li>
+<li><p><strong>max_errors_per_handler</strong> (<em>int</em>) – the number of errors per job reached</p></li>
+<li><p><strong>handler</strong> (<em>Handler</em>) – the handler that caused the exception</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="exception">
 <dt id="custodian.custodian.MaxCorrectionsPerJobError">
-<em class="property">exception </em><code class="descname">MaxCorrectionsPerJobError</code><span class="sig-paren">(</span><em>message</em>, <em>raises</em>, <em>max_errors_per_job</em>, <em>job</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#MaxCorrectionsPerJobError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.MaxCorrectionsPerJobError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="sig-name descname">MaxCorrectionsPerJobError</code><span class="sig-paren">(</span><em class="sig-param">message</em>, <em class="sig-param">raises</em>, <em class="sig-param">max_errors_per_job</em>, <em class="sig-param">job</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#MaxCorrectionsPerJobError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.MaxCorrectionsPerJobError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#custodian.custodian.CustodianError" title="custodian.custodian.CustodianError"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.CustodianError</span></code></a></p>
 <p>Error raised when the maximum allowed number of errors per job is reached</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>message</strong> (<em>str</em>) – Message passed to Exception</li>
-<li><strong>raises</strong> (<em>bool</em>) – Whether this should be raised outside custodian</li>
-<li><strong>max_errors_per_job</strong> (<em>int</em>) – the number of errors per job reached</li>
-<li><strong>job</strong> (<a class="reference internal" href="#custodian.custodian.Job" title="custodian.custodian.Job"><em>Job</em></a>) – the job that was stopped</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> (<em>str</em>) – Message passed to Exception</p></li>
+<li><p><strong>raises</strong> (<em>bool</em>) – Whether this should be raised outside custodian</p></li>
+<li><p><strong>max_errors_per_job</strong> (<em>int</em>) – the number of errors per job reached</p></li>
+<li><p><strong>job</strong> (<a class="reference internal" href="#custodian.custodian.Job" title="custodian.custodian.Job"><em>Job</em></a>) – the job that was stopped</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="exception">
 <dt id="custodian.custodian.NonRecoverableError">
-<em class="property">exception </em><code class="descname">NonRecoverableError</code><span class="sig-paren">(</span><em>message</em>, <em>raises</em>, <em>handler</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#NonRecoverableError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.NonRecoverableError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="sig-name descname">NonRecoverableError</code><span class="sig-paren">(</span><em class="sig-param">message</em>, <em class="sig-param">raises</em>, <em class="sig-param">handler</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#NonRecoverableError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.NonRecoverableError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#custodian.custodian.CustodianError" title="custodian.custodian.CustodianError"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.CustodianError</span></code></a></p>
 <p>Error raised when a handler found an error but could not fix it</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>message</strong> (<em>str</em>) – Message passed to Exception</li>
-<li><strong>raises</strong> (<em>bool</em>) – Whether this should be raised outside custodian</li>
-<li><strong>handler</strong> (<em>Handler</em>) – Handler that caused the exception.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> (<em>str</em>) – Message passed to Exception</p></li>
+<li><p><strong>raises</strong> (<em>bool</em>) – Whether this should be raised outside custodian</p></li>
+<li><p><strong>handler</strong> (<em>Handler</em>) – Handler that caused the exception.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="exception">
 <dt id="custodian.custodian.ReturnCodeError">
-<em class="property">exception </em><code class="descname">ReturnCodeError</code><span class="sig-paren">(</span><em>message</em>, <em>raises=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#ReturnCodeError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ReturnCodeError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="sig-name descname">ReturnCodeError</code><span class="sig-paren">(</span><em class="sig-param">message</em>, <em class="sig-param">raises=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#ReturnCodeError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ReturnCodeError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#custodian.custodian.CustodianError" title="custodian.custodian.CustodianError"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.CustodianError</span></code></a></p>
 <p>Error raised when the process gave non zero return code</p>
 <p>Initializes the error with a message.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>message</strong> (<em>str</em>) – Message passed to Exception</li>
-<li><strong>raises</strong> (<em>bool</em>) – Whether this should be raised outside custodian</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> (<em>str</em>) – Message passed to Exception</p></li>
+<li><p><strong>raises</strong> (<em>bool</em>) – Whether this should be raised outside custodian</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="exception">
 <dt id="custodian.custodian.ValidationError">
-<em class="property">exception </em><code class="descname">ValidationError</code><span class="sig-paren">(</span><em>message</em>, <em>raises</em>, <em>validator</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#ValidationError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ValidationError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="sig-name descname">ValidationError</code><span class="sig-paren">(</span><em class="sig-param">message</em>, <em class="sig-param">raises</em>, <em class="sig-param">validator</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#ValidationError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.ValidationError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#custodian.custodian.CustodianError" title="custodian.custodian.CustodianError"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.CustodianError</span></code></a></p>
 <p>Error raised when a validator does not pass the check</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>message</strong> (<em>str</em>) – Message passed to Exception</li>
-<li><strong>raises</strong> (<em>bool</em>) – Whether this should be raised outside custodian</li>
-<li><strong>validator</strong> (<a class="reference internal" href="#custodian.custodian.Validator" title="custodian.custodian.Validator"><em>Validator</em></a>) – Validator that caused the exception.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> (<em>str</em>) – Message passed to Exception</p></li>
+<li><p><strong>raises</strong> (<em>bool</em>) – Whether this should be raised outside custodian</p></li>
+<li><p><strong>validator</strong> (<a class="reference internal" href="#custodian.custodian.Validator" title="custodian.custodian.Validator"><em>Validator</em></a>) – Validator that caused the exception.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.custodian.Validator">
-<em class="property">class </em><code class="descname">Validator</code><a class="reference internal" href="_modules/custodian/custodian.html#Validator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Validator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">Validator</code><a class="reference internal" href="_modules/custodian/custodian.html#Validator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Validator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">monty.json.MSONable</span></code></p>
 <p>Abstract base class defining the interface for a Validator. A Validator
 differs from an ErrorHandler in that it does not correct a run and is run
@@ -617,16 +568,13 @@ only at the end of a Job. If errors are detected by a Validator, a run is
 immediately terminated.</p>
 <dl class="method">
 <dt id="custodian.custodian.Validator.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Validator.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Validator.check" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/custodian.html#Validator.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.custodian.Validator.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -636,38 +584,31 @@ immediately terminated.</p>
 <span id="custodian-utils-module"></span><h2>custodian.utils module<a class="headerlink" href="#module-custodian.utils" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="custodian.utils.backup">
-<code class="descname">backup</code><span class="sig-paren">(</span><em>filenames</em>, <em>prefix='error'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/utils.html#backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.utils.backup" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">backup</code><span class="sig-paren">(</span><em class="sig-param">filenames</em>, <em class="sig-param">prefix='error'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/utils.html#backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.utils.backup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Backup files to a tar.gz file. Used, for example, in backing up the
 files of an errored run before performing corrections.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>filenames</strong> (<em>[</em><em>str</em><em>]</em>) – List of files to backup. Supports wildcards, e.g.,
-<em>.</em>.</li>
-<li><strong>prefix</strong> (<em>str</em>) – prefix to the files. Defaults to error, which means a
-series of error.1.tar.gz, error.2.tar.gz, … will be generated.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filenames</strong> (<em>[</em><em>str</em><em>]</em>) – List of files to backup. Supports wildcards, e.g.,
+<em>.</em>.</p></li>
+<li><p><strong>prefix</strong> (<em>str</em>) – prefix to the files. Defaults to error, which means a
+series of error.1.tar.gz, error.2.tar.gz, … will be generated.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="custodian.utils.get_execution_host_info">
-<code class="descname">get_execution_host_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/utils.html#get_execution_host_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.utils.get_execution_host_info" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_execution_host_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/utils.html#get_execution_host_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.utils.get_execution_host_info" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tries to return a tuple describing the execution host.
 Doesn’t work for all queueing systems</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(HOSTNAME, CLUSTER_NAME)</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(HOSTNAME, CLUSTER_NAME)</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -706,13 +647,11 @@ Doesn’t work for all queueing systems</p>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>

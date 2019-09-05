@@ -1,12 +1,10 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian.cli.run_vasp &#8212; custodian 2019.2.10 documentation</title>
+    <meta charset="utf-8" />
+    <title>custodian.cli.run_vasp &#8212; custodian 2019.8.24 documentation</title>
     <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -39,7 +37,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2019.2.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2019.8.24 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -130,7 +128,7 @@
                 <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">user_incar_settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;LWAVE&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;EDIFF&quot;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">},</span>
                 <span class="n">ediff_per_atom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">settings</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
-                <span class="p">{</span><span class="s2">&quot;dict&quot;</span>  <span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
+                <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">vis</span><span class="o">.</span><span class="n">incar</span><span class="p">)}},</span>
                 <span class="p">{</span><span class="s1">&#39;dict&#39;</span><span class="p">:</span> <span class="s1">&#39;KPOINTS&#39;</span><span class="p">,</span>
                  <span class="s1">&#39;action&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;_set&#39;</span><span class="p">:</span> <span class="n">vis</span><span class="o">.</span><span class="n">kpoints</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()}}])</span>
@@ -199,8 +197,7 @@
                                      <span class="s2">&quot;LDAUU&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">u</span> <span class="o">*</span> <span class="n">f</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">ldauu</span><span class="p">]}}})</span>
             <span class="n">copy_magmom</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">ramps</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">elif</span> <span class="n">job_type</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;quick_relax&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">job_type</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span>\
-                <span class="s2">&quot;quickrelax&quot;</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="n">job_type</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;quick_relax&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">job_type</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;quickrelax&quot;</span><span class="p">):</span>
             <span class="n">kpoints</span> <span class="o">=</span> <span class="n">vinput</span><span class="p">[</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">]</span>
             <span class="n">incar</span> <span class="o">=</span> <span class="n">vinput</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span>
             <span class="n">structure</span> <span class="o">=</span> <span class="n">vinput</span><span class="p">[</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">structure</span>
@@ -216,7 +213,7 @@
                                   <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">kpoints</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()}})</span>
             <span class="c1"># lattice vectors with length &lt; 9 will get &gt;1 KPOINT</span>
             <span class="n">low_kpoints</span> <span class="o">=</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">gamma_automatic</span><span class="p">(</span>
-                <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">18</span><span class="o">/</span><span class="n">l</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">abc</span><span class="p">])</span>
+                <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">18</span> <span class="o">/</span> <span class="n">l</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">abc</span><span class="p">])</span>
             <span class="n">settings</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
                 <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISMEAR&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}},</span>
@@ -286,7 +283,6 @@
         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Set to true to turn off auto_npar. Useful for certain machines &quot;</span>
              <span class="s2">&quot;and calculations where you want absolute control.&quot;</span><span class="p">)</span>
 
-
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
         <span class="s2">&quot;-z&quot;</span><span class="p">,</span> <span class="s2">&quot;--gzip&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;gzip&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Add this option to gzip the final output. Do not gzip if you &quot;</span>
@@ -312,7 +308,7 @@
     <span class="p">)</span>
 
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;-me&quot;</span><span class="p">,</span>  <span class="s2">&quot;--max-errors&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;max_errors&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;?&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;-me&quot;</span><span class="p">,</span> <span class="s2">&quot;--max-errors&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;max_errors&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;?&quot;</span><span class="p">,</span>
         <span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Maximum number of errors to allow before quitting&quot;</span><span class="p">)</span>
 
@@ -368,13 +364,11 @@
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>

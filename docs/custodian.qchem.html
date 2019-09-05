@@ -1,12 +1,10 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian.qchem package &#8212; custodian 2019.2.10 documentation</title>
+    <meta charset="utf-8" />
+    <title>custodian.qchem package &#8212; custodian 2019.8.24 documentation</title>
     <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -39,7 +37,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 2019.2.10 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 2019.8.24 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -62,126 +60,106 @@
 <span id="custodian-qchem-handlers-module"></span><h2>custodian.qchem.handlers module<a class="headerlink" href="#module-custodian.qchem.handlers" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="custodian.qchem.handlers.QChemErrorHandler">
-<em class="property">class </em><code class="descname">QChemErrorHandler</code><span class="sig-paren">(</span><em>input_file='mol.qin'</em>, <em>output_file='mol.qout'</em>, <em>scf_max_cycles=200</em>, <em>geom_max_cycles=200</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/handlers.html#QChemErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.handlers.QChemErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">QChemErrorHandler</code><span class="sig-paren">(</span><em class="sig-param">input_file='mol.qin'</em>, <em class="sig-param">output_file='mol.qout'</em>, <em class="sig-param">scf_max_cycles=200</em>, <em class="sig-param">geom_max_cycles=200</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/handlers.html#QChemErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.handlers.QChemErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Master QChemErrorHandler class that handles a number of common errors
 that occur during QChem runs.</p>
 <p>Initializes the error handler from a set of input and output files.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>input_file</strong> (<em>str</em>) – Name of the QChem input file.</li>
-<li><strong>output_file</strong> (<em>str</em>) – Name of the QChem output file.</li>
-<li><strong>scf_max_cycles</strong> (<em>int</em>) – The max iterations to set to fix SCF failure.</li>
-<li><strong>geom_max_cycles</strong> (<em>int</em>) – The max iterations to set to fix geometry
-optimization failure.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em>) – Name of the QChem input file.</p></li>
+<li><p><strong>output_file</strong> (<em>str</em>) – Name of the QChem output file.</p></li>
+<li><p><strong>scf_max_cycles</strong> (<em>int</em>) – The max iterations to set to fix SCF failure.</p></li>
+<li><p><strong>geom_max_cycles</strong> (<em>int</em>) – The max iterations to set to fix geometry
+optimization failure.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.qchem.handlers.QChemErrorHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/handlers.html#QChemErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.handlers.QChemErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/handlers.html#QChemErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.handlers.QChemErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.qchem.handlers.QChemErrorHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/handlers.html#QChemErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.handlers.QChemErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/handlers.html#QChemErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.handlers.QChemErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.qchem.handlers.QChemErrorHandler.is_monitor">
-<code class="descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.qchem.handlers.QChemErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.qchem.handlers.QChemErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="custodian.qchem.handlers.QChemSCFErrorHandler">
-<em class="property">class </em><code class="descname">QChemSCFErrorHandler</code><span class="sig-paren">(</span><em>input_file='mol.qin'</em>, <em>output_file='mol.qout'</em>, <em>rca_gdm_thresh=0.001</em>, <em>scf_max_cycles=200</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/handlers.html#QChemSCFErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.handlers.QChemSCFErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">QChemSCFErrorHandler</code><span class="sig-paren">(</span><em class="sig-param">input_file='mol.qin'</em>, <em class="sig-param">output_file='mol.qout'</em>, <em class="sig-param">rca_gdm_thresh=0.001</em>, <em class="sig-param">scf_max_cycles=200</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/handlers.html#QChemSCFErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.handlers.QChemSCFErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>QChem ErrorHandler class that addresses SCF non-convergence.</p>
 <p>Initializes the error handler from a set of input and output files.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>input_file</strong> (<em>str</em>) – Name of the QChem input file.</li>
-<li><strong>output_file</strong> (<em>str</em>) – Name of the QChem output file.</li>
-<li><strong>rca_gdm_thresh</strong> (<em>float</em>) – The threshold for the prior scf algorithm.
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em>) – Name of the QChem input file.</p></li>
+<li><p><strong>output_file</strong> (<em>str</em>) – Name of the QChem output file.</p></li>
+<li><p><strong>rca_gdm_thresh</strong> (<em>float</em>) – The threshold for the prior scf algorithm.
 If last deltaE is larger than the threshold try RCA_DIIS
-first, else, try DIIS_GDM first.</li>
-<li><strong>scf_max_cycles</strong> (<em>int</em>) – The max iterations to set to fix SCF failure.</li>
+first, else, try DIIS_GDM first.</p></li>
+<li><p><strong>scf_max_cycles</strong> (<em>int</em>) – The max iterations to set to fix SCF failure.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
 <dt id="custodian.qchem.handlers.QChemSCFErrorHandler.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/handlers.html#QChemSCFErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.handlers.QChemSCFErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/handlers.html#QChemSCFErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.handlers.QChemSCFErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called during the job (for monitors) or at the end of
 the job to check for errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(bool) Indicating if errors are detected.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.qchem.handlers.QChemSCFErrorHandler.correct">
-<code class="descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/handlers.html#QChemSCFErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.handlers.QChemSCFErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/handlers.html#QChemSCFErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.handlers.QChemSCFErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job when an error is detected.
 It should perform any corrective measures relating to the detected
 error.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(dict) JSON serializable dict that describes the errors and
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
 actions taken. E.g.
 {“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</td>
-</tr>
-</tbody>
-</table>
+If this is an unfixable error, actions should be set to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="custodian.qchem.handlers.QChemSCFErrorHandler.is_monitor">
-<code class="descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.qchem.handlers.QChemSCFErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.qchem.handlers.QChemSCFErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -191,73 +169,65 @@ If this is an unfixable error, actions should be set to None.</td>
 <span id="custodian-qchem-jobs-module"></span><h2>custodian.qchem.jobs module<a class="headerlink" href="#module-custodian.qchem.jobs" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="custodian.qchem.jobs.QCJob">
-<em class="property">class </em><code class="descname">QCJob</code><span class="sig-paren">(</span><em>qchem_command</em>, <em>max_cores</em>, <em>multimode='openmp'</em>, <em>input_file='mol.qin'</em>, <em>output_file='mol.qout'</em>, <em>qclog_file='mol.qclog'</em>, <em>suffix=''</em>, <em>scratch_dir='/dev/shm/qcscratch/'</em>, <em>save_scratch=False</em>, <em>save_name='default_save_name'</em>, <em>backup=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/jobs.html#QCJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.jobs.QCJob" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">QCJob</code><span class="sig-paren">(</span><em class="sig-param">qchem_command</em>, <em class="sig-param">max_cores</em>, <em class="sig-param">multimode='openmp'</em>, <em class="sig-param">input_file='mol.qin'</em>, <em class="sig-param">output_file='mol.qout'</em>, <em class="sig-param">qclog_file='mol.qclog'</em>, <em class="sig-param">suffix=''</em>, <em class="sig-param">scratch_dir='/Users/shyue/repos/custodian/docs_rst'</em>, <em class="sig-param">save_scratch=False</em>, <em class="sig-param">save_name='saved_scratch'</em>, <em class="sig-param">backup=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/jobs.html#QCJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.jobs.QCJob" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.Job</span></code></a></p>
 <p>A basic QChem Job.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>qchem_command</strong> (<em>str</em>) – Command to run QChem.</li>
-<li><strong>max_cores</strong> (<em>int</em>) – Maximum number of cores to parallelize over.</li>
-<li><strong>multimode</strong> (<em>str</em>) – Parallelization scheme, either openmp or mpi.</li>
-<li><strong>input_file</strong> (<em>str</em>) – Name of the QChem input file.</li>
-<li><strong>output_file</strong> (<em>str</em>) – Name of the QChem output file.</li>
-<li><strong>qclog_file</strong> (<em>str</em>) – Name of the file to redirect the standard output
-to. None means not to record the standard output.</li>
-<li><strong>suffix</strong> (<em>str</em>) – String to append to the file in postprocess.</li>
-<li><strong>scratch_dir</strong> (<em>str</em>) – QCSCRATCH directory. Defaults to “/dev/shm/qcscratch/”.</li>
-<li><strong>save_scratch</strong> (<em>bool</em>) – Whether to save scratch directory contents.
-Defaults to False.</li>
-<li><strong>save_name</strong> (<em>str</em>) – Name of the saved scratch directory. Defaults to
-to “default_save_name”.</li>
-<li><strong>backup</strong> (<em>bool</em>) – Whether to backup the initial input file. If True, the
-input will be copied with a “.orig” appended. Defaults to True.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qchem_command</strong> (<em>str</em>) – Command to run QChem.</p></li>
+<li><p><strong>max_cores</strong> (<em>int</em>) – Maximum number of cores to parallelize over.</p></li>
+<li><p><strong>multimode</strong> (<em>str</em>) – Parallelization scheme, either openmp or mpi.</p></li>
+<li><p><strong>input_file</strong> (<em>str</em>) – Name of the QChem input file.</p></li>
+<li><p><strong>output_file</strong> (<em>str</em>) – Name of the QChem output file.</p></li>
+<li><p><strong>qclog_file</strong> (<em>str</em>) – Name of the file to redirect the standard output
+to. None means not to record the standard output.</p></li>
+<li><p><strong>suffix</strong> (<em>str</em>) – String to append to the file in postprocess.</p></li>
+<li><p><strong>scratch_dir</strong> (<em>str</em>) – QCSCRATCH directory. Defaults to current directory.</p></li>
+<li><p><strong>save_scratch</strong> (<em>bool</em>) – Whether to save basic scratch directory contents.
+Defaults to False.</p></li>
+<li><p><strong>save_name</strong> (<em>str</em>) – Name of the saved scratch directory. Defaults to
+to “saved_scratch”.</p></li>
+<li><p><strong>backup</strong> (<em>bool</em>) – Whether to backup the initial input file. If True, the
+input will be copied with a “.orig” appended. Defaults to True.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
-<dl class="attribute">
+</dd>
+</dl>
+<dl class="method">
 <dt id="custodian.qchem.jobs.QCJob.current_command">
-<code class="descname">current_command</code><a class="headerlink" href="#custodian.qchem.jobs.QCJob.current_command" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">current_command</code><a class="headerlink" href="#custodian.qchem.jobs.QCJob.current_command" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="custodian.qchem.jobs.QCJob.opt_with_frequency_flattener">
-<em class="property">classmethod </em><code class="descname">opt_with_frequency_flattener</code><span class="sig-paren">(</span><em>qchem_command</em>, <em>multimode='openmp'</em>, <em>input_file='mol.qin'</em>, <em>output_file='mol.qout'</em>, <em>qclog_file='mol.qclog'</em>, <em>max_iterations=10</em>, <em>max_molecule_perturb_scale=0.3</em>, <em>check_connectivity=True</em>, <em>**QCJob_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/jobs.html#QCJob.opt_with_frequency_flattener"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.jobs.QCJob.opt_with_frequency_flattener" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">opt_with_frequency_flattener</code><span class="sig-paren">(</span><em class="sig-param">qchem_command</em>, <em class="sig-param">multimode='openmp'</em>, <em class="sig-param">input_file='mol.qin'</em>, <em class="sig-param">output_file='mol.qout'</em>, <em class="sig-param">qclog_file='mol.qclog'</em>, <em class="sig-param">max_iterations=10</em>, <em class="sig-param">max_molecule_perturb_scale=0.3</em>, <em class="sig-param">check_connectivity=True</em>, <em class="sig-param">linked=True</em>, <em class="sig-param">**QCJob_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/jobs.html#QCJob.opt_with_frequency_flattener"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.jobs.QCJob.opt_with_frequency_flattener" title="Permalink to this definition">¶</a></dt>
 <dd><p>Optimize a structure and calculate vibrational frequencies to check if the
 structure is in a true minima. If a frequency is negative, iteratively
 perturbe the geometry, optimize, and recalculate frequencies until all are
 positive, aka a true minima has been found.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>qchem_command</strong> (<em>str</em>) – Command to run QChem.</li>
-<li><strong>multimode</strong> (<em>str</em>) – Parallelization scheme, either openmp or mpi.</li>
-<li><strong>input_file</strong> (<em>str</em>) – Name of the QChem input file.</li>
-<li><strong>output_file</strong> (<em>str</em>) – Name of the QChem output file.</li>
-<li><strong>max_iterations</strong> (<em>int</em>) – Number of perturbation -&gt; optimization -&gt; frequency
-iterations to perform. Defaults to 10.</li>
-<li><strong>max_molecule_perturb_scale</strong> (<em>float</em>) – The maximum scaled perturbation that
-can be applied to the molecule. Defaults to 0.3.</li>
-<li><strong>check_connectivity</strong> (<em>bool</em>) – Whether to check differences in connectivity
-introduced by structural perturbation. Defaults to True.</li>
-<li><strong>**QCJob_kwargs</strong> – Passthrough kwargs to QCJob. See
-<a class="reference internal" href="#custodian.qchem.jobs.QCJob" title="custodian.qchem.jobs.QCJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.qchem.jobs.QCJob</span></code></a>.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qchem_command</strong> (<em>str</em>) – Command to run QChem.</p></li>
+<li><p><strong>multimode</strong> (<em>str</em>) – Parallelization scheme, either openmp or mpi.</p></li>
+<li><p><strong>input_file</strong> (<em>str</em>) – Name of the QChem input file.</p></li>
+<li><p><strong>output_file</strong> (<em>str</em>) – Name of the QChem output file.</p></li>
+<li><p><strong>max_iterations</strong> (<em>int</em>) – Number of perturbation -&gt; optimization -&gt; frequency
+iterations to perform. Defaults to 10.</p></li>
+<li><p><strong>max_molecule_perturb_scale</strong> (<em>float</em>) – The maximum scaled perturbation that
+can be applied to the molecule. Defaults to 0.3.</p></li>
+<li><p><strong>check_connectivity</strong> (<em>bool</em>) – Whether to check differences in connectivity
+introduced by structural perturbation. Defaults to True.</p></li>
+<li><p><strong>**QCJob_kwargs</strong> – Passthrough kwargs to QCJob. See
+<a class="reference internal" href="#custodian.qchem.jobs.QCJob" title="custodian.qchem.jobs.QCJob"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.qchem.jobs.QCJob</span></code></a>.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.qchem.jobs.QCJob.postprocess">
-<code class="descname">postprocess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/jobs.html#QCJob.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.jobs.QCJob.postprocess" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">postprocess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/jobs.html#QCJob.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.jobs.QCJob.postprocess" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called at the end of a job, <em>after</em> error detection.
 This allows post-processing, such as cleanup, analysis of results,
 etc.</p>
@@ -265,21 +235,18 @@ etc.</p>
 
 <dl class="method">
 <dt id="custodian.qchem.jobs.QCJob.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/jobs.html#QCJob.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.jobs.QCJob.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/jobs.html#QCJob.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.jobs.QCJob.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the actual QChem run.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(subprocess.Popen) Used for monitoring.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(subprocess.Popen) Used for monitoring.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="custodian.qchem.jobs.QCJob.setup">
-<code class="descname">setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/jobs.html#QCJob.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.jobs.QCJob.setup" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/jobs.html#QCJob.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.jobs.QCJob.setup" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is run before the start of a job. Allows for some
 pre-processing.</p>
 </dd></dl>
@@ -288,7 +255,12 @@ pre-processing.</p>
 
 <dl class="function">
 <dt id="custodian.qchem.jobs.perturb_coordinates">
-<code class="descname">perturb_coordinates</code><span class="sig-paren">(</span><em>old_coords</em>, <em>negative_freq_vecs</em>, <em>molecule_perturb_scale</em>, <em>reversed_direction</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/jobs.html#perturb_coordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.jobs.perturb_coordinates" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">perturb_coordinates</code><span class="sig-paren">(</span><em class="sig-param">old_coords</em>, <em class="sig-param">negative_freq_vecs</em>, <em class="sig-param">molecule_perturb_scale</em>, <em class="sig-param">reversed_direction</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/jobs.html#perturb_coordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.jobs.perturb_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="custodian.qchem.jobs.vector_list_diff">
+<code class="sig-name descname">vector_list_diff</code><span class="sig-paren">(</span><em class="sig-param">vecs1</em>, <em class="sig-param">vecs2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/qchem/jobs.html#vector_list_diff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.qchem.jobs.vector_list_diff" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -327,13 +299,11 @@ pre-processing.</p>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>

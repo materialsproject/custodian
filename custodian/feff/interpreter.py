@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 from custodian.ansible.actions import FileActions, DictActions
 from custodian.ansible.interpreter import Modder
 from pymatgen.io.feff.sets import FEFFDictSet
-import six
 import os
 
 
@@ -57,7 +56,7 @@ class FeffModder(Modder):
             feff_input = "\n\n".join(str(feff[k]) for k in
                                      ["HEADER", "PARAMETERS", "POTENTIALS", "ATOMS"]
                                      if k in feff)
-            for k, v in six.iteritems(feff):
+            for k, v in feff.items():
                 with open(os.path.join('.', k), "w") as f:
                     f.write(str(v))
 

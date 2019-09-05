@@ -1,12 +1,7 @@
 
 Running Job 1 of 1 mol.qin
-qchem mol.qin_55890.0 /tmp/qchem55890/ 1
-srun -n 1 /global/common/cori/software/qchem/5.1beta/exe/qcprog.exe mol.qin_55890.0 /tmp/qchem55890/
-
-Process 0 of 1 is on nid00761 - thread support 0
-initial socket setup ...start
-initial socket setup ...done 
-now start server 0 ... 
+qchem mol.qin_35668.0 /tmp/qchem35668/ 1
+/global/common/edison/software/qchem/5.1/exe/qcprog.exe mol.qin_35668.0 /tmp/qchem35668/
 Check license passed
 
                   Welcome to Q-Chem
@@ -26,32 +21,32 @@ Check license passed
  A. L. Dempwolff,  M. Diedenhofen,  Hainam Do,  R. G. Edgar,  Po-Tung Fang,  
  S. Faraji,  S. Fatehi,  Qingguo Feng,  K. D. Fenk,  J. Fosso-Tande,  
  Qinghui Ge,  A. Ghysels,  G. Gidofalvi,  J. Gomes,  J. Gonthier,  A. Gunina,  
- M. W. D. Hanson-Heine,  P. H. P. Harbach,  A. W. Hauser,  J. E. Herr,  
- E. G. Hohenstein,  Z. C. Holden,  Kerwin Hui,  T.-C. Jagau,  Hyunjun Ji,  
- B. Kaduk,  K. Khistyaev,  Jaehoon Kim,  P. Klunzinger,  K. Koh,  
- D. Kosenkov,  L. Koulias,  T. Kowalczyk,  C. M. Krauter,  A. Kunitsa,  
- Ka Un Lao,  A. Laurent,  K. V. Lawler,  Joonho Lee,  D. Lefrancois,  
- S. Lehtola,  D. S. Levine,  Yi-Pei Li,  You-Sheng Lin,  Fenglai Liu,  
- E. Livshits,  A. Luenser,  P. Manohar,  E. Mansoor,  S. F. Manzer,  
- Shan-Ping Mao,  Yuezhi Mao,  N. Mardirossian,  A. V. Marenich,  
- T. Markovich,  L. A. Martinez-Martinez,  S. A. Maurer,  N. J. Mayhall,  
- S. C. McKenzie,  J.-M. Mewes,  A. F. Morrison,  J. W. Mullinax,  K. Nanda,  
- T. S. Nguyen-Beck,  R. Olivares-Amaya,  J. A. Parkhill,  T. M. Perrine,  
- F. Plasser,  P. Pokhilko,  S. Prager,  A. Prociuk,  E. Ramos,  D. R. Rehn,  
- F. Rob,  M. Schneider,  N. Sergueev,  S. M. Sharada,  S. Sharma,  
- D. W. Small,  T. Stauch,  T. Stein,  Yu-Chuan Su,  A. J. W. Thom,  
- A. Tkatchenko,  T. Tsuchimochi,  N. M. Tubman,  L. Vogt,  M. L. Vidal,  
- O. Vydrov,  M. A. Watson,  J. Wenzel,  M. de Wergifosse,  T. A. Wesolowski,  
- A. White,  J. Witte,  A. Yamada,  Jun Yang,  K. Yao,  S. Yeganeh,  
- S. R. Yost,  Zhi-Qiang You,  A. Zech,  Igor Ying Zhang,  Xing Zhang,  
- Yan Zhao,  Ying Zhu,  B. R. Brooks,  G. K. L. Chan,  C. J. Cramer,  
- M. S. Gordon,  W. J. Hehre,  A. Klamt,  M. W. Schmidt,  C. D. Sherrill,  
- D. G. Truhlar,  A. Aspuru-Guzik,  R. Baer,  A. T. Bell,  N. A. Besley,  
- Jeng-Da Chai,  R. A. DiStasio Jr.,  A. Dreuw,  B. D. Dunietz,  
- T. R. Furlani,  Chao-Ping Hsu,  Yousung Jung,  Jing Kong,  D. S. Lambrecht,  
- WanZhen Liang,  C. Ochsenfeld,  V. A. Rassolov,  L. V. Slipchenko,  
- J. E. Subotnik,  T. Van Voorhis,  J. M. Herbert,  A. I. Krylov,  
- P. M. W. Gill,  M. Head-Gordon
+ D. Hait,  M. W. D. Hanson-Heine,  P. H. P. Harbach,  A. W. Hauser,  
+ J. E. Herr,  E. G. Hohenstein,  Z. C. Holden,  Kerwin Hui,  B. C. Huynh,  
+ T.-C. Jagau,  Hyunjun Ji,  B. Kaduk,  K. Khistyaev,  Jaehoon Kim,  
+ P. Klunzinger,  K. Koh,  D. Kosenkov,  L. Koulias,  T. Kowalczyk,  
+ C. M. Krauter,  A. Kunitsa,  Ka Un Lao,  A. Laurent,  K. V. Lawler,  
+ Joonho Lee,  D. Lefrancois,  S. Lehtola,  D. S. Levine,  Yi-Pei Li,  
+ You-Sheng Lin,  Fenglai Liu,  E. Livshits,  A. Luenser,  P. Manohar,  
+ E. Mansoor,  S. F. Manzer,  Shan-Ping Mao,  Yuezhi Mao,  N. Mardirossian,  
+ A. V. Marenich,  T. Markovich,  L. A. Martinez-Martinez,  S. A. Maurer,  
+ N. J. Mayhall,  S. C. McKenzie,  J.-M. Mewes,  A. F. Morrison,  
+ J. W. Mullinax,  K. Nanda,  T. S. Nguyen-Beck,  R. Olivares-Amaya,  
+ J. A. Parkhill,  T. M. Perrine,  F. Plasser,  P. Pokhilko,  S. Prager,  
+ A. Prociuk,  E. Ramos,  D. R. Rehn,  F. Rob,  M. Schneider,  N. Sergueev,  
+ S. M. Sharada,  S. Sharma,  D. W. Small,  T. Stauch,  T. Stein,  
+ Yu-Chuan Su,  A. J. W. Thom,  A. Tkatchenko,  T. Tsuchimochi,  N. M. Tubman,  
+ L. Vogt,  M. L. Vidal,  O. Vydrov,  M. A. Watson,  J. Wenzel,  
+ M. de Wergifosse,  T. A. Wesolowski,  A. White,  J. Witte,  A. Yamada,  
+ Jun Yang,  K. Yao,  S. Yeganeh,  S. R. Yost,  Zhi-Qiang You,  A. Zech,  
+ Igor Ying Zhang,  Xing Zhang,  Yan Zhao,  Ying Zhu,  B. R. Brooks,  
+ G. K. L. Chan,  C. J. Cramer,  M. S. Gordon,  W. J. Hehre,  A. Klamt,  
+ M. W. Schmidt,  C. D. Sherrill,  D. G. Truhlar,  A. Aspuru-Guzik,  R. Baer,  
+ A. T. Bell,  N. A. Besley,  Jeng-Da Chai,  R. A. DiStasio Jr.,  A. Dreuw,  
+ B. D. Dunietz,  T. R. Furlani,  Chao-Ping Hsu,  Yousung Jung,  Jing Kong,  
+ D. S. Lambrecht,  WanZhen Liang,  C. Ochsenfeld,  V. A. Rassolov,  
+ L. V. Slipchenko,  J. E. Subotnik,  T. Van Voorhis,  J. M. Herbert,  
+ A. I. Krylov,  P. M. W. Gill,  M. Head-Gordon
 
  Contributors to earlier versions of Q-Chem not listed above: 
  R. D. Adamson,  B. Austin,  J. Baker,  G. J. O. Beran,  K. Brandhorst,  
@@ -78,16 +73,15 @@ Check license passed
  Parts of Q-Chem use Armadillo 8.300.2 (Tropical Shenanigans).
  http://arma.sourceforge.net/
 
- Q-Chem begins on Mon Aug 27 12:00:31 2018  
+ Q-Chem begins on Tue Nov 13 14:48:07 2018  
 
-Host: cori09
+Host: edison03
 0
 
-     Scratch files written to /tmp/qchem55890//
- Mar1918  _RNUM -1
- Parallel job on  1  processors
-Processing $rem in /global/common/cori/software/qchem/5.1beta/config/preferences.
- MEM_TOTAL  2000 
+     Scratch files written to /tmp/qchem35668//
+ Jun2518 |scratch|qcdevops|jenkins|workspace|build_RNUM -1
+Processing $rem in /global/common/edison/software/qchem/5.1/config/preferences.
+ MEM_TOTAL  48000 
 
 Checking the input file for inconsistencies... 	...done.
 
@@ -107,10 +101,10 @@ C     -0.0400664112     -0.3384659407      0.0076454372
 H      2.3461005300     -0.9894359336      0.7670441516
 H      2.3333174846     -0.8364516769     -0.9855847267
 H     -2.3466514427     -1.2021463683      0.0541102323
-H      4.4064426351      0.4049331983      0.1123650129
+H      4.4064426351      0.4049331983      0.1123650130
 H      3.1369561679      1.8360374819     -0.0410301417
 H     -4.4154437790      0.1644100701     -0.0105833136
-H     -3.3844297073      1.7175613913     -0.0534061086
+H     -3.3844297073      1.7175613913     -0.0534061085
 $end
 
 $rem
@@ -133,15 +127,15 @@ $end
     4      C       2.2942686071    -0.2575327011    -0.0497372962
     5      C      -2.3568851438    -0.1200548108     0.0197540467
     6      C       3.3726608956     0.7498592039     0.0351215982
-    7      C      -3.4413120474     0.6342770370    -0.0187056661
+    7      C      -3.4413120474     0.6342770370    -0.0187056662
     8      C      -0.0398004813    -0.3388240090     0.0081130515
-    9      H       2.3465172622    -0.9877670659     0.7687716784
+    9      H       2.3465172622    -0.9877670658     0.7687716784
    10      H       2.3335785554    -0.8386748165    -0.9841914317
    11      H      -2.3462587573    -1.2027277462     0.0566714634
-   12      H       4.4066104815     0.4054391071     0.1108414935
-   13      H       3.1369082145     1.8360185676    -0.0456321307
+   12      H       4.4066104815     0.4054391071     0.1108414936
+   13      H       3.1369082145     1.8360185676    -0.0456321308
    14      H      -4.4152509033     0.1633870341    -0.0108962197
-   15      H      -3.3844616236     1.7165863394    -0.0572450388
+   15      H      -3.3844616236     1.7165863394    -0.0572450387
  ----------------------------------------------------------------
  Molecular Point Group                 C1    NOp =  1
  Largest Abelian Subgroup              C1    NOp =  1
@@ -150,7 +144,7 @@ $end
  Requested basis set is 6-311++G(d)
  There are 76 shells and 204 basis functions
 
- Total QAlloc Memory Limit   2000 MB
+ Total QAlloc Memory Limit  48000 MB
  Mega-Array Size       188 MB
  MEM_STATIC part       192 MB
  A cutoff of  1.0D-12 yielded   2593 shell pairs
@@ -231,17 +225,17 @@ $end
  ---------------------------------------
   Cycle       Energy         DIIS error
  ---------------------------------------
-    1    -422.0802874032      2.32e-02  Roothaan Step
+    1    -422.0803035940      2.32e-02  Roothaan Step
  ---------------------------------------
   Cycle       Energy        RMS Gradient
  ---------------------------------------
-    1    -420.1283319040      1.89e-01   Descent step
-    2    -420.2832966703      2.94e-02   Normal BFGS step
-    3    -420.2940229691      2.79e-02   Normal BFGS step
-    4    -420.2981919787      1.08e-02   Normal BFGS step
-    5    -420.2989045317      2.72e-03   Normal BFGS step
+    1    -420.1283320477      1.89e-01   Descent step
+    2    -420.2832965907      2.94e-02   Normal BFGS step
+    3    -420.2940229501      2.79e-02   Normal BFGS step
+    4    -420.2981919780      1.08e-02   Normal BFGS step
+    5    -420.2989045291      2.72e-03   Normal BFGS step
     6    -420.2989906833      9.78e-04   Normal BFGS step
-    7    -420.2990067701      3.63e-04   Normal BFGS step
+    7    -420.2990067700      3.63e-04   Normal BFGS step
     8    -420.2990083905      2.33e-04   Normal BFGS step
     9    -420.2990089423      6.03e-05   Normal BFGS step
    10    -420.2990090083      3.21e-05   Normal BFGS step
@@ -258,9 +252,10 @@ $end
    21    -420.2990090205      1.13e-08   Normal BFGS step
    22    -420.2990090205      6.08e-09  Convergence criterion met
  ---------------------------------------
- SCF time:   CPU 600.95s  wall 21.00s 
- SCF   energy in the final basis set =     -420.2990090205
+ SCF time:   CPU 732.26s  wall 27.00s 
 <S^2> =          0.754693911
+ SCF   energy in the final basis set =     -420.2990090205
+ Total energy in the final basis set =     -420.2990090205
  
  --------------------------------------------------------------
  
@@ -390,7 +385,7 @@ $end
     3  -0.0013341   0.0000135  -0.0000320
  Max gradient component =       2.032E-02
  RMS gradient           =       4.031E-03
- Gradient time:  CPU 54.48 s  wall 4.28 s
+ Gradient time:  CPU 67.10 s  wall 3.46 s
  Geometry Optimization Parameters
    NAtoms,    NIC,     NZ,  NCons,   NDum,   NFix, NCnnct, MaxDiis
        15      83       0       0       0       0       0       0
@@ -409,15 +404,15 @@ $end
       4  C         2.2942686071   -0.2575327011   -0.0497372962
       5  C        -2.3568851438   -0.1200548108    0.0197540467
       6  C         3.3726608956    0.7498592039    0.0351215982
-      7  C        -3.4413120474    0.6342770370   -0.0187056661
+      7  C        -3.4413120474    0.6342770370   -0.0187056662
       8  C        -0.0398004813   -0.3388240090    0.0081130515
-      9  H         2.3465172622   -0.9877670659    0.7687716784
+      9  H         2.3465172622   -0.9877670658    0.7687716784
      10  H         2.3335785554   -0.8386748165   -0.9841914317
      11  H        -2.3462587573   -1.2027277462    0.0566714634
-     12  H         4.4066104815    0.4054391071    0.1108414935
-     13  H         3.1369082145    1.8360185676   -0.0456321307
+     12  H         4.4066104815    0.4054391071    0.1108414936
+     13  H         3.1369082145    1.8360185676   -0.0456321308
      14  H        -4.4152509033    0.1633870341   -0.0108962197
-     15  H        -3.3844616236    1.7165863394   -0.0572450388
+     15  H        -3.3844616236    1.7165863394   -0.0572450387
    Point Group: c1    Number of degrees of freedom:    39
 
 
@@ -460,13 +455,13 @@ $end
     4      C       2.2925253695    -0.2515771250    -0.0386406400
     5      C      -2.3572885831    -0.1200790570     0.0123174083
     6      C       3.3769467398     0.7485467798     0.0359417620
-    7      C      -3.4447970128     0.6299855724    -0.0076839127
+    7      C      -3.4447970128     0.6299855724    -0.0076839126
     8      C      -0.0401040701    -0.3314033121    -0.0102058078
     9      H       2.3344611800    -0.9667686289     0.7917003057
    10      H       2.3370074130    -0.8465208180    -0.9618517150
    11      H      -2.3422349930    -1.2025213548     0.0360826474
    12      H       4.4017078876     0.4117043199     0.1205638895
-   13      H       3.1597782701     1.8007842210    -0.0722927489
+   13      H       3.1597782702     1.8007842210    -0.0722927489
    14      H      -4.4170084093     0.1552197897     0.0012740507
    15      H      -3.3927227887     1.7121615604    -0.0325948731
  ----------------------------------------------------------------
@@ -539,9 +534,10 @@ $end
    13    -420.2998049457      3.18e-08   Normal BFGS step
    14    -420.2998049457      8.28e-09  Convergence criterion met
  ---------------------------------------
- SCF time:   CPU 403.53s  wall 14.00s 
- SCF   energy in the final basis set =     -420.2998049457
+ SCF time:   CPU 504.35s  wall 19.00s 
 <S^2> =          0.754464422
+ SCF   energy in the final basis set =     -420.2998049457
+ Total energy in the final basis set =     -420.2998049457
  
  --------------------------------------------------------------
  
@@ -671,7 +667,7 @@ $end
     3   0.0002485   0.0000221  -0.0000248
  Max gradient component =       1.305E-03
  RMS gradient           =       4.205E-04
- Gradient time:  CPU 54.96 s  wall 2.57 s
+ Gradient time:  CPU 67.68 s  wall 3.63 s
  Geometry Optimization Parameters
    NAtoms,    NIC,     NZ,  NCons,   NDum,   NFix, NCnnct, MaxDiis
        15      83       0       0       0       0       0       0
@@ -693,13 +689,13 @@ $end
       4  C         2.2925253695   -0.2515771250   -0.0386406400
       5  C        -2.3572885831   -0.1200790570    0.0123174083
       6  C         3.3769467398    0.7485467798    0.0359417620
-      7  C        -3.4447970128    0.6299855724   -0.0076839127
+      7  C        -3.4447970128    0.6299855724   -0.0076839126
       8  C        -0.0401040701   -0.3314033121   -0.0102058078
       9  H         2.3344611800   -0.9667686289    0.7917003057
      10  H         2.3370074130   -0.8465208180   -0.9618517150
      11  H        -2.3422349930   -1.2025213548    0.0360826474
      12  H         4.4017078876    0.4117043199    0.1205638895
-     13  H         3.1597782701    1.8007842210   -0.0722927489
+     13  H         3.1597782702    1.8007842210   -0.0722927489
      14  H        -4.4170084093    0.1552197897    0.0012740507
      15  H        -3.3927227887    1.7121615604   -0.0325948731
    Point Group: c1    Number of degrees of freedom:    39
@@ -739,7 +735,7 @@ $end
     1      O       1.0363412460     0.4386551358     0.0154950319
     2      O      -1.1120695092     0.4732355662     0.0246132526
     3      O      -0.0563368618    -1.5321268864    -0.0300490741
-    4      C       2.2924983697    -0.2530419561    -0.0305878811
+    4      C       2.2924983697    -0.2530419561    -0.0305878810
     5      C      -2.3569863750    -0.1202382751     0.0077721798
     6      C       3.3750083013     0.7495616882     0.0269597226
     7      C      -3.4437368680     0.6309670967    -0.0100865958
@@ -747,10 +743,10 @@ $end
     9      H       2.3429757141    -0.9637428644     0.8029708141
    10      H       2.3276311204    -0.8522890346    -0.9512231951
    11      H      -2.3428002021    -1.2029298889     0.0123762904
-   12      H       4.4011833514     0.4156218518     0.1047937587
+   12      H       4.4011833514     0.4156218518     0.1047937588
    13      H       3.1584119260     1.8016434045    -0.0919394508
    14      H      -4.4162602349     0.1568662654    -0.0199082686
-   15      H      -3.3910066558     1.7133943906    -0.0150694051
+   15      H      -3.3910066558     1.7133943907    -0.0150694050
  ----------------------------------------------------------------
  Molecular Point Group                 C1    NOp =  1
  Largest Abelian Subgroup              C1    NOp =  1
@@ -822,9 +818,10 @@ $end
    14    -420.2997730594      1.52e-08   Normal BFGS step
    15    -420.2997730594      3.00e-09  Convergence criterion met
  ---------------------------------------
- SCF time:   CPU 432.75s  wall 15.00s 
- SCF   energy in the final basis set =     -420.2997730594
+ SCF time:   CPU 521.42s  wall 19.00s 
 <S^2> =          0.754462033
+ SCF   energy in the final basis set =     -420.2997730594
+ Total energy in the final basis set =     -420.2997730594
  
  --------------------------------------------------------------
  
@@ -954,7 +951,7 @@ $end
     3   0.0002160   0.0000388  -0.0000465
  Max gradient component =       4.757E-03
  RMS gradient           =       8.295E-04
- Gradient time:  CPU 55.30 s  wall 2.68 s
+ Gradient time:  CPU 63.36 s  wall 3.24 s
  Geometry Optimization Parameters
    NAtoms,    NIC,     NZ,  NCons,   NDum,   NFix, NCnnct, MaxDiis
        15      83       0       0       0       0       0       0
@@ -973,7 +970,7 @@ $end
       1  O         1.0363412460    0.4386551358    0.0154950319
       2  O        -1.1120695092    0.4732355662    0.0246132526
       3  O        -0.0563368618   -1.5321268864   -0.0300490741
-      4  C         2.2924983697   -0.2530419561   -0.0305878811
+      4  C         2.2924983697   -0.2530419561   -0.0305878810
       5  C        -2.3569863750   -0.1202382751    0.0077721798
       6  C         3.3750083013    0.7495616882    0.0269597226
       7  C        -3.4437368680    0.6309670967   -0.0100865958
@@ -981,10 +978,10 @@ $end
       9  H         2.3429757141   -0.9637428644    0.8029708141
      10  H         2.3276311204   -0.8522890346   -0.9512231951
      11  H        -2.3428002021   -1.2029298889    0.0123762904
-     12  H         4.4011833514    0.4156218518    0.1047937587
+     12  H         4.4011833514    0.4156218518    0.1047937588
      13  H         3.1584119260    1.8016434045   -0.0919394508
      14  H        -4.4162602349    0.1568662654   -0.0199082686
-     15  H        -3.3910066558    1.7133943906   -0.0150694051
+     15  H        -3.3910066558    1.7133943907   -0.0150694050
    Point Group: c1    Number of degrees of freedom:    39
 
 
@@ -1020,7 +1017,7 @@ $end
              Standard Nuclear Orientation (Angstroms)
     I     Atom           X                Y                Z
  ----------------------------------------------------------------
-    1      O       1.0364529528     0.4384761988     0.0033589450
+    1      O       1.0364529528     0.4384761988     0.0033589451
     2      O      -1.1119749788     0.4732774059     0.0114342611
     3      O      -0.0564204588    -1.5324060601    -0.0401594352
     4      C       2.2928937759    -0.2539614954    -0.0258759229
@@ -1034,11 +1031,11 @@ $end
    12      H       4.3998387181     0.4176768717     0.1215713435
    13      H       3.1597435448     1.8019129463    -0.1075031841
    14      H      -4.4164260081     0.1571084043    -0.0045959818
-   15      H      -3.3912806132     1.7136547751    -0.0002646485
+   15      H      -3.3912806132     1.7136547751    -0.0002646484
  ----------------------------------------------------------------
  Molecular Point Group                 C1    NOp =  1
  Largest Abelian Subgroup              C1    NOp =  1
- Nuclear Repulsion Energy =   363.2385232508 hartrees
+ Nuclear Repulsion Energy =   363.2385232507 hartrees
  There are       31 alpha and       30 beta electrons
  Applying Cartesian multipole field
     Component          Value
@@ -1106,9 +1103,10 @@ $end
    14    -420.2998291969      1.22e-08   Normal BFGS step
    15    -420.2998291969      8.23e-09  Convergence criterion met
  ---------------------------------------
- SCF time:   CPU 432.25s  wall 16.00s 
- SCF   energy in the final basis set =     -420.2998291969
+ SCF time:   CPU 522.65s  wall 19.00s 
 <S^2> =          0.754468656
+ SCF   energy in the final basis set =     -420.2998291969
+ Total energy in the final basis set =     -420.2998291969
  
  --------------------------------------------------------------
  
@@ -1238,7 +1236,7 @@ $end
     3   0.0000945  -0.0000112  -0.0000209
  Max gradient component =       4.856E-04
  RMS gradient           =       1.160E-04
- Gradient time:  CPU 55.02 s  wall 2.61 s
+ Gradient time:  CPU 65.18 s  wall 3.22 s
  Geometry Optimization Parameters
    NAtoms,    NIC,     NZ,  NCons,   NDum,   NFix, NCnnct, MaxDiis
        15      83       0       0       0       0       0       0
@@ -1254,7 +1252,7 @@ $end
 
                        Coordinates (Angstroms)
      ATOM                X               Y               Z
-      1  O         1.0364529528    0.4384761988    0.0033589450
+      1  O         1.0364529528    0.4384761988    0.0033589451
       2  O        -1.1119749788    0.4732774059    0.0114342611
       3  O        -0.0564204588   -1.5324060601   -0.0401594352
       4  C         2.2928937759   -0.2539614954   -0.0258759229
@@ -1268,7 +1266,7 @@ $end
      12  H         4.3998387181    0.4176768717    0.1215713435
      13  H         3.1597435448    1.8019129463   -0.1075031841
      14  H        -4.4164260081    0.1571084043   -0.0045959818
-     15  H        -3.3912806132    1.7136547751   -0.0002646485
+     15  H        -3.3912806132    1.7136547751   -0.0002646484
    Point Group: c1    Number of degrees of freedom:    39
 
 
@@ -1304,25 +1302,25 @@ $end
              Standard Nuclear Orientation (Angstroms)
     I     Atom           X                Y                Z
  ----------------------------------------------------------------
-    1      O       1.0360717607     0.4396588765     0.0060995726
+    1      O       1.0360717606     0.4396588765     0.0060995726
     2      O      -1.1128126881     0.4740214770     0.0111398358
     3      O      -0.0564777540    -1.5310009343    -0.0455208859
     4      C       2.2927961560    -0.2531815730    -0.0210943716
     5      C      -2.3574651829    -0.1201193771    -0.0014066066
     6      C       3.3753794158     0.7494807655     0.0279218330
-    7      C      -3.4448582506     0.6303600177     0.0026838372
+    7      C      -3.4448582506     0.6303600177     0.0026838373
     8      C      -0.0400932594    -0.3314845287    -0.0131671976
     9      H       2.3369740794    -0.9501694465     0.8243004482
    10      H       2.3336542886    -0.8671028458    -0.9317361844
    11      H      -2.3425122701    -1.2027691337    -0.0129878790
-   12      H       4.4009520830     0.4172310819     0.1254204709
+   12      H       4.4009520830     0.4172310819     0.1254204710
    13      H       3.1637926569     1.7993391050    -0.1237854816
    14      H      -4.4170844028     0.1555897032    -0.0046419663
-   15      H      -3.3931458494     1.7128067344     0.0139408463
+   15      H      -3.3931458494     1.7128067344     0.0139408464
  ----------------------------------------------------------------
  Molecular Point Group                 C1    NOp =  1
  Largest Abelian Subgroup              C1    NOp =  1
- Nuclear Repulsion Energy =   363.2137597276 hartrees
+ Nuclear Repulsion Energy =   363.2137597275 hartrees
  There are       31 alpha and       30 beta electrons
  Applying Cartesian multipole field
     Component          Value
@@ -1388,9 +1386,10 @@ $end
    12    -420.2998360485      1.09e-08   Normal BFGS step
    13    -420.2998360485      4.16e-09  Convergence criterion met
  ---------------------------------------
- SCF time:   CPU 379.64s  wall 13.00s 
- SCF   energy in the final basis set =     -420.2998360485
+ SCF time:   CPU 464.88s  wall 17.00s 
 <S^2> =          0.754464833
+ SCF   energy in the final basis set =     -420.2998360485
+ Total energy in the final basis set =     -420.2998360485
  
  --------------------------------------------------------------
  
@@ -1520,7 +1519,7 @@ $end
     3   0.0001384   0.0000178  -0.0000149
  Max gradient component =       1.384E-04
  RMS gradient           =       5.278E-05
- Gradient time:  CPU 54.94 s  wall 2.64 s
+ Gradient time:  CPU 71.23 s  wall 3.42 s
  Geometry Optimization Parameters
    NAtoms,    NIC,     NZ,  NCons,   NDum,   NFix, NCnnct, MaxDiis
        15      83       0       0       0       0       0       0
@@ -1536,21 +1535,21 @@ $end
 
                        Coordinates (Angstroms)
      ATOM                X               Y               Z
-      1  O         1.0360717607    0.4396588765    0.0060995726
+      1  O         1.0360717606    0.4396588765    0.0060995726
       2  O        -1.1128126881    0.4740214770    0.0111398358
       3  O        -0.0564777540   -1.5310009343   -0.0455208859
       4  C         2.2927961560   -0.2531815730   -0.0210943716
       5  C        -2.3574651829   -0.1201193771   -0.0014066066
       6  C         3.3753794158    0.7494807655    0.0279218330
-      7  C        -3.4448582506    0.6303600177    0.0026838372
+      7  C        -3.4448582506    0.6303600177    0.0026838373
       8  C        -0.0400932594   -0.3314845287   -0.0131671976
       9  H         2.3369740794   -0.9501694465    0.8243004482
      10  H         2.3336542886   -0.8671028458   -0.9317361844
      11  H        -2.3425122701   -1.2027691337   -0.0129878790
-     12  H         4.4009520830    0.4172310819    0.1254204709
+     12  H         4.4009520830    0.4172310819    0.1254204710
      13  H         3.1637926569    1.7993391050   -0.1237854816
      14  H        -4.4170844028    0.1555897032   -0.0046419663
-     15  H        -3.3931458494    1.7128067344    0.0139408463
+     15  H        -3.3931458494    1.7128067344    0.0139408464
    Point Group: c1    Number of degrees of freedom:    39
 
 
@@ -1594,17 +1593,17 @@ $end
     6      C       3.3760868660     0.7494240524     0.0208431933
     7      C      -3.4456771820     0.6293320926     0.0121994475
     8      C      -0.0402634845    -0.3300239012    -0.0155388389
-    9      H       2.3415702608    -0.9353933940     0.8502656112
+    9      H       2.3415702608    -0.9353933941     0.8502656112
    10      H       2.3268460735    -0.8806896083    -0.9073133999
    11      H      -2.3419580798    -1.2015473662    -0.0604625877
-   12      H       4.4007422748     0.4200612932     0.1371633676
+   12      H       4.4007422748     0.4200612932     0.1371633677
    13      H       3.1695228061     1.7920709347    -0.1769290568
    14      H      -4.4175210114     0.1542252312    -0.0103023935
    15      H      -3.3949451218     1.7109027112     0.0579817313
  ----------------------------------------------------------------
  Molecular Point Group                 C1    NOp =  1
  Largest Abelian Subgroup              C1    NOp =  1
- Nuclear Repulsion Energy =   363.2071982805 hartrees
+ Nuclear Repulsion Energy =   363.2071982804 hartrees
  There are       31 alpha and       30 beta electrons
  Applying Cartesian multipole field
     Component          Value
@@ -1671,9 +1670,10 @@ $end
    13    -420.2998481311      1.90e-08   Normal BFGS step
    14    -420.2998481311      9.49e-09  Convergence criterion met
  ---------------------------------------
- SCF time:   CPU 402.31s  wall 15.00s 
- SCF   energy in the final basis set =     -420.2998481311
+ SCF time:   CPU 496.19s  wall 19.00s 
 <S^2> =          0.754454517
+ SCF   energy in the final basis set =     -420.2998481311
+ Total energy in the final basis set =     -420.2998481311
  
  --------------------------------------------------------------
  
@@ -1803,7 +1803,7 @@ $end
     3   0.0001636   0.0000018   0.0000077
  Max gradient component =       4.200E-04
  RMS gradient           =       1.278E-04
- Gradient time:  CPU 55.60 s  wall 2.63 s
+ Gradient time:  CPU 63.36 s  wall 2.86 s
  Geometry Optimization Parameters
    NAtoms,    NIC,     NZ,  NCons,   NDum,   NFix, NCnnct, MaxDiis
        15      83       0       0       0       0       0       0
@@ -1827,10 +1827,10 @@ $end
       6  C         3.3760868660    0.7494240524    0.0208431933
       7  C        -3.4456771820    0.6293320926    0.0121994475
       8  C        -0.0402634845   -0.3300239012   -0.0155388389
-      9  H         2.3415702608   -0.9353933940    0.8502656112
+      9  H         2.3415702608   -0.9353933941    0.8502656112
      10  H         2.3268460735   -0.8806896083   -0.9073133999
      11  H        -2.3419580798   -1.2015473662   -0.0604625877
-     12  H         4.4007422748    0.4200612932    0.1371633676
+     12  H         4.4007422748    0.4200612932    0.1371633677
      13  H         3.1695228061    1.7920709347   -0.1769290568
      14  H        -4.4175210114    0.1542252312   -0.0103023935
      15  H        -3.3949451218    1.7109027112    0.0579817313
@@ -1878,16 +1878,16 @@ $end
     7      C      -3.4457158454     0.6294481907     0.0154067435
     8      C      -0.0403980853    -0.3303940137    -0.0138475719
     9      H       2.3470714944    -0.9322678036     0.8582032515
-   10      H       2.3228026682    -0.8840487818    -0.8996344719
+   10      H       2.3228026682    -0.8840487818    -0.8996344720
    11      H      -2.3422656012    -1.2005686414    -0.0800880727
-   12      H       4.3997817527     0.4236635452     0.1471669077
-   13      H       3.1699572989     1.7882573791    -0.2040700157
+   12      H       4.3997817527     0.4236635452     0.1471669078
+   13      H       3.1699572989     1.7882573791    -0.2040700156
    14      H      -4.4176733988     0.1549257640    -0.0137673810
    15      H      -3.3946954772     1.7103035557     0.0755683625
  ----------------------------------------------------------------
  Molecular Point Group                 C1    NOp =  1
  Largest Abelian Subgroup              C1    NOp =  1
- Nuclear Repulsion Energy =   363.1905428055 hartrees
+ Nuclear Repulsion Energy =   363.1905428054 hartrees
  There are       31 alpha and       30 beta electrons
  Applying Cartesian multipole field
     Component          Value
@@ -1939,7 +1939,7 @@ $end
  ---------------------------------------
   Cycle       Energy        RMS Gradient
  ---------------------------------------
-    1    -420.2998266897      2.16e-03   Normal BFGS step
+    1    -420.2998266898      2.16e-03   Normal BFGS step
     2    -420.2998493862      1.12e-03   Normal BFGS step
     3    -420.2998543073      1.83e-04   Normal BFGS step
     4    -420.2998544354      5.95e-05   Normal BFGS step
@@ -1953,9 +1953,10 @@ $end
    12    -420.2998544867      1.12e-07   Normal BFGS step
    13    -420.2998544867      9.48e-09  Convergence criterion met
  ---------------------------------------
- SCF time:   CPU 378.61s  wall 14.00s 
- SCF   energy in the final basis set =     -420.2998544867
+ SCF time:   CPU 463.19s  wall 17.00s 
 <S^2> =          0.754450645
+ SCF   energy in the final basis set =     -420.2998544867
+ Total energy in the final basis set =     -420.2998544867
  
  --------------------------------------------------------------
  
@@ -2085,7 +2086,7 @@ $end
     3   0.0001301   0.0000166   0.0000140
  Max gradient component =       2.845E-04
  RMS gradient           =       1.013E-04
- Gradient time:  CPU 55.60 s  wall 2.68 s
+ Gradient time:  CPU 64.50 s  wall 2.93 s
  Geometry Optimization Parameters
    NAtoms,    NIC,     NZ,  NCons,   NDum,   NFix, NCnnct, MaxDiis
        15      83       0       0       0       0       0       0
@@ -2110,10 +2111,10 @@ $end
       7  C        -3.4457158454    0.6294481907    0.0154067435
       8  C        -0.0403980853   -0.3303940137   -0.0138475719
       9  H         2.3470714944   -0.9322678036    0.8582032515
-     10  H         2.3228026682   -0.8840487818   -0.8996344719
+     10  H         2.3228026682   -0.8840487818   -0.8996344720
      11  H        -2.3422656012   -1.2005686414   -0.0800880727
-     12  H         4.3997817527    0.4236635452    0.1471669077
-     13  H         3.1699572989    1.7882573791   -0.2040700157
+     12  H         4.3997817527    0.4236635452    0.1471669078
+     13  H         3.1699572989    1.7882573791   -0.2040700156
      14  H        -4.4176733988    0.1549257640   -0.0137673810
      15  H        -3.3946954772    1.7103035557    0.0755683625
    Point Group: c1    Number of degrees of freedom:    39
@@ -2152,24 +2153,24 @@ $end
     I     Atom           X                Y                Z
  ----------------------------------------------------------------
     1      O       1.0355070226     0.4382868012     0.0405527565
-    2      O      -1.1130665819     0.4733936583     0.0192804143
+    2      O      -1.1130665819     0.4733936583     0.0192804144
     3      O      -0.0565522306    -1.5303184036    -0.0712599446
     4      C       2.2932071051    -0.2535002996     0.0012199231
     5      C      -2.3576775183    -0.1193388870    -0.0228204177
-    6      C       3.3745588418     0.7514788794     0.0155382319
+    6      C       3.3745588417     0.7514788794     0.0155382319
     7      C      -3.4449600947     0.6302812558     0.0166810495
     8      C      -0.0402694174    -0.3319252985    -0.0096678329
     9      H       2.3546633974    -0.9362431702     0.8566270112
-   10      H       2.3172099414    -0.8808079055    -0.9009422184
+   10      H       2.3172099413    -0.8808079055    -0.9009422184
    11      H      -2.3427855002    -1.2000275738    -0.0891199228
-   12      H       4.3967092168     0.4297080646     0.1677758567
+   12      H       4.3967092168     0.4297080646     0.1677758568
    13      H       3.1687763859     1.7839699470    -0.2325444671
-   14      H      -4.4173471227     0.1570251297    -0.0180597624
+   14      H      -4.4173471227     0.1570251298    -0.0180597624
    15      H      -3.3928026620     1.7106777243     0.0839055938
  ----------------------------------------------------------------
  Molecular Point Group                 C1    NOp =  1
  Largest Abelian Subgroup              C1    NOp =  1
- Nuclear Repulsion Energy =   363.1951536559 hartrees
+ Nuclear Repulsion Energy =   363.1951536560 hartrees
  There are       31 alpha and       30 beta electrons
  Applying Cartesian multipole field
     Component          Value
@@ -2237,9 +2238,10 @@ $end
    14    -420.2998633549      1.91e-08   Normal BFGS step
    15    -420.2998633549      9.98e-09  Convergence criterion met
  ---------------------------------------
- SCF time:   CPU 428.53s  wall 15.00s 
- SCF   energy in the final basis set =     -420.2998633549
+ SCF time:   CPU 515.05s  wall 19.00s 
 <S^2> =          0.754446188
+ SCF   energy in the final basis set =     -420.2998633549
+ Total energy in the final basis set =     -420.2998633549
  
  --------------------------------------------------------------
  
@@ -2369,7 +2371,7 @@ $end
     3   0.0000679  -0.0000243   0.0000116
  Max gradient component =       2.258E-04
  RMS gradient           =       6.248E-05
- Gradient time:  CPU 55.24 s  wall 2.65 s
+ Gradient time:  CPU 61.12 s  wall 3.14 s
  Geometry Optimization Parameters
    NAtoms,    NIC,     NZ,  NCons,   NDum,   NFix, NCnnct, MaxDiis
        15      83       0       0       0       0       0       0
@@ -2386,19 +2388,19 @@ $end
                        Coordinates (Angstroms)
      ATOM                X               Y               Z
       1  O         1.0355070226    0.4382868012    0.0405527565
-      2  O        -1.1130665819    0.4733936583    0.0192804143
+      2  O        -1.1130665819    0.4733936583    0.0192804144
       3  O        -0.0565522306   -1.5303184036   -0.0712599446
       4  C         2.2932071051   -0.2535002996    0.0012199231
       5  C        -2.3576775183   -0.1193388870   -0.0228204177
-      6  C         3.3745588418    0.7514788794    0.0155382319
+      6  C         3.3745588417    0.7514788794    0.0155382319
       7  C        -3.4449600947    0.6302812558    0.0166810495
       8  C        -0.0402694174   -0.3319252985   -0.0096678329
       9  H         2.3546633974   -0.9362431702    0.8566270112
-     10  H         2.3172099414   -0.8808079055   -0.9009422184
+     10  H         2.3172099413   -0.8808079055   -0.9009422184
      11  H        -2.3427855002   -1.2000275738   -0.0891199228
-     12  H         4.3967092168    0.4297080646    0.1677758567
+     12  H         4.3967092168    0.4297080646    0.1677758568
      13  H         3.1687763859    1.7839699470   -0.2325444671
-     14  H        -4.4173471227    0.1570251297   -0.0180597624
+     14  H        -4.4173471227    0.1570251298   -0.0180597624
      15  H        -3.3928026620    1.7106777243    0.0839055938
    Point Group: c1    Number of degrees of freedom:    39
 
@@ -2440,20 +2442,20 @@ $end
     3      O      -0.0569409381    -1.5313097200    -0.0725148528
     4      C       2.2935680258    -0.2540721223    -0.0028442315
     5      C      -2.3577057755    -0.1195689531    -0.0188888446
-    6      C       3.3735831864     0.7523655406     0.0182115125
+    6      C       3.3735831864     0.7523655406     0.0182115126
     7      C      -3.4445014415     0.6310417322     0.0153899583
     8      C      -0.0402296522    -0.3331032473    -0.0078795873
     9      H       2.3581517401    -0.9450949729     0.8452948584
-   10      H       2.3155892788    -0.8721773485    -0.9115350365
+   10      H       2.3155892788    -0.8721773484    -0.9115350365
    11      H      -2.3434593499    -1.2006553872    -0.0785527033
-   12      H       4.3934018616     0.4339731225     0.1908707241
+   12      H       4.3934018615     0.4339731225     0.1908707242
    13      H       3.1695010335     1.7817047315    -0.2455049838
    14      H      -4.4172463499     0.1583552978    -0.0166452101
-   15      H      -3.3914328022     1.7118166470     0.0756419051
+   15      H      -3.3914328022     1.7118166471     0.0756419051
  ----------------------------------------------------------------
  Molecular Point Group                 C1    NOp =  1
  Largest Abelian Subgroup              C1    NOp =  1
- Nuclear Repulsion Energy =   363.1908280385 hartrees
+ Nuclear Repulsion Energy =   363.1908280384 hartrees
  There are       31 alpha and       30 beta electrons
  Applying Cartesian multipole field
     Component          Value
@@ -2505,8 +2507,8 @@ $end
  ---------------------------------------
   Cycle       Energy        RMS Gradient
  ---------------------------------------
-    1    -420.2998513873      2.47e-03   Normal BFGS step
-    2    -420.2998659534      1.27e-03   Normal BFGS step
+    1    -420.2998513874      2.47e-03   Normal BFGS step
+    2    -420.2998659533      1.27e-03   Normal BFGS step
     3    -420.2998693652      1.49e-04   Normal BFGS step
     4    -420.2998694715      1.57e-04   Normal BFGS step
     5    -420.2998696937      3.18e-05   Normal BFGS step
@@ -2521,9 +2523,10 @@ $end
    14    -420.2998697006      1.34e-08   Normal BFGS step
    15    -420.2998697006      7.60e-09  Convergence criterion met
  ---------------------------------------
- SCF time:   CPU 431.91s  wall 16.00s 
- SCF   energy in the final basis set =     -420.2998697006
+ SCF time:   CPU 522.71s  wall 19.00s 
 <S^2> =          0.754442603
+ SCF   energy in the final basis set =     -420.2998697006
+ Total energy in the final basis set =     -420.2998697006
  
  --------------------------------------------------------------
  
@@ -2653,7 +2656,7 @@ $end
     3   0.0000066  -0.0000112  -0.0000003
  Max gradient component =       2.672E-04
  RMS gradient           =       8.993E-05
- Gradient time:  CPU 55.07 s  wall 2.58 s
+ Gradient time:  CPU 64.69 s  wall 3.07 s
  Geometry Optimization Parameters
    NAtoms,    NIC,     NZ,  NCons,   NDum,   NFix, NCnnct, MaxDiis
        15      83       0       0       0       0       0       0
@@ -2674,16 +2677,16 @@ $end
       3  O        -0.0569409381   -1.5313097200   -0.0725148528
       4  C         2.2935680258   -0.2540721223   -0.0028442315
       5  C        -2.3577057755   -0.1195689531   -0.0188888446
-      6  C         3.3735831864    0.7523655406    0.0182115125
+      6  C         3.3735831864    0.7523655406    0.0182115126
       7  C        -3.4445014415    0.6310417322    0.0153899583
       8  C        -0.0402296522   -0.3331032473   -0.0078795873
       9  H         2.3581517401   -0.9450949729    0.8452948584
-     10  H         2.3155892788   -0.8721773485   -0.9115350365
+     10  H         2.3155892788   -0.8721773484   -0.9115350365
      11  H        -2.3434593499   -1.2006553872   -0.0785527033
-     12  H         4.3934018616    0.4339731225    0.1908707241
+     12  H         4.3934018615    0.4339731225    0.1908707242
      13  H         3.1695010335    1.7817047315   -0.2455049838
      14  H        -4.4172463499    0.1583552978   -0.0166452101
-     15  H        -3.3914328022    1.7118166470    0.0756419051
+     15  H        -3.3914328022    1.7118166471    0.0756419051
    Point Group: c1    Number of degrees of freedom:    39
 
 
@@ -2722,10 +2725,10 @@ $end
     1      O       1.0354877519     0.4363305262     0.0455719484
     2      O      -1.1128352517     0.4720378649     0.0244332806
     3      O      -0.0568801590    -1.5317316683    -0.0740712198
-    4      C       2.2935782037    -0.2539654870    -0.0102904758
+    4      C       2.2935782036    -0.2539654870    -0.0102904758
     5      C      -2.3579032500    -0.1201354503    -0.0102663715
-    6      C       3.3730432405     0.7526914958     0.0241713693
-    7      C      -3.4444266574     0.6313061255     0.0131097879
+    6      C       3.3730432405     0.7526914957     0.0241713693
+    7      C      -3.4444266575     0.6313061255     0.0131097879
     8      C      -0.0402792924    -0.3336324401    -0.0073793661
     9      H       2.3586247850    -0.9564687373     0.8278732902
    10      H       2.3153511828    -0.8591703557    -0.9278190387
@@ -2806,9 +2809,10 @@ $end
    15    -420.2998756099      1.28e-08   Normal BFGS step
    16    -420.2998756099      4.43e-09  Convergence criterion met
  ---------------------------------------
- SCF time:   CPU 454.80s  wall 15.00s 
- SCF   energy in the final basis set =     -420.2998756099
+ SCF time:   CPU 550.40s  wall 21.00s 
 <S^2> =          0.754435810
+ SCF   energy in the final basis set =     -420.2998756099
+ Total energy in the final basis set =     -420.2998756099
  
  --------------------------------------------------------------
  
@@ -2938,7 +2942,7 @@ $end
     3  -0.0000306  -0.0000388  -0.0000149
  Max gradient component =       2.869E-04
  RMS gradient           =       1.009E-04
- Gradient time:  CPU 54.98 s  wall 2.51 s
+ Gradient time:  CPU 68.04 s  wall 3.24 s
  Geometry Optimization Parameters
    NAtoms,    NIC,     NZ,  NCons,   NDum,   NFix, NCnnct, MaxDiis
        15      83       0       0       0       0       0       0
@@ -2957,10 +2961,10 @@ $end
       1  O         1.0354877519    0.4363305262    0.0455719484
       2  O        -1.1128352517    0.4720378649    0.0244332806
       3  O        -0.0568801590   -1.5317316683   -0.0740712198
-      4  C         2.2935782037   -0.2539654870   -0.0102904758
+      4  C         2.2935782036   -0.2539654870   -0.0102904758
       5  C        -2.3579032500   -0.1201354503   -0.0102663715
-      6  C         3.3730432405    0.7526914958    0.0241713693
-      7  C        -3.4444266574    0.6313061255    0.0131097879
+      6  C         3.3730432405    0.7526914957    0.0241713693
+      7  C        -3.4444266575    0.6313061255    0.0131097879
       8  C        -0.0402792924   -0.3336324401   -0.0073793661
       9  H         2.3586247850   -0.9564687373    0.8278732902
      10  H         2.3153511828   -0.8591703557   -0.9278190387
@@ -3016,13 +3020,13 @@ $end
    10      H       2.3170026247    -0.8497190333    -0.9396179855
    11      H      -2.3440818022    -1.2026587082    -0.0395983165
    12      H       4.3871376633     0.4368074274     0.2386045561
-   13      H       3.1802961383     1.7771113910    -0.2594655851
+   13      H       3.1802961383     1.7771113910    -0.2594655850
    14      H      -4.4176175839     0.1576440896    -0.0113039785
    15      H      -3.3918498091     1.7127682983     0.0460176163
  ----------------------------------------------------------------
  Molecular Point Group                 C1    NOp =  1
  Largest Abelian Subgroup              C1    NOp =  1
- Nuclear Repulsion Energy =   363.1731432942 hartrees
+ Nuclear Repulsion Energy =   363.1731432940 hartrees
  There are       31 alpha and       30 beta electrons
  Applying Cartesian multipole field
     Component          Value
@@ -3084,15 +3088,16 @@ $end
     8    -420.2998788596      3.65e-06   Normal BFGS step
     9    -420.2998788596      6.35e-07   Normal BFGS step
    10    -420.2998788596      4.94e-07   Normal BFGS step
-   11    -420.2998788596      7.15e-08   Normal BFGS step
-   12    -420.2998788597      2.84e-08   Normal BFGS step
+   11    -420.2998788597      7.15e-08   Normal BFGS step
+   12    -420.2998788596      2.84e-08   Normal BFGS step
    13    -420.2998788597      2.50e-08   Normal BFGS step
    14    -420.2998788597      1.90e-08   Normal BFGS step
    15    -420.2998788597      9.77e-09  Convergence criterion met
  ---------------------------------------
- SCF time:   CPU 430.87s  wall 15.00s 
- SCF   energy in the final basis set =     -420.2998788597
+ SCF time:   CPU 533.38s  wall 21.00s 
 <S^2> =          0.754429057
+ SCF   energy in the final basis set =     -420.2998788597
+ Total energy in the final basis set =     -420.2998788597
  
  --------------------------------------------------------------
  
@@ -3222,7 +3227,7 @@ $end
     3  -0.0000345   0.0000040  -0.0000277
  Max gradient component =       1.511E-04
  RMS gradient           =       5.681E-05
- Gradient time:  CPU 55.54 s  wall 2.56 s
+ Gradient time:  CPU 63.46 s  wall 3.15 s
  Geometry Optimization Parameters
    NAtoms,    NIC,     NZ,  NCons,   NDum,   NFix, NCnnct, MaxDiis
        15      83       0       0       0       0       0       0
@@ -3250,7 +3255,7 @@ $end
      10  H         2.3170026247   -0.8497190333   -0.9396179855
      11  H        -2.3440818022   -1.2026587082   -0.0395983165
      12  H         4.3871376633    0.4368074274    0.2386045561
-     13  H         3.1802961383    1.7771113910   -0.2594655851
+     13  H         3.1802961383    1.7771113910   -0.2594655850
      14  H        -4.4176175839    0.1576440896   -0.0113039785
      15  H        -3.3918498091    1.7127682983    0.0460176163
    Point Group: c1    Number of degrees of freedom:    39
@@ -3292,21 +3297,21 @@ $end
     2      O      -1.1136589592     0.4722671399     0.0307222139
     3      O      -0.0569225954    -1.5306546598    -0.0756926114
     4      C       2.2933766059    -0.2528075280    -0.0177626524
-    5      C      -2.3584009844    -0.1207029591    -0.0012807144
+    5      C      -2.3584009843    -0.1207029591    -0.0012807144
     6      C       3.3735528867     0.7521037693     0.0320796023
-    7      C      -3.4453269701     0.6304260059     0.0104924950
+    7      C      -3.4453269701     0.6304260059     0.0104924951
     8      C      -0.0406658653    -0.3325398395    -0.0084633996
     9      H       2.3545760341    -0.9644820013     0.8125748577
    10      H       2.3178721076    -0.8473016437    -0.9423047952
    11      H      -2.3440492285    -1.2028959341    -0.0352140132
-   12      H       4.3870917090     0.4357582267     0.2419094151
+   12      H       4.3870917090     0.4357582266     0.2419094152
    13      H       3.1834535322     1.7763184364    -0.2605630845
-   14      H      -4.4178875216     0.1568493132    -0.0125426249
+   14      H      -4.4178875216     0.1568493131    -0.0125426249
    15      H      -3.3927458685     1.7124058102     0.0432642293
  ----------------------------------------------------------------
  Molecular Point Group                 C1    NOp =  1
  Largest Abelian Subgroup              C1    NOp =  1
- Nuclear Repulsion Energy =   363.1632426265 hartrees
+ Nuclear Repulsion Energy =   363.1632426266 hartrees
  There are       31 alpha and       30 beta electrons
  Applying Cartesian multipole field
     Component          Value
@@ -3372,9 +3377,10 @@ $end
    12    -420.2998798053      1.10e-08   Normal BFGS step
    13    -420.2998798053      7.23e-09  Convergence criterion met
  ---------------------------------------
- SCF time:   CPU 378.33s  wall 14.00s 
- SCF   energy in the final basis set =     -420.2998798053
+ SCF time:   CPU 459.80s  wall 17.00s 
 <S^2> =          0.754425254
+ SCF   energy in the final basis set =     -420.2998798053
+ Total energy in the final basis set =     -420.2998798053
  
  --------------------------------------------------------------
  
@@ -3504,7 +3510,7 @@ $end
     3  -0.0000169  -0.0000180  -0.0000284
  Max gradient component =       7.017E-05
  RMS gradient           =       1.986E-05
- Gradient time:  CPU 55.36 s  wall 2.57 s
+ Gradient time:  CPU 62.27 s  wall 2.85 s
  Geometry Optimization Parameters
    NAtoms,    NIC,     NZ,  NCons,   NDum,   NFix, NCnnct, MaxDiis
        15      83       0       0       0       0       0       0
@@ -3524,16 +3530,16 @@ $end
       2  O        -1.1136589592    0.4722671399    0.0307222139
       3  O        -0.0569225954   -1.5306546598   -0.0756926114
       4  C         2.2933766059   -0.2528075280   -0.0177626524
-      5  C        -2.3584009844   -0.1207029591   -0.0012807144
+      5  C        -2.3584009843   -0.1207029591   -0.0012807144
       6  C         3.3735528867    0.7521037693    0.0320796023
-      7  C        -3.4453269701    0.6304260059    0.0104924950
+      7  C        -3.4453269701    0.6304260059    0.0104924951
       8  C        -0.0406658653   -0.3325398395   -0.0084633996
       9  H         2.3545760341   -0.9644820013    0.8125748577
      10  H         2.3178721076   -0.8473016437   -0.9423047952
      11  H        -2.3440492285   -1.2028959341   -0.0352140132
-     12  H         4.3870917090    0.4357582267    0.2419094151
+     12  H         4.3870917090    0.4357582266    0.2419094152
      13  H         3.1834535322    1.7763184364   -0.2605630845
-     14  H        -4.4178875216    0.1568493132   -0.0125426249
+     14  H        -4.4178875216    0.1568493131   -0.0125426249
      15  H        -3.3927458685    1.7124058102    0.0432642293
    Point Group: c1    Number of degrees of freedom:    39
 
@@ -3605,16 +3611,16 @@ $end
       2  O        -1.1136589592    0.4722671399    0.0307222139
       3  O        -0.0569225954   -1.5306546598   -0.0756926114
       4  C         2.2933766059   -0.2528075280   -0.0177626524
-      5  C        -2.3584009844   -0.1207029591   -0.0012807144
+      5  C        -2.3584009843   -0.1207029591   -0.0012807144
       6  C         3.3735528867    0.7521037693    0.0320796023
-      7  C        -3.4453269701    0.6304260059    0.0104924950
+      7  C        -3.4453269701    0.6304260059    0.0104924951
       8  C        -0.0406658653   -0.3325398395   -0.0084633996
       9  H         2.3545760341   -0.9644820013    0.8125748577
      10  H         2.3178721076   -0.8473016437   -0.9423047952
      11  H        -2.3440492285   -1.2028959341   -0.0352140132
-     12  H         4.3870917090    0.4357582267    0.2419094151
+     12  H         4.3870917090    0.4357582266    0.2419094152
      13  H         3.1834535322    1.7763184364   -0.2605630845
-     14  H        -4.4178875216    0.1568493132   -0.0125426249
+     14  H        -4.4178875216    0.1568493131   -0.0125426249
      15  H        -3.3927458685    1.7124058102    0.0432642293
 
 Z-matrix Print:
@@ -3751,10 +3757,10 @@ $end
       XZZZ      -1.6374   YZZZ      -3.0741   ZZZZ     -57.6301
  -----------------------------------------------------------------
 Archival summary:
-1\1\nid00761\OPT\ProcedureUnspecified\BasisUnspecified\357(2)\sblau\MonAug2712:04:132018MonAug2712:04:132018\0\\#,OPT,ProcedureUnspecified,BasisUnspecified,\\0,2\O\C,1,1.32393\O,2,1.20011,1,126.444\O,2,1.34185,1,107.429,3,-179.969,0\C,4,1.37914,2,117.591,1,-179.653,0\H,5,1.08282,4,114.738,2,1.21942,0\C,5,1.32127,4,119.857,2,-178.768,0\H,7,1.08198,5,119.369,4,-179.861,0\H,7,1.08375,5,121.865,4,0.103483,0\C,1,1.43672,2,115.491,3,1.10795,0\H,10,1.0953,1,109.321,2,-58.3161,0\H,10,1.09946,1,108.255,2,57.3778,0\C,10,1.47618,1,108.199,2,179.373,0\H,13,1.08203,10,120.443,1,-22.5579,0\H,13,1.0823,10,119.526,1,165.179,0\\\@
+1\1\nid03485\OPT\ProcedureUnspecified\BasisUnspecified\357(2)\sblau\TueNov1314:52:452018TueNov1314:52:452018\0\\#,OPT,ProcedureUnspecified,BasisUnspecified,\\0,2\O\C,1,1.32393\O,2,1.20011,1,126.444\O,2,1.34185,1,107.429,3,-179.969,0\C,4,1.37914,2,117.591,1,-179.653,0\H,5,1.08282,4,114.738,2,1.21942,0\C,5,1.32127,4,119.857,2,-178.768,0\H,7,1.08198,5,119.369,4,-179.861,0\H,7,1.08375,5,121.865,4,0.103483,0\C,1,1.43672,2,115.491,3,1.10795,0\H,10,1.0953,1,109.321,2,-58.3161,0\H,10,1.09946,1,108.255,2,57.3778,0\C,10,1.47618,1,108.199,2,179.373,0\H,13,1.08203,10,120.443,1,-22.5579,0\H,13,1.0823,10,119.526,1,165.179,0\\\@
 
- Total job time:  221.78s(wall), 5973.30s(cpu) 
- Mon Aug 27 12:04:13 2018
+ Total job time:  277.56s(wall), 7240.80s(cpu) 
+ Tue Nov 13 14:52:45 2018
 
         *************************************************************
         *                                                           *
@@ -3763,6 +3769,3 @@ Archival summary:
         *************************************************************
 
 
-0 sent ACK to 0 
-now end server 0 ... 
-cleanup process ... done

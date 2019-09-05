@@ -1,12 +1,10 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian.vasp.validators &#8212; custodian 2019.2.10 documentation</title>
+    <meta charset="utf-8" />
+    <title>custodian.vasp.validators &#8212; custodian 2019.8.24 documentation</title>
     <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -39,7 +37,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2019.2.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2019.8.24 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -55,21 +53,60 @@
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
 
 <span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="k">import</span> <span class="n">Validator</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="k">import</span> <span class="n">Vasprun</span><span class="p">,</span> <span class="n">Incar</span><span class="p">,</span> <span class="n">Outcar</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="k">import</span> <span class="n">Vasprun</span><span class="p">,</span> <span class="n">Incar</span><span class="p">,</span> <span class="n">Outcar</span><span class="p">,</span> <span class="n">Chgcar</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">deque</span>
+
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
 
 <div class="viewcode-block" id="VasprunXMLValidator"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VasprunXMLValidator">[docs]</a><span class="k">class</span> <span class="nc">VasprunXMLValidator</span><span class="p">(</span><span class="n">Validator</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Checks that a valid vasprun.xml was generated</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;vasp.out&quot;</span><span class="p">,</span> <span class="n">stderr_file</span><span class="o">=</span><span class="s2">&quot;std_err.txt&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            output_file (str): Name of file VASP standard output is directed to.</span>
+<span class="sd">                Defaults to &quot;vasp.out&quot;.</span>
+<span class="sd">            stderr_file (str): Name of file VASP standard error is direct to.</span>
+<span class="sd">                Defaults to &quot;std_err.txt&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span> <span class="o">=</span> <span class="n">output_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stderr_file</span> <span class="o">=</span> <span class="n">stderr_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
 
 <div class="viewcode-block" id="VasprunXMLValidator.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VasprunXMLValidator.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">Vasprun</span><span class="p">(</span><span class="s2">&quot;vasprun.xml&quot;</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">exception_context</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">):</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output_file</span><span class="p">:</span>
+                    <span class="n">output_file_tail</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="n">maxlen</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+                <span class="n">exception_context</span><span class="p">[</span><span class="s2">&quot;output_file_tail&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_file_tail</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stderr_file</span><span class="p">):</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stderr_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">stderr_file</span><span class="p">:</span>
+                    <span class="n">stderr_file_tail</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">stderr_file</span><span class="p">,</span> <span class="n">maxlen</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+                <span class="n">exception_context</span><span class="p">[</span><span class="s2">&quot;stderr_file_tail&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">stderr_file_tail</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;vasprun.xml&quot;</span><span class="p">):</span>
+                <span class="n">stat</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="s2">&quot;vasprun.xml&quot;</span><span class="p">)</span>
+                <span class="n">exception_context</span><span class="p">[</span><span class="s2">&quot;vasprun_st_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stat</span><span class="o">.</span><span class="n">st_size</span>
+                <span class="n">exception_context</span><span class="p">[</span><span class="s2">&quot;vasprun_st_atime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stat</span><span class="o">.</span><span class="n">st_atime</span>
+                <span class="n">exception_context</span><span class="p">[</span><span class="s2">&quot;vasprun_st_mtime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stat</span><span class="o">.</span><span class="n">st_mtime</span>
+                <span class="n">exception_context</span><span class="p">[</span><span class="s2">&quot;vasprun_st_ctime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stat</span><span class="o">.</span><span class="n">st_ctime</span>
+
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;vasprun.xml&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">vasprun</span><span class="p">:</span>
+                    <span class="n">vasprun_tail</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">vasprun</span><span class="p">,</span> <span class="n">maxlen</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+                <span class="n">exception_context</span><span class="p">[</span><span class="s2">&quot;vasprun_tail&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">vasprun_tail</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to load vasprun.xml&quot;</span><span class="p">,</span>
+                              <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">exception_context</span><span class="p">)</span>
+
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="kc">False</span></div></div>
 
@@ -112,6 +149,35 @@
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span></div></div>
+
+
+<div class="viewcode-block" id="VaspAECCARValidator"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VaspAECCARValidator">[docs]</a><span class="k">class</span> <span class="nc">VaspAECCARValidator</span><span class="p">(</span><span class="n">Validator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if the data in the AECCAR is corrupted</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="VaspAECCARValidator.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VaspAECCARValidator.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">aeccar0</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;AECCAR0&quot;</span><span class="p">)</span>
+        <span class="n">aeccar2</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;AECCAR2&quot;</span><span class="p">)</span>
+        <span class="n">aeccar</span> <span class="o">=</span> <span class="n">aeccar0</span> <span class="o">+</span> <span class="n">aeccar2</span>
+        <span class="k">return</span> <span class="n">check_broken_chgcar</span><span class="p">(</span><span class="n">aeccar</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="check_broken_chgcar"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.check_broken_chgcar">[docs]</a><span class="k">def</span> <span class="nf">check_broken_chgcar</span><span class="p">(</span><span class="n">chgcar</span><span class="p">):</span>
+    <span class="n">chgcar_data</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">chgcar_data</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="c1"># a decent bunch of the values are negative</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">chgcar_data</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">chgcar_data</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="n">diff</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="n">chgcar_data</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">chgcar_data</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mf">0.95</span><span class="p">:</span>
+        <span class="c1"># Some single diagonal finite difference is more than 95% of the entire range</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="kc">False</span></div>
 </pre></div>
 
           </div>
@@ -126,13 +192,11 @@
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>

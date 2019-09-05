@@ -1,0 +1,5 @@
+2019-07-17 03:52:35,317 INFO Launching Rocket
+2019-07-17 03:52:35,342 INFO RUNNING fw_id: 125688 in directory: /global/cscratch1/sd/sblau/smd_production/launcher_2019-07-16-21-51-10-872618/launcher_2019-07-17-10-52-35-313716
+2019-07-17 03:52:35,349 INFO Task started: {{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}}.
+2019-07-17 03:52:35,353 INFO Task completed: {{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}} 
+2019-07-17 03:52:35,356 INFO Task started: {{atomate.qchem.firetasks.run_calc.RunQChemCustodian}}.

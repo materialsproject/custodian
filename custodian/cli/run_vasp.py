@@ -78,7 +78,7 @@ def get_jobs(args):
                 ".", user_incar_settings={"LWAVE": True, "EDIFF": 1e-6},
                 ediff_per_atom=False)
             settings.extend([
-                {"dict"  : "INCAR",
+                {"dict": "INCAR",
                  "action": {"_set": dict(vis.incar)}},
                 {'dict': 'KPOINTS',
                  'action': {'_set': vis.kpoints.as_dict()}}])
@@ -147,8 +147,7 @@ def get_jobs(args):
                                      "LDAUU": [u * f for u in ldauu]}}})
             copy_magmom = True
             ramps += 1
-        elif job_type.startswith("quick_relax") or job_type.startswith(\
-                "quickrelax"):
+        elif job_type.startswith("quick_relax") or job_type.startswith("quickrelax"):
             kpoints = vinput["KPOINTS"]
             incar = vinput["INCAR"]
             structure = vinput["POSCAR"].structure
@@ -164,7 +163,7 @@ def get_jobs(args):
                                   "action": {"_set": kpoints.as_dict()}})
             # lattice vectors with length < 9 will get >1 KPOINT
             low_kpoints = Kpoints.gamma_automatic(
-                [max(int(18/l), 1) for l in structure.lattice.abc])
+                [max(int(18 / l), 1) for l in structure.lattice.abc])
             settings.extend([
                 {"dict": "INCAR",
                  "action": {"_set": {"ISMEAR": 0}}},
@@ -234,7 +233,6 @@ def main():
         help="Set to true to turn off auto_npar. Useful for certain machines "
              "and calculations where you want absolute control.")
 
-
     parser.add_argument(
         "-z", "--gzip", dest="gzip", action="store_true",
         help="Add this option to gzip the final output. Do not gzip if you "
@@ -260,7 +258,7 @@ def main():
     )
 
     parser.add_argument(
-        "-me",  "--max-errors", dest="max_errors", nargs="?",
+        "-me", "--max-errors", dest="max_errors", nargs="?",
         default=10, type=int,
         help="Maximum number of errors to allow before quitting")
 

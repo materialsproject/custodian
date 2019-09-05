@@ -1,6 +1,16 @@
 Change Log
 ==========
 
+v2019.2.10
+----------
+* Improved slow convergence handling. (@shyamd)
+
+v2019.2.7
+---------
+* Improved error logging.
+* Improved handling of frozen jobs and potim errors.
+* Improved Exceptino handling. (Guido Petretto)
+
 v2017.12.23
 -----------
 * cstdn command line tool is now official with docs.

@@ -1,12 +1,10 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>custodian.vasp.handlers &#8212; custodian 2019.2.10 documentation</title>
+    <meta charset="utf-8" />
+    <title>custodian.vasp.handlers &#8212; custodian 2019.8.24 documentation</title>
     <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -39,7 +37,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2019.2.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2019.8.24 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -60,6 +58,7 @@
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">operator</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">reduce</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">Counter</span>
 <span class="kn">import</span> <span class="nn">re</span>
@@ -179,8 +178,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
         <span class="c1"># threshold of number of atoms to treat the cell as large.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">natoms_large_cell</span> <span class="o">=</span> <span class="n">natoms_large_cell</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">errors_subset_to_catch</span> <span class="o">=</span> <span class="n">errors_subset_to_catch</span> <span class="ow">or</span> \
-            <span class="nb">list</span><span class="p">(</span><span class="n">VaspErrorHandler</span><span class="o">.</span><span class="n">error_msgs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errors_subset_to_catch</span> <span class="o">=</span> <span class="n">errors_subset_to_catch</span> <span class="ow">or</span> <span class="nb">list</span><span class="p">(</span><span class="n">VaspErrorHandler</span><span class="o">.</span><span class="n">error_msgs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
 
 <div class="viewcode-block" id="VaspErrorHandler.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -199,6 +198,7 @@
                                 <span class="k">if</span> <span class="n">err</span> <span class="o">==</span> <span class="s2">&quot;brmix&quot;</span> <span class="ow">and</span> <span class="s1">&#39;NELECT&#39;</span> <span class="ow">in</span> <span class="n">incar</span><span class="p">:</span>
                                     <span class="k">continue</span>
                                 <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;incar&quot;</span><span class="p">:</span> <span class="n">incar</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()})</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="VaspErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.VaspErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -208,7 +208,7 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">intersection</span><span class="p">([</span><span class="s2">&quot;tet&quot;</span><span class="p">,</span> <span class="s2">&quot;dentet&quot;</span><span class="p">]):</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISMEAR&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}})</span>
+                            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISMEAR&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;SIGMA&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">}}})</span>
 
         <span class="k">if</span> <span class="s2">&quot;inv_rot_mat&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
@@ -221,7 +221,7 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="k">assert</span> <span class="p">(</span><span class="n">Outcar</span><span class="p">(</span><span class="n">zpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                         <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s2">&quot;OUTCAR&quot;</span><span class="p">)))</span><span class="o">.</span><span class="n">is_stopped</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">)</span>
-                <span class="k">except</span><span class="p">:</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span><span class="p">[</span><span class="s1">&#39;brmix&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span><span class="p">[</span><span class="s1">&#39;brmix&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -240,17 +240,14 @@
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span><span class="p">[</span><span class="s1">&#39;brmix&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">style</span> \
                     <span class="o">==</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">supported_modes</span><span class="o">.</span><span class="n">Gamma</span><span class="p">:</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span>
-                                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;generation_style&quot;</span><span class="p">:</span>
-                                                    <span class="s2">&quot;Monkhorst&quot;</span><span class="p">}}})</span>
+                                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;generation_style&quot;</span><span class="p">:</span> <span class="s2">&quot;Monkhorst&quot;</span><span class="p">}}})</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_unset&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;IMIX&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}})</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span><span class="p">[</span><span class="s1">&#39;brmix&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
 
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span><span class="p">[</span><span class="s1">&#39;brmix&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="ow">and</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">style</span> \
-                    <span class="o">==</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">supported_modes</span><span class="o">.</span><span class="n">Monkhorst</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span><span class="p">[</span><span class="s1">&#39;brmix&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="ow">and</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">supported_modes</span><span class="o">.</span><span class="n">Monkhorst</span><span class="p">:</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span>
-                                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;generation_style&quot;</span><span class="p">:</span>
-                                                    <span class="s2">&quot;Gamma&quot;</span><span class="p">}}})</span>
+                                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;generation_style&quot;</span><span class="p">:</span> <span class="s2">&quot;Gamma&quot;</span><span class="p">}}})</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_unset&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;IMIX&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}})</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span><span class="p">[</span><span class="s1">&#39;brmix&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -259,11 +256,9 @@
                     <span class="n">all_kpts_even</span> <span class="o">=</span> <span class="nb">all</span><span class="p">([</span>
                         <span class="nb">bool</span><span class="p">(</span><span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="p">])</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;all_kpts_even = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">all_kpts_even</span><span class="p">))</span>
                     <span class="k">if</span> <span class="n">all_kpts_even</span><span class="p">:</span>
                         <span class="n">new_kpts</span> <span class="o">=</span> <span class="p">(</span>
                             <span class="nb">tuple</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="mi">0</span><span class="p">]),)</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;new_kpts = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">new_kpts</span><span class="p">))</span>
                         <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span>
                             <span class="s2">&quot;kpoints&quot;</span><span class="p">:</span> <span class="n">new_kpts</span>
                         <span class="p">}}})</span>
@@ -295,7 +290,7 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">oszicar</span> <span class="o">=</span> <span class="n">Oszicar</span><span class="p">(</span><span class="s2">&quot;OSZICAR&quot;</span><span class="p">)</span>
                 <span class="n">nsteps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">oszicar</span><span class="o">.</span><span class="n">ionic_steps</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                 <span class="n">nsteps</span> <span class="o">=</span> <span class="mi">0</span>
 
             <span class="k">if</span> <span class="n">nsteps</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
@@ -407,13 +402,11 @@
                             <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;NBANDS&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1.1</span> <span class="o">*</span> <span class="n">nbands</span><span class="p">)}}})</span>
 
         <span class="k">if</span> <span class="s2">&quot;pssyevx&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span>
-                            <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Normal&quot;</span><span class="p">}}})</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Normal&quot;</span><span class="p">}}})</span>
         <span class="k">if</span> <span class="s2">&quot;eddrmm&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="c1"># RMM algorithm is not stable for this calculation</span>
             <span class="k">if</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ALGO&quot;</span><span class="p">,</span> <span class="s2">&quot;Normal&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;Fast&quot;</span><span class="p">,</span> <span class="s2">&quot;VeryFast&quot;</span><span class="p">]:</span>
-                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span>
-                                <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Normal&quot;</span><span class="p">}}})</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Normal&quot;</span><span class="p">}}})</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">potim</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;POTIM&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
@@ -428,13 +421,12 @@
             <span class="k">if</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ICHARG&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_delete&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="s2">&quot;actual&quot;</span><span class="p">}}})</span>
-            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span>
-                            <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;All&quot;</span><span class="p">}}})</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;All&quot;</span><span class="p">}}})</span>
 
         <span class="k">if</span> <span class="s2">&quot;grad_not_orth&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ISMEAR&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
-                                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISMEAR&quot;</span><span class="p">:</span> <span class="s2">&quot;0&quot;</span><span class="p">}}})</span>
+                                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISMEAR&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;SIGMA&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">}}})</span>
 
         <span class="k">if</span> <span class="s2">&quot;zheev&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ALGO&quot;</span><span class="p">,</span> <span class="s2">&quot;Fast&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;exact&quot;</span><span class="p">:</span>
@@ -454,7 +446,7 @@
         <span class="k">if</span> <span class="s2">&quot;posmap&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                             <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;SYMPREC&quot;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">}}})</span>
-        
+
         <span class="k">if</span> <span class="s2">&quot;point_group&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                             <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISYM&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}})</span>
@@ -683,7 +675,8 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes the handler with max drift</span>
 <span class="sd">        Args:</span>
-<span class="sd">            max_drift (float): This defines the max drift. Leaving this at the default of None gets the max_drift from EDFIFFG</span>
+<span class="sd">            max_drift (float): This defines the max drift. Leaving this at the default of None gets the max_drift from</span>
+<span class="sd">                EDFIFFG</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">max_drift</span> <span class="o">=</span> <span class="n">max_drift</span>
@@ -703,7 +696,7 @@
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">outcar</span> <span class="o">=</span> <span class="n">Outcar</span><span class="p">(</span><span class="s2">&quot;OUTCAR&quot;</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="c1"># Can&#39;t perform check if Outcar not valid</span>
             <span class="k">return</span> <span class="kc">False</span>
 
@@ -782,14 +775,14 @@
         <span class="c1"># Also disregard if automatic KPOINT generation is used</span>
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ISYM&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span> <span class="ow">or</span> \
                 <span class="n">vi</span><span class="p">[</span>
-                <span class="s2">&quot;KPOINTS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">supported_modes</span><span class="o">.</span><span class="n">Automatic</span><span class="p">:</span>
+                    <span class="s2">&quot;KPOINTS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">supported_modes</span><span class="o">.</span><span class="n">Automatic</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">Vasprun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_vasprun</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">converged</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">pass</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
@@ -832,7 +825,7 @@
             <span class="n">v</span> <span class="o">=</span> <span class="n">Vasprun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">converged</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">pass</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
@@ -915,7 +908,7 @@
             <span class="n">max_force</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">forces</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">max_force</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_force_threshold</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">converged</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">pass</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
@@ -966,7 +959,7 @@
             <span class="n">max_dE</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">s</span><span class="p">[</span><span class="s1">&#39;dE&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">oszicar</span><span class="o">.</span><span class="n">ionic_steps</span><span class="p">[</span><span class="mi">1</span><span class="p">:]])</span> <span class="o">/</span> <span class="n">n</span>
             <span class="k">if</span> <span class="n">max_dE</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">dE_threshold</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="PotimErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.PotimErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1066,7 +1059,7 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">esteps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">nionic_steps</span><span class="p">:</span>
                 <span class="k">return</span> <span class="nb">all</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">==</span> <span class="n">nelm</span>
                             <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">esteps</span><span class="p">[</span><span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nionic_steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">pass</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
@@ -1107,6 +1100,7 @@
         <span class="c1"># Unfixable error. Just return None for actions.</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Non-converging job&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span></div></div>
+
 
 <div class="viewcode-block" id="WalltimeHandler"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.handlers.WalltimeHandler">[docs]</a><span class="k">class</span> <span class="nc">WalltimeHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1348,7 +1342,7 @@
             <span class="n">oszicar</span> <span class="o">=</span> <span class="n">Oszicar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">oszicar</span><span class="o">.</span><span class="n">final_energy</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">pass</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
@@ -1385,13 +1379,11 @@
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
