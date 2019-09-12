@@ -10,7 +10,8 @@ import logging
 import numpy as np
 
 from pymatgen import Structure
-from pymatgen.io.vasp import VaspInput, Incar, Poscar, Outcar, Kpoints, Vasprun
+from pymatgen.io.vasp import Incar, Poscar, Outcar, Kpoints, Vasprun
+from pymatgen.io.vasp.inputs import VaspInput
 from monty.os.path import which
 from monty.shutil import decompress_dir
 from monty.serialization import dumpfn, loadfn

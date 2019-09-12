@@ -3,7 +3,8 @@
 from __future__ import unicode_literals, division
 
 from custodian.custodian import Validator
-from pymatgen.io.vasp import Vasprun, Incar, Outcar, Chgcar
+from pymatgen.io.vasp import Incar, Outcar, Chgcar
+from pymatgen.io.vasp.inputs import VaspInput
 from collections import deque
 
 import os

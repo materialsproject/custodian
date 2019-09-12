@@ -20,8 +20,9 @@ from monty.serialization import loadfn
 
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
-from pymatgen.io.vasp import Poscar, VaspInput, Incar, Kpoints, Vasprun, \
+from pymatgen.io.vasp import Poscar, Incar, Kpoints, Vasprun, \
     Oszicar, Outcar
+from pymatgen.io.vasp.inputs import VaspInput
 from pymatgen.transformations.standard_transformations import \
     SupercellTransformation
 

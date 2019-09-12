@@ -13,7 +13,8 @@ import ruamel.yaml as yaml
 
 from custodian.custodian import Custodian
 from custodian.vasp.jobs import VaspJob
-from pymatgen.io.vasp import VaspInput, Incar, Kpoints
+from pymatgen.io.vasp import Incar, Kpoints
+from pymatgen.io.vasp.inputs import VaspInput
 
 __author__ = "Shyue Ping Ong"
 __version__ = "0.5"
