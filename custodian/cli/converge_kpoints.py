@@ -20,7 +20,8 @@ from custodian.custodian import Custodian
 from custodian.vasp.handlers import VaspErrorHandler, \
     UnconvergedErrorHandler
 from custodian.vasp.jobs import VaspJob
-from pymatgen.io.vasp import VaspInput, Vasprun
+from pymatgen.io.vasp.inputs import VaspInput
+from pymatgen.io.vasp.outputs import Vasprun
 
 FORMAT = '%(asctime)s %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
