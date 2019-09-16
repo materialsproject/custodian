@@ -26,9 +26,7 @@ from custodian.vasp.handlers import VaspErrorHandler, \
     PositiveEnergyErrorHandler, PotimErrorHandler, \
     FrozenJobErrorHandler, AliasingErrorHandler, StdErrHandler, LrfCommutatorHandler, \
     DriftErrorHandler
-from pymatgen.io.vasp import Incar, Poscar, Kpoints, Vasprun
-from pymatgen import Structure
-from pymatgen.io.vasp.inputs import VaspInput
+from pymatgen.io.vasp.inputs import Incar, Structure, Kpoints, VaspInput
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
