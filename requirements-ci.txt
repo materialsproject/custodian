@@ -2,5 +2,5 @@ pymatgen==2019.10.3
 coverage==4.5.4
 coveralls==1.8.2
 pytest==5.2.0
-pytest-cov==2.7.1
+pytest-cov==2.8.1
 pycodestyle==2.5.0
