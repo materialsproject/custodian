@@ -59,7 +59,7 @@ if "SENTRY_DSN" in os.environ:
 # Sentry.io is a service to aggregate logs remotely, this is useful
 # for Custodian to get statistics on which errors are most common.
 # If you do not have a SENTRY_DSN environment variable set, or do
-# not have CUSTODIAN_ERROR_REPORTING_OPT_IN set to True, then
+# not have CUSTODIAN_REPORTING_OPT_IN set to True, then
 # Sentry will not be enabled.
 
 SENTRY_DSN = None
