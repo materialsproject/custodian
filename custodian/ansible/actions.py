@@ -201,7 +201,7 @@ class FileActions(object):
                 try:
                     os.remove(filename)
                 except OSError:
-                    #Skip file not found error.
+                    # Skip file not found error.
                     pass
             elif k == "mode" and v == "simulated":
                 print("Simulated removal of {}".format(filename))
@@ -230,6 +230,6 @@ class FileActions(object):
         """
         for k, v in settings.items():
             if k == "mode":
-                os.chmod(filename,v)
+                os.chmod(filename, v)
             if k == "owners":
-                os.chown(filename,v)
+                os.chown(filename, v)

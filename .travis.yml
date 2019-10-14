@@ -18,14 +18,13 @@ install:
   - conda install --quiet -c openbabel openbabel
   - conda install --quiet -c conda-forge python-igraph
   - pip install --quiet --ignore-installed -r requirements.txt -r requirements-ci.txt
-before_script:
-  - python setup.py --quiet develop
 # command to run tests, e.g. python setup.py test
 script:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - source activate test-environment
-  - travis_wait 28800 pytest custodian
-  - echo "--- Done ---"
+  - pip install --quiet -e .
+  - pytest custodian
+  - pycodestyle custodian
 notifications:
   email:
     recipients:

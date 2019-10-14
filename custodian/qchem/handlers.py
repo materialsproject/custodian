@@ -211,7 +211,8 @@ class QChemErrorHandler(ErrorHandler):
             print("Must have gotten an error which is correctly parsed but not included in the handler. FIX!!!")
             return {"errors": self.errors, "actions": None}
 
-        if {"molecule": "molecule_from_last_geometry"} in actions and str(self.qcinp.rem.get("geom_opt_hessian")).lower() == "read":
+        if {"molecule": "molecule_from_last_geometry"} in actions and \
+                str(self.qcinp.rem.get("geom_opt_hessian")).lower() == "read":
             del self.qcinp.rem["geom_opt_hessian"]
             actions.append({"geom_opt_hessian": "deleted"})
         os.rename(self.input_file, self.input_file + ".last")

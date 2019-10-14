@@ -13,10 +13,7 @@ import os
 from abc import ABCMeta, abstractmethod
 from itertools import islice
 import warnings
-from pprint import pformat
 from ast import literal_eval
-
-import six
 
 from .utils import get_execution_host_info
 
@@ -38,7 +35,6 @@ __maintainer__ = "Shyue Ping Ong"
 __email__ = "ongsp@ucsd.edu"
 __date__ = "Sep 17 2014"
 
-
 logger = logging.getLogger(__name__)
 
 if "SENTRY_DSN" in os.environ:
@@ -48,17 +44,17 @@ if "SENTRY_DSN" in os.environ:
     # will not be used.
 
     import sentry_sdk
+
     sentry_sdk.init(dsn=os.environ["SENTRY_DSN"])
-    
+
     with sentry_sdk.configure_scope() as scope:
-        
+
         from getpass import getuser
+
         try:
             scope.user = {"username": getuser()}
-        except:
+        except Exception:
             pass
-            
-
 
 # Sentry.io is a service to aggregate logs remotely, this is useful
 # for Custodian to get statistics on which errors are most common.
@@ -78,17 +74,20 @@ elif "CUSTODIAN_REPORTING_OPT_IN" in os.environ:
 if SENTRY_DSN:
 
     import sentry_sdk
+
     sentry_sdk.init(dsn=SENTRY_DSN)
-    
+
     with sentry_sdk.configure_scope() as scope:
-        
+
         from getpass import getuser
+
         try:
             scope.user = {"username": getuser()}
-        except:
+        except Exception:
             pass
-        
+
         import socket
+
         scope.set_tag("hostname", socket.gethostname())
 
 
@@ -243,7 +242,7 @@ class Custodian(object):
         try:
             Custodian._delete_checkpoints(cwd)
             n = os.path.join(cwd, "custodian.chk.{}.tar.gz".format(index))
-            with tarfile.open(n,  mode="w:gz", compresslevel=3) as f:
+            with tarfile.open(n, mode="w:gz", compresslevel=3) as f:
                 f.add(cwd, arcname='.')
             logger.info("Checkpoint written to {}".format(n))
         except Exception as ex:
@@ -663,7 +662,7 @@ class Custodian(object):
                             self.run_log[-1]["max_errors_per_handler"] = True
                             raise MaxCorrectionsPerHandlerError(msg, True, h.max_num_corrections, h)
                         else:
-                            logger.warning(msg+" Correction not applied.")
+                            logger.warning(msg + " Correction not applied.")
                             continue
                     if terminate_func is not None and h.is_terminating:
                         logger.info("Terminating job")
@@ -694,7 +693,7 @@ class Custodian(object):
         return len(corrections) > 0
 
 
-class Job(six.with_metaclass(ABCMeta, MSONable)):
+class Job(MSONable):
     """
     Abstract base class defining the interface for a Job.
     """
@@ -777,7 +776,7 @@ class ErrorHandler(MSONable):
     fixed maximum number of times on a single job (i.e. the counter is reset
     at the beginning of each job). If the maximum number is reached the code
     will either raise a MaxCorrectionsPerHandlerError (raise_on_max==True) or stops
-    considering the correction (raise_on_max==False). If max_num_corrections 
+    considering the correction (raise_on_max==False). If max_num_corrections
     is None this option is not considered. These options can be overridden
     as class attributes of the subclass or as customizable options setting
     an instance attribute from __init__.
@@ -835,7 +834,7 @@ class ErrorHandler(MSONable):
         self._num_applied_corrections = value
 
 
-class Validator(six.with_metaclass(ABCMeta, MSONable)):
+class Validator(MSONable):
     """
     Abstract base class defining the interface for a Validator. A Validator
     differs from an ErrorHandler in that it does not correct a run and is run

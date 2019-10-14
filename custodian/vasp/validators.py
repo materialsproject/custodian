@@ -30,34 +30,33 @@ class VasprunXMLValidator(Validator):
     def check(self):
         try:
             Vasprun("vasprun.xml")
-        except:
+        except Exception:
             exception_context = {}
-            
+
             if os.path.exists(self.output_file):
                 with open(self.output_file, "r") as output_file:
                     output_file_tail = deque(output_file, maxlen=10)
                 exception_context["output_file_tail"] = "".join(output_file_tail)
-            
+
             if os.path.exists(self.stderr_file):
                 with open(self.stderr_file, "r") as stderr_file:
                     stderr_file_tail = deque(stderr_file, maxlen=10)
                 exception_context["stderr_file_tail"] = "".join(stderr_file_tail)
-            
+
             if os.path.exists("vasprun.xml"):
-                
                 stat = os.stat("vasprun.xml")
                 exception_context["vasprun_st_size"] = stat.st_size
                 exception_context["vasprun_st_atime"] = stat.st_atime
                 exception_context["vasprun_st_mtime"] = stat.st_mtime
                 exception_context["vasprun_st_ctime"] = stat.st_ctime
-                
+
                 with open("vasprun.xml", "r") as vasprun:
                     vasprun_tail = deque(vasprun, maxlen=10)
                 exception_context["vasprun_tail"] = "".join(vasprun_tail)
-            
+
             self.logger.error("Failed to load vasprun.xml",
                               exc_info=True, extra=exception_context)
-            
+
             return True
         return False
 
@@ -101,6 +100,7 @@ class VaspNpTMDValidator(Validator):
         else:
             return True
 
+
 class VaspAECCARValidator(Validator):
     """
     Check if the data in the AECCAR is corrupted
@@ -115,6 +115,7 @@ class VaspAECCARValidator(Validator):
         aeccar = aeccar0 + aeccar2
         return check_broken_chgcar(aeccar)
 
+
 def check_broken_chgcar(chgcar):
     chgcar_data = chgcar.data['total']
     if (chgcar_data < 0).sum() > 100:
@@ -122,7 +123,7 @@ def check_broken_chgcar(chgcar):
         return True
 
     diff = chgcar_data[:-1, :-1, :-1] - chgcar_data[1:, 1:, 1:]
-    if diff.max()/(chgcar_data.max() - chgcar_data.min()) > 0.95:
+    if diff.max() / (chgcar_data.max() - chgcar_data.min()) > 0.95:
         # Some single diagonal finite difference is more than 95% of the entire range
         return True
 

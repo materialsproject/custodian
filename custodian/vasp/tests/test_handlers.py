@@ -22,11 +22,11 @@ import datetime
 import numpy as np
 
 from custodian.vasp.handlers import VaspErrorHandler, \
-    UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler, \
-    MaxForceErrorHandler, PositiveEnergyErrorHandler, PotimErrorHandler, \
+    UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler,\
+    PositiveEnergyErrorHandler, PotimErrorHandler, \
     FrozenJobErrorHandler, AliasingErrorHandler, StdErrHandler, LrfCommutatorHandler, \
     DriftErrorHandler
-from pymatgen.io.vasp import Incar, Poscar, Structure, Kpoints, VaspInput, Vasprun
+from pymatgen.io.vasp.inputs import Incar, Structure, Kpoints, VaspInput
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
@@ -478,50 +478,6 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         shutil.move("INCAR.orig", "INCAR")
         os.remove("OSZICAR")
         clean_dir()
-        os.chdir(cwd)
-
-class MaxForceErrorHandlerTest(unittest.TestCase):
-
-    def setUp(self):
-        if "PMG_VASP_PSP_DIR" not in os.environ:
-            os.environ["PMG_VASP_PSP_DIR"] = test_dir
-        os.chdir(test_dir)
-
-    def test_check_correct(self):
-        #NOTE: the vasprun here has had projected and partial eigenvalues removed
-        subdir = os.path.join(test_dir, "max_force")
-        os.chdir(subdir)
-        shutil.copy("INCAR", "INCAR.orig")
-        shutil.copy("POSCAR", "POSCAR.orig")
-
-        h = MaxForceErrorHandler()
-        self.assertTrue(h.check())
-        d = h.correct()
-        self.assertEqual(d["errors"], ['MaxForce'])
-
-        os.remove(os.path.join(subdir, "error.1.tar.gz"))
-
-        incar = Incar.from_file('INCAR')
-        poscar = Poscar.from_file('POSCAR')
-        contcar = Poscar.from_file('CONTCAR')
-
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("POSCAR.orig", "POSCAR")
-
-        self.assertEqual(poscar.structure, contcar.structure)
-        self.assertAlmostEqual(incar['EDIFFG'], 0.005)
-
-    def test_selective_dynamics(self):
-        output_filename = os.path.join(test_dir, "vasprun.xml.indirect.gz")
-        vr = Vasprun(output_filename)
-        # assert that the max force is above the threshold
-        max_constrained = np.max(np.linalg.norm(vr.ionic_steps[-1]['forces'],
-                                                axis=1))
-        self.assertTrue(max_constrained > 0.5)
-        handler = MaxForceErrorHandler(output_filename, max_force_threshold=0.5)
-        self.assertFalse(handler.check())
-
-    def tearDown(self):
         os.chdir(cwd)
 
 

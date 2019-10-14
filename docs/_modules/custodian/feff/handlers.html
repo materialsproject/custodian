@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>custodian.feff.handlers &#8212; custodian 2019.8.23 documentation</title>
+    <title>custodian.feff.handlers &#8212; custodian 2019.8.24 documentation</title>
     <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2019.8.23 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2019.8.24 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -118,8 +118,8 @@
         <span class="n">nmix</span> <span class="o">=</span> <span class="n">scf_values</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
         <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="c1">#Add RESTART card to PARAMETERS</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;RESTART&quot;</span> <span class="ow">in</span> <span class="n">feff_input</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span>
+        <span class="c1"># Add RESTART card to PARAMETERS</span>
+        <span class="k">if</span> <span class="s2">&quot;RESTART&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">feff_input</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;PARAMETERS&quot;</span><span class="p">,</span>
                             <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;RESTART&quot;</span><span class="p">:</span> <span class="p">[]}}})</span>
 
