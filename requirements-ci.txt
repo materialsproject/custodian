@@ -1,4 +1,4 @@
-pymatgen==2019.10.4
+pymatgen==2019.10.16
 coverage==4.5.4
 coveralls==1.8.2
 pytest==5.2.1
