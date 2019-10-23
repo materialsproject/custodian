@@ -116,15 +116,18 @@ class VaspAECCARValidator(Validator):
         return check_broken_chgcar(aeccar)
 
 
-def check_broken_chgcar(chgcar):
+def check_broken_chgcar(chgcar, diff_tresh=None):
+    """
+    """
     chgcar_data = chgcar.data['total']
     if (chgcar_data < 0).sum() > 100:
         # a decent bunch of the values are negative
         return True
 
     diff = chgcar_data[:-1, :-1, :-1] - chgcar_data[1:, 1:, 1:]
-    if diff.max() / (chgcar_data.max() - chgcar_data.min()) > 0.95:
-        # Some single diagonal finite difference is more than 95% of the entire range
-        return True
+    if diff_tresh:
+        if diff.max() / (chgcar_data.max() - chgcar_data.min()) > 0.95:
+            # Some single diagonal finite difference is more than 95% of the entire range
+            return True
 
     return False
