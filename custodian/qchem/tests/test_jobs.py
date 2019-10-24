@@ -502,6 +502,12 @@ class OptFF_small_neg_freq(TestCase):
         shutil.copyfile(os.path.join(test_dir,"small_neg_freq/mol.qout.freq_1"),os.path.join(scr_dir,"mol.qout.freq_1"))
         shutil.copyfile(os.path.join(test_dir,"small_neg_freq/mol.qout.opt_2"),os.path.join(scr_dir,"mol.qout.opt_2"))
         shutil.copyfile(os.path.join(test_dir,"small_neg_freq/mol.qout.freq_2"),os.path.join(scr_dir,"mol.qout.freq_2"))
+        shutil.copyfile(os.path.join(test_dir,"small_neg_freq/mol.qin.opt_0"),os.path.join(scr_dir,"mol.qin.opt_0"))
+        shutil.copyfile(os.path.join(test_dir,"small_neg_freq/mol.qin.freq_0"),os.path.join(scr_dir,"mol.qin.freq_0"))
+        shutil.copyfile(os.path.join(test_dir,"small_neg_freq/mol.qin.opt_1"),os.path.join(scr_dir,"mol.qin.opt_1"))
+        shutil.copyfile(os.path.join(test_dir,"small_neg_freq/mol.qin.freq_1"),os.path.join(scr_dir,"mol.qin.freq_1"))
+        shutil.copyfile(os.path.join(test_dir,"small_neg_freq/mol.qin.opt_2"),os.path.join(scr_dir,"mol.qin.opt_2"))
+        shutil.copyfile(os.path.join(test_dir,"small_neg_freq/mol.qin.freq_2"),os.path.join(scr_dir,"mol.qin.freq_2"))
         os.chdir(scr_dir)
 
     def tearDown(self):

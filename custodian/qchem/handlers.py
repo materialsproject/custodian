@@ -82,9 +82,9 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
             elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
-                self.qcinp.rem["scf_algorithm"] = "diis_gdm"
-                actions.append({"scf_algorithm": "diis_gdm"})
-            elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis_gdm":
+            #     self.qcinp.rem["scf_algorithm"] = "diis_gdm"
+            #     actions.append({"scf_algorithm": "diis_gdm"})
+            # elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis_gdm":
                 self.qcinp.rem["scf_algorithm"] = "gdm"
                 actions.append({"scf_algorithm": "gdm"})
             elif self.qcinp.rem.get("scf_guess_always", "none").lower() != "true":

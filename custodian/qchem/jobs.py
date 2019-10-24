@@ -181,6 +181,10 @@ class QCJob(Job):
                     backup=first,
                     **QCJob_kwargs))
                 opt_outdata = QCOutput(output_file + ".opt_" + str(ii)).data
+                opt_indata = QCInput.from_file(input_file + ".opt_" + str(ii))
+                if opt_indata.rem["scf_algorithm"] != freq_rem["scf_algorithm"]:
+                    freq_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
+                    opt_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
                 first = False
                 if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
                     print("Unstable molecule broke into unconnected fragments which failed to optimize! Exiting...")
@@ -208,6 +212,10 @@ class QCJob(Job):
                         backup=first,
                         **QCJob_kwargs))
                     outdata = QCOutput(output_file + ".freq_" + str(ii)).data
+                    indata = QCInput.from_file(input_file + ".freq_" + str(ii))
+                    if indata.rem["scf_algorithm"] != freq_rem["scf_algorithm"]:
+                        freq_rem["scf_algorithm"] = indata.rem["scf_algorithm"]
+                        opt_rem["scf_algorithm"] = indata.rem["scf_algorithm"]
                     errors = outdata.get("errors")
                     if len(errors) != 0:
                         raise AssertionError('No errors should be encountered while flattening frequencies!')
