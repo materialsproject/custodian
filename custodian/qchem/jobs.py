@@ -75,6 +75,8 @@ class QCJob(Job):
         self.save_scratch = save_scratch
         self.save_name = save_name
         self.backup = backup
+        self.orig_qclocalscr = copy.deepcopy(os.environ["QCLOCALSCR"])
+        self.my_qclocalscr = None
 
     @property
     def current_command(self):
@@ -103,6 +105,8 @@ class QCJob(Job):
             shutil.move(self.input_file, self.input_file + self.suffix)
             shutil.move(self.output_file, self.output_file + self.suffix)
             shutil.move(self.qclog_file, self.qclog_file + self.suffix)
+        shutil.rmtree(self.my_qclocalscr)
+        os.environ["QCLOCALSCR"] = self.orig_qclocalscr
 
     def run(self):
         """
@@ -111,10 +115,12 @@ class QCJob(Job):
         Returns:
             (subprocess.Popen) Used for monitoring.
         """
+        if self.my_qclocalscr != None:
+            shutil.rmtree(self.my_qclocalscr)
         myrand = str(random.randint(1, 1000000000))
-        mydir = os.path.join(os.environ["QCLOCALSCR"], "qchem" + myrand)
-        os.mkdir(mydir)
-        os.environ["QCLOCALSCR"] = mydir
+        self.my_qclocalscr = os.path.join(self.orig_qclocalscr, "qchem" + myrand)
+        os.mkdir(self.my_qclocalscr)
+        os.environ["QCLOCALSCR"] = self.my_qclocalscr
         qclog = open(self.qclog_file, 'w')
         p = subprocess.Popen(self.current_command, stdout=qclog, shell=True)
         return p
