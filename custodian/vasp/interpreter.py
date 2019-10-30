@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from custodian.ansible.actions import FileActions, DictActions
 from custodian.ansible.interpreter import Modder
-from pymatgen.io.vasp import VaspInput
+from pymatgen.io.vasp.inputs import VaspInput
 
 
 class VaspModder(Modder):
