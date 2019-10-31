@@ -138,7 +138,6 @@ def check_broken_chgcar(chgcar, diff_thresh=None):
         """
         diff = chgcar_data[:-1, :-1, :-1] - chgcar_data[1:, 1:, 1:]
         if diff.max() / (chgcar_data.max() - chgcar_data.min()) > diff_thresh:
-            # Some single diagonal finite difference is more than 95% of the entire range
             return True
 
     return False
