@@ -1055,11 +1055,11 @@ class NonConvergingErrorHandler(ErrorHandler):
         # Unfixable error. Just return None for actions.
         else:
             return {"errors": ["Non-converging job"], "actions": None}
-        
+
     @classmethod
     def from_dict(cls, d):
         """
-        Custom from_dict method to preserve backwards compatibility with 
+        Custom from_dict method to preserve backwards compatibility with
         older versions of Custodian.
         """
         if "change_algo" in d:
