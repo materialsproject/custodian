@@ -1056,6 +1056,17 @@ class NonConvergingErrorHandler(ErrorHandler):
         else:
             return {"errors": ["Non-converging job"], "actions": None}
 
+    @classmethod
+    def from_dict(cls, d):
+        """
+        Custom from_dict method to preserve backwards compatibility with
+        older versions of Custodian.
+        """
+        if "change_algo" in d:
+            del d["change_algo"]
+        return cls(output_filename=d.get("output_filename", "OSZICAR"),
+                   nionic_steps=d.get("nionic_steps", 10))
+
 
 class WalltimeHandler(ErrorHandler):
     """
