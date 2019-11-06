@@ -433,7 +433,7 @@ class VaspJob(Job):
                         settings_override=pre_opt_setings)]
 
         # Finish with regular static calculation using SCAN
-        jobs.extend(VaspJob(vasp_cmd, auto_npar=auto_npar))
+        jobs.extend([VaspJob(vasp_cmd, auto_npar=auto_npar)])
 
         # Ensure the first relaxation doesn't overwrite the original inputs
         jobs[1].backup = False
