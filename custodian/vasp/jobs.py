@@ -377,7 +377,9 @@ class VaspJob(Job):
         pre_opt_setings = [{"dict": "INCAR",
                             "action": {"_set": {"METAGGA": None,
                                                 "LWAVE": True,
-                                                }}]
+                                                }
+                                        }
+                            }]
         jobs = [VaspJob(vasp_cmd, auto_npar=auto_npar,
                         final=False, suffix=".precondition",
                         settings_override=pre_opt_setings)]
