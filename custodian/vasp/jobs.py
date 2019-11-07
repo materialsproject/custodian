@@ -442,7 +442,7 @@ class VaspJob(Job):
         post_opt_settings = [{"dict": "INCAR",
                               "action": {"_set": {"METAGGA": metaGGA,
                                                   "ISTART": 1,
-                                                  "NSW": incar.get("NSW", 0),
+                                                  "NSW": 0,
                                                   }}},
                              {"file": "CONTCAR",
                               "action": {"_file_copy": {"dest": "POSCAR"}}}]
