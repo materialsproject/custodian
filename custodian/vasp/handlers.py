@@ -92,7 +92,9 @@ class VaspErrorHandler(ErrorHandler):
         "elf_ncl": ["WARNING: ELF not implemented for non collinear case"],
         "rhosyg": ["RHOSYG internal error"],
         "posmap": ["POSMAP internal error: symmetry equivalent atom not found"],
-        "point_group": ["Error: point group operation missing"]
+        "point_group": ["Error: point group operation missing"],
+        "psmaxn": ["REAL_OPT: internal ERROR:",
+                        "WARNING: PSMAXN for non-local potential too small"]
     }
 
     def __init__(self, output_filename="vasp.out", natoms_large_cell=100,
@@ -166,6 +168,10 @@ class VaspErrorHandler(ErrorHandler):
         if "inv_rot_mat" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"SYMPREC": 1e-8}}})
+        
+        if "psmaxn" in self.errors:
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"LREAL": False}}})
 
         if "brmix" in self.errors:
             # If there is not a valid OUTCAR already, increment
