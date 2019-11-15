@@ -153,7 +153,10 @@ class VaspJob(Job):
 
         if self.backup:
             for f in VASP_INPUT_FILES:
-                shutil.copy(f, "{}.orig".format(f))
+                try:
+                    shutil.copy(f, "{}.orig".format(f))
+                except FileNotFoundError: # handle the situation when there is no KPOINTS file
+                    pass
 
         if self.auto_npar:
             try:
