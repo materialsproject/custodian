@@ -729,6 +729,10 @@ class MeshSymmetryErrorHandler(ErrorHandler):
               " lattices."
 
         vi = VaspInput.from_directory('.')
+        # disregard this error if KSPACING is set and no KPOINTS file is generated
+        if vi["INCAR"].get('KSPACING', False):
+            return False
+
         # According to VASP admins, you can disregard this error
         # if symmetry is off
         # Also disregard if automatic KPOINT generation is used
