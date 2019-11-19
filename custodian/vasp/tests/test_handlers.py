@@ -229,7 +229,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h = VaspErrorHandler("vasp.nicht_konvergent")
         h.natoms_large_cell = 5
         self.assertEqual(h.check(), True)
-        self.assertEqual(h.correct()["errors"], ["psmaxn","nicht_konv"])
+        self.assertEqual(h.correct()["errors"], ["realopt","nicht_konv"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["LREAL"], True)
 
@@ -429,7 +429,7 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         h = VaspErrorHandler("vasp.out")
         self.assertEqual(h.check(), True)
         d = h.correct()
-        self.assertEqual(d['errors'], ["psmaxn","zpotrf"])
+        self.assertEqual(d['errors'], ["realopt","zpotrf"])
         s2 = Structure.from_file("POSCAR")
         self.assertAlmostEqual(s2.volume, s1.volume * 1.2 ** 3, 3)
 
@@ -439,7 +439,7 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         h = VaspErrorHandler("vasp.out")
         self.assertEqual(h.check(), True)
         d = h.correct()
-        self.assertEqual(d['errors'], ["psmaxn","zpotrf"])
+        self.assertEqual(d['errors'], ["realopt","zpotrf"])
         s2 = Structure.from_file("POSCAR")
         self.assertAlmostEqual(s2.volume, s1.volume, 3)
         self.assertAlmostEqual(Incar.from_file("INCAR")['POTIM'], 0.25)
@@ -455,7 +455,7 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         h = VaspErrorHandler("vasp.out")
         self.assertEqual(h.check(), True)
         d = h.correct()
-        self.assertEqual(d['errors'], ["psmaxn","zpotrf"])
+        self.assertEqual(d['errors'], ["realopt","zpotrf"])
         s2 = Structure.from_file("POSCAR")
         self.assertAlmostEqual(s2.volume, s1.volume, 3)
         self.assertEqual(Incar.from_file("INCAR")["ISYM"], 0)

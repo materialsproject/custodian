@@ -93,8 +93,7 @@ class VaspErrorHandler(ErrorHandler):
         "rhosyg": ["RHOSYG internal error"],
         "posmap": ["POSMAP internal error: symmetry equivalent atom not found"],
         "point_group": ["Error: point group operation missing"],
-        "psmaxn": ["REAL_OPT: internal ERROR:",
-                        "WARNING: PSMAXN for non-local potential too small"]
+        "realopt": ["REAL_OPT: internal ERROR:"]
     }
 
     def __init__(self, output_filename="vasp.out", natoms_large_cell=100,
@@ -169,7 +168,7 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"SYMPREC": 1e-8}}})
         
-        if "psmaxn" in self.errors:
+        if "realopt" in self.errors:
             actions.append({"dict": "INCAR",
                             "action": {"_set": {"LREAL": False}}})
 
