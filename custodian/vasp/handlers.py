@@ -160,7 +160,7 @@ class VaspErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
 
         if self.errors.intersection(["tet", "dentet"]):
-            if incar.get("KSPACING",None) is not None:
+            if vi.incar.get("KSPACING",None) is not None:
                 # decrease KSPACING by 20% in each direction (approximately double no. of kpoints)
                 actions.append({"dict": "INCAR",
                             "action": {"_set": {"KSPACING": incar.get("KSPACING",None)*0.8}}})
