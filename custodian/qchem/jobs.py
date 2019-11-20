@@ -244,8 +244,8 @@ class QCJob(Job):
                             solvent=orig_input.solvent,
                             smx=orig_input.smx)
                         opt_QCInput.write_file(input_file)
-            if os.path.exists(os.path.join(os.getcwd(), "chain_scratch")):
-                shutil.rmtree(os.path.join(os.getcwd(), "chain_scratch"))
+            # if os.path.exists(os.path.join(os.getcwd(), "chain_scratch")):
+            #     shutil.rmtree(os.path.join(os.getcwd(), "chain_scratch"))
 
         else:
             if not os.path.exists(input_file):
