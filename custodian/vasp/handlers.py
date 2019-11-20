@@ -161,9 +161,9 @@ class VaspErrorHandler(ErrorHandler):
 
         if self.errors.intersection(["tet", "dentet"]):
             if incar.get("KSPACING",None) is not None:
-                # decrease KSPACING by 50% (double no. of kpoints)
+                # decrease KSPACING by 20% in each direction (approximately double no. of kpoints)
                 actions.append({"dict": "INCAR",
-                            "action": {"_set": {"KSPACING": incar.get("KSPACING",None)*0.5}})
+                            "action": {"_set": {"KSPACING": incar.get("KSPACING",None)*0.8}})
             else:
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
