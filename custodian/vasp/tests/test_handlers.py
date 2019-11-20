@@ -277,7 +277,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ['tet'])
         self.assertEqual(d["actions"],
-                         [{"_set": {"KSPACING": incar.get("KSPACING",None)*0.8}}])
+                         [{"_set": {"KSPACING": vi["INCAR"].get("KSPACING")*0.8}])
 
     def tearDown(self):
         os.chdir(test_dir)
