@@ -160,8 +160,13 @@ class VaspErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
 
         if self.errors.intersection(["tet", "dentet"]):
-            actions.append({"dict": "INCAR",
-                            "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+            if incar.get("KSPACING",None) is not None:
+                # decrease KSPACING by 50% (double no. of kpoints)
+                actions.append({"dict": "INCAR",
+                            "action": {"_set": {"KSPACING": incar.get("KSPACING",None)*0.5}})
+            else:
+                actions.append({"dict": "INCAR",
+                                "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
 
         if "inv_rot_mat" in self.errors:
             actions.append({"dict": "INCAR",
