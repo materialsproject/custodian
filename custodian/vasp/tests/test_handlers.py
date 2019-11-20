@@ -272,12 +272,13 @@ class VaspErrorHandlerTest(unittest.TestCase):
     
     def test_too_large_kspacing(self):
         shutil.copy("INCAR.kspacing", "INCAR")
+        vi = VaspInput.from_directory(".")
         h = VaspErrorHandler("vasp.teterror")
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ['tet'])
         self.assertEqual(d["actions"],
-                         [{'action': {"_set": {"KSPACING": vi["INCAR"].get("KSPACING")*0.8}}}])
+                         [{'action': {"_set": {"KSPACING": vi["INCAR"].get("KSPACING")*0.8}},'dict': 'INCAR'}])
 
     def tearDown(self):
         os.chdir(test_dir)
