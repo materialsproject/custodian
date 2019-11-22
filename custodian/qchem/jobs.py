@@ -100,7 +100,7 @@ class QCJob(Job):
         for file in ["HESS","GRAD","plots/dens.0.cube"]:
             file_path = os.path.join(scratch_dir,file)
             if os.path.exists(file_path):
-                shutil.copy_file(file_path,os.getcwd())
+                shutil.copy(file_path,os.getcwd())
         if self.suffix != "":
             shutil.move(self.input_file, self.input_file + self.suffix)
             shutil.move(self.output_file, self.output_file + self.suffix)
