@@ -118,7 +118,9 @@ class QCJob(Job):
         Returns:
             (subprocess.Popen) Used for monitoring.
         """
-        shutil.rmtree(os.path.join(os.environ["QCLOCALSCR"],"scratch"))
+        local_scratch = os.path.join(os.environ["QCLOCALSCR"],"scratch")
+        if os.path.exists(local_scratch):
+            shutil.rmtree(local_scratch)
         qclog = open(self.qclog_file, 'w')
         p = subprocess.Popen(self.current_command, stdout=qclog, shell=True)
         return p
