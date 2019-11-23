@@ -224,11 +224,11 @@ class VaspErrorHandler(ErrorHandler):
             else:
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"ISYM": 0}}})
-
-                if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
-                    actions.append({"dict": "KPOINTS",
-                                    "action": {
-                                        "_set": {"generation_style": "Gamma"}}})
+                if ["KPOINTS"] is not None:
+                    if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                        actions.append({"dict": "KPOINTS",
+                                        "action": {
+                                            "_set": {"generation_style": "Gamma"}}})
 
                 # Based on VASP forum's recommendation, you should delete the
                 # CHGCAR and WAVECAR when dealing with this error.
@@ -302,16 +302,18 @@ class VaspErrorHandler(ErrorHandler):
 
         if self.errors.intersection(["tetirr", "incorrect_shift"]):
 
-            if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
-                actions.append({"dict": "KPOINTS",
-                                "action": {
-                                    "_set": {"generation_style": "Gamma"}}})
+            if ["KPOINTS"] is not None:
+                if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                    actions.append({"dict": "KPOINTS",
+                                    "action": {
+                                        "_set": {"generation_style": "Gamma"}}})
 
         if "rot_matrix" in self.errors:
-            if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
-                actions.append({"dict": "KPOINTS",
-                                "action": {
-                                    "_set": {"generation_style": "Gamma"}}})
+            if ["KPOINTS"] is not None:
+                if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                    actions.append({"dict": "KPOINTS",
+                                    "action": {
+                                        "_set": {"generation_style": "Gamma"}}})
             else:
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"ISYM": 0}}})
