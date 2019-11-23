@@ -35,7 +35,7 @@ __maintainer__ = "Shyue Ping Ong"
 __email__ = "ongsp@ucsd.edu"
 __date__ = "Sep 17 2014"
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 if "SENTRY_DSN" in os.environ:
     # Sentry.io is a service to aggregate logs remotely, this is useful
@@ -224,7 +224,7 @@ class Custodian(object):
         if chkpts:
             chkpt = sorted(chkpts, key=lambda c: int(c.split(".")[-3]))[0]
             restart = int(chkpt.split(".")[-3])
-            logger.info("Loading from checkpoint file {}...".format(chkpt))
+            # logger.info("Loading from checkpoint file {}...".format(chkpt))
             t = tarfile.open(chkpt)
             t.extractall()
             # Log the corrections to a json file.
@@ -244,11 +244,11 @@ class Custodian(object):
             n = os.path.join(cwd, "custodian.chk.{}.tar.gz".format(index))
             with tarfile.open(n, mode="w:gz", compresslevel=3) as f:
                 f.add(cwd, arcname='.')
-            logger.info("Checkpoint written to {}".format(n))
+            # logger.info("Checkpoint written to {}".format(n))
         except Exception as ex:
-            logger.info("Checkpointing failed")
+            # logger.info("Checkpointing failed")
             import traceback
-            logger.error(traceback.format_exc())
+            # logger.error(traceback.format_exc())
 
     @classmethod
     def from_spec(cls, spec):
@@ -364,12 +364,12 @@ class Custodian(object):
                         copy_from_current_on_enter=True) as temp_dir:
             self.total_errors = 0
             start = datetime.datetime.now()
-            logger.info("Run started at {} in {}.".format(
-                start, temp_dir))
+            # logger.info("Run started at {} in {}.".format(
+            #     start, temp_dir))
             v = sys.version.replace("\n", " ")
-            logger.info("Custodian running on Python version {}".format(v))
-            logger.info("Hostname: {}, Cluster: {}".format(
-                *get_execution_host_info()))
+            # logger.info("Custodian running on Python version {}".format(v))
+            # logger.info("Hostname: {}, Cluster: {}".format(
+            #     *get_execution_host_info()))
 
             try:
                 # skip jobs until the restart
@@ -390,14 +390,14 @@ class Custodian(object):
                     raise
             finally:
                 # Log the corrections to a json file.
-                logger.info("Logging to {}...".format(Custodian.LOG_FILE))
+                # logger.info("Logging to {}...".format(Custodian.LOG_FILE))
                 dumpfn(self.run_log, Custodian.LOG_FILE, cls=MontyEncoder,
                        indent=4)
                 end = datetime.datetime.now()
-                logger.info("Run ended at {}.".format(end))
+                # logger.info("Run ended at {}.".format(end))
                 run_time = end - start
-                logger.info("Run completed. Total time taken = {}."
-                            .format(run_time))
+                # logger.info("Run completed. Total time taken = {}."
+                #             .format(run_time))
                 if self.gzipped_output:
                     gzip_dir(".")
 
@@ -440,11 +440,11 @@ class Custodian(object):
         while (self.total_errors < self.max_errors and
                self.errors_current_job < self.max_errors_per_job):
             attempt += 1
-            logger.info(
-                "Starting job no. {} ({}) attempt no. {}. Total errors and "
-                "errors in job thus far = {}, {}.".format(
-                    job_n, job.name, attempt, self.total_errors,
-                    self.errors_current_job))
+            # logger.info(
+            #     "Starting job no. {} ({}) attempt no. {}. Total errors and "
+            #     "errors in job thus far = {}, {}.".format(
+            #         job_n, job.name, attempt, self.total_errors,
+            #         self.errors_current_job))
 
             p = job.run()
             # Check for errors using the error handlers and perform
@@ -477,8 +477,8 @@ class Custodian(object):
 
                 zero_return_code = p.returncode == 0
 
-            logger.info("{}.run has completed. "
-                        "Checking remaining handlers".format(job.name))
+            # logger.info("{}.run has completed. "
+            #             "Checking remaining handlers".format(job.name))
             # Check for errors again, since in some cases non-monitor
             # handlers fix the problems detected by monitors
             # if an error has been found, not all handlers need to run
@@ -505,7 +505,7 @@ class Custodian(object):
                         self.run_log[-1]["nonzero_return_code"] = True
                         s = "Job return code is %d. Terminating..." % \
                             p.returncode
-                        logger.info(s)
+                        # logger.info(s)
                         raise ReturnCodeError(s, True)
                     else:
                         warnings.warn("subprocess returned a non-zero return "
@@ -528,12 +528,12 @@ class Custodian(object):
         if self.errors_current_job >= self.max_errors_per_job:
             self.run_log[-1]["max_errors_per_job"] = True
             msg = "Max errors per job reached: {}.".format(self.max_errors_per_job)
-            logger.info(msg)
+            # logger.info(msg)
             raise MaxCorrectionsPerJobError(msg, True, self.max_errors_per_job, job)
         else:
             self.run_log[-1]["max_errors"] = True
             msg = "Max errors reached: {}.".format(self.max_errors)
-            logger.info(msg)
+            # logger.info(msg)
             raise MaxCorrectionsError(msg, True, self.max_errors)
 
     def run_interrupted(self):
@@ -556,9 +556,9 @@ class Custodian(object):
         try:
             cwd = os.getcwd()
             v = sys.version.replace("\n", " ")
-            logger.info("Custodian started in singleshot mode at {} in {}."
-                        .format(start, cwd))
-            logger.info("Custodian running on Python version {}".format(v))
+            # logger.info("Custodian started in singleshot mode at {} in {}."
+            #             .format(start, cwd))
+            # logger.info("Custodian running on Python version {}".format(v))
 
             # load run log
             if os.path.exists(Custodian.LOG_FILE):
@@ -568,7 +568,7 @@ class Custodian(object):
                 # starting up an initial job - setup input and quit
                 job_n = 0
                 job = self.jobs[job_n]
-                logger.info("Setting up job no. 1 ({}) ".format(job.name))
+                # logger.info("Setting up job no. 1 ({}) ".format(job.name))
                 job.setup()
                 self.run_log.append({"job": job.as_dict(), "corrections": [],
                                      'job_n': job_n})
@@ -580,15 +580,15 @@ class Custodian(object):
 
                 # If we had to fix errors from a previous run, insert clean log
                 # dict
-                if len(self.run_log[-1]['corrections']) > 0:
-                    logger.info("Reran {}.run due to fixable errors".format(
-                        job.name))
+                # if len(self.run_log[-1]['corrections']) > 0:
+                #     logger.info("Reran {}.run due to fixable errors".format(
+                #         job.name))
 
                 # check error handlers
-                logger.info("Checking error handlers for {}.run".format(
-                    job.name))
+                # logger.info("Checking error handlers for {}.run".format(
+                #     job.name))
                 if self._do_check(self.handlers):
-                    logger.info("Failed validation based on error handlers")
+                    # logger.info("Failed validation based on error handlers")
                     # raise an error for an unrecoverable error
                     for x in self.run_log[-1]["corrections"]:
                         if not x["actions"] and x["handler"].raises_runtime_error:
@@ -596,21 +596,21 @@ class Custodian(object):
                             s = "Unrecoverable error for handler: {}. " \
                                 "Raising RuntimeError".format(x["handler"])
                             raise NonRecoverableError(s, True, x["handler"])
-                    logger.info("Corrected input based on error handlers")
+                    # logger.info("Corrected input based on error handlers")
                     # Return with more jobs to run if recoverable error caught
                     # and corrected for
                     return len(self.jobs) - job_n
 
                 # check validators
-                logger.info("Checking validator for {}.run".format(job.name))
+                # logger.info("Checking validator for {}.run".format(job.name))
                 for v in self.validators:
                     if v.check():
                         self.run_log[-1]["validator"] = v
-                        logger.info("Failed validation based on validator")
+                        # logger.info("Failed validation based on validator")
                         s = "Validation failed: {}".format(v)
                         raise ValidationError(s, True, v)
 
-                logger.info("Postprocessing for {}.run".format(job.name))
+                # logger.info("Postprocessing for {}.run".format(job.name))
                 job.postprocess()
 
                 # IF DONE WITH ALL JOBS - DELETE ALL CHECKPOINTS AND RETURN
@@ -628,20 +628,20 @@ class Custodian(object):
                 return len(self.jobs) - job_n
 
         except CustodianError as ex:
-            logger.error(ex.message)
+            # logger.error(ex.message)
             if ex.raises:
                 raise
 
         finally:
             # Log the corrections to a json file.
-            logger.info("Logging to {}...".format(Custodian.LOG_FILE))
+            # logger.info("Logging to {}...".format(Custodian.LOG_FILE))
             dumpfn(self.run_log, Custodian.LOG_FILE, cls=MontyEncoder,
                    indent=4)
             end = datetime.datetime.now()
-            logger.info("Run ended at {}.".format(end))
+            # logger.info("Run ended at {}.".format(end))
             run_time = end - start
-            logger.info("Run completed. Total time taken = {}."
-                        .format(run_time))
+            # logger.info("Run completed. Total time taken = {}."
+            #             .format(run_time))
             if self.finished and self.gzipped_output:
                 gzip_dir(".")
 
@@ -662,15 +662,15 @@ class Custodian(object):
                             self.run_log[-1]["max_errors_per_handler"] = True
                             raise MaxCorrectionsPerHandlerError(msg, True, h.max_num_corrections, h)
                         else:
-                            logger.warning(msg + " Correction not applied.")
+                            # logger.warning(msg + " Correction not applied.")
                             continue
                     if terminate_func is not None and h.is_terminating:
-                        logger.info("Terminating job")
+                        # logger.info("Terminating job")
                         terminate_func()
                         # make sure we don't terminate twice
                         terminate_func = None
                     d = h.correct()
-                    logger.error(h.__class__.__name__, extra=d)
+                    # logger.error(h.__class__.__name__, extra=d)
                     d["handler"] = h
                     corrections.append(d)
                     h.n_applied_corrections += 1
@@ -679,8 +679,8 @@ class Custodian(object):
                     raise
                 else:
                     import traceback
-                    logger.error("Bad handler %s " % h)
-                    logger.error(traceback.format_exc())
+                    # logger.error("Bad handler %s " % h)
+                    # logger.error(traceback.format_exc())
                     corrections.append(
                         {"errors": ["Bad handler %s " % h],
                          "actions": []})
