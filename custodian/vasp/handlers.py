@@ -224,7 +224,7 @@ class VaspErrorHandler(ErrorHandler):
             else:
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"ISYM": 0}}})
-                if ["KPOINTS"] is not None:
+                if vi["KPOINTS"] is not None:
                     if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
                         actions.append({"dict": "KPOINTS",
                                         "action": {
@@ -265,7 +265,7 @@ class VaspErrorHandler(ErrorHandler):
                 s.apply_strain(0.2)
                 actions.append({"dict": "POSCAR",
                                 "action": {"_set": {"structure": s.as_dict()}}})
-
+     
             # Based on VASP forum's recommendation, you should delete the
             # CHGCAR and WAVECAR when dealing with this error.
             if vi["INCAR"].get("ICHARG", 0) < 10:
@@ -302,14 +302,14 @@ class VaspErrorHandler(ErrorHandler):
 
         if self.errors.intersection(["tetirr", "incorrect_shift"]):
 
-            if ["KPOINTS"] is not None:
+            if vi["KPOINTS"] is not None:
                 if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
                     actions.append({"dict": "KPOINTS",
                                     "action": {
                                         "_set": {"generation_style": "Gamma"}}})
 
         if "rot_matrix" in self.errors:
-            if ["KPOINTS"] is not None:
+            if vi["KPOINTS"] is not None:
                 if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
                     actions.append({"dict": "KPOINTS",
                                     "action": {
@@ -730,6 +730,10 @@ class MeshSymmetryErrorHandler(ErrorHandler):
               " lattices."
 
         vi = VaspInput.from_directory('.')
+        # disregard this error if KSPACING is set and no KPOINTS file is generated
+        if vi["INCAR"].get('KSPACING', False):
+            return False
+
         # According to VASP admins, you can disregard this error
         # if symmetry is off
         # Also disregard if automatic KPOINT generation is used
