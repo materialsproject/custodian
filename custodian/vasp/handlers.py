@@ -265,7 +265,7 @@ class VaspErrorHandler(ErrorHandler):
                 s.apply_strain(0.2)
                 actions.append({"dict": "POSCAR",
                                 "action": {"_set": {"structure": s.as_dict()}}})
-     
+
             # Based on VASP forum's recommendation, you should delete the
             # CHGCAR and WAVECAR when dealing with this error.
             if vi["INCAR"].get("ICHARG", 0) < 10:
