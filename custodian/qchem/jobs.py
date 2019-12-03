@@ -301,8 +301,8 @@ class QCJob(Job):
                         raise AssertionError('No errors should be encountered while flattening frequencies!')
                     if outdata.get('frequencies')[0] > 0.0:
                         # print("All frequencies positive!")
-                        if opt_outdata.get('final_energy') > orig_energy:
-                            # print("WARNING: Energy increased during frequency flattening!")
+                        # if opt_outdata.get('final_energy') > orig_energy:
+                        #    print("WARNING: Energy increased during frequency flattening!")
                         break
                     else:
                         hist = {}
