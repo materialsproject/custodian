@@ -580,7 +580,7 @@ class Custodian(object):
 
                 # If we had to fix errors from a previous run, insert clean log
                 # dict
-                # if len(self.run_log[-1]['corrections']) > 0:
+                if len(self.run_log[-1]['corrections']) > 0:
                     logger.info("Reran {}.run due to fixable errors".format(
                         job.name))
 
