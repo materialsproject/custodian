@@ -160,8 +160,13 @@ class VaspErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
 
         if self.errors.intersection(["tet", "dentet"]):
-            actions.append({"dict": "INCAR",
-                            "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+            if vi["INCAR"].get("KSPACING"):
+                # decrease KSPACING by 20% in each direction (approximately double no. of kpoints)
+                actions.append({"dict": "INCAR",
+                                "action": {"_set": {"KSPACING": vi["INCAR"].get("KSPACING")*0.8}}})
+            else:
+                actions.append({"dict": "INCAR",
+                                "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
 
         if "inv_rot_mat" in self.errors:
             actions.append({"dict": "INCAR",
@@ -219,11 +224,11 @@ class VaspErrorHandler(ErrorHandler):
             else:
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"ISYM": 0}}})
-
-                if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
-                    actions.append({"dict": "KPOINTS",
-                                    "action": {
-                                        "_set": {"generation_style": "Gamma"}}})
+                if vi["KPOINTS"] is not None:
+                    if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                        actions.append({"dict": "KPOINTS",
+                                        "action": {
+                                            "_set": {"generation_style": "Gamma"}}})
 
                 # Based on VASP forum's recommendation, you should delete the
                 # CHGCAR and WAVECAR when dealing with this error.
@@ -297,16 +302,18 @@ class VaspErrorHandler(ErrorHandler):
 
         if self.errors.intersection(["tetirr", "incorrect_shift"]):
 
-            if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
-                actions.append({"dict": "KPOINTS",
-                                "action": {
-                                    "_set": {"generation_style": "Gamma"}}})
+            if vi["KPOINTS"] is not None:
+                if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                    actions.append({"dict": "KPOINTS",
+                                    "action": {
+                                        "_set": {"generation_style": "Gamma"}}})
 
         if "rot_matrix" in self.errors:
-            if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
-                actions.append({"dict": "KPOINTS",
-                                "action": {
-                                    "_set": {"generation_style": "Gamma"}}})
+            if vi["KPOINTS"] is not None:
+                if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                    actions.append({"dict": "KPOINTS",
+                                    "action": {
+                                        "_set": {"generation_style": "Gamma"}}})
             else:
                 actions.append({"dict": "INCAR",
                                 "action": {"_set": {"ISYM": 0}}})
@@ -723,6 +730,10 @@ class MeshSymmetryErrorHandler(ErrorHandler):
               " lattices."
 
         vi = VaspInput.from_directory('.')
+        # disregard this error if KSPACING is set and no KPOINTS file is generated
+        if vi["INCAR"].get('KSPACING', False):
+            return False
+
         # According to VASP admins, you can disregard this error
         # if symmetry is off
         # Also disregard if automatic KPOINT generation is used
