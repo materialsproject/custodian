@@ -9,7 +9,7 @@ from monty.tempfile import ScratchDir
 from monty.os import cd
 import multiprocessing
 from custodian.vasp.jobs import VaspJob, VaspNEBJob, GenerateVaspInputJob
-from pymatgen.io.vasp import Incar, Kpoints, Poscar, VaspInput
+from pymatgen.io.vasp import Incar, Kpoints, Poscar
 import pymatgen
 
 """
