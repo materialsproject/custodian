@@ -48,6 +48,19 @@ class VaspJobTest(unittest.TestCase):
                 # Need at least 3 CPUs for NPAR to be greater than 1
                 if count > 3:
                     self.assertGreater(incar["NPAR"], 1)
+    
+    def test_setup_run_no_kpts(self):
+        # just make sure v.setup() and v.run() exit cleanly when no KPOINTS file is present
+        with cd(os.path.join(test_dir, "kspacing")):
+            with ScratchDir('.', copy_from_current_on_enter=True) as d:
+                v = VaspJob("hello", auto_npar=True)
+                v.setup()
+                with self.assertRaises(FileNotFoundError):
+                    # a FileNotFoundError indicates that v.run() tried to run 
+                    # subprocess.Popen(cmd, stdout=f_std, stderr=f_err) with
+                    # cmd == "hello", so it successfully parsed the input file
+                    # directory.
+                    v.run()
 
     def test_postprocess(self):
         with cd(os.path.join(test_dir, 'postprocess')):

@@ -153,7 +153,11 @@ class VaspJob(Job):
 
         if self.backup:
             for f in VASP_INPUT_FILES:
-                shutil.copy(f, "{}.orig".format(f))
+                try:
+                    shutil.copy(f, "{}.orig".format(f))
+                except FileNotFoundError:  # handle the situation when there is no KPOINTS file
+                    if f == "KPOINTS":
+                        pass
 
         if self.auto_npar:
             try:
@@ -215,13 +219,14 @@ class VaspJob(Job):
         if self.auto_gamma:
             vi = VaspInput.from_directory(".")
             kpts = vi["KPOINTS"]
-            if kpts.style == Kpoints.supported_modes.Gamma \
-                    and tuple(kpts.kpts[0]) == (1, 1, 1):
-                if self.gamma_vasp_cmd is not None and which(
-                        self.gamma_vasp_cmd[-1]):
-                    cmd = self.gamma_vasp_cmd
-                elif which(cmd[-1] + ".gamma"):
-                    cmd[-1] += ".gamma"
+            if kpts is not None:
+                if kpts.style == Kpoints.supported_modes.Gamma \
+                        and tuple(kpts.kpts[0]) == (1, 1, 1):
+                    if self.gamma_vasp_cmd is not None and which(
+                            self.gamma_vasp_cmd[-1]):
+                        cmd = self.gamma_vasp_cmd
+                    elif which(cmd[-1] + ".gamma"):
+                        cmd[-1] += ".gamma"
         logger.info("Running {}".format(" ".join(cmd)))
         with open(self.output_file, 'w') as f_std, \
                 open(self.stderr_file, "w", buffering=1) as f_err:
