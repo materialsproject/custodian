@@ -1,5 +1,5 @@
 pymatgen==2019.12.3
-coverage==4.5.4
+coverage==5.0
 coveralls==1.9.2
 pytest==5.3.2
 pytest-cov==2.8.1
