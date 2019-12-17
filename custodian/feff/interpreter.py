@@ -26,7 +26,7 @@ class FeffModder(Modder):
                 Initialized automatically if not passed (but passing it will
                 avoid having to reparse the directory).
         """
-        self.feffinp = feffinp or FEFFDictSet.from_directory('.')
+        self.feffinp = feffinp or FEFFDictSet.from_directory(".")
         self.feffinp = self.feffinp.all_input()
         actions = actions or [FileActions, DictActions]
         super(FeffModder, self).__init__(actions, strict)
@@ -53,12 +53,14 @@ class FeffModder(Modder):
                 raise ValueError("Unrecognized format: {}".format(a))
         if modified:
             feff = self.feffinp
-            feff_input = "\n\n".join(str(feff[k]) for k in
-                                     ["HEADER", "PARAMETERS", "POTENTIALS", "ATOMS"]
-                                     if k in feff)
+            feff_input = "\n\n".join(
+                str(feff[k])
+                for k in ["HEADER", "PARAMETERS", "POTENTIALS", "ATOMS"]
+                if k in feff
+            )
             for k, v in feff.items():
-                with open(os.path.join('.', k), "w") as f:
+                with open(os.path.join(".", k), "w") as f:
                     f.write(str(v))
 
-            with open(os.path.join('.', "feff.inp"), "w") as f:
+            with open(os.path.join(".", "feff.inp"), "w") as f:
                 f.write(feff_input)

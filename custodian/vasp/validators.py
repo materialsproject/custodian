@@ -54,8 +54,9 @@ class VasprunXMLValidator(Validator):
                     vasprun_tail = deque(vasprun, maxlen=10)
                 exception_context["vasprun_tail"] = "".join(vasprun_tail)
 
-            self.logger.error("Failed to load vasprun.xml",
-                              exc_info=True, extra=exception_context)
+            self.logger.error(
+                "Failed to load vasprun.xml", exc_info=True, extra=exception_context
+            )
 
             return True
         return False
@@ -95,7 +96,7 @@ class VaspNpTMDValidator(Validator):
         outcar = Outcar("OUTCAR")
         patterns = {"MDALGO": "MDALGO\s+=\s+([\d]+)"}
         outcar.read_pattern(patterns=patterns)
-        if outcar.data["MDALGO"] == [['3']]:
+        if outcar.data["MDALGO"] == [["3"]]:
             return False
         else:
             return True
@@ -124,7 +125,7 @@ def check_broken_chgcar(chgcar, diff_thresh=None):
         diff_thresh (Float): Threshhold for diagonal difference.
                         None means we won't check for this.
     """
-    chgcar_data = chgcar.data['total']
+    chgcar_data = chgcar.data["total"]
     if (chgcar_data < 0).sum() > 100:
         # a decent bunch of the values are negative this for sure means a broken charge density
         return True

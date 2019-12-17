@@ -21,16 +21,23 @@ import shutil
 import datetime
 import numpy as np
 
-from custodian.vasp.handlers import VaspErrorHandler, \
-    UnconvergedErrorHandler, MeshSymmetryErrorHandler, WalltimeHandler,\
-    PositiveEnergyErrorHandler, PotimErrorHandler, \
-    FrozenJobErrorHandler, AliasingErrorHandler, StdErrHandler, LrfCommutatorHandler, \
-    DriftErrorHandler
+from custodian.vasp.handlers import (
+    VaspErrorHandler,
+    UnconvergedErrorHandler,
+    MeshSymmetryErrorHandler,
+    WalltimeHandler,
+    PositiveEnergyErrorHandler,
+    PotimErrorHandler,
+    FrozenJobErrorHandler,
+    AliasingErrorHandler,
+    StdErrHandler,
+    LrfCommutatorHandler,
+    DriftErrorHandler,
+)
 from pymatgen.io.vasp.inputs import Incar, Structure, Kpoints, VaspInput
 
 
-test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
-                        'test_files')
+test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")
 
 cwd = os.getcwd()
 
@@ -43,7 +50,6 @@ def clean_dir():
 
 
 class VaspErrorHandlerTest(unittest.TestCase):
-
     def setUp(self):
         os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
@@ -55,34 +61,35 @@ class VaspErrorHandlerTest(unittest.TestCase):
     def test_frozen_job(self):
         h = FrozenJobErrorHandler()
         d = h.correct()
-        self.assertEqual(d['errors'], ['Frozen job'])
-        self.assertEqual(Incar.from_file("INCAR")['ALGO'], "Normal")
+        self.assertEqual(d["errors"], ["Frozen job"])
+        self.assertEqual(Incar.from_file("INCAR")["ALGO"], "Normal")
 
     def test_subspace(self):
         h = VaspErrorHandler("vasp.subspace")
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ['subspacematrix'])
-        self.assertEqual(d["actions"],
-                         [{'action': {'_set': {'LREAL': False}},
-                           'dict': 'INCAR'}])
+        self.assertEqual(d["errors"], ["subspacematrix"])
+        self.assertEqual(
+            d["actions"], [{"action": {"_set": {"LREAL": False}}, "dict": "INCAR"}]
+        )
 
         # 2nd error should set PREC to accurate.
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ['subspacematrix'])
-        self.assertEqual(d["actions"],
-                         [{'action': {'_set': {'PREC': 'Accurate'}},
-                           'dict': 'INCAR'}])
+        self.assertEqual(d["errors"], ["subspacematrix"])
+        self.assertEqual(
+            d["actions"], [{"action": {"_set": {"PREC": "Accurate"}}, "dict": "INCAR"}]
+        )
 
     def test_check_correct(self):
         h = VaspErrorHandler("vasp.teterror")
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ['tet'])
-        self.assertEqual(d["actions"],
-                         [{'action': {'_set': {'ISMEAR': 0, 'SIGMA': 0.05}},
-                           'dict': 'INCAR'}])
+        self.assertEqual(d["errors"], ["tet"])
+        self.assertEqual(
+            d["actions"],
+            [{"action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}, "dict": "INCAR"}],
+        )
 
         h = VaspErrorHandler("vasp.teterror", errors_subset_to_catch=["eddrmm"])
         self.assertFalse(h.check())
@@ -90,17 +97,16 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h = VaspErrorHandler("vasp.sgrcon")
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ['rot_matrix'])
-        self.assertEqual(set([a["dict"] for a in d["actions"]]),
-                         {"KPOINTS"})
+        self.assertEqual(d["errors"], ["rot_matrix"])
+        self.assertEqual(set([a["dict"] for a in d["actions"]]), {"KPOINTS"})
 
         h = VaspErrorHandler("vasp.real_optlay")
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ['real_optlay'])
-        self.assertEqual(d["actions"],
-                         [{'action': {'_set': {'LREAL': False}},
-                           'dict': 'INCAR'}])
+        self.assertEqual(d["errors"], ["real_optlay"])
+        self.assertEqual(
+            d["actions"], [{"action": {"_set": {"LREAL": False}}, "dict": "INCAR"}]
+        )
 
         subdir = os.path.join(test_dir, "large_cell_real_optlay")
         os.chdir(subdir)
@@ -108,12 +114,12 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h = VaspErrorHandler()
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ['real_optlay'])
+        self.assertEqual(d["errors"], ["real_optlay"])
         vi = VaspInput.from_directory(".")
         self.assertEqual(vi["INCAR"]["LREAL"], True)
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ['real_optlay'])
+        self.assertEqual(d["errors"], ["real_optlay"])
         vi = VaspInput.from_directory(".")
         self.assertEqual(vi["INCAR"]["LREAL"], False)
         shutil.copy("INCAR.orig", "INCAR")
@@ -126,19 +132,21 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h = MeshSymmetryErrorHandler("vasp.ibzkpt")
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ['mesh_symmetry'])
-        self.assertEqual(d["actions"],
-                         [{'action': {'_set': {'kpoints': [[4, 4, 4]]}},
-                           'dict': 'KPOINTS'}])
+        self.assertEqual(d["errors"], ["mesh_symmetry"])
+        self.assertEqual(
+            d["actions"],
+            [{"action": {"_set": {"kpoints": [[4, 4, 4]]}}, "dict": "KPOINTS"}],
+        )
 
     def test_dentet(self):
         h = VaspErrorHandler("vasp.dentet")
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ['dentet'])
-        self.assertEqual(d["actions"],
-                         [{'action': {'_set': {'ISMEAR': 0, 'SIGMA': 0.05}},
-                           'dict': 'INCAR'}])
+        self.assertEqual(d["errors"], ["dentet"])
+        self.assertEqual(
+            d["actions"],
+            [{"action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}, "dict": "INCAR"}],
+        )
 
     def test_brmix(self):
         h = VaspErrorHandler("vasp.brmix")
@@ -146,7 +154,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
 
         # The first (no good OUTCAR) correction, check IMIX
         d = h.correct()
-        self.assertEqual(d["errors"], ['brmix'])
+        self.assertEqual(d["errors"], ["brmix"])
         vi = VaspInput.from_directory(".")
         self.assertEqual(vi["INCAR"]["IMIX"], 1)
         self.assertTrue(os.path.exists("CHGCAR"))
@@ -156,10 +164,11 @@ class VaspErrorHandlerTest(unittest.TestCase):
         vi = VaspInput.from_directory(".")
         self.assertFalse("IMIX" in vi["INCAR"])
         self.assertTrue(os.path.exists("CHGCAR"))
-        if vi["KPOINTS"].style == Kpoints.supported_modes.Gamma and vi["KPOINTS"].num_kpts < 1:
-            all_kpts_even = all([
-                bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0]
-            ])
+        if (
+            vi["KPOINTS"].style == Kpoints.supported_modes.Gamma
+            and vi["KPOINTS"].num_kpts < 1
+        ):
+            all_kpts_even = all([bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0]])
             self.assertFalse(all_kpts_even)
 
         # The next correction check ISYM and no CHGCAR
@@ -180,10 +189,10 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h = VaspErrorHandler("vasp.too_few_bands")
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ['too_few_bands'])
-        self.assertEqual(d["actions"],
-                         [{'action': {'_set': {'NBANDS': 501}},
-                           'dict': 'INCAR'}])
+        self.assertEqual(d["errors"], ["too_few_bands"])
+        self.assertEqual(
+            d["actions"], [{"action": {"_set": {"NBANDS": 501}}, "dict": "INCAR"}]
+        )
         clean_dir()
         shutil.move("INCAR.orig", "INCAR")
         os.chdir(test_dir)
@@ -269,16 +278,23 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.correct()["errors"], ["point_group"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ISYM"], 0)
-    
+
     def test_too_large_kspacing(self):
         shutil.copy("INCAR.kspacing", "INCAR")
         vi = VaspInput.from_directory(".")
         h = VaspErrorHandler("vasp.teterror")
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ['tet'])
-        self.assertEqual(d["actions"],
-                         [{'action': {"_set": {"KSPACING": vi["INCAR"].get("KSPACING")*0.8}},'dict': 'INCAR'}])
+        self.assertEqual(d["errors"], ["tet"])
+        self.assertEqual(
+            d["actions"],
+            [
+                {
+                    "action": {"_set": {"KSPACING": vi["INCAR"].get("KSPACING") * 0.8}},
+                    "dict": "INCAR",
+                }
+            ],
+        )
 
     def tearDown(self):
         os.chdir(test_dir)
@@ -291,7 +307,6 @@ class VaspErrorHandlerTest(unittest.TestCase):
 
 
 class AliasingErrorHandlerTest(unittest.TestCase):
-
     def setUp(self):
         if "PMG_VASP_PSP_DIR" not in os.environ:
             os.environ["PMG_VASP_PSP_DIR"] = test_dir
@@ -311,13 +326,15 @@ class AliasingErrorHandlerTest(unittest.TestCase):
         clean_dir()
         os.chdir(test_dir)
 
-        self.assertEqual(d["errors"], ['aliasing'])
-        self.assertEqual(d["actions"],
-                         [{'action': {'_set': {'NGX': 34}},
-                           'dict': 'INCAR'}, {"file": "CHGCAR",
-                            "action": {"_file_delete": {'mode': "actual"}}},
-                          {"file": "WAVECAR",
-                            "action": {"_file_delete": {'mode': "actual"}}}])
+        self.assertEqual(d["errors"], ["aliasing"])
+        self.assertEqual(
+            d["actions"],
+            [
+                {"action": {"_set": {"NGX": 34}}, "dict": "INCAR"},
+                {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}},
+                {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}},
+            ],
+        )
 
     def test_aliasing_incar(self):
         os.chdir(os.path.join(test_dir, "aliasing"))
@@ -326,27 +343,29 @@ class AliasingErrorHandlerTest(unittest.TestCase):
         h.check()
         d = h.correct()
 
-        self.assertEqual(d["errors"], ['aliasing_incar'])
-        self.assertEqual(d["actions"],
-                         [{'action': {'_unset': {'NGY':1, 'NGZ': 1}},
-                           'dict': 'INCAR'}, {"file": "CHGCAR",
-                            "action": {"_file_delete": {'mode': "actual"}}},
-                          {"file": "WAVECAR",
-                            "action": {"_file_delete": {'mode': "actual"}}}])
+        self.assertEqual(d["errors"], ["aliasing_incar"])
+        self.assertEqual(
+            d["actions"],
+            [
+                {"action": {"_unset": {"NGY": 1, "NGZ": 1}}, "dict": "INCAR"},
+                {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}},
+                {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}},
+            ],
+        )
 
-        incar = Incar.from_file('INCAR.orig')
+        incar = Incar.from_file("INCAR.orig")
         incar["ICHARG"] = 10
         incar.write_file("INCAR")
         d = h.correct()
-        self.assertEqual(d["errors"], ['aliasing_incar'])
-        self.assertEqual(d["actions"],
-                         [{'action': {'_unset': {'NGY': 1, 'NGZ': 1}},
-                           'dict': 'INCAR'}])
+        self.assertEqual(d["errors"], ["aliasing_incar"])
+        self.assertEqual(
+            d["actions"],
+            [{"action": {"_unset": {"NGY": 1, "NGZ": 1}}, "dict": "INCAR"}],
+        )
 
         shutil.move("INCAR.orig", "INCAR")
         clean_dir()
         os.chdir(test_dir)
-
 
     def tearDown(self):
         os.chdir(test_dir)
@@ -359,7 +378,6 @@ class AliasingErrorHandlerTest(unittest.TestCase):
 
 
 class UnconvergedErrorHandlerTest(unittest.TestCase):
-
     def setUp(cls):
         if "PMG_VASP_PSP_DIR" not in os.environ:
             os.environ["PMG_VASP_PSP_DIR"] = test_dir
@@ -377,7 +395,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         h = UnconvergedErrorHandler()
         self.assertTrue(h.check())
         d = h.correct()
-        self.assertEqual(d["errors"], ['Unconverged'])
+        self.assertEqual(d["errors"], ["Unconverged"])
         os.remove("vasprun.xml")
 
     def test_check_correct_electronic_repeat(self):
@@ -385,8 +403,13 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         h = UnconvergedErrorHandler()
         self.assertTrue(h.check())
         d = h.correct()
-        self.assertEqual(d, {'actions': [{'action': {'_set': {'ALGO': 'All'}}, 'dict': 'INCAR'}],
-                            'errors': ['Unconverged']})
+        self.assertEqual(
+            d,
+            {
+                "actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}],
+                "errors": ["Unconverged"],
+            },
+        )
         os.remove("vasprun.xml")
 
     def test_check_correct_ionic(self):
@@ -394,7 +417,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         h = UnconvergedErrorHandler()
         self.assertTrue(h.check())
         d = h.correct()
-        self.assertEqual(d["errors"], ['Unconverged'])
+        self.assertEqual(d["errors"], ["Unconverged"])
         os.remove("vasprun.xml")
 
     def test_check_correct_scan(self):
@@ -402,9 +425,10 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         h = UnconvergedErrorHandler()
         self.assertTrue(h.check())
         d = h.correct()
-        self.assertEqual(d["errors"], ['Unconverged'])
-        self.assertIn({"dict": "INCAR",
-                           "action": {"_set": {"ALGO": "All"}}},d["actions"])
+        self.assertEqual(d["errors"], ["Unconverged"])
+        self.assertIn(
+            {"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}}, d["actions"]
+        )
         os.remove("vasprun.xml")
 
     def test_to_from_dict(self):
@@ -424,12 +448,11 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
 
 
 class ZpotrfErrorHandlerTest(unittest.TestCase):
-
     def setUp(self):
         if "PMG_VASP_PSP_DIR" not in os.environ:
             os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
-        os.chdir('zpotrf')
+        os.chdir("zpotrf")
         shutil.copy("POSCAR", "POSCAR.orig")
         shutil.copy("INCAR", "INCAR.orig")
 
@@ -439,7 +462,7 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         h = VaspErrorHandler("vasp.out")
         self.assertEqual(h.check(), True)
         d = h.correct()
-        self.assertEqual(d['errors'], ['zpotrf'])
+        self.assertEqual(d["errors"], ["zpotrf"])
         s2 = Structure.from_file("POSCAR")
         self.assertAlmostEqual(s2.volume, s1.volume * 1.2 ** 3, 3)
 
@@ -449,10 +472,10 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         h = VaspErrorHandler("vasp.out")
         self.assertEqual(h.check(), True)
         d = h.correct()
-        self.assertEqual(d['errors'], ['zpotrf'])
+        self.assertEqual(d["errors"], ["zpotrf"])
         s2 = Structure.from_file("POSCAR")
         self.assertAlmostEqual(s2.volume, s1.volume, 3)
-        self.assertAlmostEqual(Incar.from_file("INCAR")['POTIM'], 0.25)
+        self.assertAlmostEqual(Incar.from_file("INCAR")["POTIM"], 0.25)
 
     def test_static_run_correction(self):
         shutil.copy("OSZICAR.empty", "OSZICAR")
@@ -465,25 +488,25 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         h = VaspErrorHandler("vasp.out")
         self.assertEqual(h.check(), True)
         d = h.correct()
-        self.assertEqual(d['errors'], ['zpotrf'])
+        self.assertEqual(d["errors"], ["zpotrf"])
         s2 = Structure.from_file("POSCAR")
         self.assertAlmostEqual(s2.volume, s1.volume, 3)
         self.assertEqual(Incar.from_file("INCAR")["ISYM"], 0)
 
         # Test for ISIF 0-2
-        incar.update({"NSW":99, "ISIF":2})
+        incar.update({"NSW": 99, "ISIF": 2})
         incar.write_file("INCAR")
         h = VaspErrorHandler("vasp.out")
         self.assertEqual(h.check(), True)
         d = h.correct()
-        self.assertEqual(d['errors'], ['zpotrf'])
+        self.assertEqual(d["errors"], ["zpotrf"])
         s2 = Structure.from_file("POSCAR")
         self.assertAlmostEqual(s2.volume, s1.volume, 3)
         self.assertEqual(Incar.from_file("INCAR")["ISYM"], 0)
 
     def tearDown(self):
         os.chdir(test_dir)
-        os.chdir('zpotrf')
+        os.chdir("zpotrf")
         shutil.move("POSCAR.orig", "POSCAR")
         shutil.move("INCAR.orig", "INCAR")
         os.remove("OSZICAR")
@@ -492,9 +515,8 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
 
 
 class WalltimeHandlerTest(unittest.TestCase):
-
     def setUp(self):
-        os.chdir(os.path.join(test_dir, 'postprocess'))
+        os.chdir(os.path.join(test_dir, "postprocess"))
         if "CUSTODIAN_WALLTIME_START" in os.environ:
             os.environ.pop("CUSTODIAN_WALLTIME_START")
 
@@ -502,12 +524,16 @@ class WalltimeHandlerTest(unittest.TestCase):
         # checks the walltime handlers starttime initialization
         h = WalltimeHandler(wall_time=3600)
         new_starttime = h.start_time
-        self.assertEqual(os.environ.get("CUSTODIAN_WALLTIME_START"),
-                         new_starttime.strftime("%a %b %d %H:%M:%S UTC %Y"))
+        self.assertEqual(
+            os.environ.get("CUSTODIAN_WALLTIME_START"),
+            new_starttime.strftime("%a %b %d %H:%M:%S UTC %Y"),
+        )
         # Test that walltime persists if new handler is created
         h = WalltimeHandler(wall_time=3600)
-        self.assertEqual(os.environ.get("CUSTODIAN_WALLTIME_START"),
-                         new_starttime.strftime("%a %b %d %H:%M:%S UTC %Y"))
+        self.assertEqual(
+            os.environ.get("CUSTODIAN_WALLTIME_START"),
+            new_starttime.strftime("%a %b %d %H:%M:%S UTC %Y"),
+        )
 
     def test_check_and_correct(self):
         # Try a 1 hr wall time with a 2 min buffer
@@ -533,8 +559,7 @@ class WalltimeHandlerTest(unittest.TestCase):
             self.assertEqual(content, "LSTOP = .TRUE.")
         os.remove("STOPCAR")
 
-        h = WalltimeHandler(wall_time=3600, buffer_time=120,
-                            electronic_step_stop=True)
+        h = WalltimeHandler(wall_time=3600, buffer_time=120, electronic_step_stop=True)
 
         self.assertFalse(h.check())
         h.start_time = datetime.datetime.now() - datetime.timedelta(minutes=59)
@@ -554,7 +579,6 @@ class WalltimeHandlerTest(unittest.TestCase):
 
 
 class PositiveEnergyHandlerTest(unittest.TestCase):
-
     def setUp(cls):
         os.chdir(test_dir)
 
@@ -567,16 +591,16 @@ class PositiveEnergyHandlerTest(unittest.TestCase):
         h = PositiveEnergyErrorHandler()
         self.assertTrue(h.check())
         d = h.correct()
-        self.assertEqual(d["errors"], ['Positive energy'])
+        self.assertEqual(d["errors"], ["Positive energy"])
 
         os.remove(os.path.join(subdir, "error.1.tar.gz"))
 
-        incar = Incar.from_file('INCAR')
+        incar = Incar.from_file("INCAR")
 
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("POSCAR.orig", "POSCAR")
 
-        self.assertEqual(incar['ALGO'], 'Normal')
+        self.assertEqual(incar["ALGO"], "Normal")
 
     @classmethod
     def tearDownClass(cls):
@@ -584,7 +608,6 @@ class PositiveEnergyHandlerTest(unittest.TestCase):
 
 
 class PotimHandlerTest(unittest.TestCase):
-
     def setUp(cls):
         os.chdir(test_dir)
 
@@ -594,24 +617,24 @@ class PotimHandlerTest(unittest.TestCase):
         shutil.copy("INCAR", "INCAR.orig")
         shutil.copy("POSCAR", "POSCAR.orig")
 
-        incar = Incar.from_file('INCAR')
-        original_potim = incar['POTIM']
+        incar = Incar.from_file("INCAR")
+        original_potim = incar["POTIM"]
 
         h = PotimErrorHandler()
         self.assertTrue(h.check())
         d = h.correct()
-        self.assertEqual(d["errors"], ['POTIM'])
+        self.assertEqual(d["errors"], ["POTIM"])
 
         os.remove(os.path.join(subdir, "error.1.tar.gz"))
 
-        incar = Incar.from_file('INCAR')
-        new_potim = incar['POTIM']
+        incar = Incar.from_file("INCAR")
+        new_potim = incar["POTIM"]
 
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("POSCAR.orig", "POSCAR")
 
         self.assertEqual(original_potim, new_potim)
-        self.assertEqual(incar['IBRION'], 3)
+        self.assertEqual(incar["IBRION"], 3)
 
     @classmethod
     def tearDownClass(cls):
@@ -619,32 +642,30 @@ class PotimHandlerTest(unittest.TestCase):
 
 
 class LrfCommHandlerTest(unittest.TestCase):
-
     def setUp(self):
         os.chdir(test_dir)
-        os.chdir('lrf_comm')
+        os.chdir("lrf_comm")
         for f in ["INCAR", "OUTCAR", "std_err.txt"]:
-            shutil.copy(f, f+".orig")
+            shutil.copy(f, f + ".orig")
 
     def test_lrf_comm(self):
         h = LrfCommutatorHandler("std_err.txt")
         self.assertEqual(h.check(), True)
         d = h.correct()
-        self.assertEqual(d["errors"], ['lrf_comm'])
+        self.assertEqual(d["errors"], ["lrf_comm"])
         vi = VaspInput.from_directory(".")
         self.assertEqual(vi["INCAR"]["LPEAD"], True)
 
     def tearDown(self):
         os.chdir(test_dir)
-        os.chdir('lrf_comm')
+        os.chdir("lrf_comm")
         for f in ["INCAR", "OUTCAR", "std_err.txt"]:
-            shutil.move(f+".orig", f)
+            shutil.move(f + ".orig", f)
         clean_dir()
         os.chdir(cwd)
 
 
 class KpointsTransHandlerTest(unittest.TestCase):
-
     def setUp(self):
         os.chdir(test_dir)
         shutil.copy("KPOINTS", "KPOINTS.orig")
@@ -653,15 +674,15 @@ class KpointsTransHandlerTest(unittest.TestCase):
         h = StdErrHandler("std_err.txt.kpoints_trans")
         self.assertEqual(h.check(), True)
         d = h.correct()
-        self.assertEqual(d["errors"], ['kpoints_trans'])
-        self.assertEqual(d["actions"],
-                         [{u'action': {u'_set':
-                                {u'kpoints': [[4, 4, 4]]}},
-                                u'dict': u'KPOINTS'}])
+        self.assertEqual(d["errors"], ["kpoints_trans"])
+        self.assertEqual(
+            d["actions"],
+            [{"action": {"_set": {"kpoints": [[4, 4, 4]]}}, "dict": "KPOINTS"}],
+        )
 
         self.assertEqual(h.check(), True)
         d = h.correct()
-        self.assertEqual(d["errors"], ['kpoints_trans'])
+        self.assertEqual(d["errors"], ["kpoints_trans"])
         self.assertEqual(d["actions"], [])  # don't correct twice
 
     def tearDown(self):
@@ -671,7 +692,6 @@ class KpointsTransHandlerTest(unittest.TestCase):
 
 
 class OutOfMemoryHandlerTest(unittest.TestCase):
-
     def setUp(self):
         os.chdir(test_dir)
         shutil.copy("INCAR", "INCAR.orig")
@@ -679,27 +699,28 @@ class OutOfMemoryHandlerTest(unittest.TestCase):
     def test_oom(self):
         vi = VaspInput.from_directory(".")
         from custodian.vasp.interpreter import VaspModder
-        VaspModder(vi=vi).apply_actions([{"dict": "INCAR",
-                                          "action": {"_set": {"KPAR": 4}}}])
+
+        VaspModder(vi=vi).apply_actions(
+            [{"dict": "INCAR", "action": {"_set": {"KPAR": 4}}}]
+        )
         h = StdErrHandler("std_err.txt.oom")
         self.assertEqual(h.check(), True)
         d = h.correct()
-        self.assertEqual(d["errors"], ['out_of_memory'])
-        self.assertEqual(d["actions"],
-                         [{'dict': 'INCAR',
-                           'action': {'_set': {'KPAR': 2}}}])
+        self.assertEqual(d["errors"], ["out_of_memory"])
+        self.assertEqual(
+            d["actions"], [{"dict": "INCAR", "action": {"_set": {"KPAR": 2}}}]
+        )
 
     def tearDown(self):
         shutil.move("INCAR.orig", "INCAR")
         clean_dir()
         os.chdir(cwd)
 
-class DriftErrorHandlerTest(unittest.TestCase):
 
+class DriftErrorHandlerTest(unittest.TestCase):
     def setUp(self):
         os.chdir(os.path.abspath(test_dir))
         os.chdir("drift")
-
 
     def test_check(self):
 
@@ -723,7 +744,7 @@ class DriftErrorHandlerTest(unittest.TestCase):
 
         h = DriftErrorHandler()
         h.check()
-        self.assertEqual(h.max_drift,0.01)
+        self.assertEqual(h.max_drift, 0.01)
 
         clean_dir()
         shutil.move("INCAR.orig", "INCAR")
@@ -732,16 +753,16 @@ class DriftErrorHandlerTest(unittest.TestCase):
 
         shutil.copy("INCAR", "INCAR.orig")
 
-        h = DriftErrorHandler(max_drift=0.0001,enaug_multiply=2)
+        h = DriftErrorHandler(max_drift=0.0001, enaug_multiply=2)
         h.check()
         d = h.correct()
         incar = Incar.from_file("INCAR")
-        self.assertTrue(incar.get("ADDGRID",False))
+        self.assertTrue(incar.get("ADDGRID", False))
 
         d = h.correct()
         incar = Incar.from_file("INCAR")
-        self.assertEqual(incar.get("PREC"),"High")
-        self.assertEqual(incar.get("ENAUG",0),incar.get("ENCUT",2)*2)
+        self.assertEqual(incar.get("PREC"), "High")
+        self.assertEqual(incar.get("ENAUG", 0), incar.get("ENCUT", 2) * 2)
 
         clean_dir()
         shutil.move("INCAR.orig", "INCAR")
@@ -749,7 +770,6 @@ class DriftErrorHandlerTest(unittest.TestCase):
     def tearDown(self):
         clean_dir()
         os.chdir(cwd)
-
 
 
 if __name__ == "__main__":

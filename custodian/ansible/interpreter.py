@@ -58,8 +58,7 @@ class Modder(object):
         actions = actions if actions is not None else [DictActions]
         for action in actions:
             for i in dir(action):
-                if (not re.match('__\w+__', i)) and \
-                        callable(getattr(action, i)):
+                if (not re.match("__\w+__", i)) and callable(getattr(action, i)):
                     self.supported_actions["_" + i] = getattr(action, i)
         self.strict = strict
 
@@ -80,8 +79,7 @@ class Modder(object):
             if action in self.supported_actions:
                 self.supported_actions[action].__call__(obj, settings)
             elif self.strict:
-                raise ValueError("{} is not a supported action!"
-                                 .format(action))
+                raise ValueError("{} is not a supported action!".format(action))
 
     def modify_object(self, modification, obj):
         """

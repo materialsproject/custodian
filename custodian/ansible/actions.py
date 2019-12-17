@@ -104,8 +104,7 @@ class DictActions(object):
         for k, v in settings.items():
             (d, key) = get_nested_dict(input_dict, k)
             if key in d and (not isinstance(d[key], list)):
-                raise ValueError("Keyword {} does not refer to an array."
-                                 .format(k))
+                raise ValueError("Keyword {} does not refer to an array.".format(k))
             if key in d and v not in d[key]:
                 d[key].append(v)
             elif key not in d:
@@ -116,8 +115,7 @@ class DictActions(object):
         for k, v in settings.items():
             (d, key) = get_nested_dict(input_dict, k)
             if key in d and (not isinstance(d[key], list)):
-                raise ValueError("Keyword {} does not refer to an array."
-                                 .format(k))
+                raise ValueError("Keyword {} does not refer to an array.".format(k))
             if key in d:
                 d[key] = [i for i in d[key] if i != v]
 
@@ -125,8 +123,7 @@ class DictActions(object):
     def pull_all(input_dict, settings):
         for k, v in settings.items():
             if k in input_dict and (not isinstance(input_dict[k], list)):
-                raise ValueError("Keyword {} does not refer to an array."
-                                 .format(k))
+                raise ValueError("Keyword {} does not refer to an array.".format(k))
             for i in v:
                 DictActions.pull(input_dict, {k: i})
 
@@ -135,8 +132,7 @@ class DictActions(object):
         for k, v in settings.items():
             (d, key) = get_nested_dict(input_dict, k)
             if key in d and (not isinstance(d[key], list)):
-                raise ValueError("Keyword {} does not refer to an array."
-                                 .format(k))
+                raise ValueError("Keyword {} does not refer to an array.".format(k))
             if v == 1:
                 d[key].pop()
             elif v == -1:
@@ -160,11 +156,12 @@ class FileActions(object):
             settings (dict): Must be {"content": actual_content}
         """
         if len(settings) != 1:
-            raise ValueError("Settings must only contain one item with key "
-                             "'content'.")
+            raise ValueError(
+                "Settings must only contain one item with key " "'content'."
+            )
         for k, v in settings.items():
             if k == "content":
-                with open(filename, 'w') as f:
+                with open(filename, "w") as f:
                     f.write(v)
 
     @staticmethod
@@ -177,8 +174,7 @@ class FileActions(object):
             settings (dict): Must be {"dest": path of new file}
         """
         if len(settings) != 1:
-            raise ValueError("Settings must only contain one item with key "
-                             "'dest'.")
+            raise ValueError("Settings must only contain one item with key " "'dest'.")
         for k, v in settings.items():
             if k == "dest":
                 shutil.move(filename, v)
@@ -194,8 +190,7 @@ class FileActions(object):
                 mode only prints the action without performing it.
         """
         if len(settings) != 1:
-            raise ValueError("Settings must only contain one item with key "
-                             "'mode'.")
+            raise ValueError("Settings must only contain one item with key " "'mode'.")
         for k, v in settings.items():
             if k == "mode" and v == "actual":
                 try:
