@@ -1111,7 +1111,7 @@ class NonConvergingErrorHandler(ErrorHandler):
             esteps = oszicar.electronic_steps
             if len(esteps) > self.nionic_steps:
                 return all(
-                    [len(e) == nelm for e in esteps[-(self.nionic_steps + 1) : -1]]
+                    [len(e) == nelm for e in esteps[-(self.nionic_steps + 1): -1]]
                 )
         except Exception:
             pass
