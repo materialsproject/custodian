@@ -1,15 +1,17 @@
 import os, shutil
 import unittest
-from custodian.vasp.validators import VasprunXMLValidator, VaspFilesValidator, \
-    VaspNpTMDValidator, VaspAECCARValidator
+from custodian.vasp.validators import (
+    VasprunXMLValidator,
+    VaspFilesValidator,
+    VaspNpTMDValidator,
+    VaspAECCARValidator,
+)
 
-test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
-                        'test_files')
+test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")
 cwd = os.getcwd()
 
 
 class VasprunXMLValidatorTest(unittest.TestCase):
-
     def test_check_and_correct(self):
         os.chdir(os.path.join(test_dir, "bad_vasprun"))
         h = VasprunXMLValidator()
@@ -33,7 +35,6 @@ class VasprunXMLValidatorTest(unittest.TestCase):
 
 
 class VaspFilesValidatorTest(unittest.TestCase):
-
     def test_check_and_correct(self):
         # just an example where CONTCAR is not present
         os.chdir(os.path.join(test_dir, "positive_energy"))
@@ -55,7 +56,6 @@ class VaspFilesValidatorTest(unittest.TestCase):
 
 
 class VaspNpTMDValidatorTest(unittest.TestCase):
-
     def test_check_and_correct(self):
         # NPT-AIMD using correct VASP
         os.chdir(os.path.join(test_dir, "npt_common"))
@@ -80,18 +80,18 @@ class VaspNpTMDValidatorTest(unittest.TestCase):
     def tearDownClass(cls):
         os.chdir(cwd)
 
-class VaspAECCARValidatorTest(unittest.TestCase):
 
+class VaspAECCARValidatorTest(unittest.TestCase):
     def test_check_and_correct(self):
         # NPT-AIMD using correct VASP
         os.chdir(os.path.join(test_dir, "bad_aeccar"))
         h = VaspAECCARValidator()
         self.assertTrue(h.check())
 
-
     @classmethod
     def tearDownClass(cls):
         os.chdir(cwd)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,3 +1,3 @@
 from __future__ import unicode_literals
 
-__author__ = 'shyue'
+__author__ = "shyue"

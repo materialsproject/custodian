@@ -27,9 +27,15 @@ class NwchemJob(Job):
     A basic Nwchem job.
     """
 
-    def __init__(self, nwchem_cmd, input_file="mol.nw",
-                 output_file="mol.nwout", gzipped=False,
-                 backup=True, settings_override=None):
+    def __init__(
+        self,
+        nwchem_cmd,
+        input_file="mol.nw",
+        output_file="mol.nwout",
+        gzipped=False,
+        backup=True,
+        settings_override=None,
+    ):
         """
         Initializes a basic NwChem job.
 
@@ -66,9 +72,8 @@ class NwchemJob(Job):
         """
         Performs actual nwchem run.
         """
-        with zopen(self.output_file, 'w') as fout:
-            return subprocess.Popen(self.nwchem_cmd + [self.input_file],
-                                    stdout=fout)
+        with zopen(self.output_file, "w") as fout:
+            return subprocess.Popen(self.nwchem_cmd + [self.input_file], stdout=fout)
 
     def postprocess(self):
         """

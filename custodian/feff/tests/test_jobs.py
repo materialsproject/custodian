@@ -16,8 +16,9 @@ from monty.tempfile import ScratchDir
 from custodian.feff.jobs import FeffJob
 from pymatgen.io.feff.inputs import Atoms, Tags
 
-test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
-                        "test_files", "feff_unconverge")
+test_dir = os.path.join(
+    os.path.dirname(__file__), "..", "..", "..", "test_files", "feff_unconverge"
+)
 
 
 class FeffJobTest(unittest.TestCase):
@@ -29,23 +30,23 @@ class FeffJobTest(unittest.TestCase):
 
     def test_setup(self):
         with cd(test_dir):
-            with ScratchDir('.', copy_from_current_on_enter=True):
+            with ScratchDir(".", copy_from_current_on_enter=True):
                 f = FeffJob("hello", backup=True)
                 f.setup()
 
-                parameter = Tags.from_file('feff.inp')
-                parameter_orig = Tags.from_file('feff.inp.orig')
+                parameter = Tags.from_file("feff.inp")
+                parameter_orig = Tags.from_file("feff.inp.orig")
                 self.assertEqual(parameter, parameter_orig)
 
-                atom = Atoms.cluster_from_file('feff.inp')
-                atom_origin = Atoms.cluster_from_file('feff.inp.orig')
+                atom = Atoms.cluster_from_file("feff.inp")
+                atom_origin = Atoms.cluster_from_file("feff.inp.orig")
                 self.assertEqual(atom, atom_origin)
 
     def test_postprocess(self):
         with cd(test_dir):
-            with ScratchDir('.', copy_from_current_on_enter=True):
+            with ScratchDir(".", copy_from_current_on_enter=True):
                 f = FeffJob("hello", backup=True, gzipped=True)
                 f.postprocess()
-                self.assertTrue(os.path.exists('feff_out.1.tar.gz'))
+                self.assertTrue(os.path.exists("feff_out.1.tar.gz"))
                 f.postprocess()
-                self.assertTrue(os.path.exists('feff_out.2.tar.gz'))
+                self.assertTrue(os.path.exists("feff_out.2.tar.gz"))

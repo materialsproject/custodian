@@ -18,7 +18,7 @@ __version__ = "0.1"
 __maintainer__ = "Chen Zheng"
 __email__ = "chz022@ucsd.edu"
 __status__ = "Alpha"
-__date__ = '10/20/17'
+__date__ = "10/20/17"
 
 FEFF_INPUT_FILES = {"feff.inp"}
 FEFF_BACKUP_FILES = {"ATOMS", "HEADER", "PARAMETERS", "POTENTIALS"}
@@ -29,9 +29,15 @@ class FeffJob(Job):
     A basic FEFF job, run whatever is in the directory.
     """
 
-    def __init__(self, feff_cmd, output_file="feff.out",
-                 stderr_file="std_feff_err.txt", backup=True,
-                 gzipped=False, gzipped_prefix='feff_out'):
+    def __init__(
+        self,
+        feff_cmd,
+        output_file="feff.out",
+        stderr_file="std_feff_err.txt",
+        backup=True,
+        gzipped=False,
+        gzipped_prefix="feff_out",
+    ):
         """
         This constructor is used for a standard FEFF initialization
 
@@ -62,7 +68,7 @@ class FeffJob(Job):
         Returns:
 
         """
-        decompress_dir('.')
+        decompress_dir(".")
 
         if self.backup:
             for f in FEFF_INPUT_FILES:
@@ -79,8 +85,9 @@ class FeffJob(Job):
         Returns:
             (subprocess.Popen) Used for monitoring.
         """
-        with open(self.output_file, "w") as f_std, \
-                open(self.stderr_file, "w", buffering=1) as f_err:
+        with open(self.output_file, "w") as f_std, open(
+            self.stderr_file, "w", buffering=1
+        ) as f_err:
             # Use line buffering for stderr
             # On TSCC, need to run shell command
             p = subprocess.Popen(self.feff_cmd, stdout=f_std, stderr=f_err, shell=True)

@@ -31,11 +31,11 @@ def make_doc(ctx):
         ctx.run("sphinx-apidoc -d 6 -o . -f ../custodian")
         ctx.run("rm custodian*.tests.rst")
         for f in glob.glob("*.rst"):
-            if f.startswith('custodian') and f.endswith('rst'):
+            if f.startswith("custodian") and f.endswith("rst"):
                 newoutput = []
                 suboutput = []
                 subpackage = False
-                with open(f, 'r') as fid:
+                with open(f, "r") as fid:
                     for line in fid:
                         clean = line.strip()
                         if clean == "Subpackages":
@@ -46,12 +46,13 @@ def make_doc(ctx):
                             if not clean.endswith("tests"):
                                 suboutput.append(line)
                             if clean.startswith("custodian") and not clean.endswith(
-                                    "tests"):
+                                "tests"
+                            ):
                                 newoutput.extend(suboutput)
                                 subpackage = False
                                 suboutput = []
 
-                with open(f, 'w') as fid:
+                with open(f, "w") as fid:
                     fid.write("".join(newoutput))
         ctx.run("make html")
         # ctx.run("cp _static/* _build/html/_static")
@@ -70,7 +71,7 @@ def make_doc(ctx):
 def update_doc(ctx):
     make_doc(ctx)
     ctx.run("git add .")
-    ctx.run("git commit -a -m \"Update dev docs\"")
+    ctx.run('git commit -a -m "Update dev docs"')
     ctx.run("git push")
 
 
@@ -89,13 +90,15 @@ def release_github(ctx):
         "name": "v" + NEW_VER,
         "body": "See changes at https://materialsproject.github.io/custodian",
         "draft": False,
-        "prerelease": False
+        "prerelease": False,
     }
     response = requests.post(
         "https://api.github.com/repos/materialsproject/custodian/releases",
         data=json.dumps(payload),
-        headers={"Authorization": "token " + os.environ["GITHUB_RELEASES_TOKEN"]})
+        headers={"Authorization": "token " + os.environ["GITHUB_RELEASES_TOKEN"]},
+    )
     print(response.text)
+
 
 @task
 def test(ctx):
@@ -117,8 +120,9 @@ def set_ver(ctx):
     lines = []
     with open("setup.py", "rt") as f:
         for l in f:
-            lines.append(re.sub(r'version=([^,]+),', 'version="%s",' % NEW_VER,
-                                l.rstrip()))
+            lines.append(
+                re.sub(r"version=([^,]+),", 'version="%s",' % NEW_VER, l.rstrip())
+            )
     with open("setup.py", "wt") as f:
         f.write("\n".join(lines))
 

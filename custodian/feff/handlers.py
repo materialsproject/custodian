@@ -17,7 +17,15 @@ __maintainer__ = "Chen Zheng"
 __email__ = "chz022@ucsd.edu"
 __date__ = "Oct 18, 2017"
 
-FEFF_BACKUP_FILES = ["ATOMS", "HEADER", "PARAMETERS", "POTENTIALS", "feff.inp", "*.cif", "pot.bin"]
+FEFF_BACKUP_FILES = [
+    "ATOMS",
+    "HEADER",
+    "PARAMETERS",
+    "POTENTIALS",
+    "feff.inp",
+    "*.cif",
+    "pot.bin",
+]
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +37,7 @@ class UnconvergedErrorHandler(ErrorHandler):
 
     is_monitor = False
 
-    def __init__(self, output_filename='log1.dat'):
+    def __init__(self, output_filename="log1.dat"):
         """
         Initializes the handler with the output file to check
 
@@ -51,7 +59,7 @@ class UnconvergedErrorHandler(ErrorHandler):
 
         # Process the output file and get converge information
         not_converge_pattern = re.compile("Convergence not reached.*")
-        converge_pattern = re.compile('Convergence reached.*')
+        converge_pattern = re.compile("Convergence reached.*")
         for _, line in enumerate(open(self.output_filename)):
             if len(not_converge_pattern.findall(line)) > 0:
                 return True
@@ -70,22 +78,23 @@ class UnconvergedErrorHandler(ErrorHandler):
 
         # Add RESTART card to PARAMETERS
         if "RESTART" not in feff_input.tags:
-            actions.append({"dict": "PARAMETERS",
-                            "action": {"_set": {"RESTART": []}}})
+            actions.append({"dict": "PARAMETERS", "action": {"_set": {"RESTART": []}}})
 
         if nscmt < 100 and ca == 0.2:
             scf_values[2] = 100
             scf_values[4] = 3  # Set nmix = 3
-            actions.append({"dict": "PARAMETERS",
-                            "action": {"_set": {"SCF": scf_values}}})
+            actions.append(
+                {"dict": "PARAMETERS", "action": {"_set": {"SCF": scf_values}}}
+            )
             FeffModder().apply_actions(actions)
             return {"errors": ["Non-converging job"], "actions": actions}
 
         elif nscmt == 100 and nmix == 3 and ca > 0.01:
             # Reduce the convergence accelerator factor
             scf_values[3] = round(ca / 2, 2)
-            actions.append({"dict": "PARAMETERS",
-                            "action": {"_set": {"SCF": scf_values}}})
+            actions.append(
+                {"dict": "PARAMETERS", "action": {"_set": {"SCF": scf_values}}}
+            )
             FeffModder().apply_actions(actions)
             return {"errors": ["Non-converging job"], "actions": actions}
 
@@ -93,8 +102,9 @@ class UnconvergedErrorHandler(ErrorHandler):
             # Set ca = 0.05 and set nmix
             scf_values[3] = 0.05
             scf_values[4] = 5
-            actions.append({"dict": "PARAMETERS",
-                            "action": {"_set": {"SCF": scf_values}}})
+            actions.append(
+                {"dict": "PARAMETERS", "action": {"_set": {"SCF": scf_values}}}
+            )
             FeffModder().apply_actions(actions)
             return {"errors": ["Non-converging job"], "actions": actions}
 
@@ -102,16 +112,18 @@ class UnconvergedErrorHandler(ErrorHandler):
             # Set ca = 0.05 and set nmix
             scf_values[3] = 0.05
             scf_values[4] = 10
-            actions.append({"dict": "PARAMETERS",
-                            "action": {"_set": {"SCF": scf_values}}})
+            actions.append(
+                {"dict": "PARAMETERS", "action": {"_set": {"SCF": scf_values}}}
+            )
             FeffModder().apply_actions(actions)
             return {"errors": ["Non-converging job"], "actions": actions}
 
         elif nmix == 10 and ca < 0.2:
             # loop through ca with nmix = 10
             scf_values[3] = round(ca * 2, 2)
-            actions.append({"dict": "PARAMETERS",
-                            "action": {"_set": {"SCF": scf_values}}})
+            actions.append(
+                {"dict": "PARAMETERS", "action": {"_set": {"SCF": scf_values}}}
+            )
             FeffModder().apply_actions(actions)
             return {"errors": ["Non-converging job"], "actions": actions}
 

@@ -31,8 +31,7 @@ def backup(filenames, prefix="error"):
         prefix (str): prefix to the files. Defaults to error, which means a
             series of error.1.tar.gz, error.2.tar.gz, ... will be generated.
     """
-    num = max([0] + [int(f.split(".")[1])
-                     for f in glob("{}.*.tar.gz".format(prefix))])
+    num = max([0] + [int(f.split(".")[1]) for f in glob("{}.*.tar.gz".format(prefix))])
     filename = "{}.{}.tar.gz".format(prefix, num + 1)
     logging.info("Backing up run to {}.".format(filename))
     with tarfile.open(filename, "w:gz") as tar:
@@ -49,12 +48,13 @@ def get_execution_host_info():
     Returns:
         (HOSTNAME, CLUSTER_NAME)
     """
-    host = os.environ.get('HOSTNAME', None)
-    cluster = os.environ.get('SGE_O_HOST', None)
+    host = os.environ.get("HOSTNAME", None)
+    cluster = os.environ.get("SGE_O_HOST", None)
     if host is None:
         try:
             import socket
+
             host = host or socket.gethostname()
         except Exception:
             pass
-    return host or 'unknown', cluster or 'unknown'
+    return host or "unknown", cluster or "unknown"
