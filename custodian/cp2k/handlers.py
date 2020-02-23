@@ -32,6 +32,50 @@ When adding more remember the following tips:
 """
 
 
+class StdErrHandler(ErrorHandler):
+    """
+    Master StdErr class that handles a number of common errors
+    that occur during Cp2k runs with error messages only in
+    the standard error.
+    """
+
+    is_monitor = True
+
+    error_msgs = {
+        "kpoints_trans": ["internal error in GENERATE_KPOINTS_TRANS: "
+                          "number of G-vector changed in star"],
+        "out_of_memory": ["Allocation would exceed memory limit"]
+    }
+
+    def __init__(self, output_filename="std_err.txt"):
+        """
+        Initializes the handler with the output file to check.
+
+        Args:
+            output_filename (str): This is the file where the stderr for vasp
+                is being redirected. The error messages that are checked are
+                present in the stderr. Defaults to "std_err.txt", which is the
+                default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
+        """
+        self.output_filename = output_filename
+        self.errors = set()
+        self.error_count = Counter()
+
+    def check(self):
+        self.errors = set()
+        with open(self.output_filename, "r") as f:
+            for line in f:
+                l = line.strip()
+                for err, msgs in StdErrHandler.error_msgs.items():
+                    for msg in msgs:
+                        if l.find(msg) != -1:
+                            self.errors.add(err)
+        return len(self.errors) > 0
+
+    def correct(self):
+        pass
+
+
 class UnconvergedScfErrorHandler(ErrorHandler):
     """
     CP2K ErrorHandler class that addresses SCF non-convergence.
@@ -62,15 +106,14 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         # Checks output file for errors.
         out = Cp2kOuput(self.output_file, auto_load=False, verbose=False)
         out._convergence()
-        for scf_loop in out['scf_converged']:
-            if not scf_loop[0]:
-                return False
-        return True
+        for scf_loop in out.data['scf_not_converged']:
+            if scf_loop[0]:
+                return True
+        return False
 
     def correct(self):
         ci = Cp2kInput.from_file(self.input_file)
         actions = []
-
         """
         Non-converging SCF can have two flavors:
         (1) OT Diagonalization:
@@ -82,14 +125,16 @@ class UnconvergedScfErrorHandler(ErrorHandler):
             Follow the VASP custodian charge mixing updates
         """
         if ci.check('FORCE_EVAL/DFT/SCF/OT'):
+            if ci['FORCE_EVAL']['DFT']['SCF'].get_keyword('MAX_SCF').values[0] > 50:
+                actions.append({'dict': self.input_file,
+                                "action": {"_set": {'FORCE_EVAL': {'DFT': {'SCF': {'MAX_SCF': 50}}}}}})
+
             if ci['FORCE_EVAL']['DFT']['SCF']['OT'].get_keyword('MINIMIZER').values == ['DIIS']:
                 actions.append({'dict': self.input_file,
                                 "action": {"_set": {'FORCE_EVAL': {'DFT': {'SCF': {'OT': {'MINIMIZER': 'CG'}}}}}}})
             elif ci['FORCE_EVAL']['DFT']['SCF']['OT'].get_keyword('MINIMIZER').values == ['CG']:
                 actions.append({'dict': self.input_file,
                                 "action": {"_set": {'FORCE_EVAL': {'DFT': {'SCF': {'OT': {'MINIMIZER': 'CG'}}}}}}})
-
-        actions = [{'dict': "cp2k.inp", "action": {'_set': {'FORCE_EVAL': {'DFT': {'UKS': False}}}}}]
 
         if actions:
             Cp2kModder(ci=ci).apply_actions(actions)

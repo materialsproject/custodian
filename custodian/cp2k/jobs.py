@@ -101,6 +101,7 @@ class Cp2kJob(Job):
         Returns:
             (subprocess.Popen) Used for monitoring.
         """
+        # TODO: cp2k has bizarre in/out streams. Some errors that should go to std_err are not sent anywhere...
         cmd = list(self.cp2k_cmd)
         cmd.extend(['-i', self.input_file])
         logger.info("Running {}".format(" ".join(cmd)))
