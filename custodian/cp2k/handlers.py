@@ -6,7 +6,7 @@ from __future__ import unicode_literals, division
 
 import os
 from pymatgen.io.cp2k.inputs import Cp2kInput
-from pymatgen.io.cp2k.outputs import Cp2kOuput
+from pymatgen.io.cp2k.outputs import Cp2kOutput
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from custodian.cp2k.interpreter import Cp2kModder
@@ -104,8 +104,8 @@ class UnconvergedScfErrorHandler(ErrorHandler):
 
     def check(self):
         # Checks output file for errors.
-        out = Cp2kOuput(self.output_file, auto_load=False, verbose=False)
-        out._convergence()
+        out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
+        out.convergence()
         for scf_loop in out.data['scf_not_converged']:
             if scf_loop[0]:
                 return True
