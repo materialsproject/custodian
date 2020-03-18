@@ -37,25 +37,6 @@ __date__ = "Sep 17 2014"
 
 logger = logging.getLogger(__name__)
 
-if "SENTRY_DSN" in os.environ:
-    # Sentry.io is a service to aggregate logs remotely, this is useful
-    # for Custodian to get statistics on which errors are most common.
-    # If you do not have a SENTRY_DSN environment variable set, Sentry
-    # will not be used.
-
-    import sentry_sdk
-
-    sentry_sdk.init(dsn=os.environ["SENTRY_DSN"])
-
-    with sentry_sdk.configure_scope() as scope:
-
-        from getpass import getuser
-
-        try:
-            scope.user = {"username": getuser()}
-        except Exception:
-            pass
-
 # Sentry.io is a service to aggregate logs remotely, this is useful
 # for Custodian to get statistics on which errors are most common.
 # If you do not have a SENTRY_DSN environment variable set, or do
