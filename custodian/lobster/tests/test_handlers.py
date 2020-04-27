@@ -1,4 +1,3 @@
-# TODO: write tests for validators - easily done!
 import os
 import unittest
 
