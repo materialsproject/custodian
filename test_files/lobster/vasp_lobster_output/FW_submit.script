@@ -1,0 +1,20 @@
+#!/bin/bash
+#SBATCH --time=00:15:00 # hh:mm:ss
+#SBATCH --job-name=FW_job
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem-per-cpu=4000mb # megabytes
+
+
+
+
+
+
+export OMP_NUM_THREADS=8
+export MKL_NUM_THREADS=8
+source /home/ucl/naps/yugd/intel/compilers_and_libraries_2016.1.150/linux/bin/ifortvars.sh intel64
+cd /globalscratch/users/j/g/jgeorge/LobsterTests/block_2019-10-16-18-01-09-678861/launcher_2019-10-16-18-06-25-192937
+rlaunch singleshot --fw_id 133
+
+# CommonAdapter (PBS) completed writing Template
+

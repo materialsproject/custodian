@@ -1,0 +1,136 @@
+{
+    "spec": {
+        "_queueadapter": {
+            "rocket_launch": "rlaunch singleshot",
+            "mem": "4000mb",
+            "ntasks": 1,
+            "cpuspertask": 8,
+            "walltime": "00:15:00",
+            "job_name": null,
+            "logdir": "/home/ucl/naps/jgeorge/miniconda3/lib/python3.7/site-packages/atomate/logs",
+            "pre_rocket1": "export OMP_NUM_THREADS=8",
+            "pre_rocket2": "export MKL_NUM_THREADS=8",
+            "post_rocket": null,
+            "_fw_q_type": "SLURM",
+            "_fw_template_file": "/home/ucl/naps/jgeorge/.fireworks/slurm_template_lobster.txt",
+            "_fw_name": "CommonAdapter"
+        },
+        "_tasks": [
+            {
+                "calc_loc": true,
+                "additional_files": [
+                    "OUTCAR",
+                    "vasprun.xml",
+                    "CHG",
+                    "CHGCAR",
+                    "CONTCAR",
+                    "INCAR",
+                    "KPOINTS",
+                    "POSCAR",
+                    "POTCAR",
+                    "DOSCAR",
+                    "EIGENVAL",
+                    "IBZKPT",
+                    "OSZICAR",
+                    "PCDAT",
+                    "PROCAR",
+                    "REPORT",
+                    "WAVECAR",
+                    "XDATCAR"
+                ],
+                "contcar_to_poscar": false,
+                "_fw_name": "{{atomate.vasp.firetasks.glue_tasks.CopyVaspOutputs}}"
+            },
+            {
+                "poscaraddress": "POSCAR",
+                "incaraddress": "INCAR",
+                "potcaraddress": "POTCAR",
+                "option": "standard",
+                "user_supplied_basis": null,
+                "_fw_name": "{{atomate_here.WriteLobsterinputfromIO}}"
+            },
+            {
+                "lobster_cmd": ">>lobster_cmd<<",
+                "gzip_output": true,
+                "_fw_name": "{{atomate_here.RunLobster}}"
+            },
+            {
+                "files": [
+                    "WAVECAR.gz"
+                ],
+                "_fw_name": "{{atomate.common.firetasks.glue_tasks.DeleteFiles}}"
+            },
+            {
+                "files": [
+                    "WAVECAR.gz"
+                ],
+                "from_prev_folder": true,
+                "calc_loc": true,
+                "_fw_name": "{{atomate_here.DeleteFilesFlexible}}"
+            },
+            {
+                "db_file": ">>db_file<<",
+                "calc_loc": true,
+                "additional_fields": {
+                    "mp_id": "lobster_calculation",
+                    "JobType": "Lobster",
+                    "run": "Normal Lobster run"
+                },
+                "_fw_name": "{{atomate_here.LobsterRunToDb}}"
+            },
+            {
+                "name": "lobster_calculation",
+                "_fw_name": "{{atomate.common.firetasks.glue_tasks.PassCalcLocs}}"
+            }
+        ],
+        "calc_locs": [
+            {
+                "name": "static",
+                "filesystem": null,
+                "path": "/auto/globalscratch/users/j/g/jgeorge/LobsterTests/block_2019-10-16-18-01-09-678861/launcher_2019-10-16-18-01-13-421750"
+            }
+        ]
+    },
+    "fw_id": 133,
+    "created_on": "2019-10-16T18:00:59.511950",
+    "updated_on": "2019-10-16T18:06:41.266990",
+    "launches": [
+        {
+            "fworker": {
+                "name": "manneback",
+                "category": "",
+                "query": "{}",
+                "env": {
+                    "vasp_cmd": "srun -n 32 /home/ucl/naps/jgeorge/bin/vasp_std",
+                    "scratch_dir": "/globalscratch/users/j/g/jgeorge",
+                    "db_file": "/home/ucl/naps/jgeorge/.fireworks/db.json",
+                    "auto_npar": true,
+                    "lobster_cmd": "/home/ucl/naps/jgeorge/bin/lobster-3.2.0"
+                }
+            },
+            "fw_id": 133,
+            "launch_dir": "/auto/globalscratch/users/j/g/jgeorge/LobsterTests/block_2019-10-16-18-01-09-678861/launcher_2019-10-16-18-06-25-192937",
+            "host": "mb-wes001.cism.ucl.ac.be",
+            "ip": "10.3.206.1",
+            "trackers": [],
+            "action": null,
+            "state": "RUNNING",
+            "state_history": [
+                {
+                    "state": "RESERVED",
+                    "created_on": "2019-10-16T18:06:25.152860",
+                    "updated_on": "2019-10-16T18:06:25.152867",
+                    "reservation_id": "14953081"
+                },
+                {
+                    "state": "RUNNING",
+                    "created_on": "2019-10-16T18:06:41.264066",
+                    "updated_on": "2019-10-16T18:06:41.264073"
+                }
+            ],
+            "launch_id": 131
+        }
+    ],
+    "state": "RUNNING",
+    "name": "unknown-lobster_calculation"
+}
