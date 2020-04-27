@@ -41,7 +41,7 @@ class TestLobsterFilesValidator(unittest.TestCase):
         self.assertFalse(v.check())
 
     def test_check_and_correct_2(self):
-        os.chdir(os.path.join(test_files_lobster, "nolobsterout"))
+        os.chdir(os.path.join(test_files_lobster, "../lobsterins"))
         v2 = LobsterFilesValidator()
         self.assertTrue(v2.check())
 
