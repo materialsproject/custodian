@@ -4,15 +4,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>custodian.cli.converge_geometry &#8212; custodian 2019.8.24 documentation</title>
+    <title>custodian.cli.converge_geometry &#8212; custodian 2020.4.27 documentation</title>
     <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../../_static/language_data.js"></script>
-    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
 
@@ -37,7 +36,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2019.8.24 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2020.4.27 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -54,7 +53,7 @@
 <span class="sd">This is a script to converge the geometry of a system</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Stephen Dacek&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.1&quot;</span>
@@ -65,13 +64,18 @@
 
 <span class="kn">import</span> <span class="nn">logging</span>
 
-<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="k">import</span> <span class="n">Custodian</span>
-<span class="kn">from</span> <span class="nn">custodian.vasp.handlers</span> <span class="k">import</span> <span class="n">VaspErrorHandler</span><span class="p">,</span> <span class="n">UnconvergedErrorHandler</span><span class="p">,</span> \
-    <span class="n">MeshSymmetryErrorHandler</span><span class="p">,</span> <span class="n">NonConvergingErrorHandler</span><span class="p">,</span> <span class="n">PotimErrorHandler</span>
-<span class="kn">from</span> <span class="nn">custodian.vasp.jobs</span> <span class="k">import</span> <span class="n">VaspJob</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.vasp.outputs</span> <span class="k">import</span> <span class="n">Vasprun</span>
+<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">Custodian</span>
+<span class="kn">from</span> <span class="nn">custodian.vasp.handlers</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">VaspErrorHandler</span><span class="p">,</span>
+    <span class="n">UnconvergedErrorHandler</span><span class="p">,</span>
+    <span class="n">MeshSymmetryErrorHandler</span><span class="p">,</span>
+    <span class="n">NonConvergingErrorHandler</span><span class="p">,</span>
+    <span class="n">PotimErrorHandler</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">custodian.vasp.jobs</span> <span class="kn">import</span> <span class="n">VaspJob</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vasp.outputs</span> <span class="kn">import</span> <span class="n">Vasprun</span>
 
-<span class="n">FORMAT</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> </span><span class="si">%(message)s</span><span class="s1">&#39;</span>
+<span class="n">FORMAT</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> </span><span class="si">%(message)s</span><span class="s2">&quot;</span>
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="n">FORMAT</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;run.log&quot;</span><span class="p">)</span>
 
 
@@ -82,16 +86,13 @@
 
     <span class="k">while</span> <span class="p">(</span><span class="ow">not</span> <span class="n">converged</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">job_number</span> <span class="o">&lt;</span> <span class="n">args</span><span class="o">.</span><span class="n">max_relax</span><span class="p">):</span>
 
-        <span class="n">suffix</span> <span class="o">=</span> <span class="s2">&quot;.</span><span class="si">{}{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;relax&#39;</span><span class="p">,</span> <span class="n">job_number</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">suffix</span> <span class="o">=</span> <span class="s2">&quot;.</span><span class="si">{}{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;relax&quot;</span><span class="p">,</span> <span class="n">job_number</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">job_number</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">backup</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="c1"># assume the initial guess is poor,</span>
             <span class="c1"># start with conjugate gradients</span>
-            <span class="n">settings</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;IBRION&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}}}</span>
-            <span class="p">]</span>
+            <span class="n">settings</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;IBRION&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}}}]</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="n">backup</span> <span class="o">=</span> <span class="kc">False</span>
@@ -103,29 +104,36 @@
             <span class="k">if</span> <span class="n">job_number</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">converged</span><span class="p">:</span>
 
                 <span class="n">settings</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
-                     <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}},</span>
-                    <span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span>
-                     <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}}]</span>
+                    <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}},</span>
+                    <span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}},</span>
+                <span class="p">]</span>
 
             <span class="c1"># switch to RMM-DIIS once we are near the</span>
             <span class="c1"># local minimum (assumed after 2 runs of CG)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">settings</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
-                     <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;IBRION&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}},</span>
-                    <span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span>
-                     <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}}]</span>
+                    <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;IBRION&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}},</span>
+                    <span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}},</span>
+                <span class="p">]</span>
 
         <span class="n">job_number</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">yield</span> <span class="n">VaspJob</span><span class="p">(</span><span class="n">vasp_command</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="n">converged</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="n">backup</span><span class="p">,</span>
-                      <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span> <span class="n">settings_override</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span></div>
+        <span class="k">yield</span> <span class="n">VaspJob</span><span class="p">(</span>
+            <span class="n">vasp_command</span><span class="p">,</span>
+            <span class="n">final</span><span class="o">=</span><span class="n">converged</span><span class="p">,</span>
+            <span class="n">backup</span><span class="o">=</span><span class="n">backup</span><span class="p">,</span>
+            <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span>
+            <span class="n">settings_override</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="do_run"><a class="viewcode-back" href="../../../custodian.cli.html#custodian.cli.converge_geometry.do_run">[docs]</a><span class="k">def</span> <span class="nf">do_run</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
-    <span class="n">handlers</span> <span class="o">=</span> <span class="p">[</span><span class="n">VaspErrorHandler</span><span class="p">(),</span> <span class="n">MeshSymmetryErrorHandler</span><span class="p">(),</span>
-                <span class="n">UnconvergedErrorHandler</span><span class="p">(),</span> <span class="n">NonConvergingErrorHandler</span><span class="p">(),</span>
-                <span class="n">PotimErrorHandler</span><span class="p">()]</span>
+    <span class="n">handlers</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">VaspErrorHandler</span><span class="p">(),</span>
+        <span class="n">MeshSymmetryErrorHandler</span><span class="p">(),</span>
+        <span class="n">UnconvergedErrorHandler</span><span class="p">(),</span>
+        <span class="n">NonConvergingErrorHandler</span><span class="p">(),</span>
+        <span class="n">PotimErrorHandler</span><span class="p">(),</span>
+    <span class="p">]</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">Custodian</span><span class="p">(</span><span class="n">handlers</span><span class="p">,</span> <span class="n">get_runs</span><span class="p">(</span><span class="n">args</span><span class="p">),</span> <span class="n">max_errors</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">gzipped_output</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">gzip</span><span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Geometry optimization complete&quot;</span><span class="p">)</span></div>
@@ -134,33 +142,50 @@
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">argparse</span>
 
-    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">    converge_geometry performs a geometry optimization. What this script will do</span>
 <span class="s2">    is run a particular VASP relaxation repeatedly until the geometry</span>
 <span class="s2">    is converged within the first ionic step. This is a common practice for</span>
 <span class="s2">    converging molecular geometries in VASP, especially in situations where</span>
 <span class="s2">    the geometry needs to be precise: such as frequency calculations.</span>
 <span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span>
-                                     <span class="n">epilog</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+        <span class="n">epilog</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">    Author: Stephen Dacek</span>
 <span class="s2">    Version: </span><span class="si">{}</span><span class="s2"></span>
-<span class="s2">    Last updated: </span><span class="si">{}</span><span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__version__</span><span class="p">,</span> <span class="n">__date__</span><span class="p">))</span>
+<span class="s2">    Last updated: </span><span class="si">{}</span><span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">__version__</span><span class="p">,</span> <span class="n">__date__</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
 
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="s2">&quot;--command&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;command&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;?&quot;</span><span class="p">,</span>
-        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;pvasp&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+        <span class="s2">&quot;-c&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--command&quot;</span><span class="p">,</span>
+        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;command&quot;</span><span class="p">,</span>
+        <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;?&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;pvasp&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;VASP command. Defaults to pvasp. If you are using mpirun, &quot;</span>
-             <span class="s2">&quot;set this to something like </span><span class="se">\&quot;</span><span class="s2">mpirun pvasp</span><span class="se">\&quot;</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="p">)</span>
+        <span class="s1">&#39;set this to something like &quot;mpirun pvasp&quot;.&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;-z&quot;</span><span class="p">,</span> <span class="s2">&quot;--gzip&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;gzip&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;-z&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--gzip&quot;</span><span class="p">,</span>
+        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;gzip&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Add this option to gzip the final output. Do not gzip if you &quot;</span>
-             <span class="s2">&quot;are going to perform an additional static run.&quot;</span><span class="p">)</span>
+        <span class="s2">&quot;are going to perform an additional static run.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;-mr&quot;</span><span class="p">,</span> <span class="s2">&quot;--max_relaxtions&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;max_relax&quot;</span><span class="p">,</span>
-        <span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
-        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Maximum number of relaxations to allow&quot;</span><span class="p">)</span>
+        <span class="s2">&quot;-mr&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--max_relaxtions&quot;</span><span class="p">,</span>
+        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;max_relax&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Maximum number of relaxations to allow&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
     <span class="n">do_run</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
@@ -186,14 +211,14 @@
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
 
     <div class="footer">
-      &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
+      &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu, Matthew Horton, Samuel M. Blau.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

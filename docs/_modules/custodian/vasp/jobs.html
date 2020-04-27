@@ -4,15 +4,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>custodian.vasp.jobs &#8212; custodian 2019.8.24 documentation</title>
+    <title>custodian.vasp.jobs &#8212; custodian 2020.4.27 documentation</title>
     <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../../_static/language_data.js"></script>
-    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
 
@@ -37,7 +36,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2019.8.24 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2020.4.27 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -50,7 +49,7 @@
   <h1>Source code for custodian.vasp.jobs</h1><div class="highlight"><pre>
 <span></span><span class="c1"># coding: utf-8</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
@@ -59,16 +58,17 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">pymatgen</span> <span class="k">import</span> <span class="n">Structure</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="k">import</span> <span class="n">VaspInput</span><span class="p">,</span> <span class="n">Incar</span><span class="p">,</span> <span class="n">Poscar</span><span class="p">,</span> <span class="n">Outcar</span><span class="p">,</span> <span class="n">Kpoints</span><span class="p">,</span> <span class="n">Vasprun</span>
-<span class="kn">from</span> <span class="nn">monty.os.path</span> <span class="k">import</span> <span class="n">which</span>
-<span class="kn">from</span> <span class="nn">monty.shutil</span> <span class="k">import</span> <span class="n">decompress_dir</span>
-<span class="kn">from</span> <span class="nn">monty.serialization</span> <span class="k">import</span> <span class="n">dumpfn</span><span class="p">,</span> <span class="n">loadfn</span>
+<span class="kn">from</span> <span class="nn">pymatgen</span> <span class="kn">import</span> <span class="n">Structure</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vasp.inputs</span> <span class="kn">import</span> <span class="n">VaspInput</span><span class="p">,</span> <span class="n">Incar</span><span class="p">,</span> <span class="n">Poscar</span><span class="p">,</span> <span class="n">Kpoints</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vasp.outputs</span> <span class="kn">import</span> <span class="n">Vasprun</span><span class="p">,</span> <span class="n">Outcar</span>
+<span class="kn">from</span> <span class="nn">monty.os.path</span> <span class="kn">import</span> <span class="n">which</span>
+<span class="kn">from</span> <span class="nn">monty.shutil</span> <span class="kn">import</span> <span class="n">decompress_dir</span>
+<span class="kn">from</span> <span class="nn">monty.serialization</span> <span class="kn">import</span> <span class="n">dumpfn</span><span class="p">,</span> <span class="n">loadfn</span>
 
-<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="k">import</span> <span class="n">Job</span><span class="p">,</span> <span class="n">SENTRY_DSN</span>
-<span class="kn">from</span> <span class="nn">custodian.utils</span> <span class="k">import</span> <span class="n">backup</span>
-<span class="kn">from</span> <span class="nn">custodian.vasp.interpreter</span> <span class="k">import</span> <span class="n">VaspModder</span>
-<span class="kn">from</span> <span class="nn">custodian.vasp.handlers</span> <span class="k">import</span> <span class="n">VASP_BACKUP_FILES</span>
+<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">Job</span><span class="p">,</span> <span class="n">SENTRY_DSN</span>
+<span class="kn">from</span> <span class="nn">custodian.utils</span> <span class="kn">import</span> <span class="n">backup</span>
+<span class="kn">from</span> <span class="nn">custodian.vasp.interpreter</span> <span class="kn">import</span> <span class="n">VaspModder</span>
+<span class="kn">from</span> <span class="nn">custodian.vasp.handlers</span> <span class="kn">import</span> <span class="n">VASP_BACKUP_FILES</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This module implements basic kinds of jobs for VASP runs.</span>
@@ -88,18 +88,43 @@
 
 <span class="n">VASP_INPUT_FILES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">}</span>
 
-<span class="n">VASP_OUTPUT_FILES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;DOSCAR&#39;</span><span class="p">,</span> <span class="s1">&#39;INCAR&#39;</span><span class="p">,</span> <span class="s1">&#39;KPOINTS&#39;</span><span class="p">,</span> <span class="s1">&#39;POSCAR&#39;</span><span class="p">,</span> <span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span>
-                     <span class="s1">&#39;vasprun.xml&#39;</span><span class="p">,</span> <span class="s1">&#39;CHGCAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CHG&#39;</span><span class="p">,</span> <span class="s1">&#39;EIGENVAL&#39;</span><span class="p">,</span> <span class="s1">&#39;OSZICAR&#39;</span><span class="p">,</span>
-                     <span class="s1">&#39;WAVECAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CONTCAR&#39;</span><span class="p">,</span> <span class="s1">&#39;IBZKPT&#39;</span><span class="p">,</span> <span class="s1">&#39;OUTCAR&#39;</span><span class="p">]</span>
+<span class="n">VASP_OUTPUT_FILES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;DOSCAR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;POSCAR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PROCAR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;vasprun.xml&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CHG&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EIGENVAL&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;OSZICAR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;WAVECAR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;IBZKPT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;OUTCAR&quot;</span><span class="p">,</span>
+<span class="p">]</span>
 
-<span class="n">VASP_NEB_INPUT_FILES</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;INCAR&#39;</span><span class="p">,</span> <span class="s1">&#39;POTCAR&#39;</span><span class="p">,</span> <span class="s1">&#39;KPOINTS&#39;</span><span class="p">}</span>
+<span class="n">VASP_NEB_INPUT_FILES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">}</span>
 
-<span class="n">VASP_NEB_OUTPUT_FILES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;INCAR&#39;</span><span class="p">,</span> <span class="s1">&#39;KPOINTS&#39;</span><span class="p">,</span> <span class="s1">&#39;POTCAR&#39;</span><span class="p">,</span> <span class="s1">&#39;vasprun.xml&#39;</span><span class="p">]</span>
+<span class="n">VASP_NEB_OUTPUT_FILES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;vasprun.xml&quot;</span><span class="p">]</span>
 
-<span class="n">VASP_NEB_OUTPUT_SUB_FILES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CHG&#39;</span><span class="p">,</span> <span class="s1">&#39;CHGCAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CONTCAR&#39;</span><span class="p">,</span> <span class="s1">&#39;DOSCAR&#39;</span><span class="p">,</span>
-                             <span class="s1">&#39;EIGENVAL&#39;</span><span class="p">,</span> <span class="s1">&#39;IBZKPT&#39;</span><span class="p">,</span> <span class="s1">&#39;PCDAT&#39;</span><span class="p">,</span> <span class="s1">&#39;POSCAR&#39;</span><span class="p">,</span>
-                             <span class="s1">&#39;REPORT&#39;</span><span class="p">,</span> <span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span> <span class="s1">&#39;OSZICAR&#39;</span><span class="p">,</span> <span class="s1">&#39;OUTCAR&#39;</span><span class="p">,</span>
-                             <span class="s1">&#39;WAVECAR&#39;</span><span class="p">,</span> <span class="s1">&#39;XDATCAR&#39;</span><span class="p">]</span>
+<span class="n">VASP_NEB_OUTPUT_SUB_FILES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;CHG&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DOSCAR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EIGENVAL&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;IBZKPT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PCDAT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;POSCAR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;REPORT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PROCAR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;OSZICAR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;OUTCAR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;WAVECAR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;XDATCAR&quot;</span><span class="p">,</span>
+<span class="p">]</span>
 
 
 <div class="viewcode-block" id="VaspJob"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob">[docs]</a><span class="k">class</span> <span class="nc">VaspJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
@@ -108,11 +133,21 @@
 <span class="sd">    can be a complex processing of inputs etc. with initialization.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;vasp.out&quot;</span><span class="p">,</span>
-                 <span class="n">stderr_file</span><span class="o">=</span><span class="s2">&quot;std_err.txt&quot;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                 <span class="n">backup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_gamma</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                 <span class="n">settings_override</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gamma_vasp_cmd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">copy_magmom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_continue</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">vasp_cmd</span><span class="p">,</span>
+        <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;vasp.out&quot;</span><span class="p">,</span>
+        <span class="n">stderr_file</span><span class="o">=</span><span class="s2">&quot;std_err.txt&quot;</span><span class="p">,</span>
+        <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">final</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">backup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">auto_npar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">auto_gamma</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">settings_override</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">gamma_vasp_cmd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">copy_magmom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">auto_continue</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This constructor is necessarily complex due to the need for</span>
 <span class="sd">        flexibility. For standard kinds of runs, it&#39;s often better to use one</span>
@@ -180,17 +215,20 @@
 
         <span class="k">if</span> <span class="n">SENTRY_DSN</span><span class="p">:</span>
             <span class="c1"># if using Sentry logging, add specific VASP executable to scope</span>
-            <span class="kn">from</span> <span class="nn">sentry_sdk</span> <span class="k">import</span> <span class="n">configure_scope</span>
+            <span class="kn">from</span> <span class="nn">sentry_sdk</span> <span class="kn">import</span> <span class="n">configure_scope</span>
+
             <span class="k">with</span> <span class="n">configure_scope</span><span class="p">()</span> <span class="k">as</span> <span class="n">scope</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                        <span class="n">vasp_path</span> <span class="o">=</span> <span class="n">which</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">vasp_path</span> <span class="o">=</span> <span class="n">which</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
                     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
                         <span class="n">vasp_path</span> <span class="o">=</span> <span class="n">which</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
                     <span class="n">scope</span><span class="o">.</span><span class="n">set_tag</span><span class="p">(</span><span class="s2">&quot;vasp_path&quot;</span><span class="p">,</span> <span class="n">vasp_path</span><span class="p">)</span>
                     <span class="n">scope</span><span class="o">.</span><span class="n">set_tag</span><span class="p">(</span><span class="s2">&quot;vasp_cmd&quot;</span><span class="p">,</span> <span class="n">vasp_cmd</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to detect VASP path: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">),</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="s2">&quot;Failed to detect VASP path: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">),</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="p">)</span>
                     <span class="n">scope</span><span class="o">.</span><span class="n">set_tag</span><span class="p">(</span><span class="s2">&quot;vasp_cmd&quot;</span><span class="p">,</span> <span class="n">vasp_cmd</span><span class="p">)</span>
 
 <div class="viewcode-block" id="VaspJob.setup"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -198,32 +236,36 @@
 <span class="sd">        Performs initial setup for VaspJob, including overriding any settings</span>
 <span class="sd">        and backing up.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">decompress_dir</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="n">decompress_dir</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backup</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">VASP_INPUT_FILES</span><span class="p">:</span>
-                <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.orig&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.orig&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>  <span class="c1"># handle the situation when there is no KPOINTS file</span>
+                    <span class="k">if</span> <span class="n">f</span> <span class="o">==</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">:</span>
+                        <span class="k">pass</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_npar</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
                 <span class="c1"># Only optimized NPAR for non-HF and non-RPA calculations.</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;LHFCALC&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;LRPA&quot;</span><span class="p">)</span> <span class="ow">or</span>
-                        <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;LEPSILON&quot;</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+                    <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;LHFCALC&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;LRPA&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;LEPSILON&quot;</span><span class="p">)</span>
+                <span class="p">):</span>
                     <span class="k">if</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;IBRION&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">]:</span>
                         <span class="c1"># NPAR should not be set for Hessian matrix</span>
                         <span class="c1"># calculations, whether in DFPT or otherwise.</span>
                         <span class="k">del</span> <span class="n">incar</span><span class="p">[</span><span class="s2">&quot;NPAR&quot;</span><span class="p">]</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="kn">import</span> <span class="nn">multiprocessing</span>
+
                         <span class="c1"># try sge environment variable first</span>
                         <span class="c1"># (since multiprocessing counts cores on the current</span>
                         <span class="c1"># machine only)</span>
-                        <span class="n">ncores</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;NSLOTS&#39;</span><span class="p">)</span> <span class="ow">or</span> \
-                            <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+                        <span class="n">ncores</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NSLOTS&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
                         <span class="n">ncores</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ncores</span><span class="p">)</span>
-                        <span class="k">for</span> <span class="n">npar</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ncores</span><span class="p">)),</span>
-                                          <span class="n">ncores</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">npar</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ncores</span><span class="p">)),</span> <span class="n">ncores</span><span class="p">):</span>
                             <span class="k">if</span> <span class="n">ncores</span> <span class="o">%</span> <span class="n">npar</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                                 <span class="n">incar</span><span class="p">[</span><span class="s2">&quot;NPAR&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">npar</span>
                                 <span class="k">break</span>
@@ -242,10 +284,13 @@
                 <span class="c1"># Default functionality is to copy CONTCAR to POSCAR and set</span>
                 <span class="c1"># ISTART to 1 in the INCAR, but other actions can be specified</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_continue</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                    <span class="n">actions</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span>
-                                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}},</span>
-                               <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
-                                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}}]</span>
+                    <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}},</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}},</span>
+                    <span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">actions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_continue</span>
                 <span class="n">dumpfn</span><span class="p">({</span><span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">},</span> <span class="s2">&quot;continue.json&quot;</span><span class="p">)</span>
@@ -264,16 +309,20 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_gamma</span><span class="p">:</span>
             <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
             <span class="n">kpts</span> <span class="o">=</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">kpts</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">supported_modes</span><span class="o">.</span><span class="n">Gamma</span> \
-                    <span class="ow">and</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">kpts</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">which</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
-                    <span class="n">cmd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span>
-                <span class="k">elif</span> <span class="n">which</span><span class="p">(</span><span class="n">cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.gamma&quot;</span><span class="p">):</span>
-                    <span class="n">cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;.gamma&quot;</span>
+            <span class="k">if</span> <span class="n">kpts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">kpts</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">supported_modes</span><span class="o">.</span><span class="n">Gamma</span> <span class="ow">and</span> <span class="nb">tuple</span><span class="p">(</span>
+                    <span class="n">kpts</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">which</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="p">):</span>
+                        <span class="n">cmd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span>
+                    <span class="k">elif</span> <span class="n">which</span><span class="p">(</span><span class="n">cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.gamma&quot;</span><span class="p">):</span>
+                        <span class="n">cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;.gamma&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Running </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cmd</span><span class="p">)))</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_std</span><span class="p">,</span> \
-                <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stderr_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">buffering</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_err</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_std</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stderr_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">buffering</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">f_err</span><span class="p">:</span>
             <span class="c1"># use line buffering for stderr</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">f_std</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">f_err</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">p</span></div>
@@ -293,12 +342,12 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy_magmom</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">final</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">outcar</span> <span class="o">=</span> <span class="n">Outcar</span><span class="p">(</span><span class="s2">&quot;OUTCAR&quot;</span><span class="p">)</span>
-                <span class="n">magmom</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;tot&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">outcar</span><span class="o">.</span><span class="n">magnetization</span><span class="p">]</span>
+                <span class="n">magmom</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;tot&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">outcar</span><span class="o">.</span><span class="n">magnetization</span><span class="p">]</span>
                 <span class="n">incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
-                <span class="n">incar</span><span class="p">[</span><span class="s1">&#39;MAGMOM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">magmom</span>
+                <span class="n">incar</span><span class="p">[</span><span class="s2">&quot;MAGMOM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">magmom</span>
                 <span class="n">incar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;MAGMOM copy from OUTCAR to INCAR failed&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;MAGMOM copy from OUTCAR to INCAR failed&quot;</span><span class="p">)</span>
 
         <span class="c1"># Remove continuation so if a subsequent job is run in</span>
         <span class="c1"># the same directory, will not restart this job.</span>
@@ -306,8 +355,14 @@
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;continue.json&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VaspJob.double_relaxation_run"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.double_relaxation_run">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">double_relaxation_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ediffg</span><span class="o">=-</span><span class="mf">0.05</span><span class="p">,</span>
-                              <span class="n">half_kpts_first_relax</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_continue</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">double_relaxation_run</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">vasp_cmd</span><span class="p">,</span>
+        <span class="n">auto_npar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">ediffg</span><span class="o">=-</span><span class="mf">0.05</span><span class="p">,</span>
+        <span class="n">half_kpts_first_relax</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">auto_continue</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of two jobs corresponding to an AFLOW style double</span>
 <span class="sd">        relaxation run.</span>
@@ -334,37 +389,57 @@
             <span class="n">incar_update</span><span class="p">[</span><span class="s2">&quot;EDIFFG&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ediffg</span>
         <span class="n">settings_overide_1</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">settings_overide_2</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
-             <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">incar_update</span><span class="p">}},</span>
-            <span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span>
-             <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}}]</span>
-        <span class="k">if</span> <span class="n">half_kpts_first_relax</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">)</span> <span class="ow">and</span> \
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">):</span>
+            <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">incar_update</span><span class="p">}},</span>
+            <span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}},</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">half_kpts_first_relax</span>
+            <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">)</span>
+        <span class="p">):</span>
             <span class="n">kpts</span> <span class="o">=</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">)</span>
             <span class="n">orig_kpts_dict</span> <span class="o">=</span> <span class="n">kpts</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
             <span class="c1"># lattice vectors with length &lt; 8 will get &gt;1 KPOINT</span>
-            <span class="n">kpts</span><span class="o">.</span><span class="n">kpts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">kpts</span><span class="o">.</span><span class="n">kpts</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
-                                            <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">kpts</span><span class="o">.</span><span class="n">kpts</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">kpts</span><span class="o">.</span><span class="n">kpts</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="p">)</span>
             <span class="n">low_kpts_dict</span> <span class="o">=</span> <span class="n">kpts</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
             <span class="n">settings_overide_1</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">low_kpts_dict</span><span class="p">}}</span>
+                <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">low_kpts_dict</span><span class="p">}}</span>
             <span class="p">]</span>
             <span class="n">settings_overide_2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">orig_kpts_dict</span><span class="p">}}</span>
+                <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">orig_kpts_dict</span><span class="p">}}</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="p">[</span><span class="n">VaspJob</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.relax1&quot;</span><span class="p">,</span>
-                        <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">,</span> <span class="n">auto_continue</span><span class="o">=</span><span class="n">auto_continue</span><span class="p">,</span>
-                        <span class="n">settings_override</span><span class="o">=</span><span class="n">settings_overide_1</span><span class="p">),</span>
-                <span class="n">VaspJob</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.relax2&quot;</span><span class="p">,</span>
-                        <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">,</span> <span class="n">auto_continue</span><span class="o">=</span><span class="n">auto_continue</span><span class="p">,</span>
-                        <span class="n">settings_override</span><span class="o">=</span><span class="n">settings_overide_2</span><span class="p">)]</span></div>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">VaspJob</span><span class="p">(</span>
+                <span class="n">vasp_cmd</span><span class="p">,</span>
+                <span class="n">final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.relax1&quot;</span><span class="p">,</span>
+                <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">,</span>
+                <span class="n">auto_continue</span><span class="o">=</span><span class="n">auto_continue</span><span class="p">,</span>
+                <span class="n">settings_override</span><span class="o">=</span><span class="n">settings_overide_1</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">VaspJob</span><span class="p">(</span>
+                <span class="n">vasp_cmd</span><span class="p">,</span>
+                <span class="n">final</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">backup</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.relax2&quot;</span><span class="p">,</span>
+                <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">,</span>
+                <span class="n">auto_continue</span><span class="o">=</span><span class="n">auto_continue</span><span class="p">,</span>
+                <span class="n">settings_override</span><span class="o">=</span><span class="n">settings_overide_2</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">]</span></div>
 
 <div class="viewcode-block" id="VaspJob.metagga_opt_run"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.metagga_opt_run">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">metagga_opt_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ediffg</span><span class="o">=-</span><span class="mf">0.05</span><span class="p">,</span>
-                        <span class="n">half_kpts_first_relax</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_continue</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">metagga_opt_run</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">vasp_cmd</span><span class="p">,</span>
+        <span class="n">auto_npar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">ediffg</span><span class="o">=-</span><span class="mf">0.05</span><span class="p">,</span>
+        <span class="n">half_kpts_first_relax</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">auto_continue</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of thres jobs to perform an optimization for any</span>
 <span class="sd">        metaGGA functional. There is an initial calculation of the</span>
@@ -378,29 +453,50 @@
         <span class="n">metaGGA</span> <span class="o">=</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;METAGGA&quot;</span><span class="p">,</span> <span class="s2">&quot;SCAN&quot;</span><span class="p">)</span>
 
         <span class="c1"># Pre optimze WAVECAR and structure using regular GGA</span>
-        <span class="n">pre_opt_setings</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;METAGGA&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-                                                <span class="s2">&quot;LWAVE&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                                                <span class="s2">&quot;NSW&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}}]</span>
-        <span class="n">jobs</span> <span class="o">=</span> <span class="p">[</span><span class="n">VaspJob</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">,</span>
-                        <span class="n">final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.precondition&quot;</span><span class="p">,</span>
-                        <span class="n">settings_override</span><span class="o">=</span><span class="n">pre_opt_setings</span><span class="p">)]</span>
+        <span class="n">pre_opt_setings</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;METAGGA&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;LWAVE&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;NSW&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}},</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+        <span class="n">jobs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">VaspJob</span><span class="p">(</span>
+                <span class="n">vasp_cmd</span><span class="p">,</span>
+                <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">,</span>
+                <span class="n">final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.precondition&quot;</span><span class="p">,</span>
+                <span class="n">settings_override</span><span class="o">=</span><span class="n">pre_opt_setings</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
 
         <span class="c1"># Finish with regular double relaxation style run using SCAN</span>
-        <span class="n">jobs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">VaspJob</span><span class="o">.</span><span class="n">double_relaxation_run</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">,</span>
-                                                  <span class="n">ediffg</span><span class="o">=</span><span class="n">ediffg</span><span class="p">,</span>
-                                                  <span class="n">half_kpts_first_relax</span><span class="o">=</span><span class="n">half_kpts_first_relax</span><span class="p">))</span>
+        <span class="n">jobs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="n">VaspJob</span><span class="o">.</span><span class="n">double_relaxation_run</span><span class="p">(</span>
+                <span class="n">vasp_cmd</span><span class="p">,</span>
+                <span class="n">auto_npar</span><span class="o">=</span><span class="n">auto_npar</span><span class="p">,</span>
+                <span class="n">ediffg</span><span class="o">=</span><span class="n">ediffg</span><span class="p">,</span>
+                <span class="n">half_kpts_first_relax</span><span class="o">=</span><span class="n">half_kpts_first_relax</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="c1"># Ensure the first relaxation doesn&#39;t overwrite the original inputs</span>
         <span class="n">jobs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">backup</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1"># Update double_relaxation job to start from pre-optimized run</span>
-        <span class="n">post_opt_settings</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
-                              <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;METAGGA&quot;</span><span class="p">:</span> <span class="n">metaGGA</span><span class="p">,</span> <span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-                                                  <span class="s2">&quot;NSW&quot;</span><span class="p">:</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NSW&quot;</span><span class="p">,</span> <span class="mi">99</span><span class="p">),</span>
-                                                  <span class="s2">&quot;LWAVE&quot;</span><span class="p">:</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;LWAVE&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)}}},</span>
-                             <span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span>
-                              <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}}]</span>
+        <span class="n">post_opt_settings</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;METAGGA&quot;</span><span class="p">:</span> <span class="n">metaGGA</span><span class="p">,</span>
+                        <span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="s2">&quot;NSW&quot;</span><span class="p">:</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NSW&quot;</span><span class="p">,</span> <span class="mi">99</span><span class="p">),</span>
+                        <span class="s2">&quot;LWAVE&quot;</span><span class="p">:</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;LWAVE&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+            <span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}},</span>
+        <span class="p">]</span>
         <span class="k">if</span> <span class="n">jobs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">settings_override</span><span class="p">:</span>
             <span class="n">post_opt_settings</span> <span class="o">=</span> <span class="n">jobs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">settings_override</span> <span class="o">+</span> <span class="n">post_opt_settings</span>
         <span class="n">jobs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">settings_override</span> <span class="o">=</span> <span class="n">post_opt_settings</span>
@@ -408,9 +504,15 @@
         <span class="k">return</span> <span class="n">jobs</span></div>
 
 <div class="viewcode-block" id="VaspJob.full_opt_run"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.full_opt_run">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">full_opt_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">vol_change_tol</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
-                     <span class="n">max_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ediffg</span><span class="o">=-</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">half_kpts_first_relax</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                     <span class="o">**</span><span class="n">vasp_job_kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">full_opt_run</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">vasp_cmd</span><span class="p">,</span>
+        <span class="n">vol_change_tol</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+        <span class="n">max_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">ediffg</span><span class="o">=-</span><span class="mf">0.05</span><span class="p">,</span>
+        <span class="n">half_kpts_first_relax</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">vasp_job_kwargs</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a generator of jobs for a full optimization run. Basically,</span>
 <span class="sd">        this runs an infinite series of geometry optimization jobs until the</span>
@@ -439,16 +541,16 @@
             <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">settings</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">backup</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">if</span> <span class="n">half_kpts_first_relax</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">)</span> <span class="ow">and</span> \
-                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">half_kpts_first_relax</span>
+                    <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">)</span>
+                <span class="p">):</span>
                     <span class="n">kpts</span> <span class="o">=</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">)</span>
                     <span class="n">orig_kpts_dict</span> <span class="o">=</span> <span class="n">kpts</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
                     <span class="n">kpts</span><span class="o">.</span><span class="n">kpts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">kpts</span><span class="o">.</span><span class="n">kpts</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
                     <span class="n">low_kpts_dict</span> <span class="o">=</span> <span class="n">kpts</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
-                    <span class="n">settings</span> <span class="o">=</span> <span class="p">[</span>
-                        <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span>
-                         <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">low_kpts_dict</span><span class="p">}}</span>
-                    <span class="p">]</span>
+                    <span class="n">settings</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">low_kpts_dict</span><span class="p">}}]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">backup</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">initial</span> <span class="o">=</span> <span class="n">Poscar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">structure</span>
@@ -464,22 +566,37 @@
                     <span class="k">if</span> <span class="n">ediffg</span><span class="p">:</span>
                         <span class="n">incar_update</span><span class="p">[</span><span class="s2">&quot;EDIFFG&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ediffg</span>
                     <span class="n">settings</span> <span class="o">=</span> <span class="p">[</span>
-                        <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
-                         <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">incar_update</span><span class="p">}},</span>
-                        <span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span>
-                         <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}}]</span>
+                        <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">incar_update</span><span class="p">}},</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}},</span>
+                        <span class="p">},</span>
+                    <span class="p">]</span>
                     <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">half_kpts_first_relax</span><span class="p">:</span>
-                        <span class="n">settings</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span>
-                                         <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">orig_kpts_dict</span><span class="p">}})</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Generating job = </span><span class="si">%d</span><span class="s2">!&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
-            <span class="k">yield</span> <span class="n">VaspJob</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="n">backup</span><span class="p">,</span>
-                          <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.relax</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">settings_override</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
-                          <span class="o">**</span><span class="n">vasp_job_kwargs</span><span class="p">)</span></div>
+                        <span class="n">settings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">orig_kpts_dict</span><span class="p">}}</span>
+                        <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Generating job = </span><span class="si">%d</span><span class="s2">!&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">yield</span> <span class="n">VaspJob</span><span class="p">(</span>
+                <span class="n">vasp_cmd</span><span class="p">,</span>
+                <span class="n">final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">backup</span><span class="o">=</span><span class="n">backup</span><span class="p">,</span>
+                <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.relax</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+                <span class="n">settings_override</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">vasp_job_kwargs</span>
+            <span class="p">)</span></div>
 
 <div class="viewcode-block" id="VaspJob.constrained_opt_run"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.constrained_opt_run">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">constrained_opt_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">lattice_direction</span><span class="p">,</span> <span class="n">initial_strain</span><span class="p">,</span>
-                            <span class="n">atom_relax</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">algo</span><span class="o">=</span><span class="s2">&quot;bfgs&quot;</span><span class="p">,</span>
-                            <span class="o">**</span><span class="n">vasp_job_kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">constrained_opt_run</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">vasp_cmd</span><span class="p">,</span>
+        <span class="n">lattice_direction</span><span class="p">,</span>
+        <span class="n">initial_strain</span><span class="p">,</span>
+        <span class="n">atom_relax</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">max_steps</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+        <span class="n">algo</span><span class="o">=</span><span class="s2">&quot;bfgs&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">vasp_job_kwargs</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a generator of jobs for a constrained optimization run. Typical</span>
 <span class="sd">        use case is when you want to approximate a biaxial strain situation,</span>
@@ -544,8 +661,8 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_steps</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">settings</span> <span class="o">=</span> <span class="p">[</span>
-                        <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
-                         <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISIF&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;NSW&quot;</span><span class="p">:</span> <span class="n">nsw</span><span class="p">}}}]</span>
+                    <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISIF&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;NSW&quot;</span><span class="p">:</span> <span class="n">nsw</span><span class="p">}}}</span>
+                <span class="p">]</span>
                 <span class="n">structure</span> <span class="o">=</span> <span class="n">Poscar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">structure</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="n">lattice_index</span><span class="p">]</span>
                 <span class="n">backup</span> <span class="o">=</span> <span class="kc">True</span>
@@ -561,7 +678,7 @@
                 <span class="n">energies</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy</span>
 
                 <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">x</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">initial_strain</span><span class="p">)</span>
+                    <span class="n">x</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">initial_strain</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># Sort the lattice parameter by energies.</span>
                     <span class="n">min_x</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">energies</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">energies</span><span class="p">[</span><span class="n">e</span><span class="p">])</span>
@@ -572,14 +689,16 @@
                     <span class="k">elif</span> <span class="n">ind</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                         <span class="n">other</span> <span class="o">=</span> <span class="n">ind</span> <span class="o">-</span> <span class="mi">1</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">other</span> <span class="o">=</span> <span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span> \
-                            <span class="k">if</span> <span class="n">energies</span><span class="p">[</span><span class="n">sorted_x</span><span class="p">[</span><span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]]</span> \
-                            <span class="o">&lt;</span> <span class="n">energies</span><span class="p">[</span><span class="n">sorted_x</span><span class="p">[</span><span class="n">ind</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]]</span> \
+                        <span class="n">other</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span>
+                            <span class="k">if</span> <span class="n">energies</span><span class="p">[</span><span class="n">sorted_x</span><span class="p">[</span><span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">&lt;</span> <span class="n">energies</span><span class="p">[</span><span class="n">sorted_x</span><span class="p">[</span><span class="n">ind</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]]</span>
                             <span class="k">else</span> <span class="n">ind</span> <span class="o">-</span> <span class="mi">1</span>
-                    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">energies</span><span class="p">[</span><span class="n">min_x</span><span class="p">]</span>
-                           <span class="o">-</span> <span class="n">energies</span><span class="p">[</span><span class="n">sorted_x</span><span class="p">[</span><span class="n">other</span><span class="p">]])</span> <span class="o">&lt;</span> <span class="n">etol</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Stopping optimization! Final </span><span class="si">%s</span><span class="s2"> = </span><span class="si">%f</span><span class="s2">&quot;</span>
-                                    <span class="o">%</span> <span class="p">(</span><span class="n">lattice_direction</span><span class="p">,</span> <span class="n">min_x</span><span class="p">))</span>
+                        <span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">energies</span><span class="p">[</span><span class="n">min_x</span><span class="p">]</span> <span class="o">-</span> <span class="n">energies</span><span class="p">[</span><span class="n">sorted_x</span><span class="p">[</span><span class="n">other</span><span class="p">]])</span> <span class="o">&lt;</span> <span class="n">etol</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                            <span class="s2">&quot;Stopping optimization! Final </span><span class="si">%s</span><span class="s2"> = </span><span class="si">%f</span><span class="s2">&quot;</span>
+                            <span class="o">%</span> <span class="p">(</span><span class="n">lattice_direction</span><span class="p">,</span> <span class="n">min_x</span><span class="p">)</span>
+                        <span class="p">)</span>
                         <span class="k">break</span>
 
                     <span class="k">if</span> <span class="n">ind</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
@@ -588,16 +707,20 @@
                         <span class="c1"># iteration to find a minimum. This applies only when</span>
                         <span class="c1"># there are at least 3 values.</span>
                         <span class="n">x</span> <span class="o">=</span> <span class="n">sorted_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sorted_x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">sorted_x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Lowest energy lies below bounds. &quot;</span>
-                                    <span class="s2">&quot;Setting </span><span class="si">%s</span><span class="s2"> = </span><span class="si">%f</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lattice_direction</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                            <span class="s2">&quot;Lowest energy lies below bounds. &quot;</span>
+                            <span class="s2">&quot;Setting </span><span class="si">%s</span><span class="s2"> = </span><span class="si">%f</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lattice_direction</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+                        <span class="p">)</span>
                     <span class="k">elif</span> <span class="n">ind</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
                         <span class="c1"># Lowest energy lies outside of range of highest value.</span>
                         <span class="c1"># we increase the lattice parameter in the next</span>
                         <span class="c1"># iteration to find a minimum. This applies only when</span>
                         <span class="c1"># there are at least 3 values.</span>
                         <span class="n">x</span> <span class="o">=</span> <span class="n">sorted_x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sorted_x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">sorted_x</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Lowest energy lies above bounds. &quot;</span>
-                                    <span class="s2">&quot;Setting </span><span class="si">%s</span><span class="s2"> = </span><span class="si">%f</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lattice_direction</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                            <span class="s2">&quot;Lowest energy lies above bounds. &quot;</span>
+                            <span class="s2">&quot;Setting </span><span class="si">%s</span><span class="s2"> = </span><span class="si">%f</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lattice_direction</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+                        <span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">algo</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;bfgs&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_x</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">:</span>
                             <span class="k">try</span><span class="p">:</span>
@@ -607,30 +730,33 @@
                                 <span class="n">y1</span> <span class="o">=</span> <span class="p">[</span><span class="n">energies</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">x1</span><span class="p">]</span>
                                 <span class="n">z1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
                                 <span class="n">pp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">poly1d</span><span class="p">(</span><span class="n">z1</span><span class="p">)</span>
-                                <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">minimize</span>
+                                <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span>
+
                                 <span class="n">result</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
-                                    <span class="n">pp</span><span class="p">,</span> <span class="n">min_x</span><span class="p">,</span>
-                                    <span class="n">bounds</span><span class="o">=</span><span class="p">[(</span><span class="n">sorted_x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sorted_x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])])</span>
+                                    <span class="n">pp</span><span class="p">,</span> <span class="n">min_x</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">[(</span><span class="n">sorted_x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sorted_x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+                                <span class="p">)</span>
                                 <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">)</span> <span class="ow">or</span> <span class="n">result</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                                        <span class="s2">&quot;Negative lattice constant!&quot;</span><span class="p">)</span>
+                                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Negative lattice constant!&quot;</span><span class="p">)</span>
                                 <span class="n">x</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;BFGS minimized </span><span class="si">%s</span><span class="s2"> = </span><span class="si">%f</span><span class="s2">.&quot;</span>
-                                            <span class="o">%</span> <span class="p">(</span><span class="n">lattice_direction</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                    <span class="s2">&quot;BFGS minimized </span><span class="si">%s</span><span class="s2"> = </span><span class="si">%f</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lattice_direction</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+                                <span class="p">)</span>
                             <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
                                 <span class="c1"># Fall back on bisection algo if the bfgs fails.</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ex</span><span class="p">))</span>
                                 <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">min_x</span> <span class="o">+</span> <span class="n">sorted_x</span><span class="p">[</span><span class="n">other</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Falling back on bisection </span><span class="si">%s</span><span class="s2"> = </span><span class="si">%f</span><span class="s2">.&quot;</span>
-                                            <span class="o">%</span> <span class="p">(</span><span class="n">lattice_direction</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                    <span class="s2">&quot;Falling back on bisection </span><span class="si">%s</span><span class="s2"> = </span><span class="si">%f</span><span class="s2">.&quot;</span>
+                                    <span class="o">%</span> <span class="p">(</span><span class="n">lattice_direction</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+                                <span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">min_x</span> <span class="o">+</span> <span class="n">sorted_x</span><span class="p">[</span><span class="n">other</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Bisection </span><span class="si">%s</span><span class="s2"> = </span><span class="si">%f</span><span class="s2">.&quot;</span>
-                                        <span class="o">%</span> <span class="p">(</span><span class="n">lattice_direction</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Bisection </span><span class="si">%s</span><span class="s2"> = </span><span class="si">%f</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lattice_direction</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
 
                 <span class="n">lattice</span> <span class="o">=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">matrix</span>
-                <span class="n">lattice</span><span class="p">[</span><span class="n">lattice_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">lattice</span><span class="p">[</span><span class="n">lattice_index</span><span class="p">]</span> <span class="o">/</span> \
-                    <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">lattice</span><span class="p">[</span><span class="n">lattice_index</span><span class="p">])</span> <span class="o">*</span> <span class="n">x</span>
+                <span class="n">lattice</span><span class="p">[</span><span class="n">lattice_index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">lattice</span><span class="p">[</span><span class="n">lattice_index</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">lattice</span><span class="p">[</span><span class="n">lattice_index</span><span class="p">])</span> <span class="o">*</span> <span class="n">x</span>
+                <span class="p">)</span>
 
                 <span class="n">s</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">(</span><span class="n">lattice</span><span class="p">,</span> <span class="n">structure</span><span class="o">.</span><span class="n">species</span><span class="p">,</span> <span class="n">structure</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">)</span>
                 <span class="n">fname</span> <span class="o">=</span> <span class="s2">&quot;POSCAR.</span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">x</span>
@@ -639,15 +765,19 @@
                 <span class="n">incar_update</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;NSW&quot;</span><span class="p">:</span> <span class="n">nsw</span><span class="p">,</span> <span class="s2">&quot;ISIF&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
 
                 <span class="n">settings</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
-                     <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">incar_update</span><span class="p">}},</span>
-                    <span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">fname</span><span class="p">,</span>
-                     <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}}]</span>
+                    <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="n">incar_update</span><span class="p">}},</span>
+                    <span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}}},</span>
+                <span class="p">]</span>
 
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Generating job = </span><span class="si">%d</span><span class="s2"> with parameter </span><span class="si">%f</span><span class="s2">!&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
-            <span class="k">yield</span> <span class="n">VaspJob</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="n">backup</span><span class="p">,</span>
-                          <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.static.</span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">x</span><span class="p">,</span>
-                          <span class="n">settings_override</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span> <span class="o">**</span><span class="n">vasp_job_kwargs</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">VaspJob</span><span class="p">(</span>
+                <span class="n">vasp_cmd</span><span class="p">,</span>
+                <span class="n">final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">backup</span><span class="o">=</span><span class="n">backup</span><span class="p">,</span>
+                <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.static.</span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">x</span><span class="p">,</span>
+                <span class="n">settings_override</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">vasp_job_kwargs</span>
+            <span class="p">)</span>
 
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;EOS.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;wt&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;# </span><span class="si">%s</span><span class="s2"> energy</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">lattice_direction</span><span class="p">)</span>
@@ -670,11 +800,21 @@
 <span class="sd">    arrangement in NEB calculation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vasp_cmd</span><span class="p">,</span>
-                 <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;neb_vasp.out&quot;</span><span class="p">,</span> <span class="n">stderr_file</span><span class="o">=</span><span class="s2">&quot;neb_std_err.txt&quot;</span><span class="p">,</span>
-                 <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_npar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                 <span class="n">half_kpts</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_gamma</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_continue</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                 <span class="n">gamma_vasp_cmd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">settings_override</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">vasp_cmd</span><span class="p">,</span>
+        <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;neb_vasp.out&quot;</span><span class="p">,</span>
+        <span class="n">stderr_file</span><span class="o">=</span><span class="s2">&quot;neb_std_err.txt&quot;</span><span class="p">,</span>
+        <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">final</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">backup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">auto_npar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">half_kpts</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">auto_gamma</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">auto_continue</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">gamma_vasp_cmd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">settings_override</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This constructor is a simplified version of VaspJob, which satisfies</span>
 <span class="sd">        the need for flexibility. For standard kinds of runs, it&#39;s often</span>
@@ -746,7 +886,7 @@
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">neb_dirs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">neb_dirs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">neb_dirs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">neb_sub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">neb_dirs</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">neb_sub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">neb_dirs</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
 <div class="viewcode-block" id="VaspNEBJob.setup"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspNEBJob.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -770,7 +910,7 @@
             <span class="n">kpts</span><span class="o">.</span><span class="n">kpts</span> <span class="o">=</span> <span class="n">kpts</span><span class="o">.</span><span class="n">kpts</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
             <span class="k">if</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">kpts</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="n">kpt_dic</span> <span class="o">=</span> <span class="n">kpts</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
-                <span class="n">kpt_dic</span><span class="p">[</span><span class="s2">&quot;generation_style&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Gamma&#39;</span>
+                <span class="n">kpt_dic</span><span class="p">[</span><span class="s2">&quot;generation_style&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Gamma&quot;</span>
                 <span class="n">kpts</span> <span class="o">=</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">kpt_dic</span><span class="p">)</span>
             <span class="n">kpts</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">)</span>
 
@@ -778,13 +918,13 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
                 <span class="kn">import</span> <span class="nn">multiprocessing</span>
+
                 <span class="c1"># Try sge environment variable first</span>
                 <span class="c1"># (since multiprocessing counts cores on the current</span>
                 <span class="c1"># machine only)</span>
-                <span class="n">ncores</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;NSLOTS&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+                <span class="n">ncores</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NSLOTS&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
                 <span class="n">ncores</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ncores</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">npar</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ncores</span><span class="p">)),</span>
-                                  <span class="n">ncores</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">npar</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ncores</span><span class="p">)),</span> <span class="n">ncores</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">ncores</span> <span class="o">%</span> <span class="n">npar</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">incar</span><span class="p">[</span><span class="s2">&quot;NPAR&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">npar</span>
                         <span class="k">break</span>
@@ -792,9 +932,11 @@
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                 <span class="k">pass</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_continue</span> <span class="ow">and</span> \
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;STOPCAR&quot;</span><span class="p">)</span> <span class="ow">and</span> \
-                <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="s2">&quot;STOPCAR&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">W_OK</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auto_continue</span>
+            <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;STOPCAR&quot;</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="s2">&quot;STOPCAR&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">W_OK</span><span class="p">)</span>
+        <span class="p">):</span>
             <span class="c1"># Remove STOPCAR</span>
             <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="s2">&quot;STOPCAR&quot;</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;STOPCAR&quot;</span><span class="p">)</span>
@@ -818,16 +960,19 @@
         <span class="n">cmd</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vasp_cmd</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_gamma</span><span class="p">:</span>
             <span class="n">kpts</span> <span class="o">=</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">kpts</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">supported_modes</span><span class="o">.</span><span class="n">Gamma</span> \
-                    <span class="ow">and</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">kpts</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">which</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">kpts</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">supported_modes</span><span class="o">.</span><span class="n">Gamma</span> <span class="ow">and</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">kpts</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="p">(</span>
+                <span class="mi">1</span><span class="p">,</span>
+                <span class="mi">1</span><span class="p">,</span>
+                <span class="mi">1</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">which</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
                     <span class="n">cmd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span>
                 <span class="k">elif</span> <span class="n">which</span><span class="p">(</span><span class="n">cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.gamma&quot;</span><span class="p">):</span>
                     <span class="n">cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;.gamma&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Running </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cmd</span><span class="p">)))</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_std</span><span class="p">,</span> \
-                <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stderr_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">buffering</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_err</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_std</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stderr_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">buffering</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">f_err</span><span class="p">:</span>
 
             <span class="c1"># Use line buffering for stderr</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">f_std</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">f_err</span><span class="p">)</span>
@@ -857,8 +1002,7 @@
 
 
 <div class="viewcode-block" id="GenerateVaspInputJob"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.GenerateVaspInputJob">[docs]</a><span class="k">class</span> <span class="nc">GenerateVaspInputJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_set</span><span class="p">,</span> <span class="n">contcar_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_set</span><span class="p">,</span> <span class="n">contcar_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates a VASP input based on an existing directory. This is typically</span>
 <span class="sd">        used to modify the VASP input files before the next VaspJob.</span>
@@ -912,14 +1056,14 @@
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
 
     <div class="footer">
-      &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
+      &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu, Matthew Horton, Samuel M. Blau.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

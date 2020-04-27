@@ -4,15 +4,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>custodian.vasp.validators &#8212; custodian 2019.8.24 documentation</title>
+    <title>custodian.vasp.validators &#8212; custodian 2020.4.27 documentation</title>
     <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../../_static/language_data.js"></script>
-    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
 
@@ -37,7 +36,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2019.8.24 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2020.4.27 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -50,11 +49,11 @@
   <h1>Source code for custodian.vasp.validators</h1><div class="highlight"><pre>
 <span></span><span class="c1"># coding: utf-8</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
 
-<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="k">import</span> <span class="n">Validator</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="k">import</span> <span class="n">Vasprun</span><span class="p">,</span> <span class="n">Incar</span><span class="p">,</span> <span class="n">Outcar</span><span class="p">,</span> <span class="n">Chgcar</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">deque</span>
+<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">Validator</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="kn">import</span> <span class="n">Vasprun</span><span class="p">,</span> <span class="n">Incar</span><span class="p">,</span> <span class="n">Outcar</span><span class="p">,</span> <span class="n">Chgcar</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -65,7 +64,7 @@
 <span class="sd">    Checks that a valid vasprun.xml was generated</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;vasp.out&quot;</span><span class="p">,</span> <span class="n">stderr_file</span><span class="o">=</span><span class="s2">&quot;std_err.txt&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;vasp.out&quot;</span><span class="p">,</span> <span class="n">stderr_file</span><span class="o">=</span><span class="s2">&quot;std_err.txt&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            output_file (str): Name of file VASP standard output is directed to.</span>
@@ -104,8 +103,9 @@
                     <span class="n">vasprun_tail</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">vasprun</span><span class="p">,</span> <span class="n">maxlen</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
                 <span class="n">exception_context</span><span class="p">[</span><span class="s2">&quot;vasprun_tail&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">vasprun_tail</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to load vasprun.xml&quot;</span><span class="p">,</span>
-                              <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">exception_context</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Failed to load vasprun.xml&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">exception_context</span>
+            <span class="p">)</span>
 
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="kc">False</span></div></div>
@@ -117,7 +117,7 @@
 <span class="sd">        normally create upon running.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
 <div class="viewcode-block" id="VaspFilesValidator.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VaspFilesValidator.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -133,7 +133,7 @@
 <span class="sd">    Currently, VASP only have Langevin thermostat (MDALGO = 3) for NpT ensemble.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
 <div class="viewcode-block" id="VaspNpTMDValidator.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VaspNpTMDValidator.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -145,7 +145,7 @@
         <span class="n">outcar</span> <span class="o">=</span> <span class="n">Outcar</span><span class="p">(</span><span class="s2">&quot;OUTCAR&quot;</span><span class="p">)</span>
         <span class="n">patterns</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;MDALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;MDALGO\s+=\s+([\d]+)&quot;</span><span class="p">}</span>
         <span class="n">outcar</span><span class="o">.</span><span class="n">read_pattern</span><span class="p">(</span><span class="n">patterns</span><span class="o">=</span><span class="n">patterns</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;MDALGO&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="p">[[</span><span class="s1">&#39;3&#39;</span><span class="p">]]:</span>
+        <span class="k">if</span> <span class="n">outcar</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;MDALGO&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="p">[[</span><span class="s2">&quot;3&quot;</span><span class="p">]]:</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span></div></div>
@@ -156,7 +156,7 @@
 <span class="sd">    Check if the data in the AECCAR is corrupted</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
 <div class="viewcode-block" id="VaspAECCARValidator.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VaspAECCARValidator.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -166,16 +166,29 @@
         <span class="k">return</span> <span class="n">check_broken_chgcar</span><span class="p">(</span><span class="n">aeccar</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="check_broken_chgcar"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.check_broken_chgcar">[docs]</a><span class="k">def</span> <span class="nf">check_broken_chgcar</span><span class="p">(</span><span class="n">chgcar</span><span class="p">):</span>
-    <span class="n">chgcar_data</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span>
+<div class="viewcode-block" id="check_broken_chgcar"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.check_broken_chgcar">[docs]</a><span class="k">def</span> <span class="nf">check_broken_chgcar</span><span class="p">(</span><span class="n">chgcar</span><span class="p">,</span> <span class="n">diff_thresh</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if the charge density file is corrupt</span>
+<span class="sd">    Args:</span>
+<span class="sd">        chgcar (Chgcar): Chgcar-like object.</span>
+<span class="sd">        diff_thresh (Float): Threshhold for diagonal difference.</span>
+<span class="sd">                        None means we won&#39;t check for this.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">chgcar_data</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">chgcar_data</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
-        <span class="c1"># a decent bunch of the values are negative</span>
+        <span class="c1"># a decent bunch of the values are negative this for sure means a broken charge density</span>
         <span class="k">return</span> <span class="kc">True</span>
 
-    <span class="n">diff</span> <span class="o">=</span> <span class="n">chgcar_data</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">chgcar_data</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span>
-    <span class="k">if</span> <span class="n">diff</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="n">chgcar_data</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">chgcar_data</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mf">0.95</span><span class="p">:</span>
-        <span class="c1"># Some single diagonal finite difference is more than 95% of the entire range</span>
-        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">diff_thresh</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If any one diagonal difference accounts for more than a particular portion of</span>
+<span class="sd">        the total difference between highest and lowest density.</span>
+<span class="sd">        When we are looking at AECCAR data, since the charge density is so high near the core</span>
+<span class="sd">        and we have a course grid, this threshhold can be as high as 0.99</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">chgcar_data</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">chgcar_data</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="n">diff</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="n">chgcar_data</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">chgcar_data</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">&gt;</span> <span class="n">diff_thresh</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">return</span> <span class="kc">False</span></div>
 </pre></div>
@@ -200,14 +213,14 @@
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
 
     <div class="footer">
-      &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
+      &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu, Matthew Horton, Samuel M. Blau.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
