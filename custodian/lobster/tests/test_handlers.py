@@ -4,8 +4,8 @@ import unittest
 from custodian.lobster.handlers import ChargeSpillingValidator, EnoughBandsValidator, LobsterFilesValidator
 
 # get location of module
-MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
-test_files_lobster = os.path.join(MODULE_DIR, '../../../test_files/lobster/lobsterouts')
+TEST_DIR = os.path.dirname(os.path.abspath(__file__)) 
+test_files_lobster = os.path.join(TEST_DIR, '../../../test_files/lobster/lobsterouts')
 
 
 class TestChargeSpillingValidator(unittest.TestCase):
@@ -40,17 +40,21 @@ class TestChargeSpillingValidator(unittest.TestCase):
 
 class TestLobsterFilesValidator(unittest.TestCase):
 
-    def test_check_and_correct(self):
+    def test_check_and_correct_1(self):
         os.chdir(test_files_lobster)
         v = LobsterFilesValidator()
         self.assertFalse(v.check())
-        os.chdir(os.path.join(MODULE_DIR,test_files_lobster, "nolobsterout"))
+
+    def test_check_and_correct_2(self):
+        os.chdir(os.path.join(test_files_lobster, "nolobsterout"))
         v2 = LobsterFilesValidator()
         self.assertTrue(v2.check())
-        os.chdir(os.path.join(MODULE_DIR,test_files_lobster, "crash"))
+    
+    def test_check_and_correct_3(self): 
+        os.chdir(os.path.join(test_files_lobster, "crash"))
         v2 = LobsterFilesValidator()
         self.assertTrue(v2.check())
-        os.chdir(MODULE_DIR)
+
 
     def test_as_dict(self):
         os.chdir(test_files_lobster)
@@ -58,7 +62,7 @@ class TestLobsterFilesValidator(unittest.TestCase):
         d = v.as_dict()
         v2 = LobsterFilesValidator.from_dict(d)
         self.assertIsInstance(v2, LobsterFilesValidator)
-        os.chdir(MODULE_DIR)
+
 
 
 class TestEnoughBandsValidator(unittest.TestCase):
