@@ -79,7 +79,7 @@ def update_doc(ctx):
 def publish(ctx):
     ctx.run("rm dist/*.*", warn=True)
     ctx.run("python setup.py sdist")
-    ctx.run("twine upload -u Shyue.Ping.Ong dist/*")
+    ctx.run("twine upload dist/*")
 
 
 @task
