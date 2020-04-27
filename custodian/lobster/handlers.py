@@ -1,8 +1,7 @@
 import os
 
-from pymatgen.io.lobster import Lobsterout
-
 from custodian.custodian import Validator
+from pymatgen.io.lobster import Lobsterout
 
 
 class EnoughBandsValidator(Validator):
@@ -29,7 +28,7 @@ class EnoughBandsValidator(Validator):
             with open(self.output_filename) as f:
                 data = f.read()
             return 'You are employing too few bands in your PAW calculation.' in data
-        except:
+        except OSError:
             return False
 
 

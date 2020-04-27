@@ -32,10 +32,6 @@ class TestChargeSpillingValidator(unittest.TestCase):
         v2 = ChargeSpillingValidator.from_dict(d)
         self.assertIsInstance(v2, ChargeSpillingValidator)
 
-    @classmethod
-    def tearDownClass(cls):
-        pass
-
 
 class TestLobsterFilesValidator(unittest.TestCase):
 
@@ -51,8 +47,8 @@ class TestLobsterFilesValidator(unittest.TestCase):
 
     def test_check_and_correct_3(self):
         os.chdir(os.path.join(test_files_lobster, "crash"))
-        v2 = LobsterFilesValidator()
-        self.assertTrue(v2.check())
+        v3 = LobsterFilesValidator()
+        self.assertTrue(v3.check())
 
     def test_as_dict(self):
         os.chdir(test_files_lobster)
@@ -68,10 +64,12 @@ class TestEnoughBandsValidator(unittest.TestCase):
         v = EnoughBandsValidator(output_filename=os.path.join(test_files_lobster, "lobsterout.normal"))
         self.assertFalse(v.check())
 
+    def test_check_and_correct2(self):
         v2 = EnoughBandsValidator(output_filename=os.path.join(test_files_lobster, "lobsterout.nocohp"))
         self.assertTrue(v2.check())
 
-        v3 = EnoughBandsValidator(output_filename=os.path.join(test_files_lobster, "nolobsterout"))
+    def test_check_and_correct3(self):
+        v3 = EnoughBandsValidator(output_filename=os.path.join(test_files_lobster, "nolobsterout/lobsterout"))
         self.assertFalse(v3.check())
 
     def test_as_dict(self):
@@ -79,10 +77,6 @@ class TestEnoughBandsValidator(unittest.TestCase):
         d = v.as_dict()
         v2 = EnoughBandsValidator.from_dict(d)
         self.assertIsInstance(v2, EnoughBandsValidator)
-
-    @classmethod
-    def tearDownClass(cls):
-        pass
 
 
 if __name__ == '__main__':
