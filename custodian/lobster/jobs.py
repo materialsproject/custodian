@@ -3,10 +3,18 @@ import os
 import shutil
 import subprocess
 
+from custodian.custodian import Job
 from monty.io import zopen
 from monty.shutil import compress_file
 
-from custodian.custodian import Job
+""" This module implements jobs for Lobster runs. """
+
+__author__ = "Janine George, Guido Petretto"
+__copyright__ = "Copyright 2020, The Materials Project"
+__version__ = "0.1"
+__maintainer__ = "Janine George"
+__email__ = "janine.george@uclouvain.be"
+__date__ = "April 27, 2020"
 
 LOBSTERINPUT_FILES = ["lobsterin"]
 LOBSTEROUTPUT_FILES = ["lobsterout", "CHARGE.lobster", "COHPCAR.lobster", "COOPCAR.lobster", "DOSCAR.lobster",
