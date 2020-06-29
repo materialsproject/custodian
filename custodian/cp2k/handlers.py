@@ -107,14 +107,12 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         self.outdata = None
         self.errors = None
         self.scf = None
-        with Cp2kInput.from_file('cp2k.inp')['GLOBAL'].get_keyword('RUN_TYPE').values[0] as v:
-            if v.upper() in ["ENERGY",
-                             "ENERGY_FORCE",
-                             "WAVEFUNCTION_OPTIMIZATION",
-                             "WFN_OPT"]:
-                self.is_static = True
-            else:
-                self.is_static = False
+        ci = Cp2kInput.from_file('cp2k.inp')
+        if ci['GLOBAL'].get_keyword('RUN_TYPE').values[0].upper() in [
+            "ENERGY", "ENERGY_FORCE", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT"]:
+            self.is_static = True
+        else:
+            self.is_static = False
 
     def check(self):
         # Checks output file for errors.
@@ -169,8 +167,6 @@ class UnconvergedScfErrorHandler(ErrorHandler):
             Cp2kModder(ci=ci).apply_actions(actions)
 
         return {"errors": ["Non-converging Job"], "actions": actions}
-
-
 
 class FrozenJobErrorHandler(ErrorHandler):
     """
