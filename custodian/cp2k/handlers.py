@@ -5,6 +5,9 @@ from __future__ import unicode_literals, division
 # This module implements new error handlers for QChem runs.
 
 import os
+import time
+import numpy as np
+from collections import Counter, deque
 from pymatgen.io.cp2k.inputs import Cp2kInput
 from pymatgen.io.cp2k.outputs import Cp2kOutput
 from custodian.custodian import ErrorHandler
@@ -31,6 +34,8 @@ When adding more remember the following tips:
     writing a wavefunction restart file before quiting. 
 """
 
+CP2K_BACKUP_FILES = {"cp2k.out", "cp2k.inp", "std_err.txt"}
+
 
 class StdErrHandler(ErrorHandler):
     """
@@ -42,9 +47,10 @@ class StdErrHandler(ErrorHandler):
     is_monitor = True
 
     error_msgs = {
-        "kpoints_trans": ["internal error in GENERATE_KPOINTS_TRANS: "
-                          "number of G-vector changed in star"],
-        "out_of_memory": ["Allocation would exceed memory limit"]
+        "seg_fault": [""],
+        "invalid_memory_reference": [""],
+        "out_of_memory": [""],
+        "ORTE": ["ORTE"]
     }
 
     def __init__(self, output_filename="std_err.txt"):
@@ -55,7 +61,7 @@ class StdErrHandler(ErrorHandler):
             output_filename (str): This is the file where the stderr for vasp
                 is being redirected. The error messages that are checked are
                 present in the stderr. Defaults to "std_err.txt", which is the
-                default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
+                default redirect used by :class:`custodian.vasp.jobs.Cp2kJob`.
         """
         self.output_filename = output_filename
         self.errors = set()
@@ -101,14 +107,37 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         self.outdata = None
         self.errors = None
         self.scf = None
+        with Cp2kInput.from_file('cp2k.inp')['GLOBAL'].get_keyword('RUN_TYPE').values[0] as v:
+            if v.upper() in ["ENERGY",
+                             "ENERGY_FORCE",
+                             "WAVEFUNCTION_OPTIMIZATION",
+                             "WFN_OPT"]:
+                self.is_static = True
+            else:
+                self.is_static = False
 
     def check(self):
         # Checks output file for errors.
         out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
         out.convergence()
-        for scf_loop in out.data['scf_not_converged']:
-            if scf_loop[0]:
+
+        # General catch for SCF not converged
+        # If not static, mark not-converged if last 5 SCF loops
+        # failed to converge
+        scf = out.data['scf_converged']
+        if self.is_static:
+            if scf[0]:
                 return True
+            else:
+                # SCF does not decrease 5 out of the last 10 steps
+                t = tail(self.output_file, 10)
+                if all([len(t[i]) == 8 for i in range(10)]):
+                    if np.sum([t[i][4] >= t[i + 1][4] for i in range(9)]) > 5:
+                        return True
+        else:
+            if not all(scf[-5:]):
+                return True
+
         return False
 
     def correct(self):
@@ -122,22 +151,91 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                 (2) Increase both
                 (3) Switch to CG minimization 
         (2) If normal Davidson minimization:
-            Follow the VASP custodian charge mixing updates
+            Not implemented, but will follow the VASP custodian charge mixing updates
         """
         if ci.check('FORCE_EVAL/DFT/SCF/OT'):
-            if ci['FORCE_EVAL']['DFT']['SCF'].get_keyword('MAX_SCF').values[0] > 50:
+            if ci['FORCE_EVAL']['DFT']['SCF']['OT'].get_keyword('MINIMIZER').values[0].upper() == 'DIIS':
+                actions.append({'dict': self.input_file,
+                                "action": {"_set": {'FORCE_EVAL': {'DFT': {'SCF': {'OT': {'MINIMIZER': 'CG'}}}}}}})
+            elif ci['FORCE_EVAL']['DFT']['SCF']['OT'].get_keyword('MINIMIZER').values[0].upper() == 'CG':
+                actions.append({'dict': self.input_file,
+                                "action": {"_set": {'FORCE_EVAL': {'DFT': {'SCF': {'OT': {'LINESEARCH': '3PNT'}}}}}}})
+
+            elif ci['FORCE_EVAL']['DFT']['SCF']['OT'].get_keyword('MAX_SCF').values[0] > 50:
                 actions.append({'dict': self.input_file,
                                 "action": {"_set": {'FORCE_EVAL': {'DFT': {'SCF': {'MAX_SCF': 50}}}}}})
-
-            if ci['FORCE_EVAL']['DFT']['SCF']['OT'].get_keyword('MINIMIZER').values == ['DIIS']:
-                actions.append({'dict': self.input_file,
-                                "action": {"_set": {'FORCE_EVAL': {'DFT': {'SCF': {'OT': {'MINIMIZER': 'CG'}}}}}}})
-            elif ci['FORCE_EVAL']['DFT']['SCF']['OT'].get_keyword('MINIMIZER').values == ['CG']:
-                actions.append({'dict': self.input_file,
-                                "action": {"_set": {'FORCE_EVAL': {'DFT': {'SCF': {'OT': {'MINIMIZER': 'CG'}}}}}}})
 
         if actions:
             Cp2kModder(ci=ci).apply_actions(actions)
 
         return {"errors": ["Non-converging Job"], "actions": actions}
+
+
+
+class FrozenJobErrorHandler(ErrorHandler):
+    """
+    Detects an error when the output file has not been updated
+    in timeout seconds. The reason for this can be a slow step
+    (i.e. HFX 4-electron integrals are very slow, and don't update
+    the output until they are completed), or cp2k hanging.
+    """
+
+    is_monitor = True
+
+    def __init__(self, output_filename="cp2k.out", timeout=3600):
+        """
+        Initializes the handler with the output file to check.
+
+        Args:
+            output_filename (str): This is the file where the stdout for vasp
+                is being redirected. The error messages that are checked are
+                present in the stdout. Defaults to "vasp.out", which is the
+                default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
+            timeout (int): The time in seconds between checks where if there
+                is no activity on the output file, the run is considered
+                frozen. Defaults to 3600 seconds, i.e., 1 hour.
+        """
+        self.output_filename = output_filename
+        self.timeout = timeout
+
+    def check(self):
+        st = os.stat(self.output_filename)
+        t = tail(self.output_filename, 10)
+        t1, t2 = t[-1].split(), t[-2].split()
+
+        # Quicker than waitin for long time-out threshold. If SCF step
+        # Is taking more than 4 times the previous SCF step, then the
+        # job is likely frozen
+        if len(t1) > 1:
+            if t1[1].__contains__('OT') or t1[1].__contains__('Diag'):
+                if len(t2) > 1:
+                    if t2[1].__contains__('OT') or t2[1].__contains__('Diag'):
+                        if float(t1[3]) > 4*float(t2[3]):
+                            return True
+        if time.time() - st.st_mtime > self.timeout:
+            return True
+        return False
+
+    def correct(self):
+        backup(VASP_BACKUP_FILES | {self.output_filename})
+
+        vi = VaspInput.from_directory('.')
+        actions = []
+        if vi["INCAR"].get("ALGO", "Normal") == "Fast":
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"ALGO": "Normal"}}})
+        else:
+            actions.append({"dict": "INCAR",
+                            "action": {"_set": {"SYMPREC": 1e-8}}})
+
+        VaspModder(vi=vi).apply_actions(actions)
+
+        return {"errors": ["Frozen job"], "actions": actions}
+
+
+def tail(filename, n=10):
+    """
+    Returns the last n lines of a file as a list (including empty lines)
+    """
+    return deque(open(filename), n)
 

@@ -7,7 +7,7 @@ from custodian.ansible.interpreter import Modder
 from pymatgen.io.cp2k.inputs import Cp2kInput
 
 
-# TODO: The normal Custion DictActions don't quite work for me... will this cause problems now that I've modified?
+# TODO: The normal Custodian DictActions don't quite work for me... will this cause problems now that I've modified?
 class Cp2kModder(Modder):
 
     def __init__(self, filename='cp2k.inp', actions=None, strict=True, ci=None):
