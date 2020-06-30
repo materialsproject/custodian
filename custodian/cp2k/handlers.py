@@ -122,16 +122,10 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         # General catch for SCF not converged
         # If not static, mark not-converged if last 5 SCF loops
         # failed to converge
-        scf = out.data['scf_converged']
+        scf = out.data['scf_converged'] or [False]
         if self.is_static:
             if scf[0]:
                 return True
-            else:
-                # SCF does not decrease 5 out of the last 10 steps
-                t = tail(self.output_file, 10)
-                if all([len(t[i]) == 8 for i in range(10)]):
-                    if np.sum([t[i][4] >= t[i + 1][4] for i in range(9)]) > 5:
-                        return True
         else:
             if not all(scf[-5:]):
                 return True
