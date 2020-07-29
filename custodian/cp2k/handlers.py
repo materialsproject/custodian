@@ -146,21 +146,22 @@ class UnconvergedScfErrorHandler(ErrorHandler):
             Not implemented, but will follow the VASP custodian charge mixing updates
         """
         if ci.check('FORCE_EVAL/DFT/SCF/OT'):
-            if ci['FORCE_EVAL']['DFT']['SCF']['OT'].get_keyword('MINIMIZER').values[0].upper() == 'DIIS':
+            if ci['FORCE_EVAL']['DFT']['SCF']['OT']['MINIMIZER'].upper() == 'DIIS':
                 actions.append({'dict': self.input_file,
                                 "action": {"_set": {'FORCE_EVAL': {'DFT': {'SCF': {'OT': {'MINIMIZER': 'CG'}}}}}}})
-            elif ci['FORCE_EVAL']['DFT']['SCF']['OT'].get_keyword('MINIMIZER').values[0].upper() == 'CG':
-                actions.append({'dict': self.input_file,
-                                "action": {"_set": {'FORCE_EVAL': {'DFT': {'SCF': {'OT': {'LINESEARCH': '3PNT'}}}}}}})
-
-            elif ci['FORCE_EVAL']['DFT']['SCF']['OT'].get_keyword('MAX_SCF').values[0] > 50:
-                actions.append({'dict': self.input_file,
-                                "action": {"_set": {'FORCE_EVAL': {'DFT': {'SCF': {'MAX_SCF': 50}}}}}})
+            elif ci['FORCE_EVAL']['DFT']['SCF']['OT']['MINIMIZER'].upper() == 'CG':
+                if ci['FORCE_EVAL']['DFT']['SCF']['OT']['LINESEARCH'].upper() != '3PNT':
+                    actions.append({'dict': self.input_file,
+                                    "action": {"_set": {'FORCE_EVAL': {'DFT': {'SCF': {'OT': {'LINESEARCH': '3PNT'}}}}}}})
+                elif ci['FORCE_EVAL']['DFT']['SCF']['OT']['MAX_SCF'] < 50:
+                        actions.append({'dict': self.input_file,
+                                        "action": {"_set": {'FORCE_EVAL': {'DFT': {'SCF': {'MAX_SCF': 50}}}}}})
 
         if actions:
             Cp2kModder(ci=ci).apply_actions(actions)
 
         return {"errors": ["Non-converging Job"], "actions": actions}
+
 
 class FrozenJobErrorHandler(ErrorHandler):
     """
