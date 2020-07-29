@@ -107,7 +107,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         self.outdata = None
         self.errors = None
         self.scf = None
-        ci = Cp2kInput.from_file('cp2k.inp')
+        ci = Cp2kInput.from_file(self.input_file)
         if ci['GLOBAL'].get_keyword('RUN_TYPE').values[0].upper() in [
             "ENERGY", "ENERGY_FORCE", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT"]:
             self.is_static = True
@@ -122,9 +122,9 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         # General catch for SCF not converged
         # If not static, mark not-converged if last 5 SCF loops
         # failed to converge
-        scf = out.data['scf_converged'] or [False]
+        scf = out.data['scf_converged'] or [True]
         if self.is_static:
-            if scf[0]:
+            if not scf[0]:
                 return True
         else:
             if not all(scf[-5:]):
