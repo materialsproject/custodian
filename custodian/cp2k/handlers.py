@@ -107,12 +107,16 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         self.outdata = None
         self.errors = None
         self.scf = None
+        self.mixing_hierarchy = ['BROYDEN_MIXING', 'PULAY', 'PULAY_LINEAR']
         ci = Cp2kInput.from_file(self.input_file)
         if ci['GLOBAL'].get_keyword('RUN_TYPE').values[0].upper() in [
             "ENERGY", "ENERGY_FORCE", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT"]:
             self.is_static = True
         else:
             self.is_static = False
+        self.is_ot = True if ci.check('FORCE_EVAL/DFT/SCF/OT') else False
+        self.mixing_hierarchy = [m for m in self.mixing_hierarchy if m.upper() !=
+                                 ci['FORCE_EVAL']['DFT']['SCF']['MIXING']['METHOD']]
 
     def check(self):
         # Checks output file for errors.
@@ -132,36 +136,141 @@ class UnconvergedScfErrorHandler(ErrorHandler):
 
         return False
 
+    # TODO More comprehensive mixing methods for non-OT diagonalization
     def correct(self):
         ci = Cp2kInput.from_file(self.input_file)
         actions = []
-        """
-        Non-converging SCF can have two flavors:
-        (1) OT Diagonalization:
-            If OT is applicable, convergence is easier, if not convering, can try the following:
-                (1) Increase number of outer loops and decrease number of inner loops
-                (2) Increase both
-                (3) Switch to CG minimization 
-        (2) If normal Davidson minimization:
-            Not implemented, but will follow the VASP custodian charge mixing updates
-        """
-        if ci.check('FORCE_EVAL/DFT/SCF/OT'):
+
+        if self.is_ot:
             if ci['FORCE_EVAL']['DFT']['SCF']['OT']['MINIMIZER'].upper() == 'DIIS':
                 actions.append({'dict': self.input_file,
-                                "action": {"_set": {'FORCE_EVAL': {'DFT': {'SCF': {'OT': {'MINIMIZER': 'CG'}}}}}}})
+                                "action": {"_set": {
+                                    'FORCE_EVAL': {
+                                        'DFT': {
+                                            'SCF': {
+                                                'OT': {
+                                                    'MINIMIZER': 'CG'
+                                                }
+                                            }
+                                        }
+                                    }
+                                }}})
             elif ci['FORCE_EVAL']['DFT']['SCF']['OT']['MINIMIZER'].upper() == 'CG':
                 if ci['FORCE_EVAL']['DFT']['SCF']['OT']['LINESEARCH'].upper() != '3PNT':
                     actions.append({'dict': self.input_file,
-                                    "action": {"_set": {'FORCE_EVAL': {'DFT': {'SCF': {'OT': {'LINESEARCH': '3PNT'}}}}}}})
+                                    "action": {"_set": {
+                                        'FORCE_EVAL': {
+                                            'DFT': {
+                                                'SCF': {
+                                                    'OT': {
+                                                        'LINESEARCH': '3PNT'
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }}})
                 elif ci['FORCE_EVAL']['DFT']['SCF']['OT']['MAX_SCF'] < 50:
                         actions.append({'dict': self.input_file,
-                                        "action": {"_set": {'FORCE_EVAL': {'DFT': {'SCF': {'MAX_SCF': 50}}}}}})
+                                        "action": {"_set": {
+                                            'FORCE_EVAL': {
+                                                'DFT': {
+                                                    'SCF': {
+                                                        'MAX_SCF': 50
+                                                    }
+                                                }
+                                            }
+                                        }}})
+        else:
+            # Make sure mixing and smearing are enabled
+            # Try Broyden -> Pulay mixing
+            if not ci.check('FORCE_EVAL/DFT/SCF/MIXING'):
+                actions.append({'dict': self.input_file,
+                                'action': {"_set": {
+                                    "FORCE_EVAL": {
+                                        "DFT": {
+                                            "SCF": {
+                                                "MIXING": {}
+                                            }
+                                        }
+                                    }
+                                }}})
+            if not ci.check('FORCE_EVAL/DFT/SCF/SMEARING'):
+                actions.append({'dict': self.input_file,
+                                'action': {"_set": {
+                                    "FORCE_EVAL": {
+                                        "DFT": {
+                                            "SCF": {
+                                                "SMEARING": {
+                                                    "ELEC_TEMP": 300,
+                                                    "METHOD": "FERMI_DIRAC"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }}})
+
+            _next = self.mixing_hierarchy.pop(0) if self.mixing_hierarchy else None
+            if _next == 'BROYDEN_MIXING':
+                actions.append({'dict': self.input_file,
+                                'action': {"_set": {
+                                    "FORCE_EVAL": {
+                                        "DFT": {
+                                            "SCF": {
+                                                "MIXING": {
+                                                    "METHOD": "BROYDEN_MIXING",
+                                                    "NBUFFER": 5,
+                                                    "ALPHA": 0.2
+                                                }
+                                            }
+                                        }
+                                    }
+                                }}})
+            elif _next == 'PULAY':
+                actions.append({'dict': self.input_file,
+                                'action': {"_set": {
+                                    "FORCE_EVAL": {
+                                        "DFT": {
+                                            "SCF": {
+                                                "MIXING": {
+                                                    "METHOD": "PULAY",
+                                                    "NBUFFER": 5,
+                                                    "ALPHA": 0.2
+                                                }
+                                            }
+                                        }
+                                    }
+                                }}})
+            elif _next == 'PULAY_LINEAR':
+                actions.append({'dict': self.input_file,
+                                'action': {"_set": {
+                                    "FORCE_EVAL": {
+                                        "DFT": {
+                                            "SCF": {
+                                                "MIXING": {
+                                                    "METHOD": "PULAY",
+                                                    "NBUFFER": 5,
+                                                    "ALPHA": 0.1,
+                                                    "BETA": 0.01
+                                                }
+                                            }
+                                        }
+                                    }
+                                }}})
 
         if actions:
             Cp2kModder(ci=ci).apply_actions(actions)
 
         return {"errors": ["Non-converging Job"], "actions": actions}
 
+
+class OtEigen(ErrorHandler):
+
+    is_monitor = True
+
+    def __init__(self, output_filename="cp2k.out", input_filename="cp2k.inp"):
+
+        self.output_filename = output_filename
+        self.input_filename = input_filename
 
 class FrozenJobErrorHandler(ErrorHandler):
     """
@@ -229,4 +338,16 @@ def tail(filename, n=10):
     Returns the last n lines of a file as a list (including empty lines)
     """
     return deque(open(filename), n)
+
+
+from pymatgen.io.cp2k.sets import StaticSet
+from pymatgen.ext.matproj import MPRester
+
+with MPRester() as mp:
+    struc = mp.get_structure_by_material_id('mp-149')
+
+s = StaticSet(struc, ot=False)
+s.write_file('cp2k.inp')
+h = UnconvergedScfErrorHandler(input_file='cp2k.inp', output_file='cp2k.out')
+h.correct()
 
