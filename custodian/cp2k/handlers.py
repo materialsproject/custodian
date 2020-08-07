@@ -115,8 +115,9 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         else:
             self.is_static = False
         self.is_ot = True if ci.check('FORCE_EVAL/DFT/SCF/OT') else False
-        self.mixing_hierarchy = [m for m in self.mixing_hierarchy if m.upper() !=
-                                 ci['FORCE_EVAL']['DFT']['SCF']['MIXING']['METHOD']]
+        if ci.check('FORCE_EVAL/DFT/SCF/MIXING/METHOD'):
+            self.mixing_hierarchy = [m for m in self.mixing_hierarchy if m.upper() !=
+                                     ci['FORCE_EVAL']['DFT']['SCF']['MIXING']['METHOD']]
 
     def check(self):
         # Checks output file for errors.
@@ -272,6 +273,7 @@ class OtEigen(ErrorHandler):
         self.output_filename = output_filename
         self.input_filename = input_filename
 
+
 class FrozenJobErrorHandler(ErrorHandler):
     """
     Detects an error when the output file has not been updated
@@ -338,16 +340,4 @@ def tail(filename, n=10):
     Returns the last n lines of a file as a list (including empty lines)
     """
     return deque(open(filename), n)
-
-
-from pymatgen.io.cp2k.sets import StaticSet
-from pymatgen.ext.matproj import MPRester
-
-with MPRester() as mp:
-    struc = mp.get_structure_by_material_id('mp-149')
-
-s = StaticSet(struc, ot=False)
-s.write_file('cp2k.inp')
-h = UnconvergedScfErrorHandler(input_file='cp2k.inp', output_file='cp2k.out')
-h.correct()
 
