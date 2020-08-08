@@ -108,7 +108,11 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         self.errors = None
         self.scf = None
         self.mixing_hierarchy = ['BROYDEN_MIXING', 'PULAY', 'PULAY_LINEAR']
-        ci = Cp2kInput.from_file(self.input_file)
+        for ext in ["", ".gz", ".GZ", ".z", ".Z", ".bz2", ".BZ2"]:
+            if os.path.exists(os.path.join(self.dir, self.input_file + ext)):
+                ci = Cp2kInput.from_file(
+                    os.path.join(self.dir, self.input_file + ext)
+                )
         if ci['GLOBAL'].get_keyword('RUN_TYPE').values[0].upper() in [
             "ENERGY", "ENERGY_FORCE", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT"]:
             self.is_static = True
