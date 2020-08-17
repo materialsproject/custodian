@@ -113,7 +113,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                 ci = Cp2kInput.from_file(
                     os.path.join(self.dir, self.input_file + ext)
                 )
-        if ci['GLOBAL'].get_keyword('RUN_TYPE').values[0].upper() in [
+        if ci['GLOBAL']['RUN_TYPE'].values[0].upper() in [
             "ENERGY", "ENERGY_FORCE", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT"]:
             self.is_static = True
         else:
@@ -147,7 +147,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         actions = []
 
         if self.is_ot:
-            if ci['FORCE_EVAL']['DFT']['SCF']['OT']['MINIMIZER'].upper() == 'DIIS':
+            if ci['FORCE_EVAL']['DFT']['SCF']['OT']['MINIMIZER'].values[0].upper() == 'DIIS':
                 actions.append({'dict': self.input_file,
                                 "action": {"_set": {
                                     'FORCE_EVAL': {
@@ -160,8 +160,8 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                         }
                                     }
                                 }}})
-            elif ci['FORCE_EVAL']['DFT']['SCF']['OT']['MINIMIZER'].upper() == 'CG':
-                if ci['FORCE_EVAL']['DFT']['SCF']['OT']['LINESEARCH'].upper() != '3PNT':
+            elif ci['FORCE_EVAL']['DFT']['SCF']['OT']['MINIMIZER'].values[0].upper() == 'CG':
+                if ci['FORCE_EVAL']['DFT']['SCF']['OT']['LINESEARCH'].values[0].upper() != '3PNT':
                     actions.append({'dict': self.input_file,
                                     "action": {"_set": {
                                         'FORCE_EVAL': {
@@ -174,7 +174,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                             }
                                         }
                                     }}})
-                elif ci['FORCE_EVAL']['DFT']['SCF']['OT']['MAX_SCF'] < 50:
+                elif ci['FORCE_EVAL']['DFT']['SCF']['OT']['MAX_SCF'].values[0] < 50:
                         actions.append({'dict': self.input_file,
                                         "action": {"_set": {
                                             'FORCE_EVAL': {
