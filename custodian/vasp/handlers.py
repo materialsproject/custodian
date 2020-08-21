@@ -102,6 +102,7 @@ class VaspErrorHandler(ErrorHandler):
         "rhosyg": ["RHOSYG internal error"],
         "posmap": ["POSMAP internal error: symmetry equivalent atom not found"],
         "point_group": ["Error: point group operation missing"],
+        "symprec_noise": ["determination of the symmetry of your systems shows a strong"]
     }
 
     def __init__(
@@ -463,6 +464,9 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-6}}})
 
         if "point_group" in self.errors:
+            actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+
+        if "symprec_noise" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
         VaspModder(vi=vi).apply_actions(actions)
