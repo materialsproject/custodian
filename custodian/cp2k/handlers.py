@@ -2,16 +2,14 @@
 
 from __future__ import unicode_literals, division
 
-# This module implements new error handlers for QChem runs.
+# This module implements new error handlers for Cp2k runs.
 
 import os
 import time
-import numpy as np
 from collections import Counter, deque
-from pymatgen.io.cp2k.inputs import Cp2kInput
+from pymatgen.io.cp2k.inputs import Cp2kInput, Keyword
 from pymatgen.io.cp2k.outputs import Cp2kOutput
 from custodian.custodian import ErrorHandler
-from custodian.utils import backup
 from custodian.cp2k.interpreter import Cp2kModder
 
 __author__ = "Nicholas Winner"
@@ -30,11 +28,11 @@ When adding more remember the following tips:
 (2) CP2K error handlers will be different from VASP error handlers depending on if
     you are using Cp2k-specific functionality (like OT minimization).
 (3) Not all things that could go wrong should be handled by custodian. For example
-    walltime handling can vibe done natively in CP2K, and will have added benefits like
+    walltime handling can be done natively in CP2K, and will have added benefits like
     writing a wavefunction restart file before quiting. 
 """
 
-CP2K_BACKUP_FILES = {"cp2k.out", "cp2k.inp", "std_err.txt"}
+CP2K_BACKUP_FILES = {"cp2k.out.precondstuck", "cp2k.inp", "std_err.txt"}
 
 
 class StdErrHandler(ErrorHandler):
@@ -172,13 +170,16 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                             }
                                         }
                                     }}})
-                elif ci['FORCE_EVAL']['DFT']['SCF']['OT']['MAX_SCF'].values[0] < 50:
+                elif ci['FORCE_EVAL']['DFT']['SCF']['MAX_SCF'].values[0] < 50:
                         actions.append({'dict': self.input_file,
                                         "action": {"_set": {
                                             'FORCE_EVAL': {
                                                 'DFT': {
                                                     'SCF': {
                                                         'MAX_SCF': 50
+                                                    },
+                                                    'OUTER_SCF': {
+                                                        'MAX_SCF': 8
                                                     }
                                                 }
                                             }
@@ -266,16 +267,6 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         return {"errors": ["Non-converging Job"], "actions": actions}
 
 
-class OtEigen(ErrorHandler):
-
-    is_monitor = True
-
-    def __init__(self, output_filename="cp2k.out", input_filename="cp2k.inp"):
-
-        self.output_filename = output_filename
-        self.input_filename = input_filename
-
-
 class FrozenJobErrorHandler(ErrorHandler):
     """
     Detects an error when the output file has not been updated
@@ -286,7 +277,7 @@ class FrozenJobErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, output_filename="cp2k.out", timeout=3600):
+    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out.precondstuck", timeout=3600, loop_start_timeout=600):
         """
         Initializes the handler with the output file to check.
 
@@ -298,13 +289,18 @@ class FrozenJobErrorHandler(ErrorHandler):
             timeout (int): The time in seconds between checks where if there
                 is no activity on the output file, the run is considered
                 frozen. Defaults to 3600 seconds, i.e., 1 hour.
+            loop_start_timeout (int): similar to timeout. Applies specifically
+                to the SCF loop start. Sometimes the preconditioner can get
+                stuck and the SCF loop never starts.
         """
-        self.output_filename = output_filename
+        self.input_file = input_file
+        self.output_file = output_file
         self.timeout = timeout
+        self.loop_start_timeout = loop_start_timeout
 
     def check(self):
-        st = os.stat(self.output_filename)
-        t = tail(self.output_filename, 10)
+        st = os.stat(self.output_file)
+        t = tail(self.output_file, 10)
         t1, t2 = t[-1].split(), t[-2].split()
 
         # Quicker than waitin for long time-out threshold. If SCF step
@@ -316,25 +312,90 @@ class FrozenJobErrorHandler(ErrorHandler):
                     if t2[1].__contains__('OT') or t2[1].__contains__('Diag'):
                         if float(t1[3]) > 4*float(t2[3]):
                             return True
+
         if time.time() - st.st_mtime > self.timeout:
             return True
         return False
 
     def correct(self):
-        backup(VASP_BACKUP_FILES | {self.output_filename})
+        pass
 
-        vi = VaspInput.from_directory('.')
+
+class FrozenPreconditionerHandler(ErrorHandler):
+    """
+    Special frozen error handler for the preconditioner, which
+    can get stuck in rare cases.
+    """
+
+    is_monitor = True
+
+    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out.precondstuck", timeout=600):
+        """
+        Initializes the handler with the output file to check.
+
+        Args:
+            output_filename (str): This is the file where the stdout for vasp
+                is being redirected. The error messages that are checked are
+                present in the stdout. Defaults to "vasp.out", which is the
+                default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
+            timeout (int): The time in seconds between checks where if there
+                is no activity on the output file, the run is considered
+                frozen. Defaults to 3600 seconds, i.e., 1 hour.
+            loop_start_timeout (int): similar to timeout. Applies specifically
+                to the SCF loop start. Sometimes the preconditioner can get
+                stuck and the SCF loop never starts.
+        """
+        self.input_file = input_file
+        self.output_file = output_file
+        self.timeout = timeout
+
+    def check(self):
+        st = os.stat(self.output_file)
+        t = tail(self.output_file, 2)
+        if t[0].split() == ['Step', 'Update', 'method', 'Time', 'Convergence', 'Total', 'energy', 'Change']:
+            if time.time() - st.st_mtime > self.timeout:
+                return True
+        return False
+
+    def correct(self):
+        ci = Cp2kInput.from_file(self.input_file)
         actions = []
-        if vi["INCAR"].get("ALGO", "Normal") == "Fast":
-            actions.append({"dict": "INCAR",
-                            "action": {"_set": {"ALGO": "Normal"}}})
-        else:
-            actions.append({"dict": "INCAR",
-                            "action": {"_set": {"SYMPREC": 1e-8}}})
 
-        VaspModder(vi=vi).apply_actions(actions)
+        if ci.check('FORCE_EVAL/DFT/SCF/OT'):
+            p = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get('PRECONDITIONER', Keyword('PRECONDITIONER', 'FULL_ALL'))
 
-        return {"errors": ["Frozen job"], "actions": actions}
+            # This rare problem seems to come from FULL_SINGLE_INVERSE, which is (otherwise) the best preconditioner
+            # FULL_ALL is a little more robust
+            if p == Keyword('PRECONDITIONER', 'FULL_SINGLE_INVERSE'):
+                actions.append({'dict': self.input_file,
+                                "action": {"_set": {
+                                    'FORCE_EVAL': {
+                                        'DFT': {
+                                            'SCF': {
+                                                'OT': {
+                                                    'PRECONDITIONER': 'FULL_ALL'
+                                                }
+                                            }
+                                        }
+                                    }
+                                }}})
+
+            # Otherwise try changing the preconditioner solver from default to direct
+            else:
+                actions.append({'dict': self.input_file,
+                                "action": {"_set": {
+                                    'FORCE_EVAL': {
+                                        'DFT': {
+                                            'SCF': {
+                                                'OT': {
+                                                    'PRECOND_SOLVER': 'DIRECT'
+                                                }
+                                            }
+                                        }
+                                    }
+                                }}})
+
+        return {"errors": ["Frozen preconditioner"], "actions": actions}
 
 
 def tail(filename, n=10):
