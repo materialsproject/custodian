@@ -467,7 +467,10 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
         if "symprec_noise" in self.errors:
-            actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+            if (vi["INCAR"].get("ISYM", 2) > 0) and (vi["INCAR"].get("SYMPREC", 1e-5) > 1e-6):
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-6}}})
+            else:
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
