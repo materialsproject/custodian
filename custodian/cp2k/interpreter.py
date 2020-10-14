@@ -1,13 +1,12 @@
-# coding: utf-8
-
-from __future__ import unicode_literals
+"""
+CP2K adapted interpreter and modder for custodian.
+"""
 
 from custodian.ansible.actions import FileActions, DictActions
 from custodian.ansible.interpreter import Modder
 from pymatgen.io.cp2k.inputs import Cp2kInput
 
 
-# TODO: The normal Custodian DictActions don't quite work for me... will this cause problems now that I've modified?
 class Cp2kModder(Modder):
 
     def __init__(self, filename='cp2k.inp', actions=None, strict=True, ci=None):

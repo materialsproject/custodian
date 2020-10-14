@@ -4,18 +4,11 @@ from __future__ import unicode_literals, division
 import subprocess
 import os
 import shutil
-import math
 import logging
 
-import numpy as np
-
-from pymatgen import Structure
-from monty.os.path import which
 from monty.shutil import decompress_dir
-from monty.serialization import dumpfn, loadfn
-
 from custodian.custodian import Job
-from pymatgen.io.cp2k.inputs import Cp2kInput
+from pymatgen.io.cp2k.inputs import Cp2kInput, Keyword
 
 """
 This module implements basic kinds of jobs for Cp2k runs.
@@ -48,7 +41,7 @@ class Cp2kJob(Job):
         of the static constructors. The defaults are usually fine too.
 
         Args:
-            cp2k_cmd (str): Command to run vasp as a list of args. For example,
+            cp2k_cmd (list): Command to run cp2k as a list of args. For example,
                 if you are using mpirun, it can be something like
                 ["mpirun", "pvasp.5.2.11"]
             input_file (str): Name of the file to use as input to CP2K
@@ -72,6 +65,7 @@ class Cp2kJob(Job):
         """
         self.cp2k_cmd = cp2k_cmd
         self.input_file = input_file
+        self.ci = Cp2kInput.from_file(self.input_file)
         self.output_file = output_file
         self.stderr_file = stderr_file
         self.final = final
@@ -87,7 +81,7 @@ class Cp2kJob(Job):
         decompress_dir('.')
 
         if self.settings_override is not None:
-            new_input = Cp2kInput.from_file(self.input_file)
+            new_input = self.ci
             new_input.update(self.settings_override)
             new_input.write_file(self.input_file)
 
@@ -134,3 +128,42 @@ class Cp2kJob(Job):
                     os.system("killall %s" % k)
                 except:
                     pass
+
+    @classmethod
+    def gga_static_to_hybrid(cls, cp2k_cmd, input_file="cp2k.inp", output_file="cp2k.out",
+                             stderr_file="std_err.txt", backup=True, settings_override_gga=None,
+                             settings_override_hybrid=None):
+        """
+        A bare gga to hybrid calculation. Removes all unecessary features
+        from the gga run, and making it only a ENERGY/ENERGY_FORCE
+        depending on the hybrid run.
+        """
+
+        ggaJob = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
+                         stderr_file=stderr_file, final=False, suffix=".1",
+                         settings_override=settings_override_gga)
+
+        del ggaJob.ci['force_eval']['dft']['AUXILIARY_DENSITY_MATRIX_METHOD']
+        del ggaJob.ci['force_eval']['dft']['xc']['hf']
+        r = ggaJob.ci['global'].get('run_type', Keyword('RUN_TYPE', 'ENERGY_FORCE')).values[0]
+        if r not in ['ENERGY', 'WAVEFUNCTION_OPTIMIZATION', 'WFN_OPT']:
+            ggaJob.settings_override_gga = {'GLOBAL': {'RUN_TYPE': 'ENERGY_FORCE'}}
+        ggaJob.ci.silence()  # Turn off all printing
+
+        for k,v in ggaJob.ci['force_eval']['dft']['xc'].subsections.items():
+            if v.name.upper() == 'XC_FUNCTIONAL':
+                for k2, v2 in v.subsections.items():
+                    v2.keywords = {}
+
+        ggaJob.ci['global']['project_name'] = 'GGA-PRE-CALC'
+        ggaJob.ci.set({'GLOBAL': {'PROJECT_NAME': 'GGA-PRE-CALC'}})
+
+        hybridJob = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
+                            stderr_file=stderr_file, final=False, suffix=".2",
+                            settings_override=settings_override_hybrid)
+
+        # If the job has a restart file, assume that the gga should now be the restart
+        if hybridJob.ci['force_eval']['dft'].get('wfn_restart_file_name'):
+            hybridJob.ci['force_eval']['dft']['wfn_restart_file_name'] = 'GGA-PRE-CALC-RESTART.wfn'
+
+        return [ggaJob, hybridJob]
