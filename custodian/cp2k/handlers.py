@@ -26,6 +26,7 @@ from pymatgen.io.cp2k.utils import get_aux_basis
 from custodian.custodian import ErrorHandler
 from custodian.cp2k.interpreter import Cp2kModder
 from monty.re import regrep
+from monty.os.path import zpath
 
 __author__ = "Nicholas Winner"
 __version__ = "0.2"
@@ -110,10 +111,9 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         self.errors = None
         self.scf = None
         self.mixing_hierarchy = ['BROYDEN_MIXING', 'PULAY', 'PULAY_LINEAR']
-        for ext in ["", ".gz", ".GZ", ".z", ".Z", ".bz2", ".BZ2"]:
-            if os.path.exists(self.input_file + ext):
-                ci = Cp2kInput.from_file(self.input_file + ext)
-        if ci['GLOBAL']['RUN_TYPE'].values[0].upper() in [
+        if os.path.exists(zpath(self.input_file)):
+                ci = Cp2kInput.from_file(zpath(self.input_file))
+        if ci['GLOBAL']['RUN_TYPE'].values[0].__str__().upper() in [
             "ENERGY", "ENERGY_FORCE", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT"]:
             self.is_static = True
         else:

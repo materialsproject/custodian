@@ -7,6 +7,7 @@ import shutil
 import logging
 
 from monty.shutil import decompress_dir
+from monty.os.path import zpath
 from custodian.custodian import Job
 from pymatgen.io.cp2k.inputs import Cp2kInput, Keyword
 
@@ -65,7 +66,7 @@ class Cp2kJob(Job):
         """
         self.cp2k_cmd = cp2k_cmd
         self.input_file = input_file
-        self.ci = Cp2kInput.from_file(self.input_file)
+        self.ci = Cp2kInput.from_file(zpath(self.input_file))
         self.output_file = output_file
         self.stderr_file = stderr_file
         self.final = final
