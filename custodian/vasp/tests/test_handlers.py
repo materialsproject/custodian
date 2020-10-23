@@ -34,6 +34,7 @@ from custodian.vasp.handlers import (
     LrfCommutatorHandler,
     DriftErrorHandler,
     ScanMetalHandler,
+    LargeSigmaHandler
 )
 from pymatgen.io.vasp.inputs import Incar, Structure, Kpoints, VaspInput
 
@@ -467,6 +468,33 @@ class ScanMetalHandlerTest(unittest.TestCase):
         self.assertEqual(Incar.from_file("INCAR")["ISMEAR"], 2)
         self.assertEqual(Incar.from_file("INCAR")["SIGMA"], 0.2)
         self.assertEqual(Incar.from_file("INCAR")["KSPACING"], 0.22)
+        os.remove("vasprun.xml")
+
+    @classmethod
+    def tearDown(cls):
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("vasprun.xml.orig", "vasprun.xml")
+        clean_dir()
+        os.chdir(cwd)
+
+
+class LargeSigmaHandlerTest(unittest.TestCase):
+    def setUp(cls):
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.chdir(test_dir)
+        subdir = os.path.join(test_dir, "large_sigma")
+        os.chdir(subdir)
+
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("vasprun.xml", "vasprun.xml.orig")
+
+    def test_check_correct_large_sigma(self):
+        h = LargeSigmaHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["LargeSigma"])
+        self.assertEqual(Incar.from_file("INCAR")["SIGMA"], 1.46)
         os.remove("vasprun.xml")
 
     @classmethod

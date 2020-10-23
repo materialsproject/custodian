@@ -953,13 +953,16 @@ class ScanMetalHandler(ErrorHandler):
         try:
             v = Vasprun(self.output_filename)
             # check whether bandgap is zero and tetrahedron smearing was used
-            if v.get_band_structure().get_band_gap()["energy"] == 0 and v.incar.get("ISMEAR", -5):
+            if v.eigenvalue_band_properties[0] == 0 and v.incar.get("ISMEAR", -5):
                 return True
         except Exception:
             pass
         return False
 
     def correct(self):
+        backup(VASP_BACKUP_FILES | {self.output_filename})
+        vi = VaspInput.from_directory(".")
+
         _dummy_structure = Structure(
                                     [1, 0, 0, 0, 1, 0, 0, 0, 1],
                                     ["I"],
@@ -972,10 +975,66 @@ class ScanMetalHandler(ErrorHandler):
         actions.append({"dict": "INCAR", "action": {"_set": {"SIGMA": new_vis.incar["SIGMA"]}}})
         actions.append({"dict": "INCAR", "action": {"_set": {"KSPACING": new_vis.incar["KSPACING"]}}})
 
-        vi = VaspInput.from_directory(".")
-        backup(VASP_BACKUP_FILES)
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": ["ScanMetal"], "actions": actions}
+
+
+class LargeSigmaHandler(ErrorHandler):
+    """
+    When ISMEAR > 0 (Gaussian or Methfessel-Paxton), monitor the magnitude of the entropy
+    term T*S in the OUTCAR file. If the entropy term is larger than 1 meV/atom, reduce the
+    value of SIGMA. See VASP documentation for ISMEAR.
+    """
+
+    is_monitor = True
+
+    def __init__(self, ):
+        """
+        Initializes the handler with a buffer time.
+
+        Args:
+
+        """
+        self.n_atoms = Structure.from_file("POSCAR").num_sites
+
+    def check(self):
+        incar = Incar.from_file("INCAR")
+        outcar = Outcar("OUTCAR")
+
+        if incar.get("ISMEAR", 0) > 0:
+            # Read the latest entropy term.
+            outcar.read_pattern(
+                {"entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"},
+                postprocess=float,
+                reverse=True,
+                terminate_on_match=True
+            )
+            print(np.max(outcar.data.get("entropy")))
+            entropy_per_atom = abs(np.max(outcar.data.get("entropy", 0)))/self.n_atoms
+
+            # if more than 1 meV/atom, reduce sigma
+            if entropy_per_atom > 0.001:
+                return True
+
+        return False
+
+    def correct(self):
+        backup(VASP_BACKUP_FILES)
+        actions = []
+        vi = VaspInput.from_directory(".")
+
+        # Reduce SIGMA
+        actions.append(
+                {
+                    "dict": "INCAR",
+                    "action": {
+                        "_set": {"SIGMA": vi["INCAR"].get("SIGMA", 0.2) - 0.04}
+                    },
+                }
+            )
+
+        VaspModder(vi=vi).apply_actions(actions)
+        return {"errors": ["LargeSigma"], "actions": actions}
 
 
 @deprecated(
