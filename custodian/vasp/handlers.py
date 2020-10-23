@@ -953,7 +953,7 @@ class ScanMetalHandler(ErrorHandler):
         try:
             v = Vasprun(self.output_filename)
             # check whether bandgap is zero and tetrahedron smearing was used
-            if v.eigenvalue_band_properties[0] == 0 and v.incar.get("ISMEAR", -5):
+            if v.eigenvalue_band_properties[0] == 0 and v.incar.get("ISMEAR", -5) < 0:
                 return True
         except Exception:
             pass
