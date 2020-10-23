@@ -20,8 +20,10 @@ from monty.serialization import loadfn
 
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
+from pymatgen import Structure
 from pymatgen.io.vasp.inputs import Poscar, VaspInput, Incar, Kpoints
 from pymatgen.io.vasp.outputs import Vasprun, Oszicar, Outcar
+from pymatgen.io.vasp.sets import MPScanRelaxSet
 from pymatgen.transformations.standard_transformations import SupercellTransformation
 
 from custodian.ansible.interpreter import Modder
@@ -925,6 +927,55 @@ class UnconvergedErrorHandler(ErrorHandler):
         else:
             # Unfixable error. Just return None for actions.
             return {"errors": ["Unconverged"], "actions": None}
+
+
+class ScanMetalHandler(ErrorHandler):
+    """
+    Check if a SCAN calculation is a metal (zero bandgap) but has been run with
+    ISMEAR=-5, which is only appropriate for semiconductors. If this occurs,
+    this handler will rerun the calculation using the smearing settings appropriate
+    for metals (ISMEAR=-2, SIGMA=0.2). See MPScanRelaxSet.
+    """
+
+    is_monitor = False
+
+    def __init__(self, output_filename="vasprun.xml"):
+        """
+        Initializes the handler with the output file to check.
+
+        Args:
+            output_filename (str): Filename for the vasprun.xml file. Change
+                this only if it is different from the default (unlikely).
+        """
+        self.output_filename = output_filename
+
+    def check(self):
+        try:
+            v = Vasprun(self.output_filename)
+            # check whether bandgap is zero and tetrahedron smearing was used
+            if v.get_band_structure().get_band_gap()["energy"] == 0 and v.incar.get("ISMEAR", -5):
+                return True
+        except Exception:
+            pass
+        return False
+
+    def correct(self):
+        _dummy_structure = Structure(
+                                    [1, 0, 0, 0, 1, 0, 0, 0, 1],
+                                    ["I"],
+                                    [[0, 0, 0]],
+                                    )
+        new_vis = MPScanRelaxSet(_dummy_structure, bandgap=0)
+
+        actions = []
+        actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": new_vis.incar["ISMEAR"]}}})
+        actions.append({"dict": "INCAR", "action": {"_set": {"SIGMA": new_vis.incar["SIGMA"]}}})
+        actions.append({"dict": "INCAR", "action": {"_set": {"KSPACING": new_vis.incar["KSPACING"]}}})
+
+        vi = VaspInput.from_directory(".")
+        backup(VASP_BACKUP_FILES)
+        VaspModder(vi=vi).apply_actions(actions)
+        return {"errors": ["ScanMetal"], "actions": actions}
 
 
 @deprecated(

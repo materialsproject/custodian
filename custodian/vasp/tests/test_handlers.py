@@ -33,6 +33,7 @@ from custodian.vasp.handlers import (
     StdErrHandler,
     LrfCommutatorHandler,
     DriftErrorHandler,
+    ScanMetalHandler,
 )
 from pymatgen.io.vasp.inputs import Incar, Structure, Kpoints, VaspInput
 
@@ -443,6 +444,35 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         shutil.move("KPOINTS.orig", "KPOINTS")
         shutil.move("POSCAR.orig", "POSCAR")
         shutil.move("CONTCAR.orig", "CONTCAR")
+        clean_dir()
+        os.chdir(cwd)
+
+
+class ScanMetalHandlerTest(unittest.TestCase):
+    def setUp(cls):
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.chdir(test_dir)
+        subdir = os.path.join(test_dir, "scan_metal")
+        os.chdir(subdir)
+
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("vasprun.xml", "vasprun.xml.orig")
+
+    def test_check_correct_scan_metal(self):
+        h = ScanMetalHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["ScanMetal"])
+        self.assertEqual(Incar.from_file("INCAR")["ISMEAR"], 2)
+        self.assertEqual(Incar.from_file("INCAR")["SIGMA"], 0.2)
+        self.assertEqual(Incar.from_file("INCAR")["KSPACING"], 0.22)
+        os.remove("vasprun.xml")
+
+    @classmethod
+    def tearDown(cls):
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("vasprun.xml.orig", "vasprun.xml")
         clean_dir()
         os.chdir(cwd)
 
