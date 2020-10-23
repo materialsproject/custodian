@@ -988,7 +988,7 @@ class LargeSigmaHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, ):
+    def __init__(self):
         """
         Initializes the handler with a buffer time.
 
@@ -1009,7 +1009,7 @@ class LargeSigmaHandler(ErrorHandler):
                 reverse=True,
                 terminate_on_match=True
             )
-            print(np.max(outcar.data.get("entropy")))
+
             entropy_per_atom = abs(np.max(outcar.data.get("entropy", 0)))/self.n_atoms
 
             # if more than 1 meV/atom, reduce sigma
