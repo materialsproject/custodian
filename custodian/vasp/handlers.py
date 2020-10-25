@@ -991,11 +991,7 @@ class LargeSigmaHandler(ErrorHandler):
     def __init__(self):
         """
         Initializes the handler with a buffer time.
-
-        Args:
-
         """
-        self.n_atoms = Structure.from_file("POSCAR").num_sites
 
     def check(self):
         incar = Incar.from_file("INCAR")
@@ -1009,8 +1005,8 @@ class LargeSigmaHandler(ErrorHandler):
                 reverse=True,
                 terminate_on_match=True
             )
-
-            entropy_per_atom = abs(np.max(outcar.data.get("entropy", 0)))/self.n_atoms
+            n_atoms = Structure.from_file("POSCAR").num_sites
+            entropy_per_atom = abs(np.max(outcar.data.get("entropy", 0)))/n_atoms
 
             # if more than 1 meV/atom, reduce sigma
             if entropy_per_atom > 0.001:
