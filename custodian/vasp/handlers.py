@@ -1006,11 +1006,12 @@ class LargeSigmaHandler(ErrorHandler):
                 terminate_on_match=True
             )
             n_atoms = Structure.from_file("POSCAR").num_sites
-            entropy_per_atom = abs(np.max(outcar.data.get("entropy", 0)))/n_atoms
+            if outcar.data.get("entropy", []):
+                entropy_per_atom = abs(np.max(outcar.data.get("entropy")))/n_atoms
 
-            # if more than 1 meV/atom, reduce sigma
-            if entropy_per_atom > 0.001:
-                return True
+                # if more than 1 meV/atom, reduce sigma
+                if entropy_per_atom > 0.001:
+                    return True
 
         return False
 
