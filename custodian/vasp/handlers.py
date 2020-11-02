@@ -929,12 +929,12 @@ class UnconvergedErrorHandler(ErrorHandler):
             return {"errors": ["Unconverged"], "actions": None}
 
 
-class ScanMetalHandler(ErrorHandler):
+class IncorrectSmearingHandler(ErrorHandler):
     """
-    Check if a SCAN calculation is a metal (zero bandgap) but has been run with
+    Check if a calculation is a metal (zero bandgap) but has been run with
     ISMEAR=-5, which is only appropriate for semiconductors. If this occurs,
     this handler will rerun the calculation using the smearing settings appropriate
-    for metals (ISMEAR=-2, SIGMA=0.2). See MPScanRelaxSet.
+    for metals (ISMEAR=-2, SIGMA=0.2).
     """
 
     is_monitor = False
@@ -963,6 +963,48 @@ class ScanMetalHandler(ErrorHandler):
         backup(VASP_BACKUP_FILES | {self.output_filename})
         vi = VaspInput.from_directory(".")
 
+        actions = []
+        actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 2}}})
+        actions.append({"dict": "INCAR", "action": {"_set": {"SIGMA": 0.2}}})
+
+        VaspModder(vi=vi).apply_actions(actions)
+        return {"errors": ["IncorrectSmearing"], "actions": actions}
+
+
+class ScanMetalHandler(ErrorHandler):
+    """
+    Check if a SCAN calculation is a metal (zero bandgap) but has been run with
+    a KSPACING value appropriate for semiconductors. If this occurs, this handler
+    will rerun the calculation using the KSPACING setting appropriate for metals
+    (KSPACING=0.22). Note that this handler depends on values set in MPScanRelaxSet.
+    """
+
+    is_monitor = False
+
+    def __init__(self, output_filename="vasprun.xml"):
+        """
+        Initializes the handler with the output file to check.
+
+        Args:
+            output_filename (str): Filename for the vasprun.xml file. Change
+                this only if it is different from the default (unlikely).
+        """
+        self.output_filename = output_filename
+
+    def check(self):
+        try:
+            v = Vasprun(self.output_filename)
+            # check whether bandgap is zero and tetrahedron smearing was used
+            if v.eigenvalue_band_properties[0] == 0 and v.incar.get("KSPACING", 1) > 0.22:
+                return True
+        except Exception:
+            pass
+        return False
+
+    def correct(self):
+        backup(VASP_BACKUP_FILES | {self.output_filename})
+        vi = VaspInput.from_directory(".")
+
         _dummy_structure = Structure(
                                     [1, 0, 0, 0, 1, 0, 0, 0, 1],
                                     ["I"],
@@ -971,8 +1013,6 @@ class ScanMetalHandler(ErrorHandler):
         new_vis = MPScanRelaxSet(_dummy_structure, bandgap=0)
 
         actions = []
-        actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": new_vis.incar["ISMEAR"]}}})
-        actions.append({"dict": "INCAR", "action": {"_set": {"SIGMA": new_vis.incar["SIGMA"]}}})
         actions.append({"dict": "INCAR", "action": {"_set": {"KSPACING": new_vis.incar["KSPACING"]}}})
 
         VaspModder(vi=vi).apply_actions(actions)
