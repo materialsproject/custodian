@@ -74,7 +74,7 @@ class VaspErrorHandler(ErrorHandler):
             "Tetrahedron method fails (number of k-points < 4)",
         ],
         "inv_rot_mat": [
-            "inverse of rotation matrix was not found (increase " "SYMPREC)"
+            "rotation matrix was not found (increase " "SYMPREC)"
         ],
         "brmix": ["BRMIX: very serious problems"],
         "subspacematrix": ["WARNING: Sub-Space-Matrix is not hermitian in " "DAV"],
@@ -101,7 +101,7 @@ class VaspErrorHandler(ErrorHandler):
         "elf_ncl": ["WARNING: ELF not implemented for non collinear case"],
         "rhosyg": ["RHOSYG internal error"],
         "posmap": ["POSMAP internal error: symmetry equivalent atom not found"],
-        "point_group": ["Error: point group operation missing"],
+        "point_group": ["group operation missing"],
     }
 
     def __init__(
