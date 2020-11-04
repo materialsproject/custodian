@@ -279,6 +279,22 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ISYM"], 0)
 
+    def test_point_group_vasp6(self):
+        # the error message is formatted differently in VASP6 compared to VASP5
+        h = VaspErrorHandler("vasp6.point_group")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["point_group"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ISYM"], 0)
+
+    def test_inv_rot_matrix_vasp6(self):
+        # the error message is formatted differently in VASP6 compared to VASP5
+        h = VaspErrorHandler("vasp6.inv_rot_mat")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["inv_rot_mat"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["SYMPREC"], 1e-08)
+
     def test_too_large_kspacing(self):
         shutil.copy("INCAR.kspacing", "INCAR")
         vi = VaspInput.from_directory(".")
