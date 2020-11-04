@@ -20,8 +20,10 @@ from monty.serialization import loadfn
 
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
+from pymatgen import Structure
 from pymatgen.io.vasp.inputs import Poscar, VaspInput, Incar, Kpoints
 from pymatgen.io.vasp.outputs import Vasprun, Oszicar, Outcar
+from pymatgen.io.vasp.sets import MPScanRelaxSet
 from pymatgen.transformations.standard_transformations import SupercellTransformation
 
 from custodian.ansible.interpreter import Modder
@@ -925,6 +927,151 @@ class UnconvergedErrorHandler(ErrorHandler):
         else:
             # Unfixable error. Just return None for actions.
             return {"errors": ["Unconverged"], "actions": None}
+
+
+class IncorrectSmearingHandler(ErrorHandler):
+    """
+    Check if a calculation is a metal (zero bandgap) but has been run with
+    ISMEAR=-5, which is only appropriate for semiconductors. If this occurs,
+    this handler will rerun the calculation using the smearing settings appropriate
+    for metals (ISMEAR=-2, SIGMA=0.2).
+    """
+
+    is_monitor = False
+
+    def __init__(self, output_filename="vasprun.xml"):
+        """
+        Initializes the handler with the output file to check.
+
+        Args:
+            output_filename (str): Filename for the vasprun.xml file. Change
+                this only if it is different from the default (unlikely).
+        """
+        self.output_filename = output_filename
+
+    def check(self):
+        try:
+            v = Vasprun(self.output_filename)
+            # check whether bandgap is zero and tetrahedron smearing was used
+            if v.eigenvalue_band_properties[0] == 0 and v.incar.get("ISMEAR", 1) < 0:
+                return True
+        except Exception:
+            pass
+        return False
+
+    def correct(self):
+        backup(VASP_BACKUP_FILES | {self.output_filename})
+        vi = VaspInput.from_directory(".")
+
+        actions = []
+        actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 2}}})
+        actions.append({"dict": "INCAR", "action": {"_set": {"SIGMA": 0.2}}})
+
+        VaspModder(vi=vi).apply_actions(actions)
+        return {"errors": ["IncorrectSmearing"], "actions": actions}
+
+
+class ScanMetalHandler(ErrorHandler):
+    """
+    Check if a SCAN calculation is a metal (zero bandgap) but has been run with
+    a KSPACING value appropriate for semiconductors. If this occurs, this handler
+    will rerun the calculation using the KSPACING setting appropriate for metals
+    (KSPACING=0.22). Note that this handler depends on values set in MPScanRelaxSet.
+    """
+
+    is_monitor = False
+
+    def __init__(self, output_filename="vasprun.xml"):
+        """
+        Initializes the handler with the output file to check.
+
+        Args:
+            output_filename (str): Filename for the vasprun.xml file. Change
+                this only if it is different from the default (unlikely).
+        """
+        self.output_filename = output_filename
+
+    def check(self):
+        try:
+            v = Vasprun(self.output_filename)
+            # check whether bandgap is zero and tetrahedron smearing was used
+            if v.eigenvalue_band_properties[0] == 0 and v.incar.get("KSPACING", 1) > 0.22:
+                return True
+        except Exception:
+            pass
+        return False
+
+    def correct(self):
+        backup(VASP_BACKUP_FILES | {self.output_filename})
+        vi = VaspInput.from_directory(".")
+
+        _dummy_structure = Structure(
+                                    [1, 0, 0, 0, 1, 0, 0, 0, 1],
+                                    ["I"],
+                                    [[0, 0, 0]],
+                                    )
+        new_vis = MPScanRelaxSet(_dummy_structure, bandgap=0)
+
+        actions = []
+        actions.append({"dict": "INCAR", "action": {"_set": {"KSPACING": new_vis.incar["KSPACING"]}}})
+
+        VaspModder(vi=vi).apply_actions(actions)
+        return {"errors": ["ScanMetal"], "actions": actions}
+
+
+class LargeSigmaHandler(ErrorHandler):
+    """
+    When ISMEAR > 0 (Gaussian or Methfessel-Paxton), monitor the magnitude of the entropy
+    term T*S in the OUTCAR file. If the entropy term is larger than 1 meV/atom, reduce the
+    value of SIGMA. See VASP documentation for ISMEAR.
+    """
+
+    is_monitor = True
+
+    def __init__(self):
+        """
+        Initializes the handler with a buffer time.
+        """
+
+    def check(self):
+        incar = Incar.from_file("INCAR")
+        outcar = Outcar("OUTCAR")
+
+        if incar.get("ISMEAR", 0) > 0:
+            # Read the latest entropy term.
+            outcar.read_pattern(
+                {"entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"},
+                postprocess=float,
+                reverse=True,
+                terminate_on_match=True
+            )
+            n_atoms = Structure.from_file("POSCAR").num_sites
+            if outcar.data.get("entropy", []):
+                entropy_per_atom = abs(np.max(outcar.data.get("entropy")))/n_atoms
+
+                # if more than 1 meV/atom, reduce sigma
+                if entropy_per_atom > 0.001:
+                    return True
+
+        return False
+
+    def correct(self):
+        backup(VASP_BACKUP_FILES)
+        actions = []
+        vi = VaspInput.from_directory(".")
+
+        # Reduce SIGMA
+        actions.append(
+                {
+                    "dict": "INCAR",
+                    "action": {
+                        "_set": {"SIGMA": vi["INCAR"].get("SIGMA", 0.2) - 0.04}
+                    },
+                }
+            )
+
+        VaspModder(vi=vi).apply_actions(actions)
+        return {"errors": ["LargeSigma"], "actions": actions}
 
 
 @deprecated(
