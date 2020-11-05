@@ -1035,7 +1035,11 @@ class LargeSigmaHandler(ErrorHandler):
 
     def check(self):
         incar = Incar.from_file("INCAR")
-        outcar = Outcar("OUTCAR")
+        try:
+            outcar = Outcar("OUTCAR")
+        except Exception:
+            # Can't perform check if Outcar not valid
+            return False
 
         if incar.get("ISMEAR", 0) > 0:
             # Read the latest entropy term.
