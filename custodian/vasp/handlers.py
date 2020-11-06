@@ -392,11 +392,18 @@ class VaspErrorHandler(ErrorHandler):
             )
 
         if "brions" in self.errors:
-            potim = float(vi["INCAR"].get("POTIM", 0.5)) + 0.1
-            actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
+            potim = np.round(float(vi["INCAR"].get("POTIM", 0.5)),2) + 0.1
+            actions.append(
+                {"dict": "INCAR", "action": {"_set": {"POTIM": potim}}}
+            )
+            actions.append(
+                {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
+            )
 
         if "zbrent" in self.errors:
-            actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 1}}})
+            actions.append(
+                {"dict": "INCAR", "action": {"_set": {"IBRION": 1}}}
+            )
             actions.append(
                 {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
             )
