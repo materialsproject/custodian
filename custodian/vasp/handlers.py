@@ -392,7 +392,7 @@ class VaspErrorHandler(ErrorHandler):
             )
 
         if "brions" in self.errors:
-            potim = np.round(float(vi["INCAR"].get("POTIM", 0.5)),2) + 0.1
+            potim = np.round(float(vi["INCAR"].get("POTIM", 0.5)), 2) + 0.1
             actions.append(
                 {"dict": "INCAR", "action": {"_set": {"POTIM": potim}}}
             )
