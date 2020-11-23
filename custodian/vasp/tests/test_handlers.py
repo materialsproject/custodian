@@ -547,7 +547,7 @@ class LargeSigmaHandlerTest(unittest.TestCase):
         self.assertTrue(h.check())
         d = h.correct()
         self.assertEqual(d["errors"], ["LargeSigma"])
-        self.assertEqual(Incar.from_file("INCAR")["SIGMA"], 1.46)
+        self.assertEqual(Incar.from_file("INCAR")["SIGMA"], 1.44)
         os.remove("vasprun.xml")
 
     @classmethod
