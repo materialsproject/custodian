@@ -102,7 +102,7 @@ class VaspErrorHandler(ErrorHandler):
         "elf_kpar": ["ELF: KPAR>1 not implemented"],
         "elf_ncl": ["WARNING: ELF not implemented for non collinear case"],
         "rhosyg": ["RHOSYG"],
-        "posmap": ["POSMAP internal error: symmetry equivalent atom not found"],
+        "posmap": ["POSMAP"],
         "point_group": ["group operation missing"],
     }
 

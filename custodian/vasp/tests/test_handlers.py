@@ -285,6 +285,13 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertEqual(i["SYMPREC"], 1e-6)
 
+    def test_posmap_vasp6(self):
+        h = VaspErrorHandler("vasp6.posmap")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["posmap"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["SYMPREC"], 1e-6)
+
     def test_point_group(self):
         h = VaspErrorHandler("vasp.point_group")
         self.assertEqual(h.check(), True)
