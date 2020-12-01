@@ -29,9 +29,9 @@ from monty.re import regrep
 from monty.os.path import zpath
 
 __author__ = "Nicholas Winner"
-__version__ = "0.2"
+__version__ = "0.3"
 __email__ = "nwinner@berkeley.edu"
-__date__ = "Octoboer 2020"
+__date__ = "December 2020"
 
 
 CP2K_BACKUP_FILES = {"cp2k.out", "cp2k.inp", "std_err.txt"}
@@ -297,14 +297,17 @@ class DivergingScfErrorHandler(ErrorHandler):
     done by seeing if, on average, the last 10 convergence print outs were
     increasing rather than decreasing.
 
-    This error handler does not return any actions, and will terminate the
-    job, as diverging SCF usually comes from issues outside the scope of
-    custodian such as unphysical atomic coordinates.
+    Diverging SCF usually comes from issues outside the scope of
+    custodian such as unphysical atomic coordinates. However, a system
+    with a very high condition number for the overlap matrix (see
+    FORCE_EVAL/DFT/PRINT/CONDITION_OVERLAP) can diverge if the precision
+    is set to a normal value. So, this error handler will bump up the precision
+    in an attempt to remedy the problem.
     """
 
     is_monitor = True
 
-    def __init__(self, output_file="cp2k.out"):
+    def __init__(self, output_file="cp2k.out", input_file='cp2k.inp'):
         """
         Initializes the error handler from an output files.
 
@@ -312,6 +315,7 @@ class DivergingScfErrorHandler(ErrorHandler):
             output_file (str): Name of the CP2K output file.
         """
         self.output_file = output_file
+        self.input_file = input_file
 
     def check(self):
         conv = get_conv(self.output_file)
@@ -320,6 +324,33 @@ class DivergingScfErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
+        ci = Cp2kInput.from_file(self.input_file)
+        actions = []
+
+        p = ci['force_eval']['dft']['qs'].get(
+            'EPS_DEFAULT',
+            Keyword('EPS_DEFAULT', 1e-12)
+        ).values[0]
+        if p < 1e-16:
+            actions.append(
+                {
+                    "dict": self.input_file,
+                    "action": {
+                        "_set":
+                            {
+                                'FORCE_EVAL': {
+                                    'DFT': {
+                                        'QS': {
+                                            'EPS_DEFAULT': p / 10
+                                        }
+                                    }
+                                }
+                            }
+
+                    }
+                }
+            )
+
         return {'errors': ['Diverging SCF'], 'actions': []}
 
 
@@ -471,7 +502,7 @@ class AbortHandler(ErrorHandler):
         self.input_file = input_file
         self.output_file = output_file
         self.messages = {
-            'cholesky': r'(fm/cp_fm_cholesky)'
+            'cholesky': r'(Cholesky decomposition failed. Matrix ill conditioned ?)'
         }
         self.responses = []
 
@@ -560,7 +591,7 @@ class AbortHandler(ErrorHandler):
                         }
                     )
                 else:
-                    n += 1 #
+                    n += 1
 
             if n == 2:
                 # Last resort: bump up overlap matrix resolution specifically
