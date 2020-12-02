@@ -82,7 +82,7 @@ class StdErrHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
-        return {"errors": ["System error"], "actions": []}
+        return {"errors": ["System error(s): {}".format(self.errors)], "actions": []}
 
 
 class UnconvergedScfErrorHandler(ErrorHandler):
