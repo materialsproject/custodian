@@ -329,9 +329,9 @@ class DivergingScfErrorHandler(ErrorHandler):
 
         p = ci['force_eval']['dft']['qs'].get(
             'EPS_DEFAULT',
-            Keyword('EPS_DEFAULT', 1e-12)
+            Keyword('EPS_DEFAULT', 1e-10)
         ).values[0]
-        if p < 1e-16:
+        if p > 1e-16:
             actions.append(
                 {
                     "dict": self.input_file,
@@ -350,8 +350,31 @@ class DivergingScfErrorHandler(ErrorHandler):
                     }
                 }
             )
+        p = ci['force_eval']['dft']['qs'].get(
+            'EPS_PGF_ORB',
+            Keyword('EPS_PGF_ORB', np.sqrt(p))
+        ).values[0]
+        if p > 1e-12:
+            actions.append(
+                {
+                    "dict": self.input_file,
+                    "action": {
+                        "_set":
+                            {
+                                'FORCE_EVAL': {
+                                    'DFT': {
+                                        'QS': {
+                                            'EPS_PGF_ORB': 1e-12
+                                        }
+                                    }
+                                }
+                            }
 
-        return {'errors': ['Diverging SCF'], 'actions': []}
+                    }
+                }
+            )
+
+        return {'errors': ['Diverging SCF'], 'actions': actions}
 
 
 class FrozenJobErrorHandler(ErrorHandler):
@@ -596,7 +619,7 @@ class AbortHandler(ErrorHandler):
             if n == 2:
                 # Last resort: bump up overlap matrix resolution specifically
                 p = ci['force_eval']['dft']['qs'].get(
-                    'EPS_DEFAULT',
+                    'EPS_PGF_ORB',
                     Keyword('EPS_PGF_ORB', 1e-6)
                 ).values[0]
                 actions.append({
@@ -607,7 +630,7 @@ class AbortHandler(ErrorHandler):
                                 'FORCE_EVAL': {
                                     'DFT': {
                                         'QS': {
-                                            'EPS_PGF_ORB': p/10
+                                            'EPS_PGF_ORB': 1e-10 if p > 1e-10 else p / 10
                                         }
                                     }
                                 }
