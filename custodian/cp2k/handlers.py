@@ -544,7 +544,7 @@ class AbortHandler(ErrorHandler):
 
         if self.responses[-1] == 'cholesky':
             n = self.responses.count('cholesky')
-            if n == 0:
+            if n == 1:
                 # Change preconditioner
                 p = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
                     'PRECONDITIONER', Keyword('PRECONDITIONER', 'FULL_ALL')
@@ -589,13 +589,13 @@ class AbortHandler(ErrorHandler):
                         }
                     )
 
-            if n == 1:
+            if n == 2:
                 # preconditioner was fine, make sure eps_default is at least 1e-12
                 p = ci['force_eval']['dft']['qs'].get(
                     'EPS_DEFAULT',
                     Keyword('EPS_DEFAULT', 1e-12)
                 ).values[0]
-                if p < 1e-12:
+                if p > 1e-12:
                     actions.append({
                             "dict": self.input_file,
                             "action": {
@@ -616,8 +616,8 @@ class AbortHandler(ErrorHandler):
                 else:
                     n += 1
 
-            if n == 2:
-                # Last resort: bump up overlap matrix resolution specifically
+            if n == 3:
+                # bump up overlap matrix resolution
                 p = ci['force_eval']['dft']['qs'].get(
                     'EPS_PGF_ORB',
                     Keyword('EPS_PGF_ORB', 1e-6)
@@ -625,8 +625,7 @@ class AbortHandler(ErrorHandler):
                 actions.append({
                     "dict": self.input_file,
                     "action": {
-                        "_set":
-                            {
+                        "_set": {
                                 'FORCE_EVAL': {
                                     'DFT': {
                                         'QS': {
@@ -640,6 +639,37 @@ class AbortHandler(ErrorHandler):
                 }
                 )
 
+            if n == 4:
+                # restart file could be problematic (gga restart for hybrids)
+                if ci['force_eval']['dft'].get('wfn_restart_file_name'):
+                    actions.append(
+                        {
+                            'dict': self.input_file,
+                            'action': {
+                                "_unset": {
+                                    'FORCE_EVAL': {
+                                        'DFT': 'WFN_RESTART_FILE_NAME'
+                                    }
+                                },
+                                "set": {
+                                    'FORCE_EVAL': {
+                                        'DFT': {
+                                            'XC': {
+                                                'HF': {
+                                                    'SCREENING': {
+                                                        'SCREEN_ON_INITIAL_P': False,
+                                                        'SCREEN_P_FORCES': False
+                                                    },
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    )
+
+        Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
         return {'errors': [self.responses[-1]], 'actions': actions}
 
 
