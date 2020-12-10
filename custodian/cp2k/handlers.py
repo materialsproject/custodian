@@ -832,7 +832,11 @@ def tail(filename, n=10):
     Returns the last n lines of a file as a list (including empty lines)
     """
     with open(filename) as f:
-        return deque(f, n)
+        t = deque(f, n)
+        if t:
+            return t
+        else:
+            return ['']*n
 
 
 def get_conv(outfile):
