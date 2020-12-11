@@ -88,7 +88,7 @@ class VaspErrorHandler(ErrorHandler):
         "dentet": ["DENTET"],
         "too_few_bands": ["TOO FEW BANDS"],
         "triple_product": ["ERROR: the triple product of the basis vectors"],
-        "rot_matrix": ["Found some non-integer element in rotation matrix"],
+        "rot_matrix": ["Found some non-integer element in rotation matrix", "SGRCON"],
         "brions": ["BRIONS problems: POTIM should be increased"],
         "pricel": ["internal error in subroutine PRICEL"],
         "zpotrf": ["LAPACK: Routine ZPOTRF failed"],

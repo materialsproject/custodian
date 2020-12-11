@@ -214,6 +214,11 @@ class VaspErrorHandlerTest(unittest.TestCase):
         shutil.copy("KPOINTS.orig", "KPOINTS")
         os.remove("KPOINTS.orig")
 
+    def test_rot_matrix_vasp6(self):
+        h = VaspErrorHandler("vasp6.sgrcon")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["rot_matrix"])
+
     def test_to_from_dict(self):
         h = VaspErrorHandler("random_name")
         h2 = VaspErrorHandler.from_dict(h.as_dict())
@@ -314,7 +319,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.correct()["errors"], ["inv_rot_mat"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["SYMPREC"], 1e-08)
-    
+
     def test_bzint_vasp6(self):
         # the BZINT error message is formatted differently in VASP6 compared to VASP5
         h = VaspErrorHandler("vasp6.bzint")
