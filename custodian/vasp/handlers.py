@@ -69,11 +69,12 @@ class VaspErrorHandler(ErrorHandler):
 
     error_msgs = {
         "tet": [
-            "Tetrahedron method fails for NKPT<4",
+            "Tetrahedron method fails",
             "Fatal error detecting k-mesh",
             "Fatal error: unable to match k-point",
             "Routine TETIRR needs special values",
             "Tetrahedron method fails (number of k-points < 4)",
+            "BZINTS"
         ],
         "inv_rot_mat": [
             "rotation matrix was not found (increase " "SYMPREC)"

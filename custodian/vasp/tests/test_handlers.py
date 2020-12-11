@@ -314,6 +314,15 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.correct()["errors"], ["inv_rot_mat"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["SYMPREC"], 1e-08)
+    
+    def test_bzint_vasp6(self):
+        # the BZINT error message is formatted differently in VASP6 compared to VASP5
+        h = VaspErrorHandler("vasp6.bzint")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["tet"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ISMEAR"], 0)
+        self.assertEqual(i["SIGMA"], 0.05)
 
     def test_too_large_kspacing(self):
         shutil.copy("INCAR.kspacing", "INCAR")
