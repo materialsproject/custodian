@@ -465,10 +465,14 @@ class VaspErrorHandler(ErrorHandler):
         if "posmap" in self.errors:
             # VASP advises to decrease or increase SYMPREC by an order of magnitude
             # the default SYMPREC value is 1e-5
-            if vi["INCAR"].get("SYMPREC", 1e-5) != 1e-6 and self.error_count["posmap"] == 0:
-                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-6}}})
-            elif vi["INCAR"].get("SYMPREC", 1e-5) == 1e-6 and self.error_count["posmap"] == 1:
-                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-4}}})
+            if self.error_count["posmap"] == 0:
+                # first, reduce by 10x
+                orig_symprec = vi["INCAR"].get("SYMPREC", 1e-5)
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": orig_symprec / 10}}})
+            elif self.error_count["posmap"] == 1:
+                # next, increase by 100x (10x the original)
+                orig_symprec = vi["INCAR"].get("SYMPREC", 1e-6)
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": orig_symprec * 100}}})
             else:
                 # if we have already corrected twice, there's nothing else to do
                 pass
