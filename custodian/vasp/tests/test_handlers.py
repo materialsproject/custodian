@@ -33,6 +33,9 @@ from custodian.vasp.handlers import (
     StdErrHandler,
     LrfCommutatorHandler,
     DriftErrorHandler,
+    IncorrectSmearingHandler,
+    ScanMetalHandler,
+    LargeSigmaHandler
 )
 from pymatgen.io.vasp.inputs import Incar, Structure, Kpoints, VaspInput
 
@@ -265,6 +268,16 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ISYM"], 0)
 
+    def test_rhosyg_vasp6(self):
+        h = VaspErrorHandler("vasp6.rhosyg")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["rhosyg"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["SYMPREC"], 1e-4)
+        self.assertEqual(h.correct()["errors"], ["rhosyg"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ISYM"], 0)
+
     def test_posmap(self):
         h = VaspErrorHandler("vasp.posmap")
         self.assertEqual(h.check(), True)
@@ -285,6 +298,22 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.correct()["errors"], ["symprec_noise"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["SYMPREC"], 1e-6)
+
+    def test_point_group_vasp6(self):
+        # the error message is formatted differently in VASP6 compared to VASP5
+        h = VaspErrorHandler("vasp6.point_group")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["point_group"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ISYM"], 0)
+
+    def test_inv_rot_matrix_vasp6(self):
+        # the error message is formatted differently in VASP6 compared to VASP5
+        h = VaspErrorHandler("vasp6.inv_rot_mat")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["inv_rot_mat"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["SYMPREC"], 1e-08)
 
     def test_too_large_kspacing(self):
         shutil.copy("INCAR.kspacing", "INCAR")
@@ -450,6 +479,88 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         shutil.move("KPOINTS.orig", "KPOINTS")
         shutil.move("POSCAR.orig", "POSCAR")
         shutil.move("CONTCAR.orig", "CONTCAR")
+        clean_dir()
+        os.chdir(cwd)
+
+
+class IncorrectSmearingHandlerTest(unittest.TestCase):
+    def setUp(cls):
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.chdir(test_dir)
+        subdir = os.path.join(test_dir, "scan_metal")
+        os.chdir(subdir)
+
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("vasprun.xml", "vasprun.xml.orig")
+
+    def test_check_correct_scan_metal(self):
+        h = IncorrectSmearingHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["IncorrectSmearing"])
+        self.assertEqual(Incar.from_file("INCAR")["ISMEAR"], 2)
+        self.assertEqual(Incar.from_file("INCAR")["SIGMA"], 0.2)
+        os.remove("vasprun.xml")
+
+    @classmethod
+    def tearDown(cls):
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("vasprun.xml.orig", "vasprun.xml")
+        clean_dir()
+        os.chdir(cwd)
+
+
+class ScanMetalHandlerTest(unittest.TestCase):
+    def setUp(cls):
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.chdir(test_dir)
+        subdir = os.path.join(test_dir, "scan_metal")
+        os.chdir(subdir)
+
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("vasprun.xml", "vasprun.xml.orig")
+
+    def test_check_correct_scan_metal(self):
+        h = ScanMetalHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["ScanMetal"])
+        self.assertEqual(Incar.from_file("INCAR")["KSPACING"], 0.22)
+        os.remove("vasprun.xml")
+
+    @classmethod
+    def tearDown(cls):
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("vasprun.xml.orig", "vasprun.xml")
+        clean_dir()
+        os.chdir(cwd)
+
+
+class LargeSigmaHandlerTest(unittest.TestCase):
+    def setUp(cls):
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.chdir(test_dir)
+        subdir = os.path.join(test_dir, "large_sigma")
+        os.chdir(subdir)
+
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("vasprun.xml", "vasprun.xml.orig")
+
+    def test_check_correct_large_sigma(self):
+        h = LargeSigmaHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["LargeSigma"])
+        self.assertEqual(Incar.from_file("INCAR")["SIGMA"], 1.46)
+        os.remove("vasprun.xml")
+
+    @classmethod
+    def tearDown(cls):
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("vasprun.xml.orig", "vasprun.xml")
         clean_dir()
         os.chdir(cwd)
 
