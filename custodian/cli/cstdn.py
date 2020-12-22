@@ -75,7 +75,7 @@ custodian_params:
 
 
 def run(args):
-    FORMAT = '%(asctime)s %(message)s'
+    FORMAT = "%(asctime)s %(message)s"
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
     logging.info("Spec file is %s" % args.spec_file)
     d = loadfn(args.spec_file[0])
@@ -88,19 +88,25 @@ def print_example(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="""
+    parser = argparse.ArgumentParser(
+        description="""
     cstdn is a convenient script to run custodian style jobs using a
-    simple YAML spec.""", epilog="""Author: Shyue Ping Ong""")
+    simple YAML spec.""",
+        epilog="""Author: Shyue Ping Ong""",
+    )
 
     subparsers = parser.add_subparsers()
 
     prun = subparsers.add_parser("run", help="Run custodian.")
-    prun.add_argument("spec_file", metavar="spec_file", type=str, nargs=1,
-                      help="YAML/JSON spec file.")
+    prun.add_argument(
+        "spec_file", metavar="spec_file", type=str, nargs=1, help="YAML/JSON spec file."
+    )
     prun.set_defaults(func=run)
 
     prun = subparsers.add_parser(
-        "example", help="Print examples. Right now, there is only one example for VASP double relaxation.")
+        "example",
+        help="Print examples. Right now, there is only one example for VASP double relaxation.",
+    )
     prun.set_defaults(func=print_example)
 
     args = parser.parse_args()

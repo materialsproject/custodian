@@ -20,6 +20,12 @@ lib
 lib64
 distribute*.tar.gz
 
+# mypy
+.*_cache
+
+# VS Code
+.vscode/*
+
 # Installer logs
 pip-log.txt
 

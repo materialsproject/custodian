@@ -24,7 +24,7 @@ class VaspModder(Modder):
                 Initialized automatically if not passed (but passing it will
                 avoid having to reparse the directory).
         """
-        self.vi = vi or VaspInput.from_directory('.')
+        self.vi = vi or VaspInput.from_directory(".")
         actions = actions or [FileActions, DictActions]
         super(VaspModder, self).__init__(actions, strict)
 

@@ -4,15 +4,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>custodian.vasp package &#8212; custodian 2019.8.24 documentation</title>
+    <title>custodian.vasp package &#8212; custodian 2020.4.27 documentation</title>
     <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 
@@ -37,7 +36,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 2019.8.24 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 2020.4.27 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -328,59 +327,6 @@ If this is an unfixable error, actions should be set to None.</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="custodian.vasp.handlers.MaxForceErrorHandler">
-<em class="property">class </em><code class="sig-name descname">MaxForceErrorHandler</code><span class="sig-paren">(</span><em class="sig-param">output_filename='vasprun.xml'</em>, <em class="sig-param">max_force_threshold=0.25</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
-<p>Checks that the desired force convergence has been achieved. Otherwise
-restarts the run with smaller EDIFF. (This is necessary since energy
-and force convergence criteria cannot be set simultaneously)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>input_filename</strong> (<em>str</em>) – name of the vasp INCAR file</p></li>
-<li><p><strong>output_filename</strong> (<em>str</em>) – name to look for the vasprun</p></li>
-<li><p><strong>max_force_threshold</strong> (<em>float</em>) – Threshold for max force for
-restarting the run. (typically should be set to the value
-that the creator looks for)</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="method">
-<dt id="custodian.vasp.handlers.MaxForceErrorHandler.check">
-<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.check" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method is called during the job (for monitors) or at the end of
-the job to check for errors.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>(bool) Indicating if errors are detected.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="custodian.vasp.handlers.MaxForceErrorHandler.correct">
-<code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MaxForceErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method is called at the end of a job when an error is detected.
-It should perform any corrective measures relating to the detected
-error.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
-actions taken. E.g.
-{“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="custodian.vasp.handlers.MaxForceErrorHandler.is_monitor">
-<code class="sig-name descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.vasp.handlers.MaxForceErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
 <dt id="custodian.vasp.handlers.MeshSymmetryErrorHandler">
 <em class="property">class </em><code class="sig-name descname">MeshSymmetryErrorHandler</code><span class="sig-paren">(</span><em class="sig-param">output_filename='vasp.out'</em>, <em class="sig-param">output_vasprun='vasprun.xml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#MeshSymmetryErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.MeshSymmetryErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
@@ -480,6 +426,13 @@ actions taken. E.g.
 If this is an unfixable error, actions should be set to None.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="custodian.vasp.handlers.NonConvergingErrorHandler.from_dict">
+<em class="property">classmethod </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param">d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/handlers.html#NonConvergingErrorHandler.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.handlers.NonConvergingErrorHandler.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom from_dict method to preserve backwards compatibility with
+older versions of Custodian.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1377,8 +1330,17 @@ Defaults to “std_err.txt”.</p></li>
 
 <dl class="function">
 <dt id="custodian.vasp.validators.check_broken_chgcar">
-<code class="sig-name descname">check_broken_chgcar</code><span class="sig-paren">(</span><em class="sig-param">chgcar</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/validators.html#check_broken_chgcar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.check_broken_chgcar" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="sig-name descname">check_broken_chgcar</code><span class="sig-paren">(</span><em class="sig-param">chgcar</em>, <em class="sig-param">diff_thresh=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/vasp/validators.html#check_broken_chgcar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.vasp.validators.check_broken_chgcar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the charge density file is corrupt
+:param chgcar: Chgcar-like object.
+:type chgcar: Chgcar
+:param diff_thresh: Threshhold for diagonal difference.</p>
+<blockquote>
+<div><p>None means we won’t check for this.</p>
+</div></blockquote>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
 
 </div>
 <div class="section" id="module-custodian.vasp">
@@ -1426,14 +1388,14 @@ Defaults to “std_err.txt”.</p></li>
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
 
     <div class="footer">
-      &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu.
+      &copy; Copyright 2013, Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu, Matthew Horton, Samuel M. Blau.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

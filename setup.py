@@ -10,12 +10,12 @@ from setuptools import setup, find_packages
 with open("README.rst") as f:
     long_desc = f.read()
     ind = long_desc.find("\n")
-    long_desc = long_desc[ind + 1:]
+    long_desc = long_desc[ind + 1 :]
 
 setup(
     name="custodian",
     packages=find_packages(),
-    version="2019.8.24",
+    version="2020.4.27",
     install_requires=["monty>=2.0.6", "ruamel.yaml>=0.15.6", "sentry-sdk>=0.8.0"],
     extras_require={"vasp, nwchem, qchem": ["pymatgen>=2019.8.23"]},
     package_data={},
@@ -38,15 +38,15 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering :: Physics",
         "Topic :: Scientific/Engineering :: Chemistry",
-        "Topic :: Software Development :: Libraries :: Python Modules"
+        "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     entry_points={
-          'console_scripts': [
-              'cstdn = custodian.cli.cstdn:main',
-              'run_vasp = custodian.cli.run_vasp:main',
-              'run_nwchem = custodian.cli.run_nwchem:main',
-              'converge_kpoints = custodian.cli.converge_kpoints:main',
-              'converge_geometry = custodian.cli.converge_geometry:main',
-          ]
-    }
+        "console_scripts": [
+            "cstdn = custodian.cli.cstdn:main",
+            "run_vasp = custodian.cli.run_vasp:main",
+            "run_nwchem = custodian.cli.run_nwchem:main",
+            "converge_kpoints = custodian.cli.converge_kpoints:main",
+            "converge_geometry = custodian.cli.converge_geometry:main",
+        ]
+    },
 )
