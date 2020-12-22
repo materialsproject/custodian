@@ -34,17 +34,19 @@ class QCJob(Job):
     A basic QChem Job.
     """
 
-    def __init__(self,
-                 qchem_command,
-                 max_cores,
-                 multimode="openmp",
-                 input_file="mol.qin",
-                 output_file="mol.qout",
-                 qclog_file="mol.qclog",
-                 suffix="",
-                 calc_loc=None,
-                 save_scratch=False,
-                 backup=True):
+    def __init__(
+        self,
+        qchem_command,
+        max_cores,
+        multimode="openmp",
+        input_file="mol.qin",
+        output_file="mol.qout",
+        qclog_file="mol.qclog",
+        suffix="",
+        calc_loc=None,
+        save_scratch=False,
+        backup=True
+    ):
         """
         Args:
             qchem_command (str): Command to run QChem.
@@ -78,7 +80,13 @@ class QCJob(Job):
         multi = {"openmp": "-nt", "mpi": "-np"}
         if self.multimode not in multi:
             raise RuntimeError("ERROR: Multimode should only be set to openmp or mpi")
-        command = [multi[self.multimode], str(self.max_cores), self.input_file, self.output_file, "scratch"]
+        command = [
+            multi[self.multimode],
+            str(self.max_cores),
+            self.input_file,
+            self.output_file,
+            "scratch"
+        ]
         command = self.qchem_command + command
         com_str = ""
         for part in command:
@@ -126,18 +134,20 @@ class QCJob(Job):
         return p
 
     @classmethod
-    def opt_with_frequency_flattener(cls,
-                                     qchem_command,
-                                     multimode="openmp",
-                                     input_file="mol.qin",
-                                     output_file="mol.qout",
-                                     qclog_file="mol.qclog",
-                                     max_iterations=10,
-                                     max_molecule_perturb_scale=0.3,
-                                     check_connectivity=True,
-                                     linked=True,
-                                     save_final_scratch=False,
-                                     **QCJob_kwargs):
+    def opt_with_frequency_flattener(
+        cls,
+        qchem_command,
+        multimode="openmp",
+        input_file="mol.qin",
+        output_file="mol.qout",
+        qclog_file="mol.qclog",
+        max_iterations=10,
+        max_molecule_perturb_scale=0.3,
+        check_connectivity=True,
+        linked=True,
+        save_final_scratch=False,
+        **QCJob_kwargs
+    ):
         """
         Optimize a structure and calculate vibrational frequencies to check if the
         structure is in a true minima. If a frequency is negative, iteratively
@@ -178,16 +188,19 @@ class QCJob(Job):
             energy_history = []
 
             for ii in range(max_iterations):
-                yield (QCJob(
-                    qchem_command=qchem_command,
-                    multimode=multimode,
-                    input_file=input_file,
-                    output_file=output_file,
-                    qclog_file=qclog_file,
-                    suffix=".opt_" + str(ii),
-                    save_scratch=True,
-                    backup=first,
-                    **QCJob_kwargs))
+                yield (
+                    QCJob(
+                        qchem_command=qchem_command,
+                        multimode=multimode,
+                        input_file=input_file,
+                        output_file=output_file,
+                        qclog_file=qclog_file,
+                        suffix=".opt_" + str(ii),
+                        save_scratch=True,
+                        backup=first,
+                        **QCJob_kwargs
+                    )
+                )
                 opt_outdata = QCOutput(output_file + ".opt_" + str(ii)).data
                 opt_indata = QCInput.from_file(input_file + ".opt_" + str(ii))
                 if opt_indata.rem["scf_algorithm"] != freq_rem["scf_algorithm"]:
@@ -213,16 +226,19 @@ class QCJob(Job):
                         smx=orig_input.smx,
                     )
                     freq_QCInput.write_file(input_file)
-                    yield (QCJob(
-                        qchem_command=qchem_command,
-                        multimode=multimode,
-                        input_file=input_file,
-                        output_file=output_file,
-                        qclog_file=qclog_file,
-                        suffix=".freq_" + str(ii),
-                        save_scratch=True,
-                        backup=first,
-                        **QCJob_kwargs))
+                    yield (
+                        QCJob(
+                            qchem_command=qchem_command,
+                            multimode=multimode,
+                            input_file=input_file,
+                            output_file=output_file,
+                            qclog_file=qclog_file,
+                            suffix=".freq_" + str(ii),
+                            save_scratch=True,
+                            backup=first,
+                            **QCJob_kwargs
+                        )
+                    )
                     outdata = QCOutput(output_file + ".freq_" + str(ii)).data
                     indata = QCInput.from_file(input_file + ".freq_" + str(ii))
                     if indata.rem["scf_algorithm"] != freq_rem["scf_algorithm"]:
