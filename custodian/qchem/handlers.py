@@ -139,7 +139,7 @@ class QChemErrorHandler(ErrorHandler):
 
         elif "unable_to_determine_lamda" in self.errors:
             # Set last geom as new starting geom and rerun. If no opt cycles,
-            # use diff SCF strat? Diff initial guess? Change basis?
+            # use diff SCF strat? Diff initial guess? Change basis? Unclear.
             if len(self.outdata.get("energy_trajectory")) > 1:
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
