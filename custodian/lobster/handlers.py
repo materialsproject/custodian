@@ -1,4 +1,3 @@
-
 """ This module implements specific error handler for Lobster runs. """
 
 import os
@@ -51,9 +50,15 @@ class LobsterFilesValidator(Validator):
     """
 
     def __init__(self):
+        """
+        Dummy init
+        """
         pass
 
     def check(self) -> bool:
+        """
+        Check for errors.
+        """
         for vfile in ["lobsterout"]:
             if not os.path.exists(vfile):
                 return True
@@ -79,7 +84,7 @@ class ChargeSpillingValidator(Validator):
         self.charge_spilling_limit = charge_spilling_limit
 
     def check(self) -> bool:
-        # open lobsterout and find charge spilling
+        """open lobsterout and find charge spilling"""
 
         if os.path.exists(self.output_filename):
             lobsterout = Lobsterout(self.output_filename)

@@ -32,7 +32,9 @@ class NwchemErrorHandler(ErrorHandler):
         self.output_filename = output_filename
 
     def check(self):
-        # Checks output file for errors.
+        """
+        Check for errors.
+        """
         out = NwOutput(self.output_filename)
         self.errors = []
         self.input_file = out.job_info["input"]
@@ -55,6 +57,7 @@ class NwchemErrorHandler(ErrorHandler):
             fout.write("".join(lines))
 
     def correct(self):
+        """Correct errors"""
         backup("*.nw*")
         actions = []
         nwi = NwInput.from_file(self.input_file)

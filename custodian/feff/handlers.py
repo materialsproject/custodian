@@ -73,6 +73,9 @@ class UnconvergedErrorHandler(ErrorHandler):
         return None
 
     def correct(self):
+        """
+        Perform the corrections.
+        """
         backup(FEFF_BACKUP_FILES)
         feff_input = FEFFDictSet.from_directory(".")
         scf_values = feff_input.tags.get("SCF")

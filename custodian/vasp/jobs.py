@@ -724,6 +724,9 @@ class VaspJob(Job):
                 f.write("%f %f\n" % (k, energies[k]))
 
     def terminate(self):
+        """
+        Ensure all vasp jobs are killed.
+        """
         for k in self.vasp_cmd:
             if "vasp" in k:
                 try:
@@ -958,9 +961,15 @@ class GenerateVaspInputJob(Job):
         self.kwargs = kwargs
 
     def setup(self):
+        """
+        Dummy setup
+        """
         pass
 
     def run(self):
+        """
+        Run the calculation.
+        """
         if os.path.exists("CONTCAR"):
             structure = Structure.from_file("CONTCAR")
         elif (not self.contcar_only) and os.path.exists("POSCAR"):
@@ -973,4 +982,7 @@ class GenerateVaspInputJob(Job):
         vis.write_input(".")
 
     def postprocess(self):
+        """
+        Dummy postprocess.
+        """
         pass

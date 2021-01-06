@@ -146,6 +146,9 @@ class VaspErrorHandler(ErrorHandler):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def check(self):
+        """
+        Check for error.
+        """
         incar = Incar.from_file("INCAR")
         self.errors = set()
         error_msgs = set()
@@ -169,6 +172,9 @@ class VaspErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
         actions = []
         vi = VaspInput.from_directory(".")
@@ -494,6 +500,9 @@ class LrfCommutatorHandler(ErrorHandler):
         self.error_count = Counter()
 
     def check(self):
+        """
+        Check for error.
+        """
         self.errors = set()
         with open(self.output_filename, "r") as f:
             for line in f:
@@ -505,6 +514,9 @@ class LrfCommutatorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
         actions = []
         vi = VaspInput.from_directory(".")
@@ -552,6 +564,9 @@ class StdErrHandler(ErrorHandler):
         self.error_count = Counter()
 
     def check(self):
+        """
+        Check for error.
+        """
         self.errors = set()
         with open(self.output_filename, "r") as f:
             for line in f:
@@ -563,6 +578,9 @@ class StdErrHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
         actions = []
         vi = VaspInput.from_directory(".")
@@ -618,6 +636,9 @@ class AliasingErrorHandler(ErrorHandler):
         self.errors = set()
 
     def check(self):
+        """
+        Check for error.
+        """
         incar = Incar.from_file("INCAR")
         self.errors = set()
         with open(self.output_filename, "r") as f:
@@ -636,6 +657,9 @@ class AliasingErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
         actions = []
         vi = VaspInput.from_directory(".")
@@ -712,7 +736,9 @@ class DriftErrorHandler(ErrorHandler):
         self.enaug_multiply = enaug_multiply
 
     def check(self):
-
+        """
+        Check for error.
+        """
         incar = Incar.from_file("INCAR")
         if incar.get("EDIFFG", 0.1) >= 0 or incar.get("NSW", 0) == 0:
             # Only activate when force relaxing and ionic steps
@@ -737,6 +763,9 @@ class DriftErrorHandler(ErrorHandler):
         return curr_drift > self.max_drift
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES)
         actions = []
         vi = VaspInput.from_directory(".")
@@ -808,6 +837,9 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         self.output_vasprun = output_vasprun
 
     def check(self):
+        """
+        Check for error.
+        """
         msg = (
             "Reciprocal lattice and k-lattice belong to different class of" " lattices."
         )
@@ -839,6 +871,9 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
         vi = VaspInput.from_directory(".")
         m = reduce(operator.mul, vi["KPOINTS"].kpts[0])
@@ -868,6 +903,9 @@ class UnconvergedErrorHandler(ErrorHandler):
         self.output_filename = output_filename
 
     def check(self):
+        """
+        Check for error.
+        """
         try:
             v = Vasprun(self.output_filename)
             if not v.converged:
@@ -877,6 +915,9 @@ class UnconvergedErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         v = Vasprun(self.output_filename)
         actions = []
         if not v.converged_electronic:
@@ -947,6 +988,9 @@ class IncorrectSmearingHandler(ErrorHandler):
         self.output_filename = output_filename
 
     def check(self):
+        """
+        Check for error.
+        """
         try:
             v = Vasprun(self.output_filename)
             # check whether bandgap is zero and tetrahedron smearing was used
@@ -957,6 +1001,9 @@ class IncorrectSmearingHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
         vi = VaspInput.from_directory(".")
 
@@ -989,6 +1036,9 @@ class ScanMetalHandler(ErrorHandler):
         self.output_filename = output_filename
 
     def check(self):
+        """
+        Check for error.
+        """
         try:
             v = Vasprun(self.output_filename)
             # check whether bandgap is zero and tetrahedron smearing was used
@@ -999,6 +1049,9 @@ class ScanMetalHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
         vi = VaspInput.from_directory(".")
 
@@ -1031,6 +1084,9 @@ class LargeSigmaHandler(ErrorHandler):
         """
 
     def check(self):
+        """
+        Check for error.
+        """
         incar = Incar.from_file("INCAR")
         try:
             outcar = Outcar("OUTCAR")
@@ -1057,6 +1113,9 @@ class LargeSigmaHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES)
         actions = []
         vi = VaspInput.from_directory(".")
@@ -1101,6 +1160,9 @@ class MaxForceErrorHandler(ErrorHandler):
         self.max_force_threshold = max_force_threshold
 
     def check(self):
+        """
+        Check for error.
+        """
         try:
             v = Vasprun(self.output_filename)
             forces = np.array(v.ionic_steps[-1]["forces"])
@@ -1115,6 +1177,9 @@ class MaxForceErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
         vi = VaspInput.from_directory(".")
         ediff = float(vi["INCAR"].get("EDIFF", 1e-4))
@@ -1157,6 +1222,9 @@ class PotimErrorHandler(ErrorHandler):
         self.dE_threshold = dE_threshold
 
     def check(self):
+        """
+        Check for error.
+        """
         try:
             oszicar = Oszicar(self.output_filename)
             n = len(Poscar.from_file(self.input_filename).structure)
@@ -1168,6 +1236,9 @@ class PotimErrorHandler(ErrorHandler):
         return None
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES)
         vi = VaspInput.from_directory(".")
         potim = float(vi["INCAR"].get("POTIM", 0.5))
@@ -1210,12 +1281,18 @@ class FrozenJobErrorHandler(ErrorHandler):
         self.timeout = timeout
 
     def check(self):
+        """
+        Check for error.
+        """
         st = os.stat(self.output_filename)
         if time.time() - st.st_mtime > self.timeout:
             return True
         return None
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
 
         vi = VaspInput.from_directory(".")
@@ -1254,6 +1331,9 @@ class NonConvergingErrorHandler(ErrorHandler):
         self.nionic_steps = nionic_steps
 
     def check(self):
+        """
+        Check for error.
+        """
         vi = VaspInput.from_directory(".")
         nelm = vi["INCAR"].get("NELM", 60)
         try:
@@ -1268,6 +1348,9 @@ class NonConvergingErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         vi = VaspInput.from_directory(".")
         algo = vi["INCAR"].get("ALGO", "Normal")
         amix = vi["INCAR"].get("AMIX", 0.4)
@@ -1394,6 +1477,9 @@ class WalltimeHandler(ErrorHandler):
         self.prev_check_time = self.start_time
 
     def check(self):
+        """
+        Check for error.
+        """
         if self.wall_time:
             run_time = datetime.datetime.now() - self.start_time
             total_secs = run_time.total_seconds()
@@ -1428,7 +1514,9 @@ class WalltimeHandler(ErrorHandler):
         return False
 
     def correct(self):
-
+        """
+        Perform corrections.
+        """
         content = (
             "LSTOP = .TRUE." if not self.electronic_step_stop else "LABORT = .TRUE."
         )
@@ -1474,6 +1562,9 @@ class CheckpointHandler(ErrorHandler):
         self.chk_counter = 0
 
     def check(self):
+        """
+        Check for error.
+        """
         run_time = datetime.datetime.now() - self.start_time
         total_secs = run_time.seconds + run_time.days * 3600 * 24
         if total_secs > self.interval:
@@ -1481,6 +1572,9 @@ class CheckpointHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         content = "LSTOP = .TRUE."
         chkpt_content = 'Index: %d\nTime: "%s"' % (
             self.chk_counter,
@@ -1529,12 +1623,21 @@ class StoppedRunHandler(ErrorHandler):
     is_terminating = False
 
     def __init__(self):
+        """
+        Dummy init.
+        """
         pass
 
     def check(self):
+        """
+        Check for error.
+        """
         return os.path.exists("chkpt.yaml")
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         d = loadfn("chkpt.yaml")
         i = d["Index"]
         name = shutil.make_archive(
@@ -1571,6 +1674,9 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         self.output_filename = output_filename
 
     def check(self):
+        """
+        Check for error.
+        """
         try:
             oszicar = Oszicar(self.output_filename)
             if oszicar.final_energy > 0:
@@ -1580,6 +1686,9 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         # change ALGO = Fast to Normal if ALGO is !Normal
         vi = VaspInput.from_directory(".")
         algo = vi["INCAR"].get("ALGO", "Normal")
