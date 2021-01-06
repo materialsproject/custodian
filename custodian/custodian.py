@@ -235,7 +235,7 @@ class Custodian(object):
             with tarfile.open(n, mode="w:gz", compresslevel=3) as f:
                 f.add(cwd, arcname=".")
             logger.info("Checkpoint written to {}".format(n))
-        except Exception as _:
+        except Exception:
             logger.info("Checkpointing failed")
             import traceback
             logger.error(traceback.format_exc())
