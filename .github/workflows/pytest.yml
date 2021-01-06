@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
   build:
     strategy:
-      max-parallel: 20
+      max-parallel: 1
       matrix:
         os: [ubuntu-latest]
         python-version: [3.7, 3.8]
