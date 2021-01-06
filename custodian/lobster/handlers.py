@@ -1,9 +1,11 @@
-import os
-
-from custodian.custodian import Validator
-from pymatgen.io.lobster import Lobsterout
 
 """ This module implements specific error handler for Lobster runs. """
+
+import os
+
+from pymatgen.io.lobster import Lobsterout
+
+from custodian.custodian import Validator
 
 __author__ = "Janine George, Guido Petretto"
 __copyright__ = "Copyright 2020, The Materials Project"
@@ -57,7 +59,7 @@ class LobsterFilesValidator(Validator):
                 return True
         with open("lobsterout") as f:
             data = f.read()
-        return ('finished' not in data)
+        return 'finished' not in data
 
 
 class ChargeSpillingValidator(Validator):
@@ -87,5 +89,4 @@ class ChargeSpillingValidator(Validator):
                 if lobsterout.chargespilling[1] > self.charge_spilling_limit:
                     return True
             return False
-        else:
-            return False
+        return False

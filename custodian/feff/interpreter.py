@@ -1,18 +1,23 @@
 # coding: utf-8
 
-from __future__ import unicode_literals
+"""
+Implements various interpreters and modders for FEFF calculations.
+"""
+
+import os
+
+from pymatgen.io.feff.sets import FEFFDictSet
 
 from custodian.ansible.actions import FileActions, DictActions
 from custodian.ansible.interpreter import Modder
-from pymatgen.io.feff.sets import FEFFDictSet
-import os
 
 
 class FeffModder(Modder):
+    """
+    A Modder for FeffInput sets
+    """
     def __init__(self, actions=None, strict=True, feffinp=None):
         """
-        Initializes a Modder for FeffInput sets
-
         Args:
             actions ([Action]): A sequence of supported actions. See
             actions ([Action]): A sequence of supported actions. See
@@ -29,7 +34,7 @@ class FeffModder(Modder):
         self.feffinp = feffinp or FEFFDictSet.from_directory(".")
         self.feffinp = self.feffinp.all_input()
         actions = actions or [FileActions, DictActions]
-        super(FeffModder, self).__init__(actions, strict)
+        super().__init__(actions, strict)
 
     def apply_actions(self, actions):
         """
