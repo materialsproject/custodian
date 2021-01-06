@@ -1,8 +1,8 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
-
-# This module implements new error handlers for QChem runs.
+"""
+This module implements new error handlers for QChem runs.
+"""
 
 import os
 from pymatgen.io.qchem.inputs import QCInput
@@ -261,11 +261,9 @@ class QChemSCFErrorHandler(ErrorHandler):
         self.input_file = input_file
         self.output_file = output_file
         self.scf_max_cycles = scf_max_cycles
-        self.geom_max_cycles = geom_max_cycles
         self.qcinp = QCInput.from_file(self.input_file)
         self.outdata = None
         self.errors = None
-        self.qchem_job = qchem_job
 
     def check(self):
         # Checks output file for errors.

@@ -645,7 +645,7 @@ class AliasingErrorHandler(ErrorHandler):
             with open("OUTCAR") as f:
                 grid_adjusted = False
                 changes_dict = {}
-                r = re.compile(".+aliasing errors.*(NG.)\s*to\s*(\d+)")
+                r = re.compile(r".+aliasing errors.*(NG.)\s*to\s*(\d+)")
                 for line in f:
                     m = r.match(line)
                     if m:
@@ -1401,7 +1401,7 @@ class WalltimeHandler(ErrorHandler):
             if not self.electronic_step_stop:
                 # Determine max time per ionic step.
                 outcar.read_pattern(
-                    {"timings": "LOOP\+.+real time(.+)"}, postprocess=float
+                    {"timings": r"LOOP\+.+real time(.+)"}, postprocess=float
                 )
                 time_per_step = (
                     np.max(outcar.data.get("timings"))
