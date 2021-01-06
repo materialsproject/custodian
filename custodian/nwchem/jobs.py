@@ -1,18 +1,16 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
+"""
+This module implements basic kinds of jobs for Nwchem runs.
+"""
 
 import subprocess
 import shutil
 
 from monty.io import zopen
-
-from custodian.custodian import Job
 from monty.shutil import gzip_dir
 
-"""
-This module implements basic kinds of jobs for Nwchem runs.
-"""
+from custodian.custodian import Job
 
 __author__ = "Shyue Ping Ong"
 __version__ = "0.1"

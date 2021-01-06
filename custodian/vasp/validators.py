@@ -1,11 +1,12 @@
 # coding: utf-8
 
-from custodian.custodian import Validator
-from pymatgen.io.vasp import Vasprun, Incar, Outcar, Chgcar
+import logging
+import os
 from collections import deque
 
-import os
-import logging
+from pymatgen.io.vasp import Vasprun, Incar, Outcar, Chgcar
+
+from custodian.custodian import Validator
 
 
 class VasprunXMLValidator(Validator):

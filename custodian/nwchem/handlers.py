@@ -1,23 +1,15 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
-
 """
 This module implements error handlers for Nwchem runs. Currently tested only
 for B3LYP DFT jobs.
 """
 
-__author__ = "Shyue Ping Ong"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "ongsp@ucsd.edu"
-__status__ = "Beta"
-__date__ = "5/20/13"
+from pymatgen.io.nwchem import NwOutput, NwInput
 
+from custodian.ansible.interpreter import Modder
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
-from pymatgen.io.nwchem import NwOutput, NwInput
-from custodian.ansible.interpreter import Modder
 
 
 class NwchemErrorHandler(ErrorHandler):

@@ -1,38 +1,37 @@
 # coding: utf-8
 
-from monty.os.path import zpath
-import os
-import time
+"""
+This module implements specific error handlers for VASP runs. These handlers
+tries to detect common errors in vasp runs and attempt to fix them on the fly
+by modifying the input files.
+"""
+
 import datetime
-import operator
-import shutil
 import logging
-from functools import reduce
-from collections import Counter
+import operator
+import os
 import re
+import shutil
+import time
+from collections import Counter
+from functools import reduce
 
 import numpy as np
-
 from monty.dev import deprecated
+from monty.os.path import zpath
 from monty.serialization import loadfn
-
-from custodian.custodian import ErrorHandler
-from custodian.utils import backup
 from pymatgen.core.structure import Structure
 from pymatgen.io.vasp.inputs import Poscar, VaspInput, Incar, Kpoints
 from pymatgen.io.vasp.outputs import Vasprun, Oszicar, Outcar
 from pymatgen.io.vasp.sets import MPScanRelaxSet
 from pymatgen.transformations.standard_transformations import SupercellTransformation
 
-from custodian.ansible.interpreter import Modder
 from custodian.ansible.actions import FileActions
+from custodian.ansible.interpreter import Modder
+from custodian.custodian import ErrorHandler
+from custodian.utils import backup
 from custodian.vasp.interpreter import VaspModder
 
-"""
-This module implements specific error handlers for VASP runs. These handlers
-tries to detect common errors in vasp runs and attempt to fix them on the fly
-by modifying the input files.
-"""
 
 __author__ = (
     "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, "
@@ -732,10 +731,10 @@ class DriftErrorHandler(ErrorHandler):
         if len(outcar.data.get("drift", [])) < self.to_average:
             # Ensure enough steps to get average drift
             return False
-        else:
-            curr_drift = outcar.data.get("drift", [])[::-1][: self.to_average]
-            curr_drift = np.average([np.linalg.norm(d) for d in curr_drift])
-            return curr_drift > self.max_drift
+
+        curr_drift = outcar.data.get("drift", [])[::-1][: self.to_average]
+        curr_drift = np.average([np.linalg.norm(d) for d in curr_drift])
+        return curr_drift > self.max_drift
 
     def correct(self):
         backup(VASP_BACKUP_FILES)
@@ -922,9 +921,9 @@ class UnconvergedErrorHandler(ErrorHandler):
             backup(VASP_BACKUP_FILES)
             VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Unconverged"], "actions": actions}
-        else:
-            # Unfixable error. Just return None for actions.
-            return {"errors": ["Unconverged"], "actions": None}
+
+        # Unfixable error. Just return None for actions.
+        return {"errors": ["Unconverged"], "actions": None}
 
 
 class IncorrectSmearingHandler(ErrorHandler):
@@ -1166,6 +1165,7 @@ class PotimErrorHandler(ErrorHandler):
                 return True
         except Exception:
             return False
+        return None
 
     def correct(self):
         backup(VASP_BACKUP_FILES)
@@ -1213,6 +1213,7 @@ class FrozenJobErrorHandler(ErrorHandler):
         st = os.stat(self.output_filename)
         if time.time() - st.st_mtime > self.timeout:
             return True
+        return None
 
     def correct(self):
         backup(VASP_BACKUP_FILES | {self.output_filename})
@@ -1304,8 +1305,7 @@ class NonConvergingErrorHandler(ErrorHandler):
             VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Non-converging job"], "actions": actions}
         # Unfixable error. Just return None for actions.
-        else:
-            return {"errors": ["Non-converging job"], "actions": None}
+        return {"errors": ["Non-converging job"], "actions": None}
 
     @classmethod
     def from_dict(cls, d):
@@ -1441,12 +1441,6 @@ class WalltimeHandler(ErrorHandler):
         for a in actions:
             m.modify(a["action"], a["file"])
         return {"errors": ["Walltime reached"], "actions": None}
-
-
-@deprecated(replacement=WalltimeHandler)
-class PBSWalltimeHandler(WalltimeHandler):
-    def __init__(self, buffer_time=300):
-        super(PBSWalltimeHandler, self).__init__(None, buffer_time=buffer_time)
 
 
 class CheckpointHandler(ErrorHandler):
@@ -1594,11 +1588,10 @@ class PositiveEnergyErrorHandler(ErrorHandler):
             actions = [{"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}}]
             VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Positive energy"], "actions": actions}
-        elif algo == "Normal":
+        if algo == "Normal":
             potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
             actions = [{"dict": "INCAR", "action": {"_set": {"POTIM": potim}}}]
             VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Positive energy"], "actions": actions}
         # Unfixable error. Just return None for actions.
-        else:
-            return {"errors": ["Positive energy"], "actions": None}
+        return {"errors": ["Positive energy"], "actions": None}
