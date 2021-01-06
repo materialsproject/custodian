@@ -1,7 +1,5 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
-
 from monty.os.path import zpath
 import os
 import time

@@ -1,6 +1,5 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
 import subprocess
 import os
 import shutil
@@ -456,7 +455,7 @@ class VaspJob(Job):
         half_kpts_first_relax=False,
         **vasp_job_kwargs
     ):
-        """
+        r"""
         Returns a generator of jobs for a full optimization run. Basically,
         this runs an infinite series of geometry optimization jobs until the
         % vol change in a particular optimization is less than vol_change_tol.
@@ -540,7 +539,7 @@ class VaspJob(Job):
         algo="bfgs",
         **vasp_job_kwargs
     ):
-        """
+        r"""
         Returns a generator of jobs for a constrained optimization run. Typical
         use case is when you want to approximate a biaxial strain situation,
         e.g., you apply a defined strain to a and b directions of the lattice,
