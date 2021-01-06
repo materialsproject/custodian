@@ -1,32 +1,26 @@
 #!/usr/bin/env python
 
 """
-This is a master vasp running script to perform variuos combinations of VASP
-runs.
+This is a master vasp running script to converging kpoints for a calculation
 """
 
-from __future__ import division
-
-__author__ = "shyuepingong"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "shyuep@gmail.com"
-__status__ = "Beta"
-__date__ = "2/4/13"
-
 import logging
+
+from pymatgen.io.vasp.inputs import VaspInput
+from pymatgen.io.vasp.outputs import Vasprun
 
 from custodian.custodian import Custodian
 from custodian.vasp.handlers import VaspErrorHandler, UnconvergedErrorHandler
 from custodian.vasp.jobs import VaspJob
-from pymatgen.io.vasp.inputs import VaspInput
-from pymatgen.io.vasp.outputs import Vasprun
 
 FORMAT = "%(asctime)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
 
 
 def get_runs(vasp_command, target=1e-3, max_steps=10, mode="linear"):
+    """
+    Generate the runs using a generator until convergence is achieved.
+    """
     energy = 0
     vinput = VaspInput.from_directory(".")
     kpoints = vinput["KPOINTS"].kpts[0]
@@ -46,16 +40,15 @@ def get_runs(vasp_command, target=1e-3, max_steps=10, mode="linear"):
             if ediff < target:
                 logging.info("Converged to {} eV/atom!".format(ediff))
                 break
-            else:
-                energy = e_per_atom
-                settings = [
-                    {"dict": "INCAR", "action": {"_set": {"ISTART": 1}}},
-                    {"dict": "KPOINTS", "action": {"_set": {"kpoints": [m]}}},
-                    {
-                        "filename": "CONTCAR",
-                        "action": {"_file_copy": {"dest": "POSCAR"}},
-                    },
-                ]
+            energy = e_per_atom
+            settings = [
+                {"dict": "INCAR", "action": {"_set": {"ISTART": 1}}},
+                {"dict": "KPOINTS", "action": {"_set": {"kpoints": [m]}}},
+                {
+                    "filename": "CONTCAR",
+                    "action": {"_file_copy": {"dest": "POSCAR"}},
+                },
+            ]
         yield VaspJob(
             vasp_command,
             final=False,
@@ -66,6 +59,9 @@ def get_runs(vasp_command, target=1e-3, max_steps=10, mode="linear"):
 
 
 def do_run(args):
+    """
+    Perform the run.
+    """
     handlers = [VaspErrorHandler(), UnconvergedErrorHandler()]
     c = Custodian(
         handlers,
@@ -81,6 +77,9 @@ def do_run(args):
 
 
 def main():
+    """
+    Main method
+    """
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -94,12 +93,7 @@ def main():
     default convergence criteria is 1meV/atom, but this can be set using the
     --target option.
     """,
-        epilog="""
-    Author: Shyue Ping Ong
-    Version: {}
-    Last updated: {}""".format(
-            __version__, __date__
-        ),
+        epilog="""Author: Shyue Ping Ong"""
     )
 
     parser.add_argument(

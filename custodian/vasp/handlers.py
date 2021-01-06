@@ -1,38 +1,37 @@
 # coding: utf-8
 
-from monty.os.path import zpath
-import os
-import time
+"""
+This module implements specific error handlers for VASP runs. These handlers
+tries to detect common errors in vasp runs and attempt to fix them on the fly
+by modifying the input files.
+"""
+
 import datetime
-import operator
-import shutil
 import logging
-from functools import reduce
-from collections import Counter
+import operator
+import os
 import re
+import shutil
+import time
+from collections import Counter
+from functools import reduce
 
 import numpy as np
-
 from monty.dev import deprecated
+from monty.os.path import zpath
 from monty.serialization import loadfn
-
-from custodian.custodian import ErrorHandler
-from custodian.utils import backup
 from pymatgen.core.structure import Structure
 from pymatgen.io.vasp.inputs import Poscar, VaspInput, Incar, Kpoints
 from pymatgen.io.vasp.outputs import Vasprun, Oszicar, Outcar
 from pymatgen.io.vasp.sets import MPScanRelaxSet
 from pymatgen.transformations.standard_transformations import SupercellTransformation
 
-from custodian.ansible.interpreter import Modder
 from custodian.ansible.actions import FileActions
+from custodian.ansible.interpreter import Modder
+from custodian.custodian import ErrorHandler
+from custodian.utils import backup
 from custodian.vasp.interpreter import VaspModder
 
-"""
-This module implements specific error handlers for VASP runs. These handlers
-tries to detect common errors in vasp runs and attempt to fix them on the fly
-by modifying the input files.
-"""
 
 __author__ = (
     "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, "
@@ -147,6 +146,9 @@ class VaspErrorHandler(ErrorHandler):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def check(self):
+        """
+        Check for error.
+        """
         incar = Incar.from_file("INCAR")
         self.errors = set()
         error_msgs = set()
@@ -170,6 +172,9 @@ class VaspErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
         actions = []
         vi = VaspInput.from_directory(".")
@@ -495,6 +500,9 @@ class LrfCommutatorHandler(ErrorHandler):
         self.error_count = Counter()
 
     def check(self):
+        """
+        Check for error.
+        """
         self.errors = set()
         with open(self.output_filename, "r") as f:
             for line in f:
@@ -506,6 +514,9 @@ class LrfCommutatorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
         actions = []
         vi = VaspInput.from_directory(".")
@@ -553,6 +564,9 @@ class StdErrHandler(ErrorHandler):
         self.error_count = Counter()
 
     def check(self):
+        """
+        Check for error.
+        """
         self.errors = set()
         with open(self.output_filename, "r") as f:
             for line in f:
@@ -564,6 +578,9 @@ class StdErrHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
         actions = []
         vi = VaspInput.from_directory(".")
@@ -619,6 +636,9 @@ class AliasingErrorHandler(ErrorHandler):
         self.errors = set()
 
     def check(self):
+        """
+        Check for error.
+        """
         incar = Incar.from_file("INCAR")
         self.errors = set()
         with open(self.output_filename, "r") as f:
@@ -637,6 +657,9 @@ class AliasingErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
         actions = []
         vi = VaspInput.from_directory(".")
@@ -713,7 +736,9 @@ class DriftErrorHandler(ErrorHandler):
         self.enaug_multiply = enaug_multiply
 
     def check(self):
-
+        """
+        Check for error.
+        """
         incar = Incar.from_file("INCAR")
         if incar.get("EDIFFG", 0.1) >= 0 or incar.get("NSW", 0) == 0:
             # Only activate when force relaxing and ionic steps
@@ -732,12 +757,15 @@ class DriftErrorHandler(ErrorHandler):
         if len(outcar.data.get("drift", [])) < self.to_average:
             # Ensure enough steps to get average drift
             return False
-        else:
-            curr_drift = outcar.data.get("drift", [])[::-1][: self.to_average]
-            curr_drift = np.average([np.linalg.norm(d) for d in curr_drift])
-            return curr_drift > self.max_drift
+
+        curr_drift = outcar.data.get("drift", [])[::-1][: self.to_average]
+        curr_drift = np.average([np.linalg.norm(d) for d in curr_drift])
+        return curr_drift > self.max_drift
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES)
         actions = []
         vi = VaspInput.from_directory(".")
@@ -809,6 +837,9 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         self.output_vasprun = output_vasprun
 
     def check(self):
+        """
+        Check for error.
+        """
         msg = (
             "Reciprocal lattice and k-lattice belong to different class of" " lattices."
         )
@@ -840,6 +871,9 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
         vi = VaspInput.from_directory(".")
         m = reduce(operator.mul, vi["KPOINTS"].kpts[0])
@@ -869,6 +903,9 @@ class UnconvergedErrorHandler(ErrorHandler):
         self.output_filename = output_filename
 
     def check(self):
+        """
+        Check for error.
+        """
         try:
             v = Vasprun(self.output_filename)
             if not v.converged:
@@ -878,6 +915,9 @@ class UnconvergedErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         v = Vasprun(self.output_filename)
         actions = []
         if not v.converged_electronic:
@@ -922,9 +962,9 @@ class UnconvergedErrorHandler(ErrorHandler):
             backup(VASP_BACKUP_FILES)
             VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Unconverged"], "actions": actions}
-        else:
-            # Unfixable error. Just return None for actions.
-            return {"errors": ["Unconverged"], "actions": None}
+
+        # Unfixable error. Just return None for actions.
+        return {"errors": ["Unconverged"], "actions": None}
 
 
 class IncorrectSmearingHandler(ErrorHandler):
@@ -948,6 +988,9 @@ class IncorrectSmearingHandler(ErrorHandler):
         self.output_filename = output_filename
 
     def check(self):
+        """
+        Check for error.
+        """
         try:
             v = Vasprun(self.output_filename)
             # check whether bandgap is zero and tetrahedron smearing was used
@@ -958,6 +1001,9 @@ class IncorrectSmearingHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
         vi = VaspInput.from_directory(".")
 
@@ -990,6 +1036,9 @@ class ScanMetalHandler(ErrorHandler):
         self.output_filename = output_filename
 
     def check(self):
+        """
+        Check for error.
+        """
         try:
             v = Vasprun(self.output_filename)
             # check whether bandgap is zero and tetrahedron smearing was used
@@ -1000,6 +1049,9 @@ class ScanMetalHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
         vi = VaspInput.from_directory(".")
 
@@ -1032,6 +1084,9 @@ class LargeSigmaHandler(ErrorHandler):
         """
 
     def check(self):
+        """
+        Check for error.
+        """
         incar = Incar.from_file("INCAR")
         try:
             outcar = Outcar("OUTCAR")
@@ -1058,6 +1113,9 @@ class LargeSigmaHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES)
         actions = []
         vi = VaspInput.from_directory(".")
@@ -1102,6 +1160,9 @@ class MaxForceErrorHandler(ErrorHandler):
         self.max_force_threshold = max_force_threshold
 
     def check(self):
+        """
+        Check for error.
+        """
         try:
             v = Vasprun(self.output_filename)
             forces = np.array(v.ionic_steps[-1]["forces"])
@@ -1116,6 +1177,9 @@ class MaxForceErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
         vi = VaspInput.from_directory(".")
         ediff = float(vi["INCAR"].get("EDIFF", 1e-4))
@@ -1158,6 +1222,9 @@ class PotimErrorHandler(ErrorHandler):
         self.dE_threshold = dE_threshold
 
     def check(self):
+        """
+        Check for error.
+        """
         try:
             oszicar = Oszicar(self.output_filename)
             n = len(Poscar.from_file(self.input_filename).structure)
@@ -1166,8 +1233,12 @@ class PotimErrorHandler(ErrorHandler):
                 return True
         except Exception:
             return False
+        return None
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES)
         vi = VaspInput.from_directory(".")
         potim = float(vi["INCAR"].get("POTIM", 0.5))
@@ -1210,11 +1281,18 @@ class FrozenJobErrorHandler(ErrorHandler):
         self.timeout = timeout
 
     def check(self):
+        """
+        Check for error.
+        """
         st = os.stat(self.output_filename)
         if time.time() - st.st_mtime > self.timeout:
             return True
+        return None
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         backup(VASP_BACKUP_FILES | {self.output_filename})
 
         vi = VaspInput.from_directory(".")
@@ -1253,6 +1331,9 @@ class NonConvergingErrorHandler(ErrorHandler):
         self.nionic_steps = nionic_steps
 
     def check(self):
+        """
+        Check for error.
+        """
         vi = VaspInput.from_directory(".")
         nelm = vi["INCAR"].get("NELM", 60)
         try:
@@ -1267,6 +1348,9 @@ class NonConvergingErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         vi = VaspInput.from_directory(".")
         algo = vi["INCAR"].get("ALGO", "Normal")
         amix = vi["INCAR"].get("AMIX", 0.4)
@@ -1304,8 +1388,7 @@ class NonConvergingErrorHandler(ErrorHandler):
             VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Non-converging job"], "actions": actions}
         # Unfixable error. Just return None for actions.
-        else:
-            return {"errors": ["Non-converging job"], "actions": None}
+        return {"errors": ["Non-converging job"], "actions": None}
 
     @classmethod
     def from_dict(cls, d):
@@ -1394,6 +1477,9 @@ class WalltimeHandler(ErrorHandler):
         self.prev_check_time = self.start_time
 
     def check(self):
+        """
+        Check for error.
+        """
         if self.wall_time:
             run_time = datetime.datetime.now() - self.start_time
             total_secs = run_time.total_seconds()
@@ -1428,7 +1514,9 @@ class WalltimeHandler(ErrorHandler):
         return False
 
     def correct(self):
-
+        """
+        Perform corrections.
+        """
         content = (
             "LSTOP = .TRUE." if not self.electronic_step_stop else "LABORT = .TRUE."
         )
@@ -1441,12 +1529,6 @@ class WalltimeHandler(ErrorHandler):
         for a in actions:
             m.modify(a["action"], a["file"])
         return {"errors": ["Walltime reached"], "actions": None}
-
-
-@deprecated(replacement=WalltimeHandler)
-class PBSWalltimeHandler(WalltimeHandler):
-    def __init__(self, buffer_time=300):
-        super(PBSWalltimeHandler, self).__init__(None, buffer_time=buffer_time)
 
 
 class CheckpointHandler(ErrorHandler):
@@ -1480,6 +1562,9 @@ class CheckpointHandler(ErrorHandler):
         self.chk_counter = 0
 
     def check(self):
+        """
+        Check for error.
+        """
         run_time = datetime.datetime.now() - self.start_time
         total_secs = run_time.seconds + run_time.days * 3600 * 24
         if total_secs > self.interval:
@@ -1487,6 +1572,9 @@ class CheckpointHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         content = "LSTOP = .TRUE."
         chkpt_content = 'Index: %d\nTime: "%s"' % (
             self.chk_counter,
@@ -1535,12 +1623,21 @@ class StoppedRunHandler(ErrorHandler):
     is_terminating = False
 
     def __init__(self):
+        """
+        Dummy init.
+        """
         pass
 
     def check(self):
+        """
+        Check for error.
+        """
         return os.path.exists("chkpt.yaml")
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         d = loadfn("chkpt.yaml")
         i = d["Index"]
         name = shutil.make_archive(
@@ -1577,6 +1674,9 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         self.output_filename = output_filename
 
     def check(self):
+        """
+        Check for error.
+        """
         try:
             oszicar = Oszicar(self.output_filename)
             if oszicar.final_energy > 0:
@@ -1586,6 +1686,9 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Perform corrections.
+        """
         # change ALGO = Fast to Normal if ALGO is !Normal
         vi = VaspInput.from_directory(".")
         algo = vi["INCAR"].get("ALGO", "Normal")
@@ -1594,11 +1697,10 @@ class PositiveEnergyErrorHandler(ErrorHandler):
             actions = [{"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}}]
             VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Positive energy"], "actions": actions}
-        elif algo == "Normal":
+        if algo == "Normal":
             potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
             actions = [{"dict": "INCAR", "action": {"_set": {"POTIM": potim}}}]
             VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Positive energy"], "actions": actions}
         # Unfixable error. Just return None for actions.
-        else:
-            return {"errors": ["Positive energy"], "actions": None}
+        return {"errors": ["Positive energy"], "actions": None}

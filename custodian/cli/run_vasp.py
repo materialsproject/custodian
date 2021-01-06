@@ -5,25 +5,20 @@ This is a master vasp running script to perform various combinations of VASP
 runs.
 """
 
-from __future__ import division
-
 import logging
 import sys
+
 import ruamel.yaml as yaml
+from pymatgen.io.vasp.inputs import VaspInput, Incar, Kpoints
 
 from custodian.custodian import Custodian
 from custodian.vasp.jobs import VaspJob
-from pymatgen.io.vasp.inputs import VaspInput, Incar, Kpoints
-
-__author__ = "Shyue Ping Ong"
-__version__ = "0.5"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "ongsp@ucsd.edu"
-__status__ = "Beta"
-__date__ = "12/31/13"
 
 
 def load_class(mod, name):
+    """
+    Load the class from mod and name specification.
+    """
     toks = name.split("?")
     params = {}
     if len(toks) == 2:
@@ -38,7 +33,9 @@ def load_class(mod, name):
 
 
 def get_jobs(args):
-    # Returns a generator of jobs. Allows of "infinite" jobs.
+    """
+    Returns a generator of jobs. Allows of "infinite" jobs.
+    """
     vasp_command = args.command.split()
     # save initial INCAR for rampU runs
     n_ramp_u = args.jobs.count("rampU")
@@ -51,14 +48,14 @@ def get_jobs(args):
     njobs = len(args.jobs)
     post_settings = []  # append to this list to have settings applied on next job
     for i, job in enumerate(args.jobs):
-        final = False if i != njobs - 1 else True
+        final = i == njobs - 1
         if any(c.isdigit() for c in job):
             suffix = "." + job
         else:
             suffix = ".{}{}".format(job, i + 1)
         settings = post_settings
         post_settings = []
-        backup = True if i == 0 else False
+        backup = i == 0
         copy_magmom = False
         vinput = VaspInput.from_directory(".")
         if i > 0:
@@ -232,6 +229,9 @@ def get_jobs(args):
 
 
 def do_run(args):
+    """
+    Do the run.
+    """
     FORMAT = "%(asctime)s %(message)s"
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
     logging.info("Handlers used are %s" % args.handlers)
@@ -251,18 +251,14 @@ def do_run(args):
 
 
 def main():
+    """
+    Main method
+    """
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="""
-    run_vasp is a master script to perform various kinds of VASP runs.
-    """,
-        epilog="""
-    Author: Shyue Ping Ong
-    Version: {}
-    Last updated: {}""".format(
-            __version__, __date__
-        ),
+        description="run_vasp is a master script to perform various kinds of VASP runs.",
+        epilog="Author: Shyue Ping Ong"
     )
 
     parser.add_argument(

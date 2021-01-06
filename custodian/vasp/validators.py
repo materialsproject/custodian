@@ -1,11 +1,16 @@
 # coding: utf-8
 
-from custodian.custodian import Validator
-from pymatgen.io.vasp import Vasprun, Incar, Outcar, Chgcar
+"""
+Implements various validatiors, e.g., check if vasprun.xml is valid, for VASP.
+"""
+
+import logging
+import os
 from collections import deque
 
-import os
-import logging
+from pymatgen.io.vasp import Vasprun, Incar, Outcar, Chgcar
+
+from custodian.custodian import Validator
 
 
 class VasprunXMLValidator(Validator):
@@ -26,6 +31,9 @@ class VasprunXMLValidator(Validator):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def check(self):
+        """
+        Check for error.
+        """
         try:
             Vasprun("vasprun.xml")
         except Exception:
@@ -67,9 +75,15 @@ class VaspFilesValidator(Validator):
     """
 
     def __init__(self):
+        """
+        Dummy init
+        """
         pass
 
     def check(self):
+        """
+        Check for error.
+        """
         for vfile in ["CONTCAR", "OSZICAR", "OUTCAR"]:
             if not os.path.exists(vfile):
                 return True
@@ -83,9 +97,15 @@ class VaspNpTMDValidator(Validator):
     """
 
     def __init__(self):
+        """
+        Dummy init.
+        """
         pass
 
     def check(self):
+        """
+        Check for error.
+        """
         incar = Incar.from_file("INCAR")
         is_npt = incar.get("MDALGO") == 3
         if not is_npt:
@@ -96,8 +116,7 @@ class VaspNpTMDValidator(Validator):
         outcar.read_pattern(patterns=patterns)
         if outcar.data["MDALGO"] == [["3"]]:
             return False
-        else:
-            return True
+        return True
 
 
 class VaspAECCARValidator(Validator):
@@ -106,9 +125,15 @@ class VaspAECCARValidator(Validator):
     """
 
     def __init__(self):
+        """
+        Dummy init
+        """
         pass
 
     def check(self):
+        """
+        Check for error.
+        """
         aeccar0 = Chgcar.from_file("AECCAR0")
         aeccar2 = Chgcar.from_file("AECCAR2")
         aeccar = aeccar0 + aeccar2
