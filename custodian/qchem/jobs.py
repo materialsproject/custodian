@@ -5,7 +5,6 @@ import os
 import shutil
 import copy
 import subprocess
-import random
 import numpy as np
 from pymatgen.core import Molecule
 from pymatgen.io.qchem.inputs import QCInput
