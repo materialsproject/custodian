@@ -9,7 +9,7 @@ import logging
 
 import numpy as np
 
-from pymatgen import Structure
+from pymatgen.core.structure import Structure
 from pymatgen.io.vasp.inputs import VaspInput, Incar, Poscar, Kpoints
 from pymatgen.io.vasp.outputs import Vasprun, Outcar
 from monty.os.path import which
@@ -27,14 +27,6 @@ This module implements basic kinds of jobs for VASP runs.
 
 
 logger = logging.getLogger(__name__)
-
-
-__author__ = "Shyue Ping Ong"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "shyuep@gmail.com"
-__status__ = "Beta"
-__date__ = "2/4/13"
 
 
 VASP_INPUT_FILES = {"INCAR", "POSCAR", "POTCAR", "KPOINTS"}
