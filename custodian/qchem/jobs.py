@@ -93,20 +93,20 @@ class QCJob(Job):
             os.environ['QCTHREADS'] = str(self.max_cores)
             os.environ['OMP_NUM_THREADS'] = str(self.max_cores)
         os.environ["QCSCRATCH"] = os.getcwd()
-        if self.calc_loc != None:
+        if self.calc_loc is not None:
             os.environ["QCLOCALSCR"] = self.calc_loc
 
     def postprocess(self):
-        scratch_dir = os.path.join(os.environ["QCSCRATCH"],"scratch")
-        for file in ["HESS","GRAD","plots/dens.0.cube"]:
-            file_path = os.path.join(scratch_dir,file)
+        scratch_dir = os.path.join(os.environ["QCSCRATCH"], "scratch")
+        for file in ["HESS", "GRAD", "plots/dens.0.cube"]:
+            file_path = os.path.join(scratch_dir, file)
             if os.path.exists(file_path):
-                shutil.copy(file_path,os.getcwd())
+                shutil.copy(file_path, os.getcwd())
         if self.suffix != "":
             shutil.move(self.input_file, self.input_file + self.suffix)
             shutil.move(self.output_file, self.output_file + self.suffix)
             shutil.move(self.qclog_file, self.qclog_file + self.suffix)
-            for file in ["HESS","GRAD","dens.0.cube"]:
+            for file in ["HESS", "GRAD", "dens.0.cube"]:
                 if os.path.exists(file):
                     shutil.move(file, file + self.suffix)
         if not self.save_scratch:
@@ -119,7 +119,7 @@ class QCJob(Job):
         Returns:
             (subprocess.Popen) Used for monitoring.
         """
-        local_scratch = os.path.join(os.environ["QCLOCALSCR"],"scratch")
+        local_scratch = os.path.join(os.environ["QCLOCALSCR"], "scratch")
         if os.path.exists(local_scratch):
             shutil.rmtree(local_scratch)
         qclog = open(self.qclog_file, 'w')
