@@ -33,9 +33,9 @@ jobs:
         flake8 --count --show-source --statistics custodian
         # exit-zero treats all errors as warnings.
         flake8 --count --exit-zero --max-complexity=20 --statistics custodian
-    - name: pydocstyle
-      run: |
-        pydocstyle --count custodian
+#    - name: pydocstyle
+#      run: |
+#        pydocstyle --count custodian
     - name: pylint
       run: |
         pylint custodian
