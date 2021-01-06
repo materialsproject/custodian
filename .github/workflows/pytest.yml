@@ -7,11 +7,8 @@ jobs:
     strategy:
       max-parallel: 20
       matrix:
-        include:
-          - os: ubuntu-latest
-            python-version: 3.8
-          - os: ubuntu-latest
-            python-version: 3.7
+        os: [ubuntu-latest]
+        python-version: [3.7, 3.8]
 
     runs-on: ${{ matrix.os }}
 
@@ -27,21 +24,6 @@ jobs:
         pip install -r requirements.txt
         pip install -r requirements-ci.txt
         pip install -e .
-    - name: Set Linux Paths
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        for EXEPATH in `pwd`/cmd_line/*/Linux_64bit; do export PATH=$PATH:$EXEPATH; done
-        export GULP_LIB=`pwd`/cmd_line/gulp/Libraries
-        export PMG_TEST_FILES_DIR=`pwd`/test_files
-    - name: Set Mac Paths
-      if: matrix.os == 'macos-latest'
-      run: |
-        for EXEPATH in `pwd`/cmd_line/*/Darwin_64bit; do export PATH=$PATH:$EXEPATH; done
-        export PMG_TEST_FILES_DIR=`pwd`/test_files
-    - name: Set Windows Paths
-      if: matrix.os == 'windows-latest'
-      run: |
-        set PMG_TEST_FILES_DIR=test_files
     - name: pytest
       env:
         PMG_MAPI_KEY: ${{ secrets.PMG_MAPI_KEY }}

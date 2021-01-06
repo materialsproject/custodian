@@ -11,8 +11,8 @@ jobs:
     strategy:
       max-parallel: 3
       matrix:
-        os: [macos-latest]
-        python-version: [3.6, 3.7, 3.8]
+        os: [ubuntu-latest]
+        python-version: [3.8]
 
     runs-on: ${{ matrix.os }}
 
