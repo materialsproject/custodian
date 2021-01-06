@@ -1,11 +1,19 @@
 # coding: utf-8
 
+"""
+Implements various interpreters and modders for VASP.
+"""
+
+from pymatgen.io.vasp.inputs import VaspInput
+
 from custodian.ansible.actions import FileActions, DictActions
 from custodian.ansible.interpreter import Modder
-from pymatgen.io.vasp.inputs import VaspInput
 
 
 class VaspModder(Modder):
+    """
+    A Modder for VaspInputSets.
+    """
     def __init__(self, actions=None, strict=True, vi=None):
         """
         Initializes a Modder for VaspInput sets
@@ -24,7 +32,7 @@ class VaspModder(Modder):
         """
         self.vi = vi or VaspInput.from_directory(".")
         actions = actions or [FileActions, DictActions]
-        super(VaspModder, self).__init__(actions, strict)
+        super().__init__(actions, strict)
 
     def apply_actions(self, actions):
         """

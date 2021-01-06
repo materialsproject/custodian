@@ -1,5 +1,9 @@
 # coding: utf-8
 
+"""
+Implements various validatiors, e.g., check if vasprun.xml is valid, for VASP.
+"""
+
 import logging
 import os
 from collections import deque
@@ -97,8 +101,7 @@ class VaspNpTMDValidator(Validator):
         outcar.read_pattern(patterns=patterns)
         if outcar.data["MDALGO"] == [["3"]]:
             return False
-        else:
-            return True
+        return True
 
 
 class VaspAECCARValidator(Validator):

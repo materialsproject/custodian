@@ -4,16 +4,9 @@
 This is a script to converge the geometry of a system
 """
 
-from __future__ import division
-
-__author__ = "Stephen Dacek"
-__version__ = "0.1"
-__maintainer__ = "Stephen Dacek"
-__email__ = "sdacek@mit.edu"
-__status__ = "Beta"
-__date__ = "11/3/13"
-
 import logging
+
+from pymatgen.io.vasp.outputs import Vasprun
 
 from custodian.custodian import Custodian
 from custodian.vasp.handlers import (
@@ -24,13 +17,15 @@ from custodian.vasp.handlers import (
     PotimErrorHandler,
 )
 from custodian.vasp.jobs import VaspJob
-from pymatgen.io.vasp.outputs import Vasprun
 
 FORMAT = "%(asctime)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
 
 
 def get_runs(args):
+    """
+    Get the runs.
+    """
     vasp_command = args.command.split()
     converged = False
     job_number = 0
@@ -78,6 +73,9 @@ def get_runs(args):
 
 
 def do_run(args):
+    """
+    Perform the run.
+    """
     handlers = [
         VaspErrorHandler(),
         MeshSymmetryErrorHandler(),
@@ -101,12 +99,7 @@ if __name__ == "__main__":
     converging molecular geometries in VASP, especially in situations where
     the geometry needs to be precise: such as frequency calculations.
     """,
-        epilog="""
-    Author: Stephen Dacek
-    Version: {}
-    Last updated: {}""".format(
-            __version__, __date__
-        ),
+        epilog="Author: Stephen Dacek",
     )
 
     parser.add_argument(
