@@ -1,6 +1,10 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
+"""
+This module implements the main Custodian class, which manages a list of jobs
+given a set of error handlers, the abstract base classes for the
+ErrorHandlers and Jobs.
+"""
 
 import logging
 import subprocess
@@ -10,23 +14,17 @@ import time
 from glob import glob
 import tarfile
 import os
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from itertools import islice
 import warnings
 from ast import literal_eval
-
-from .utils import get_execution_host_info
 
 from monty.tempfile import ScratchDir
 from monty.shutil import gzip_dir
 from monty.json import MSONable, MontyEncoder, MontyDecoder
 from monty.serialization import loadfn, dumpfn
 
-"""
-This module implements the main Custodian class, which manages a list of jobs
-given a set of error handlers, the abstract base classes for the
-ErrorHandlers and Jobs.
-"""
+from .utils import get_execution_host_info
 
 __author__ = "Shyue Ping Ong, William Davidson Richards"
 __copyright__ = "Copyright 2012, The Materials Project"
@@ -237,10 +235,9 @@ class Custodian(object):
             with tarfile.open(n, mode="w:gz", compresslevel=3) as f:
                 f.add(cwd, arcname=".")
             logger.info("Checkpoint written to {}".format(n))
-        except Exception as ex:
+        except Exception:
             logger.info("Checkpointing failed")
             import traceback
-
             logger.error(traceback.format_exc())
 
     @classmethod

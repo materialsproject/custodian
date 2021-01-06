@@ -1,7 +1,5 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
-
 from custodian.custodian import Validator
 from pymatgen.io.vasp import Vasprun, Incar, Outcar, Chgcar
 from collections import deque
@@ -94,7 +92,7 @@ class VaspNpTMDValidator(Validator):
             return False
 
         outcar = Outcar("OUTCAR")
-        patterns = {"MDALGO": "MDALGO\s+=\s+([\d]+)"}
+        patterns = {"MDALGO": r"MDALGO\s+=\s+([\d]+)"}
         outcar.read_pattern(patterns=patterns)
         if outcar.data["MDALGO"] == [["3"]]:
             return False

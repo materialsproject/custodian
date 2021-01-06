@@ -1,11 +1,6 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
 import math
-
-# New QChem job module
-
-
 import os
 import shutil
 import copy
@@ -15,8 +10,6 @@ import numpy as np
 from pymatgen.core import Molecule
 from pymatgen.io.qchem.inputs import QCInput
 from pymatgen.io.qchem.outputs import QCOutput, check_for_structure_changes
-from pymatgen.analysis.graphs import MoleculeGraph
-from pymatgen.analysis.local_env import OpenBabelNN
 from custodian.custodian import Job
 
 __author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath"

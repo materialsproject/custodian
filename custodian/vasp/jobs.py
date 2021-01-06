@@ -1,6 +1,5 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
 import subprocess
 import os
 import shutil
@@ -9,7 +8,7 @@ import logging
 
 import numpy as np
 
-from pymatgen import Structure
+from pymatgen.core.structure import Structure
 from pymatgen.io.vasp.inputs import VaspInput, Incar, Poscar, Kpoints
 from pymatgen.io.vasp.outputs import Vasprun, Outcar
 from monty.os.path import which
@@ -27,14 +26,6 @@ This module implements basic kinds of jobs for VASP runs.
 
 
 logger = logging.getLogger(__name__)
-
-
-__author__ = "Shyue Ping Ong"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "shyuep@gmail.com"
-__status__ = "Beta"
-__date__ = "2/4/13"
 
 
 VASP_INPUT_FILES = {"INCAR", "POSCAR", "POTCAR", "KPOINTS"}
@@ -464,7 +455,7 @@ class VaspJob(Job):
         half_kpts_first_relax=False,
         **vasp_job_kwargs
     ):
-        """
+        r"""
         Returns a generator of jobs for a full optimization run. Basically,
         this runs an infinite series of geometry optimization jobs until the
         % vol change in a particular optimization is less than vol_change_tol.
@@ -548,7 +539,7 @@ class VaspJob(Job):
         algo="bfgs",
         **vasp_job_kwargs
     ):
-        """
+        r"""
         Returns a generator of jobs for a constrained optimization run. Typical
         use case is when you want to approximate a biaxial strain situation,
         e.g., you apply a defined strain to a and b directions of the lattice,

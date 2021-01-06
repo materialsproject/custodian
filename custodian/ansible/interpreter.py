@@ -1,7 +1,5 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
-
 """
 This module implements a Modder class that performs modifications on objects
 using support actions.
@@ -58,7 +56,7 @@ class Modder(object):
         actions = actions if actions is not None else [DictActions]
         for action in actions:
             for i in dir(action):
-                if (not re.match("__\w+__", i)) and callable(getattr(action, i)):
+                if (not re.match(r"__\w+__", i)) and callable(getattr(action, i)):
                     self.supported_actions["_" + i] = getattr(action, i)
         self.strict = strict
 
@@ -97,5 +95,4 @@ class Modder(object):
 
 if __name__ == "__main__":
     import doctest
-
     doctest.testmod()

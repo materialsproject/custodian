@@ -7,9 +7,9 @@ import shutil
 from unittest import TestCase
 
 try:
-    from unittest.mock import patch
+    from unittest.mock import patch  # type: ignore
 except ImportError:
-    from mock import patch
+    from mock import patch  # type: ignore
 import unittest
 
 from custodian.qchem.jobs import QCJob

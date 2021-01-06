@@ -1,7 +1,5 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
-
 from monty.os.path import zpath
 import os
 import time
@@ -20,7 +18,7 @@ from monty.serialization import loadfn
 
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
-from pymatgen import Structure
+from pymatgen.core.structure import Structure
 from pymatgen.io.vasp.inputs import Poscar, VaspInput, Incar, Kpoints
 from pymatgen.io.vasp.outputs import Vasprun, Oszicar, Outcar
 from pymatgen.io.vasp.sets import MPScanRelaxSet
@@ -647,7 +645,7 @@ class AliasingErrorHandler(ErrorHandler):
             with open("OUTCAR") as f:
                 grid_adjusted = False
                 changes_dict = {}
-                r = re.compile(".+aliasing errors.*(NG.)\s*to\s*(\d+)")
+                r = re.compile(r".+aliasing errors.*(NG.)\s*to\s*(\d+)")
                 for line in f:
                     m = r.match(line)
                     if m:
@@ -1403,7 +1401,7 @@ class WalltimeHandler(ErrorHandler):
             if not self.electronic_step_stop:
                 # Determine max time per ionic step.
                 outcar.read_pattern(
-                    {"timings": "LOOP\+.+real time(.+)"}, postprocess=float
+                    {"timings": r"LOOP\+.+real time(.+)"}, postprocess=float
                 )
                 time_per_step = (
                     np.max(outcar.data.get("timings"))
