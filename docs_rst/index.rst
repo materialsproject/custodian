@@ -22,19 +22,7 @@ The current version of Custodian also comes with two sub-packages for error
 handling for Vienna Ab Initio Simulation Package (VASP), NwChem and QChem
 calculations.
 
-Change log
-==========
-
-v2019.8.24
-----------
-* Cleanup codestyle, which is now enforced.
-* Py3k support only, in line with pymatgen.
-* Update dependencies.
-* Sentry support (@mkhorton).
-* Complete qchem overhaul (frequency flattening optimization, refined error
-  handlers) (@samblau)
-
-:doc:`Older versions </changelog>`
+:doc:`Change log </changelog>`
 
 Getting custodian
 =================

@@ -17,14 +17,6 @@ from custodian import __version__ as CURRENT_VER
 
 NEW_VER = datetime.datetime.today().strftime("%Y.%-m.%-d")
 
-__author__ = "Shyue Ping Ong"
-__copyright__ = "Copyright 2012, The Materials Project"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "shyue@mit.edu"
-__date__ = "Apr 29, 2012"
-
-
 @task
 def make_doc(ctx):
     with cd("docs_rst"):
