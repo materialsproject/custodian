@@ -54,7 +54,9 @@ class QChemErrorHandler(ErrorHandler):
         self.opt_error_history = []
 
     def check(self):
-        # Checks output file for errors.
+        """
+        Checks output file for errors
+        """
         self.outdata = QCOutput(self.output_file).data
         self.errors = self.outdata.get("errors")
         self.warnings = self.outdata.get("warnings")
@@ -70,6 +72,9 @@ class QChemErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
+        """
+        Perform corrections
+        """
         backup({self.input_file, self.output_file})
         actions = []
         self.qcinp = QCInput.from_file(self.input_file)
@@ -139,7 +144,7 @@ class QChemErrorHandler(ErrorHandler):
 
         elif "unable_to_determine_lamda" in self.errors:
             # Set last geom as new starting geom and rerun. If no opt cycles,
-            # use diff SCF strat? Diff initial guess? Change basis?
+            # use diff SCF strat? Diff initial guess? Change basis? Unclear.
             if len(self.outdata.get("energy_trajectory")) > 1:
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
@@ -266,11 +271,16 @@ class QChemSCFErrorHandler(ErrorHandler):
         self.errors = None
 
     def check(self):
-        # Checks output file for errors.
+        """
+        Checks output file for errors
+        """
         self.outdata = QCOutput(self.output_file).data
         self.errors = self.outdata.get("errors")
         return len(self.errors) > 0
 
     def correct(self):
+        """
+        Corrects errors, but it hasn't been implemented yet
+        """
         print("This hasn't been implemented yet!")
         return {"errors": self.errors, "actions": None}
