@@ -1,12 +1,13 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>custodian.feff package &#8212; custodian 2020.4.27 documentation</title>
-    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>custodian.feff package &#8212; custodian 2021.1.7 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
@@ -36,7 +37,8 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 2020.4.27 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 2021.1.7 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">custodian.feff package</a></li> 
       </ul>
     </div>  
 
@@ -57,9 +59,10 @@
 </div>
 <div class="section" id="module-custodian.feff.handlers">
 <span id="custodian-feff-handlers-module"></span><h2>custodian.feff.handlers module<a class="headerlink" href="#module-custodian.feff.handlers" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<p>This module implements specific error handler for FEFF runs.</p>
+<dl class="py class">
 <dt id="custodian.feff.handlers.UnconvergedErrorHandler">
-<em class="property">class </em><code class="sig-name descname">UnconvergedErrorHandler</code><span class="sig-paren">(</span><em class="sig-param">output_filename='log1.dat'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/handlers.html#UnconvergedErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.feff.handlers.UnconvergedErrorHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">UnconvergedErrorHandler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">output_filename</span><span class="o">=</span><span class="default_value">'log1.dat'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/handlers.html#UnconvergedErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.feff.handlers.UnconvergedErrorHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
 <p>Correct the unconverged error of FEFF’s SCF calculation.</p>
 <p>Initializes the handler with the output file to check</p>
@@ -70,30 +73,20 @@ contains the SCF calculation convergence information. Change this only
 if it is different from the default (unlikely).</p>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.feff.handlers.UnconvergedErrorHandler.check">
 <code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/handlers.html#UnconvergedErrorHandler.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.feff.handlers.UnconvergedErrorHandler.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>If the FEFF run does not converge, the check will return
 “TRUE”</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.feff.handlers.UnconvergedErrorHandler.correct">
 <code class="sig-name descname">correct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/handlers.html#UnconvergedErrorHandler.correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.feff.handlers.UnconvergedErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method is called at the end of a job when an error is detected.
-It should perform any corrective measures relating to the detected
-error.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>(dict) JSON serializable dict that describes the errors and
-actions taken. E.g.
-{“errors”: list_of_errors, “actions”: list_of_actions_taken}.
-If this is an unfixable error, actions should be set to None.</p>
-</dd>
-</dl>
+<dd><p>Perform the corrections.</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="custodian.feff.handlers.UnconvergedErrorHandler.is_monitor">
 <code class="sig-name descname">is_monitor</code><em class="property"> = False</em><a class="headerlink" href="#custodian.feff.handlers.UnconvergedErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -103,11 +96,12 @@ If this is an unfixable error, actions should be set to None.</p>
 </div>
 <div class="section" id="module-custodian.feff.interpreter">
 <span id="custodian-feff-interpreter-module"></span><h2>custodian.feff.interpreter module<a class="headerlink" href="#module-custodian.feff.interpreter" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<p>Implements various interpreters and modders for FEFF calculations.</p>
+<dl class="py class">
 <dt id="custodian.feff.interpreter.FeffModder">
-<em class="property">class </em><code class="sig-name descname">FeffModder</code><span class="sig-paren">(</span><em class="sig-param">actions=None</em>, <em class="sig-param">strict=True</em>, <em class="sig-param">feffinp=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/interpreter.html#FeffModder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.feff.interpreter.FeffModder" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">FeffModder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">actions</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">strict</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">feffinp</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/interpreter.html#FeffModder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.feff.interpreter.FeffModder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.ansible.html#custodian.ansible.interpreter.Modder" title="custodian.ansible.interpreter.Modder"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.ansible.interpreter.Modder</span></code></a></p>
-<p>Initializes a Modder for FeffInput sets</p>
+<p>A Modder for FeffInput sets</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -125,9 +119,9 @@ avoid having to reparse the directory).</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.feff.interpreter.FeffModder.apply_actions">
-<code class="sig-name descname">apply_actions</code><span class="sig-paren">(</span><em class="sig-param">actions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/interpreter.html#FeffModder.apply_actions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.feff.interpreter.FeffModder.apply_actions" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">apply_actions</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">actions</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/interpreter.html#FeffModder.apply_actions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.feff.interpreter.FeffModder.apply_actions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies a list of actions to the FEFF Input Set and rewrites modified
 files.</p>
 <dl class="field-list simple">
@@ -144,9 +138,10 @@ files.</p>
 </div>
 <div class="section" id="module-custodian.feff.jobs">
 <span id="custodian-feff-jobs-module"></span><h2>custodian.feff.jobs module<a class="headerlink" href="#module-custodian.feff.jobs" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<p>This module implements basic kinds of jobs for FEFF runs.</p>
+<dl class="py class">
 <dt id="custodian.feff.jobs.FeffJob">
-<em class="property">class </em><code class="sig-name descname">FeffJob</code><span class="sig-paren">(</span><em class="sig-param">feff_cmd</em>, <em class="sig-param">output_file='feff.out'</em>, <em class="sig-param">stderr_file='std_feff_err.txt'</em>, <em class="sig-param">backup=True</em>, <em class="sig-param">gzipped=False</em>, <em class="sig-param">gzipped_prefix='feff_out'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/jobs.html#FeffJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.feff.jobs.FeffJob" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">FeffJob</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">feff_cmd</span></em>, <em class="sig-param"><span class="n">output_file</span><span class="o">=</span><span class="default_value">'feff.out'</span></em>, <em class="sig-param"><span class="n">stderr_file</span><span class="o">=</span><span class="default_value">'std_feff_err.txt'</span></em>, <em class="sig-param"><span class="n">backup</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">gzipped</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">gzipped_prefix</span><span class="o">=</span><span class="default_value">'feff_out'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/jobs.html#FeffJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.feff.jobs.FeffJob" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.Job</span></code></a></p>
 <p>A basic FEFF job, run whatever is in the directory.</p>
 <p>This constructor is used for a standard FEFF initialization</p>
@@ -168,20 +163,20 @@ will be generated.</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.feff.jobs.FeffJob.postprocess">
 <code class="sig-name descname">postprocess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/jobs.html#FeffJob.postprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.feff.jobs.FeffJob.postprocess" title="Permalink to this definition">¶</a></dt>
 <dd><p>Renaming or gzipping all the output as needed</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.feff.jobs.FeffJob.run">
 <code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/jobs.html#FeffJob.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.feff.jobs.FeffJob.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs the actual FEFF run
 :returns: (subprocess.Popen) Used for monitoring.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.feff.jobs.FeffJob.setup">
 <code class="sig-name descname">setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/jobs.html#FeffJob.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.feff.jobs.FeffJob.setup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs initial setup for FeffJob, do backing up.
@@ -193,10 +188,12 @@ Returns:</p>
 </div>
 <div class="section" id="module-custodian.feff">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-custodian.feff" title="Permalink to this headline">¶</a></h2>
+<p>Jobs and Handlers for FEFF calculations.</p>
 </div>
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>

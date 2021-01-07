@@ -44,7 +44,6 @@ custodian.cli.run\_vasp module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

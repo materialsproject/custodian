@@ -5,6 +5,7 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 6
 
    custodian.ansible
    custodian.cli
@@ -32,7 +33,6 @@ custodian.utils module
    :members:
    :undoc-members:
    :show-inheritance:
-
 
 Module contents
 ---------------

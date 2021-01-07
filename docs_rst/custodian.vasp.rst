@@ -5,6 +5,7 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 6
 
 
 Submodules
@@ -41,7 +42,6 @@ custodian.vasp.validators module
    :members:
    :undoc-members:
    :show-inheritance:
-
 
 Module contents
 ---------------
