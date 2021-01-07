@@ -1,8 +1,3 @@
-.. image:: https://github.com/materialsproject/custodian/workflows/Testing/badge.svg
-    :target: https://github.com/materialsproject/custodian/workflows/Testing/badge.svg
-.. image:: https://github.com/materialsproject/custodian/workflows/Linting/badge.svg
-    :target: https://github.com/materialsproject/custodian/workflows/Linting/badge.svg
-
 Custodian is a simple, robust and flexible just-in-time (JIT) job management
 framework written in Python. Using custodian, you can create wrappers that
 perform error checking, job management and error recovery. It has a simple

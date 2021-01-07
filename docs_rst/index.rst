@@ -22,6 +22,11 @@ The current version of Custodian also comes with two sub-packages for error
 handling for Vienna Ab Initio Simulation Package (VASP), NwChem and QChem
 calculations.
 
+.. image:: https://github.com/materialsproject/custodian/workflows/Testing/badge.svg
+    :target: https://github.com/materialsproject/custodian/workflows/Testing/badge.svg
+.. image:: https://github.com/materialsproject/custodian/workflows/Linting/badge.svg
+    :target: https://github.com/materialsproject/custodian/workflows/Linting/badge.svg
+
 :doc:`Change log </changelog>`
 
 Getting custodian

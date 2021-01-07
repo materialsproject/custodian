@@ -14,7 +14,6 @@ v2019.8.24
 * Complete qchem overhaul (frequency flattening optimization, refined error
   handlers) (@samblau)
 
-
 v2019.2.10
 ----------
 * Improved slow convergence handling. (@shyamd)
