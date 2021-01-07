@@ -1,5 +1,9 @@
 # coding: utf-8
 
+"""
+This module implements basic kinds of jobs for QChem runs.
+"""
+
 import math
 import os
 import shutil
@@ -69,6 +73,9 @@ class QCJob(Job):
 
     @property
     def current_command(self):
+        """
+        The command to run QChem
+        """
         multi = {"openmp": "-nt", "mpi": "-np"}
         if self.multimode not in multi:
             raise RuntimeError("ERROR: Multimode should only be set to openmp or mpi")
@@ -86,6 +93,9 @@ class QCJob(Job):
         return com_str
 
     def setup(self):
+        """
+        Sets up environment variables necessary to efficiently run QChem
+        """
         if self.backup:
             shutil.copy(self.input_file, "{}.orig".format(self.input_file))
         if self.multimode == 'openmp':
@@ -96,6 +106,9 @@ class QCJob(Job):
             os.environ["QCLOCALSCR"] = self.calc_loc
 
     def postprocess(self):
+        """
+        Renames and removes scratch files after running QChem
+        """
         scratch_dir = os.path.join(os.environ["QCSCRATCH"], "scratch")
         for file in ["HESS", "GRAD", "plots/dens.0.cube"]:
             file_path = os.path.join(scratch_dir, file)
@@ -518,6 +531,9 @@ class QCJob(Job):
 def perturb_coordinates(
     old_coords, negative_freq_vecs, molecule_perturb_scale, reversed_direction
 ):
+    """
+    Perturbs a structure along the imaginary mode vibrational frequency vectors
+    """
     max_dis = max([math.sqrt(sum([x ** 2 for x in vec])) for vec in negative_freq_vecs])
     scale = molecule_perturb_scale / max_dis
     normalized_vecs = [[x * scale for x in vec] for vec in negative_freq_vecs]
@@ -531,6 +547,9 @@ def perturb_coordinates(
 
 
 def vector_list_diff(vecs1, vecs2):
+    """
+    Calculates the summed difference of two vectors
+    """
     diff = 0.0
     if len(vecs1) != len(vecs2):
         raise AssertionError("ERROR: Vectors must be of equal length! Exiting...")
