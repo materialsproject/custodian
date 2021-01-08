@@ -17,14 +17,6 @@ from custodian import __version__ as CURRENT_VER
 
 NEW_VER = datetime.datetime.today().strftime("%Y.%-m.%-d")
 
-__author__ = "Shyue Ping Ong"
-__copyright__ = "Copyright 2012, The Materials Project"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "shyue@mit.edu"
-__date__ = "Apr 29, 2012"
-
-
 @task
 def make_doc(ctx):
     with cd("docs_rst"):
@@ -76,13 +68,6 @@ def update_doc(ctx):
 
 
 @task
-def publish(ctx):
-    ctx.run("rm dist/*.*", warn=True)
-    ctx.run("python setup.py sdist")
-    ctx.run("twine upload dist/*")
-
-
-@task
 def release_github(ctx):
     payload = {
         "tag_name": "v" + NEW_VER,
@@ -115,7 +100,7 @@ def set_ver(ctx):
             else:
                 lines.append(l.rstrip())
     with open("custodian/__init__.py", "wt") as f:
-        f.write("\n".join(lines))
+        f.write("\n".join(lines) + "\n")
 
     lines = []
     with open("setup.py", "rt") as f:
@@ -124,13 +109,11 @@ def set_ver(ctx):
                 re.sub(r"version=([^,]+),", 'version="%s",' % NEW_VER, l.rstrip())
             )
     with open("setup.py", "wt") as f:
-        f.write("\n".join(lines))
+        f.write("\n".join(lines) + "\n")
 
 
 @task
 def release(ctx):
     set_ver(ctx)
-    # test(ctx)
-    publish(ctx)
     update_doc(ctx)
     release_github(ctx)

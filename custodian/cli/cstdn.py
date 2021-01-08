@@ -2,15 +2,17 @@
 # Copyright (c) Materials Virtual Lab.
 # Distributed under the terms of the BSD License.
 
-from __future__ import division, unicode_literals, print_function
+"""
+A yaml based Custodian job runner. Allows for multi-step jobs with modifications along the way.
+"""
 
 import argparse
-
+import logging
 import sys
+
 from monty.serialization import loadfn
 
 from custodian.custodian import Custodian
-import logging
 
 example_yaml = """
 # This is an example of a Custodian yaml spec file. It shows how you can specify
@@ -65,7 +67,7 @@ validators:
 - vldr: custodian.vasp.validators.VasprunXMLValidator
 
 
-#This sets all custodian running parameters.
+# This sets all custodian running parameters.
 custodian_params:
   max_errors: 10
   scratch_dir: /tmp
@@ -75,6 +77,9 @@ custodian_params:
 
 
 def run(args):
+    """
+    Perform a single run.
+    """
     FORMAT = "%(asctime)s %(message)s"
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
     logging.info("Spec file is %s" % args.spec_file)
@@ -84,10 +89,16 @@ def run(args):
 
 
 def print_example(args):
+    """
+    Print the example_yaml.
+    """
     print(example_yaml)
 
 
 def main():
+    """
+    Main method
+    """
     parser = argparse.ArgumentParser(
         description="""
     cstdn is a convenient script to run custodian style jobs using a
@@ -112,7 +123,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        a = getattr(args, "func")
+        getattr(args, "func")
     except AttributeError:
         parser.print_help()
         sys.exit(0)

@@ -1,23 +1,15 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
-
 """
 This module implements error handlers for Nwchem runs. Currently tested only
 for B3LYP DFT jobs.
 """
 
-__author__ = "Shyue Ping Ong"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "ongsp@ucsd.edu"
-__status__ = "Beta"
-__date__ = "5/20/13"
+from pymatgen.io.nwchem import NwOutput, NwInput
 
+from custodian.ansible.interpreter import Modder
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
-from pymatgen.io.nwchem import NwOutput, NwInput
-from custodian.ansible.interpreter import Modder
 
 
 class NwchemErrorHandler(ErrorHandler):
@@ -40,7 +32,9 @@ class NwchemErrorHandler(ErrorHandler):
         self.output_filename = output_filename
 
     def check(self):
-        # Checks output file for errors.
+        """
+        Check for errors.
+        """
         out = NwOutput(self.output_filename)
         self.errors = []
         self.input_file = out.job_info["input"]
@@ -63,6 +57,7 @@ class NwchemErrorHandler(ErrorHandler):
             fout.write("".join(lines))
 
     def correct(self):
+        """Correct errors"""
         backup("*.nw*")
         actions = []
         nwi = NwInput.from_file(self.input_file)

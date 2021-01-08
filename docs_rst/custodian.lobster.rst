@@ -5,6 +5,7 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 6
 
 
 Submodules
@@ -25,7 +26,6 @@ custodian.lobster.jobs module
    :members:
    :undoc-members:
    :show-inheritance:
-
 
 Module contents
 ---------------

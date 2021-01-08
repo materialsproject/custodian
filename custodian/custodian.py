@@ -1,6 +1,10 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
+"""
+This module implements the main Custodian class, which manages a list of jobs
+given a set of error handlers, the abstract base classes for the
+ErrorHandlers and Jobs.
+"""
 
 import logging
 import subprocess
@@ -10,23 +14,17 @@ import time
 from glob import glob
 import tarfile
 import os
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from itertools import islice
 import warnings
 from ast import literal_eval
-
-from .utils import get_execution_host_info
 
 from monty.tempfile import ScratchDir
 from monty.shutil import gzip_dir
 from monty.json import MSONable, MontyEncoder, MontyDecoder
 from monty.serialization import loadfn, dumpfn
 
-"""
-This module implements the main Custodian class, which manages a list of jobs
-given a set of error handlers, the abstract base classes for the
-ErrorHandlers and Jobs.
-"""
+from .utils import get_execution_host_info
 
 __author__ = "Shyue Ping Ong, William Davidson Richards"
 __copyright__ = "Copyright 2012, The Materials Project"
@@ -72,7 +70,7 @@ if SENTRY_DSN:
         scope.set_tag("hostname", socket.gethostname())
 
 
-class Custodian(object):
+class Custodian:
     """
     The Custodian class is the manager for a list of jobs given a list of
     error handlers. The way it works is as follows:
@@ -237,10 +235,9 @@ class Custodian(object):
             with tarfile.open(n, mode="w:gz", compresslevel=3) as f:
                 f.add(cwd, arcname=".")
             logger.info("Checkpoint written to {}".format(n))
-        except Exception as ex:
+        except Exception:
             logger.info("Checkpointing failed")
             import traceback
-
             logger.error(traceback.format_exc())
 
     @classmethod
@@ -508,11 +505,10 @@ class Custodian(object):
                         s = "Job return code is %d. Terminating..." % p.returncode
                         logger.info(s)
                         raise ReturnCodeError(s, True)
-                    else:
-                        warnings.warn(
-                            "subprocess returned a non-zero return "
-                            "code. Check outputs carefully..."
-                        )
+                    warnings.warn(
+                        "subprocess returned a non-zero return "
+                        "code. Check outputs carefully..."
+                    )
                 job.postprocess()
                 return
 
@@ -533,11 +529,11 @@ class Custodian(object):
             msg = "Max errors per job reached: {}.".format(self.max_errors_per_job)
             logger.info(msg)
             raise MaxCorrectionsPerJobError(msg, True, self.max_errors_per_job, job)
-        else:
-            self.run_log[-1]["max_errors"] = True
-            msg = "Max errors reached: {}.".format(self.max_errors)
-            logger.info(msg)
-            raise MaxCorrectionsError(msg, True, self.max_errors)
+
+        self.run_log[-1]["max_errors"] = True
+        msg = "Max errors reached: {}.".format(self.max_errors)
+        logger.info(msg)
+        raise MaxCorrectionsError(msg, True, self.max_errors)
 
     def run_interrupted(self):
         """
@@ -578,60 +574,60 @@ class Custodian(object):
                     {"job": job.as_dict(), "corrections": [], "job_n": job_n}
                 )
                 return len(self.jobs)
-            else:
-                # Continuing after running calculation
-                job_n = self.run_log[-1]["job_n"]
-                job = self.jobs[job_n]
 
-                # If we had to fix errors from a previous run, insert clean log
-                # dict
-                if len(self.run_log[-1]["corrections"]) > 0:
-                    logger.info("Reran {}.run due to fixable errors".format(job.name))
+            # Continuing after running calculation
+            job_n = self.run_log[-1]["job_n"]
+            job = self.jobs[job_n]
 
-                # check error handlers
-                logger.info("Checking error handlers for {}.run".format(job.name))
-                if self._do_check(self.handlers):
-                    logger.info("Failed validation based on error handlers")
-                    # raise an error for an unrecoverable error
-                    for x in self.run_log[-1]["corrections"]:
-                        if not x["actions"] and x["handler"].raises_runtime_error:
-                            self.run_log[-1]["handler"] = x["handler"]
-                            s = (
-                                "Unrecoverable error for handler: {}. "
-                                "Raising RuntimeError".format(x["handler"])
-                            )
-                            raise NonRecoverableError(s, True, x["handler"])
-                    logger.info("Corrected input based on error handlers")
-                    # Return with more jobs to run if recoverable error caught
-                    # and corrected for
-                    return len(self.jobs) - job_n
+            # If we had to fix errors from a previous run, insert clean log
+            # dict
+            if len(self.run_log[-1]["corrections"]) > 0:
+                logger.info("Reran {}.run due to fixable errors".format(job.name))
 
-                # check validators
-                logger.info("Checking validator for {}.run".format(job.name))
-                for v in self.validators:
-                    if v.check():
-                        self.run_log[-1]["validator"] = v
-                        logger.info("Failed validation based on validator")
-                        s = "Validation failed: {}".format(v)
-                        raise ValidationError(s, True, v)
-
-                logger.info("Postprocessing for {}.run".format(job.name))
-                job.postprocess()
-
-                # IF DONE WITH ALL JOBS - DELETE ALL CHECKPOINTS AND RETURN
-                # VALIDATED
-                if len(self.jobs) == (job_n + 1):
-                    self.finished = True
-                    return 0
-
-                # Setup next job_n
-                job_n += 1
-                job = self.jobs[job_n]
-                self.run_log.append(
-                    {"job": job.as_dict(), "corrections": [], "job_n": job_n}
-                )
-                job.setup()
+            # check error handlers
+            logger.info("Checking error handlers for {}.run".format(job.name))
+            if self._do_check(self.handlers):
+                logger.info("Failed validation based on error handlers")
+                # raise an error for an unrecoverable error
+                for x in self.run_log[-1]["corrections"]:
+                    if not x["actions"] and x["handler"].raises_runtime_error:
+                        self.run_log[-1]["handler"] = x["handler"]
+                        s = (
+                            "Unrecoverable error for handler: {}. "
+                            "Raising RuntimeError".format(x["handler"])
+                        )
+                        raise NonRecoverableError(s, True, x["handler"])
+                logger.info("Corrected input based on error handlers")
+                # Return with more jobs to run if recoverable error caught
+                # and corrected for
                 return len(self.jobs) - job_n
+
+            # check validators
+            logger.info("Checking validator for {}.run".format(job.name))
+            for v in self.validators:
+                if v.check():
+                    self.run_log[-1]["validator"] = v
+                    logger.info("Failed validation based on validator")
+                    s = "Validation failed: {}".format(v)
+                    raise ValidationError(s, True, v)
+
+            logger.info("Postprocessing for {}.run".format(job.name))
+            job.postprocess()
+
+            # IF DONE WITH ALL JOBS - DELETE ALL CHECKPOINTS AND RETURN
+            # VALIDATED
+            if len(self.jobs) == (job_n + 1):
+                self.finished = True
+                return 0
+
+            # Setup next job_n
+            job_n += 1
+            job = self.jobs[job_n]
+            self.run_log.append(
+                {"job": job.as_dict(), "corrections": [], "job_n": job_n}
+            )
+            job.setup()
+            return len(self.jobs) - job_n
 
         except CustodianError as ex:
             logger.error(ex.message)
@@ -671,9 +667,8 @@ class Custodian(object):
                             raise MaxCorrectionsPerHandlerError(
                                 msg, True, h.max_num_corrections, h
                             )
-                        else:
-                            logger.warning(msg + " Correction not applied.")
-                            continue
+                        logger.warning(msg + " Correction not applied.")
+                        continue
                     if terminate_func is not None and h.is_terminating:
                         logger.info("Terminating job")
                         terminate_func()
@@ -687,14 +682,10 @@ class Custodian(object):
             except Exception:
                 if not self.skip_over_errors:
                     raise
-                else:
-                    import traceback
-
-                    logger.error("Bad handler %s " % h)
-                    logger.error(traceback.format_exc())
-                    corrections.append(
-                        {"errors": ["Bad handler %s " % h], "actions": []}
-                    )
+                import traceback
+                logger.error("Bad handler %s " % h)
+                logger.error(traceback.format_exc())
+                corrections.append({"errors": ["Bad handler %s " % h], "actions": []})
         self.total_errors += len(corrections)
         self.errors_current_job += len(corrections)
         self.run_log[-1]["corrections"].extend(corrections)
@@ -733,7 +724,10 @@ class Job(MSONable):
         """
         pass
 
-    def terminate(self):
+    def terminate(self):  # pylint: disable=R0201
+        """
+        Implement termination function.
+        """
         return None
 
     @property
@@ -876,7 +870,7 @@ class CustodianError(RuntimeError):
             message (str): Message passed to Exception
             raises (bool): Whether this should be raised outside custodian
         """
-        super(CustodianError, self).__init__(message)
+        super().__init__(message)
         self.raises = raises
         self.message = message
 
@@ -893,7 +887,7 @@ class ValidationError(CustodianError):
             raises (bool): Whether this should be raised outside custodian
             validator (Validator): Validator that caused the exception.
         """
-        super(ValidationError, self).__init__(message, raises)
+        super().__init__(message, raises)
         self.validator = validator
 
 
@@ -909,7 +903,7 @@ class NonRecoverableError(CustodianError):
             raises (bool): Whether this should be raised outside custodian
             handler (Handler): Handler that caused the exception.
         """
-        super(NonRecoverableError, self).__init__(message, raises)
+        super().__init__(message, raises)
         self.handler = handler
 
 
@@ -933,7 +927,7 @@ class MaxCorrectionsError(CustodianError):
             raises (bool): Whether this should be raised outside custodian
             max_errors (int): the number of errors reached
         """
-        super(MaxCorrectionsError, self).__init__(message, raises)
+        super().__init__(message, raises)
         self.max_errors = max_errors
 
 
@@ -950,7 +944,7 @@ class MaxCorrectionsPerJobError(CustodianError):
             max_errors_per_job (int): the number of errors per job reached
             job (Job): the job that was stopped
         """
-        super(MaxCorrectionsPerJobError, self).__init__(message, raises)
+        super().__init__(message, raises)
         self.max_errors_per_job = max_errors_per_job
         self.job = job
 
@@ -968,6 +962,6 @@ class MaxCorrectionsPerHandlerError(CustodianError):
             max_errors_per_handler (int): the number of errors per job reached
             handler (Handler): the handler that caused the exception
         """
-        super(MaxCorrectionsPerHandlerError, self).__init__(message, raises)
+        super().__init__(message, raises)
         self.max_errors_per_handler = max_errors_per_handler
         self.handler = handler
