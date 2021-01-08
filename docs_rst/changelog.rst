@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v2020.1.8
+---------
+* New handlers for VASP6 (@mkhorton, @rkingsbury)
+
 v2020.1.7
 ---------
 * Improved handling of scratch directories and update for QChem.
