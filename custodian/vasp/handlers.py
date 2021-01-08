@@ -102,6 +102,7 @@ class VaspErrorHandler(ErrorHandler):
         "rhosyg": ["RHOSYG"],
         "posmap": ["POSMAP"],
         "point_group": ["group operation missing"],
+        "symprec_noise": ["determination of the symmetry of your systems shows a strong"]
     }
 
     def __init__(
@@ -482,6 +483,12 @@ class VaspErrorHandler(ErrorHandler):
 
         if "point_group" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+
+        if "symprec_noise" in self.errors:
+            if (vi["INCAR"].get("ISYM", 2) > 0) and (vi["INCAR"].get("SYMPREC", 1e-5) > 1e-6):
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-6}}})
+            else:
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}

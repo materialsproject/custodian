@@ -303,6 +303,13 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.correct()["errors"], ["point_group"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ISYM"], 0)
+        
+    def test_symprec_noise(self):
+        h = VaspErrorHandler("vasp.symprec_noise")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["symprec_noise"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["SYMPREC"], 1e-6)
 
     def test_point_group_vasp6(self):
         # the error message is formatted differently in VASP6 compared to VASP5

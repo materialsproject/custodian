@@ -1,0 +1,15 @@
+ -----------------------------------------------------------------------------
+|                                                                             |
+|           W    W    AA    RRRRR   N    N  II  N    N   GGGG   !!!           |
+|           W    W   A  A   R    R  NN   N  II  NN   N  G    G  !!!           |
+|           W    W  A    A  R    R  N N  N  II  N N  N  G       !!!           |
+|           W WW W  AAAAAA  RRRRR   N  N N  II  N  N N  G  GGG   !            |
+|           WW  WW  A    A  R   R   N   NN  II  N   NN  G    G                |
+|           W    W  A    A  R    R  N    N  II  N    N   GGGG   !!!           |
+|                                                                             |
+|     The determination of the symmetry of your systems shows a strong        |
+|     dependence on the tolerance parameter SYMPREC. This is often the        |
+|     result of "noise" in the structural parameters (lattice vectors         |
+|     and/or ionic positions). Set NWRITE=3 for more details.                 |
+|                                                                             |
+ -----------------------------------------------------------------------------
