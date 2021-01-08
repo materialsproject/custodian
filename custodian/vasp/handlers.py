@@ -66,11 +66,12 @@ class VaspErrorHandler(ErrorHandler):
 
     error_msgs = {
         "tet": [
-            "Tetrahedron method fails for NKPT<4",
+            "Tetrahedron method fails",
             "Fatal error detecting k-mesh",
             "Fatal error: unable to match k-point",
             "Routine TETIRR needs special values",
             "Tetrahedron method fails (number of k-points < 4)",
+            "BZINTS"
         ],
         "inv_rot_mat": [
             "rotation matrix was not found (increase " "SYMPREC)"
@@ -84,7 +85,7 @@ class VaspErrorHandler(ErrorHandler):
         "dentet": ["DENTET"],
         "too_few_bands": ["TOO FEW BANDS"],
         "triple_product": ["ERROR: the triple product of the basis vectors"],
-        "rot_matrix": ["Found some non-integer element in rotation matrix"],
+        "rot_matrix": ["Found some non-integer element in rotation matrix", "SGRCON"],
         "brions": ["BRIONS problems: POTIM should be increased"],
         "pricel": ["internal error in subroutine PRICEL"],
         "zpotrf": ["LAPACK: Routine ZPOTRF failed"],
@@ -99,7 +100,7 @@ class VaspErrorHandler(ErrorHandler):
         "elf_kpar": ["ELF: KPAR>1 not implemented"],
         "elf_ncl": ["WARNING: ELF not implemented for non collinear case"],
         "rhosyg": ["RHOSYG"],
-        "posmap": ["POSMAP internal error: symmetry equivalent atom not found"],
+        "posmap": ["POSMAP"],
         "point_group": ["group operation missing"],
     }
 
@@ -465,7 +466,19 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-4}}})
 
         if "posmap" in self.errors:
-            actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-6}}})
+            # VASP advises to decrease or increase SYMPREC by an order of magnitude
+            # the default SYMPREC value is 1e-5
+            if self.error_count["posmap"] == 0:
+                # first, reduce by 10x
+                orig_symprec = vi["INCAR"].get("SYMPREC", 1e-5)
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": orig_symprec / 10}}})
+            elif self.error_count["posmap"] == 1:
+                # next, increase by 100x (10x the original)
+                orig_symprec = vi["INCAR"].get("SYMPREC", 1e-6)
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": orig_symprec * 100}}})
+            else:
+                # if we have already corrected twice, there's nothing else to do
+                pass
 
         if "point_group" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
