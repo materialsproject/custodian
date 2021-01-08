@@ -1132,16 +1132,20 @@ class LargeSigmaHandler(ErrorHandler):
         backup(VASP_BACKUP_FILES)
         actions = []
         vi = VaspInput.from_directory(".")
+        sigma = vi["INCAR"].get("SIGMA", 0.2)
 
-        # Reduce SIGMA
-        actions.append(
-                {
-                    "dict": "INCAR",
-                    "action": {
-                        "_set": {"SIGMA": vi["INCAR"].get("SIGMA", 0.2) - 0.04}
-                    },
-                }
-            )
+        # Reduce SIGMA by 0.06 if larger than 0.08
+        # this will reduce SIGMA from the default of 0.2 to the practical
+        # minimum value of 0.02 in 3 steps
+        if sigma > 0.08:
+            actions.append(
+                    {
+                        "dict": "INCAR",
+                        "action": {
+                            "_set": {"SIGMA": sigma - 0.06}
+                        },
+                    }
+                )
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": ["LargeSigma"], "actions": actions}
