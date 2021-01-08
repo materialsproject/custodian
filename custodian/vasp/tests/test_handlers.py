@@ -214,6 +214,11 @@ class VaspErrorHandlerTest(unittest.TestCase):
         shutil.copy("KPOINTS.orig", "KPOINTS")
         os.remove("KPOINTS.orig")
 
+    def test_rot_matrix_vasp6(self):
+        h = VaspErrorHandler("vasp6.sgrcon")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["rot_matrix"])
+
     def test_to_from_dict(self):
         h = VaspErrorHandler("random_name")
         h2 = VaspErrorHandler.from_dict(h.as_dict())
@@ -283,7 +288,14 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.check(), True)
         self.assertEqual(h.correct()["errors"], ["posmap"])
         i = Incar.from_file("INCAR")
-        self.assertEqual(i["SYMPREC"], 1e-6)
+        self.assertAlmostEqual(i["SYMPREC"], 1e-6)
+
+    def test_posmap_vasp6(self):
+        h = VaspErrorHandler("vasp6.posmap")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["posmap"])
+        i = Incar.from_file("INCAR")
+        self.assertAlmostEqual(i["SYMPREC"], 1e-6)
 
     def test_point_group(self):
         h = VaspErrorHandler("vasp.point_group")
@@ -314,6 +326,15 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.correct()["errors"], ["inv_rot_mat"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["SYMPREC"], 1e-08)
+
+    def test_bzint_vasp6(self):
+        # the BZINT error message is formatted differently in VASP6 compared to VASP5
+        h = VaspErrorHandler("vasp6.bzint")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["tet"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ISMEAR"], 0)
+        self.assertEqual(i["SIGMA"], 0.05)
 
     def test_too_large_kspacing(self):
         shutil.copy("INCAR.kspacing", "INCAR")
@@ -554,7 +575,7 @@ class LargeSigmaHandlerTest(unittest.TestCase):
         self.assertTrue(h.check())
         d = h.correct()
         self.assertEqual(d["errors"], ["LargeSigma"])
-        self.assertEqual(Incar.from_file("INCAR")["SIGMA"], 1.46)
+        self.assertEqual(Incar.from_file("INCAR")["SIGMA"], 1.44)
         os.remove("vasprun.xml")
 
     @classmethod

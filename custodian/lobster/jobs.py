@@ -1,13 +1,14 @@
+"""This module implements jobs for Lobster runs. """
+
 import logging
 import os
 import shutil
 import subprocess
 
-from custodian.custodian import Job
 from monty.io import zopen
 from monty.shutil import compress_file
 
-""" This module implements jobs for Lobster runs. """
+from custodian.custodian import Job
 
 __author__ = "Janine George, Guido Petretto"
 __copyright__ = "Copyright 2020, The Materials Project"
