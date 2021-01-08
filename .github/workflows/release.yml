@@ -1,4 +1,4 @@
-name: Test, Release
+name: Release
 
 on:
   release:
@@ -45,6 +45,7 @@ jobs:
         TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
       run: |
-        pip install setuptools wheel twine
+        pip install setuptools wheel
+        conda install twine
         python setup.py sdist bdist_wheel
         twine upload --skip-existing dist/*.tar.gz
