@@ -1,15 +1,16 @@
 # coding: utf-8
 
-import subprocess
+""" This module implements basic kinds of jobs for FEFF runs."""
+
+import logging
 import os
 import shutil
-import logging
+import subprocess
+
 from monty.shutil import decompress_dir
 
 from custodian.custodian import Job
 from custodian.utils import backup
-
-""" This module implements basic kinds of jobs for FEFF runs."""
 
 logger = logging.getLogger(__name__)
 

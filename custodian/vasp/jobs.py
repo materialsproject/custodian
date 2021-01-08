@@ -1,40 +1,29 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
-import subprocess
-import os
-import shutil
-import math
-import logging
-
-import numpy as np
-
-from pymatgen import Structure
-from pymatgen.io.vasp.inputs import VaspInput, Incar, Poscar, Kpoints
-from pymatgen.io.vasp.outputs import Vasprun, Outcar
-from monty.os.path import which
-from monty.shutil import decompress_dir
-from monty.serialization import dumpfn, loadfn
-
-from custodian.custodian import Job, SENTRY_DSN
-from custodian.utils import backup
-from custodian.vasp.interpreter import VaspModder
-from custodian.vasp.handlers import VASP_BACKUP_FILES
-
 """
 This module implements basic kinds of jobs for VASP runs.
 """
 
+import logging
+import math
+import os
+import shutil
+import subprocess
+
+import numpy as np
+from monty.os.path import which
+from monty.serialization import dumpfn, loadfn
+from monty.shutil import decompress_dir
+from pymatgen.core.structure import Structure
+from pymatgen.io.vasp.inputs import VaspInput, Incar, Poscar, Kpoints
+from pymatgen.io.vasp.outputs import Vasprun, Outcar
+
+from custodian.custodian import Job, SENTRY_DSN
+from custodian.utils import backup
+from custodian.vasp.handlers import VASP_BACKUP_FILES
+from custodian.vasp.interpreter import VaspModder
 
 logger = logging.getLogger(__name__)
-
-
-__author__ = "Shyue Ping Ong"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "shyuep@gmail.com"
-__status__ = "Beta"
-__date__ = "2/4/13"
 
 
 VASP_INPUT_FILES = {"INCAR", "POSCAR", "POTCAR", "KPOINTS"}
@@ -464,7 +453,7 @@ class VaspJob(Job):
         half_kpts_first_relax=False,
         **vasp_job_kwargs
     ):
-        """
+        r"""
         Returns a generator of jobs for a full optimization run. Basically,
         this runs an infinite series of geometry optimization jobs until the
         % vol change in a particular optimization is less than vol_change_tol.
@@ -512,21 +501,20 @@ class VaspJob(Job):
                 if abs(vol_change) < vol_change_tol:
                     logger.info("Stopping optimization!")
                     break
-                else:
-                    incar_update = {"ISTART": 1}
-                    if ediffg:
-                        incar_update["EDIFFG"] = ediffg
-                    settings = [
-                        {"dict": "INCAR", "action": {"_set": incar_update}},
-                        {
-                            "file": "CONTCAR",
-                            "action": {"_file_copy": {"dest": "POSCAR"}},
-                        },
-                    ]
-                    if i == 1 and half_kpts_first_relax:
-                        settings.append(
-                            {"dict": "KPOINTS", "action": {"_set": orig_kpts_dict}}
-                        )
+                incar_update = {"ISTART": 1}
+                if ediffg:
+                    incar_update["EDIFFG"] = ediffg
+                settings = [
+                    {"dict": "INCAR", "action": {"_set": incar_update}},
+                    {
+                        "file": "CONTCAR",
+                        "action": {"_file_copy": {"dest": "POSCAR"}},
+                    },
+                ]
+                if i == 1 and half_kpts_first_relax:
+                    settings.append(
+                        {"dict": "KPOINTS", "action": {"_set": orig_kpts_dict}}
+                    )
             logger.info("Generating job = %d!" % (i + 1))
             yield VaspJob(
                 vasp_cmd,
@@ -548,7 +536,7 @@ class VaspJob(Job):
         algo="bfgs",
         **vasp_job_kwargs
     ):
-        """
+        r"""
         Returns a generator of jobs for a constrained optimization run. Typical
         use case is when you want to approximate a biaxial strain situation,
         e.g., you apply a defined strain to a and b directions of the lattice,
@@ -736,6 +724,9 @@ class VaspJob(Job):
                 f.write("%f %f\n" % (k, energies[k]))
 
     def terminate(self):
+        """
+        Ensure all vasp jobs are killed.
+        """
         for k in self.vasp_cmd:
             if "vasp" in k:
                 try:
@@ -953,11 +944,12 @@ class VaspNEBJob(Job):
 
 
 class GenerateVaspInputJob(Job):
+    """
+    Generates a VASP input based on an existing directory. This is typically
+    used to modify the VASP input files before the next VaspJob.
+    """
     def __init__(self, input_set, contcar_only=True, **kwargs):
         """
-        Generates a VASP input based on an existing directory. This is typically
-        used to modify the VASP input files before the next VaspJob.
-
         Args:
             input_set (str): Full path to the input set. E.g.,
                 "pymatgen.io.vasp.sets.MPNonSCFSet".
@@ -969,9 +961,15 @@ class GenerateVaspInputJob(Job):
         self.kwargs = kwargs
 
     def setup(self):
+        """
+        Dummy setup
+        """
         pass
 
     def run(self):
+        """
+        Run the calculation.
+        """
         if os.path.exists("CONTCAR"):
             structure = Structure.from_file("CONTCAR")
         elif (not self.contcar_only) and os.path.exists("POSCAR"):
@@ -984,4 +982,7 @@ class GenerateVaspInputJob(Job):
         vis.write_input(".")
 
     def postprocess(self):
+        """
+        Dummy postprocess.
+        """
         pass
