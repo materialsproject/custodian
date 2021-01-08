@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.vasp.handlers &#8212; custodian 2021.1.7 documentation</title>
+    <title>custodian.vasp.handlers &#8212; custodian 2021.1.8 documentation</title>
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2021.1.7 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2021.1.8 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.vasp.handlers</a></li> 
       </ul>
@@ -117,11 +117,12 @@
 
     <span class="n">error_msgs</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;tet&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="s2">&quot;Tetrahedron method fails for NKPT&lt;4&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Tetrahedron method fails&quot;</span><span class="p">,</span>
             <span class="s2">&quot;Fatal error detecting k-mesh&quot;</span><span class="p">,</span>
             <span class="s2">&quot;Fatal error: unable to match k-point&quot;</span><span class="p">,</span>
             <span class="s2">&quot;Routine TETIRR needs special values&quot;</span><span class="p">,</span>
             <span class="s2">&quot;Tetrahedron method fails (number of k-points &lt; 4)&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;BZINTS&quot;</span>
         <span class="p">],</span>
         <span class="s2">&quot;inv_rot_mat&quot;</span><span class="p">:</span> <span class="p">[</span>
             <span class="s2">&quot;rotation matrix was not found (increase &quot;</span> <span class="s2">&quot;SYMPREC)&quot;</span>
@@ -135,7 +136,7 @@
         <span class="s2">&quot;dentet&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;DENTET&quot;</span><span class="p">],</span>
         <span class="s2">&quot;too_few_bands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;TOO FEW BANDS&quot;</span><span class="p">],</span>
         <span class="s2">&quot;triple_product&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ERROR: the triple product of the basis vectors&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;rot_matrix&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Found some non-integer element in rotation matrix&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;rot_matrix&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Found some non-integer element in rotation matrix&quot;</span><span class="p">,</span> <span class="s2">&quot;SGRCON&quot;</span><span class="p">],</span>
         <span class="s2">&quot;brions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;BRIONS problems: POTIM should be increased&quot;</span><span class="p">],</span>
         <span class="s2">&quot;pricel&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;internal error in subroutine PRICEL&quot;</span><span class="p">],</span>
         <span class="s2">&quot;zpotrf&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;LAPACK: Routine ZPOTRF failed&quot;</span><span class="p">],</span>
@@ -150,8 +151,9 @@
         <span class="s2">&quot;elf_kpar&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ELF: KPAR&gt;1 not implemented&quot;</span><span class="p">],</span>
         <span class="s2">&quot;elf_ncl&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;WARNING: ELF not implemented for non collinear case&quot;</span><span class="p">],</span>
         <span class="s2">&quot;rhosyg&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;RHOSYG&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;posmap&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POSMAP internal error: symmetry equivalent atom not found&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;posmap&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POSMAP&quot;</span><span class="p">],</span>
         <span class="s2">&quot;point_group&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;group operation missing&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;symprec_noise&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;determination of the symmetry of your systems shows a strong&quot;</span><span class="p">]</span>
     <span class="p">}</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -516,10 +518,28 @@
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;SYMPREC&quot;</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">}}})</span>
 
         <span class="k">if</span> <span class="s2">&quot;posmap&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;SYMPREC&quot;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">}}})</span>
+            <span class="c1"># VASP advises to decrease or increase SYMPREC by an order of magnitude</span>
+            <span class="c1"># the default SYMPREC value is 1e-5</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span><span class="p">[</span><span class="s2">&quot;posmap&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># first, reduce by 10x</span>
+                <span class="n">orig_symprec</span> <span class="o">=</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SYMPREC&quot;</span><span class="p">,</span> <span class="mf">1e-5</span><span class="p">)</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;SYMPREC&quot;</span><span class="p">:</span> <span class="n">orig_symprec</span> <span class="o">/</span> <span class="mi">10</span><span class="p">}}})</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span><span class="p">[</span><span class="s2">&quot;posmap&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># next, increase by 100x (10x the original)</span>
+                <span class="n">orig_symprec</span> <span class="o">=</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SYMPREC&quot;</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;SYMPREC&quot;</span><span class="p">:</span> <span class="n">orig_symprec</span> <span class="o">*</span> <span class="mi">100</span><span class="p">}}})</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># if we have already corrected twice, there&#39;s nothing else to do</span>
+                <span class="k">pass</span>
 
         <span class="k">if</span> <span class="s2">&quot;point_group&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISYM&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}})</span>
+
+        <span class="k">if</span> <span class="s2">&quot;symprec_noise&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ISYM&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SYMPREC&quot;</span><span class="p">,</span> <span class="mf">1e-5</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-6</span><span class="p">):</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;SYMPREC&quot;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">}}})</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISYM&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}})</span>
 
         <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">),</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div></div>
@@ -1170,16 +1190,20 @@
         <span class="n">backup</span><span class="p">(</span><span class="n">VASP_BACKUP_FILES</span><span class="p">)</span>
         <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">vi</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SIGMA&quot;</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
 
-        <span class="c1"># Reduce SIGMA</span>
-        <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;SIGMA&quot;</span><span class="p">:</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SIGMA&quot;</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.04</span><span class="p">}</span>
-                    <span class="p">},</span>
-                <span class="p">}</span>
-            <span class="p">)</span>
+        <span class="c1"># Reduce SIGMA by 0.06 if larger than 0.08</span>
+        <span class="c1"># this will reduce SIGMA from the default of 0.2 to the practical</span>
+        <span class="c1"># minimum value of 0.02 in 3 steps</span>
+        <span class="k">if</span> <span class="n">sigma</span> <span class="o">&gt;</span> <span class="mf">0.08</span><span class="p">:</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;SIGMA&quot;</span><span class="p">:</span> <span class="n">sigma</span> <span class="o">-</span> <span class="mf">0.06</span><span class="p">}</span>
+                        <span class="p">},</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
 
         <span class="n">VaspModder</span><span class="p">(</span><span class="n">vi</span><span class="o">=</span><span class="n">vi</span><span class="p">)</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;LargeSigma&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div></div>
