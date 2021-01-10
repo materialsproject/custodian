@@ -41,11 +41,11 @@ jobs:
       run: |
         pytest custodian --color=yes
     - name: release
+      shell: bash -l {0}
       env:
         TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
       run: |
-        pip install setuptools wheel
-        conda install twine
+        pip install setuptools wheel twine
         python setup.py sdist bdist_wheel
         twine upload --skip-existing dist/*.tar.gz
