@@ -45,13 +45,18 @@ class StdErrHandler(ErrorHandler):
 
     These issues are generally not cp2k-specific, and have to do
     with hardware/slurm/memory/etc.
+
+    This handler does not raise a runtime error, because if the
+    error is non-recoverable, then cp2k will stop itself.
     """
 
     is_monitor = True
+    raises_runtime_error = False
 
     error_msgs = {
         "seg_fault": ["SIGSEGV"],
         "out_of_memory": ["insufficient virtual memory"],
+        "ORTE": ["ORTE"],
         "abort": ["SIGABRT"]
     }
 
@@ -423,23 +428,27 @@ class FrozenJobErrorHandler(ErrorHandler):
 
     def check(self):
         st = os.stat(self.output_file)
-
         out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
         out.parse_scf_opt()
-        conv = out.data['scf_time']
-        if conv:
-            if len(conv[-1]) > 2:  # At least one precond and regular step
-                if time.time() - st.st_mtime > 4*conv[-1][-1]:
-                    self.frozen_scf = True
-                    return True
+        conv = list(itertools.chain.from_iterable(out.data['scf_time']))
 
-        t = tail(self.output_file, 2)
-        if t[0].split() == ['Step', 'Update', 'method', 'Time', 'Convergence', 'Total', 'energy', 'Change']:
-            if time.time() - st.st_mtime > self.timeout:
-                self.frozen_preconditioner = True
+        ci = Cp2kInput.from_file(self.input_file)
+        inner = ci['FORCE_EVAL']['DFT']['SCF'].get('MAX_SCF', Keyword('', 50)).values[0] \
+            if ci.check('FORCE_EVAL/DFT/SCF') else 50
+        outer = ci['FORCE_EVAL']['DFT']['SCF']['OUTER_SCF'].get('MAX_SCF', Keyword('', 1)).values[0] \
+            if ci.check('FORCE_EVAL/DFT/SCF/OUTER_SCF') else 1
+
+        # At least one precond and one regular step
+        # Also make sure you are in the scf loop
+        if len(conv) > 2 and not len(conv) % int(inner*outer) == 0:
+            if (time.time() - st.st_mtime) > 4*max(conv):
+                self.frozen_scf = True
                 return True
 
+        t = tail(self.output_file, 2)
         if time.time() - st.st_mtime > self.timeout:
+            if t[0].split() == ['Step', 'Update', 'method', 'Time', 'Convergence', 'Total', 'energy', 'Change']:
+                self.frozen_preconditioner = True
             return True
 
         return False
@@ -812,22 +821,23 @@ class NumericalPrecisionHandler(ErrorHandler):
                         }}})
             else:
                 # Try a more expensive XC grid
-                if ci.check('FORCE_EVAL/DFT/XC/XC_GRID'):
-                    if ci.by_path('FORCE_EVAL/DFT/XC/XC_GRID').get('XC_GRID', None):
-                        actions.append({
-                            'dict': self.input_file,
-                            "action": {
-                                "_set": {
-                                    'FORCE_EVAL': {
-                                        'DFT': {
-                                            'XC': {
-                                                'XC_GRID': {
-                                                    'USE_FINER_GRID': True
-                                                }
+                tmp = {'dict': self.input_file,
+                        "action": {
+                            "_set": {
+                                'FORCE_EVAL': {
+                                    'DFT': {
+                                        'XC': {
+                                            'XC_GRID': {
+                                                'USE_FINER_GRID': True
                                             }
                                         }
                                     }
-                                }}})
+                                }
+                        }}}
+                if not ci.check('FORCE_EVAL/DFT/XC/XC_GRID'):
+                    actions.append(tmp)
+                elif ci.by_path('FORCE_EVAL/DFT/XC/XC_GRID').get('XC_GRID', None):
+                    actions.append(tmp)
 
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
         return {"errors": ["Unsufficient precision"], "actions": actions}
