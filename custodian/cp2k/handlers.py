@@ -20,7 +20,7 @@ import time
 from typing import Sequence
 from collections import deque
 import itertools
-from pymatgen.io.cp2k.inputs import Cp2kInput, Keyword
+from pymatgen.io.cp2k.inputs import Cp2kInput, Keyword, KeywordList
 from pymatgen.io.cp2k.outputs import Cp2kOutput
 from pymatgen.io.cp2k.utils import get_aux_basis
 from custodian.custodian import ErrorHandler
@@ -52,7 +52,6 @@ class StdErrHandler(ErrorHandler):
     error_msgs = {
         "seg_fault": ["SIGSEGV"],
         "out_of_memory": ["insufficient virtual memory"],
-        "ORTE": ["ORTE"],
         "abort": ["SIGABRT"]
     }
 
@@ -61,10 +60,10 @@ class StdErrHandler(ErrorHandler):
         Initializes the handler with the output file to check.
 
         Args:
-            output_filename (str): This is the file where the stderr for vasp
+            output_file (str): This is the file where the stderr for vasp
                 is being redirected. The error messages that are checked are
                 present in the stderr. Defaults to "std_err.txt", which is the
-                default redirect used by :class:`custodian.vasp.jobs.Cp2kJob`.
+                default redirect used by :class:`custodian.cp2k.jobs.Cp2kJob`.
         """
         self.std_err = std_err
         self.output_file = output_file
@@ -319,7 +318,8 @@ class DivergingScfErrorHandler(ErrorHandler):
 
     def check(self):
         conv = get_conv(self.output_file)
-        if len(conv) > 10 and np.mean(np.diff(conv[-10:])) > 0:
+        tmp = np.diff(conv[-10:])
+        if len(conv) > 10 and all([tmp[i+1] > tmp[i] for i in range(len(tmp)-1)]):
             return True
         return False
 
@@ -341,7 +341,7 @@ class DivergingScfErrorHandler(ErrorHandler):
                                 'FORCE_EVAL': {
                                     'DFT': {
                                         'QS': {
-                                            'EPS_DEFAULT': p / 10
+                                            'EPS_DEFAULT': 1e-16
                                         }
                                     }
                                 }
@@ -373,7 +373,7 @@ class DivergingScfErrorHandler(ErrorHandler):
                     }
                 }
             )
-
+        Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
         return {'errors': ['Diverging SCF'], 'actions': actions}
 
 
@@ -682,7 +682,9 @@ class NumericalPrecisionHandler(ErrorHandler):
     separate numerical issues from things like optimizer choice, slow-to-converge
     systems, or divergence issues, this handler specifically detects the problem of
     convergence getting stuck, where the same convergence value is returned many times
-    in a row. Currently, we have identified the following causes of this problem:
+    in a row. Numerical precision can also be the cause of oscillating convergence.
+    This is a little harder to assess, as it can also just look like slow-convergence.
+    Currently, we have identified the following causes of this problem:
 
         (1) EPS_DEFAULT: Sets the overall precision of the Quickstep module (note, not
             the same as EPS_SCF). The CP2K default of 1e-10 works fine for simple systems
@@ -712,7 +714,7 @@ class NumericalPrecisionHandler(ErrorHandler):
             output_file (str): name of the output file to monitor
             max_same (int): maximum number of SCF convergence loops with the same
                 convergence value before numerical imprecision is decided. It only
-                checks for consequetive convergence values, so if you have:
+                checks for consecutive convergence values, so if you have:
 
                     Convergence
                         0.0001
@@ -764,30 +766,32 @@ class NumericalPrecisionHandler(ErrorHandler):
                         if isinstance(bs, Sequence):
                             for i in range(len(bs)):
                                 if 'AUX_FIT' in [val.upper() for val in bs[i].values]:
-                                    if not bs[i].values[1].startswith('cp'):
+                                    if el == 'Li': # special case of Li aux basis
+                                        aux = get_aux_basis({el: 'cFIT4-SR'})
+                                    elif not bs[i].values[1].startswith('cp'):
                                         aux = get_aux_basis({el: None}, 'cpFIT')
-                                        bs.keywords.pop(i)
-                                        actions.append({'dict': self.input_file,
-                                                        "action": {"_set": {
-                                                            'FORCE_EVAL': {
-                                                                'SUBSYS': {
-                                                                    k: {
-                                                                        'BASIS_SET': 'AUX_FIT '+aux[el]
-                                                                    }
-                                                                }
-                                                            }
-                                                        }}})
-                                        for _bs in bs:
-                                            actions.append({
-                                                'dict': self.input_file,
-                                                'action': {
-                                                    "_inc": {
+                                    bs.keywords.pop(i)
+                                    actions.append({'dict': self.input_file,
+                                                    "action": {"_set": {
                                                         'FORCE_EVAL': {
                                                             'SUBSYS': {
                                                                 k: {
-                                                                    'BASIS_SET': ' '.join(_bs.values)
-                                                                }}}}}})
-                                        break
+                                                                    'BASIS_SET': 'AUX_FIT '+aux[el]
+                                                                }
+                                                            }
+                                                        }
+                                                    }}})
+                                    for _bs in bs:
+                                        actions.append({
+                                            'dict': self.input_file,
+                                            'action': {
+                                                "_inc": {
+                                                    'FORCE_EVAL': {
+                                                        'SUBSYS': {
+                                                            k: {
+                                                                'BASIS_SET': ' '.join(_bs.values)
+                                                            }}}}}})
+                                    break
 
         # If no hybrid modifications were performed
         if len(actions) == 0:
@@ -808,23 +812,150 @@ class NumericalPrecisionHandler(ErrorHandler):
                         }}})
             else:
                 # Try a more expensive XC grid
-                actions.append({
-                    'dict': self.input_file,
+                if ci.check('FORCE_EVAL/DFT/XC/XC_GRID'):
+                    if ci.by_path('FORCE_EVAL/DFT/XC/XC_GRID').get('XC_GRID', None):
+                        actions.append({
+                            'dict': self.input_file,
+                            "action": {
+                                "_set": {
+                                    'FORCE_EVAL': {
+                                        'DFT': {
+                                            'XC': {
+                                                'XC_GRID': {
+                                                    'USE_FINER_GRID': True
+                                                }
+                                            }
+                                        }
+                                    }
+                                }}})
+
+        Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
+        return {"errors": ["Unsufficient precision"], "actions": actions}
+
+
+class HybridPrecisionHandler(ErrorHandler):
+    """
+    Hybrid calculations have additional settings beyond normal DFT
+    calculations that can lead to the SCF getting stuck, oscillating forever,
+    etc.
+
+    Central to this handler is the use of the condition number (CN)
+    (i.e. the ratio of the largest to smallest eigenvalue) of the overlap matrix.
+    The condition number should, ideally, be as small as possible to ensure good
+    convergence. Overlap condition numbers below 1e4 should be fairly easy to
+    converge, more than 1e5 are considered problematic, and
+    above 1e6 is extremely difficult to converge.
+
+    In the HF module, screening is generally used to improve the speed of the
+    calculation. The "ideal" screening parameter in the HF module
+    is roughly:
+
+        EPS_SCHWARZ ~ 1 / (CN)**2
+
+    This is a very conservative estimate, though. Calculations with CN=1e4 would
+    be expected to require EPS_SCHWARZ = 1e-8, while 1e-6 or 1e-7 are often sufficient.
+    Therefore, this handler will take a semi-conservative approach and use a power of 1.5
+    in the denominator instead of 2. This is still a little conservative, but it will help
+    with the computational effort.
+    """
+    def __init__(self, input_file='cp2k.inp', output_file='cp2k.out'):
+        self.input_file = input_file
+        self.output_file = output_file
+        self.overlap_condition = None
+
+    def check(self):
+        ci = Cp2kInput.from_file(self.input_file)
+        out = Cp2kOutput(self.output_file)
+        out.parse_overlap_condition()
+        self.overlap_condition = out.data.get('overlap_condition_number', [[None]])[0][0]
+        if not ci.check('FORCE_EVAL/DFT/XC/HF'):
+            return False
+
+    def correct(self):
+        ci = Cp2kInput.from_file(self.input_file)
+        actions = []
+
+        # custodian should make sure the overlap condition number is calculated, in advance
+        # This is just in case
+        if self.overlap_condition:
+            eps_schwarz = 1 / np.power(self.overlap_condition, 1.5)
+            if ci.check('FORCE_EVAL/DFT/XC/HF/SCREENING'):
+                val = ci.by_path('FORCE_EVAL/DFT/XC/HF/SCREENING').get(
+                    'EPS_SCHWARZ', Keyword('EPS_SCHWARZ', 1e-10)
+                ).values[0]
+                if val > eps_schwarz:
+                    actions.append({'dict': self.input_file,
+                                    "action": {"_set": {
+                                        'FORCE_EVAL': {
+                                            'DFT': {
+                                                'XC': {
+                                                    'HF': {
+                                                        'SCREENING': {
+                                                            'EPS_SCHWARZ': eps_schwarz
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }}})
+
+        # special case of Li: requires SR auxiliary basis for good condition number
+        for k, v in ci['FORCE_EVAL']['SUBSYS'].subsections.items():
+            if v.name.upper() == 'KIND':
+                if v.get('ELEMENT'):
+                    kind = v["ELEMENT"].values[0]
+                else:
+                    kind = v.section_parameters[0]
+                if kind == 'Li':
+                    if isinstance(v['BASIS_SET'], KeywordList):
+                        bases = v['BASIS_SET'].keywords
+                        for b in bases:
+                            if 'AUX_FIT' in b.values and 'SR' not in b.values[-1]:
+                                b = Keyword('BASIS_SET', 'AUX_FIT', 'cFIT4-SR')
+
+        # HF module has stricter precision requirements in general
+        eps_default = ci.by_path('FORCE_EVAL/DFT/QS').get('EPS_DEFAULT', Keyword('EPS_DEFAULT', 1e-10)).values[0]
+
+        if eps_default > 1e-16:
+            actions.append({
+                'dict': self.input_file,
+                "action": {
+                    "_set": {
+                        'FORCE_EVAL': {
+                            'DFT': {
+                                'QS': {
+                                    'EPS_DEFAULT': 1e-16
+                                }
+                            }
+                        }
+                    }}})
+
+        # overlap matrix precision
+        pgf = ci['force_eval']['dft']['qs'].get(
+            'EPS_PGF_ORB', Keyword('EPS_PGF_ORB', np.sqrt(eps_default))
+        ).values[0]
+        if pgf > 1e-12:
+            actions.append(
+                {
+                    "dict": self.input_file,
                     "action": {
-                        "_set": {
-                            'FORCE_EVAL': {
-                                'DFT': {
-                                    'XC': {
-                                        'XC_GRID': {
-                                            'USE_FINER_GRID': True
+                        "_set":
+                            {
+                                'FORCE_EVAL': {
+                                    'DFT': {
+                                        'QS': {
+                                            'EPS_PGF_ORB': 1e-12
                                         }
                                     }
                                 }
                             }
-                        }}})
+
+                    }
+                }
+            )
 
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
-        return {"errors": ["Unsufficient precision"], "actions": actions}
+        return {"errors": ["Unsufficient HF precision"], "actions": actions}
 
 
 def tail(filename, n=10):
