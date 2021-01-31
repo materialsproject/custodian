@@ -63,9 +63,7 @@ class NwchemErrorHandler(ErrorHandler):
         nwi = NwInput.from_file(self.input_file)
         for e in self.errors:
             if e == "autoz error":
-                action = {
-                    "_set": {"geometry_options": ["units", "angstroms", "noautoz"]}
-                }
+                action = {"_set": {"geometry_options": ["units", "angstroms", "noautoz"]}}
                 actions.append(action)
             elif e == "Bad convergence":
                 t = nwi.tasks[self.ntasks - 1]

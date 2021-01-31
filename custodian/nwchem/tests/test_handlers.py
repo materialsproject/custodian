@@ -23,9 +23,7 @@ import glob
 from custodian.nwchem.handlers import NwchemErrorHandler
 
 
-test_dir = os.path.join(
-    os.path.dirname(__file__), "..", "..", "..", "test_files", "nwchem"
-)
+test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files", "nwchem")
 
 
 class NwchemErrorHandlerTest(unittest.TestCase):

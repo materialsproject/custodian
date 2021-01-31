@@ -14,6 +14,7 @@ class VaspModder(Modder):
     """
     A Modder for VaspInputSets.
     """
+
     def __init__(self, actions=None, strict=True, vi=None):
         """
         Initializes a Modder for VaspInput sets

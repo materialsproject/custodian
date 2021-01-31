@@ -93,7 +93,7 @@ def main():
     default convergence criteria is 1meV/atom, but this can be set using the
     --target option.
     """,
-        epilog="""Author: Shyue Ping Ong"""
+        epilog="""Author: Shyue Ping Ong""",
     )
 
     parser.add_argument(
@@ -103,8 +103,7 @@ def main():
         nargs="?",
         default="pvasp",
         type=str,
-        help="VASP command. Defaults to pvasp. If you are using mpirun, "
-        'set this to something like "mpirun pvasp".',
+        help="VASP command. Defaults to pvasp. If you are using mpirun, " 'set this to something like "mpirun pvasp".',
     )
 
     parser.add_argument(

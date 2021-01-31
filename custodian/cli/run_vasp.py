@@ -59,9 +59,7 @@ def get_jobs(args):
         copy_magmom = False
         vinput = VaspInput.from_directory(".")
         if i > 0:
-            settings.append(
-                {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
-            )
+            settings.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
 
         job_type = job.lower()
         auto_npar = True
@@ -123,9 +121,7 @@ def get_jobs(args):
         elif job_type.startswith("nonscf_derived"):
             from pymatgen.io.vasp.sets import MPNonSCFSet
 
-            vis = MPNonSCFSet.from_prev_calc(
-                ".", copy_chgcar=False, user_incar_settings={"LWAVE": True}
-            )
+            vis = MPNonSCFSet.from_prev_calc(".", copy_chgcar=False, user_incar_settings={"LWAVE": True})
             settings.extend(
                 [
                     {"dict": "INCAR", "action": {"_set": dict(vis.incar)}},
@@ -178,20 +174,12 @@ def get_jobs(args):
             incar = vinput["INCAR"]
             structure = vinput["POSCAR"].structure
             if "ISMEAR" in incar:
-                post_settings.append(
-                    {"dict": "INCAR", "action": {"_set": {"ISMEAR": incar["ISMEAR"]}}}
-                )
+                post_settings.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": incar["ISMEAR"]}}})
             else:
-                post_settings.append(
-                    {"dict": "INCAR", "action": {"_unset": {"ISMEAR": 1}}}
-                )
-            post_settings.append(
-                {"dict": "KPOINTS", "action": {"_set": kpoints.as_dict()}}
-            )
+                post_settings.append({"dict": "INCAR", "action": {"_unset": {"ISMEAR": 1}}})
+            post_settings.append({"dict": "KPOINTS", "action": {"_set": kpoints.as_dict()}})
             # lattice vectors with length < 9 will get >1 KPOINT
-            low_kpoints = Kpoints.gamma_automatic(
-                [max(int(18 / l), 1) for l in structure.lattice.abc]
-            )
+            low_kpoints = Kpoints.gamma_automatic([max(int(18 / l), 1) for l in structure.lattice.abc])
             settings.extend(
                 [
                     {"dict": "INCAR", "action": {"_set": {"ISMEAR": 0}}},
@@ -202,9 +190,7 @@ def get_jobs(args):
             # let vasp determine encut (will be lower than
             # needed for compatibility with other runs)
             if "ENCUT" in incar:
-                post_settings.append(
-                    {"dict": "INCAR", "action": {"_set": {"ENCUT": incar["ENCUT"]}}}
-                )
+                post_settings.append({"dict": "INCAR", "action": {"_set": {"ENCUT": incar["ENCUT"]}}})
                 settings.append({"dict": "INCAR", "action": {"_unset": {"ENCUT": 1}}})
 
         elif job_type.startswith("relax"):
@@ -258,7 +244,7 @@ def main():
 
     parser = argparse.ArgumentParser(
         description="run_vasp is a master script to perform various kinds of VASP runs.",
-        epilog="Author: Shyue Ping Ong"
+        epilog="Author: Shyue Ping Ong",
     )
 
     parser.add_argument(
@@ -268,8 +254,7 @@ def main():
         nargs="?",
         default="pvasp",
         type=str,
-        help="VASP command. Defaults to pvasp. If you are using mpirun, "
-        'set this to something like "mpirun pvasp".',
+        help="VASP command. Defaults to pvasp. If you are using mpirun, " 'set this to something like "mpirun pvasp".',
     )
 
     parser.add_argument(

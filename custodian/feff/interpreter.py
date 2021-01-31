@@ -16,6 +16,7 @@ class FeffModder(Modder):
     """
     A Modder for FeffInput sets
     """
+
     def __init__(self, actions=None, strict=True, feffinp=None):
         """
         Args:
@@ -58,11 +59,7 @@ class FeffModder(Modder):
                 raise ValueError("Unrecognized format: {}".format(a))
         if modified:
             feff = self.feffinp
-            feff_input = "\n\n".join(
-                str(feff[k])
-                for k in ["HEADER", "PARAMETERS", "POTENTIALS", "ATOMS"]
-                if k in feff
-            )
+            feff_input = "\n\n".join(str(feff[k]) for k in ["HEADER", "PARAMETERS", "POTENTIALS", "ATOMS"] if k in feff)
             for k, v in feff.items():
                 with open(os.path.join(".", k), "w") as f:
                     f.write(str(v))

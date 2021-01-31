@@ -60,9 +60,7 @@ class VasprunXMLValidator(Validator):
                     vasprun_tail = deque(vasprun, maxlen=10)
                 exception_context["vasprun_tail"] = "".join(vasprun_tail)
 
-            self.logger.error(
-                "Failed to load vasprun.xml", exc_info=True, extra=exception_context
-            )
+            self.logger.error("Failed to load vasprun.xml", exc_info=True, extra=exception_context)
 
             return True
         return False

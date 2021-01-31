@@ -109,9 +109,7 @@ def main():
     subparsers = parser.add_subparsers()
 
     prun = subparsers.add_parser("run", help="Run custodian.")
-    prun.add_argument(
-        "spec_file", metavar="spec_file", type=str, nargs=1, help="YAML/JSON spec file."
-    )
+    prun.add_argument("spec_file", metavar="spec_file", type=str, nargs=1, help="YAML/JSON spec file.")
     prun.set_defaults(func=run)
 
     prun = subparsers.add_parser(

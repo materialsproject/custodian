@@ -35,7 +35,7 @@ from custodian.vasp.handlers import (
     DriftErrorHandler,
     IncorrectSmearingHandler,
     ScanMetalHandler,
-    LargeSigmaHandler
+    LargeSigmaHandler,
 )
 from pymatgen.io.vasp.inputs import Incar, Structure, Kpoints, VaspInput
 
@@ -72,17 +72,13 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["subspacematrix"])
-        self.assertEqual(
-            d["actions"], [{"action": {"_set": {"LREAL": False}}, "dict": "INCAR"}]
-        )
+        self.assertEqual(d["actions"], [{"action": {"_set": {"LREAL": False}}, "dict": "INCAR"}])
 
         # 2nd error should set PREC to accurate.
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["subspacematrix"])
-        self.assertEqual(
-            d["actions"], [{"action": {"_set": {"PREC": "Accurate"}}, "dict": "INCAR"}]
-        )
+        self.assertEqual(d["actions"], [{"action": {"_set": {"PREC": "Accurate"}}, "dict": "INCAR"}])
 
     def test_check_correct(self):
         h = VaspErrorHandler("vasp.teterror")
@@ -107,9 +103,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["real_optlay"])
-        self.assertEqual(
-            d["actions"], [{"action": {"_set": {"LREAL": False}}, "dict": "INCAR"}]
-        )
+        self.assertEqual(d["actions"], [{"action": {"_set": {"LREAL": False}}, "dict": "INCAR"}])
 
         subdir = os.path.join(test_dir, "large_cell_real_optlay")
         os.chdir(subdir)
@@ -167,10 +161,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         vi = VaspInput.from_directory(".")
         self.assertFalse("IMIX" in vi["INCAR"])
         self.assertTrue(os.path.exists("CHGCAR"))
-        if (
-            vi["KPOINTS"].style == Kpoints.supported_modes.Gamma
-            and vi["KPOINTS"].num_kpts < 1
-        ):
+        if vi["KPOINTS"].style == Kpoints.supported_modes.Gamma and vi["KPOINTS"].num_kpts < 1:
             all_kpts_even = all([bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0]])
             self.assertFalse(all_kpts_even)
 
@@ -193,9 +184,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["too_few_bands"])
-        self.assertEqual(
-            d["actions"], [{"action": {"_set": {"NBANDS": 501}}, "dict": "INCAR"}]
-        )
+        self.assertEqual(d["actions"], [{"action": {"_set": {"NBANDS": 501}}, "dict": "INCAR"}])
         clean_dir()
         shutil.move("INCAR.orig", "INCAR")
         os.chdir(test_dir)
@@ -303,7 +292,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.correct()["errors"], ["point_group"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ISYM"], 0)
-        
+
     def test_symprec_noise(self):
         h = VaspErrorHandler("vasp.symprec_noise")
         self.assertEqual(h.check(), True)
@@ -483,9 +472,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         self.assertTrue(h.check())
         d = h.correct()
         self.assertEqual(d["errors"], ["Unconverged"])
-        self.assertIn(
-            {"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}}, d["actions"]
-        )
+        self.assertIn({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}}, d["actions"])
         os.remove("vasprun.xml")
 
     def test_to_from_dict(self):
@@ -839,16 +826,12 @@ class OutOfMemoryHandlerTest(unittest.TestCase):
         vi = VaspInput.from_directory(".")
         from custodian.vasp.interpreter import VaspModder
 
-        VaspModder(vi=vi).apply_actions(
-            [{"dict": "INCAR", "action": {"_set": {"KPAR": 4}}}]
-        )
+        VaspModder(vi=vi).apply_actions([{"dict": "INCAR", "action": {"_set": {"KPAR": 4}}}])
         h = StdErrHandler("std_err.txt.oom")
         self.assertEqual(h.check(), True)
         d = h.correct()
         self.assertEqual(d["errors"], ["out_of_memory"])
-        self.assertEqual(
-            d["actions"], [{"dict": "INCAR", "action": {"_set": {"KPAR": 2}}}]
-        )
+        self.assertEqual(d["actions"], [{"dict": "INCAR", "action": {"_set": {"KPAR": 2}}}])
 
     def tearDown(self):
         shutil.move("INCAR.orig", "INCAR")

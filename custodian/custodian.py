@@ -238,6 +238,7 @@ class Custodian:
         except Exception:
             logger.info("Checkpointing failed")
             import traceback
+
             logger.error(traceback.format_exc())
 
     @classmethod
@@ -328,9 +329,7 @@ class Custodian:
 
         custodian_params = process_params(spec.get("custodian_params", {}))
 
-        return cls(
-            jobs=jobs, handlers=handlers, validators=validators, **custodian_params
-        )
+        return cls(jobs=jobs, handlers=handlers, validators=validators, **custodian_params)
 
     def run(self):
         """
@@ -432,10 +431,7 @@ class Custodian:
         job.setup()
 
         attempt = 0
-        while (
-            self.total_errors < self.max_errors
-            and self.errors_current_job < self.max_errors_per_job
-        ):
+        while self.total_errors < self.max_errors and self.errors_current_job < self.max_errors_per_job:
             attempt += 1
             logger.info(
                 "Starting job no. {} ({}) attempt no. {}. Total errors and "
@@ -467,18 +463,13 @@ class Custodian:
                             time.sleep(self.polling_time_step)
                 else:
                     p.wait()
-                    if (
-                        self.terminate_func is not None
-                        and self.terminate_func != p.terminate
-                    ):
+                    if self.terminate_func is not None and self.terminate_func != p.terminate:
                         self.terminate_func()
                         time.sleep(self.polling_time_step)
 
                 zero_return_code = p.returncode == 0
 
-            logger.info(
-                "{}.run has completed. " "Checking remaining handlers".format(job.name)
-            )
+            logger.info("{}.run has completed. " "Checking remaining handlers".format(job.name))
             # Check for errors again, since in some cases non-monitor
             # handlers fix the problems detected by monitors
             # if an error has been found, not all handlers need to run
@@ -505,10 +496,7 @@ class Custodian:
                         s = "Job return code is %d. Terminating..." % p.returncode
                         logger.info(s)
                         raise ReturnCodeError(s, True)
-                    warnings.warn(
-                        "subprocess returned a non-zero return "
-                        "code. Check outputs carefully..."
-                    )
+                    warnings.warn("subprocess returned a non-zero return " "code. Check outputs carefully...")
                 job.postprocess()
                 return
 
@@ -555,9 +543,7 @@ class Custodian:
         try:
             cwd = os.getcwd()
             v = sys.version.replace("\n", " ")
-            logger.info(
-                "Custodian started in singleshot mode at {} in {}.".format(start, cwd)
-            )
+            logger.info("Custodian started in singleshot mode at {} in {}.".format(start, cwd))
             logger.info("Custodian running on Python version {}".format(v))
 
             # load run log
@@ -570,9 +556,7 @@ class Custodian:
                 job = self.jobs[job_n]
                 logger.info("Setting up job no. 1 ({}) ".format(job.name))
                 job.setup()
-                self.run_log.append(
-                    {"job": job.as_dict(), "corrections": [], "job_n": job_n}
-                )
+                self.run_log.append({"job": job.as_dict(), "corrections": [], "job_n": job_n})
                 return len(self.jobs)
 
             # Continuing after running calculation
@@ -592,10 +576,7 @@ class Custodian:
                 for x in self.run_log[-1]["corrections"]:
                     if not x["actions"] and x["handler"].raises_runtime_error:
                         self.run_log[-1]["handler"] = x["handler"]
-                        s = (
-                            "Unrecoverable error for handler: {}. "
-                            "Raising RuntimeError".format(x["handler"])
-                        )
+                        s = "Unrecoverable error for handler: {}. " "Raising RuntimeError".format(x["handler"])
                         raise NonRecoverableError(s, True, x["handler"])
                 logger.info("Corrected input based on error handlers")
                 # Return with more jobs to run if recoverable error caught
@@ -623,9 +604,7 @@ class Custodian:
             # Setup next job_n
             job_n += 1
             job = self.jobs[job_n]
-            self.run_log.append(
-                {"job": job.as_dict(), "corrections": [], "job_n": job_n}
-            )
+            self.run_log.append({"job": job.as_dict(), "corrections": [], "job_n": job_n})
             job.setup()
             return len(self.jobs) - job_n
 
@@ -653,20 +632,14 @@ class Custodian:
         for h in handlers:
             try:
                 if h.check():
-                    if (
-                        h.max_num_corrections is not None
-                        and h.n_applied_corrections >= h.max_num_corrections
-                    ):
-                        msg = (
-                            "Maximum number of corrections {} reached "
-                            "for handler {}".format(h.max_num_corrections, h)
+                    if h.max_num_corrections is not None and h.n_applied_corrections >= h.max_num_corrections:
+                        msg = "Maximum number of corrections {} reached " "for handler {}".format(
+                            h.max_num_corrections, h
                         )
                         if h.raise_on_max:
                             self.run_log[-1]["handler"] = h
                             self.run_log[-1]["max_errors_per_handler"] = True
-                            raise MaxCorrectionsPerHandlerError(
-                                msg, True, h.max_num_corrections, h
-                            )
+                            raise MaxCorrectionsPerHandlerError(msg, True, h.max_num_corrections, h)
                         logger.warning(msg + " Correction not applied.")
                         continue
                     if terminate_func is not None and h.is_terminating:
@@ -683,6 +656,7 @@ class Custodian:
                 if not self.skip_over_errors:
                     raise
                 import traceback
+
                 logger.error("Bad handler %s " % h)
                 logger.error(traceback.format_exc())
                 corrections.append({"errors": ["Bad handler %s " % h], "actions": []})

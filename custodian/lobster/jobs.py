@@ -18,9 +18,18 @@ __email__ = "janine.george@uclouvain.be"
 __date__ = "April 27, 2020"
 
 LOBSTERINPUT_FILES = ["lobsterin"]
-LOBSTEROUTPUT_FILES = ["lobsterout", "CHARGE.lobster", "COHPCAR.lobster", "COOPCAR.lobster", "DOSCAR.lobster",
-                       "GROSSPOP.lobster", "ICOHPLIST.lobster", "ICOOPLIST.lobster", "lobster.out",
-                       "projectionData.lobster"]
+LOBSTEROUTPUT_FILES = [
+    "lobsterout",
+    "CHARGE.lobster",
+    "COHPCAR.lobster",
+    "COOPCAR.lobster",
+    "DOSCAR.lobster",
+    "GROSSPOP.lobster",
+    "ICOHPLIST.lobster",
+    "ICOOPLIST.lobster",
+    "lobster.out",
+    "projectionData.lobster",
+]
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +39,15 @@ class LobsterJob(Job):
     Runs the Lobster Job
     """
 
-    def __init__(self, lobster_cmd: str, output_file: str = "lobsterout", stderr_file: str = "std_err_lobster.txt",
-                 gzipped: bool = True, add_files_to_gzip=[], backup: bool = True):
+    def __init__(
+        self,
+        lobster_cmd: str,
+        output_file: str = "lobsterout",
+        stderr_file: str = "std_err_lobster.txt",
+        gzipped: bool = True,
+        add_files_to_gzip=[],
+        backup: bool = True,
+    ):
         """
 
         Args:
@@ -65,8 +81,7 @@ class LobsterJob(Job):
 
         logger.info("Running {}".format(" ".join(cmd)))
 
-        with zopen(self.output_file, 'w') as f_std, \
-                zopen(self.stderr_file, "w", buffering=1) as f_err:
+        with zopen(self.output_file, "w") as f_std, zopen(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr
             p = subprocess.Popen(cmd, stdout=f_std, stderr=f_err)
 

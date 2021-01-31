@@ -91,18 +91,14 @@ class UnconvergedErrorHandler(ErrorHandler):
         if nscmt < 100 and ca == 0.2:
             scf_values[2] = 100
             scf_values[4] = 3  # Set nmix = 3
-            actions.append(
-                {"dict": "PARAMETERS", "action": {"_set": {"SCF": scf_values}}}
-            )
+            actions.append({"dict": "PARAMETERS", "action": {"_set": {"SCF": scf_values}}})
             FeffModder().apply_actions(actions)
             return {"errors": ["Non-converging job"], "actions": actions}
 
         if nscmt == 100 and nmix == 3 and ca > 0.01:
             # Reduce the convergence accelerator factor
             scf_values[3] = round(ca / 2, 2)
-            actions.append(
-                {"dict": "PARAMETERS", "action": {"_set": {"SCF": scf_values}}}
-            )
+            actions.append({"dict": "PARAMETERS", "action": {"_set": {"SCF": scf_values}}})
             FeffModder().apply_actions(actions)
             return {"errors": ["Non-converging job"], "actions": actions}
 
@@ -110,9 +106,7 @@ class UnconvergedErrorHandler(ErrorHandler):
             # Set ca = 0.05 and set nmix
             scf_values[3] = 0.05
             scf_values[4] = 5
-            actions.append(
-                {"dict": "PARAMETERS", "action": {"_set": {"SCF": scf_values}}}
-            )
+            actions.append({"dict": "PARAMETERS", "action": {"_set": {"SCF": scf_values}}})
             FeffModder().apply_actions(actions)
             return {"errors": ["Non-converging job"], "actions": actions}
 
@@ -120,18 +114,14 @@ class UnconvergedErrorHandler(ErrorHandler):
             # Set ca = 0.05 and set nmix
             scf_values[3] = 0.05
             scf_values[4] = 10
-            actions.append(
-                {"dict": "PARAMETERS", "action": {"_set": {"SCF": scf_values}}}
-            )
+            actions.append({"dict": "PARAMETERS", "action": {"_set": {"SCF": scf_values}}})
             FeffModder().apply_actions(actions)
             return {"errors": ["Non-converging job"], "actions": actions}
 
         if nmix == 10 and ca < 0.2:
             # loop through ca with nmix = 10
             scf_values[3] = round(ca * 2, 2)
-            actions.append(
-                {"dict": "PARAMETERS", "action": {"_set": {"SCF": scf_values}}}
-            )
+            actions.append({"dict": "PARAMETERS", "action": {"_set": {"SCF": scf_values}}})
             FeffModder().apply_actions(actions)
             return {"errors": ["Non-converging job"], "actions": actions}
 

@@ -24,9 +24,7 @@ __status__ = "Alpha"
 __date__ = "6/6/18"
 __credits__ = "Shyam Dwaraknath"
 
-test_dir = os.path.join(
-    os.path.dirname(__file__), "..", "..", "..", "test_files", "qchem", "new_test_files"
-)
+test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files", "qchem", "new_test_files")
 
 scr_dir = os.path.join(test_dir, "scr")
 cwd = os.getcwd()
@@ -54,9 +52,7 @@ class QCJobTest(TestCase):
             calc_loc="/not/default/",
             backup=False,
         )
-        self.assertEqual(
-            myjob.current_command, " qchem -slurm -np 12 different.qin not_default.qout scratch"
-        )
+        self.assertEqual(myjob.current_command, " qchem -slurm -np 12 different.qin not_default.qout scratch")
         myjob.setup()
         self.assertEqual(os.environ["QCSCRATCH"], os.getcwd())
         self.assertEqual(os.environ["QCLOCALSCR"], "/not/default/")
@@ -140,9 +136,7 @@ class OptFFTest(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "FF_working/test.qin.freq_0")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "FF_working/test.qin.freq_0")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "test.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -156,9 +150,7 @@ class OptFFTest(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "FF_working/test.qin.opt_1")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "FF_working/test.qin.opt_1")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "test.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -172,9 +164,7 @@ class OptFFTest(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "FF_working/test.qin.freq_1")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "FF_working/test.qin.freq_1")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "test.qin")).as_dict(),
         )
         self.assertRaises(StopIteration, myjob.__next__)
@@ -268,9 +258,7 @@ class OptFFTest2(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "disconnected_but_converged/mol.qin.freq_0")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "disconnected_but_converged/mol.qin.freq_0")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         self.assertRaises(StopIteration, myjob.__next__)
@@ -342,9 +330,7 @@ class OptFFTestSwitching(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "FF_switching/mol.qin.freq_0")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "FF_switching/mol.qin.freq_0")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -358,9 +344,7 @@ class OptFFTestSwitching(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "FF_switching/mol.qin.opt_1")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "FF_switching/mol.qin.opt_1")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -374,9 +358,7 @@ class OptFFTestSwitching(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "FF_switching/mol.qin.freq_1")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "FF_switching/mol.qin.freq_1")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -390,9 +372,7 @@ class OptFFTestSwitching(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "FF_switching/mol.qin.opt_2")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "FF_switching/mol.qin.opt_2")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -406,9 +386,7 @@ class OptFFTestSwitching(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "FF_switching/mol.qin.freq_2")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "FF_switching/mol.qin.freq_2")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         self.assertRaises(StopIteration, myjob.__next__)
@@ -480,9 +458,7 @@ class OptFFTest6004(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "6004_frag12/mol.qin.freq_0")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "6004_frag12/mol.qin.freq_0")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -496,9 +472,7 @@ class OptFFTest6004(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "6004_frag12/mol.qin.opt_1")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "6004_frag12/mol.qin.opt_1")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -512,9 +486,7 @@ class OptFFTest6004(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "6004_frag12/mol.qin.freq_1")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "6004_frag12/mol.qin.freq_1")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -528,9 +500,7 @@ class OptFFTest6004(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "6004_frag12/mol.qin.opt_2")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "6004_frag12/mol.qin.opt_2")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -544,9 +514,7 @@ class OptFFTest6004(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "6004_frag12/mol.qin.freq_2")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "6004_frag12/mol.qin.freq_2")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
 
@@ -617,9 +585,7 @@ class OptFFTest5952(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "5952_frag16/mol.qin.freq_0")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "5952_frag16/mol.qin.freq_0")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -633,9 +599,7 @@ class OptFFTest5952(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "5952_frag16/mol.qin.opt_1")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "5952_frag16/mol.qin.opt_1")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -649,9 +613,7 @@ class OptFFTest5952(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "5952_frag16/mol.qin.freq_1")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "5952_frag16/mol.qin.freq_1")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -665,9 +627,7 @@ class OptFFTest5952(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "5952_frag16/mol.qin.opt_2")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "5952_frag16/mol.qin.opt_2")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -681,9 +641,7 @@ class OptFFTest5952(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "5952_frag16/mol.qin.freq_2")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "5952_frag16/mol.qin.freq_2")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         self.assertRaises(Exception, myjob.__next__)
@@ -755,9 +713,7 @@ class OptFFTest5690(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "5690_frag18/mol.qin.freq_0")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "5690_frag18/mol.qin.freq_0")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -771,9 +727,7 @@ class OptFFTest5690(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "5690_frag18/mol.qin.opt_1")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "5690_frag18/mol.qin.opt_1")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -787,9 +741,7 @@ class OptFFTest5690(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "5690_frag18/mol.qin.freq_1")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "5690_frag18/mol.qin.freq_1")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -803,9 +755,7 @@ class OptFFTest5690(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "5690_frag18/mol.qin.opt_2")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "5690_frag18/mol.qin.opt_2")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         expected_next = QCJob(
@@ -819,9 +769,7 @@ class OptFFTest5690(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "5690_frag18/mol.qin.freq_2")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "5690_frag18/mol.qin.freq_2")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         self.assertRaises(Exception, myjob.__next__)
@@ -830,7 +778,7 @@ class OptFFTest5690(TestCase):
 class OptFF_small_neg_freq(TestCase):
     def setUp(self):
         os.makedirs(scr_dir)
-        os.makedirs(os.path.join(scr_dir,"scratch"))
+        os.makedirs(os.path.join(scr_dir, "scratch"))
         shutil.copyfile(
             os.path.join(test_dir, "small_neg_freq/mol.qin.orig"),
             os.path.join(scr_dir, "mol.qin"),
@@ -900,9 +848,7 @@ class OptFF_small_neg_freq(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "small_neg_freq/mol.qin.freq_0")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "small_neg_freq/mol.qin.freq_0")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         shutil.copyfile(
@@ -921,9 +867,7 @@ class OptFF_small_neg_freq(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "small_neg_freq/mol.qin.opt_1")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "small_neg_freq/mol.qin.opt_1")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         shutil.copyfile(
@@ -942,9 +886,7 @@ class OptFF_small_neg_freq(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "small_neg_freq/mol.qin.freq_1")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "small_neg_freq/mol.qin.freq_1")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         shutil.copyfile(
@@ -963,9 +905,7 @@ class OptFF_small_neg_freq(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "small_neg_freq/mol.qin.opt_2")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "small_neg_freq/mol.qin.opt_2")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         shutil.copyfile(
@@ -984,9 +924,7 @@ class OptFF_small_neg_freq(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
         self.assertEqual(
-            QCInput.from_file(
-                os.path.join(test_dir, "small_neg_freq/mol.qin.freq_2")
-            ).as_dict(),
+            QCInput.from_file(os.path.join(test_dir, "small_neg_freq/mol.qin.freq_2")).as_dict(),
             QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
         )
         shutil.copyfile(

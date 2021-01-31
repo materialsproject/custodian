@@ -41,7 +41,7 @@ class QCJob(Job):
         suffix="",
         calc_loc=None,
         save_scratch=False,
-        backup=True
+        backup=True,
     ):
         """
         Args:
@@ -79,13 +79,7 @@ class QCJob(Job):
         multi = {"openmp": "-nt", "mpi": "-np"}
         if self.multimode not in multi:
             raise RuntimeError("ERROR: Multimode should only be set to openmp or mpi")
-        command = [
-            multi[self.multimode],
-            str(self.max_cores),
-            self.input_file,
-            self.output_file,
-            "scratch"
-        ]
+        command = [multi[self.multimode], str(self.max_cores), self.input_file, self.output_file, "scratch"]
         command = self.qchem_command + command
         com_str = ""
         for part in command:
@@ -98,9 +92,9 @@ class QCJob(Job):
         """
         if self.backup:
             shutil.copy(self.input_file, "{}.orig".format(self.input_file))
-        if self.multimode == 'openmp':
-            os.environ['QCTHREADS'] = str(self.max_cores)
-            os.environ['OMP_NUM_THREADS'] = str(self.max_cores)
+        if self.multimode == "openmp":
+            os.environ["QCTHREADS"] = str(self.max_cores)
+            os.environ["OMP_NUM_THREADS"] = str(self.max_cores)
         os.environ["QCSCRATCH"] = os.getcwd()
         if self.calc_loc is not None:
             os.environ["QCLOCALSCR"] = self.calc_loc
@@ -134,7 +128,7 @@ class QCJob(Job):
         local_scratch = os.path.join(os.environ["QCLOCALSCR"], "scratch")
         if os.path.exists(local_scratch):
             shutil.rmtree(local_scratch)
-        qclog = open(self.qclog_file, 'w')
+        qclog = open(self.qclog_file, "w")
         p = subprocess.Popen(self.current_command, stdout=qclog, shell=True)
         return p
 
@@ -151,7 +145,7 @@ class QCJob(Job):
         check_connectivity=True,
         linked=True,
         save_final_scratch=False,
-        **QCJob_kwargs
+        **QCJob_kwargs,
     ):
         """
         Optimize a structure and calculate vibrational frequencies to check if the
@@ -203,7 +197,7 @@ class QCJob(Job):
                         suffix=".opt_" + str(ii),
                         save_scratch=True,
                         backup=first,
-                        **QCJob_kwargs
+                        **QCJob_kwargs,
                     )
                 )
                 opt_outdata = QCOutput(output_file + ".opt_" + str(ii)).data
@@ -212,13 +206,8 @@ class QCJob(Job):
                     freq_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
                     opt_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
                 first = False
-                if (
-                    opt_outdata["structure_change"] == "unconnected_fragments"
-                    and not opt_outdata["completion"]
-                ):
-                    print(
-                        "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
-                    )
+                if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
+                    print("Unstable molecule broke into unconnected fragments which failed to optimize! Exiting...")
                     break
                 energy_history.append(opt_outdata.get("final_energy"))
                 freq_QCInput = QCInput(
@@ -240,7 +229,7 @@ class QCJob(Job):
                         suffix=".freq_" + str(ii),
                         save_scratch=True,
                         backup=first,
-                        **QCJob_kwargs
+                        **QCJob_kwargs,
                     )
                 )
                 outdata = QCOutput(output_file + ".freq_" + str(ii)).data
@@ -250,31 +239,19 @@ class QCJob(Job):
                     opt_rem["scf_algorithm"] = indata.rem["scf_algorithm"]
                 errors = outdata.get("errors")
                 if len(errors) != 0:
-                    raise AssertionError(
-                        "No errors should be encountered while flattening frequencies!"
-                    )
+                    raise AssertionError("No errors should be encountered while flattening frequencies!")
                 if outdata.get("frequencies")[0] > 0.0:
                     print("All frequencies positive!")
                     break
-                if (
-                    abs(outdata.get("frequencies")[0]) < 15.0
-                    and outdata.get("frequencies")[1] > 0.0
-                ):
-                    print(
-                        "One negative frequency smaller than 15.0 - not worth further flattening!"
-                    )
+                if abs(outdata.get("frequencies")[0]) < 15.0 and outdata.get("frequencies")[1] > 0.0:
+                    print("One negative frequency smaller than 15.0 - not worth further flattening!")
                     break
                 if len(energy_history) > 1:
-                    if (
-                        abs(energy_history[-1] - energy_history[-2])
-                        < energy_diff_cutoff
-                    ):
+                    if abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
                         print("Energy change below cutoff!")
                         break
                 opt_QCInput = QCInput(
-                    molecule=opt_outdata.get(
-                        "molecule_from_optimized_geometry"
-                    ),
+                    molecule=opt_outdata.get("molecule_from_optimized_geometry"),
                     rem=opt_rem,
                     opt=orig_input.opt,
                     pcm=orig_input.pcm,
@@ -305,7 +282,7 @@ class QCJob(Job):
                         qclog_file=qclog_file,
                         suffix=".opt_" + str(ii),
                         backup=first,
-                        **QCJob_kwargs
+                        **QCJob_kwargs,
                     )
                 )
                 opt_outdata = QCOutput(output_file + ".opt_" + str(ii)).data
@@ -315,13 +292,8 @@ class QCJob(Job):
                     orig_multiplicity = copy.deepcopy(opt_outdata.get("multiplicity"))
                     orig_energy = copy.deepcopy(opt_outdata.get("final_energy"))
                 first = False
-                if (
-                    opt_outdata["structure_change"] == "unconnected_fragments"
-                    and not opt_outdata["completion"]
-                ):
-                    print(
-                        "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
-                    )
+                if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
+                    print("Unstable molecule broke into unconnected fragments which failed to optimize! Exiting...")
                     break
                 freq_QCInput = QCInput(
                     molecule=opt_outdata.get("molecule_from_optimized_geometry"),
@@ -341,36 +313,24 @@ class QCJob(Job):
                         qclog_file=qclog_file,
                         suffix=".freq_" + str(ii),
                         backup=first,
-                        **QCJob_kwargs
+                        **QCJob_kwargs,
                     )
                 )
                 outdata = QCOutput(output_file + ".freq_" + str(ii)).data
                 errors = outdata.get("errors")
                 if len(errors) != 0:
-                    raise AssertionError(
-                        "No errors should be encountered while flattening frequencies!"
-                    )
+                    raise AssertionError("No errors should be encountered while flattening frequencies!")
                 if outdata.get("frequencies")[0] > 0.0:
                     print("All frequencies positive!")
                     if opt_outdata.get("final_energy") > orig_energy:
-                        print(
-                            "WARNING: Energy increased during frequency flattening!"
-                        )
+                        print("WARNING: Energy increased during frequency flattening!")
                     break
                 hist = {}
-                hist["molecule"] = copy.deepcopy(
-                    outdata.get("initial_molecule")
-                )
-                hist["geometry"] = copy.deepcopy(
-                    outdata.get("initial_geometry")
-                )
+                hist["molecule"] = copy.deepcopy(outdata.get("initial_molecule"))
+                hist["geometry"] = copy.deepcopy(outdata.get("initial_geometry"))
                 hist["frequencies"] = copy.deepcopy(outdata.get("frequencies"))
-                hist["frequency_mode_vectors"] = copy.deepcopy(
-                    outdata.get("frequency_mode_vectors")
-                )
-                hist["num_neg_freqs"] = sum(
-                    1 for freq in outdata.get("frequencies") if freq < 0
-                )
+                hist["frequency_mode_vectors"] = copy.deepcopy(outdata.get("frequency_mode_vectors"))
+                hist["num_neg_freqs"] = sum(1 for freq in outdata.get("frequencies") if freq < 0)
                 hist["energy"] = copy.deepcopy(opt_outdata.get("final_energy"))
                 hist["index"] = len(history)
                 hist["children"] = []
@@ -399,19 +359,14 @@ class QCJob(Job):
 
                     # if the number of negative frequencies has remained constant or increased from parent to
                     # child,
-                    if (
-                        history[-1]["num_neg_freqs"]
-                        >= parent_hist["num_neg_freqs"]
-                    ):
+                    if history[-1]["num_neg_freqs"] >= parent_hist["num_neg_freqs"]:
                         # check to see if the parent only has one child, aka only the positive perturbation has
                         # been tried,
                         # in which case just try the negative perturbation from the same parent
                         if len(parent_hist["children"]) == 1:
                             ref_mol = parent_hist["molecule"]
                             geom_to_perturb = parent_hist["geometry"]
-                            negative_freq_vecs = parent_hist[
-                                "frequency_mode_vectors"
-                            ][0]
+                            negative_freq_vecs = parent_hist["frequency_mode_vectors"][0]
                             reversed_direction = True
                             standard = False
                             parent_hist["children"].append(len(history))
@@ -421,56 +376,36 @@ class QCJob(Job):
                             # If we're dealing with just one negative frequency,
                             if parent_hist["num_neg_freqs"] == 1:
                                 make_good_child_next_parent = False
-                                if (
-                                    history[parent_hist["children"][0]][
-                                        "energy"
-                                    ]
-                                    < history[-1]["energy"]
-                                ):
-                                    good_child = copy.deepcopy(
-                                        history[parent_hist["children"][0]]
-                                    )
+                                if history[parent_hist["children"][0]]["energy"] < history[-1]["energy"]:
+                                    good_child = copy.deepcopy(history[parent_hist["children"][0]])
                                 else:
                                     good_child = copy.deepcopy(history[-1])
                                 if good_child["num_neg_freqs"] > 1:
                                     raise Exception(
-                                        "ERROR: Child with lower energy has more negative frequencies! "
-                                        "Exiting..."
+                                        "ERROR: Child with lower energy has more negative frequencies! " "Exiting..."
                                     )
-                                if (
-                                    good_child["energy"] < parent_hist["energy"]
-                                ):
+                                if good_child["energy"] < parent_hist["energy"]:
                                     make_good_child_next_parent = True
                                 elif (
                                     vector_list_diff(
                                         good_child["frequency_mode_vectors"][0],
-                                        parent_hist["frequency_mode_vectors"][
-                                            0
-                                        ],
+                                        parent_hist["frequency_mode_vectors"][0],
                                     )
                                     > 0.2
                                 ):
                                     make_good_child_next_parent = True
                                 else:
-                                    raise Exception(
-                                        "ERROR: Good child not good enough! Exiting..."
-                                    )
+                                    raise Exception("ERROR: Good child not good enough! Exiting...")
                                 if make_good_child_next_parent:
                                     good_child["index"] = len(history)
                                     history.append(good_child)
                                     ref_mol = history[-1]["molecule"]
                                     geom_to_perturb = history[-1]["geometry"]
-                                    negative_freq_vecs = history[-1][
-                                        "frequency_mode_vectors"
-                                    ][0]
+                                    negative_freq_vecs = history[-1]["frequency_mode_vectors"][0]
                             else:
-                                raise Exception(
-                                    "ERROR: Can't deal with multiple neg frequencies yet! Exiting..."
-                                )
+                                raise Exception("ERROR: Can't deal with multiple neg frequencies yet! Exiting...")
                         else:
-                            raise AssertionError(
-                                "ERROR: Parent cannot have more than two childen! Exiting..."
-                            )
+                            raise AssertionError("ERROR: Parent cannot have more than two childen! Exiting...")
                     # Implicitly, if the number of negative frequencies decreased from parent to child,
                     # continue normally.
                 if standard:
@@ -478,9 +413,7 @@ class QCJob(Job):
 
                 min_molecule_perturb_scale = 0.1
                 scale_grid = 10
-                perturb_scale_grid = (
-                    max_molecule_perturb_scale - min_molecule_perturb_scale
-                ) / scale_grid
+                perturb_scale_grid = (max_molecule_perturb_scale - min_molecule_perturb_scale) / scale_grid
 
                 structure_successfully_perturbed = False
                 for molecule_perturb_scale in np.arange(
@@ -502,8 +435,7 @@ class QCJob(Job):
                     )
                     if check_connectivity:
                         structure_successfully_perturbed = (
-                            check_for_structure_changes(ref_mol, new_molecule)
-                            == "no_change"
+                            check_for_structure_changes(ref_mol, new_molecule) == "no_change"
                         )
                         if structure_successfully_perturbed:
                             break
@@ -524,9 +456,7 @@ class QCJob(Job):
                 new_opt_QCInput.write_file(input_file)
 
 
-def perturb_coordinates(
-    old_coords, negative_freq_vecs, molecule_perturb_scale, reversed_direction
-):
+def perturb_coordinates(old_coords, negative_freq_vecs, molecule_perturb_scale, reversed_direction):
     """
     Perturbs a structure along the imaginary mode vibrational frequency vectors
     """
@@ -536,10 +466,7 @@ def perturb_coordinates(
     direction = 1.0
     if reversed_direction:
         direction = -1.0
-    return [
-        [c + v * direction for c, v in zip(coord, vec)]
-        for coord, vec in zip(old_coords, normalized_vecs)
-    ]
+    return [[c + v * direction for c, v in zip(coord, vec)] for coord, vec in zip(old_coords, normalized_vecs)]
 
 
 def vector_list_diff(vecs1, vecs2):

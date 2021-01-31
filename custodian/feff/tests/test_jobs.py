@@ -16,9 +16,7 @@ from monty.tempfile import ScratchDir
 from custodian.feff.jobs import FeffJob
 from pymatgen.io.feff.inputs import Atoms, Tags
 
-test_dir = os.path.join(
-    os.path.dirname(__file__), "..", "..", "..", "test_files", "feff_unconverge"
-)
+test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files", "feff_unconverge")
 
 
 class FeffJobTest(unittest.TestCase):

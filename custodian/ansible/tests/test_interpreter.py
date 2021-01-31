@@ -61,19 +61,13 @@ class ModderTest(unittest.TestCase):
         self.assertEqual(d, {"Bye": "World", "List": [], "number": 10})
         mod = {"_push_all": {"List": list(range(10))}}
         modder.modify(mod, d)
-        self.assertEqual(
-            d, {"Bye": "World", "List": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "number": 10}
-        )
+        self.assertEqual(d, {"Bye": "World", "List": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "number": 10})
         mod = {"_pop": {"List": 1}}
         modder.modify(mod, d)
-        self.assertEqual(
-            d, {"Bye": "World", "List": [0, 1, 2, 3, 4, 5, 6, 7, 8], "number": 10}
-        )
+        self.assertEqual(d, {"Bye": "World", "List": [0, 1, 2, 3, 4, 5, 6, 7, 8], "number": 10})
         mod = {"_pop": {"List": -1}}
         modder.modify(mod, d)
-        self.assertEqual(
-            d, {"Bye": "World", "List": [1, 2, 3, 4, 5, 6, 7, 8], "number": 10}
-        )
+        self.assertEqual(d, {"Bye": "World", "List": [1, 2, 3, 4, 5, 6, 7, 8], "number": 10})
         d = {}
         mod = {"_set": {"a->b->c": 100}}
         modder.modify(mod, d)

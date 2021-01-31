@@ -15,9 +15,7 @@ def do_run(args):
     """
     Do the run.
     """
-    logging.basicConfig(
-        format="%(asctime)s %(message)s", level=logging.INFO, filename="run.log"
-    )
+    logging.basicConfig(format="%(asctime)s %(message)s", level=logging.INFO, filename="run.log")
     job = NwchemJob(
         nwchem_cmd=args.command.split(),
         input_file=args.infile,
@@ -44,7 +42,7 @@ def main():
         description="""
     run_nwchem is a master script to perform various kinds of Nwchem runs.
     """,
-        epilog="""Author: Shyue Ping Ong"""
+        epilog="""Author: Shyue Ping Ong""",
     )
 
     parser.add_argument(

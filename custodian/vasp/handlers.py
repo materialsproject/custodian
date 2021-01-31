@@ -33,10 +33,7 @@ from custodian.utils import backup
 from custodian.vasp.interpreter import VaspModder
 
 
-__author__ = (
-    "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, "
-    "Wei Chen, Stephen Dacek"
-)
+__author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, " "Wei Chen, Stephen Dacek"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
 __email__ = "ongsp@ucsd.edu"
@@ -71,11 +68,9 @@ class VaspErrorHandler(ErrorHandler):
             "Fatal error: unable to match k-point",
             "Routine TETIRR needs special values",
             "Tetrahedron method fails (number of k-points < 4)",
-            "BZINTS"
+            "BZINTS",
         ],
-        "inv_rot_mat": [
-            "rotation matrix was not found (increase " "SYMPREC)"
-        ],
+        "inv_rot_mat": ["rotation matrix was not found (increase " "SYMPREC)"],
         "brmix": ["BRMIX: very serious problems"],
         "subspacematrix": ["WARNING: Sub-Space-Matrix is not hermitian in " "DAV"],
         "tetirr": ["Routine TETIRR needs special values"],
@@ -102,7 +97,7 @@ class VaspErrorHandler(ErrorHandler):
         "rhosyg": ["RHOSYG"],
         "posmap": ["POSMAP"],
         "point_group": ["group operation missing"],
-        "symprec_noise": ["determination of the symmetry of your systems shows a strong"]
+        "symprec_noise": ["determination of the symmetry of your systems shows a strong"],
     }
 
     def __init__(
@@ -142,9 +137,7 @@ class VaspErrorHandler(ErrorHandler):
         self.error_count = Counter()
         # threshold of number of atoms to treat the cell as large.
         self.natoms_large_cell = natoms_large_cell
-        self.errors_subset_to_catch = errors_subset_to_catch or list(
-            VaspErrorHandler.error_msgs.keys()
-        )
+        self.errors_subset_to_catch = errors_subset_to_catch or list(VaspErrorHandler.error_msgs.keys())
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def check(self):
@@ -187,15 +180,11 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append(
                     {
                         "dict": "INCAR",
-                        "action": {
-                            "_set": {"KSPACING": vi["INCAR"].get("KSPACING") * 0.8}
-                        },
+                        "action": {"_set": {"KSPACING": vi["INCAR"].get("KSPACING") * 0.8}},
                     }
                 )
             else:
-                actions.append(
-                    {"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}}
-                )
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
 
         if "inv_rot_mat" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8}}})
@@ -205,10 +194,7 @@ class VaspErrorHandler(ErrorHandler):
             # error count to 1 to skip first fix
             if self.error_count["brmix"] == 0:
                 try:
-                    assert (
-                        Outcar(zpath(os.path.join(os.getcwd(), "OUTCAR"))).is_stopped
-                        is False
-                    )
+                    assert Outcar(zpath(os.path.join(os.getcwd(), "OUTCAR"))).is_stopped is False
                 except Exception:
                     self.error_count["brmix"] += 1
 
@@ -223,10 +209,7 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"IMIX": 1}}})
                 self.error_count["brmix"] += 1
 
-            elif (
-                self.error_count["brmix"] == 2
-                and vi["KPOINTS"].style == Kpoints.supported_modes.Gamma
-            ):
+            elif self.error_count["brmix"] == 2 and vi["KPOINTS"].style == Kpoints.supported_modes.Gamma:
                 actions.append(
                     {
                         "dict": "KPOINTS",
@@ -236,10 +219,7 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_unset": {"IMIX": 1}}})
                 self.error_count["brmix"] += 1
 
-            elif (
-                self.error_count["brmix"] in [2, 3]
-                and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst
-            ):
+            elif self.error_count["brmix"] in [2, 3] and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
                 actions.append(
                     {
                         "dict": "KPOINTS",
@@ -250,9 +230,7 @@ class VaspErrorHandler(ErrorHandler):
                 self.error_count["brmix"] += 1
 
                 if vi["KPOINTS"].num_kpts < 1:
-                    all_kpts_even = all(
-                        [bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0]]
-                    )
+                    all_kpts_even = all([bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0]])
                     if all_kpts_even:
                         new_kpts = (tuple(n + 1 for n in vi["KPOINTS"].kpts[0]),)
                         actions.append(
@@ -302,37 +280,25 @@ class VaspErrorHandler(ErrorHandler):
 
             if nsteps >= 1:
                 potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
-                actions.append(
-                    {"dict": "INCAR", "action": {"_set": {"ISYM": 0, "POTIM": potim}}}
-                )
-            elif vi["INCAR"].get("NSW", 0) == 0 or vi["INCAR"].get("ISIF", 0) in range(
-                3
-            ):
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0, "POTIM": potim}}})
+            elif vi["INCAR"].get("NSW", 0) == 0 or vi["INCAR"].get("ISIF", 0) in range(3):
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
             else:
                 s = vi["POSCAR"].structure
                 s.apply_strain(0.2)
-                actions.append(
-                    {"dict": "POSCAR", "action": {"_set": {"structure": s.as_dict()}}}
-                )
+                actions.append({"dict": "POSCAR", "action": {"_set": {"structure": s.as_dict()}}})
 
             # Based on VASP forum's recommendation, you should delete the
             # CHGCAR and WAVECAR when dealing with this error.
             if vi["INCAR"].get("ICHARG", 0) < 10:
-                actions.append(
-                    {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}}
-                )
-                actions.append(
-                    {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}}
-                )
+                actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
+                actions.append({"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}})
 
         if self.errors.intersection(["subspacematrix"]):
             if self.error_count["subspacematrix"] == 0:
                 actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
             else:
-                actions.append(
-                    {"dict": "INCAR", "action": {"_set": {"PREC": "Accurate"}}}
-                )
+                actions.append({"dict": "INCAR", "action": {"_set": {"PREC": "Accurate"}}})
             self.error_count["subspacematrix"] += 1
 
         if self.errors.intersection(["rspher", "real_optlay", "nicht_konv"]):
@@ -344,13 +310,9 @@ class VaspErrorHandler(ErrorHandler):
                 # prior to LREAL = False
                 if self.error_count["real_optlay"] == 0:
                     # use real space projectors generated by pot
-                    actions.append(
-                        {"dict": "INCAR", "action": {"_set": {"LREAL": True}}}
-                    )
+                    actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": True}}})
                 elif self.error_count["real_optlay"] == 1:
-                    actions.append(
-                        {"dict": "INCAR", "action": {"_set": {"LREAL": False}}}
-                    )
+                    actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
                 self.error_count["real_optlay"] += 1
 
         if self.errors.intersection(["tetirr", "incorrect_shift"]):
@@ -392,9 +354,7 @@ class VaspErrorHandler(ErrorHandler):
             )
 
         if "pricel" in self.errors:
-            actions.append(
-                {"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}}
-            )
+            actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}})
 
         if "brions" in self.errors:
             potim = float(vi["INCAR"].get("POTIM", 0.5)) + 0.1
@@ -402,9 +362,7 @@ class VaspErrorHandler(ErrorHandler):
 
         if "zbrent" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 1}}})
-            actions.append(
-                {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
-            )
+            actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
 
         if "too_few_bands" in self.errors:
             if "NBANDS" in vi["INCAR"]:
@@ -419,41 +377,29 @@ class VaspErrorHandler(ErrorHandler):
                                 break
                             except (IndexError, ValueError):
                                 pass
-            actions.append(
-                {"dict": "INCAR", "action": {"_set": {"NBANDS": int(1.1 * nbands)}}}
-            )
+            actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": int(1.1 * nbands)}}})
 
         if "pssyevx" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
         if "eddrmm" in self.errors:
             # RMM algorithm is not stable for this calculation
             if vi["INCAR"].get("ALGO", "Normal") in ["Fast", "VeryFast"]:
-                actions.append(
-                    {"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}}
-                )
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
             else:
                 potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
                 actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
             if vi["INCAR"].get("ICHARG", 0) < 10:
-                actions.append(
-                    {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}}
-                )
-                actions.append(
-                    {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}}
-                )
+                actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
+                actions.append({"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}})
 
         if "edddav" in self.errors:
             if vi["INCAR"].get("ICHARG", 0) < 10:
-                actions.append(
-                    {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}}
-                )
+                actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
 
         if "grad_not_orth" in self.errors:
             if vi["INCAR"].get("ISMEAR", 1) < 0:
-                actions.append(
-                    {"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}}
-                )
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
 
         if "zheev" in self.errors:
             if vi["INCAR"].get("ALGO", "Fast").lower() != "exact":
@@ -544,9 +490,7 @@ class LrfCommutatorHandler(ErrorHandler):
         if "lrf_comm" in self.errors:
             if Outcar(zpath(os.path.join(os.getcwd(), "OUTCAR"))).is_stopped is False:
                 if not vi["INCAR"].get("LPEAD"):
-                    actions.append(
-                        {"dict": "INCAR", "action": {"_set": {"LPEAD": True}}}
-                    )
+                    actions.append({"dict": "INCAR", "action": {"_set": {"LPEAD": True}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
@@ -562,10 +506,7 @@ class StdErrHandler(ErrorHandler):
     is_monitor = True
 
     error_msgs = {
-        "kpoints_trans": [
-            "internal error in GENERATE_KPOINTS_TRANS: "
-            "number of G-vector changed in star"
-        ],
+        "kpoints_trans": ["internal error in GENERATE_KPOINTS_TRANS: " "number of G-vector changed in star"],
         "out_of_memory": ["Allocation would exceed memory limit"],
     }
 
@@ -611,17 +552,13 @@ class StdErrHandler(ErrorHandler):
                 m = max(int(round(m ** (1 / 3))), 1)
                 if vi["KPOINTS"].style.name.lower().startswith("m"):
                     m += m % 2
-                actions.append(
-                    {"dict": "KPOINTS", "action": {"_set": {"kpoints": [[m] * 3]}}}
-                )
+                actions.append({"dict": "KPOINTS", "action": {"_set": {"kpoints": [[m] * 3]}}})
                 self.error_count["kpoints_trans"] += 1
 
         if "out_of_memory" in self.errors:
             if vi["INCAR"].get("KPAR", 1) > 1:
                 reduced_kpar = max(vi["INCAR"].get("KPAR", 1) // 2, 1)
-                actions.append(
-                    {"dict": "INCAR", "action": {"_set": {"KPAR": reduced_kpar}}}
-                )
+                actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": reduced_kpar}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
@@ -637,9 +574,7 @@ class AliasingErrorHandler(ErrorHandler):
 
     error_msgs = {
         "aliasing": ["WARNING: small aliasing (wrap around) errors must be expected"],
-        "aliasing_incar": [
-            "Your FFT grids (NGX,NGY,NGZ) are not sufficient " "for an accurate"
-        ],
+        "aliasing_incar": ["Your FFT grids (NGX,NGY,NGZ) are not sufficient " "for an accurate"],
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -696,9 +631,7 @@ class AliasingErrorHandler(ErrorHandler):
                         grid_adjusted = True
                     # Ensure that all NGX, NGY, NGZ have been checked
                     if grid_adjusted and "NGZ" in line:
-                        actions.append(
-                            {"dict": "INCAR", "action": {"_set": changes_dict}}
-                        )
+                        actions.append({"dict": "INCAR", "action": {"_set": changes_dict}})
                         if vi["INCAR"].get("ICHARG", 0) < 10:
                             actions.extend(
                                 [
@@ -794,9 +727,7 @@ class DriftErrorHandler(ErrorHandler):
         outcar = Outcar("OUTCAR")
 
         # Move CONTCAR to POSCAR
-        actions.append(
-            {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
-        )
+        actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
 
         # First try adding ADDGRID
         if not incar.get("ADDGRID", False):
@@ -815,11 +746,7 @@ class DriftErrorHandler(ErrorHandler):
             actions.append(
                 {
                     "dict": "INCAR",
-                    "action": {
-                        "_set": {
-                            "ENAUG": int(incar.get("ENAUG", 1040) * self.enaug_multiply)
-                        }
-                    },
+                    "action": {"_set": {"ENAUG": int(incar.get("ENAUG", 1040) * self.enaug_multiply)}},
                 }
             )
 
@@ -860,9 +787,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         """
         Check for error.
         """
-        msg = (
-            "Reciprocal lattice and k-lattice belong to different class of" " lattices."
-        )
+        msg = "Reciprocal lattice and k-lattice belong to different class of" " lattices."
 
         vi = VaspInput.from_directory(".")
         # disregard this error if KSPACING is set and no KPOINTS file is generated
@@ -872,9 +797,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         # According to VASP admins, you can disregard this error
         # if symmetry is off
         # Also disregard if automatic KPOINT generation is used
-        if (not vi["INCAR"].get("ISYM", True)) or vi[
-            "KPOINTS"
-        ].style == Kpoints.supported_modes.Automatic:
+        if (not vi["INCAR"].get("ISYM", True)) or vi["KPOINTS"].style == Kpoints.supported_modes.Automatic:
             return False
 
         try:
@@ -948,9 +871,7 @@ class UnconvergedErrorHandler(ErrorHandler):
             if algo == "VeryFast":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
             elif algo == "Fast":
-                actions.append(
-                    {"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}}
-                )
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
             elif algo == "Normal":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
             else:
@@ -964,18 +885,14 @@ class UnconvergedErrorHandler(ErrorHandler):
                     "BMIX_MAG": 0.001,
                 }
 
-                if not all(
-                    [v.incar.get(k, "") == val for k, val in new_settings.items()]
-                ):
+                if not all([v.incar.get(k, "") == val for k, val in new_settings.items()]):
                     actions.append({"dict": "INCAR", "action": {"_set": new_settings}})
 
         elif not v.converged_ionic:
             # Just continue optimizing and let other handles fix ionic
             # optimizer parameters
             actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 1}}})
-            actions.append(
-                {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
-            )
+            actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
 
         if actions:
             vi = VaspInput.from_directory(".")
@@ -1076,10 +993,10 @@ class ScanMetalHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
 
         _dummy_structure = Structure(
-                                    [1, 0, 0, 0, 1, 0, 0, 0, 1],
-                                    ["I"],
-                                    [[0, 0, 0]],
-                                    )
+            [1, 0, 0, 0, 1, 0, 0, 0, 1],
+            ["I"],
+            [[0, 0, 0]],
+        )
         new_vis = MPScanRelaxSet(_dummy_structure, bandgap=0)
 
         actions = []
@@ -1117,14 +1034,11 @@ class LargeSigmaHandler(ErrorHandler):
         if incar.get("ISMEAR", 0) > 0:
             # Read the latest entropy term.
             outcar.read_pattern(
-                {"entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"},
-                postprocess=float,
-                reverse=True,
-                terminate_on_match=True
+                {"entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"}, postprocess=float, reverse=True, terminate_on_match=True
             )
             n_atoms = Structure.from_file("POSCAR").num_sites
             if outcar.data.get("entropy", []):
-                entropy_per_atom = abs(np.max(outcar.data.get("entropy")))/n_atoms
+                entropy_per_atom = abs(np.max(outcar.data.get("entropy"))) / n_atoms
 
                 # if more than 1 meV/atom, reduce sigma
                 if entropy_per_atom > 0.001:
@@ -1146,13 +1060,11 @@ class LargeSigmaHandler(ErrorHandler):
         # minimum value of 0.02 in 3 steps
         if sigma > 0.08:
             actions.append(
-                    {
-                        "dict": "INCAR",
-                        "action": {
-                            "_set": {"SIGMA": sigma - 0.06}
-                        },
-                    }
-                )
+                {
+                    "dict": "INCAR",
+                    "action": {"_set": {"SIGMA": sigma - 0.06}},
+                }
+            )
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": ["LargeSigma"], "actions": actions}
@@ -1227,9 +1139,7 @@ class PotimErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(
-        self, input_filename="POSCAR", output_filename="OSZICAR", dE_threshold=1
-    ):
+    def __init__(self, input_filename="POSCAR", output_filename="OSZICAR", dE_threshold=1):
         """
         Initializes the handler with the input and output files to check.
 
@@ -1268,9 +1178,7 @@ class PotimErrorHandler(ErrorHandler):
         potim = float(vi["INCAR"].get("POTIM", 0.5))
         ibrion = int(vi["INCAR"].get("IBRION", 0))
         if potim < 0.2 and ibrion != 3:
-            actions = [
-                {"dict": "INCAR", "action": {"_set": {"IBRION": 3, "SMASS": 0.75}}}
-            ]
+            actions = [{"dict": "INCAR", "action": {"_set": {"IBRION": 3, "SMASS": 0.75}}}]
         elif potim < 0.1:
             actions = [{"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8}}}]
         else:
@@ -1364,9 +1272,7 @@ class NonConvergingErrorHandler(ErrorHandler):
             oszicar = Oszicar(self.output_filename)
             esteps = oszicar.electronic_steps
             if len(esteps) > self.nionic_steps:
-                return all(
-                    [len(e) == nelm for e in esteps[-(self.nionic_steps + 1): -1]]
-                )
+                return all([len(e) == nelm for e in esteps[-(self.nionic_steps + 1) : -1]])
         except Exception:
             pass
         return False
@@ -1510,24 +1416,12 @@ class WalltimeHandler(ErrorHandler):
             outcar = Outcar("OUTCAR")
             if not self.electronic_step_stop:
                 # Determine max time per ionic step.
-                outcar.read_pattern(
-                    {"timings": r"LOOP\+.+real time(.+)"}, postprocess=float
-                )
-                time_per_step = (
-                    np.max(outcar.data.get("timings"))
-                    if outcar.data.get("timings", [])
-                    else 0
-                )
+                outcar.read_pattern({"timings": r"LOOP\+.+real time(.+)"}, postprocess=float)
+                time_per_step = np.max(outcar.data.get("timings")) if outcar.data.get("timings", []) else 0
             else:
                 # Determine max time per electronic step.
-                outcar.read_pattern(
-                    {"timings": "LOOP:.+real time(.+)"}, postprocess=float
-                )
-                time_per_step = (
-                    np.max(outcar.data.get("timings"))
-                    if outcar.data.get("timings", [])
-                    else 0
-                )
+                outcar.read_pattern({"timings": "LOOP:.+real time(.+)"}, postprocess=float)
+                time_per_step = np.max(outcar.data.get("timings")) if outcar.data.get("timings", []) else 0
 
             # If the remaining time is less than average time for 3
             # steps or buffer_time.
@@ -1541,13 +1435,9 @@ class WalltimeHandler(ErrorHandler):
         """
         Perform corrections.
         """
-        content = (
-            "LSTOP = .TRUE." if not self.electronic_step_stop else "LABORT = .TRUE."
-        )
+        content = "LSTOP = .TRUE." if not self.electronic_step_stop else "LABORT = .TRUE."
         # Write STOPCAR
-        actions = [
-            {"file": "STOPCAR", "action": {"_file_create": {"content": content}}}
-        ]
+        actions = [{"file": "STOPCAR", "action": {"_file_create": {"content": content}}}]
 
         m = Modder(actions=[FileActions])
         for a in actions:
@@ -1664,9 +1554,7 @@ class StoppedRunHandler(ErrorHandler):
         """
         d = loadfn("chkpt.yaml")
         i = d["Index"]
-        name = shutil.make_archive(
-            os.path.join(os.getcwd(), "vasp.chk.%d" % i), "gztar"
-        )
+        name = shutil.make_archive(os.path.join(os.getcwd(), "vasp.chk.%d" % i), "gztar")
 
         actions = [{"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}]
 

@@ -37,7 +37,7 @@ class EnoughBandsValidator(Validator):
         try:
             with open(self.output_filename) as f:
                 data = f.read()
-            return 'You are employing too few bands in your PAW calculation.' in data
+            return "You are employing too few bands in your PAW calculation." in data
         except OSError:
             return False
 
@@ -64,7 +64,7 @@ class LobsterFilesValidator(Validator):
                 return True
         with open("lobsterout") as f:
             data = f.read()
-        return 'finished' not in data
+        return "finished" not in data
 
 
 class ChargeSpillingValidator(Validator):
@@ -72,7 +72,7 @@ class ChargeSpillingValidator(Validator):
     Check if spilling is below certain threshold!
     """
 
-    def __init__(self, output_filename: str = 'lobsterout', charge_spilling_limit: float = 0.05):
+    def __init__(self, output_filename: str = "lobsterout", charge_spilling_limit: float = 0.05):
         """
 
         Args:

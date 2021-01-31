@@ -222,9 +222,7 @@ class FileActions:
             settings (dict): Must be {"content": actual_content}
         """
         if len(settings) != 1:
-            raise ValueError(
-                "Settings must only contain one item with key " "'content'."
-            )
+            raise ValueError("Settings must only contain one item with key " "'content'.")
         for k, v in settings.items():
             if k == "content":
                 with open(filename, "w") as f:
