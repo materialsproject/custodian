@@ -1,0 +1,18 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=32
+#SBATCH --qos=premium
+#SBATCH --time=12:00:00
+#SBATCH --account=jcesr
+#SBATCH --job-name=qchem_fsm_li_system
+#SBATCH --output=qchem_fsm_li_system-%j.out
+#SBATCH --error=qchem_fsm_li_system-%j.error
+#SBATCH --constraint=haswell
+
+
+source activate main && module load qchem/5.2 && export QCPROG=/global/project/projectdirs/jcesr/qchem_sblau/qc521_exe/qcprog.LINUX_Ix86_64.20190628.exe && export QCPROG_S=/global/project/projectdirs/jcesr/qchem_sblau/qc521_exe/qcprog.LINUX_Ix86_64.20190628.exe
+cd /global/cscratch1/sd/ewcss/jcesr/tests/20190925_ts_net/block_2019-09-25-18-44-40-199556/launcher_2019-09-27-14-08-37-923498
+rlaunch -c /global/homes/e/ewcss/cori/config singleshot
+
+# CommonAdapter (SLURM) completed writing Template

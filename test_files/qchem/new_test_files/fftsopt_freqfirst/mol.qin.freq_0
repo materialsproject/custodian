@@ -1,0 +1,40 @@
+$molecule
+ 0 1
+ C     -2.3886387431     -2.4291688928     -3.4026481300
+ O     -3.6022035407     -3.2625804758     -4.7897092431
+ O     -2.0155235602     -1.4418603177     -3.9157038985
+ C     -3.7525136571     -2.6451622821     -5.9310167619
+ C     -4.4991034922     -3.0480547659     -6.9754531035
+ O     -2.4825282071     -3.2370722233     -2.5555543730
+ H     -4.5404751798     -2.4465129751     -7.8727459229
+ H     -3.2011777045     -1.7023597752     -6.0195802729
+ H     -5.0656852692     -3.9718772316     -6.9480311342
+ Li     -4.3578006460     -4.9190310605     -4.2399171601
+$end
+
+$rem
+   job_type = freq
+   basis = def2-tzvppd
+   max_scf_cycles = 200
+   gen_scfman = true
+   xc_grid = 3
+   scf_algorithm = diis
+   resp_charges = true
+   symmetry = false
+   sym_ignore = true
+   method = wb97xd
+   solvent_method = pcm
+   thresh = 14
+$end
+
+$pcm
+   heavypoints 194
+   hpoints 194
+   radii uff
+   theory cpcm
+   vdwscale 1.1
+$end
+
+$solvent
+   dielectric 89.78
+$end

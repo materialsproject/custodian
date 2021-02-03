@@ -209,6 +209,8 @@ class QCJob(Job):
         energy_history = list()
 
         if freq_before_opt:
+            if not linked:
+                print("WARNING: This first frequency calculation will not inform subsequent optimization!")
             yield (QCJob(qchem_command=qchem_command,
                          multimode=multimode,
                          input_file=input_file,
