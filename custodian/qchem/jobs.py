@@ -8,6 +8,7 @@ import os
 import shutil
 import copy
 import subprocess
+import warnings
 import numpy as np
 from pymatgen.core import Molecule
 from pymatgen.io.qchem.inputs import QCInput
@@ -212,7 +213,7 @@ class QCJob(Job):
 
         if freq_before_opt:
             if not linked:
-                print("WARNING: This first frequency calculation will not inform subsequent optimization!")
+                warnings.warn("WARNING: This first frequency calculation will not inform subsequent optimization!")
             yield (
                 QCJob(
                     qchem_command=qchem_command,
@@ -268,7 +269,7 @@ class QCJob(Job):
                 first = False
                 if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
                     if not transition_state:
-                        print("Unstable molecule broke into unconnected fragments which failed to optimize! Exiting...")
+                        warnings.warn("Unstable molecule broke into unconnected fragments which failed to optimize! Exiting...")
                         break
                 energy_history.append(opt_outdata.get("final_energy"))
                 freq_QCInput = QCInput(
@@ -303,14 +304,14 @@ class QCJob(Job):
                     raise AssertionError("No errors should be encountered while flattening frequencies!")
                 if not transition_state:
                     if outdata.get("frequencies")[0] > 0.0:
-                        print("All frequencies positive!")
+                        warnings.warn("All frequencies positive!")
                         break
                     elif abs(outdata.get("frequencies")[0]) < 15.0 and outdata.get("frequencies")[1] > 0.0:
-                        print("One negative frequency smaller than 15.0 - not worth further flattening!")
+                        warnings.warn("One negative frequency smaller than 15.0 - not worth further flattening!")
                         break
                     if len(energy_history) > 1:
                         if abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
-                            print("Energy change below cutoff!")
+                            warnings.warn("Energy change below cutoff!")
                             break
                     opt_QCInput = QCInput(
                         molecule=opt_outdata.get("molecule_from_optimized_geometry"),
@@ -323,10 +324,10 @@ class QCJob(Job):
                     opt_QCInput.write_file(input_file)
                 else:
                     if outdata.get("frequencies")[0] < 0.0 and outdata.get("frequencies")[1] > 0.0:
-                        print("Saddle point found!")
+                        warnings.warn("Saddle point found!")
                         break
                     elif abs(outdata.get("frequencies")[1]) < 15.0 and outdata.get("frequencies")[2] > 0.0:
-                        print("Second small imaginary frequency (smaller than 15.0) - not worth further flattening!")
+                        warnings.warn("Second small imaginary frequency (smaller than 15.0) - not worth further flattening!")
                         break
                     else:
                         opt_QCInput = QCInput(
@@ -367,7 +368,7 @@ class QCJob(Job):
                 first = False
                 if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
                     if not transition_state:
-                        print("Unstable molecule broke into unconnected fragments which failed to optimize! Exiting...")
+                        warnings.warn("Unstable molecule broke into unconnected fragments which failed to optimize! Exiting...")
                         break
                 freq_QCInput = QCInput(
                     molecule=opt_outdata.get("molecule_from_optimized_geometry"),
@@ -396,23 +397,23 @@ class QCJob(Job):
                     raise AssertionError("No errors should be encountered while flattening frequencies!")
                 if not transition_state:
                     if outdata.get("frequencies")[0] > 0.0:
-                        print("All frequencies positive!")
+                        warnings.warn("All frequencies positive!")
                         if opt_outdata.get("final_energy") > orig_energy:
-                            print("WARNING: Energy increased during frequency flattening!")
+                            warnings.warn("WARNING: Energy increased during frequency flattening!")
                         break
                     elif abs(outdata.get("frequencies")[0]) < 15.0 and outdata.get("frequencies")[1] > 0.0:
-                        print("One negative frequency smaller than 15.0 - not worth further flattening!")
+                        warnings.warn("One negative frequency smaller than 15.0 - not worth further flattening!")
                         break
                     if len(energy_history) > 1:
                         if abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
-                            print("Energy change below cutoff!")
+                            warnings.warn("Energy change below cutoff!")
                             break
                 else:
                     if outdata.get("frequencies")[0] < 0.0 and outdata.get("frequencies")[1] > 0.0:
-                        print("Saddle point found!")
+                        warnings.warn("Saddle point found!")
                         break
                     elif abs(outdata.get("frequencies")[1]) < 15.0 and outdata.get("frequencies")[2] > 0.0:
-                        print("Second small imaginary frequency (smaller than 15.0) - not worth further flattening!")
+                        warnings.warn("Second small imaginary frequency (smaller than 15.0) - not worth further flattening!")
                         break
 
                 hist = {}
