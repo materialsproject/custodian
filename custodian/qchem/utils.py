@@ -2,6 +2,7 @@ import math
 
 import numpy as np
 
+
 def perturb_coordinates(old_coords, negative_freq_vecs, molecule_perturb_scale, reversed_direction):
     """
     Perturbs a structure along the imaginary mode vibrational frequency vectors

@@ -4,7 +4,6 @@
 This module implements basic kinds of jobs for QChem runs.
 """
 
-import math
 import os
 import shutil
 import copy
@@ -152,8 +151,8 @@ class QCJob(Job):
         Optimize a structure and calculate vibrational frequencies to check if the
         structure is in a true minima.
 
-        If there are an inappropriate number of imaginary frequencies (0 for a
-         minimum-energy structure, 1 for a transition-state), attempt to re-calculate
+        If there are an inappropriate number of imaginary frequencies (>0 for a
+         minimum-energy structure, >1 for a transition-state), attempt to re-calculate
          using one of two methods:
             - Perturb the geometry based on the imaginary frequencies and re-optimize
             - Use the exact Hessian to inform a subsequent optimization
@@ -177,7 +176,10 @@ class QCJob(Job):
                 can be applied to the molecule. Defaults to 0.3.
             check_connectivity (bool): Whether to check differences in connectivity
                 introduced by structural perturbation. Defaults to True.
-            linked (bool): Whether or not to use the linked flattener. Defaults to True.
+            linked (bool): Whether or not to use the linked flattener. If set to True (default),
+                then the explicit Hessians from a vibrational frequency analysis will be used
+                as the initial Hessian of subsequent optimizations. In many cases, this can
+                significantly improve optimization efficiency.
             transition_state (bool): If True (default False), use a ts
                 optimization (search for a saddle point instead of a minimum)
             freq_before_opt (bool): If True (default False), run a frequency
@@ -211,26 +213,32 @@ class QCJob(Job):
         if freq_before_opt:
             if not linked:
                 print("WARNING: This first frequency calculation will not inform subsequent optimization!")
-            yield (QCJob(qchem_command=qchem_command,
-                         multimode=multimode,
-                         input_file=input_file,
-                         output_file=output_file,
-                         qclog_file=qclog_file,
-                         suffix=".freq_pre",
-                         save_scratch=True,
-                         backup=first,
-                         **QCJob_kwargs))
+            yield (
+                QCJob(
+                    qchem_command=qchem_command,
+                    multimode=multimode,
+                    input_file=input_file,
+                    output_file=output_file,
+                    qclog_file=qclog_file,
+                    suffix=".freq_pre",
+                    save_scratch=True,
+                    backup=first,
+                    **QCJob_kwargs,
+                )
+            )
 
             if linked:
                 opt_rem["geom_opt_hessian"] = "read"
                 opt_rem["scf_guess_always"] = True
 
-            opt_QCInput = QCInput(molecule=orig_input.molecule,
-                                  rem=opt_rem,
-                                  opt=orig_input.opt,
-                                  pcm=orig_input.pcm,
-                                  solvent=orig_input.solvent,
-                                  smx=orig_input.smx)
+            opt_QCInput = QCInput(
+                molecule=orig_input.molecule,
+                rem=opt_rem,
+                opt=orig_input.opt,
+                pcm=orig_input.pcm,
+                solvent=orig_input.solvent,
+                smx=orig_input.smx,
+            )
             opt_QCInput.write_file(input_file)
             first = False
 
@@ -314,7 +322,7 @@ class QCJob(Job):
                     )
                     opt_QCInput.write_file(input_file)
                 else:
-                    if outdata.get('frequencies')[0] < 0.0 and outdata.get('frequencies')[1] > 0.0:
+                    if outdata.get("frequencies")[0] < 0.0 and outdata.get("frequencies")[1] > 0.0:
                         print("Saddle point found!")
                         break
                     elif abs(outdata.get("frequencies")[1]) < 15.0 and outdata.get("frequencies")[2] > 0.0:
@@ -327,7 +335,8 @@ class QCJob(Job):
                             opt=orig_input.opt,
                             pcm=orig_input.pcm,
                             solvent=orig_input.solvent,
-                            smx=orig_input.smx)
+                            smx=orig_input.smx,
+                        )
                         opt_QCInput.write_file(input_file)
             if not save_final_scratch:
                 shutil.rmtree(os.path.join(os.getcwd(), "scratch"))
@@ -399,7 +408,7 @@ class QCJob(Job):
                             print("Energy change below cutoff!")
                             break
                 else:
-                    if outdata.get('frequencies')[0] < 0.0 and outdata.get('frequencies')[1] > 0.0:
+                    if outdata.get("frequencies")[0] < 0.0 and outdata.get("frequencies")[1] > 0.0:
                         print("Saddle point found!")
                         break
                     elif abs(outdata.get("frequencies")[1]) < 15.0 and outdata.get("frequencies")[2] > 0.0:
@@ -499,7 +508,7 @@ class QCJob(Job):
                 for molecule_perturb_scale in np.arange(
                     max_molecule_perturb_scale,
                     min_molecule_perturb_scale,
-                    - perturb_scale_grid,
+                    -perturb_scale_grid,
                 ):
                     new_coords = perturb_coordinates(
                         old_coords=geom_to_perturb,
