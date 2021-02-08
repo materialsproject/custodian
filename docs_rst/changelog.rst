@@ -1,11 +1,15 @@
 Change Log
 ==========
 
-v2020.1.8
+v2021.2.8
+---------
+*  Allow static calculations with ISMEAR = -5 for metals (@MichaelWolloch).
+
+v2021.1.8
 ---------
 * New handlers for VASP6 (@mkhorton, @rkingsbury)
 
-v2020.1.7
+v2021.1.7
 ---------
 * Improved handling of scratch directories and update for QChem.
 
