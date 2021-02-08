@@ -518,6 +518,50 @@ class IncorrectSmearingHandlerTest(unittest.TestCase):
         clean_dir()
         os.chdir(cwd)
 
+class IncorrectSmearingHandlerStaticTest(unittest.TestCase):
+    def setUp(cls):
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.chdir(test_dir)
+        subdir = os.path.join(test_dir, "static_smearing")
+        os.chdir(subdir)
+
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("vasprun.xml", "vasprun.xml.orig")
+
+    def test_check_correct_scan_metal(self):
+        h = IncorrectSmearingHandler()
+        self.assertFalse(h.check())
+
+    @classmethod
+    def tearDown(cls):
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("vasprun.xml.orig", "vasprun.xml")
+        clean_dir()
+        os.chdir(cwd)
+
+class IncorrectSmearingHandlerFermiTest(unittest.TestCase):
+    def setUp(cls):
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.chdir(test_dir)
+        subdir = os.path.join(test_dir, "fermi_smearing")
+        os.chdir(subdir)
+
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("vasprun.xml", "vasprun.xml.orig")
+
+    def test_check_correct_scan_metal(self):
+        h = IncorrectSmearingHandler()
+        self.assertFalse(h.check())
+
+    @classmethod
+    def tearDown(cls):
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("vasprun.xml.orig", "vasprun.xml")
+        clean_dir()
+        os.chdir(cwd)
+
 
 class ScanMetalHandlerTest(unittest.TestCase):
     def setUp(cls):
