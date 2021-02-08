@@ -518,6 +518,7 @@ class IncorrectSmearingHandlerTest(unittest.TestCase):
         clean_dir()
         os.chdir(cwd)
 
+
 class IncorrectSmearingHandlerStaticTest(unittest.TestCase):
     def setUp(cls):
         if "PMG_VASP_PSP_DIR" not in os.environ:
@@ -539,6 +540,7 @@ class IncorrectSmearingHandlerStaticTest(unittest.TestCase):
         shutil.move("vasprun.xml.orig", "vasprun.xml")
         clean_dir()
         os.chdir(cwd)
+
 
 class IncorrectSmearingHandlerFermiTest(unittest.TestCase):
     def setUp(cls):
