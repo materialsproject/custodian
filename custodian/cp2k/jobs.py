@@ -44,7 +44,7 @@ class Cp2kJob(Job):
         Args:
             cp2k_cmd (list): Command to run cp2k as a list of args. For example,
                 if you are using mpirun, it can be something like
-                ["mpirun", "pvasp.5.2.11"]
+                ["mpirun", "cp2k.popt"]
             input_file (str): Name of the file to use as input to CP2K
                 executable. Defaults to "cp2k.inp"
             output_file (str): Name of file to direct standard out to.
@@ -60,19 +60,19 @@ class Cp2kJob(Job):
                 the input file will be copied with a
                 ".orig" appended. Defaults to True.
             settings_override ([dict]): An ansible style list of dict to
-                override changes. For example, to set spin polarization to
-                True for subsequent runs and to copy the CONTCAR to the POSCAR, you will provide::
+                override changes.
 
         """
         self.cp2k_cmd = cp2k_cmd
         self.input_file = input_file
-        self.ci = Cp2kInput.from_file(zpath(self.input_file))
+        self.ci = None
         self.output_file = output_file
         self.stderr_file = stderr_file
         self.final = final
         self.backup = backup
         self.suffix = suffix
-        self.settings_override = settings_override
+        self.settings_override = settings_override if settings_override else \
+            {'FORCE_EVAL': {'DFT': {'PRINT': {'OVERLAP_CONDITION': {}}}}}
 
     def setup(self):
         """
@@ -80,6 +80,8 @@ class Cp2kJob(Job):
         and backing up.
         """
         decompress_dir('.')
+
+        self.ci = Cp2kInput.from_file(zpath(self.input_file))
 
         if self.settings_override is not None:
             new_input = self.ci
@@ -109,7 +111,6 @@ class Cp2kJob(Job):
     def postprocess(self):
         """
         Postprocessing includes renaming and gzipping where necessary.
-        Also copies the magmom to the incar if necessary
         """
         if os.path.exists(self.output_file):
             if self.final and self.suffix != "":
@@ -123,6 +124,9 @@ class Cp2kJob(Job):
             os.remove("continue.json")
 
     def terminate(self):
+        """
+        Terminate cp2k
+        """
         for k in self.cp2k_cmd:
             if "cp2k" in k:
                 try:
