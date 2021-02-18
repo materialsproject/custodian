@@ -116,16 +116,16 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         self.scf = None
         self.mixing_hierarchy = ['BROYDEN_MIXING', 'PULAY', 'PULAY_LINEAR']
         if os.path.exists(zpath(self.input_file)):
-                ci = Cp2kInput.from_file(zpath(self.input_file))
-        if ci['GLOBAL']['RUN_TYPE'].values[0].__str__().upper() in [
-            "ENERGY", "ENERGY_FORCE", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT"]:
-            self.is_static = True
-        else:
-            self.is_static = False
-        self.is_ot = True if ci.check('FORCE_EVAL/DFT/SCF/OT') else False
-        if ci.check('FORCE_EVAL/DFT/SCF/MIXING/METHOD'):
-            self.mixing_hierarchy = [m for m in self.mixing_hierarchy if m.upper() !=
-                                     ci['FORCE_EVAL']['DFT']['SCF']['MIXING']['METHOD']]
+            ci = Cp2kInput.from_file(zpath(self.input_file))
+            if ci['GLOBAL']['RUN_TYPE'].values[0].__str__().upper() in [
+                "ENERGY", "ENERGY_FORCE", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT"]:
+                self.is_static = True
+            else:
+                self.is_static = False
+            self.is_ot = True if ci.check('FORCE_EVAL/DFT/SCF/OT') else False
+            if ci.check('FORCE_EVAL/DFT/SCF/MIXING/METHOD'):
+                self.mixing_hierarchy = [m for m in self.mixing_hierarchy if m.upper() !=
+                                         ci['FORCE_EVAL']['DFT']['SCF']['MIXING']['METHOD']]
 
     def check(self):
         # Checks output file for errors.
@@ -278,7 +278,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                 }}})
 
         # If corrections were applied, AND convergence is already good (1e-5)
-        # then discard the RESTART file if present
+        # then discard the original RESTART file if present
         if actions:
             if ci.check('force_eval/dft') and \
                     ci['force_eval']['dft'].get('wfn_restart_file_name'):
@@ -286,10 +286,10 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                 if conv[-1] <= 1e-5:
                     actions.append(
                         {'dict': self.input_file,
-                         'action':
-                             {'_unset':
-                                  {'FORCE_EVAL':
-                                       {'DFT': {'WFN_RESTART_FILE_NAME'}}}}}
+                         'action': {
+                             '_unset': {
+                                 'FORCE_EVAL': {
+                                     'DFT': 'WFN_RESTART_FILE_NAME'}}}}
                     )
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
         return {"errors": ["Non-converging Job"], "actions": actions}
@@ -429,6 +429,9 @@ class FrozenJobErrorHandler(ErrorHandler):
     def check(self):
         st = os.stat(self.output_file)
         out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
+        if out.completed:
+            return False
+
         out.parse_scf_opt()
         conv = list(itertools.chain.from_iterable(out.data['scf_time']))
 
@@ -569,7 +572,7 @@ class AbortHandler(ErrorHandler):
                                         'DFT': {
                                             'SCF': {
                                                 'OT': {
-                                                    'PRECONDITIONEER': 'FULL_SINGLE_INVERSE'
+                                                    'PRECONDITIONER': 'FULL_SINGLE_INVERSE'
                                                 }
                                             }
                                         }
@@ -588,7 +591,7 @@ class AbortHandler(ErrorHandler):
                                         'DFT': {
                                             'SCF': {
                                                 'OT': {
-                                                    'PRECONDITIONEER': 'FULL_ALL'
+                                                    'PRECONDITIONER': 'FULL_ALL'
                                                 }
                                             }
                                         }
@@ -660,7 +663,7 @@ class AbortHandler(ErrorHandler):
                                         'DFT': 'WFN_RESTART_FILE_NAME'
                                     }
                                 },
-                                "set": {
+                                "_set": {
                                     'FORCE_EVAL': {
                                         'DFT': {
                                             'XC': {
@@ -769,7 +772,7 @@ class NumericalPrecisionHandler(ErrorHandler):
                                     }}})
                 for k, v in ci.by_path('FORCE_EVAL/SUBSYS').subsections.items():
                     if v.name.upper() == 'KIND':
-                        el = v.section_parameters or v.get('ELEMENT').values
+                        el = v.get('ELEMENT').values or v.section_parameters
                         el = el[0]
                         bs = ci.by_path('FORCE_EVAL/SUBSYS')[k].get('BASIS_SET', None)
                         if isinstance(bs, Sequence):
