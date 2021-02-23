@@ -114,7 +114,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         self.outdata = None
         self.errors = None
         self.scf = None
-        self.mixing_hierarchy = ['BROYDEN_MIXING', 'PULAY', 'PULAY_LINEAR']
+        self.mixing_hierarchy = ['BROYDEN_MIXING', 'PULAY', 'PULAY_LINEAR' 'MULTISECANT_MIXING']
         if os.path.exists(zpath(self.input_file)):
             ci = Cp2kInput.from_file(zpath(self.input_file))
             if ci['GLOBAL']['RUN_TYPE'].values[0].__str__().upper() in [
@@ -125,7 +125,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
             self.is_ot = True if ci.check('FORCE_EVAL/DFT/SCF/OT') else False
             if ci.check('FORCE_EVAL/DFT/SCF/MIXING/METHOD'):
                 self.mixing_hierarchy = [m for m in self.mixing_hierarchy if m.upper() !=
-                                         ci['FORCE_EVAL']['DFT']['SCF']['MIXING']['METHOD']]
+                                         ci['FORCE_EVAL']['DFT']['SCF']['MIXING']['METHOD'].values[0].upper()]
 
     def check(self):
         # Checks output file for errors.
@@ -209,18 +209,22 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                     "FORCE_EVAL": {
                                         "DFT": {
                                             "SCF": {
-                                                "MIXING": {}
+                                                "MIXING": {
+                                                    'METHOD': 'BROYDEN_MIXING',
+                                                    'ALPHA': 0.2,
+                                                    'NBUFFER': 5
+                                                }
                                             }
                                         }
                                     }
                                 }}})
-            if not ci.check('FORCE_EVAL/DFT/SCF/SMEARING'):
+            if not ci.check('FORCE_EVAL/DFT/SCF/SMEAR'):
                 actions.append({'dict': self.input_file,
                                 'action': {"_set": {
                                     "FORCE_EVAL": {
                                         "DFT": {
                                             "SCF": {
-                                                "SMEARING": {
+                                                "SMEAR": {
                                                     "ELEC_TEMP": 300,
                                                     "METHOD": "FERMI_DIRAC"
                                                 }
@@ -271,6 +275,20 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                                     "NBUFFER": 5,
                                                     "ALPHA": 0.1,
                                                     "BETA": 0.01
+                                                }
+                                            }
+                                        }
+                                    }
+                                }}})
+            elif _next == 'MULTISECANT_MIXING':
+                actions.append({'dict': self.input_file,
+                                'action': {"_set": {
+                                    "FORCE_EVAL": {
+                                        "DFT": {
+                                            "SCF": {
+                                                "MIXING": {
+                                                    "METHOD": "MULTISECANT_MIXING",
+                                                    "NBUFFER": 5,
                                                 }
                                             }
                                         }
