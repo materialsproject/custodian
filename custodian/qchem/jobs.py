@@ -330,7 +330,7 @@ class QCJob(Job):
                     freq_0 = outdata.get("frequencies")[0]
                     freq_1 = outdata.get("frequencies")[1]
                     freq_2 = outdata.get("frequencies")[2]
-                    if freq_0 < 0.0 and freq_1 > 0.0:
+                    if freq_0 < 0.0 < freq_1:
                         warnings.warn("Saddle point found!")
                         break
                     if abs(freq_1) < 15.0 and freq_2 > 0.0:
@@ -338,22 +338,21 @@ class QCJob(Job):
                             "Second small imaginary frequency (smaller than 15.0) - not worth further flattening!"
                         )
                         break
-                    else:
-                        opt_QCInput = QCInput(
-                            molecule=opt_outdata.get("molecule_from_optimized_geometry"),
-                            rem=opt_rem,
-                            opt=orig_input.opt,
-                            pcm=orig_input.pcm,
-                            solvent=orig_input.solvent,
-                            smx=orig_input.smx,
-                        )
-                        opt_QCInput.write_file(input_file)
+                    opt_QCInput = QCInput(
+                        molecule=opt_outdata.get("molecule_from_optimized_geometry"),
+                        rem=opt_rem,
+                        opt=orig_input.opt,
+                        pcm=orig_input.pcm,
+                        solvent=orig_input.solvent,
+                        smx=orig_input.smx,
+                    )
+                    opt_QCInput.write_file(input_file)
             if not save_final_scratch:
                 shutil.rmtree(os.path.join(os.getcwd(), "scratch"))
 
         else:
             orig_opt_input = QCInput.from_file(input_file)
-            history = []
+            history = list()
 
             for ii in range(max_iterations):
                 yield (
@@ -407,12 +406,14 @@ class QCJob(Job):
                 if len(errors) != 0:
                     raise AssertionError("No errors should be encountered while flattening frequencies!")
                 if not transition_state:
-                    if outdata.get("frequencies")[0] > 0.0:
+                    freq_0 = outdata.get("frequencies")[0]
+                    freq_1 = outdata.get("frequencies")[1]
+                    if freq_0 > 0.0:
                         warnings.warn("All frequencies positive!")
                         if opt_outdata.get("final_energy") > orig_energy:
                             warnings.warn("WARNING: Energy increased during frequency flattening!")
                         break
-                    if abs(outdata.get("frequencies")[0]) < 15.0 and outdata.get("frequencies")[1] > 0.0:
+                    if abs(freq_0) < 15.0 and freq_1 > 0.0:
                         warnings.warn("One negative frequency smaller than 15.0 - not worth further flattening!")
                         break
                     if len(energy_history) > 1:
@@ -420,10 +421,13 @@ class QCJob(Job):
                             warnings.warn("Energy change below cutoff!")
                             break
                 else:
-                    if outdata.get("frequencies")[0] < 0.0 and outdata.get("frequencies")[1] > 0.0:
+                    freq_0 = outdata.get("frequencies")[0]
+                    freq_1 = outdata.get("frequencies")[1]
+                    freq_2 = outdata.get("frequencies")[2]
+                    if freq_0 < 0.0 < freq_1:
                         warnings.warn("Saddle point found!")
                         break
-                    if abs(outdata.get("frequencies")[1]) < 15.0 and outdata.get("frequencies")[2] > 0.0:
+                    if abs(freq_1) < 15.0 and freq_2 > 0.0:
                         warnings.warn(
                             "Second small imaginary frequency (smaller than 15.0) - not worth further flattening!"
                         )
@@ -437,7 +441,7 @@ class QCJob(Job):
                 hist["num_neg_freqs"] = sum(1 for freq in outdata.get("frequencies") if freq < 0)
                 hist["energy"] = copy.deepcopy(opt_outdata.get("final_energy"))
                 hist["index"] = len(history)
-                hist["children"] = []
+                hist["children"] = list()
                 history.append(hist)
 
                 ref_mol = history[-1]["molecule"]
