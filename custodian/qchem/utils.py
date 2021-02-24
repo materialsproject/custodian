@@ -1,3 +1,9 @@
+# coding: utf-8
+
+"""
+This module contains utility functions that are useful for Q-Chem jobs.
+"""
+
 import math
 
 import numpy as np
