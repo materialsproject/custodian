@@ -269,7 +269,9 @@ class QCJob(Job):
                 first = False
                 if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
                     if not transition_state:
-                        warnings.warn("Unstable molecule broke into unconnected fragments which failed to optimize! Exiting...")
+                        warnings.warn(
+                            "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
+                        )
                         break
                 energy_history.append(opt_outdata.get("final_energy"))
                 freq_QCInput = QCInput(
@@ -327,7 +329,9 @@ class QCJob(Job):
                         warnings.warn("Saddle point found!")
                         break
                     elif abs(outdata.get("frequencies")[1]) < 15.0 and outdata.get("frequencies")[2] > 0.0:
-                        warnings.warn("Second small imaginary frequency (smaller than 15.0) - not worth further flattening!")
+                        warnings.warn(
+                            "Second small imaginary frequency (smaller than 15.0) - not worth further flattening!"
+                        )
                         break
                     else:
                         opt_QCInput = QCInput(
@@ -368,7 +372,9 @@ class QCJob(Job):
                 first = False
                 if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
                     if not transition_state:
-                        warnings.warn("Unstable molecule broke into unconnected fragments which failed to optimize! Exiting...")
+                        warnings.warn(
+                            "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
+                        )
                         break
                 freq_QCInput = QCInput(
                     molecule=opt_outdata.get("molecule_from_optimized_geometry"),
@@ -413,7 +419,9 @@ class QCJob(Job):
                         warnings.warn("Saddle point found!")
                         break
                     elif abs(outdata.get("frequencies")[1]) < 15.0 and outdata.get("frequencies")[2] > 0.0:
-                        warnings.warn("Second small imaginary frequency (smaller than 15.0) - not worth further flattening!")
+                        warnings.warn(
+                            "Second small imaginary frequency (smaller than 15.0) - not worth further flattening!"
+                        )
                         break
 
                 hist = {}
