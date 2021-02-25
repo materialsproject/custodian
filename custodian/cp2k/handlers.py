@@ -114,7 +114,8 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         self.outdata = None
         self.errors = None
         self.scf = None
-        self.mixing_hierarchy = ['BROYDEN_MIXING', 'PULAY', 'PULAY_LINEAR' 'MULTISECANT_MIXING']
+        self.restart = None
+        self.mixing_hierarchy = ['BROYDEN_MIXING', 'BROYDEN_MIXING_LINEAR', 'PULAY_MIXING', 'PULAY_MIXING_LINEAR']
         if os.path.exists(zpath(self.input_file)):
             ci = Cp2kInput.from_file(zpath(self.input_file))
             if ci['GLOBAL']['RUN_TYPE'].values[0].__str__().upper() in [
@@ -123,14 +124,27 @@ class UnconvergedScfErrorHandler(ErrorHandler):
             else:
                 self.is_static = False
             self.is_ot = True if ci.check('FORCE_EVAL/DFT/SCF/OT') else False
-            if ci.check('FORCE_EVAL/DFT/SCF/MIXING/METHOD'):
-                self.mixing_hierarchy = [m for m in self.mixing_hierarchy if m.upper() !=
-                                         ci['FORCE_EVAL']['DFT']['SCF']['MIXING']['METHOD'].values[0].upper()]
+            if ci.check('FORCE_EVAL/DFT/SCF/MIXING'):
+                method = ci.by_path(
+                    'FORCE_EVAL/DFT/SCF/MIXING'
+                ).get('METHOD', Keyword('METHOD', 'DIRECT_P_MIXING')).values[0]
+                alpha = ci.by_path(
+                    'FORCE_EVAL/DFT/SCF/MIXING'
+                ).get('ALPHA', Keyword('ALPHA', .4)).values[0]
+                beta = ci.by_path(
+                    'FORCE_EVAL/DFT/SCF/MIXING'
+                ).get('BETA', Keyword('BETA', .5)).values[0]
+                ext = '_LINEAR' if (beta > 1 and alpha < .1) else ''
+                self.mixing_hierarchy = [
+                    m for m in self.mixing_hierarchy if m != method.upper()+ext
+                ]
 
     def check(self):
         # Checks output file for errors.
         out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
         out.convergence()
+        if out.filenames.get('restart'):
+            self.restart = out.filenames['restart'][-1]
 
         # General catch for SCF not converged
         # If not static, mark not-converged if last 5 SCF loops
@@ -243,35 +257,38 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                                 "MIXING": {
                                                     "METHOD": "BROYDEN_MIXING",
                                                     "NBUFFER": 5,
-                                                    "ALPHA": 0.2
+                                                    "ALPHA": 0.1,
+                                                    "BETA": 0.01
                                                 }
                                             }
                                         }
                                     }
                                 }}})
-            elif _next == 'PULAY':
+
+            elif _next == 'BROYDEN_MIXING_LINEAR':
                 actions.append({'dict': self.input_file,
                                 'action': {"_set": {
                                     "FORCE_EVAL": {
                                         "DFT": {
                                             "SCF": {
                                                 "MIXING": {
-                                                    "METHOD": "PULAY",
+                                                    "METHOD": "BROYDEN_MIXING",
                                                     "NBUFFER": 5,
-                                                    "ALPHA": 0.2
+                                                    "ALPHA": 0.01,
+                                                    "BETA": 3
                                                 }
                                             }
                                         }
                                     }
                                 }}})
-            elif _next == 'PULAY_LINEAR':
+            elif _next == 'PULAY_MIXING':
                 actions.append({'dict': self.input_file,
                                 'action': {"_set": {
                                     "FORCE_EVAL": {
                                         "DFT": {
                                             "SCF": {
                                                 "MIXING": {
-                                                    "METHOD": "PULAY",
+                                                    "METHOD": "PULAY_MIXING",
                                                     "NBUFFER": 5,
                                                     "ALPHA": 0.1,
                                                     "BETA": 0.01
@@ -280,15 +297,17 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                         }
                                     }
                                 }}})
-            elif _next == 'MULTISECANT_MIXING':
+            elif _next == 'PULAY_MIXING_LINEAR':
                 actions.append({'dict': self.input_file,
                                 'action': {"_set": {
                                     "FORCE_EVAL": {
                                         "DFT": {
                                             "SCF": {
                                                 "MIXING": {
-                                                    "METHOD": "MULTISECANT_MIXING",
+                                                    "METHOD": "PULAY_MIXING",
                                                     "NBUFFER": 5,
+                                                    "ALPHA": 0.01,
+                                                    "BETA": 3
                                                 }
                                             }
                                         }
@@ -309,6 +328,20 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                  'FORCE_EVAL': {
                                      'DFT': 'WFN_RESTART_FILE_NAME'}}}}
                     )
+
+        # If issues arose after some ionic steps and corrections are possible
+        # then switch the restart file to the input file.
+        if actions and self.restart:
+            actions.insert(
+                0,
+                {
+                    "file": os.path.abspath(self.restart),
+                    "action": {
+                        "_file_copy": {"dest": os.path.abspath(self.input_file)}
+                    }
+                }
+            )
+
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
         return {"errors": ["Non-converging Job"], "actions": actions}
 
@@ -443,12 +476,15 @@ class FrozenJobErrorHandler(ErrorHandler):
         self.timeout = timeout
         self.frozen_preconditioner = False
         self.frozen_scf = False
+        self.restart = None
 
     def check(self):
         st = os.stat(self.output_file)
         out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
         if out.completed:
             return False
+        if out.filenames.get('restart'):
+            self.restart = out.filenames['restart'][-1]
 
         out.parse_scf_opt()
         conv = list(itertools.chain.from_iterable(out.data['scf_time']))
@@ -515,6 +551,47 @@ class FrozenJobErrorHandler(ErrorHandler):
                                             }
                                         }}})
 
+            elif ci.check('FORCE_EVAL/DFT/SCF/DIAGONALIZATION/DAVIDSON'):
+                p = ci.by_path('FORCE_EVAL/DFT/SCF/DIAGONALIZATION/DAVIDSON').get(
+                    'PRECONDITIONER', Keyword('PRECONDITIONER', 'FULL_ALL')
+                )
+
+                if p == Keyword('PRECONDITIONER', 'FULL_SINGLE_INVERSE'):
+                    actions.append({'dict': self.input_file,
+                                    "action": {"_set": {
+                                        'FORCE_EVAL': {
+                                            'DFT': {
+                                                'SCF': {
+                                                    'DIAGONALIZATION': {
+                                                        'DAVIDSON': {
+                                                            'PRECONDITIONER': 'FULL_ALL'
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }}})
+
+                else:
+                    p = ci.by_path('FORCE_EVAL/DFT/SCF/DIAGONALIZATION/DAVIDSON').get(
+                        'PRECOND_SOLVER', Keyword('PRECOND_SOLVER', 'DEFAULT')
+                    )
+                    if p.values[0] == 'DEFAULT':
+                        actions.append({'dict': self.input_file,
+                                        "action": {"_set": {
+                                            'FORCE_EVAL': {
+                                                'DFT': {
+                                                    'SCF': {
+                                                        'DIAGONALIZATION': {
+                                                            'DAVIDSON': {
+                                                                'PRECOND_SOLVER': 'DIRECT'
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }}})
+
             self.frozen_preconditioner = False
             errors.append('Frozen preconditioner')
 
@@ -524,6 +601,19 @@ class FrozenJobErrorHandler(ErrorHandler):
 
         else:
             errors.append('Frozen job')
+
+        # If job froze after some ionic steps and corrections are possible
+        # then switch the restart file to the input file.
+        if actions and self.restart:
+            actions.insert(
+                0,
+                {
+                    "file": os.path.abspath(self.restart),
+                    "action": {
+                        "_file_copy": {"dest": os.path.abspath(self.input_file)}
+                    }
+                }
+            )
 
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
         return {"errors": errors, "actions": actions}
