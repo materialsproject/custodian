@@ -460,7 +460,7 @@ class FrozenJobErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out", timeout=3600):
+    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out", timeout=3600, scf_timeout=300):
         """
         Initializes the handler with the output file to check.
 
@@ -469,11 +469,19 @@ class FrozenJobErrorHandler(ErrorHandler):
             output_file (str): Name of the output file to monitor
             timeout (int): The time in seconds between checks where if there
                 is no activity on the output file, the run is considered
-                frozen. Defaults to 3600 seconds, i.e., 1 hour.
+                frozen. Defaults to 3600 seconds, i.e., 1 hour. Most stages of
+                cp2k take much less than 1 hour, but 1 hour is the default to account
+                for large HF force calculations or sizable preconditioner calculations.
+            scf_timeout int): A secondary timeout. The handler will check to see if
+                cp2k is in the middle of an scf loop and check if this criteria. By default
+                this is set to 5 minutes, as each step of the scf should be much less than this,
+                *but* this can break down if you are doing something like a primary basis-set HF
+                calcualtion or an enormous system, in which case it should be increased.
         """
         self.input_file = input_file
         self.output_file = output_file
         self.timeout = timeout
+        self.scf_timeout = scf_timeout
         self.frozen_preconditioner = False
         self.frozen_scf = False
         self.restart = None
@@ -498,7 +506,7 @@ class FrozenJobErrorHandler(ErrorHandler):
         # At least one precond and one regular step
         # Also make sure you are in the scf loop
         if len(conv) > 2 and not len(conv) % int(inner*outer) == 0:
-            if (time.time() - st.st_mtime) > 4*max(conv):
+            if (time.time() - st.st_mtime) > self.scf_timeout:
                 self.frozen_scf = True
                 return True
 
