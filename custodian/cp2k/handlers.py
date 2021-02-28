@@ -375,7 +375,7 @@ class DivergingScfErrorHandler(ErrorHandler):
     def check(self):
         conv = get_conv(self.output_file)
         tmp = np.diff(conv[-10:])
-        if len(conv) > 10 and all([tmp[i+1] > tmp[i] for i in range(len(tmp)-1)]):
+        if len(conv) > 10 and all([_ > 0 for _ in tmp]) and any([_ > 1 for _ in conv]):
             return True
         return False
 
