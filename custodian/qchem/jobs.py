@@ -25,6 +25,11 @@ __status__ = "Alpha"
 __date__ = "3/20/18"
 __credits__ = "Xiaohui Qu"
 
+try:
+    from openbabel import openbabel as ob # noqa: F401
+except:
+    raise RuntimeError("ERROR: Openbabel must be installed in order to use Q-Chem Custodian!")
+
 
 class QCJob(Job):
     """
@@ -267,8 +272,6 @@ class QCJob(Job):
                     freq_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
                     opt_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
                 first = False
-                if "structure_change" not in opt_outdata:
-                    raise RuntimeError("ERROR: OpenBabel must be installed to use FFopt!")
                 if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
                     if not transition_state:
                         warnings.warn(
@@ -376,8 +379,6 @@ class QCJob(Job):
                     orig_multiplicity = copy.deepcopy(opt_outdata.get("multiplicity"))
                     orig_energy = copy.deepcopy(opt_outdata.get("final_energy"))
                 first = False
-                if "structure_change" not in opt_outdata:
-                    raise RuntimeError("ERROR: OpenBabel must be installed to use FFopt!")
                 if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
                     if not transition_state:
                         warnings.warn(

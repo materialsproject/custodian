@@ -19,6 +19,11 @@ __status__ = "Alpha"
 __date__ = "3/26/18"
 __credits__ = "Xiaohui Qu"
 
+try:
+    from openbabel import openbabel as ob # noqa: F401
+except:
+    raise RuntimeError("ERROR: Openbabel must be installed in order to use Q-Chem Custodian!")
+
 
 class QChemErrorHandler(ErrorHandler):
     """
@@ -58,9 +63,6 @@ class QChemErrorHandler(ErrorHandler):
         Checks output file for errors
         """
         self.outdata = QCOutput(self.output_file).data
-        if "out_of_opt_cycles" in self.errors:
-            if "structure_change" not in self.outdata:
-                raise RuntimeError("ERROR: OpenBabel must be installed to use Q-Chem opt handlers!")
         self.errors = self.outdata.get("errors")
         self.warnings = self.outdata.get("warnings")
         # If we aren't out of optimization cycles, but we were in the past, reset the history
