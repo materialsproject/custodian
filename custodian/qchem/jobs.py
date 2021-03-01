@@ -15,6 +15,11 @@ from pymatgen.io.qchem.inputs import QCInput
 from pymatgen.io.qchem.outputs import QCOutput, check_for_structure_changes
 from custodian.custodian import Job
 
+try:
+    from openbabel import openbabel as ob
+except ImportError:
+    raise RuntimeError("ERROR: OpenBabel must be installed to use Q-Chem Custodian!")
+
 __author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath"
 __copyright__ = "Copyright 2018, The Materials Project"
 __version__ = "0.1"

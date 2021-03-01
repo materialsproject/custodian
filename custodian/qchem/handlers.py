@@ -10,6 +10,11 @@ from pymatgen.io.qchem.outputs import QCOutput
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 
+try:
+    from openbabel import openbabel as ob
+except ImportError:
+    raise RuntimeError("ERROR: OpenBabel must be installed to use Q-Chem Custodian!")
+
 __author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath"
 __copyright__ = "Copyright 2018, The Materials Project"
 __version__ = "0.1"
