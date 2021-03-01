@@ -325,6 +325,9 @@ class QCJob(Job):
                     if opt_outdata.get("final_energy") > orig_energy:
                         print("WARNING: Energy increased during frequency flattening!")
                     break
+                if abs(outdata.get("frequencies")[0]) < 15.0 and outdata.get("frequencies")[1] > 0.0:
+                    print("One negative frequency smaller than 15.0 - not worth further flattening!")
+                    break
                 hist = {}
                 hist["molecule"] = copy.deepcopy(outdata.get("initial_molecule"))
                 hist["geometry"] = copy.deepcopy(outdata.get("initial_geometry"))
