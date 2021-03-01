@@ -376,6 +376,8 @@ class QCJob(Job):
                     orig_multiplicity = copy.deepcopy(opt_outdata.get("multiplicity"))
                     orig_energy = copy.deepcopy(opt_outdata.get("final_energy"))
                 first = False
+                if "structure_change" not in opt_outdata:
+                    raise RuntimeError("ERROR: OpenBabel must be installed to use FFopt!")
                 if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
                     if not transition_state:
                         warnings.warn(
