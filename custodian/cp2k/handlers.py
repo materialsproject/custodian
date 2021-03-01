@@ -476,7 +476,6 @@ class FrozenJobErrorHandler(ErrorHandler):
         self.input_file = input_file
         self.output_file = output_file
         self.timeout = timeout
-        self.scf_timeout = scf_timeout
         self.frozen_preconditioner = False
         self.restart = None
 
