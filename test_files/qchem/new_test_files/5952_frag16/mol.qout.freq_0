@@ -538,7 +538,7 @@ atom: 6 element: 9
  
 
  Mode:                 1                      2                      3
- Frequency:       -20.61                  20.92                  44.18
+ Frequency:       -10.61                  20.92                  44.18
  Force Cnst:      0.0011                 0.0045                 0.0214
  Red. Mass:      16.3489                17.5818                18.6232
  IR Active:          YES                    YES                    YES
