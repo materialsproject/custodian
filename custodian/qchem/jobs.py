@@ -4,18 +4,19 @@
 This module implements basic kinds of jobs for QChem runs.
 """
 
-import math
 import os
 import shutil
 import copy
 import subprocess
+import warnings
 import numpy as np
 from pymatgen.core import Molecule
 from pymatgen.io.qchem.inputs import QCInput
 from pymatgen.io.qchem.outputs import QCOutput, check_for_structure_changes
 from custodian.custodian import Job
+from custodian.qchem.utils import perturb_coordinates, vector_list_diff
 
-__author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath"
+__author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath, Evan Spotte-Smith"
 __copyright__ = "Copyright 2018, The Materials Project"
 __version__ = "0.1"
 __maintainer__ = "Samuel Blau"
@@ -81,9 +82,7 @@ class QCJob(Job):
             raise RuntimeError("ERROR: Multimode should only be set to openmp or mpi")
         command = [multi[self.multimode], str(self.max_cores), self.input_file, self.output_file, "scratch"]
         command = self.qchem_command + command
-        com_str = ""
-        for part in command:
-            com_str = com_str + " " + part
+        com_str = " ".join(command)
         return com_str
 
     def setup(self):
@@ -144,14 +143,28 @@ class QCJob(Job):
         max_molecule_perturb_scale=0.3,
         check_connectivity=True,
         linked=True,
+        transition_state=False,
+        freq_before_opt=False,
         save_final_scratch=False,
         **QCJob_kwargs,
     ):
         """
         Optimize a structure and calculate vibrational frequencies to check if the
-        structure is in a true minima. If a frequency is negative, iteratively
-        perturbe the geometry, optimize, and recalculate frequencies until all are
-        positive, aka a true minima has been found.
+        structure is in a true minima.
+
+        If there are an inappropriate number of imaginary frequencies (>0 for a
+         minimum-energy structure, >1 for a transition-state), attempt to re-calculate
+         using one of two methods:
+            - Perturb the geometry based on the imaginary frequencies and re-optimize
+            - Use the exact Hessian to inform a subsequent optimization
+         After each geometry optimization, the frequencies are re-calculated to
+         determine if a true minimum (or transition-state) has been found.
+
+        Note: Very small imaginary frequencies (-15cm^-1 < nu < 0) are allowed
+        if there is only one more than there should be. In other words, if there
+        is one very small imaginary frequency, it is still treated as a minimum,
+        and if there is one significant imaginary frequency and one very small
+        imaginary frequency, it is still treated as a transition-state.
 
         Args:
             qchem_command (str): Command to run QChem.
@@ -164,7 +177,15 @@ class QCJob(Job):
                 can be applied to the molecule. Defaults to 0.3.
             check_connectivity (bool): Whether to check differences in connectivity
                 introduced by structural perturbation. Defaults to True.
-            linked (bool): Whether or not to use the linked flattener. Defaults to True.
+            linked (bool): Whether or not to use the linked flattener. If set to True (default),
+                then the explicit Hessians from a vibrational frequency analysis will be used
+                as the initial Hessian of subsequent optimizations. In many cases, this can
+                significantly improve optimization efficiency.
+            transition_state (bool): If True (default False), use a ts
+                optimization (search for a saddle point instead of a minimum)
+            freq_before_opt (bool): If True (default False), run a frequency
+                calculation before any opt/ts searches to improve understanding
+                of the local potential energy surface.
             save_final_scratch (bool): Whether to save full scratch directory contents
                 at the end of the flattening. Defaults to False.
             **QCJob_kwargs: Passthrough kwargs to QCJob. See
@@ -173,18 +194,58 @@ class QCJob(Job):
         if not os.path.exists(input_file):
             raise AssertionError("Input file must be present!")
 
+        if transition_state:
+            opt_method = "ts"
+            perturb_index = 1
+        else:
+            opt_method = "opt"
+            perturb_index = 0
+
+        energy_diff_cutoff = 0.0000001
+
+        orig_input = QCInput.from_file(input_file)
+        freq_rem = copy.deepcopy(orig_input.rem)
+        freq_rem["job_type"] = "freq"
+        opt_rem = copy.deepcopy(orig_input.rem)
+        opt_rem["job_type"] = opt_method
+        first = True
+        energy_history = list()
+
+        if freq_before_opt:
+            if not linked:
+                warnings.warn("WARNING: This first frequency calculation will not inform subsequent optimization!")
+            yield (
+                QCJob(
+                    qchem_command=qchem_command,
+                    multimode=multimode,
+                    input_file=input_file,
+                    output_file=output_file,
+                    qclog_file=qclog_file,
+                    suffix=".freq_pre",
+                    save_scratch=True,
+                    backup=first,
+                    **QCJob_kwargs,
+                )
+            )
+
+            if linked:
+                opt_rem["geom_opt_hessian"] = "read"
+                opt_rem["scf_guess_always"] = True
+
+            opt_QCInput = QCInput(
+                molecule=orig_input.molecule,
+                rem=opt_rem,
+                opt=orig_input.opt,
+                pcm=orig_input.pcm,
+                solvent=orig_input.solvent,
+                smx=orig_input.smx,
+            )
+            opt_QCInput.write_file(input_file)
+            first = False
+
         if linked:
-
-            energy_diff_cutoff = 0.0000001
-
-            orig_input = QCInput.from_file(input_file)
-            freq_rem = copy.deepcopy(orig_input.rem)
-            freq_rem["job_type"] = "freq"
-            opt_rem = copy.deepcopy(orig_input.rem)
             opt_rem["geom_opt_hessian"] = "read"
             opt_rem["scf_guess_always"] = True
-            first = True
-            energy_history = []
 
             for ii in range(max_iterations):
                 yield (
@@ -194,14 +255,14 @@ class QCJob(Job):
                         input_file=input_file,
                         output_file=output_file,
                         qclog_file=qclog_file,
-                        suffix=".opt_" + str(ii),
+                        suffix=".{}_".format(opt_method) + str(ii),
                         save_scratch=True,
                         backup=first,
                         **QCJob_kwargs,
                     )
                 )
-                opt_outdata = QCOutput(output_file + ".opt_" + str(ii)).data
-                opt_indata = QCInput.from_file(input_file + ".opt_" + str(ii))
+                opt_outdata = QCOutput(output_file + ".{}_".format(opt_method) + str(ii)).data
+                opt_indata = QCInput.from_file(input_file + ".{}_".format(opt_method) + str(ii))
                 if opt_indata.rem["scf_algorithm"] != freq_rem["scf_algorithm"]:
                     freq_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
                     opt_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
@@ -209,8 +270,11 @@ class QCJob(Job):
                 if "structure_change" not in opt_outdata:
                     raise RuntimeError("ERROR: OpenBabel must be installed to use FFopt!")
                 if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
-                    print("Unstable molecule broke into unconnected fragments which failed to optimize! Exiting...")
-                    break
+                    if not transition_state:
+                        warnings.warn(
+                            "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
+                        )
+                        break
                 energy_history.append(opt_outdata.get("final_energy"))
                 freq_QCInput = QCInput(
                     molecule=opt_outdata.get("molecule_from_optimized_geometry"),
@@ -242,37 +306,55 @@ class QCJob(Job):
                 errors = outdata.get("errors")
                 if len(errors) != 0:
                     raise AssertionError("No errors should be encountered while flattening frequencies!")
-                if outdata.get("frequencies")[0] > 0.0:
-                    print("All frequencies positive!")
-                    break
-                if abs(outdata.get("frequencies")[0]) < 15.0 and outdata.get("frequencies")[1] > 0.0:
-                    print("One negative frequency smaller than 15.0 - not worth further flattening!")
-                    break
-                if len(energy_history) > 1:
-                    if abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
-                        print("Energy change below cutoff!")
+                if not transition_state:
+                    freq_0 = outdata.get("frequencies")[0]
+                    freq_1 = outdata.get("frequencies")[1]
+                    if freq_0 > 0.0:
+                        warnings.warn("All frequencies positive!")
                         break
-                opt_QCInput = QCInput(
-                    molecule=opt_outdata.get("molecule_from_optimized_geometry"),
-                    rem=opt_rem,
-                    opt=orig_input.opt,
-                    pcm=orig_input.pcm,
-                    solvent=orig_input.solvent,
-                    smx=orig_input.smx,
-                )
-                opt_QCInput.write_file(input_file)
+                    if abs(freq_0) < 15.0 and freq_1 > 0.0:
+                        warnings.warn("One negative frequency smaller than 15.0 - not worth further flattening!")
+                        break
+                    if len(energy_history) > 1:
+                        if abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
+                            warnings.warn("Energy change below cutoff!")
+                            break
+                    opt_QCInput = QCInput(
+                        molecule=opt_outdata.get("molecule_from_optimized_geometry"),
+                        rem=opt_rem,
+                        opt=orig_input.opt,
+                        pcm=orig_input.pcm,
+                        solvent=orig_input.solvent,
+                        smx=orig_input.smx,
+                    )
+                    opt_QCInput.write_file(input_file)
+                else:
+                    freq_0 = outdata.get("frequencies")[0]
+                    freq_1 = outdata.get("frequencies")[1]
+                    freq_2 = outdata.get("frequencies")[2]
+                    if freq_0 < 0.0 < freq_1:
+                        warnings.warn("Saddle point found!")
+                        break
+                    if abs(freq_1) < 15.0 and freq_2 > 0.0:
+                        warnings.warn(
+                            "Second small imaginary frequency (smaller than 15.0) - not worth further flattening!"
+                        )
+                        break
+                    opt_QCInput = QCInput(
+                        molecule=opt_outdata.get("molecule_from_optimized_geometry"),
+                        rem=opt_rem,
+                        opt=orig_input.opt,
+                        pcm=orig_input.pcm,
+                        solvent=orig_input.solvent,
+                        smx=orig_input.smx,
+                    )
+                    opt_QCInput.write_file(input_file)
             if not save_final_scratch:
                 shutil.rmtree(os.path.join(os.getcwd(), "scratch"))
 
         else:
-            if not os.path.exists(input_file):
-                raise AssertionError("Input file must be present!")
             orig_opt_input = QCInput.from_file(input_file)
-            orig_opt_rem = copy.deepcopy(orig_opt_input.rem)
-            orig_freq_rem = copy.deepcopy(orig_opt_input.rem)
-            orig_freq_rem["job_type"] = "freq"
-            first = True
-            history = []
+            history = list()
 
             for ii in range(max_iterations):
                 yield (
@@ -282,12 +364,12 @@ class QCJob(Job):
                         input_file=input_file,
                         output_file=output_file,
                         qclog_file=qclog_file,
-                        suffix=".opt_" + str(ii),
+                        suffix=".{}_".format(opt_method) + str(ii),
                         backup=first,
                         **QCJob_kwargs,
                     )
                 )
-                opt_outdata = QCOutput(output_file + ".opt_" + str(ii)).data
+                opt_outdata = QCOutput(output_file + ".{}_".format(opt_method) + str(ii)).data
                 if first:
                     orig_species = copy.deepcopy(opt_outdata.get("species"))
                     orig_charge = copy.deepcopy(opt_outdata.get("charge"))
@@ -295,11 +377,14 @@ class QCJob(Job):
                     orig_energy = copy.deepcopy(opt_outdata.get("final_energy"))
                 first = False
                 if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
-                    print("Unstable molecule broke into unconnected fragments which failed to optimize! Exiting...")
-                    break
+                    if not transition_state:
+                        warnings.warn(
+                            "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
+                        )
+                        break
                 freq_QCInput = QCInput(
                     molecule=opt_outdata.get("molecule_from_optimized_geometry"),
-                    rem=orig_freq_rem,
+                    rem=freq_rem,
                     opt=orig_opt_input.opt,
                     pcm=orig_opt_input.pcm,
                     solvent=orig_opt_input.solvent,
@@ -322,14 +407,34 @@ class QCJob(Job):
                 errors = outdata.get("errors")
                 if len(errors) != 0:
                     raise AssertionError("No errors should be encountered while flattening frequencies!")
-                if outdata.get("frequencies")[0] > 0.0:
-                    print("All frequencies positive!")
-                    if opt_outdata.get("final_energy") > orig_energy:
-                        print("WARNING: Energy increased during frequency flattening!")
-                    break
-                if abs(outdata.get("frequencies")[0]) < 15.0 and outdata.get("frequencies")[1] > 0.0:
-                    print("One negative frequency smaller than 15.0 - not worth further flattening!")
-                    break
+                if not transition_state:
+                    freq_0 = outdata.get("frequencies")[0]
+                    freq_1 = outdata.get("frequencies")[1]
+                    if freq_0 > 0.0:
+                        warnings.warn("All frequencies positive!")
+                        if opt_outdata.get("final_energy") > orig_energy:
+                            warnings.warn("WARNING: Energy increased during frequency flattening!")
+                        break
+                    if abs(freq_0) < 15.0 and freq_1 > 0.0:
+                        warnings.warn("One negative frequency smaller than 15.0 - not worth further flattening!")
+                        break
+                    if len(energy_history) > 1:
+                        if abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
+                            warnings.warn("Energy change below cutoff!")
+                            break
+                else:
+                    freq_0 = outdata.get("frequencies")[0]
+                    freq_1 = outdata.get("frequencies")[1]
+                    freq_2 = outdata.get("frequencies")[2]
+                    if freq_0 < 0.0 < freq_1:
+                        warnings.warn("Saddle point found!")
+                        break
+                    if abs(freq_1) < 15.0 and freq_2 > 0.0:
+                        warnings.warn(
+                            "Second small imaginary frequency (smaller than 15.0) - not worth further flattening!"
+                        )
+                        break
+
                 hist = {}
                 hist["molecule"] = copy.deepcopy(outdata.get("initial_molecule"))
                 hist["geometry"] = copy.deepcopy(outdata.get("initial_geometry"))
@@ -338,12 +443,12 @@ class QCJob(Job):
                 hist["num_neg_freqs"] = sum(1 for freq in outdata.get("frequencies") if freq < 0)
                 hist["energy"] = copy.deepcopy(opt_outdata.get("final_energy"))
                 hist["index"] = len(history)
-                hist["children"] = []
+                hist["children"] = list()
                 history.append(hist)
 
                 ref_mol = history[-1]["molecule"]
                 geom_to_perturb = history[-1]["geometry"]
-                negative_freq_vecs = history[-1]["frequency_mode_vectors"][0]
+                negative_freq_vecs = history[-1]["frequency_mode_vectors"][perturb_index]
                 reversed_direction = False
                 standard = True
 
@@ -371,7 +476,7 @@ class QCJob(Job):
                         if len(parent_hist["children"]) == 1:
                             ref_mol = parent_hist["molecule"]
                             geom_to_perturb = parent_hist["geometry"]
-                            negative_freq_vecs = parent_hist["frequency_mode_vectors"][0]
+                            negative_freq_vecs = parent_hist["frequency_mode_vectors"][perturb_index]
                             reversed_direction = True
                             standard = False
                             parent_hist["children"].append(len(history))
@@ -380,7 +485,6 @@ class QCJob(Job):
                         elif len(parent_hist["children"]) == 2:
                             # If we're dealing with just one negative frequency,
                             if parent_hist["num_neg_freqs"] == 1:
-                                make_good_child_next_parent = False
                                 if history[parent_hist["children"][0]]["energy"] < history[-1]["energy"]:
                                     good_child = copy.deepcopy(history[parent_hist["children"][0]])
                                 else:
@@ -393,8 +497,8 @@ class QCJob(Job):
                                     make_good_child_next_parent = True
                                 elif (
                                     vector_list_diff(
-                                        good_child["frequency_mode_vectors"][0],
-                                        parent_hist["frequency_mode_vectors"][0],
+                                        good_child["frequency_mode_vectors"][perturb_index],
+                                        parent_hist["frequency_mode_vectors"][perturb_index],
                                     )
                                     > 0.2
                                 ):
@@ -406,7 +510,7 @@ class QCJob(Job):
                                     history.append(good_child)
                                     ref_mol = history[-1]["molecule"]
                                     geom_to_perturb = history[-1]["geometry"]
-                                    negative_freq_vecs = history[-1]["frequency_mode_vectors"][0]
+                                    negative_freq_vecs = history[-1]["frequency_mode_vectors"][perturb_index]
                             else:
                                 raise Exception("ERROR: Can't deal with multiple neg frequencies yet! Exiting...")
                         else:
@@ -438,7 +542,7 @@ class QCJob(Job):
                         charge=orig_charge,
                         spin_multiplicity=orig_multiplicity,
                     )
-                    if check_connectivity:
+                    if check_connectivity and not transition_state:
                         structure_successfully_perturbed = (
                             check_for_structure_changes(ref_mol, new_molecule) == "no_change"
                         )
@@ -452,35 +556,10 @@ class QCJob(Job):
 
                 new_opt_QCInput = QCInput(
                     molecule=new_molecule,
-                    rem=orig_opt_rem,
+                    rem=opt_rem,
                     opt=orig_opt_input.opt,
                     pcm=orig_opt_input.pcm,
                     solvent=orig_opt_input.solvent,
                     smx=orig_opt_input.smx,
                 )
                 new_opt_QCInput.write_file(input_file)
-
-
-def perturb_coordinates(old_coords, negative_freq_vecs, molecule_perturb_scale, reversed_direction):
-    """
-    Perturbs a structure along the imaginary mode vibrational frequency vectors
-    """
-    max_dis = max([math.sqrt(sum([x ** 2 for x in vec])) for vec in negative_freq_vecs])
-    scale = molecule_perturb_scale / max_dis
-    normalized_vecs = [[x * scale for x in vec] for vec in negative_freq_vecs]
-    direction = 1.0
-    if reversed_direction:
-        direction = -1.0
-    return [[c + v * direction for c, v in zip(coord, vec)] for coord, vec in zip(old_coords, normalized_vecs)]
-
-
-def vector_list_diff(vecs1, vecs2):
-    """
-    Calculates the summed difference of two vectors
-    """
-    diff = 0.0
-    if len(vecs1) != len(vecs2):
-        raise AssertionError("ERROR: Vectors must be of equal length! Exiting...")
-    for ii, vec1 in enumerate(vecs1):
-        diff += np.linalg.norm(vecs2[ii] - vec1)
-    return diff
