@@ -10,11 +10,6 @@ from pymatgen.io.qchem.outputs import QCOutput
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 
-try:
-    from openbabel import openbabel as ob
-except ImportError:
-    raise RuntimeError("ERROR: OpenBabel must be installed to use Q-Chem Custodian!")
-
 __author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath"
 __copyright__ = "Copyright 2018, The Materials Project"
 __version__ = "0.1"
@@ -63,6 +58,8 @@ class QChemErrorHandler(ErrorHandler):
         Checks output file for errors
         """
         self.outdata = QCOutput(self.output_file).data
+        if "structure_change" not in self.outdata:
+            raise RuntimeError("ERROR: OpenBabel must be installed to use Q-Chem handlers!")
         self.errors = self.outdata.get("errors")
         self.warnings = self.outdata.get("warnings")
         # If we aren't out of optimization cycles, but we were in the past, reset the history
