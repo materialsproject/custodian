@@ -58,8 +58,9 @@ class QChemErrorHandler(ErrorHandler):
         Checks output file for errors
         """
         self.outdata = QCOutput(self.output_file).data
-        if "structure_change" not in self.outdata:
-            raise RuntimeError("ERROR: OpenBabel must be installed to use Q-Chem handlers!")
+        if "out_of_opt_cycles" in self.errors:
+            if "structure_change" not in self.outdata:
+                raise RuntimeError("ERROR: OpenBabel must be installed to use Q-Chem opt handlers!")
         self.errors = self.outdata.get("errors")
         self.warnings = self.outdata.get("warnings")
         # If we aren't out of optimization cycles, but we were in the past, reset the history
