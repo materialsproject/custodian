@@ -460,7 +460,7 @@ class FrozenJobErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out", timeout=3600, scf_timeout=300):
+    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out", timeout=3600):
         """
         Initializes the handler with the output file to check.
 
@@ -472,18 +472,12 @@ class FrozenJobErrorHandler(ErrorHandler):
                 frozen. Defaults to 3600 seconds, i.e., 1 hour. Most stages of
                 cp2k take much less than 1 hour, but 1 hour is the default to account
                 for large HF force calculations or sizable preconditioner calculations.
-            scf_timeout int): A secondary timeout. The handler will check to see if
-                cp2k is in the middle of an scf loop and check if this criteria. By default
-                this is set to 5 minutes, as each step of the scf should be much less than this,
-                *but* this can break down if you are doing something like a primary basis-set HF
-                calcualtion or an enormous system, in which case it should be increased.
         """
         self.input_file = input_file
         self.output_file = output_file
         self.timeout = timeout
         self.scf_timeout = scf_timeout
         self.frozen_preconditioner = False
-        self.frozen_scf = False
         self.restart = None
 
     def check(self):
@@ -493,22 +487,6 @@ class FrozenJobErrorHandler(ErrorHandler):
             return False
         if out.filenames.get('restart'):
             self.restart = out.filenames['restart'][-1]
-
-        out.parse_scf_opt()
-        conv = list(itertools.chain.from_iterable(out.data['scf_time']))
-
-        ci = Cp2kInput.from_file(self.input_file)
-        inner = ci['FORCE_EVAL']['DFT']['SCF'].get('MAX_SCF', Keyword('', 50)).values[0] \
-            if ci.check('FORCE_EVAL/DFT/SCF') else 50
-        outer = ci['FORCE_EVAL']['DFT']['SCF']['OUTER_SCF'].get('MAX_SCF', Keyword('', 1)).values[0] \
-            if ci.check('FORCE_EVAL/DFT/SCF/OUTER_SCF') else 1
-
-        # At least one precond and one regular step
-        # Also make sure you are in the scf loop
-        if len(conv) > 2 and not len(conv) % int(inner*outer) == 0:
-            if (time.time() - st.st_mtime) > self.scf_timeout:
-                self.frozen_scf = True
-                return True
 
         t = tail(self.output_file, 2)
         if time.time() - st.st_mtime > self.timeout:
@@ -602,10 +580,6 @@ class FrozenJobErrorHandler(ErrorHandler):
 
             self.frozen_preconditioner = False
             errors.append('Frozen preconditioner')
-
-        elif self.frozen_scf:
-            self.frozen_scf = False
-            errors.append('Frozen scf')
 
         else:
             errors.append('Frozen job')
@@ -957,6 +931,21 @@ class NumericalPrecisionHandler(ErrorHandler):
                     actions.append(tmp)
                 elif ci.by_path('FORCE_EVAL/DFT/XC/XC_GRID').get('XC_GRID', None):
                     actions.append(tmp)
+
+        # If corrections were applied, AND convergence is already good (1e-5)
+        # then discard the original RESTART file if present
+        if actions:
+            if ci.check('force_eval/dft') and \
+                    ci['force_eval']['dft'].get('wfn_restart_file_name'):
+                conv = get_conv(self.output_file)
+                if conv[-1] <= 1e-5:
+                    actions.append(
+                        {'dict': self.input_file,
+                         'action': {
+                             '_unset': {
+                                 'FORCE_EVAL': {
+                                     'DFT': 'WFN_RESTART_FILE_NAME'}}}}
+                    )
 
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
         return {"errors": ["Unsufficient precision"], "actions": actions}
