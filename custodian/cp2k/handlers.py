@@ -898,7 +898,21 @@ class NumericalPrecisionHandler(ErrorHandler):
         if len(actions) == 0:
             eps_default = ci.by_path('FORCE_EVAL/DFT/QS').get('EPS_DEFAULT', Keyword('EPS_DEFAULT', 1e-10)).values[0]
 
-            if 1e-10 <= eps_default < 1e-16:
+            if eps_default > 1e-12:
+                actions.append({
+                    'dict': self.input_file,
+                    "action": {
+                        "_set": {
+                            'FORCE_EVAL': {
+                                'DFT': {
+                                    'QS': {
+                                        'EPS_DEFAULT': 1e-12
+                                    }
+                                }
+                            }
+                        }}})
+
+            elif 1e-12 >= eps_default > 1e-16:
                 actions.append({
                     'dict': self.input_file,
                     "action": {
@@ -911,6 +925,7 @@ class NumericalPrecisionHandler(ErrorHandler):
                                 }
                             }
                         }}})
+
             else:
                 # Try a more expensive XC grid
                 tmp = {'dict': self.input_file,
