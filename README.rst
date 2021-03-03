@@ -1,3 +1,7 @@
+.. image:: custodian_logo.png
+   :width: 400px
+   :alt: Custodian
+
 Custodian is a simple, robust and flexible just-in-time (JIT) job management
 framework written in Python. Using custodian, you can create wrappers that
 perform error checking, job management and error recovery. It has a simple

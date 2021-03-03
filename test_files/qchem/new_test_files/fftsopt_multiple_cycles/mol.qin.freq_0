@@ -1,0 +1,29 @@
+$molecule
+ 0 2
+ C      0.3967596691     -1.5703473831     -0.0259748355
+ O      1.2947800350     -1.8337144031     -0.7414502642
+ H      0.3239679043     -1.8356770991      1.0661458281
+ O     -1.1224527235      1.5235652923      0.1280034475
+ Li     -0.5343080478      3.0320255941      0.5057178648
+ Li     -1.2646768372      0.0154279989     -0.5702820407
+$end
+
+$rem
+   job_type = freq
+   basis = def2-svpd
+   max_scf_cycles = 200
+   gen_scfman = true
+   xc_grid = 3
+   scf_algorithm = diis
+   resp_charges = true
+   symmetry = false
+   sym_ignore = true
+   method = wb97xv
+   solvent_method = smd
+   ideriv = 1
+   thresh = 14
+$end
+
+$smx
+   solvent other
+$end
