@@ -14,7 +14,7 @@ import pymatgen
 
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")
-pymatgen.SETTINGS["PMG_VASP_PSP_DIR"] = os.path.abspath(test_dir)  # type: ignore
+pymatgen.settings.SETTINGS["PMG_VASP_PSP_DIR"] = os.path.abspath(test_dir)  # type: ignore
 
 
 class VaspJobTest(unittest.TestCase):

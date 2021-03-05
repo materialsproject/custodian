@@ -623,6 +623,7 @@ class Custodian:
             logger.info("Run completed. Total time taken = {}.".format(run_time))
             if self.finished and self.gzipped_output:
                 gzip_dir(".")
+        return None
 
     def _do_check(self, handlers, terminate_func=None):
         """
