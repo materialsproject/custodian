@@ -607,8 +607,12 @@ class AbortHandler(ErrorHandler):
     optimization rather than an error per se. Currently this error handler recognizes
     the following:
 
-        (1) Cholesky decomposition error. Which can be caused by imprecision or a bad
-            preconditioner.
+        (1) Cholesky decomposition error in preconditioner. If this is found, the
+            handler will try switching between Full_all/Full_single_inverse
+            preconditioner and increasing precision.
+
+        (2) Cholesky decomposition error from SCF diagonalization. If found, the
+            handler will try switching from the restore algorithm to inverse cholesky
     """
 
     is_monitor = False
@@ -626,7 +630,8 @@ class AbortHandler(ErrorHandler):
         self.input_file = input_file
         self.output_file = output_file
         self.messages = {
-            'cholesky': r'(Cholesky decomposition failed. Matrix ill conditioned ?)'
+            'cholesky': r'(Cholesky decomposition failed. Matrix ill conditioned ?)',
+            'cholesky_scf': r'(Cholesky decompose failed: the matrix is not positive definite or)'
         }
         self.responses = []
 
@@ -719,9 +724,13 @@ class AbortHandler(ErrorHandler):
 
             if n == 3:
                 # bump up overlap matrix resolution
+                eps_default = ci['force_eval']['dft']['qs'].get(
+                    'EPS_DEFAULT',
+                    Keyword('EPS_DEFAULT', 1e-12)
+                ).values[0]
                 p = ci['force_eval']['dft']['qs'].get(
                     'EPS_PGF_ORB',
-                    Keyword('EPS_PGF_ORB', 1e-6)
+                    Keyword('EPS_PGF_ORB', np.sqrt(eps_default))
                 ).values[0]
                 actions.append({
                     "dict": self.input_file,
@@ -762,6 +771,31 @@ class AbortHandler(ErrorHandler):
                                                         'SCREEN_P_FORCES': False
                                                     },
                                                 }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    )
+
+        elif self.responses[-1] == 'cholesky_scf':
+            n = self.responses.count('cholesky_scf')
+            if n == 1:
+                p = ci['FORCE_EVAL']['DFT']['SCF'].get(
+                    'CHOLESKY', Keyword('CHOLESKY', 'RESTORE')
+                ).values[0]
+
+                if p == 'RESTORE':
+                    actions.append(
+                        {
+                            'dict': self.input_file,
+                            "action": {
+                                "_set": {
+                                    'FORCE_EVAL': {
+                                        'DFT': {
+                                            'SCF': {
+                                                'CHOLESKY': 'INVERSE'
                                             }
                                         }
                                     }
@@ -829,6 +863,7 @@ class NumericalPrecisionHandler(ErrorHandler):
         self.input_file = input_file
         self.output_file = output_file
         self.max_same = max_same
+        self.overlap_condition = None
 
     def check(self):
         conv = get_conv(self.output_file)
@@ -843,8 +878,9 @@ class NumericalPrecisionHandler(ErrorHandler):
 
         if ci.check('FORCE_EVAL/DFT/XC/HF'):  # Hybrid has special considerations
             if ci.check('FORCE_EVAL/DFT/XC/HF/SCREENING'):
-                if ci.by_path('FORCE_EVAL/DFT/XC/HF/SCREENING').get(
-                        'EPS_SCHWARZ', Keyword('EPS_SCHWARZ', 1e-10)).values[0] > 1e-7:
+                eps_schwarz = ci.by_path('FORCE_EVAL/DFT/XC/HF/SCREENING').get(
+                    'EPS_SCHWARZ', Keyword('EPS_SCHWARZ', 1e-10)).values[0]
+                if eps_schwarz > 1e-7:
                     actions.append({'dict': self.input_file,
                                     "action": {"_set": {
                                         'FORCE_EVAL': {
@@ -867,36 +903,51 @@ class NumericalPrecisionHandler(ErrorHandler):
                         if isinstance(bs, Sequence):
                             for i in range(len(bs)):
                                 if 'AUX_FIT' in [val.upper() for val in bs[i].values]:
-                                    if el == 'Li': # special case of Li aux basis
+                                    aux = None
+                                    if el == 'Li':  # special case of Li aux basis
                                         aux = get_aux_basis({el: 'cFIT4-SR'})
                                     elif not bs[i].values[1].startswith('cp'):
                                         aux = get_aux_basis({el: None}, 'cpFIT')
-                                    bs.keywords.pop(i)
-                                    actions.append({'dict': self.input_file,
-                                                    "action": {"_set": {
+                                        if not aux.get(el, '').startswith('cpFIT'):
+                                            aux = None
+                                    if aux:
+                                        bs.keywords.pop(i)
+                                        actions.append({'dict': self.input_file,
+                                                        "action": {"_set": {
+                                                            'FORCE_EVAL': {
+                                                                'SUBSYS': {
+                                                                    k: {
+                                                                        'BASIS_SET': 'AUX_FIT '+aux[el]
+                                                                    }
+                                                                }
+                                                            }
+                                                    }}})
+                                        for _bs in bs:
+                                            actions.append({
+                                                'dict': self.input_file,
+                                                'action': {
+                                                    "_inc": {
                                                         'FORCE_EVAL': {
                                                             'SUBSYS': {
                                                                 k: {
-                                                                    'BASIS_SET': 'AUX_FIT '+aux[el]
-                                                                }
-                                                            }
-                                                        }
-                                                    }}})
-                                    for _bs in bs:
-                                        actions.append({
-                                            'dict': self.input_file,
-                                            'action': {
-                                                "_inc": {
-                                                    'FORCE_EVAL': {
-                                                        'SUBSYS': {
-                                                            k: {
-                                                                'BASIS_SET': ' '.join(_bs.values)
-                                                            }}}}}})
-                                    break
+                                                                    'BASIS_SET': ' '.join(_bs.values)
+                                                                }}}}}})
+                                        break
 
         # If no hybrid modifications were performed
+
         if len(actions) == 0:
             eps_default = ci.by_path('FORCE_EVAL/DFT/QS').get('EPS_DEFAULT', Keyword('EPS_DEFAULT', 1e-10)).values[0]
+
+            # overlap matrix precision
+            pgf = ci['force_eval']['dft']['qs'].get(
+                'EPS_PGF_ORB', Keyword('EPS_PGF_ORB', np.sqrt(eps_default))
+            ).values[0]
+
+            # realspace KS matrix precision
+            gvg = ci['force_eval']['dft']['qs'].get(
+                'EPS_GVG_RSPACE', Keyword('EPS_PGF_ORB', np.sqrt(eps_default))
+            ).values[0]
 
             if eps_default > 1e-12:
                 actions.append({
@@ -925,6 +976,46 @@ class NumericalPrecisionHandler(ErrorHandler):
                                 }
                             }
                         }}})
+
+            elif pgf > 1e-10 or gvg > 1e-10:
+                if pgf > 1e-10:
+                    actions.append(
+                        {
+                            "dict": self.input_file,
+                            "action": {
+                                "_set":
+                                    {
+                                        'FORCE_EVAL': {
+                                            'DFT': {
+                                                'QS': {
+                                                    'EPS_PGF_ORB': 1e-10,
+                                                }
+                                            }
+                                        }
+                                    }
+
+                            }
+                        }
+                    )
+                if gvg > 1e-10:
+                    actions.append(
+                        {
+                            "dict": self.input_file,
+                            "action": {
+                                "_set":
+                                    {
+                                        'FORCE_EVAL': {
+                                            'DFT': {
+                                                'QS': {
+                                                    'EPS_GVG_RSPACE': 1e-10
+                                                }
+                                            }
+                                        }
+                                    }
+
+                            }
+                        }
+                    )
 
             else:
                 # Try a more expensive XC grid
@@ -963,131 +1054,6 @@ class NumericalPrecisionHandler(ErrorHandler):
 
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
         return {"errors": ["Unsufficient precision"], "actions": actions}
-
-
-class HybridPrecisionHandler(ErrorHandler):
-    """
-    Hybrid calculations have additional settings beyond normal DFT
-    calculations that can lead to the SCF getting stuck, oscillating forever,
-    etc.
-
-    Central to this handler is the use of the condition number (CN)
-    (i.e. the ratio of the largest to smallest eigenvalue) of the overlap matrix.
-    The condition number should, ideally, be as small as possible to ensure good
-    convergence. Overlap condition numbers below 1e4 should be fairly easy to
-    converge, more than 1e5 are considered problematic, and
-    above 1e6 is extremely difficult to converge.
-
-    In the HF module, screening is generally used to improve the speed of the
-    calculation. The "ideal" screening parameter in the HF module
-    is roughly:
-
-        EPS_SCHWARZ ~ 1 / (CN)**2
-
-    This is a very conservative estimate, though. Calculations with CN=1e4 would
-    be expected to require EPS_SCHWARZ = 1e-8, while 1e-6 or 1e-7 are often sufficient.
-    Therefore, this handler will take a semi-conservative approach and use a power of 1.5
-    in the denominator instead of 2. This is still a little conservative, but it will help
-    with the computational effort.
-    """
-    def __init__(self, input_file='cp2k.inp', output_file='cp2k.out'):
-        self.input_file = input_file
-        self.output_file = output_file
-        self.overlap_condition = None
-
-    def check(self):
-        ci = Cp2kInput.from_file(self.input_file)
-        out = Cp2kOutput(self.output_file)
-        out.parse_overlap_condition()
-        self.overlap_condition = out.data.get('overlap_condition_number', [[None]])[0][0]
-        if not ci.check('FORCE_EVAL/DFT/XC/HF'):
-            return False
-
-    def correct(self):
-        ci = Cp2kInput.from_file(self.input_file)
-        actions = []
-
-        # custodian should make sure the overlap condition number is calculated, in advance
-        # This is just in case
-        if self.overlap_condition:
-            eps_schwarz = 1 / np.power(self.overlap_condition, 1.5)
-            if ci.check('FORCE_EVAL/DFT/XC/HF/SCREENING'):
-                val = ci.by_path('FORCE_EVAL/DFT/XC/HF/SCREENING').get(
-                    'EPS_SCHWARZ', Keyword('EPS_SCHWARZ', 1e-10)
-                ).values[0]
-                if val > eps_schwarz:
-                    actions.append({'dict': self.input_file,
-                                    "action": {"_set": {
-                                        'FORCE_EVAL': {
-                                            'DFT': {
-                                                'XC': {
-                                                    'HF': {
-                                                        'SCREENING': {
-                                                            'EPS_SCHWARZ': eps_schwarz
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }}})
-
-        # special case of Li: requires SR auxiliary basis for good condition number
-        for k, v in ci['FORCE_EVAL']['SUBSYS'].subsections.items():
-            if v.name.upper() == 'KIND':
-                if v.get('ELEMENT'):
-                    kind = v["ELEMENT"].values[0]
-                else:
-                    kind = v.section_parameters[0]
-                if kind == 'Li':
-                    if isinstance(v['BASIS_SET'], KeywordList):
-                        bases = v['BASIS_SET'].keywords
-                        for b in bases:
-                            if 'AUX_FIT' in b.values and 'SR' not in b.values[-1]:
-                                b = Keyword('BASIS_SET', 'AUX_FIT', 'cFIT4-SR')
-
-        # HF module has stricter precision requirements in general
-        eps_default = ci.by_path('FORCE_EVAL/DFT/QS').get('EPS_DEFAULT', Keyword('EPS_DEFAULT', 1e-10)).values[0]
-
-        if eps_default > 1e-16:
-            actions.append({
-                'dict': self.input_file,
-                "action": {
-                    "_set": {
-                        'FORCE_EVAL': {
-                            'DFT': {
-                                'QS': {
-                                    'EPS_DEFAULT': 1e-16
-                                }
-                            }
-                        }
-                    }}})
-
-        # overlap matrix precision
-        pgf = ci['force_eval']['dft']['qs'].get(
-            'EPS_PGF_ORB', Keyword('EPS_PGF_ORB', np.sqrt(eps_default))
-        ).values[0]
-        if pgf > 1e-12:
-            actions.append(
-                {
-                    "dict": self.input_file,
-                    "action": {
-                        "_set":
-                            {
-                                'FORCE_EVAL': {
-                                    'DFT': {
-                                        'QS': {
-                                            'EPS_PGF_ORB': 1e-12
-                                        }
-                                    }
-                                }
-                            }
-
-                    }
-                }
-            )
-
-        Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
-        return {"errors": ["Unsufficient HF precision"], "actions": actions}
 
 
 def tail(filename, n=10):
