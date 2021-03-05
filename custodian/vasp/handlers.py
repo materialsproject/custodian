@@ -230,7 +230,7 @@ class VaspErrorHandler(ErrorHandler):
                 self.error_count["brmix"] += 1
 
                 if vi["KPOINTS"].num_kpts < 1:
-                    all_kpts_even = all([bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0]])
+                    all_kpts_even = all(bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0])
                     if all_kpts_even:
                         new_kpts = (tuple(n + 1 for n in vi["KPOINTS"].kpts[0]),)
                         actions.append(
@@ -885,7 +885,7 @@ class UnconvergedErrorHandler(ErrorHandler):
                     "BMIX_MAG": 0.001,
                 }
 
-                if not all([v.incar.get(k, "") == val for k, val in new_settings.items()]):
+                if not all(v.incar.get(k, "") == val for k, val in new_settings.items()):
                     actions.append({"dict": "INCAR", "action": {"_set": new_settings}})
 
         elif not v.converged_ionic:
@@ -1273,7 +1273,7 @@ class NonConvergingErrorHandler(ErrorHandler):
             oszicar = Oszicar(self.output_filename)
             esteps = oszicar.electronic_steps
             if len(esteps) > self.nionic_steps:
-                return all([len(e) == nelm for e in esteps[-(self.nionic_steps + 1) : -1]])
+                return all(len(e) == nelm for e in esteps[-(self.nionic_steps + 1) : -1])
         except Exception:
             pass
         return False
