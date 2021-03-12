@@ -20,6 +20,7 @@ import time
 from typing import Sequence
 from collections import deque
 import itertools
+import re
 from pymatgen.io.cp2k.inputs import Cp2kInput, Keyword, KeywordList
 from pymatgen.io.cp2k.outputs import Cp2kOutput
 from pymatgen.io.cp2k.utils import get_aux_basis
@@ -895,7 +896,7 @@ class NumericalPrecisionHandler(ErrorHandler):
                                             }
                                         }
                                     }}})
-                for k, v in ci.by_path('FORCE_EVAL/SUBSYS').subsections.items():
+            for k, v in ci.by_path('FORCE_EVAL/SUBSYS').subsections.items():
                     if v.name.upper() == 'KIND':
                         el = v.get('ELEMENT').values or v.section_parameters
                         el = el[0]
@@ -934,8 +935,30 @@ class NumericalPrecisionHandler(ErrorHandler):
                                                                 }}}}}})
                                         break
 
-        # If no hybrid modifications were performed
+            m = regrep(
+                self.output_file,
+                patterns={
+                    'PGF': re.compile(r'WARNING in hfx_energy_potential.F:592 :: The Kohn Sham matrix is not')}
+                )
+            eps_default = ci.by_path('FORCE_EVAL/DFT/QS').get('EPS_DEFAULT', Keyword('EPS_DEFAULT', 1e-10)).values[0]
+            pgf = ci['force_eval']['dft']['qs'].get(
+                'EPS_PGF_ORB', Keyword('EPS_PGF_ORB', np.sqrt(eps_default))
+            ).values[0]
+            if m.get('PGF'):
+                actions.append({
+                    'dict': self.input_file,
+                    "action": {
+                        "_set": {
+                            'FORCE_EVAL': {
+                                'DFT': {
+                                    'QS': {
+                                        'EPS_PGF_ORB': pgf / 10
+                                    }
+                                }
+                            }
+                        }}})
 
+        # If no hybrid modifications were performed
         if len(actions) == 0:
             eps_default = ci.by_path('FORCE_EVAL/DFT/QS').get('EPS_DEFAULT', Keyword('EPS_DEFAULT', 1e-10)).values[0]
 
