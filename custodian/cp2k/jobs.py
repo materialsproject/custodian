@@ -71,8 +71,7 @@ class Cp2kJob(Job):
         self.final = final
         self.backup = backup
         self.suffix = suffix
-        self.settings_override = settings_override if settings_override else \
-            {'FORCE_EVAL': {'DFT': {'PRINT': {'OVERLAP_CONDITION': {}}}}}
+        self.settings_override = settings_override if settings_override else {}
 
     def setup(self):
         """
