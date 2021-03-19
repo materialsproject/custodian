@@ -30,9 +30,9 @@ from monty.re import regrep
 from monty.os.path import zpath
 
 __author__ = "Nicholas Winner"
-__version__ = "0.3"
+__version__ = "0.9"
 __email__ = "nwinner@berkeley.edu"
-__date__ = "December 2020"
+__date__ = "March 2021"
 
 
 CP2K_BACKUP_FILES = {"cp2k.out", "cp2k.inp", "std_err.txt"}
@@ -315,34 +315,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                     }
                                 }}})
 
-        # If corrections were applied, AND convergence is already good (1e-5)
-        # then discard the original RESTART file if present
-        if actions:
-            if ci.check('force_eval/dft') and \
-                    ci['force_eval']['dft'].get('wfn_restart_file_name'):
-                conv = get_conv(self.output_file)
-                if conv[-1] <= 1e-5:
-                    actions.append(
-                        {'dict': self.input_file,
-                         'action': {
-                             '_unset': {
-                                 'FORCE_EVAL': {
-                                     'DFT': 'WFN_RESTART_FILE_NAME'}}}}
-                    )
-
-        # If issues arose after some ionic steps and corrections are possible
-        # then switch the restart file to the input file.
-        if actions and self.restart:
-            actions.insert(
-                0,
-                {
-                    "file": os.path.abspath(self.restart),
-                    "action": {
-                        "_file_copy": {"dest": os.path.abspath(self.input_file)}
-                    }
-                }
-            )
-
+        restart(actions, self.output_file, self.input_file)
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
         return {"errors": ["Non-converging Job"], "actions": actions}
 
@@ -484,9 +457,10 @@ class FrozenJobErrorHandler(ErrorHandler):
         st = os.stat(self.output_file)
         out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
         if out.completed:
+            # If job finished, then hung, don't need to wait very long to confirm frozen
+            if time.time() - st.st_mtime > 300:
+                return True
             return False
-        if out.filenames.get('restart'):
-            self.restart = out.filenames['restart'][-1]
 
         t = tail(self.output_file, 2)
         if time.time() - st.st_mtime > self.timeout:
@@ -584,19 +558,7 @@ class FrozenJobErrorHandler(ErrorHandler):
         else:
             errors.append('Frozen job')
 
-        # If job froze after some ionic steps and corrections are possible
-        # then switch the restart file to the input file.
-        if actions and self.restart:
-            actions.insert(
-                0,
-                {
-                    "file": os.path.abspath(self.restart),
-                    "action": {
-                        "_file_copy": {"dest": os.path.abspath(self.input_file)}
-                    }
-                }
-            )
-
+        restart(actions, self.output_file, self.input_file)
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
         return {"errors": errors, "actions": actions}
 
@@ -805,6 +767,7 @@ class AbortHandler(ErrorHandler):
                         }
                     )
 
+        restart(actions, self.output_file, self.input_file)
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
         return {'errors': [self.responses[-1]], 'actions': actions}
 
@@ -1079,6 +1042,50 @@ class NumericalPrecisionHandler(ErrorHandler):
         return {"errors": ["Unsufficient precision"], "actions": actions}
 
 
+def restart(actions, output_file, input_file):
+    """
+    Helper function. To discard old restart if convergence is already good, and copy
+    the restart file to the input file.
+
+    Args:
+        actions (list): list of actions that the handler is going to return to custodian. If
+            no actions are present, then non are added by this function
+        output_file (str): the cp2k output file name.
+        input_file (str): the cp2k input file name.
+    """
+    if actions:
+        o = Cp2kOutput(output_file)
+        ci = Cp2kInput.from_file(input_file)
+        restart_file = o.filenames.get('restart', [None])[-1]
+        if ci.check('force_eval/dft'):
+            wfn_restart = ci['force_eval']['dft'].get('wfn_restart_file_name')
+
+        # If convergence is already pretty good, discard the old WFN
+        if wfn_restart:
+            conv = get_conv(output_file)
+            if conv[-1] <= 1e-5:
+                actions.append(
+                    {'dict': input_file,
+                     'action': {
+                         '_unset': {
+                             'FORCE_EVAL': {
+                                 'DFT': 'WFN_RESTART_FILE_NAME'}}}}
+                )
+
+        # If issues arose after some ionic steps and corrections are possible
+        # then switch the restart file to the input file.
+        if restart_file:
+            actions.insert(
+                0,
+                {
+                    "file": os.path.abspath(restart_file),
+                    "action": {
+                        "_file_copy": {"dest": os.path.abspath(input_file)}
+                    }
+                }
+            )
+
+
 def tail(filename, n=10):
     """
     Returns the last n lines of a file as a list (including empty lines)
@@ -1104,4 +1111,3 @@ def get_conv(outfile):
     out = Cp2kOutput(outfile, auto_load=False, verbose=False)
     out.parse_scf_opt()
     return list(itertools.chain.from_iterable(out.data['convergence']))
-

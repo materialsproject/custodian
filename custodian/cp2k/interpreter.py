@@ -36,7 +36,7 @@ class Cp2kModder(Modder):
         files.
         Args:
             actions [dict]: A list of actions of the form {'file': filename,
-                'action': moddermodification} or {'dict': vaspinput_key,
+                'action': moddermodification} or {'dict': cp2k_key,
                 'action': moddermodification}
         """
         modified = []
