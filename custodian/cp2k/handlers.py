@@ -1060,10 +1060,11 @@ def restart(actions, output_file, input_file):
         if ci.check('force_eval/dft'):
             wfn_restart = ci['force_eval']['dft'].get('wfn_restart_file_name')
 
-        # If convergence is already pretty good, discard the old WFN
+        # If convergence is already pretty good, or we have moved to a new ionic step,
+        # discard the old WFN
         if wfn_restart:
             conv = get_conv(output_file)
-            if conv[-1] <= 1e-5:
+            if conv[-1] <= 1e-5 or restart_file:
                 actions.append(
                     {'dict': input_file,
                      'action': {
