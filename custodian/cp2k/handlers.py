@@ -456,6 +456,7 @@ class FrozenJobErrorHandler(ErrorHandler):
     def check(self):
         st = os.stat(self.output_file)
         out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
+        out.ran_successfully()
         if out.completed:
             # If job finished, then hung, don't need to wait very long to confirm frozen
             if time.time() - st.st_mtime > 300:
@@ -1056,7 +1057,8 @@ def restart(actions, output_file, input_file):
     if actions:
         o = Cp2kOutput(output_file)
         ci = Cp2kInput.from_file(input_file)
-        restart_file = o.filenames.get('restart', [None])[-1]
+        restart_file = o.filenames.get('restart')
+        restart_file = restart_file[-1] if restart_file else None
         if ci.check('force_eval/dft'):
             wfn_restart = ci['force_eval']['dft'].get('wfn_restart_file_name')
 
