@@ -456,12 +456,14 @@ class FrozenJobErrorHandler(ErrorHandler):
     def check(self):
         st = os.stat(self.output_file)
         out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
-        out.ran_successfully()
-        if out.completed:
+        try:
+            out.ran_successfully()
             # If job finished, then hung, don't need to wait very long to confirm frozen
             if time.time() - st.st_mtime > 300:
                 return True
             return False
+        except ValueError:
+            pass
 
         t = tail(self.output_file, 2)
         if time.time() - st.st_mtime > self.timeout:
@@ -1024,21 +1026,7 @@ class NumericalPrecisionHandler(ErrorHandler):
                 elif ci.by_path('FORCE_EVAL/DFT/XC/XC_GRID').get('XC_GRID', None):
                     actions.append(tmp)
 
-        # If corrections were applied, AND convergence is already good (1e-5)
-        # then discard the original RESTART file if present
-        if actions:
-            if ci.check('force_eval/dft') and \
-                    ci['force_eval']['dft'].get('wfn_restart_file_name'):
-                conv = get_conv(self.output_file)
-                if conv[-1] <= 1e-5:
-                    actions.append(
-                        {'dict': self.input_file,
-                         'action': {
-                             '_unset': {
-                                 'FORCE_EVAL': {
-                                     'DFT': 'WFN_RESTART_FILE_NAME'}}}}
-                    )
-
+        restart(actions, self.output_file, self.input_file)
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
         return {"errors": ["Unsufficient precision"], "actions": actions}
 
@@ -1066,7 +1054,7 @@ def restart(actions, output_file, input_file):
         # discard the old WFN
         if wfn_restart:
             conv = get_conv(output_file)
-            if conv[-1] <= 1e-5 or restart_file:
+            if (conv and conv[-1] <= 1e-5) or restart_file:
                 actions.append(
                     {'dict': input_file,
                      'action': {
