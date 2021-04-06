@@ -935,7 +935,7 @@ class NumericalPrecisionHandler(ErrorHandler):
 
             # realspace KS matrix precision
             gvg = ci['force_eval']['dft']['qs'].get(
-                'EPS_GVG_RSPACE', Keyword('EPS_PGF_ORB', np.sqrt(eps_default))
+                'EPS_GVG_RSPACE', Keyword('EPS_GVG_RSPACE', np.sqrt(eps_default))
             ).values[0]
 
             if eps_default > 1e-12:
