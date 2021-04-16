@@ -98,6 +98,7 @@ class VaspErrorHandler(ErrorHandler):
         "posmap": ["POSMAP"],
         "point_group": ["group operation missing"],
         "symprec_noise": ["determination of the symmetry of your systems shows a strong"],
+        "dfpt_ncore": ["PEAD routines do not work for NCORE"]
     }
 
     def __init__(
@@ -435,6 +436,13 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-6}}})
             else:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+
+        if "dfpt_ncore" in self.errors:
+            # note that when using "_unset" action, the value is ignored
+            if "NCORE" in vi["INCAR"]:
+                actions.append({"dict": "INCAR", "action": {"_unset": {"NCORE": 0}}})
+            if "NPAR" in vi["INCAR"]:
+                actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 0}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
