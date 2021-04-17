@@ -47,6 +47,7 @@ class Cp2kModder(Modder):
                 self._modify(a['action'], self.ci)
             elif "file" in a:
                 self.modify(a["action"], a["file"])
+                self.ci = Cp2kInput.from_file(self.filename)
             else:
                 raise ValueError("Unrecognized format: {}".format(a))
         self.ci.write_file(self.filename)
