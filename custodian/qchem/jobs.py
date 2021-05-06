@@ -400,6 +400,8 @@ class QCJob(Job):
                     pcm=orig_opt_input.pcm,
                     solvent=orig_opt_input.solvent,
                     smx=orig_opt_input.smx,
+                    vdw_mode=orig_opt_input.vdw_mode,
+                    van_der_waals=orig_opt_input.van_der_waals,
                 )
                 freq_QCInput.write_file(input_file)
                 yield (
@@ -572,5 +574,7 @@ class QCJob(Job):
                     pcm=orig_opt_input.pcm,
                     solvent=orig_opt_input.solvent,
                     smx=orig_opt_input.smx,
+                    vdw_mode=orig_opt_input.vdw_mode,
+                    van_der_waals=orig_opt_input.van_der_waals,
                 )
                 new_opt_QCInput.write_file(input_file)
