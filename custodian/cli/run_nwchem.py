@@ -4,15 +4,6 @@
 Basic script to run nwchem job.
 """
 
-from __future__ import division
-
-__author__ = "shyuepingong"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "shyuep@gmail.com"
-__status__ = "Beta"
-__date__ = "6/18/13"
-
 import logging
 
 from custodian.custodian import Custodian
@@ -21,9 +12,10 @@ from custodian.nwchem.jobs import NwchemJob
 
 
 def do_run(args):
-    logging.basicConfig(
-        format="%(asctime)s %(message)s", level=logging.INFO, filename="run.log"
-    )
+    """
+    Do the run.
+    """
+    logging.basicConfig(format="%(asctime)s %(message)s", level=logging.INFO, filename="run.log")
     job = NwchemJob(
         nwchem_cmd=args.command.split(),
         input_file=args.infile,
@@ -41,18 +33,16 @@ def do_run(args):
 
 
 def main():
+    """
+    Main method
+    """
     import argparse
 
     parser = argparse.ArgumentParser(
         description="""
     run_nwchem is a master script to perform various kinds of Nwchem runs.
     """,
-        epilog="""
-    Author: Shyue Ping Ong
-    Version: {}
-    Last updated: {}""".format(
-            __version__, __date__
-        ),
+        epilog="""Author: Shyue Ping Ong""",
     )
 
     parser.add_argument(

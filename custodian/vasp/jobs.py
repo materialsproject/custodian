@@ -1,40 +1,29 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
-import subprocess
-import os
-import shutil
-import math
-import logging
-
-import numpy as np
-
-from pymatgen import Structure
-from pymatgen.io.vasp.inputs import VaspInput, Incar, Poscar, Kpoints
-from pymatgen.io.vasp.outputs import Vasprun, Outcar
-from monty.os.path import which
-from monty.shutil import decompress_dir
-from monty.serialization import dumpfn, loadfn
-
-from custodian.custodian import Job, SENTRY_DSN
-from custodian.utils import backup
-from custodian.vasp.interpreter import VaspModder
-from custodian.vasp.handlers import VASP_BACKUP_FILES
-
 """
 This module implements basic kinds of jobs for VASP runs.
 """
 
+import logging
+import math
+import os
+import shutil
+import subprocess
+
+import numpy as np
+from monty.os.path import which
+from monty.serialization import dumpfn, loadfn
+from monty.shutil import decompress_dir
+from pymatgen.core.structure import Structure
+from pymatgen.io.vasp.inputs import VaspInput, Incar, Poscar, Kpoints
+from pymatgen.io.vasp.outputs import Vasprun, Outcar
+
+from custodian.custodian import Job, SENTRY_DSN
+from custodian.utils import backup
+from custodian.vasp.handlers import VASP_BACKUP_FILES
+from custodian.vasp.interpreter import VaspModder
 
 logger = logging.getLogger(__name__)
-
-
-__author__ = "Shyue Ping Ong"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "shyuep@gmail.com"
-__status__ = "Beta"
-__date__ = "2/4/13"
 
 
 VASP_INPUT_FILES = {"INCAR", "POSCAR", "POTCAR", "KPOINTS"}
@@ -177,9 +166,7 @@ class VaspJob(Job):
                     scope.set_tag("vasp_path", vasp_path)
                     scope.set_tag("vasp_cmd", vasp_cmd)
                 except Exception:
-                    logger.error(
-                        "Failed to detect VASP path: {}".format(vasp_cmd), exc_info=True
-                    )
+                    logger.error("Failed to detect VASP path: {}".format(vasp_cmd), exc_info=True)
                     scope.set_tag("vasp_cmd", vasp_cmd)
 
     def setup(self):
@@ -201,9 +188,7 @@ class VaspJob(Job):
             try:
                 incar = Incar.from_file("INCAR")
                 # Only optimized NPAR for non-HF and non-RPA calculations.
-                if not (
-                    incar.get("LHFCALC") or incar.get("LRPA") or incar.get("LEPSILON")
-                ):
+                if not (incar.get("LHFCALC") or incar.get("LRPA") or incar.get("LEPSILON")):
                     if incar.get("IBRION") in [5, 6, 7, 8]:
                         # NPAR should not be set for Hessian matrix
                         # calculations, whether in DFPT or otherwise.
@@ -261,19 +246,13 @@ class VaspJob(Job):
             vi = VaspInput.from_directory(".")
             kpts = vi["KPOINTS"]
             if kpts is not None:
-                if kpts.style == Kpoints.supported_modes.Gamma and tuple(
-                    kpts.kpts[0]
-                ) == (1, 1, 1):
-                    if self.gamma_vasp_cmd is not None and which(
-                        self.gamma_vasp_cmd[-1]
-                    ):
+                if kpts.style == Kpoints.supported_modes.Gamma and tuple(kpts.kpts[0]) == (1, 1, 1):
+                    if self.gamma_vasp_cmd is not None and which(self.gamma_vasp_cmd[-1]):
                         cmd = self.gamma_vasp_cmd
                     elif which(cmd[-1] + ".gamma"):
                         cmd[-1] += ".gamma"
         logger.info("Running {}".format(" ".join(cmd)))
-        with open(self.output_file, "w") as f_std, open(
-            self.stderr_file, "w", buffering=1
-        ) as f_err:
+        with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr
             p = subprocess.Popen(cmd, stdout=f_std, stderr=f_err)
         return p
@@ -343,24 +322,14 @@ class VaspJob(Job):
             {"dict": "INCAR", "action": {"_set": incar_update}},
             {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}},
         ]
-        if (
-            half_kpts_first_relax
-            and os.path.exists("KPOINTS")
-            and os.path.exists("POSCAR")
-        ):
+        if half_kpts_first_relax and os.path.exists("KPOINTS") and os.path.exists("POSCAR"):
             kpts = Kpoints.from_file("KPOINTS")
             orig_kpts_dict = kpts.as_dict()
             # lattice vectors with length < 8 will get >1 KPOINT
-            kpts.kpts = (
-                np.round(np.maximum(np.array(kpts.kpts) / 2, 1)).astype(int).tolist()
-            )
+            kpts.kpts = np.round(np.maximum(np.array(kpts.kpts) / 2, 1)).astype(int).tolist()
             low_kpts_dict = kpts.as_dict()
-            settings_overide_1 = [
-                {"dict": "KPOINTS", "action": {"_set": low_kpts_dict}}
-            ]
-            settings_overide_2.append(
-                {"dict": "KPOINTS", "action": {"_set": orig_kpts_dict}}
-            )
+            settings_overide_1 = [{"dict": "KPOINTS", "action": {"_set": low_kpts_dict}}]
+            settings_overide_2.append({"dict": "KPOINTS", "action": {"_set": orig_kpts_dict}})
 
         return [
             VaspJob(
@@ -456,15 +425,9 @@ class VaspJob(Job):
 
     @classmethod
     def full_opt_run(
-        cls,
-        vasp_cmd,
-        vol_change_tol=0.02,
-        max_steps=10,
-        ediffg=-0.05,
-        half_kpts_first_relax=False,
-        **vasp_job_kwargs
+        cls, vasp_cmd, vol_change_tol=0.02, max_steps=10, ediffg=-0.05, half_kpts_first_relax=False, **vasp_job_kwargs
     ):
-        """
+        r"""
         Returns a generator of jobs for a full optimization run. Basically,
         this runs an infinite series of geometry optimization jobs until the
         % vol change in a particular optimization is less than vol_change_tol.
@@ -492,11 +455,7 @@ class VaspJob(Job):
             if i == 0:
                 settings = None
                 backup = True
-                if (
-                    half_kpts_first_relax
-                    and os.path.exists("KPOINTS")
-                    and os.path.exists("POSCAR")
-                ):
+                if half_kpts_first_relax and os.path.exists("KPOINTS") and os.path.exists("POSCAR"):
                     kpts = Kpoints.from_file("KPOINTS")
                     orig_kpts_dict = kpts.as_dict()
                     kpts.kpts = np.maximum(np.array(kpts.kpts) / 2, 1).tolist()
@@ -512,21 +471,18 @@ class VaspJob(Job):
                 if abs(vol_change) < vol_change_tol:
                     logger.info("Stopping optimization!")
                     break
-                else:
-                    incar_update = {"ISTART": 1}
-                    if ediffg:
-                        incar_update["EDIFFG"] = ediffg
-                    settings = [
-                        {"dict": "INCAR", "action": {"_set": incar_update}},
-                        {
-                            "file": "CONTCAR",
-                            "action": {"_file_copy": {"dest": "POSCAR"}},
-                        },
-                    ]
-                    if i == 1 and half_kpts_first_relax:
-                        settings.append(
-                            {"dict": "KPOINTS", "action": {"_set": orig_kpts_dict}}
-                        )
+                incar_update = {"ISTART": 1}
+                if ediffg:
+                    incar_update["EDIFFG"] = ediffg
+                settings = [
+                    {"dict": "INCAR", "action": {"_set": incar_update}},
+                    {
+                        "file": "CONTCAR",
+                        "action": {"_file_copy": {"dest": "POSCAR"}},
+                    },
+                ]
+                if i == 1 and half_kpts_first_relax:
+                    settings.append({"dict": "KPOINTS", "action": {"_set": orig_kpts_dict}})
             logger.info("Generating job = %d!" % (i + 1))
             yield VaspJob(
                 vasp_cmd,
@@ -534,21 +490,14 @@ class VaspJob(Job):
                 backup=backup,
                 suffix=".relax%d" % (i + 1),
                 settings_override=settings,
-                **vasp_job_kwargs
+                **vasp_job_kwargs,
             )
 
     @classmethod
     def constrained_opt_run(
-        cls,
-        vasp_cmd,
-        lattice_direction,
-        initial_strain,
-        atom_relax=True,
-        max_steps=20,
-        algo="bfgs",
-        **vasp_job_kwargs
+        cls, vasp_cmd, lattice_direction, initial_strain, atom_relax=True, max_steps=20, algo="bfgs", **vasp_job_kwargs
     ):
-        """
+        r"""
         Returns a generator of jobs for a constrained optimization run. Typical
         use case is when you want to approximate a biaxial strain situation,
         e.g., you apply a defined strain to a and b directions of the lattice,
@@ -611,9 +560,7 @@ class VaspJob(Job):
 
         for i in range(max_steps):
             if i == 0:
-                settings = [
-                    {"dict": "INCAR", "action": {"_set": {"ISIF": 2, "NSW": nsw}}}
-                ]
+                settings = [{"dict": "INCAR", "action": {"_set": {"ISIF": 2, "NSW": nsw}}}]
                 structure = Poscar.from_file("POSCAR").structure
                 x = structure.lattice.abc[lattice_index]
                 backup = True
@@ -640,16 +587,9 @@ class VaspJob(Job):
                     elif ind == len(sorted_x) - 1:
                         other = ind - 1
                     else:
-                        other = (
-                            ind + 1
-                            if energies[sorted_x[ind + 1]] < energies[sorted_x[ind - 1]]
-                            else ind - 1
-                        )
+                        other = ind + 1 if energies[sorted_x[ind + 1]] < energies[sorted_x[ind - 1]] else ind - 1
                     if abs(energies[min_x] - energies[sorted_x[other]]) < etol:
-                        logger.info(
-                            "Stopping optimization! Final %s = %f"
-                            % (lattice_direction, min_x)
-                        )
+                        logger.info("Stopping optimization! Final %s = %f" % (lattice_direction, min_x))
                         break
 
                     if ind == 0 and len(sorted_x) > 2:
@@ -658,20 +598,14 @@ class VaspJob(Job):
                         # iteration to find a minimum. This applies only when
                         # there are at least 3 values.
                         x = sorted_x[0] - abs(sorted_x[1] - sorted_x[0])
-                        logger.info(
-                            "Lowest energy lies below bounds. "
-                            "Setting %s = %f." % (lattice_direction, x)
-                        )
+                        logger.info("Lowest energy lies below bounds. " "Setting %s = %f." % (lattice_direction, x))
                     elif ind == len(sorted_x) - 1 and len(sorted_x) > 2:
                         # Lowest energy lies outside of range of highest value.
                         # we increase the lattice parameter in the next
                         # iteration to find a minimum. This applies only when
                         # there are at least 3 values.
                         x = sorted_x[-1] + abs(sorted_x[-1] - sorted_x[-2])
-                        logger.info(
-                            "Lowest energy lies above bounds. "
-                            "Setting %s = %f." % (lattice_direction, x)
-                        )
+                        logger.info("Lowest energy lies above bounds. " "Setting %s = %f." % (lattice_direction, x))
                     else:
                         if algo.lower() == "bfgs" and len(sorted_x) >= 4:
                             try:
@@ -683,31 +617,22 @@ class VaspJob(Job):
                                 pp = np.poly1d(z1)
                                 from scipy.optimize import minimize
 
-                                result = minimize(
-                                    pp, min_x, bounds=[(sorted_x[0], sorted_x[-1])]
-                                )
+                                result = minimize(pp, min_x, bounds=[(sorted_x[0], sorted_x[-1])])
                                 if (not result.success) or result.x[0] < 0:
                                     raise ValueError("Negative lattice constant!")
                                 x = result.x[0]
-                                logger.info(
-                                    "BFGS minimized %s = %f." % (lattice_direction, x)
-                                )
+                                logger.info("BFGS minimized %s = %f." % (lattice_direction, x))
                             except ValueError as ex:
                                 # Fall back on bisection algo if the bfgs fails.
                                 logger.info(str(ex))
                                 x = (min_x + sorted_x[other]) / 2
-                                logger.info(
-                                    "Falling back on bisection %s = %f."
-                                    % (lattice_direction, x)
-                                )
+                                logger.info("Falling back on bisection %s = %f." % (lattice_direction, x))
                         else:
                             x = (min_x + sorted_x[other]) / 2
                             logger.info("Bisection %s = %f." % (lattice_direction, x))
 
                 lattice = lattice.matrix
-                lattice[lattice_index] = (
-                    lattice[lattice_index] / np.linalg.norm(lattice[lattice_index]) * x
-                )
+                lattice[lattice_index] = lattice[lattice_index] / np.linalg.norm(lattice[lattice_index]) * x
 
                 s = Structure(lattice, structure.species, structure.frac_coords)
                 fname = "POSCAR.%f" % x
@@ -727,7 +652,7 @@ class VaspJob(Job):
                 backup=backup,
                 suffix=".static.%f" % x,
                 settings_override=settings,
-                **vasp_job_kwargs
+                **vasp_job_kwargs,
             )
 
         with open("EOS.txt", "wt") as f:
@@ -736,6 +661,9 @@ class VaspJob(Job):
                 f.write("%f %f\n" % (k, energies[k]))
 
     def terminate(self):
+        """
+        Ensure all vasp jobs are killed.
+        """
         for k in self.vasp_cmd:
             if "vasp" in k:
                 try:
@@ -883,11 +811,7 @@ class VaspNEBJob(Job):
             except Exception:
                 pass
 
-        if (
-            self.auto_continue
-            and os.path.exists("STOPCAR")
-            and not os.access("STOPCAR", os.W_OK)
-        ):
+        if self.auto_continue and os.path.exists("STOPCAR") and not os.access("STOPCAR", os.W_OK):
             # Remove STOPCAR
             os.chmod("STOPCAR", 0o644)
             os.remove("STOPCAR")
@@ -921,9 +845,7 @@ class VaspNEBJob(Job):
                 elif which(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
         logger.info("Running {}".format(" ".join(cmd)))
-        with open(self.output_file, "w") as f_std, open(
-            self.stderr_file, "w", buffering=1
-        ) as f_err:
+        with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
 
             # Use line buffering for stderr
             p = subprocess.Popen(cmd, stdout=f_std, stderr=f_err)
@@ -953,11 +875,13 @@ class VaspNEBJob(Job):
 
 
 class GenerateVaspInputJob(Job):
+    """
+    Generates a VASP input based on an existing directory. This is typically
+    used to modify the VASP input files before the next VaspJob.
+    """
+
     def __init__(self, input_set, contcar_only=True, **kwargs):
         """
-        Generates a VASP input based on an existing directory. This is typically
-        used to modify the VASP input files before the next VaspJob.
-
         Args:
             input_set (str): Full path to the input set. E.g.,
                 "pymatgen.io.vasp.sets.MPNonSCFSet".
@@ -969,9 +893,15 @@ class GenerateVaspInputJob(Job):
         self.kwargs = kwargs
 
     def setup(self):
+        """
+        Dummy setup
+        """
         pass
 
     def run(self):
+        """
+        Run the calculation.
+        """
         if os.path.exists("CONTCAR"):
             structure = Structure.from_file("CONTCAR")
         elif (not self.contcar_only) and os.path.exists("POSCAR"):
@@ -984,4 +914,7 @@ class GenerateVaspInputJob(Job):
         vis.write_input(".")
 
     def postprocess(self):
+        """
+        Dummy postprocess.
+        """
         pass

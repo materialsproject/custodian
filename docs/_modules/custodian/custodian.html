@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>custodian.custodian &#8212; custodian 2020.4.27 documentation</title>
-    <link rel="stylesheet" href="../../_static/flasky.css" type="text/css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>custodian.custodian &#8212; custodian 2021.2.8 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/flasky.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
 
@@ -36,8 +36,9 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">custodian 2020.4.27 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">custodian 2021.2.8 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">custodian.custodian</a></li> 
       </ul>
     </div>  
 
@@ -49,7 +50,11 @@
   <h1>Source code for custodian.custodian</h1><div class="highlight"><pre>
 <span></span><span class="c1"># coding: utf-8</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module implements the main Custodian class, which manages a list of jobs</span>
+<span class="sd">given a set of error handlers, the abstract base classes for the</span>
+<span class="sd">ErrorHandlers and Jobs.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
@@ -59,23 +64,17 @@
 <span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
 <span class="kn">import</span> <span class="nn">tarfile</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">islice</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
-
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">get_execution_host_info</span>
 
 <span class="kn">from</span> <span class="nn">monty.tempfile</span> <span class="kn">import</span> <span class="n">ScratchDir</span>
 <span class="kn">from</span> <span class="nn">monty.shutil</span> <span class="kn">import</span> <span class="n">gzip_dir</span>
 <span class="kn">from</span> <span class="nn">monty.json</span> <span class="kn">import</span> <span class="n">MSONable</span><span class="p">,</span> <span class="n">MontyEncoder</span><span class="p">,</span> <span class="n">MontyDecoder</span>
 <span class="kn">from</span> <span class="nn">monty.serialization</span> <span class="kn">import</span> <span class="n">loadfn</span><span class="p">,</span> <span class="n">dumpfn</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This module implements the main Custodian class, which manages a list of jobs</span>
-<span class="sd">given a set of error handlers, the abstract base classes for the</span>
-<span class="sd">ErrorHandlers and Jobs.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">get_execution_host_info</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Shyue Ping Ong, William Davidson Richards&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2012, The Materials Project&quot;</span>
@@ -121,7 +120,7 @@
         <span class="n">scope</span><span class="o">.</span><span class="n">set_tag</span><span class="p">(</span><span class="s2">&quot;hostname&quot;</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">())</span>
 
 
-<div class="viewcode-block" id="Custodian"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Custodian">[docs]</a><span class="k">class</span> <span class="nc">Custodian</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Custodian"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Custodian">[docs]</a><span class="k">class</span> <span class="nc">Custodian</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The Custodian class is the manager for a list of jobs given a list of</span>
 <span class="sd">    error handlers. The way it works is as follows:</span>
@@ -286,7 +285,7 @@
             <span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w:gz&quot;</span><span class="p">,</span> <span class="n">compresslevel</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cwd</span><span class="p">,</span> <span class="n">arcname</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Checkpoint written to </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Checkpointing failed&quot;</span><span class="p">)</span>
             <span class="kn">import</span> <span class="nn">traceback</span>
 
@@ -380,9 +379,7 @@
 
         <span class="n">custodian_params</span> <span class="o">=</span> <span class="n">process_params</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;custodian_params&quot;</span><span class="p">,</span> <span class="p">{}))</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
-            <span class="n">jobs</span><span class="o">=</span><span class="n">jobs</span><span class="p">,</span> <span class="n">handlers</span><span class="o">=</span><span class="n">handlers</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="n">validators</span><span class="p">,</span> <span class="o">**</span><span class="n">custodian_params</span>
-        <span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">jobs</span><span class="o">=</span><span class="n">jobs</span><span class="p">,</span> <span class="n">handlers</span><span class="o">=</span><span class="n">handlers</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="n">validators</span><span class="p">,</span> <span class="o">**</span><span class="n">custodian_params</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Custodian.run"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Custodian.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -484,10 +481,7 @@
         <span class="n">job</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
 
         <span class="n">attempt</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">while</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">total_errors</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_errors</span>
-            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors_current_job</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_errors_per_job</span>
-        <span class="p">):</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_errors</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_errors</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors_current_job</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_errors_per_job</span><span class="p">:</span>
             <span class="n">attempt</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="s2">&quot;Starting job no. </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">) attempt no. </span><span class="si">{}</span><span class="s2">. Total errors and &quot;</span>
@@ -519,18 +513,13 @@
                             <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polling_time_step</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">p</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">terminate_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                        <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminate_func</span> <span class="o">!=</span> <span class="n">p</span><span class="o">.</span><span class="n">terminate</span>
-                    <span class="p">):</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminate_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminate_func</span> <span class="o">!=</span> <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">terminate_func</span><span class="p">()</span>
                         <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polling_time_step</span><span class="p">)</span>
 
                 <span class="n">zero_return_code</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
 
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.run has completed. &quot;</span> <span class="s2">&quot;Checking remaining handlers&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.run has completed. &quot;</span> <span class="s2">&quot;Checking remaining handlers&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
             <span class="c1"># Check for errors again, since in some cases non-monitor</span>
             <span class="c1"># handlers fix the problems detected by monitors</span>
             <span class="c1"># if an error has been found, not all handlers need to run</span>
@@ -557,11 +546,7 @@
                         <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Job return code is </span><span class="si">%d</span><span class="s2">. Terminating...&quot;</span> <span class="o">%</span> <span class="n">p</span><span class="o">.</span><span class="n">returncode</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
                         <span class="k">raise</span> <span class="n">ReturnCodeError</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                            <span class="s2">&quot;subprocess returned a non-zero return &quot;</span>
-                            <span class="s2">&quot;code. Check outputs carefully...&quot;</span>
-                        <span class="p">)</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;subprocess returned a non-zero return &quot;</span> <span class="s2">&quot;code. Check outputs carefully...&quot;</span><span class="p">)</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">postprocess</span><span class="p">()</span>
                 <span class="k">return</span>
 
@@ -582,11 +567,11 @@
             <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Max errors per job reached: </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_errors_per_job</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">raise</span> <span class="n">MaxCorrectionsPerJobError</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_errors_per_job</span><span class="p">,</span> <span class="n">job</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;max_errors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Max errors reached: </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_errors</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="n">MaxCorrectionsError</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_errors</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;max_errors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Max errors reached: </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_errors</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">MaxCorrectionsError</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_errors</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Custodian.run_interrupted"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Custodian.run_interrupted">[docs]</a>    <span class="k">def</span> <span class="nf">run_interrupted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -608,9 +593,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="s2">&quot;Custodian started in singleshot mode at </span><span class="si">{}</span><span class="s2"> in </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">cwd</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Custodian started in singleshot mode at </span><span class="si">{}</span><span class="s2"> in </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">cwd</span><span class="p">))</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Custodian running on Python version </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 
             <span class="c1"># load run log</span>
@@ -623,64 +606,57 @@
                 <span class="n">job</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">[</span><span class="n">job_n</span><span class="p">]</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Setting up job no. 1 (</span><span class="si">{}</span><span class="s2">) &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="p">{</span><span class="s2">&quot;job&quot;</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="s2">&quot;corrections&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;job_n&quot;</span><span class="p">:</span> <span class="n">job_n</span><span class="p">}</span>
-                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;job&quot;</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="s2">&quot;corrections&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;job_n&quot;</span><span class="p">:</span> <span class="n">job_n</span><span class="p">})</span>
                 <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Continuing after running calculation</span>
-                <span class="n">job_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;job_n&quot;</span><span class="p">]</span>
-                <span class="n">job</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">[</span><span class="n">job_n</span><span class="p">]</span>
 
-                <span class="c1"># If we had to fix errors from a previous run, insert clean log</span>
-                <span class="c1"># dict</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;corrections&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reran </span><span class="si">{}</span><span class="s2">.run due to fixable errors&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="c1"># Continuing after running calculation</span>
+            <span class="n">job_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;job_n&quot;</span><span class="p">]</span>
+            <span class="n">job</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">[</span><span class="n">job_n</span><span class="p">]</span>
 
-                <span class="c1"># check error handlers</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Checking error handlers for </span><span class="si">{}</span><span class="s2">.run&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_check</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="p">):</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Failed validation based on error handlers&quot;</span><span class="p">)</span>
-                    <span class="c1"># raise an error for an unrecoverable error</span>
-                    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;corrections&quot;</span><span class="p">]:</span>
-                        <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;handler&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">raises_runtime_error</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;handler&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;handler&quot;</span><span class="p">]</span>
-                            <span class="n">s</span> <span class="o">=</span> <span class="p">(</span>
-                                <span class="s2">&quot;Unrecoverable error for handler: </span><span class="si">{}</span><span class="s2">. &quot;</span>
-                                <span class="s2">&quot;Raising RuntimeError&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;handler&quot;</span><span class="p">])</span>
-                            <span class="p">)</span>
-                            <span class="k">raise</span> <span class="n">NonRecoverableError</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;handler&quot;</span><span class="p">])</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Corrected input based on error handlers&quot;</span><span class="p">)</span>
-                    <span class="c1"># Return with more jobs to run if recoverable error caught</span>
-                    <span class="c1"># and corrected for</span>
-                    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">)</span> <span class="o">-</span> <span class="n">job_n</span>
+            <span class="c1"># If we had to fix errors from a previous run, insert clean log</span>
+            <span class="c1"># dict</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;corrections&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reran </span><span class="si">{}</span><span class="s2">.run due to fixable errors&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
-                <span class="c1"># check validators</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Checking validator for </span><span class="si">{}</span><span class="s2">.run&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-                <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">validators</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">check</span><span class="p">():</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;validator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Failed validation based on validator&quot;</span><span class="p">)</span>
-                        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Validation failed: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-                        <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Postprocessing for </span><span class="si">{}</span><span class="s2">.run&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">postprocess</span><span class="p">()</span>
-
-                <span class="c1"># IF DONE WITH ALL JOBS - DELETE ALL CHECKPOINTS AND RETURN</span>
-                <span class="c1"># VALIDATED</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">job_n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">finished</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="k">return</span> <span class="mi">0</span>
-
-                <span class="c1"># Setup next job_n</span>
-                <span class="n">job_n</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="n">job</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">[</span><span class="n">job_n</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="p">{</span><span class="s2">&quot;job&quot;</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="s2">&quot;corrections&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;job_n&quot;</span><span class="p">:</span> <span class="n">job_n</span><span class="p">}</span>
-                <span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+            <span class="c1"># check error handlers</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Checking error handlers for </span><span class="si">{}</span><span class="s2">.run&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_check</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Failed validation based on error handlers&quot;</span><span class="p">)</span>
+                <span class="c1"># raise an error for an unrecoverable error</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;corrections&quot;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;handler&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">raises_runtime_error</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;handler&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;handler&quot;</span><span class="p">]</span>
+                        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Unrecoverable error for handler: </span><span class="si">{}</span><span class="s2">. &quot;</span> <span class="s2">&quot;Raising RuntimeError&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;handler&quot;</span><span class="p">])</span>
+                        <span class="k">raise</span> <span class="n">NonRecoverableError</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;handler&quot;</span><span class="p">])</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Corrected input based on error handlers&quot;</span><span class="p">)</span>
+                <span class="c1"># Return with more jobs to run if recoverable error caught</span>
+                <span class="c1"># and corrected for</span>
                 <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">)</span> <span class="o">-</span> <span class="n">job_n</span>
+
+            <span class="c1"># check validators</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Checking validator for </span><span class="si">{}</span><span class="s2">.run&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">validators</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">check</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;validator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Failed validation based on validator&quot;</span><span class="p">)</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Validation failed: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Postprocessing for </span><span class="si">{}</span><span class="s2">.run&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">postprocess</span><span class="p">()</span>
+
+            <span class="c1"># IF DONE WITH ALL JOBS - DELETE ALL CHECKPOINTS AND RETURN</span>
+            <span class="c1"># VALIDATED</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">job_n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">finished</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="mi">0</span>
+
+            <span class="c1"># Setup next job_n</span>
+            <span class="n">job_n</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">job</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">[</span><span class="n">job_n</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;job&quot;</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="s2">&quot;corrections&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;job_n&quot;</span><span class="p">:</span> <span class="n">job_n</span><span class="p">})</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">)</span> <span class="o">-</span> <span class="n">job_n</span>
 
         <span class="k">except</span> <span class="n">CustodianError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
@@ -706,23 +682,16 @@
         <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">handlers</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">check</span><span class="p">():</span>
-                    <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">h</span><span class="o">.</span><span class="n">max_num_corrections</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                        <span class="ow">and</span> <span class="n">h</span><span class="o">.</span><span class="n">n_applied_corrections</span> <span class="o">&gt;=</span> <span class="n">h</span><span class="o">.</span><span class="n">max_num_corrections</span>
-                    <span class="p">):</span>
-                        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="s2">&quot;Maximum number of corrections </span><span class="si">{}</span><span class="s2"> reached &quot;</span>
-                            <span class="s2">&quot;for handler </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">max_num_corrections</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">max_num_corrections</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">h</span><span class="o">.</span><span class="n">n_applied_corrections</span> <span class="o">&gt;=</span> <span class="n">h</span><span class="o">.</span><span class="n">max_num_corrections</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Maximum number of corrections </span><span class="si">{}</span><span class="s2"> reached &quot;</span> <span class="s2">&quot;for handler </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">h</span><span class="o">.</span><span class="n">max_num_corrections</span><span class="p">,</span> <span class="n">h</span>
                         <span class="p">)</span>
                         <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">raise_on_max</span><span class="p">:</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;handler&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;max_errors_per_handler&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-                            <span class="k">raise</span> <span class="n">MaxCorrectionsPerHandlerError</span><span class="p">(</span>
-                                <span class="n">msg</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">max_num_corrections</span><span class="p">,</span> <span class="n">h</span>
-                            <span class="p">)</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span> <span class="o">+</span> <span class="s2">&quot; Correction not applied.&quot;</span><span class="p">)</span>
-                            <span class="k">continue</span>
+                            <span class="k">raise</span> <span class="n">MaxCorrectionsPerHandlerError</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">max_num_corrections</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span> <span class="o">+</span> <span class="s2">&quot; Correction not applied.&quot;</span><span class="p">)</span>
+                        <span class="k">continue</span>
                     <span class="k">if</span> <span class="n">terminate_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">h</span><span class="o">.</span><span class="n">is_terminating</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Terminating job&quot;</span><span class="p">)</span>
                         <span class="n">terminate_func</span><span class="p">()</span>
@@ -736,14 +705,11 @@
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_over_errors</span><span class="p">:</span>
                     <span class="k">raise</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="kn">import</span> <span class="nn">traceback</span>
+                <span class="kn">import</span> <span class="nn">traceback</span>
 
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Bad handler </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">h</span><span class="p">)</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                    <span class="n">corrections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Bad handler </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">h</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[]}</span>
-                    <span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Bad handler </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">h</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">corrections</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Bad handler </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">h</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[]})</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_errors</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">corrections</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">errors_current_job</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">corrections</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;corrections&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">corrections</span><span class="p">)</span>
@@ -782,7 +748,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="Job.terminate"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Job.terminate">[docs]</a>    <span class="k">def</span> <span class="nf">terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Job.terminate"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Job.terminate">[docs]</a>    <span class="k">def</span> <span class="nf">terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pylint: disable=R0201</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Implement termination function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
     <span class="nd">@property</span>
@@ -925,7 +894,7 @@
 <span class="sd">            message (str): Message passed to Exception</span>
 <span class="sd">            raises (bool): Whether this should be raised outside custodian</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">CustodianError</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">raises</span> <span class="o">=</span> <span class="n">raises</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span></div>
 
@@ -942,7 +911,7 @@
 <span class="sd">            raises (bool): Whether this should be raised outside custodian</span>
 <span class="sd">            validator (Validator): Validator that caused the exception.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ValidationError</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">raises</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">raises</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">validator</span> <span class="o">=</span> <span class="n">validator</span></div>
 
 
@@ -958,7 +927,7 @@
 <span class="sd">            raises (bool): Whether this should be raised outside custodian</span>
 <span class="sd">            handler (Handler): Handler that caused the exception.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">NonRecoverableError</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">raises</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">raises</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">handler</span> <span class="o">=</span> <span class="n">handler</span></div>
 
 
@@ -982,7 +951,7 @@
 <span class="sd">            raises (bool): Whether this should be raised outside custodian</span>
 <span class="sd">            max_errors (int): the number of errors reached</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">MaxCorrectionsError</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">raises</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">raises</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_errors</span> <span class="o">=</span> <span class="n">max_errors</span></div>
 
 
@@ -999,7 +968,7 @@
 <span class="sd">            max_errors_per_job (int): the number of errors per job reached</span>
 <span class="sd">            job (Job): the job that was stopped</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">MaxCorrectionsPerJobError</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">raises</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">raises</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_errors_per_job</span> <span class="o">=</span> <span class="n">max_errors_per_job</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">job</span> <span class="o">=</span> <span class="n">job</span></div>
 
@@ -1017,11 +986,12 @@
 <span class="sd">            max_errors_per_handler (int): the number of errors per job reached</span>
 <span class="sd">            handler (Handler): the handler that caused the exception</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">MaxCorrectionsPerHandlerError</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">raises</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">raises</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_errors_per_handler</span> <span class="o">=</span> <span class="n">max_errors_per_handler</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">handler</span> <span class="o">=</span> <span class="n">handler</span></div>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>

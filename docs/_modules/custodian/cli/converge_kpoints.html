@@ -1,12 +1,13 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>custodian.cli.converge_kpoints &#8212; custodian 2020.4.27 documentation</title>
-    <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>custodian.cli.converge_kpoints &#8212; custodian 2021.1.8 documentation</title>
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
@@ -36,8 +37,9 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2020.4.27 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2021.1.8 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">custodian.cli.converge_kpoints</a></li> 
       </ul>
     </div>  
 
@@ -50,32 +52,26 @@
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This is a master vasp running script to perform variuos combinations of VASP</span>
-<span class="sd">runs.</span>
+<span class="sd">This is a master vasp running script to converging kpoints for a calculation</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
-
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;shyuepingong&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.1&quot;</span>
-<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Shyue Ping Ong&quot;</span>
-<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;shyuep@gmail.com&quot;</span>
-<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Beta&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;2/4/13&quot;</span>
-
 <span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">pymatgen.io.vasp.inputs</span> <span class="kn">import</span> <span class="n">VaspInput</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vasp.outputs</span> <span class="kn">import</span> <span class="n">Vasprun</span>
 
 <span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">Custodian</span>
 <span class="kn">from</span> <span class="nn">custodian.vasp.handlers</span> <span class="kn">import</span> <span class="n">VaspErrorHandler</span><span class="p">,</span> <span class="n">UnconvergedErrorHandler</span>
 <span class="kn">from</span> <span class="nn">custodian.vasp.jobs</span> <span class="kn">import</span> <span class="n">VaspJob</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.vasp.inputs</span> <span class="kn">import</span> <span class="n">VaspInput</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.vasp.outputs</span> <span class="kn">import</span> <span class="n">Vasprun</span>
 
 <span class="n">FORMAT</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> </span><span class="si">%(message)s</span><span class="s2">&quot;</span>
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="n">FORMAT</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;run.log&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="get_runs"><a class="viewcode-back" href="../../../custodian.cli.html#custodian.cli.converge_kpoints.get_runs">[docs]</a><span class="k">def</span> <span class="nf">get_runs</span><span class="p">(</span><span class="n">vasp_command</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate the runs using a generator until convergence is achieved.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">energy</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">vinput</span> <span class="o">=</span> <span class="n">VaspInput</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
     <span class="n">kpoints</span> <span class="o">=</span> <span class="n">vinput</span><span class="p">[</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -95,16 +91,15 @@
             <span class="k">if</span> <span class="n">ediff</span> <span class="o">&lt;</span> <span class="n">target</span><span class="p">:</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Converged to </span><span class="si">{}</span><span class="s2"> eV/atom!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ediff</span><span class="p">))</span>
                 <span class="k">break</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">energy</span> <span class="o">=</span> <span class="n">e_per_atom</span>
-                <span class="n">settings</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}},</span>
-                    <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;kpoints&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">m</span><span class="p">]}}},</span>
-                    <span class="p">{</span>
-                        <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}},</span>
-                    <span class="p">},</span>
-                <span class="p">]</span>
+            <span class="n">energy</span> <span class="o">=</span> <span class="n">e_per_atom</span>
+            <span class="n">settings</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISTART&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}},</span>
+                <span class="p">{</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;kpoints&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">m</span><span class="p">]}}},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_copy&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dest&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">}},</span>
+                <span class="p">},</span>
+            <span class="p">]</span>
         <span class="k">yield</span> <span class="n">VaspJob</span><span class="p">(</span>
             <span class="n">vasp_command</span><span class="p">,</span>
             <span class="n">final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -115,6 +110,9 @@
 
 
 <div class="viewcode-block" id="do_run"><a class="viewcode-back" href="../../../custodian.cli.html#custodian.cli.converge_kpoints.do_run">[docs]</a><span class="k">def</span> <span class="nf">do_run</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform the run.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">handlers</span> <span class="o">=</span> <span class="p">[</span><span class="n">VaspErrorHandler</span><span class="p">(),</span> <span class="n">UnconvergedErrorHandler</span><span class="p">()]</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">Custodian</span><span class="p">(</span>
         <span class="n">handlers</span><span class="p">,</span>
@@ -130,6 +128,9 @@
 
 
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../custodian.cli.html#custodian.cli.converge_kpoints.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main method</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">argparse</span>
 
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
@@ -143,12 +144,7 @@
 <span class="s2">    default convergence criteria is 1meV/atom, but this can be set using the</span>
 <span class="s2">    --target option.</span>
 <span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span>
-        <span class="n">epilog</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">    Author: Shyue Ping Ong</span>
-<span class="s2">    Version: </span><span class="si">{}</span><span class="s2"></span>
-<span class="s2">    Last updated: </span><span class="si">{}</span><span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="n">__version__</span><span class="p">,</span> <span class="n">__date__</span>
-        <span class="p">),</span>
+        <span class="n">epilog</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;Author: Shyue Ping Ong&quot;&quot;&quot;</span>
     <span class="p">)</span>
 
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
@@ -209,6 +205,7 @@
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>

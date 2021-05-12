@@ -1,8 +1,8 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
-
-# This module implements new error handlers for QChem runs.
+"""
+This module implements new error handlers for QChem runs.
+"""
 
 import os
 from pymatgen.io.qchem.inputs import QCInput
@@ -18,6 +18,11 @@ __email__ = "samblau1@gmail.com"
 __status__ = "Alpha"
 __date__ = "3/26/18"
 __credits__ = "Xiaohui Qu"
+
+try:
+    from openbabel import openbabel as ob  # noqa: F401
+except ImportError:
+    raise RuntimeError("ERROR: Openbabel must be installed in order to use Q-Chem Custodian!")
 
 
 class QChemErrorHandler(ErrorHandler):
@@ -54,7 +59,9 @@ class QChemErrorHandler(ErrorHandler):
         self.opt_error_history = []
 
     def check(self):
-        # Checks output file for errors.
+        """
+        Checks output file for errors
+        """
         self.outdata = QCOutput(self.output_file).data
         self.errors = self.outdata.get("errors")
         self.warnings = self.outdata.get("warnings")
@@ -62,14 +69,14 @@ class QChemErrorHandler(ErrorHandler):
         if "out_of_opt_cycles" not in self.errors and len(self.opt_error_history) > 0:
             self.opt_error_history = []
         # If we're out of optimization cycles and we have unconnected fragments, no need to handle any errors
-        if (
-            "out_of_opt_cycles" in self.errors
-            and self.outdata["structure_change"] == "unconnected_fragments"
-        ):
+        if "out_of_opt_cycles" in self.errors and self.outdata["structure_change"] == "unconnected_fragments":
             return False
         return len(self.errors) > 0
 
     def correct(self):
+        """
+        Perform corrections
+        """
         backup({self.input_file, self.output_file})
         actions = []
         self.qcinp = QCInput.from_file(self.input_file)
@@ -95,22 +102,16 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.rem["scf_guess_always"] = True
                 actions.append({"scf_guess_always": True})
             else:
-                print(
-                    "More advanced changes may impact the SCF result. Use the SCF error handler"
-                )
+                print("More advanced changes may impact the SCF result. Use the SCF error handler")
 
         elif "out_of_opt_cycles" in self.errors:
             # Check number of opt cycles. If less than geom_max_cycles, increase
             # to that value, set last geom as new starting geom and rerun.
-            if str(self.qcinp.rem.get("geom_opt_max_cycles")) != str(
-                self.geom_max_cycles
-            ):
+            if str(self.qcinp.rem.get("geom_opt_max_cycles")) != str(self.geom_max_cycles):
                 self.qcinp.rem["geom_opt_max_cycles"] = self.geom_max_cycles
                 actions.append({"geom_max_cycles:": self.scf_max_cycles})
                 if len(self.outdata.get("energy_trajectory")) > 1:
-                    self.qcinp.molecule = self.outdata.get(
-                        "molecule_from_last_geometry"
-                    )
+                    self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                     actions.append({"molecule": "molecule_from_last_geometry"})
             elif self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
@@ -139,7 +140,7 @@ class QChemErrorHandler(ErrorHandler):
 
         elif "unable_to_determine_lamda" in self.errors:
             # Set last geom as new starting geom and rerun. If no opt cycles,
-            # use diff SCF strat? Diff initial guess? Change basis?
+            # use diff SCF strat? Diff initial guess? Change basis? Unclear.
             if len(self.outdata.get("energy_trajectory")) > 1:
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
@@ -157,18 +158,14 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.rem["scf_guess_always"] = True
                 actions.append({"scf_guess_always": True})
             else:
-                print(
-                    "We're in a bad spot if we get a FileMan error while always generating a new SCF guess..."
-                )
+                print("We're in a bad spot if we get a FileMan error while always generating a new SCF guess...")
 
         elif "hessian_eigenvalue_error" in self.errors:
             if self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
             else:
-                print(
-                    "Not sure how to fix hessian_eigenvalue_error if thresh is already 14!"
-                )
+                print("Not sure how to fix hessian_eigenvalue_error if thresh is already 14!")
 
         elif "failed_to_transform_coords" in self.errors:
             # Check for symmetry flag in rem. If not False, set to False and rerun.
@@ -182,9 +179,7 @@ class QChemErrorHandler(ErrorHandler):
                 print("Perhaps increase the threshold?")
 
         elif "input_file_error" in self.errors:
-            print(
-                "Something is wrong with the input file. Examine error message by hand."
-            )
+            print("Something is wrong with the input file. Examine error message by hand.")
             return {"errors": self.errors, "actions": None}
 
         elif "failed_to_read_input" in self.errors:
@@ -218,9 +213,7 @@ class QChemErrorHandler(ErrorHandler):
             # You should never get here. If correct is being called then errors should have at least one entry,
             # in which case it should have been caught by the if/elifs above.
             print("Errors:", self.errors)
-            print(
-                "Must have gotten an error which is correctly parsed but not included in the handler. FIX!!!"
-            )
+            print("Must have gotten an error which is correctly parsed but not included in the handler. FIX!!!")
             return {"errors": self.errors, "actions": None}
 
         if {"molecule": "molecule_from_last_geometry"} in actions and str(
@@ -261,18 +254,21 @@ class QChemSCFErrorHandler(ErrorHandler):
         self.input_file = input_file
         self.output_file = output_file
         self.scf_max_cycles = scf_max_cycles
-        self.geom_max_cycles = geom_max_cycles
         self.qcinp = QCInput.from_file(self.input_file)
         self.outdata = None
         self.errors = None
-        self.qchem_job = qchem_job
 
     def check(self):
-        # Checks output file for errors.
+        """
+        Checks output file for errors
+        """
         self.outdata = QCOutput(self.output_file).data
         self.errors = self.outdata.get("errors")
         return len(self.errors) > 0
 
     def correct(self):
+        """
+        Corrects errors, but it hasn't been implemented yet
+        """
         print("This hasn't been implemented yet!")
         return {"errors": self.errors, "actions": None}

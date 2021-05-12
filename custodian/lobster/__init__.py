@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 """
 This package implements Lobster Jobs and Error Handlers.
 """

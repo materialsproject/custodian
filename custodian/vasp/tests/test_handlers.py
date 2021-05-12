@@ -35,7 +35,7 @@ from custodian.vasp.handlers import (
     DriftErrorHandler,
     IncorrectSmearingHandler,
     ScanMetalHandler,
-    LargeSigmaHandler
+    LargeSigmaHandler,
 )
 from pymatgen.io.vasp.inputs import Incar, Structure, Kpoints, VaspInput
 
@@ -72,17 +72,13 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["subspacematrix"])
-        self.assertEqual(
-            d["actions"], [{"action": {"_set": {"LREAL": False}}, "dict": "INCAR"}]
-        )
+        self.assertEqual(d["actions"], [{"action": {"_set": {"LREAL": False}}, "dict": "INCAR"}])
 
         # 2nd error should set PREC to accurate.
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["subspacematrix"])
-        self.assertEqual(
-            d["actions"], [{"action": {"_set": {"PREC": "Accurate"}}, "dict": "INCAR"}]
-        )
+        self.assertEqual(d["actions"], [{"action": {"_set": {"PREC": "Accurate"}}, "dict": "INCAR"}])
 
     def test_check_correct(self):
         h = VaspErrorHandler("vasp.teterror")
@@ -107,9 +103,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["real_optlay"])
-        self.assertEqual(
-            d["actions"], [{"action": {"_set": {"LREAL": False}}, "dict": "INCAR"}]
-        )
+        self.assertEqual(d["actions"], [{"action": {"_set": {"LREAL": False}}, "dict": "INCAR"}])
 
         subdir = os.path.join(test_dir, "large_cell_real_optlay")
         os.chdir(subdir)
@@ -167,10 +161,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         vi = VaspInput.from_directory(".")
         self.assertFalse("IMIX" in vi["INCAR"])
         self.assertTrue(os.path.exists("CHGCAR"))
-        if (
-            vi["KPOINTS"].style == Kpoints.supported_modes.Gamma
-            and vi["KPOINTS"].num_kpts < 1
-        ):
+        if vi["KPOINTS"].style == Kpoints.supported_modes.Gamma and vi["KPOINTS"].num_kpts < 1:
             all_kpts_even = all([bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0]])
             self.assertFalse(all_kpts_even)
 
@@ -193,9 +184,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["too_few_bands"])
-        self.assertEqual(
-            d["actions"], [{"action": {"_set": {"NBANDS": 501}}, "dict": "INCAR"}]
-        )
+        self.assertEqual(d["actions"], [{"action": {"_set": {"NBANDS": 501}}, "dict": "INCAR"}])
         clean_dir()
         shutil.move("INCAR.orig", "INCAR")
         os.chdir(test_dir)
@@ -213,6 +202,11 @@ class VaspErrorHandlerTest(unittest.TestCase):
         os.remove(os.path.join(subdir, "error.1.tar.gz"))
         shutil.copy("KPOINTS.orig", "KPOINTS")
         os.remove("KPOINTS.orig")
+
+    def test_rot_matrix_vasp6(self):
+        h = VaspErrorHandler("vasp6.sgrcon")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["rot_matrix"])
 
     def test_to_from_dict(self):
         h = VaspErrorHandler("random_name")
@@ -268,12 +262,29 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ISYM"], 0)
 
+    def test_rhosyg_vasp6(self):
+        h = VaspErrorHandler("vasp6.rhosyg")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["rhosyg"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["SYMPREC"], 1e-4)
+        self.assertEqual(h.correct()["errors"], ["rhosyg"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ISYM"], 0)
+
     def test_posmap(self):
         h = VaspErrorHandler("vasp.posmap")
         self.assertEqual(h.check(), True)
         self.assertEqual(h.correct()["errors"], ["posmap"])
         i = Incar.from_file("INCAR")
-        self.assertEqual(i["SYMPREC"], 1e-6)
+        self.assertAlmostEqual(i["SYMPREC"], 1e-6)
+
+    def test_posmap_vasp6(self):
+        h = VaspErrorHandler("vasp6.posmap")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["posmap"])
+        i = Incar.from_file("INCAR")
+        self.assertAlmostEqual(i["SYMPREC"], 1e-6)
 
     def test_point_group(self):
         h = VaspErrorHandler("vasp.point_group")
@@ -281,6 +292,13 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.correct()["errors"], ["point_group"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ISYM"], 0)
+
+    def test_symprec_noise(self):
+        h = VaspErrorHandler("vasp.symprec_noise")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["symprec_noise"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["SYMPREC"], 1e-6)
 
     def test_point_group_vasp6(self):
         # the error message is formatted differently in VASP6 compared to VASP5
@@ -297,6 +315,15 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.correct()["errors"], ["inv_rot_mat"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["SYMPREC"], 1e-08)
+
+    def test_bzint_vasp6(self):
+        # the BZINT error message is formatted differently in VASP6 compared to VASP5
+        h = VaspErrorHandler("vasp6.bzint")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["tet"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ISMEAR"], 0)
+        self.assertEqual(i["SIGMA"], 0.05)
 
     def test_too_large_kspacing(self):
         shutil.copy("INCAR.kspacing", "INCAR")
@@ -445,9 +472,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         self.assertTrue(h.check())
         d = h.correct()
         self.assertEqual(d["errors"], ["Unconverged"])
-        self.assertIn(
-            {"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}}, d["actions"]
-        )
+        self.assertIn({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}}, d["actions"])
         os.remove("vasprun.xml")
 
     def test_to_from_dict(self):
@@ -485,6 +510,52 @@ class IncorrectSmearingHandlerTest(unittest.TestCase):
         self.assertEqual(Incar.from_file("INCAR")["ISMEAR"], 2)
         self.assertEqual(Incar.from_file("INCAR")["SIGMA"], 0.2)
         os.remove("vasprun.xml")
+
+    @classmethod
+    def tearDown(cls):
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("vasprun.xml.orig", "vasprun.xml")
+        clean_dir()
+        os.chdir(cwd)
+
+
+class IncorrectSmearingHandlerStaticTest(unittest.TestCase):
+    def setUp(cls):
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.chdir(test_dir)
+        subdir = os.path.join(test_dir, "static_smearing")
+        os.chdir(subdir)
+
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("vasprun.xml", "vasprun.xml.orig")
+
+    def test_check_correct_scan_metal(self):
+        h = IncorrectSmearingHandler()
+        self.assertFalse(h.check())
+
+    @classmethod
+    def tearDown(cls):
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("vasprun.xml.orig", "vasprun.xml")
+        clean_dir()
+        os.chdir(cwd)
+
+
+class IncorrectSmearingHandlerFermiTest(unittest.TestCase):
+    def setUp(cls):
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.chdir(test_dir)
+        subdir = os.path.join(test_dir, "fermi_smearing")
+        os.chdir(subdir)
+
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("vasprun.xml", "vasprun.xml.orig")
+
+    def test_check_correct_scan_metal(self):
+        h = IncorrectSmearingHandler()
+        self.assertFalse(h.check())
 
     @classmethod
     def tearDown(cls):
@@ -537,7 +608,7 @@ class LargeSigmaHandlerTest(unittest.TestCase):
         self.assertTrue(h.check())
         d = h.correct()
         self.assertEqual(d["errors"], ["LargeSigma"])
-        self.assertEqual(Incar.from_file("INCAR")["SIGMA"], 1.46)
+        self.assertEqual(Incar.from_file("INCAR")["SIGMA"], 1.44)
         os.remove("vasprun.xml")
 
     @classmethod
@@ -801,16 +872,12 @@ class OutOfMemoryHandlerTest(unittest.TestCase):
         vi = VaspInput.from_directory(".")
         from custodian.vasp.interpreter import VaspModder
 
-        VaspModder(vi=vi).apply_actions(
-            [{"dict": "INCAR", "action": {"_set": {"KPAR": 4}}}]
-        )
+        VaspModder(vi=vi).apply_actions([{"dict": "INCAR", "action": {"_set": {"KPAR": 4}}}])
         h = StdErrHandler("std_err.txt.oom")
         self.assertEqual(h.check(), True)
         d = h.correct()
         self.assertEqual(d["errors"], ["out_of_memory"])
-        self.assertEqual(
-            d["actions"], [{"dict": "INCAR", "action": {"_set": {"KPAR": 2}}}]
-        )
+        self.assertEqual(d["actions"], [{"dict": "INCAR", "action": {"_set": {"KPAR": 2}}}])
 
     def tearDown(self):
         shutil.move("INCAR.orig", "INCAR")

@@ -82,7 +82,7 @@ class ExampleHandler1b(ExampleHandler):
     This handler always can apply a correction, but will only apply it twice before raising.
     """
 
-    max_num_corrections = 2
+    max_num_corrections = 2  # type: ignore
     raise_on_max = True
 
 
@@ -91,7 +91,7 @@ class ExampleHandler1c(ExampleHandler):
     This handler always can apply a correction, but will only apply it twice and then not anymore.
     """
 
-    max_num_corrections = 2
+    max_num_corrections = 2  # type: ignore
     raise_on_max = False
 
 
@@ -189,15 +189,11 @@ class CustodianTest(unittest.TestCase):
         njobs = 100
         params = {"initial": 0, "total": 0}
         h = ExampleHandler2(params)
-        c = Custodian(
-            [h], [ExampleJob(i, params) for i in range(njobs)], max_errors=njobs
-        )
+        c = Custodian([h], [ExampleJob(i, params) for i in range(njobs)], max_errors=njobs)
         self.assertRaises(NonRecoverableError, c.run)
         self.assertTrue(h.has_error)
         h = ExampleHandler2b(params)
-        c = Custodian(
-            [h], [ExampleJob(i, params) for i in range(njobs)], max_errors=njobs
-        )
+        c = Custodian([h], [ExampleJob(i, params) for i in range(njobs)], max_errors=njobs)
         c.run()
         self.assertTrue(h.has_error)
         self.assertEqual(c.run_log[-1]["handler"], h)
@@ -325,11 +321,7 @@ custodian_params:
 class CustodianCheckpointTest(unittest.TestCase):
     def setUp(self):
         self.cwd = os.getcwd()
-        os.chdir(
-            os.path.join(
-                os.path.dirname(__file__), "..", "..", "test_files", "checkpointing"
-            )
-        )
+        os.chdir(os.path.join(os.path.dirname(__file__), "..", "..", "test_files", "checkpointing"))
         shutil.copy(os.path.join("backup.tar.gz"), "custodian.chk.3.tar.gz")
 
     def test_checkpoint_loading(self):

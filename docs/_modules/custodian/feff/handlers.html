@@ -1,12 +1,13 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>custodian.feff.handlers &#8212; custodian 2020.4.27 documentation</title>
-    <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>custodian.feff.handlers &#8212; custodian 2021.1.8 documentation</title>
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
@@ -36,8 +37,9 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2020.4.27 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2021.1.8 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">custodian.feff.handlers</a></li> 
       </ul>
     </div>  
 
@@ -49,15 +51,19 @@
   <h1>Source code for custodian.feff.handlers</h1><div class="highlight"><pre>
 <span></span><span class="c1"># coding: utf-8</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
-<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">ErrorHandler</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">custodian.utils</span> <span class="kn">import</span> <span class="n">backup</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.feff.sets</span> <span class="kn">import</span> <span class="n">FEFFDictSet</span>
-<span class="kn">from</span> <span class="nn">custodian.feff.interpreter</span> <span class="kn">import</span> <span class="n">FeffModder</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module implements specific error handler for FEFF runs.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">&quot;&quot;&quot; This module implements specific error handler for FEFF runs. &quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">pymatgen.io.feff.sets</span> <span class="kn">import</span> <span class="n">FEFFDictSet</span>
+
+<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">ErrorHandler</span>
+<span class="kn">from</span> <span class="nn">custodian.feff.interpreter</span> <span class="kn">import</span> <span class="n">FeffModder</span>
+<span class="kn">from</span> <span class="nn">custodian.utils</span> <span class="kn">import</span> <span class="n">backup</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Chen Zheng&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2012, The Materials Project&quot;</span>
@@ -113,10 +119,14 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">not_converge_pattern</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">line</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
 
-            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">converge_pattern</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">line</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">converge_pattern</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">line</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="UnconvergedErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.feff.html#custodian.feff.handlers.UnconvergedErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform the corrections.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">backup</span><span class="p">(</span><span class="n">FEFF_BACKUP_FILES</span><span class="p">)</span>
         <span class="n">feff_input</span> <span class="o">=</span> <span class="n">FEFFDictSet</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
         <span class="n">scf_values</span> <span class="o">=</span> <span class="n">feff_input</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SCF&quot;</span><span class="p">)</span>
@@ -138,7 +148,7 @@
             <span class="n">FeffModder</span><span class="p">()</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Non-converging job&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 
-        <span class="k">elif</span> <span class="n">nscmt</span> <span class="o">==</span> <span class="mi">100</span> <span class="ow">and</span> <span class="n">nmix</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">ca</span> <span class="o">&gt;</span> <span class="mf">0.01</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">nscmt</span> <span class="o">==</span> <span class="mi">100</span> <span class="ow">and</span> <span class="n">nmix</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">ca</span> <span class="o">&gt;</span> <span class="mf">0.01</span><span class="p">:</span>
             <span class="c1"># Reduce the convergence accelerator factor</span>
             <span class="n">scf_values</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">ca</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -147,7 +157,7 @@
             <span class="n">FeffModder</span><span class="p">()</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Non-converging job&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 
-        <span class="k">elif</span> <span class="n">nmix</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">ca</span> <span class="o">==</span> <span class="mf">0.01</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">nmix</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">ca</span> <span class="o">==</span> <span class="mf">0.01</span><span class="p">:</span>
             <span class="c1"># Set ca = 0.05 and set nmix</span>
             <span class="n">scf_values</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.05</span>
             <span class="n">scf_values</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
@@ -157,7 +167,7 @@
             <span class="n">FeffModder</span><span class="p">()</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Non-converging job&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 
-        <span class="k">elif</span> <span class="n">nmix</span> <span class="o">==</span> <span class="mi">5</span> <span class="ow">and</span> <span class="n">ca</span> <span class="o">==</span> <span class="mf">0.05</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">nmix</span> <span class="o">==</span> <span class="mi">5</span> <span class="ow">and</span> <span class="n">ca</span> <span class="o">==</span> <span class="mf">0.05</span><span class="p">:</span>
             <span class="c1"># Set ca = 0.05 and set nmix</span>
             <span class="n">scf_values</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.05</span>
             <span class="n">scf_values</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
@@ -167,7 +177,7 @@
             <span class="n">FeffModder</span><span class="p">()</span><span class="o">.</span><span class="n">apply_actions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Non-converging job&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 
-        <span class="k">elif</span> <span class="n">nmix</span> <span class="o">==</span> <span class="mi">10</span> <span class="ow">and</span> <span class="n">ca</span> <span class="o">&lt;</span> <span class="mf">0.2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">nmix</span> <span class="o">==</span> <span class="mi">10</span> <span class="ow">and</span> <span class="n">ca</span> <span class="o">&lt;</span> <span class="mf">0.2</span><span class="p">:</span>
             <span class="c1"># loop through ca with nmix = 10</span>
             <span class="n">scf_values</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">ca</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -177,10 +187,10 @@
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Non-converging job&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span>
 
         <span class="c1"># Unfixable error. Just return None for actions.</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Non-converging job&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span></div></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Non-converging job&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span></div></div>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>

@@ -1,12 +1,13 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>custodian.qchem.handlers &#8212; custodian 2020.4.27 documentation</title>
-    <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>custodian.qchem.handlers &#8212; custodian 2021.1.8 documentation</title>
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/flasky.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
@@ -36,8 +37,9 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2020.4.27 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2021.1.8 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">custodian.qchem.handlers</a></li> 
       </ul>
     </div>  
 
@@ -49,9 +51,9 @@
   <h1>Source code for custodian.qchem.handlers</h1><div class="highlight"><pre>
 <span></span><span class="c1"># coding: utf-8</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">division</span>
-
-<span class="c1"># This module implements new error handlers for QChem runs.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module implements new error handlers for QChem runs.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">pymatgen.io.qchem.inputs</span> <span class="kn">import</span> <span class="n">QCInput</span>
@@ -103,7 +105,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">opt_error_history</span> <span class="o">=</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="QChemErrorHandler.check"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Checks output file for errors.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks output file for errors</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span> <span class="o">=</span> <span class="n">QCOutput</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;errors&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">warnings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;warnings&quot;</span><span class="p">)</span>
@@ -119,6 +123,9 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="QChemErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform corrections</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">backup</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">})</span>
         <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span> <span class="o">=</span> <span class="n">QCInput</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">)</span>
@@ -188,7 +195,7 @@
 
         <span class="k">elif</span> <span class="s2">&quot;unable_to_determine_lamda&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="c1"># Set last geom as new starting geom and rerun. If no opt cycles,</span>
-            <span class="c1"># use diff SCF strat? Diff initial guess? Change basis?</span>
+            <span class="c1"># use diff SCF strat? Diff initial guess? Change basis? Unclear.</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;energy_trajectory&quot;</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span><span class="o">.</span><span class="n">molecule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;molecule_from_last_geometry&quot;</span><span class="p">)</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;molecule&quot;</span><span class="p">:</span> <span class="s2">&quot;molecule_from_last_geometry&quot;</span><span class="p">})</span>
@@ -310,23 +317,27 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">input_file</span> <span class="o">=</span> <span class="n">input_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span> <span class="o">=</span> <span class="n">output_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scf_max_cycles</span> <span class="o">=</span> <span class="n">scf_max_cycles</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">geom_max_cycles</span> <span class="o">=</span> <span class="n">geom_max_cycles</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qcinp</span> <span class="o">=</span> <span class="n">QCInput</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">qchem_job</span> <span class="o">=</span> <span class="n">qchem_job</span>
 
 <div class="viewcode-block" id="QChemSCFErrorHandler.check"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemSCFErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Checks output file for errors.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks output file for errors</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span> <span class="o">=</span> <span class="n">QCOutput</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;errors&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="QChemSCFErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.qchem.html#custodian.qchem.handlers.QChemSCFErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Corrects errors, but it hasn&#39;t been implemented yet</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;This hasn&#39;t been implemented yet!&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span></div></div>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>

@@ -5,6 +5,7 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 6
 
 
 Submodules
@@ -33,7 +34,6 @@ custodian.feff.jobs module
    :members:
    :undoc-members:
    :show-inheritance:
-
 
 Module contents
 ---------------

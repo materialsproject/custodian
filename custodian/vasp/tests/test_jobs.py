@@ -12,21 +12,9 @@ from custodian.vasp.jobs import VaspJob, VaspNEBJob, GenerateVaspInputJob
 from pymatgen.io.vasp import Incar, Kpoints, Poscar
 import pymatgen
 
-"""
-Created on Jun 1, 2012
-"""
-
-
-__author__ = "Shyue Ping Ong"
-__copyright__ = "Copyright 2012, The Materials Project"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "shyue@mit.edu"
-__date__ = "Jun 1, 2012"
-
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")
-pymatgen.SETTINGS["PMG_VASP_PSP_DIR"] = os.path.abspath(test_dir)
+pymatgen.core.SETTINGS["PMG_VASP_PSP_DIR"] = os.path.abspath(test_dir)  # type: ignore
 
 
 class VaspJobTest(unittest.TestCase):
@@ -93,9 +81,7 @@ class VaspJobTest(unittest.TestCase):
             with ScratchDir(".", copy_from_current_on_enter=True) as d:
                 v = VaspJob("hello", auto_continue=True)
                 v.setup()
-                self.assertTrue(
-                    os.path.exists("continue.json"), "continue.json not created"
-                )
+                self.assertTrue(os.path.exists("continue.json"), "continue.json not created")
                 v.setup()
                 self.assertEqual(
                     Poscar.from_file("CONTCAR").structure,
@@ -111,9 +97,7 @@ class VaspJobTest(unittest.TestCase):
             with ScratchDir(".", copy_from_current_on_enter=True) as d:
                 v = VaspJob(
                     "hello",
-                    auto_continue=[
-                        {"dict": "INCAR", "action": {"_set": {"ISTART": 1}}}
-                    ],
+                    auto_continue=[{"dict": "INCAR", "action": {"_set": {"ISTART": 1}}}],
                 )
                 v.setup()
                 v.setup()
@@ -196,9 +180,7 @@ class GenerateVaspInputJobTest(unittest.TestCase):
             for f in ["INCAR", "POSCAR", "POTCAR", "KPOINTS"]:
                 shutil.copy(os.path.join("..", test_dir, f), f)
             oldincar = Incar.from_file("INCAR")
-            v = GenerateVaspInputJob(
-                "pymatgen.io.vasp.sets.MPNonSCFSet", contcar_only=False
-            )
+            v = GenerateVaspInputJob("pymatgen.io.vasp.sets.MPNonSCFSet", contcar_only=False)
             v.run()
             incar = Incar.from_file("INCAR")
             self.assertEqual(incar["ICHARG"], 11)

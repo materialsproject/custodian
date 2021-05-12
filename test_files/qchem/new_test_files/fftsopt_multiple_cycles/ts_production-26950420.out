@@ -1,0 +1,7 @@
+echo test successful
+2020-11-11 08:37:39,419 INFO Hostname/IP lookup (this will take a few seconds)
+2020-11-11 08:37:39,421 INFO Launching Rocket
+2020-11-11 08:37:44,075 INFO RUNNING fw_id: 830312 in directory: /clusterfs/mp/ewcspottesmith/data/ts_testing/20201111_li2o_paths/block_2020-11-11-16-37-34-113586/launcher_2020-11-11-16-37-34-179163
+2020-11-11 08:37:44,111 INFO Task started: {{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}}.
+2020-11-11 08:37:44,142 INFO Task completed: {{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}} 
+2020-11-11 08:37:44,152 INFO Task started: {{atomate.qchem.firetasks.run_calc.RunQChemCustodian}}.

@@ -1,0 +1,10 @@
+echo test successful
+2019-09-27 16:19:35,242 INFO Hostname/IP lookup (this will take a few seconds)
+2019-09-27 16:19:35,244 INFO Launching Rocket
+2019-09-27 16:19:40,005 DEBUG FW with id: 2038 is unique!
+2019-09-27 16:19:40,011 DEBUG Created/updated Launch with launch_id: 1451
+2019-09-27 16:19:40,036 DEBUG RUNNING FW with id: 2038
+2019-09-27 16:19:40,036 INFO RUNNING fw_id: 2038 in directory: /global/cscratch1/sd/ewcss/jcesr/tests/20190925_ts_net/block_2019-09-25-18-44-40-199556/launcher_2019-09-27-14-08-37-923498
+2019-09-27 16:19:40,053 INFO Task started: {{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}}.
+2019-09-27 16:19:40,058 INFO Task completed: {{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}} 
+2019-09-27 16:19:40,061 INFO Task started: {{atomate.qchem.firetasks.run_calc.RunQChemCustodian}}.

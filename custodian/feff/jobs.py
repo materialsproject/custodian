@@ -1,15 +1,16 @@
 # coding: utf-8
 
-import subprocess
+""" This module implements basic kinds of jobs for FEFF runs."""
+
+import logging
 import os
 import shutil
-import logging
+import subprocess
+
 from monty.shutil import decompress_dir
 
 from custodian.custodian import Job
 from custodian.utils import backup
-
-""" This module implements basic kinds of jobs for FEFF runs."""
 
 logger = logging.getLogger(__name__)
 
@@ -85,9 +86,7 @@ class FeffJob(Job):
         Returns:
             (subprocess.Popen) Used for monitoring.
         """
-        with open(self.output_file, "w") as f_std, open(
-            self.stderr_file, "w", buffering=1
-        ) as f_err:
+        with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # Use line buffering for stderr
             # On TSCC, need to run shell command
             p = subprocess.Popen(self.feff_cmd, stdout=f_std, stderr=f_err, shell=True)

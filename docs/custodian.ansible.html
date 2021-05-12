@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>custodian.ansible package &#8212; custodian 2020.4.27 documentation</title>
-    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>custodian.ansible package &#8212; custodian 2021.2.8 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 
@@ -36,7 +36,8 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 2020.4.27 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 2021.2.8 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">custodian.ansible package</a></li> 
       </ul>
     </div>  
 
@@ -57,7 +58,10 @@
 </div>
 <div class="section" id="module-custodian.ansible.actions">
 <span id="custodian-ansible-actions-module"></span><h2>custodian.ansible.actions module<a class="headerlink" href="#module-custodian.ansible.actions" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<p>This module defines various classes of supported actions. All actions are
+implemented as static methods, but are defined using classes (as opposed to
+modules) so that a set of well-defined actions can be namespaced easily.</p>
+<dl class="py class">
 <dt id="custodian.ansible.actions.DictActions">
 <em class="property">class </em><code class="sig-name descname">DictActions</code><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -80,68 +84,158 @@ _rename</p>
 using the mongo {“a.b”:1} notation. This is because mongo does not allow
 keys with “.” to be inserted. Instead, nested dict modification is
 supported using a special “-&gt;” keyword, e.g. {“a-&gt;b”: 1}</p>
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.ansible.actions.DictActions.add_to_set">
-<em class="property">static </em><code class="sig-name descname">add_to_set</code><span class="sig-paren">(</span><em class="sig-param">input_dict</em>, <em class="sig-param">settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.add_to_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.add_to_set" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property">static </em><code class="sig-name descname">add_to_set</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_dict</span></em>, <em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.add_to_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.add_to_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add to set using MongoDB syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_dict</strong> (<em>dict</em>) – The input dictionary to be modified.</p></li>
+<li><p><strong>settings</strong> (<em>dict</em>) – The specification of the modification to be made.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.ansible.actions.DictActions.inc">
-<em class="property">static </em><code class="sig-name descname">inc</code><span class="sig-paren">(</span><em class="sig-param">input_dict</em>, <em class="sig-param">settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.inc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.inc" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property">static </em><code class="sig-name descname">inc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_dict</span></em>, <em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.inc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.inc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increment a value using MongdoDB syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_dict</strong> (<em>dict</em>) – The input dictionary to be modified.</p></li>
+<li><p><strong>settings</strong> (<em>dict</em>) – The specification of the modification to be made.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.ansible.actions.DictActions.pop">
-<em class="property">static </em><code class="sig-name descname">pop</code><span class="sig-paren">(</span><em class="sig-param">input_dict</em>, <em class="sig-param">settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.pop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.pop" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property">static </em><code class="sig-name descname">pop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_dict</span></em>, <em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.pop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pop item from a list using MongoDB syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_dict</strong> (<em>dict</em>) – The input dictionary to be modified.</p></li>
+<li><p><strong>settings</strong> (<em>dict</em>) – The specification of the modification to be made.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.ansible.actions.DictActions.pull">
-<em class="property">static </em><code class="sig-name descname">pull</code><span class="sig-paren">(</span><em class="sig-param">input_dict</em>, <em class="sig-param">settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.pull"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.pull" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property">static </em><code class="sig-name descname">pull</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_dict</span></em>, <em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.pull"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.pull" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pull an item using MongoDB syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_dict</strong> (<em>dict</em>) – The input dictionary to be modified.</p></li>
+<li><p><strong>settings</strong> (<em>dict</em>) – The specification of the modification to be made.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.ansible.actions.DictActions.pull_all">
-<em class="property">static </em><code class="sig-name descname">pull_all</code><span class="sig-paren">(</span><em class="sig-param">input_dict</em>, <em class="sig-param">settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.pull_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.pull_all" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property">static </em><code class="sig-name descname">pull_all</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_dict</span></em>, <em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.pull_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.pull_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pull multiple items to a list using MongoDB syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_dict</strong> (<em>dict</em>) – The input dictionary to be modified.</p></li>
+<li><p><strong>settings</strong> (<em>dict</em>) – The specification of the modification to be made.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.ansible.actions.DictActions.push">
-<em class="property">static </em><code class="sig-name descname">push</code><span class="sig-paren">(</span><em class="sig-param">input_dict</em>, <em class="sig-param">settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.push"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.push" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property">static </em><code class="sig-name descname">push</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_dict</span></em>, <em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.push"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.push" title="Permalink to this definition">¶</a></dt>
+<dd><p>Push to a list using MongoDB syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_dict</strong> (<em>dict</em>) – The input dictionary to be modified.</p></li>
+<li><p><strong>settings</strong> (<em>dict</em>) – The specification of the modification to be made.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.ansible.actions.DictActions.push_all">
-<em class="property">static </em><code class="sig-name descname">push_all</code><span class="sig-paren">(</span><em class="sig-param">input_dict</em>, <em class="sig-param">settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.push_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.push_all" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property">static </em><code class="sig-name descname">push_all</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_dict</span></em>, <em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.push_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.push_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Push multiple items to a list using MongoDB syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_dict</strong> (<em>dict</em>) – The input dictionary to be modified.</p></li>
+<li><p><strong>settings</strong> (<em>dict</em>) – The specification of the modification to be made.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.ansible.actions.DictActions.rename">
-<em class="property">static </em><code class="sig-name descname">rename</code><span class="sig-paren">(</span><em class="sig-param">input_dict</em>, <em class="sig-param">settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.rename" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property">static </em><code class="sig-name descname">rename</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_dict</span></em>, <em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.rename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rename a key using MongoDB syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_dict</strong> (<em>dict</em>) – The input dictionary to be modified.</p></li>
+<li><p><strong>settings</strong> (<em>dict</em>) – The specification of the modification to be made.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.ansible.actions.DictActions.set">
-<em class="property">static </em><code class="sig-name descname">set</code><span class="sig-paren">(</span><em class="sig-param">input_dict</em>, <em class="sig-param">settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.set" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property">static </em><code class="sig-name descname">set</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_dict</span></em>, <em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a value using MongoDB syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_dict</strong> (<em>dict</em>) – The input dictionary to be modified.</p></li>
+<li><p><strong>settings</strong> (<em>dict</em>) – The specification of the modification to be made.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.ansible.actions.DictActions.unset">
-<em class="property">static </em><code class="sig-name descname">unset</code><span class="sig-paren">(</span><em class="sig-param">input_dict</em>, <em class="sig-param">settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.unset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.unset" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property">static </em><code class="sig-name descname">unset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_dict</span></em>, <em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#DictActions.unset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.DictActions.unset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unsets a value using MongoDB syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_dict</strong> (<em>dict</em>) – The input dictionary to be modified.</p></li>
+<li><p><strong>settings</strong> (<em>dict</em>) – The specification of the modification to be made.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="custodian.ansible.actions.FileActions">
 <em class="property">class </em><code class="sig-name descname">FileActions</code><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class of supported file actions. For FileActions, the modder class takes in
 a filename as a string. The filename should preferably be a full path to
 avoid ambiguity.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.ansible.actions.FileActions.file_copy">
-<em class="property">static </em><code class="sig-name descname">file_copy</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_copy" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">file_copy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Copies a file. {‘_file_copy’: {‘dest’: ‘new_file_name’}}</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -153,9 +247,9 @@ avoid ambiguity.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.ansible.actions.FileActions.file_create">
-<em class="property">static </em><code class="sig-name descname">file_create</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_create" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">file_create</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_create" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -167,9 +261,9 @@ avoid ambiguity.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.ansible.actions.FileActions.file_delete">
-<em class="property">static </em><code class="sig-name descname">file_delete</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_delete" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">file_delete</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_delete" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deletes a file. {‘_file_delete’: {‘mode’: “actual”}}</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -182,9 +276,9 @@ mode only prints the action without performing it.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.ansible.actions.FileActions.file_modify">
-<em class="property">static </em><code class="sig-name descname">file_modify</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_modify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_modify" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">file_modify</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_modify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_modify" title="Permalink to this definition">¶</a></dt>
 <dd><p>Modifies file access</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -196,9 +290,9 @@ mode only prints the action without performing it.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.ansible.actions.FileActions.file_move">
-<em class="property">static </em><code class="sig-name descname">file_move</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">settings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_move"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_move" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">file_move</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#FileActions.file_move"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.FileActions.file_move" title="Permalink to this definition">¶</a></dt>
 <dd><p>Moves a file. {‘_file_move’: {‘dest’: ‘new_file_name’}}</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -212,17 +306,20 @@ mode only prints the action without performing it.</p></li>
 
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="custodian.ansible.actions.get_nested_dict">
-<code class="sig-name descname">get_nested_dict</code><span class="sig-paren">(</span><em class="sig-param">input_dict</em>, <em class="sig-param">key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#get_nested_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.get_nested_dict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="sig-name descname">get_nested_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_dict</span></em>, <em class="sig-param"><span class="n">key</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/actions.html#get_nested_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.actions.get_nested_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to interpret a nested dict input.</p>
+</dd></dl>
 
 </div>
 <div class="section" id="module-custodian.ansible.interpreter">
 <span id="custodian-ansible-interpreter-module"></span><h2>custodian.ansible.interpreter module<a class="headerlink" href="#module-custodian.ansible.interpreter" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<p>This module implements a Modder class that performs modifications on objects
+using support actions.</p>
+<dl class="py class">
 <dt id="custodian.ansible.interpreter.Modder">
-<em class="property">class </em><code class="sig-name descname">Modder</code><span class="sig-paren">(</span><em class="sig-param">actions=None</em>, <em class="sig-param">strict=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/interpreter.html#Modder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.interpreter.Modder" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">Modder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">actions</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">strict</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/interpreter.html#Modder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.interpreter.Modder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class to modify a dict/file/any object using a mongo-like language.
 Keywords are mostly adopted from mongo’s syntax, but instead of $, an
@@ -254,9 +351,9 @@ supplied, a ValueError is raised. Defaults to True.</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.ansible.interpreter.Modder.modify">
-<code class="sig-name descname">modify</code><span class="sig-paren">(</span><em class="sig-param">modification</em>, <em class="sig-param">obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/interpreter.html#Modder.modify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.interpreter.Modder.modify" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">modify</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">modification</span></em>, <em class="sig-param"><span class="n">obj</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/interpreter.html#Modder.modify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.interpreter.Modder.modify" title="Permalink to this definition">¶</a></dt>
 <dd><p>Note that modify makes actual in-place modifications. It does not
 return a copy.</p>
 <dl class="field-list simple">
@@ -273,9 +370,9 @@ file.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="custodian.ansible.interpreter.Modder.modify_object">
-<code class="sig-name descname">modify_object</code><span class="sig-paren">(</span><em class="sig-param">modification</em>, <em class="sig-param">obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/interpreter.html#Modder.modify_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.interpreter.Modder.modify_object" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">modify_object</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">modification</span></em>, <em class="sig-param"><span class="n">obj</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/ansible/interpreter.html#Modder.modify_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custodian.ansible.interpreter.Modder.modify_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Modify an object that supports pymatgen’s as_dict() and from_dict API.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -293,10 +390,18 @@ settings}. E.g., {‘_set’: {‘Hello’:’Universe’, ‘Bye’: ‘World�
 </div>
 <div class="section" id="module-custodian.ansible">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-custodian.ansible" title="Permalink to this headline">¶</a></h2>
+<p>The ansible package provides modules that provides a mongo-like syntax for
+making modifications to dicts, objects and files. The mongo-like syntax
+itself is a dict.</p>
+<p>The main use of this package is to allow changes to objects or files to be
+stored in a json file or MongoDB database, i.e., a form of version control
+or tracked changes (though without undo capability unless the input is
+stored at each step).</p>
 </div>
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>

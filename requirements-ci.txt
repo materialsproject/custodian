@@ -1,6 +1,9 @@
-pymatgen==2019.12.22
-coverage==5.0.1
-coveralls==1.9.2
-pytest==5.3.2
-pytest-cov==2.8.1
-pycodestyle==2.5.0
+pymatgen==2022.0.4
+coverage==5.5
+coveralls==3.0.1
+pytest==6.2.2
+pytest-cov==2.11.1
+mypy==0.812
+pydocstyle==5.1.1
+flake8-black==0.2.1
+pylint==2.7.2

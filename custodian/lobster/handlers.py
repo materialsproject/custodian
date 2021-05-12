@@ -1,9 +1,10 @@
+""" This module implements specific error handler for Lobster runs. """
+
 import os
 
-from custodian.custodian import Validator
 from pymatgen.io.lobster import Lobsterout
 
-""" This module implements specific error handler for Lobster runs. """
+from custodian.custodian import Validator
 
 __author__ = "Janine George, Guido Petretto"
 __copyright__ = "Copyright 2020, The Materials Project"
@@ -36,7 +37,7 @@ class EnoughBandsValidator(Validator):
         try:
             with open(self.output_filename) as f:
                 data = f.read()
-            return 'You are employing too few bands in your PAW calculation.' in data
+            return "You are employing too few bands in your PAW calculation." in data
         except OSError:
             return False
 
@@ -49,15 +50,21 @@ class LobsterFilesValidator(Validator):
     """
 
     def __init__(self):
+        """
+        Dummy init
+        """
         pass
 
     def check(self) -> bool:
+        """
+        Check for errors.
+        """
         for vfile in ["lobsterout"]:
             if not os.path.exists(vfile):
                 return True
         with open("lobsterout") as f:
             data = f.read()
-        return ('finished' not in data)
+        return "finished" not in data
 
 
 class ChargeSpillingValidator(Validator):
@@ -65,7 +72,7 @@ class ChargeSpillingValidator(Validator):
     Check if spilling is below certain threshold!
     """
 
-    def __init__(self, output_filename: str = 'lobsterout', charge_spilling_limit: float = 0.05):
+    def __init__(self, output_filename: str = "lobsterout", charge_spilling_limit: float = 0.05):
         """
 
         Args:
@@ -77,7 +84,7 @@ class ChargeSpillingValidator(Validator):
         self.charge_spilling_limit = charge_spilling_limit
 
     def check(self) -> bool:
-        # open lobsterout and find charge spilling
+        """open lobsterout and find charge spilling"""
 
         if os.path.exists(self.output_filename):
             lobsterout = Lobsterout(self.output_filename)
@@ -87,5 +94,4 @@ class ChargeSpillingValidator(Validator):
                 if lobsterout.chargespilling[1] > self.charge_spilling_limit:
                     return True
             return False
-        else:
-            return False
+        return False

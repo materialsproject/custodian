@@ -5,25 +5,20 @@ This is a master vasp running script to perform various combinations of VASP
 runs.
 """
 
-from __future__ import division
-
 import logging
 import sys
+
 import ruamel.yaml as yaml
+from pymatgen.io.vasp.inputs import VaspInput, Incar, Kpoints
 
 from custodian.custodian import Custodian
 from custodian.vasp.jobs import VaspJob
-from pymatgen.io.vasp.inputs import VaspInput, Incar, Kpoints
-
-__author__ = "Shyue Ping Ong"
-__version__ = "0.5"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "ongsp@ucsd.edu"
-__status__ = "Beta"
-__date__ = "12/31/13"
 
 
 def load_class(mod, name):
+    """
+    Load the class from mod and name specification.
+    """
     toks = name.split("?")
     params = {}
     if len(toks) == 2:
@@ -38,7 +33,9 @@ def load_class(mod, name):
 
 
 def get_jobs(args):
-    # Returns a generator of jobs. Allows of "infinite" jobs.
+    """
+    Returns a generator of jobs. Allows of "infinite" jobs.
+    """
     vasp_command = args.command.split()
     # save initial INCAR for rampU runs
     n_ramp_u = args.jobs.count("rampU")
@@ -51,20 +48,18 @@ def get_jobs(args):
     njobs = len(args.jobs)
     post_settings = []  # append to this list to have settings applied on next job
     for i, job in enumerate(args.jobs):
-        final = False if i != njobs - 1 else True
+        final = i == njobs - 1
         if any(c.isdigit() for c in job):
             suffix = "." + job
         else:
             suffix = ".{}{}".format(job, i + 1)
         settings = post_settings
         post_settings = []
-        backup = True if i == 0 else False
+        backup = i == 0
         copy_magmom = False
         vinput = VaspInput.from_directory(".")
         if i > 0:
-            settings.append(
-                {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
-            )
+            settings.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
 
         job_type = job.lower()
         auto_npar = True
@@ -126,9 +121,7 @@ def get_jobs(args):
         elif job_type.startswith("nonscf_derived"):
             from pymatgen.io.vasp.sets import MPNonSCFSet
 
-            vis = MPNonSCFSet.from_prev_calc(
-                ".", copy_chgcar=False, user_incar_settings={"LWAVE": True}
-            )
+            vis = MPNonSCFSet.from_prev_calc(".", copy_chgcar=False, user_incar_settings={"LWAVE": True})
             settings.extend(
                 [
                     {"dict": "INCAR", "action": {"_set": dict(vis.incar)}},
@@ -181,20 +174,12 @@ def get_jobs(args):
             incar = vinput["INCAR"]
             structure = vinput["POSCAR"].structure
             if "ISMEAR" in incar:
-                post_settings.append(
-                    {"dict": "INCAR", "action": {"_set": {"ISMEAR": incar["ISMEAR"]}}}
-                )
+                post_settings.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": incar["ISMEAR"]}}})
             else:
-                post_settings.append(
-                    {"dict": "INCAR", "action": {"_unset": {"ISMEAR": 1}}}
-                )
-            post_settings.append(
-                {"dict": "KPOINTS", "action": {"_set": kpoints.as_dict()}}
-            )
+                post_settings.append({"dict": "INCAR", "action": {"_unset": {"ISMEAR": 1}}})
+            post_settings.append({"dict": "KPOINTS", "action": {"_set": kpoints.as_dict()}})
             # lattice vectors with length < 9 will get >1 KPOINT
-            low_kpoints = Kpoints.gamma_automatic(
-                [max(int(18 / l), 1) for l in structure.lattice.abc]
-            )
+            low_kpoints = Kpoints.gamma_automatic([max(int(18 / l), 1) for l in structure.lattice.abc])
             settings.extend(
                 [
                     {"dict": "INCAR", "action": {"_set": {"ISMEAR": 0}}},
@@ -205,9 +190,7 @@ def get_jobs(args):
             # let vasp determine encut (will be lower than
             # needed for compatibility with other runs)
             if "ENCUT" in incar:
-                post_settings.append(
-                    {"dict": "INCAR", "action": {"_set": {"ENCUT": incar["ENCUT"]}}}
-                )
+                post_settings.append({"dict": "INCAR", "action": {"_set": {"ENCUT": incar["ENCUT"]}}})
                 settings.append({"dict": "INCAR", "action": {"_unset": {"ENCUT": 1}}})
 
         elif job_type.startswith("relax"):
@@ -232,6 +215,9 @@ def get_jobs(args):
 
 
 def do_run(args):
+    """
+    Do the run.
+    """
     FORMAT = "%(asctime)s %(message)s"
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
     logging.info("Handlers used are %s" % args.handlers)
@@ -251,18 +237,14 @@ def do_run(args):
 
 
 def main():
+    """
+    Main method
+    """
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="""
-    run_vasp is a master script to perform various kinds of VASP runs.
-    """,
-        epilog="""
-    Author: Shyue Ping Ong
-    Version: {}
-    Last updated: {}""".format(
-            __version__, __date__
-        ),
+        description="run_vasp is a master script to perform various kinds of VASP runs.",
+        epilog="Author: Shyue Ping Ong",
     )
 
     parser.add_argument(
@@ -272,8 +254,7 @@ def main():
         nargs="?",
         default="pvasp",
         type=str,
-        help="VASP command. Defaults to pvasp. If you are using mpirun, "
-        'set this to something like "mpirun pvasp".',
+        help="VASP command. Defaults to pvasp. If you are using mpirun, " 'set this to something like "mpirun pvasp".',
     )
 
     parser.add_argument(
