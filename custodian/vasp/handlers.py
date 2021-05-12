@@ -357,8 +357,9 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}})
 
         if "brions" in self.errors:
-            potim = float(vi["INCAR"].get("POTIM", 0.5)) + 0.1
+            potim = round(float(vi["INCAR"].get("POTIM", 0.5)) + 0.1, 2)
             actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
+            actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
 
         if "zbrent" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 1}}})
