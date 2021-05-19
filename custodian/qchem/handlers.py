@@ -167,6 +167,37 @@ class QChemErrorHandler(ErrorHandler):
             else:
                 print("Not sure how to fix hessian_eigenvalue_error if thresh is already 14!")
 
+        elif "NLebdevPts" in self.errors:
+            # it should not be possible to have this error if there is no pcm or smd section,
+            # but just in case
+            if self.qcinp.pcm is not None:
+                # pymatgen defaults to 194 points
+                # see pymatgen.io.qchem.sets.QChemDictSet
+                # According to the QCHem manual, acceptable values are N= 26, 50, 110, 194, 302,
+                # 434, 590, 770, 974, 1202, 1454, 1730, 2030, 2354, 2702, 3074, 3470, 3890, 4334,
+                # 4802, or 5294 points
+                # The manual suggests N=302 as a high quality option and N=590 as fully converged
+                # However, we have seen cases (for example Cs+) where N=590 still results in this
+                # error. The last 3 steps (higher N values are arbitrary)
+                for k in ["heavypoints", "hpoints"]:
+                    if int(self.qcinp.pcm.get(k, 194)) <= 194:
+                        self.qcinp.pcm[k] = "302"
+                        actions.append({k: "302"})
+                    elif int(self.qcinp.pcm.get(k, 194)) <= 302:
+                        self.qcinp.pcm[k] = "590"
+                        actions.append({k: "590"})
+                    elif int(self.qcinp.pcm.get(k, 194)) <= 590:
+                        self.qcinp.pcm[k] = "1202"
+                        actions.append({k: "1202"})
+                    elif int(self.qcinp.pcm.get(k, 194)) <= 1202:
+                        self.qcinp.pcm[k] = "2702"
+                        actions.append({k: "2702"})
+                    elif int(self.qcinp.pcm.get(k, 194)) <= 2702:
+                        self.qcinp.pcm[k] = "5294"
+                        actions.append({k: "5294"})
+            else:
+                print("Not sure how to fix NLebdevPts error if pcm section is None!")
+
         elif "failed_to_transform_coords" in self.errors:
             # Check for symmetry flag in rem. If not False, set to False and rerun.
             # If already False, increase threshold?

@@ -219,6 +219,22 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(d["errors"], ["input_file_error"])
         self.assertEqual(d["actions"], None)
 
+    def test_NLebdevPts(self):
+        shutil.copyfile(
+            os.path.join(test_dir, "lebdevpts.qin"),
+            os.path.join(scr_dir, "lebdevpts.qin"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "lebdevpts.qout"),
+            os.path.join(scr_dir, "lebdevpts.qout"),
+        )
+        h = QChemErrorHandler(input_file="lebdevpts.qin", output_file="lebdevpts.qout")
+        h.check()
+        d = h.correct()
+        print(d["actions"])
+        self.assertEqual(d["errors"], ["NLebdevPts"])
+        self.assertEqual(d["actions"], [{"heavypoints": "1202"}, {"hpoints": "1202"}])
+
     def test_read_error(self):
         shutil.copyfile(
             os.path.join(test_dir, "molecule_read_error/mol.qin"),
