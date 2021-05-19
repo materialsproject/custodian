@@ -10,7 +10,7 @@ import unittest
 from custodian.qchem.handlers import QChemErrorHandler
 from pymatgen.io.qchem.inputs import QCInput
 
-__author__ = "Samuel Blau, Brandon Woods, Shyam Dwaraknath"
+__author__ = "Samuel Blau, Brandon Woods, Shyam Dwaraknath, Ryan Kingsbury"
 __copyright__ = "Copyright 2018, The Materials Project"
 __version__ = "0.1"
 __maintainer__ = "Samuel Blau"
@@ -217,6 +217,21 @@ class QChemErrorHandlerTest(TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["input_file_error"])
+        self.assertEqual(d["actions"], None)
+
+    def test_basis_not_supported(self):
+        shutil.copyfile(
+            os.path.join(test_dir, "basis_not_supported.qin"),
+            os.path.join(scr_dir, "basis_not_supported.qin"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "basis_not_supported.qout"),
+            os.path.join(scr_dir, "basis_not_supported.qout"),
+        )
+        h = QChemErrorHandler(input_file="basis_not_supported.qin", output_file="basis_not_supported.qout")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["basis_not_supported"])
         self.assertEqual(d["actions"], None)
 
     def test_read_error(self):
