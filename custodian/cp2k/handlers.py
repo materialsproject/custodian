@@ -18,14 +18,14 @@ import numpy as np
 import os
 import time
 from typing import Sequence
-from collections import deque
 import itertools
 import re
-from pymatgen.io.cp2k.inputs import Cp2kInput, Keyword, KeywordList
+from pymatgen.io.cp2k.inputs import Cp2kInput, Keyword
 from pymatgen.io.cp2k.outputs import Cp2kOutput
 from pymatgen.io.cp2k.utils import get_aux_basis
 from custodian.custodian import ErrorHandler
 from custodian.cp2k.interpreter import Cp2kModder
+from custodian.cp2k.utils import restart, tail, get_conv
 from monty.re import regrep
 from monty.os.path import zpath
 
@@ -36,6 +36,7 @@ __date__ = "March 2021"
 
 
 CP2K_BACKUP_FILES = {"cp2k.out", "cp2k.inp", "std_err.txt"}
+MINIMUM_BAND_GAP = 0.1
 
 
 class StdErrHandler(ErrorHandler):
@@ -1031,74 +1032,64 @@ class NumericalPrecisionHandler(ErrorHandler):
         return {"errors": ["Unsufficient precision"], "actions": actions}
 
 
-def restart(actions, output_file, input_file):
+class UnconvergedRelaxationErrorHandler(ErrorHandler):
+
     """
-    Helper function. To discard old restart if convergence is already good, and copy
-    the restart file to the input file.
+    This handler checks to see if geometry optimization has failed to converge,
+    as signified by a line in the output file that says the maximum number of optimization
+    steps were reached.
 
-    Args:
-        actions (list): list of actions that the handler is going to return to custodian. If
-            no actions are present, then non are added by this function
-        output_file (str): the cp2k output file name.
-        input_file (str): the cp2k input file name.
+    At present, this handler does the following:
+
+        (1) If the geometry optimization failed using the fast (L)BFGS, switch to the slower, but more
+            robust CG algorithm with 2 point line search.
     """
-    if actions:
-        o = Cp2kOutput(output_file)
-        ci = Cp2kInput.from_file(input_file)
-        restart_file = o.filenames.get('restart')
-        restart_file = restart_file[-1] if restart_file else None
-        if ci.check('force_eval/dft'):
-            wfn_restart = ci['force_eval']['dft'].get('wfn_restart_file_name')
 
-        # If convergence is already pretty good, or we have moved to a new ionic step,
-        # discard the old WFN
-        if wfn_restart:
-            conv = get_conv(output_file)
-            if (conv and conv[-1] <= 1e-5) or restart_file:
-                actions.append(
-                    {'dict': input_file,
-                     'action': {
-                         '_unset': {
-                             'FORCE_EVAL': {
-                                 'DFT': 'WFN_RESTART_FILE_NAME'}}}}
-                )
+    is_monitor = True
 
-        # If issues arose after some ionic steps and corrections are possible
-        # then switch the restart file to the input file.
-        if restart_file:
-            actions.insert(
-                0,
-                {
-                    "file": os.path.abspath(restart_file),
+    def __init__(self, input_file='cp2k.inp', output_file='cp2k.out'):
+        """
+        Initialize the error handler.
+
+        Args:
+            input_file: name of the input file
+            output_file: name of the output file
+        """
+
+        self.input_file = input_file
+        self.output_file = output_file
+
+    def check(self):
+        o = Cp2kOutput(self.output_file)
+        o.convergence()
+        if o.data.get("geo_opt_not_converged"):
+            return True
+        return False
+
+    def correct(self):
+        ci = Cp2kInput.from_file(self.input_file)
+        actions = list()
+
+        if ci.check('MOTION/GEO_OPT'):
+            if ci['motion']['geo_opt'].get(
+                    'OPTIMIZER', Keyword('OPTIMIZER', 'BFGS')
+            ).values[0].upper() == ('BFGS' or 'LBFGS'):
+                actions.append({
+                    'dict': self.input_file,
                     "action": {
-                        "_file_copy": {"dest": os.path.abspath(input_file)}
-                    }
-                }
-            )
+                        "_set": {
+                            'MOTION': {
+                                'GEO_OPT': {
+                                    'OPTIMIZER': 'CG',
+                                    'CG': {
+                                        'LINE_SEARCH': {
+                                            'TYPE': '2PNT'
+                                        }
+                                    }
+                                }
+                            }
+                        }}})
 
-
-def tail(filename, n=10):
-    """
-    Returns the last n lines of a file as a list (including empty lines)
-    """
-    with open(filename) as f:
-        t = deque(f, n)
-        if t:
-            return t
-        else:
-            return ['']*n
-
-
-def get_conv(outfile):
-    """
-    Helper function to get the convergence info from SCF loops
-
-    Args:
-        outfile (str): output file to parse
-    Returns:
-        returns convergence info (change in energy between SCF steps) as a
-        single list (flattened across outer scf loops).
-    """
-    out = Cp2kOutput(outfile, auto_load=False, verbose=False)
-    out.parse_scf_opt()
-    return list(itertools.chain.from_iterable(out.data['convergence']))
+        restart(actions, self.output_file, self.input_file)
+        Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
+        return {"errors": ["Unsuccessful relaxation"], "actions": actions}
