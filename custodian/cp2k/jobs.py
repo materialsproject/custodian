@@ -9,6 +9,8 @@ import logging
 from monty.shutil import decompress_dir
 from monty.os.path import zpath
 from custodian.custodian import Job
+from custodian.cp2k.interpreter import Cp2kModder
+from custodian.cp2k.utils import restart, cleanup_input
 from pymatgen.io.cp2k.inputs import Cp2kInput, Keyword
 
 """
@@ -35,7 +37,7 @@ class Cp2kJob(Job):
 
     def __init__(self, cp2k_cmd, input_file="cp2k.inp", output_file="cp2k.out",
                  stderr_file="std_err.txt", suffix="", final=True,
-                 backup=True, settings_override=None):
+                 backup=True, settings_override=None, restart=False):
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -59,8 +61,10 @@ class Cp2kJob(Job):
             backup (bool): Whether to backup the initial input files. If True,
                 the input file will be copied with a
                 ".orig" appended. Defaults to True.
-            settings_override ([dict]): An ansible style list of dict to
-                override changes.
+            settings_override ([actions]): A list of actions. See the Cp2kModder
+                in interpreter.py
+            restart (bool): Whether to run in restart mode, i.e. this a continuation of
+                a previous calculation. Default is False.
 
         """
         self.cp2k_cmd = cp2k_cmd
@@ -72,20 +76,26 @@ class Cp2kJob(Job):
         self.backup = backup
         self.suffix = suffix
         self.settings_override = settings_override if settings_override else {}
+        self.restart = restart
 
     def setup(self):
         """
-        Performs initial setup for Cp2k, including overriding any settings
-        and backing up.
+        Performs initial setup for Cp2k in three stages. First, if custodian is running in restart mode, then
+        the restart function will copy the restart file to self.input_file, and remove any previous WFN initialization
+        if present. Second, any additional user specified settings will be applied. Lastly, a backup of the input
+        file will be made for reference.
         """
         decompress_dir('.')
 
         self.ci = Cp2kInput.from_file(zpath(self.input_file))
+        cleanup_input(self.ci)
 
-        if self.settings_override is not None:
-            new_input = self.ci
-            new_input.update(self.settings_override)
-            new_input.write_file(self.input_file)
+        if self.restart:
+            restart([self.settings_override], output_file=self.output_file, input_file=self.input_file)
+
+        if self.settings_override:
+            modder = Cp2kModder(filename=self.input_file, actions=[], ci=self.ci)
+            modder.apply_actions(self.settings_override)
 
         if self.backup:
             shutil.copy(self.input_file, "{}.orig".format(self.input_file))
@@ -151,7 +161,7 @@ class Cp2kJob(Job):
         del ggaJob.ci['force_eval']['dft']['xc']['hf']
         r = ggaJob.ci['global'].get('run_type', Keyword('RUN_TYPE', 'ENERGY_FORCE')).values[0]
         if r not in ['ENERGY', 'WAVEFUNCTION_OPTIMIZATION', 'WFN_OPT']:
-            ggaJob.settings_override_gga = {'GLOBAL': {'RUN_TYPE': 'ENERGY_FORCE'}}
+            ggaJob.settings_override = {'GLOBAL': {'RUN_TYPE': 'ENERGY_FORCE'}}
         ggaJob.ci.silence()  # Turn off all printing
 
         for k,v in ggaJob.ci['force_eval']['dft']['xc'].subsections.items():
@@ -171,3 +181,25 @@ class Cp2kJob(Job):
             hybridJob.ci['force_eval']['dft']['wfn_restart_file_name'] = 'GGA-PRE-CALC-RESTART.wfn'
 
         return [ggaJob, hybridJob]
+
+    @classmethod
+    def double_job(cls, cp2k_cmd, input_file="cp2k.inp", output_file="cp2k.out",
+                       stderr_file="std_err.txt", backup=True):
+        """
+        A bare gga to hybrid calculation. Removes all unecessary features
+        from the gga run, and making it only a ENERGY/ENERGY_FORCE
+        depending on the hybrid run.
+        """
+
+        job1 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
+                       stderr_file=stderr_file, final=False, suffix=".1",
+                       settings_override={})
+        r = job1.ci['global'].get('run_type', Keyword('RUN_TYPE', 'ENERGY_FORCE')).values[0]
+        if r not in ['ENERGY', 'WAVEFUNCTION_OPTIMIZATION', 'WFN_OPT']:
+            job1.settings_override = {'GLOBAL': {'RUN_TYPE': 'ENERGY_FORCE'}}
+
+        job2 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
+                       stderr_file=stderr_file, final=True, suffix=".2", restart=True,
+                       settings_override={})
+
+        return [job1, job2]
