@@ -1074,6 +1074,7 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
             if ci['motion']['geo_opt'].get(
                     'OPTIMIZER', Keyword('OPTIMIZER', 'BFGS')
             ).values[0].upper() == ('BFGS' or 'LBFGS'):
+                max_iter = ci['motion']['geo_opt'].get('MAX_ITER', Keyword('', 200)).values[0]
                 actions.append({
                     'dict': self.input_file,
                     "action": {
@@ -1081,6 +1082,7 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
                             'MOTION': {
                                 'GEO_OPT': {
                                     'OPTIMIZER': 'CG',
+                                    'MAX_ITER': max_iter*2,
                                     'CG': {
                                         'LINE_SEARCH': {
                                             'TYPE': '2PNT'
