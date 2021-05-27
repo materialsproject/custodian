@@ -65,7 +65,8 @@ class Cp2kModder(Modder):
                 For FileActions, obj will be a string with a full pathname to a
                 file.
         """
-        for action, settings in modification.items():
+        modification = list(modification.items()) if isinstance(modification, dict) else modification
+        for action, settings in modification:
             getattr(obj, action[1:])(settings)
 
 
