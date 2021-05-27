@@ -56,6 +56,16 @@ def restart(actions, output_file, input_file, minimum_band_gap=0.1):
             activate_ot(actions, ci)
 
 
+# TODO Not sure I like this solution
+def cleanup_input(ci):
+    if not ci.subsections:
+        return
+    if any(k.upper() == 'POTENTIAL' for k in ci.subsections):
+        ci.subsections.pop('POTENTIAL')
+    for k, v in ci.subsections.items():
+        cleanup_input(v)
+
+
 def activate_ot(actions, ci):
     """
     Activate OT scheme.
