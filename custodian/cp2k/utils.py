@@ -58,6 +58,15 @@ def restart(actions, output_file, input_file, minimum_band_gap=0.1):
 
 # TODO Not sure I like this solution
 def cleanup_input(ci):
+    """
+    Intention is to use this to remove problematic parts of the input file.
+
+        (1) The "POTENTIAL" section within KIND cannot be empty, but the number
+            sequences used inside do not play nice with the input parser
+
+    :param ci:
+    :return:
+    """
     if not ci.subsections:
         return
     if any(k.upper() == 'POTENTIAL' for k in ci.subsections):
