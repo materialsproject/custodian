@@ -121,11 +121,14 @@ class Cp2kJob(Job):
         """
         Postprocessing includes renaming and gzipping where necessary.
         """
+        fs = os.listdir('.')
         if os.path.exists(self.output_file):
-            if self.final and self.suffix != "":
-                shutil.move(self.output_file, "{}{}".format(self.output_file, self.suffix))
-            elif self.suffix != "":
-                shutil.copy(self.output_file, "{}{}".format(self.output_file, self.suffix))
+            if self.suffix != "":
+                os.mkdir(f"relax{self.suffix}")
+                shutil.move(self.output_file, f"relax{self.suffix}/{self.output_file}")
+                for f in fs:
+                    if not os.path.isdir(f):
+                        shutil.copy(f, f"relax{self.suffix}/{f}")
 
         # Remove continuation so if a subsequent job is run in
         # the same directory, will not restart this job.
@@ -186,20 +189,21 @@ class Cp2kJob(Job):
     def double_job(cls, cp2k_cmd, input_file="cp2k.inp", output_file="cp2k.out",
                        stderr_file="std_err.txt", backup=True):
         """
-        A bare gga to hybrid calculation. Removes all unecessary features
-        from the gga run, and making it only a ENERGY/ENERGY_FORCE
-        depending on the hybrid run.
+        This creates a sequence of two jobs. The first of which is an "initialization" of the
+        wfn. Using this, the "restart" function can be exploited to determine if a diagonalization
+        job can/would benefit from switching to OT scheme. If not, then the second job remains a
+        diagonalization job, and there is minimal overhead from restarting.
         """
 
         job1 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
-                       stderr_file=stderr_file, final=False, suffix=".1",
+                       stderr_file=stderr_file, final=False, suffix="1",
                        settings_override={})
         r = job1.ci['global'].get('run_type', Keyword('RUN_TYPE', 'ENERGY_FORCE')).values[0]
         if r not in ['ENERGY', 'WAVEFUNCTION_OPTIMIZATION', 'WFN_OPT']:
             job1.settings_override = {'GLOBAL': {'RUN_TYPE': 'ENERGY_FORCE'}}
 
         job2 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
-                       stderr_file=stderr_file, final=True, suffix=".2", restart=True,
+                       stderr_file=stderr_file, final=True, suffix="2", restart=True,
                        settings_override={})
 
         return [job1, job2]
