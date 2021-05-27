@@ -77,12 +77,16 @@ class Modder(object):
                 For FileActions, obj will be a string with a full pathname to a
                 file.
         """
-        for action, settings in modification.items():
-            if action in self.supported_actions:
-                self.supported_actions[action].__call__(obj, settings)
-            elif self.strict:
-                raise ValueError("{} is not a supported action!"
-                                 .format(action))
+        modification = list(modification)
+        for action, settings in modification:
+            try:
+                if action in self.supported_actions:
+                    self.supported_actions[action].__call__(obj, settings)
+                elif self.strict:
+                    raise ValueError("{} is not a supported action!"
+                                     .format(action))
+            except KeyError:
+                continue
 
     def modify_object(self, modification, obj):
         """
