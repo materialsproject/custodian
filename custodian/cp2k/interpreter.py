@@ -5,7 +5,7 @@ CP2K adapted interpreter and modder for custodian.
 from custodian.ansible.actions import FileActions, DictActions
 from custodian.ansible.interpreter import Modder
 from pymatgen.io.cp2k.inputs import Cp2kInput
-
+from custodian.cp2k.utils import cleanup_input
 
 class Cp2kModder(Modder):
 
@@ -50,6 +50,7 @@ class Cp2kModder(Modder):
                 self.ci = Cp2kInput.from_file(self.filename)
             else:
                 raise ValueError("Unrecognized format: {}".format(a))
+        cleanup_input(self.ci)
         self.ci.write_file(self.filename)
 
     def _modify(self, modification, obj):
