@@ -75,7 +75,7 @@ class Cp2kJob(Job):
         self.final = final
         self.backup = backup
         self.suffix = suffix
-        self.settings_override = settings_override if settings_override else {}
+        self.settings_override = settings_override if settings_override else []
         self.restart = restart
 
     def setup(self):
@@ -201,7 +201,9 @@ class Cp2kJob(Job):
         ci = Cp2kInput.from_file(zpath(input_file))
         r = ci['global'].get('run_type', Keyword('RUN_TYPE', 'ENERGY_FORCE')).values[0]
         if r not in ['ENERGY', 'WAVEFUNCTION_OPTIMIZATION', 'WFN_OPT']:
-            job1.settings_override = [{"dict": input_file, '_set': {'GLOBAL': {'RUN_TYPE': 'ENERGY_FORCE'}}}]
+            job1.settings_override = [
+                {"dict": input_file, "action": {'_set': {'GLOBAL': {'RUN_TYPE': 'ENERGY_FORCE'}}}}
+            ]
 
         job2 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
                        stderr_file=stderr_file, final=True, suffix="2", restart=True,
