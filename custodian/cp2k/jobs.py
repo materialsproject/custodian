@@ -125,9 +125,10 @@ class Cp2kJob(Job):
         if os.path.exists(self.output_file):
             if self.suffix != "":
                 os.mkdir(f"relax{self.suffix}")
-                shutil.move(self.output_file, f"relax{self.suffix}/{self.output_file}")
                 for f in fs:
-                    if not os.path.isdir(f):
+                    if f == self.output_file:
+                        shutil.move(self.output_file, f"relax{self.suffix}/{self.output_file}")
+                    elif not os.path.isdir(f):
                         shutil.copy(f, f"relax{self.suffix}/{f}")
 
         # Remove continuation so if a subsequent job is run in
