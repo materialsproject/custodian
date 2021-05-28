@@ -64,8 +64,6 @@ def cleanup_input(ci):
         (1) The "POTENTIAL" section within KIND cannot be empty, but the number
             sequences used inside do not play nice with the input parser
 
-    :param ci:
-    :return:
     """
     if not ci.subsections:
         return
@@ -89,64 +87,84 @@ def activate_ot(actions, ci):
     eps_scf = ci.by_path('force_eval/dft/scf/eps_scf')
 
     ot_actions = [
-        (
-            '_unset', {
-                'FORCE_EVAL': {
-                    'DFT': {
-                        'SCF': 'ADDED_MOS',
+        {
+            "dict": "cp2k.inp",
+            "action":
+                (
+                    '_unset', {
+                        'FORCE_EVAL': {
+                            'DFT': {
+                                'SCF': 'ADDED_MOS',
+                            }
+                        }
+                    },
+            )
+        },
+        {
+            "dict": "cp2k.inp",
+            "action":
+            (
+                '_unset', {
+                    'FORCE_EVAL': {
+                        'DFT': {
+                            'SCF': 'DIAGONALIZATION',
+                        }
                     }
-                }
-            },
-        ),
-        (
-            '_unset', {
-                'FORCE_EVAL': {
-                    'DFT': {
-                        'SCF': 'DIAGONALIZATION',
+                },
+            )
+        },
+        {
+            "dict": "cp2k.inp",
+            "action":
+            (
+                '_unset', {
+                    'FORCE_EVAL': {
+                        'DFT': {
+                            'SCF': 'MIXING',
+                        }
                     }
-                }
-            },
-        ),
-        (
-            '_unset', {
-                'FORCE_EVAL': {
-                    'DFT': {
-                        'SCF': 'MIXING',
+                },
+            )
+        },
+        {
+            "dict": "cp2k.inp",
+            "action":
+            (
+                '_unset', {
+                    'FORCE_EVAL': {
+                        'DFT': {
+                            'SCF': 'SMEAR',
+                        }
                     }
-                }
-            },
-        ),
-        (
-            '_unset', {
-                'FORCE_EVAL': {
-                    'DFT': {
-                        'SCF': 'SMEAR',
-                    }
-                }
-            },
-        ),
-        (
-            '_set', {
-                'FORCE_EVAL': {
-                    'DFT': {
-                        'SCF': {
-                            'MAX_SCF': 20,
-                            'OT': {
-                                'ENERGY_GAP': 0.01,
-                                'ALGORITHM': 'STRICT',
-                                'PRECONDITIONER': 'FULL_ALL',
-                                'MINIMIZER': 'DIIS',
-                                'LINESEARCH': '2PNT'
-                            },
-                            'OUTER_SCF': {
+                },
+            )
+        },
+        {
+            "dict": "cp2k.inp",
+            "action":
+            (
+                '_set', {
+                    'FORCE_EVAL': {
+                        'DFT': {
+                            'SCF': {
                                 'MAX_SCF': 20,
-                                'EPS_SCF': eps_scf
+                                'OT': {
+                                    'ENERGY_GAP': 0.01,
+                                    'ALGORITHM': 'STRICT',
+                                    'PRECONDITIONER': 'FULL_ALL',
+                                    'MINIMIZER': 'DIIS',
+                                    'LINESEARCH': '2PNT'
+                                },
+                                'OUTER_SCF': {
+                                    'MAX_SCF': 20,
+                                    'EPS_SCF': eps_scf
+                                }
                             }
                         }
                     }
                 }
-            }
-        )
+            )
+        }
     ]
     actions.extend(ot_actions)
 
@@ -160,45 +178,57 @@ def activate_diag(actions):
     """
 
     diag_actions = [
-        (
-            '_unset', {
-                'FORCE_EVAL': {
-                    'DFT': {
-                        'SCF': 'OT'
-                    }
-                }
-            }
-        ),
-        (
-            '_unset', {
-                'FORCE_EVAL': {
-                    'DFT': {
-                        'SCF': 'OUTER_SCF'
-                    }
-                }
-            }
-        ),
-        (
-            '_set', {
-                'FORCE_EVAL': {
-                    'DFT': {
-                        'SCF': {
-                            'MAX_SCF': 200,
-                            'ADDED_MOS': 100,  # TODO needs to be dynamic value
-                            'MAX_DIIS': 15,
-                            'DIAGONALIZATION': {},
-                            'MIXING': {
-                                'ALPHA': .05
-                            },
-                            'SMEAR': {
-                                'ELEC_TEMP': 300,
-                                'METHOD': 'FERMI_DIRAC'
-                            }
+        {
+            "dict": "cp2k.inp",
+            "action":
+            (
+                '_unset', {
+                    'FORCE_EVAL': {
+                        'DFT': {
+                            'SCF': 'OT'
                         }
                     }
                 }
-            },
-        ),
+            )
+        },
+        {
+            "dict": "cp2k.inp",
+            "action":
+            (
+                '_unset', {
+                    'FORCE_EVAL': {
+                        'DFT': {
+                            'SCF': 'OUTER_SCF'
+                        }
+                    }
+                }
+            )
+        },
+        {
+            "dict": "cp2k.inp",
+            "action":
+            (
+                '_set', {
+                    'FORCE_EVAL': {
+                        'DFT': {
+                            'SCF': {
+                                'MAX_SCF': 200,
+                                'ADDED_MOS': 100,  # TODO needs to be dynamic value
+                                'MAX_DIIS': 15,
+                                'DIAGONALIZATION': {},
+                                'MIXING': {
+                                    'ALPHA': .05
+                                },
+                                'SMEAR': {
+                                    'ELEC_TEMP': 300,
+                                    'METHOD': 'FERMI_DIRAC'
+                                }
+                            }
+                        }
+                    }
+                },
+            )
+        },
     ]
     actions.extend(diag_actions)
 
