@@ -257,6 +257,24 @@ class GaussianErrorHandler(ErrorHandler):
                     link0_parameters=self.gin.link0_parameters,
                     dieze_tag=self.gin.dieze_tag,
                     gen_basis=self.gin.gen_basis)
+                actions.append({'coords': 'rebuild_redundant_internals'})
+
+        elif 'solute_solvent_surface' in self.errors:
+            # if non-convergence in the iteration of the PCM matrix is
+            # encountered, change the type of molecular surface representing
+            # the solute-solvent boundary
+            # TODO: test
+            input_parms = {key.lower() if isinstance(key, str) else
+                           key: value for key, value in
+                           self.gin.input_parameters.items()}
+            if input_parms.get('surface', 'none').lower() != 'sas':
+                self.gin.route_parameters.get('scrf', {}).update({'read': None})
+                self.gin.input_parameters.update({'surface': 'SAS'})
+                actions.append({'surface': 'SAS'})
+            else:
+                self.logger.info('Not sure how to fix '
+                                 'solute_solvent_surface_error if surface is '
+                                 'already SAS!')
         os.rename(self.input_file, self.input_file + '.prev')
         self.gin.write_file(self.input_file, self.cart_coords)
         return {'errors': list(self.errors), 'actions': actions}
