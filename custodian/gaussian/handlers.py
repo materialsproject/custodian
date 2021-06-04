@@ -31,9 +31,20 @@ __date__ = '5/13/21'
 
 
 class GaussianErrorHandler(ErrorHandler):
-    error_patt = re.compile(r'(! Non-Optimized Parameters !|'
-                            r'Convergence failure|'
-                            r'FormBX had a problem)')
+    error_defs = {'Optimization stopped': 'opt_steps',
+                  'Convergence failure': 'scf_convergence',
+                  'FormBX had a problem': 'linear_bend',
+                  'Inv3 failed in PCMMkU': 'solute_solvent_surface'}
+    error_patt = re.compile('|'.join(list(error_defs)))
+    conv_critera = {
+        'max_force': re.compile(
+            r'\s+(Maximum Force)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)'),
+        'rms_force': re.compile(
+            r'\s+(RMS {5}Force)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)'),
+        'max_disp': re.compile(
+            r'\s+(Maximum Displacement)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)'),
+        'rms_disp': re.compile(
+            r'\s+(RMS {5}Displacement)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)')}
     activate_better_scf_guess = False
 
     def __init__(
@@ -63,6 +74,8 @@ class GaussianErrorHandler(ErrorHandler):
         self.scf_functional = scf_functional
         self.scf_basis_set = scf_basis_set
         self.prefix = prefix
+        self.check_convergence = check_convergence
+        self.conv_data = None
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @staticmethod
@@ -83,6 +96,29 @@ class GaussianErrorHandler(ErrorHandler):
         else:
             return obj
 
+    @staticmethod
+    def _monitor_convergence(data):
+        fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(12, 10))
+        for i, (k, v) in enumerate(data['values'].items()):
+            row = int(np.floor(i / 2))
+            col = i % 2
+            iters = range(0, len(v))
+            ax[row, col].plot(iters, v, color='#cf3759',
+                              linewidth=2)
+            ax[row, col].axhline(y=data['thresh'][k], linewidth=2,
+                                 color='black',
+                                 linestyle='--')
+            ax[row, col].tick_params(which='major', length=8)
+            ax[row, col].tick_params(axis='both', which='both',
+                                     direction='in',
+                                     labelsize=16)
+            ax[row, col].set_xlabel('Iteration', fontsize=16)
+            ax[row, col].set_ylabel('{}'.format(k), fontsize=16)
+            ax[row, col].set_xticks(iters)
+            ax[row, col].grid(ls='--', zorder=1)
+        plt.tight_layout()
+        plt.savefig('convergence.png')
+
     def check(self):
         self.gin = GaussianInput.from_file(self.input_file)
         self.gin.route_parameters = \
@@ -91,14 +127,30 @@ class GaussianErrorHandler(ErrorHandler):
         self.errors = set()
         error_patts = set()
         # TODO: move this to pymatgen?
+        self.conv_data = {'values': {}, 'thresh': {}}
         with zopen(self.output_file) as f:
             for line in f:
                 if GaussianErrorHandler.error_patt.search(line):
                     m = GaussianErrorHandler.error_patt.search(line)
                     patt = m.group(0)
                     error_patts.add(patt)
-                    self.errors.add(error_defs[patt])
-        # TODO: check what this does
+                    self.errors.add(GaussianErrorHandler.error_defs[patt])
+
+                if self.check_convergence and 'opt' in self.gin.route_parameters:
+                    for k, v in GaussianErrorHandler.conv_critera.items():
+                        if v.search(line):
+                            m = v.search(line)
+                            if k not in self.conv_data['values']:
+                                self.conv_data['values'][k] = [
+                                    float(m.group(2))]
+                                self.conv_data['thresh'][k] = float(m.group(3))
+                            else:
+                                self.conv_data['values'][k].append(
+                                    float(m.group(2)))
+        # TODO: it only plots after the job finishes, modify
+        if self.check_convergence and 'opt' in self.gin.route_parameters:
+            GaussianErrorHandler._monitor_convergence(self.conv_data)
+
         for patt in error_patts:
             self.logger.error(patt)
         return len(self.errors) > 0
