@@ -203,7 +203,39 @@ class GaussianErrorHandler(ErrorHandler):
                 else:
                     self.logger.info('SCF calculation failed. Exiting...')
                 return {'errors': self.errors, 'actions': None}
-        elif 'FormBX had a problem.' in self.errors:
+
+        elif 'opt_steps' in self.errors:
+            if self.gin.route_parameters.get('opt').get('maxcycles') != \
+                    str(self.opt_max_cycles):
+                self.gin.route_parameters['opt']['maxcycles'] = \
+                    self.opt_max_cycles
+                if len(self.gout.structures) > 1:
+                    self.gin.mol = self.gout.final_structure  # this does not change structure
+                    actions.append({'structure': 'from_final_structure'})
+                actions.append({'opt_max_cycles': self.opt_max_cycles})
+
+            elif self.check_convergence and \
+                    all(v[-1] < v[0] for v in self.conv_data['values'].values()):
+                self.gin.mol = self.gout.final_structure
+                actions.append({'structure': 'from_final_structure'})  # this does not change structure
+
+            elif self.gin.route_parameters.get('int') != 'ultrafine' or \
+                    self.gin.route_parameters.get('int').get(
+                        'grid') != 'ultrafine':
+                # TODO: check this condition, it seems wrong because UF is
+                # default in G16
+                self.logger.warning('Changing the numerical integration grid. '
+                                    'This will bring changes in the predicted '
+                                    'total energy. It is necessary to use'
+                                    'the same integration grid in all the '
+                                    'calculations in the same study in order '
+                                    'for the computed energies and molecular '
+                                    'properties to be comparable.')
+                self.gin.route_parameters['int'].update({'grid': 'ultrafine'})
+
+            # TODO: optimize at a lower level of theory only if the structure does not appear to be converging
+
+        elif 'linear_bend' in self.errors:
             # if there is some linear bend around an angle in the geometry
             # restart the job at the point it stopped while forcing Gaussian
             # to rebuild the set of redundant internals
