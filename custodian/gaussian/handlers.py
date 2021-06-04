@@ -9,6 +9,9 @@ import re
 import glob
 import logging
 
+import numpy as np
+import matplotlib.pyplot as plt
+
 from monty.io import zopen
 
 from pymatgen.io.gaussian import GaussianInput, GaussianOutput
@@ -44,15 +47,16 @@ class GaussianErrorHandler(ErrorHandler):
             job_type='normal',
             scf_functional=None,
             scf_basis_set=None,
-            prefix='error'
+            prefix='error',
+            check_convergence=True
     ):
         self.input_file = input_file
         self.output_file = output_file
         self.stderr_file = stderr_file
         self.cart_coords = cart_coords
-        self.errors = []
+        self.errors = set()
         self.gout = None
-        self.gin = GaussianInput.from_file(self.input_file)
+        self.gin = None
         self.scf_max_cycles = scf_max_cycles
         self.opt_max_cycles = opt_max_cycles
         self.job_type = job_type
@@ -80,21 +84,18 @@ class GaussianErrorHandler(ErrorHandler):
             return obj
 
     def check(self):
+        self.gin = GaussianInput.from_file(self.input_file)
+        self.gin.route_parameters = \
+            GaussianErrorHandler._recursive_lowercase(self.gin.route_parameters)
         self.gout = GaussianOutput(self.output_file)
-        # self.errors = self.gout.errors
         self.errors = set()
         error_patts = set()
         # TODO: move this to pymatgen?
         with zopen(self.output_file) as f:
             for line in f:
                 if GaussianErrorHandler.error_patt.search(line):
-                    # TODO: move this to above init
-                    error_defs = {'! Non-Optimized Parameters !': 'opt_error',
-                                  'Convergence failure': 'scf_convergence',
-                                  'FormBX had a problem': 'linear_bend'}
                     m = GaussianErrorHandler.error_patt.search(line)
-                    patt = m.group(1)
-                    print(f'patt is: {patt}')
+                    patt = m.group(0)
                     error_patts.add(patt)
                     self.errors.add(error_defs[patt])
         # TODO: check what this does
@@ -103,7 +104,6 @@ class GaussianErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
-        # TODO: use name of file only instead of full path!
         actions = []
         backup_files = [self.input_file, self.output_file, self.stderr_file]
         try:
@@ -114,9 +114,7 @@ class GaussianErrorHandler(ErrorHandler):
         except Exception:
             pass
         backup(backup_files, self.prefix)
-        self.gin.route_parameters = \
-            GaussianErrorHandler._recursive_lowercase(self.gin.route_parameters)
-        if 'SCF convergence error' in self.errors:
+        if 'scf_convergence' in self.errors:
             # if the SCF procedure has failed to converge
             if self.gin.route_parameters.get('scf').get('maxcycle') != \
                     str(self.scf_max_cycles):
@@ -133,15 +131,16 @@ class GaussianErrorHandler(ErrorHandler):
                 actions.append({'scf_algorithm': 'xqc'})
 
             elif self.job_type == 'better_scf_guess' and not \
-                    self.activate_better_scf_guess:
+                    GaussianErrorHandler.activate_better_scf_guess:
                 # try to get a better initial guess at a lower level of theory
                 self.logger.info('SCF calculation failed. Switching to a lower '
-                                 'level of theory to get a better initial guess of '
-                                 'molecular orbitals')
+                                 'level of theory to get a better initial '
+                                 'guess of molecular orbitals')
+                # TODO: what if inputs don't work with scf_lot? e.g. extra_basis
                 self.gin.functional = self.scf_functional
                 self.gin.basis_set = self.scf_basis_set
                 actions.append({'scf_level_of_theory': 'better_scf_guess'})
-                self.activate_better_scf_guess = True
+                GaussianErrorHandler.activate_better_scf_guess = True
 
             else:
                 if self.job_type != 'better_scf_guess':
@@ -176,4 +175,4 @@ class GaussianErrorHandler(ErrorHandler):
                     gen_basis=self.gin.gen_basis)
         os.rename(self.input_file, self.input_file + '.prev')
         self.gin.write_file(self.input_file, self.cart_coords)
-        return {'errors': self.errors, 'actions': actions}
+        return {'errors': list(self.errors), 'actions': actions}
