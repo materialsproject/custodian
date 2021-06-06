@@ -186,8 +186,8 @@ class QChemErrorHandler(ErrorHandler):
                         self.qcinp.rem["resp_charges"] = "2"
                         actions.append({"resp_charges": "2"})
                     else:
-                        self.qcinp.rem["resp_charges"] = False
-                        actions.append({"resp_charges": False})
+                        self.qcinp.rem["resp_charges"] = "false"
+                        actions.append({"resp_charges": "false"})
             else:
                 print("Not sure how to fix NLebdevPts error if resp_charges is disabled!")
 

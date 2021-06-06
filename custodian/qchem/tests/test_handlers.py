@@ -233,7 +233,7 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         print(d["actions"])
         self.assertEqual(d["errors"], ["NLebdevPts"])
-        self.assertEqual(d["actions"], [{"heavypoints": "1202"}, {"hpoints": "1202"}])
+        self.assertEqual(d["actions"], [{"esp_surface_density": "250"}])
 
     def test_read_error(self):
         shutil.copyfile(
