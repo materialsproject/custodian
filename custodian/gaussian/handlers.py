@@ -97,6 +97,43 @@ class GaussianErrorHandler(ErrorHandler):
             return obj
 
     @staticmethod
+    def _update_route_params(route_params, key, value):
+        obj = route_params.get(key, {})
+        if not obj:
+            route_params[key] = value
+        elif isinstance(obj, str):
+            update = {key: {obj: None, **value}} if isinstance(value, dict) \
+                else {key: {obj: None, value: None}}
+            route_params.update(update)
+        elif isinstance(obj, dict):
+            update = value if isinstance(value, dict) else {value: None}
+            route_params[key].update(update)
+        return route_params
+
+    @staticmethod
+    def _int_keyword(route_params):
+        int_key = 'int' if 'int' in route_params else 'integral'
+        return int_key, route_params.get(int_key)
+
+    @staticmethod
+    def _int_grid(route_params):
+        _, int_value = GaussianErrorHandler._int_keyword(route_params)
+        options = ['ultrafine', 'ultrafinegrid', '99590']
+
+        if isinstance(int_value, str) and int_value in options:
+            return True
+        elif isinstance(int_value, dict):
+            if int_value.get('grid') in options:
+                return True
+            if set(int_value) & set(options):
+                return True
+        return False
+
+    @staticmethod
+    def _not_16(gout):
+        return '16' not in gout.version
+
+    @staticmethod
     def _monitor_convergence(data):
         fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(12, 10))
         for i, (k, v) in enumerate(data['values'].items()):
@@ -163,6 +200,7 @@ class GaussianErrorHandler(ErrorHandler):
             backup_files.append(checkpoint)
             form_checkpoint = glob.glob('*.fchk')[0]
             backup_files.append(form_checkpoint)
+            backup_files.append('convergence.png')  # TODO: this is not working!
         except Exception:
             pass
         backup(backup_files, self.prefix)
@@ -233,7 +271,49 @@ class GaussianErrorHandler(ErrorHandler):
                                     'properties to be comparable.')
                 self.gin.route_parameters['int'].update({'grid': 'ultrafine'})
 
-            # TODO: optimize at a lower level of theory only if the structure does not appear to be converging
+                int_key, int_value = \
+                    GaussianErrorHandler._int_keyword(self.gin.route_parameters)
+                if not int_value and GaussianErrorHandler._not_16(self.gout):
+                    # if int keyword is missing and Gaussian version is 03 or
+                    # 09, set integration grid to ultrafine
+                    self.logger.warning(warning_msg)
+                    self.gin.route_parameters[int_key] = 'ultrafine'
+                    actions.append({'integral': 'ultra_fine'})
+                elif isinstance(int_value, dict):
+                    # if int grid is set and is different from ultrafine,
+                    # set it to ultrafine (works when others int options are
+                    # specified)
+                    flag = True if 'grid' in self.gin.route_parameters[int_key] \
+                        else False
+                    for key in self.gin.route_parameters[int_key]:
+                        if key in grid_names or grid_patt.match(key):
+                            self.gin.route_parameters[int_key].pop(key)
+                            flag = True
+                    if flag or GaussianErrorHandler._not_16(self.gout):
+                        self.logger.warning(warning_msg)
+                        self.gin.route_parameters[int_key]['grid'] = 'ultrafine'
+                        actions.append({'integral': 'ultra_fine'})
+                else:
+                    # if int grid is set and is different from ultrafine,
+                    # set it to ultrafine (works when no other int options are
+                    # specified)
+                    if int_value in grid_names or grid_patt.match(int_value):
+                        self.logger.warning(warning_msg)
+                        self.gin.route_parameters[int_key] = 'ultrafine'
+                        actions.append({'integral': 'ultra_fine'})
+                    # if int grid is not specified, but other int options are
+                    # set and Gaussian version is not 16, update with ultrafine
+                    # integral grid
+                    elif GaussianErrorHandler._not_16(self.gout):
+                        self.logger.warning(warning_msg)
+                        GaussianErrorHandler._update_route_params(
+                            self.gin.route_parameters, int_key,
+                            {'grid': 'ultrafine'})
+                        actions.append({'integral': 'ultra_fine'})
+
+            else:
+                # TODO: optimize at a lower level of theory
+                pass
 
         elif 'linear_bend' in self.errors:
             # if there is some linear bend around an angle in the geometry
