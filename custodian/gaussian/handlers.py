@@ -45,7 +45,7 @@ class GaussianErrorHandler(ErrorHandler):
             r'\s+(Maximum Displacement)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)'),
         'rms_disp': re.compile(
             r'\s+(RMS {5}Displacement)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)')}
-    activate_better_scf_guess = False
+    activate_better_guess = False
 
     def __init__(
             self,
@@ -56,8 +56,8 @@ class GaussianErrorHandler(ErrorHandler):
             scf_max_cycles=100,
             opt_max_cycles=100,
             job_type='normal',
-            scf_functional=None,
-            scf_basis_set=None,
+            lower_functional=None,
+            lower_basis_set=None,
             prefix='error',
             check_convergence=True
     ):
@@ -71,8 +71,8 @@ class GaussianErrorHandler(ErrorHandler):
         self.scf_max_cycles = scf_max_cycles
         self.opt_max_cycles = opt_max_cycles
         self.job_type = job_type
-        self.scf_functional = scf_functional
-        self.scf_basis_set = scf_basis_set
+        self.lower_functional = lower_functional
+        self.lower_basis_set = lower_basis_set
         self.prefix = prefix
         self.check_convergence = check_convergence
         self.conv_data = None
@@ -220,22 +220,22 @@ class GaussianErrorHandler(ErrorHandler):
                 self.gin.route_parameters['scf']['xqc'] = None
                 actions.append({'scf_algorithm': 'xqc'})
 
-            elif self.job_type == 'better_scf_guess' and not \
-                    GaussianErrorHandler.activate_better_scf_guess:
+            elif self.job_type == 'better_guess' and not \
+                    GaussianErrorHandler.activate_better_guess:
                 # try to get a better initial guess at a lower level of theory
                 self.logger.info('SCF calculation failed. Switching to a lower '
                                  'level of theory to get a better initial '
                                  'guess of molecular orbitals')
                 # TODO: what if inputs don't work with scf_lot? e.g. extra_basis
-                self.gin.functional = self.scf_functional
-                self.gin.basis_set = self.scf_basis_set
+                self.gin.functional = self.lower_functional
+                self.gin.basis_set = self.lower_basis_set
                 actions.append({'scf_level_of_theory': 'better_scf_guess'})
-                GaussianErrorHandler.activate_better_scf_guess = True
+                GaussianErrorHandler.activate_better_guess = True
 
             else:
-                if self.job_type != 'better_scf_guess':
+                if self.job_type != 'better_guess':
                     self.logger.info(
-                        'Try to switch to better_scf_guess job type to '
+                        'Try to switch to better_guess job type to '
                         'generate a different initial guess using a '
                         'lower level of theory')
                 else:
@@ -313,9 +313,27 @@ class GaussianErrorHandler(ErrorHandler):
                             {'grid': 'ultrafine'})
                         actions.append({'integral': 'ultra_fine'})
 
+            elif self.job_type == 'better_guess' and not \
+                    GaussianErrorHandler.activate_better_guess:
+                # TODO: check if the logic is correct since this is used with scf
+                # try to get a better initial guess at a lower level of theory
+                self.logger.info('Geometry optimiztion failed. Switching to a '
+                                 'lower level of theory to get a better '
+                                 'initial guess of molecular geometry')
+                self.gin.functional = self.lower_functional
+                self.gin.basis_set = self.lower_basis_set
+                actions.append({'opt_level_of_theory': 'better_geom_guess'})
+                GaussianErrorHandler.activate_better_guess = True
+
             else:
-                # TODO: optimize at a lower level of theory
-                pass
+                if self.job_type != 'better_guess':
+                    self.logger.info(
+                        'Try to switch to better_guess job type to '
+                        'generate a different initial guess using a '
+                        'lower level of theory')
+                else:
+                    self.logger.info('Geometry optimization failed. Exiting...')
+                return {'errors': self.errors, 'actions': None}
 
         elif 'linear_bend' in self.errors:
             # if there is some linear bend around an angle in the geometry
