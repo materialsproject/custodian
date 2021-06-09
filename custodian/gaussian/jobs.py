@@ -59,13 +59,13 @@ class GaussianJob(Job):
         pass
 
     @classmethod
-    def better_scf_guess(cls,
-                         gaussian_cmd,
-                         input_file,
-                         output_file,
-                         stderr_file='stderr.txt',
-                         backup=True,
-                         cart_coords=True):
+    def better_guess(cls,
+                     gaussian_cmd,
+                     input_file,
+                     output_file,
+                     stderr_file='stderr.txt',
+                     backup=True,
+                     cart_coords=True):
 
         orig_input = GaussianInput.from_file(input_file)
         yield(GaussianJob(gaussian_cmd=gaussian_cmd,
@@ -73,7 +73,7 @@ class GaussianJob(Job):
                           output_file=output_file,
                           stderr_file=stderr_file,
                           backup=backup))
-        if GaussianErrorHandler.activate_better_scf_guess:
+        if GaussianErrorHandler.activate_better_guess:
             # continue only if other corrections are invalid or failed
             lower_output = GaussianOutput(output_file)
             if len(lower_output.errors) == 0:
@@ -104,10 +104,10 @@ class GaussianJob(Job):
                                   stderr_file=stderr_file,
                                   backup=backup))
             else:
-                logger.info('Failed to generate a better initial SCF guess')
+                logger.info('Failed to generate a better initial guess')
                 
         else:
-            logger.info('SCF calculation completed normally without having '
-                        'to generate a better initial guess')
+            logger.info('Calculated completed normally without having to '
+                        'generate a better initial guess')
 
 
