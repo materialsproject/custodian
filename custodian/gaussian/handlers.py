@@ -257,19 +257,21 @@ class GaussianErrorHandler(ErrorHandler):
                 self.gin.mol = self.gout.final_structure
                 actions.append({'structure': 'from_final_structure'})  # this does not change structure
 
-            elif self.gin.route_parameters.get('int') != 'ultrafine' or \
-                    self.gin.route_parameters.get('int').get(
-                        'grid') != 'ultrafine':
-                # TODO: check this condition, it seems wrong because UF is
-                # default in G16
-                self.logger.warning('Changing the numerical integration grid. '
-                                    'This will bring changes in the predicted '
-                                    'total energy. It is necessary to use'
-                                    'the same integration grid in all the '
-                                    'calculations in the same study in order '
-                                    'for the computed energies and molecular '
-                                    'properties to be comparable.')
-                self.gin.route_parameters['int'].update({'grid': 'ultrafine'})
+            elif not GaussianErrorHandler._int_grid(self.gin.route_parameters):
+                # TODO: check if the defined methods are clean
+                # TODO: check if the warning message is okay
+                grid_patt = re.compile(r'(-?\d{5})')
+                grid_names = ['finegrid', 'fine', 'superfinegrid', 'superfine',
+                              'coarsegrid', 'coarse', 'sg1grid', 'sg1',
+                              'pass0grid', 'pass0']
+                # nothing int is set or is set to different values
+                warning_msg = 'Changing the numerical integration grid. ' \
+                              'This will bring changes in the predicted ' \
+                              'total energy. It is necessary to use' \
+                              'the same integration grid in all the ' \
+                              'calculations in the same study in order ' \
+                              'for the computed energies and molecular ' \
+                              'properties to be comparable.'
 
                 int_key, int_value = \
                     GaussianErrorHandler._int_keyword(self.gin.route_parameters)
