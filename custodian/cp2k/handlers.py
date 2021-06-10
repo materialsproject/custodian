@@ -28,6 +28,7 @@ from custodian.cp2k.interpreter import Cp2kModder
 from custodian.cp2k.utils import restart, tail, get_conv
 from monty.re import regrep
 from monty.os.path import zpath
+from monty.serialization import dumpfn
 
 __author__ = "Nicholas Winner"
 __version__ = "0.9"
@@ -1095,3 +1096,36 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
         restart(actions, self.output_file, self.input_file)
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
         return {"errors": ["Unsuccessful relaxation"], "actions": actions}
+
+
+class WalltimeHandler(ErrorHandler):
+
+    """
+    This walltime error handler, when enabled, will detect whether
+    the CP2K internal walltime handler has been tripped. If walltime
+    has been reached (plus some buffer), then the walltime handler will create a
+    "checkpoint.json" file that enables the job to continue. This is
+    different than saving successful runs as custodian.chk.#.tar.gz
+    (see Custodian), and simply creates checkpoint.json
+    """
+
+    is_monitor = False
+    raises_runtime_error = False
+
+    def __init__(self, output_file='cp2k.out'):
+        self.output_file = output_file
+
+    def check(self):
+        if regrep(
+                filename=self.output_file,
+                patterns={"walltime": r"(exceeded requested execution time)"},
+                reverse=True,
+                terminate_on_match=True,
+                postprocess=bool
+        ).get("walltime"):
+            return True
+        return False
+
+    def correct(self):
+        dumpfn({}, fn="checkpoint.json")
+        return {"errors": ["Walltime error"], "actions": []}
