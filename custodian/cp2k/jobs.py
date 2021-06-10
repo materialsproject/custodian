@@ -127,7 +127,10 @@ class Cp2kJob(Job):
                 os.mkdir(f"relax{self.suffix}")
                 for f in fs:
                     if not os.path.isdir(f):
-                        shutil.copy(f, f"relax{self.suffix}/{f}")
+                        if self.final:
+                            shutil.move(f, f"relax{self.suffix}/{f}")
+                        else:
+                            shutil.copy(f, f"relax{self.suffix}/{f}")
 
         # Remove continuation so if a subsequent job is run in
         # the same directory, will not restart this job.
