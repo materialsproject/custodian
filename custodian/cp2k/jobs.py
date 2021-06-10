@@ -209,5 +209,8 @@ class Cp2kJob(Job):
 
         job2 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
                        stderr_file=stderr_file, final=True, suffix="2", restart=True)
+        job2.settings_override = [
+            {"dict": input_file, "action": {'_set': {'GLOBAL': {'RUN_TYPE': r}}}}
+        ]
 
         return [job1, job2]
