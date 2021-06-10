@@ -5,7 +5,7 @@ from pymatgen.io.cp2k.inputs import Cp2kInput
 from pymatgen.io.cp2k.outputs import Cp2kOutput
 
 
-def restart(actions, output_file, input_file, minimum_band_gap=0.1):
+def restart(actions, output_file, input_file, minimum_band_gap=0.1, no_actions_needed=False):
     """
     Helper function. To discard old restart if convergence is already good, and copy
     the restart file to the input file. Restart also supports switching back and forth
@@ -18,7 +18,7 @@ def restart(actions, output_file, input_file, minimum_band_gap=0.1):
         output_file (str): the cp2k output file name.
         input_file (str): the cp2k input file name.
     """
-    if actions:
+    if actions or no_actions_needed:
         o = Cp2kOutput(output_file)
         ci = Cp2kInput.from_file(input_file)
         restart_file = o.filenames.get('restart')
@@ -90,80 +90,90 @@ def activate_ot(actions, ci):
         {
             "dict": "cp2k.inp",
             "action":
+                [
+                    (
+                        '_unset', {
+                            'FORCE_EVAL': {
+                                'DFT': {
+                                    'SCF': 'ADDED_MOS',
+                                }
+                            }
+                        },
+                )
+            ]
+        },
+        {
+            "dict": "cp2k.inp",
+            "action":
+            [
                 (
                     '_unset', {
                         'FORCE_EVAL': {
                             'DFT': {
-                                'SCF': 'ADDED_MOS',
+                                'SCF': 'DIAGONALIZATION',
                             }
                         }
                     },
-            )
+                )
+            ]
         },
         {
             "dict": "cp2k.inp",
             "action":
-            (
-                '_unset', {
-                    'FORCE_EVAL': {
-                        'DFT': {
-                            'SCF': 'DIAGONALIZATION',
+            [
+                (
+                    '_unset', {
+                        'FORCE_EVAL': {
+                            'DFT': {
+                                'SCF': 'MIXING',
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            ]
         },
         {
             "dict": "cp2k.inp",
             "action":
-            (
-                '_unset', {
-                    'FORCE_EVAL': {
-                        'DFT': {
-                            'SCF': 'MIXING',
+            [
+                (
+                    '_unset', {
+                        'FORCE_EVAL': {
+                            'DFT': {
+                                'SCF': 'SMEAR',
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            ]
         },
         {
             "dict": "cp2k.inp",
             "action":
-            (
-                '_unset', {
-                    'FORCE_EVAL': {
-                        'DFT': {
-                            'SCF': 'SMEAR',
-                        }
-                    }
-                },
-            )
-        },
-        {
-            "dict": "cp2k.inp",
-            "action":
-            (
-                '_set', {
-                    'FORCE_EVAL': {
-                        'DFT': {
-                            'SCF': {
-                                'MAX_SCF': 20,
-                                'OT': {
-                                    'ENERGY_GAP': 0.01,
-                                    'ALGORITHM': 'STRICT',
-                                    'PRECONDITIONER': 'FULL_ALL',
-                                    'MINIMIZER': 'DIIS',
-                                    'LINESEARCH': '2PNT'
-                                },
-                                'OUTER_SCF': {
+            [
+                (
+                    '_set', {
+                        'FORCE_EVAL': {
+                            'DFT': {
+                                'SCF': {
                                     'MAX_SCF': 20,
-                                    'EPS_SCF': eps_scf
+                                    'OT': {
+                                        'ENERGY_GAP': 0.01,
+                                        'ALGORITHM': 'STRICT',
+                                        'PRECONDITIONER': 'FULL_ALL',
+                                        'MINIMIZER': 'DIIS',
+                                        'LINESEARCH': '2PNT'
+                                    },
+                                    'OUTER_SCF': {
+                                        'MAX_SCF': 20,
+                                        'EPS_SCF': eps_scf
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            )
+                )
+            ]
         }
     ]
     actions.extend(ot_actions)
@@ -245,7 +255,12 @@ def can_use_ot(output, ci, minimum_band_gap=0.1):
         minimum_band_gap (float): the minimum band gap for OT
     """
     output.parse_homo_lumo()
-    if not ci.check('FORCE_EVAL/DFT/SCF/OT') and output.band_gap and output.band_gap > minimum_band_gap:
+    if (
+            not ci.check('FORCE_EVAL/DFT/SCF/OT') and
+            not ci.check('FORCE_EVAL/DFT/KPOINTS') and
+            output.band_gap and
+            all(spin[-1] > minimum_band_gap for spin in output.data.get('band_gap'))
+    ):
         return True
     return False
 
