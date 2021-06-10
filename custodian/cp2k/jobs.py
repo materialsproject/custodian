@@ -91,9 +91,9 @@ class Cp2kJob(Job):
         cleanup_input(self.ci)
 
         if self.restart:
-            restart([self.settings_override], output_file=self.output_file, input_file=self.input_file)
+            restart(self.settings_override, output_file=self.output_file, input_file=self.input_file)
 
-        if self.settings_override:
+        if self.settings_override or self.restart:
             modder = Cp2kModder(filename=self.input_file, actions=[], ci=self.ci)
             modder.apply_actions(self.settings_override)
 
@@ -125,11 +125,9 @@ class Cp2kJob(Job):
         if os.path.exists(self.output_file):
             if self.suffix != "":
                 os.mkdir(f"relax{self.suffix}")
+                os.path.isdir()
                 for f in fs:
-                    if f == self.output_file:
-                        shutil.move(self.output_file, f"relax{self.suffix}/{self.output_file}")
-                    elif not os.path.isdir(f):
-                        shutil.copy(f, f"relax{self.suffix}/{f}")
+                    shutil.copy(f, f"relax{self.suffix}/{f}")
 
         # Remove continuation so if a subsequent job is run in
         # the same directory, will not restart this job.
@@ -207,7 +205,6 @@ class Cp2kJob(Job):
             ]
 
         job2 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
-                       stderr_file=stderr_file, final=True, suffix="2", restart=True,
-                       settings_override={})
+                       stderr_file=stderr_file, final=True, suffix="2", restart=True)
 
         return [job1, job2]
