@@ -7,6 +7,7 @@ from custodian.ansible.interpreter import Modder
 from pymatgen.io.cp2k.inputs import Cp2kInput
 from custodian.cp2k.utils import cleanup_input
 
+
 class Cp2kModder(Modder):
 
     def __init__(self, filename='cp2k.inp', actions=None, strict=True, ci=None):
@@ -68,7 +69,10 @@ class Cp2kModder(Modder):
         """
         modification = list(modification.items()) if isinstance(modification, dict) else modification
         for action, settings in modification:
-            getattr(obj, action[1:])(settings)
+            try:
+                getattr(obj, action[1:])(settings)
+            except KeyError:
+                continue
 
 
 
