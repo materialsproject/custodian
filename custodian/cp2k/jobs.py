@@ -91,7 +91,12 @@ class Cp2kJob(Job):
         cleanup_input(self.ci)
 
         if self.restart:
-            restart(self.settings_override, output_file=self.output_file, input_file=self.input_file)
+            restart(
+                actions=self.settings_override,
+                output_file=self.output_file,
+                input_file=self.input_file,
+                no_actions_needed=True
+            )
 
         if self.settings_override or self.restart:
             modder = Cp2kModder(filename=self.input_file, actions=[], ci=self.ci)
