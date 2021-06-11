@@ -1111,6 +1111,7 @@ class WalltimeHandler(ErrorHandler):
 
     is_monitor = False
     raises_runtime_error = False
+    is_terminating = False
 
     def __init__(self, output_file='cp2k.out', enable_checkpointing=True):
         """
@@ -1137,5 +1138,5 @@ class WalltimeHandler(ErrorHandler):
 
     def correct(self):
         if self.enable_checkpointing:
-            dumpfn({}, fn="checkpoint.json")
+            dumpfn({"_path": os.getcwd()}, fn="checkpoint.json")
         return {"errors": ["Walltime error"], "actions": []}
