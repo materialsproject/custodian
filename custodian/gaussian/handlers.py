@@ -111,6 +111,19 @@ class GaussianErrorHandler(ErrorHandler):
             return obj
 
     @staticmethod
+    def _recursive_remove_space(obj):
+        updated_obj = {}
+        for key, value in obj.items():
+            if isinstance(value, dict):
+                updated_obj[key.strip()] = \
+                    GaussianErrorHandler._recursive_remove_space(value)
+            elif isinstance(value, str):
+                updated_obj[key.strip()] = value.strip()
+            else:
+                updated_obj[key.strip()] = value
+        return updated_obj
+
+    @staticmethod
     def _update_route_params(route_params, key, value):
         obj = route_params.get(key, {})
         if not obj:
@@ -234,6 +247,9 @@ class GaussianErrorHandler(ErrorHandler):
         self.gin = GaussianInput.from_file(self.input_file)
         self.gin.route_parameters = \
             GaussianErrorHandler._recursive_lowercase(self.gin.route_parameters)
+        self.gin.route_parameters = \
+            GaussianErrorHandler._recursive_remove_space(
+                self.gin.route_parameters)
         self.gout = GaussianOutput(self.output_file)
         self.errors = set()
         error_patts = set()
@@ -363,7 +379,8 @@ class GaussianErrorHandler(ErrorHandler):
             # if there is some linear bend around an angle in the geometry
             # restart the job at the point it stopped while forcing Gaussian
             # to rebuild the set of redundant internals
-            if not self.gin.link0_parameters('%chk'):
+            if not list(filter(re.compile(r'%[Cc][Hh][Kk]').match,
+                               self.gin.link0_parameters.keys())):
                 raise KeyError('This remedy reads coords from checkpoint '
                                'file. Consider adding CHK to link0_parameters')
             # TODO: check route_parameters: do I need to keep them?
