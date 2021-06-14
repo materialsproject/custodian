@@ -27,14 +27,22 @@ __status__ = 'Alpha'
 __date__ = '5/13/21'
 
 
-# logger = logging.getLogger(__name__)
-
-
 class GaussianErrorHandler(ErrorHandler):
     error_defs = {'Optimization stopped': 'opt_steps',
                   'Convergence failure': 'scf_convergence',
                   'FormBX had a problem': 'linear_bend',
-                  'Inv3 failed in PCMMkU': 'solute_solvent_surface'}
+                  'Linear angle in Tors.': 'linear_bend',
+                  'Inv3 failed in PCMMkU': 'solute_solvent_surface',
+                  'End of file in ZSymb': 'zmatrix',
+                  'There are no atoms in this input structure !': 'missing_mol',
+                  'Atom specifications unexpectedly found in input stream.': 'found_coords',
+                  'End of file reading connectivity.': 'coords',
+                  'FileIO operation on non-existent file.': 'missing_file',
+                  'No data on chk file.': 'empty_file',
+                  'Bad file opened by FileIO': 'bad_file',
+                  'Z-matrix optimization but no Z-matrix variables.': 'coord_inputs',
+                  'A syntax error was detected in the input line.': 'syntax'}
+
     error_patt = re.compile('|'.join(list(error_defs)))
     conv_critera = {
         'max_force': re.compile(
@@ -140,18 +148,16 @@ class GaussianErrorHandler(ErrorHandler):
             row = int(np.floor(i / 2))
             col = i % 2
             iters = range(0, len(v))
-            ax[row, col].plot(iters, v, color='#cf3759',
-                              linewidth=2)
+            ax[row, col].plot(iters, v, color='#cf3759', linewidth=2)
             ax[row, col].axhline(y=data['thresh'][k], linewidth=2,
-                                 color='black',
-                                 linestyle='--')
+                                 color='black', linestyle='--')
             ax[row, col].tick_params(which='major', length=8)
-            ax[row, col].tick_params(axis='both', which='both',
-                                     direction='in',
+            ax[row, col].tick_params(axis='both', which='both', direction='in',
                                      labelsize=16)
             ax[row, col].set_xlabel('Iteration', fontsize=16)
             ax[row, col].set_ylabel('{}'.format(k), fontsize=16)
-            ax[row, col].set_xticks(iters)
+            # ax[row, col].set_xticks(iters)
+            ax[row, col].xaxis.set_major_locator(MaxNLocator(integer=True))
             ax[row, col].grid(ls='--', zorder=1)
         plt.tight_layout()
         plt.savefig('convergence.png')
@@ -352,7 +358,7 @@ class GaussianErrorHandler(ErrorHandler):
                     title=self.gin.title,
                     functional=self.gin.functional,
                     basis_set=self.gin.basis_set,
-                    route_parameters={'geom': '(checkpoint, newdefinition)'},
+                    route_parameters=self.gin.route_parameters,
                     input_parameters=self.gin.input_parameters,
                     link0_parameters=self.gin.link0_parameters,
                     dieze_tag=self.gin.dieze_tag,
