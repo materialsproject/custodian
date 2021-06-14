@@ -430,6 +430,110 @@ class GaussianErrorHandler(ErrorHandler):
                 self.logger.info('Not sure how to fix '
                                  'solute_solvent_surface_error if surface is '
                                  'already SAS!')
+                return {'errors': [self.errors], 'actions': None}
+
+        elif 'zmatrix' in self.errors:
+            gfile = open(self.input_file)
+            lines = gfile.readlines()
+            last_lines = lines[-2:]
+            gfile.close()
+            if not set(last_lines) == {'\n'}:
+                # if the required blank lines at the end of the input file are
+                # missing, just rewrite the file
+                self.logger.info('Missing blank line at the end of the input '
+                                 'file.')
+                actions.append({'blank_lines': 'rewrite_input_file'})
+            else:
+                self.logger.info('Not sure how to fix zmatrix error. '
+                                 'Check manually?')
+                return {'errors': [self.errors], 'actions': None}
+
+        elif 'coords' in self.errors:
+            if 'connectivity' in self.gin.route_parameters.get('geom'):
+                self.logger.info('Explicit atom bonding is requested but no '
+                                 'such input is provided')
+                if isinstance(self.gin.route_parameters['geom'], dict) and \
+                        len(self.gin.route_parameters['geom']) > 1:
+                    self.gin.route_parameters['geom'].pop('connectivity', None)
+                else:
+                    del self.gin.route_parameters['geom']
+                actions.append({'coords': 'remove_connectivity'})
+            else:
+                self.logger.info('Missing connectivity info. Not sure how to '
+                                 'fix this error. Exiting!')
+                return {'errors': [self.errors], 'actions': None}
+
+        elif 'found_coords' in self.errors:
+            if self.gin.molecule and \
+                    any(key in self.gin.route_parameters.get('geom', {}) for
+                        key in ['checkpoint', 'check', 'allcheck']):
+                # if coords are found in the input and the user chooses to read
+                # the the molecule specification from the checkpoint file,
+                # remove mol
+                self.gin._mol = None
+                actions.append({'mol': 'remove_from_input'})
+            else:
+                self.logger.info('Not sure why atom specifications should not '
+                                 'be found in the input. Examine manually!')
+                return {'errors': [self.errors], 'actions': None}
+
+        elif 'coord_inputs' in self.errors:
+            if any(key in self.gin.route_parameters.get('opt', {}) for
+                   key in ['z-matrix', 'zmatrix']) and self.cart_coords:
+                # if molecule is specified in xyz format, but the user chooses
+                # to perform the optimization using internal coordinates,
+                # switch to z-matrix format
+                self.cart_coords = False
+                actions.append({'coords': 'use_zmatrix_format'})
+            else:
+                # error cannot be fixed automatically. Return None for actions
+                self.logger.info('Not sure how to fix problem with z-matrix '
+                                 'optimization if coords are already input in'
+                                 'z-matrix format. Examine manually!')
+                return {'errors': [self.errors], 'actions': None}
+
+        elif 'missing_mol' in self.errors:
+            if not self.gin.molecule and \
+                    'read' in self.gin.route_parameters.get('guess') and not \
+                    any(key in self.gin.route_parameters.get('geom', {}) for
+                        key in ['checkpoint', 'check', 'allcheck']):
+                # if molecule is not specified and the user requests that the
+                # initial guess be read from the checkpoint file but forgot to
+                # take the geom from the checkpoint file, add geom=check
+                if not glob.glob('*.[Cc][Hh][Kk]'):
+                    raise FileNotFoundError('This remedy reads geometry from '
+                                            'checkpoint file. This file is '
+                                            'missing!')
+                GaussianErrorHandler._update_route_params(
+                    self.gin.route_parameters, 'geom', 'check')
+                self.gin.route_parameters['geom'] = 'check'
+                actions.append({'mol': 'get_from_checkpoint'})
+            else:
+                # error cannot be fixed automatically. Return None for actions
+                self.logger.info('Molecule is not found in the input file. '
+                                 'Fix manually!')
+                return {'errors': list(self.errors), 'actions': None}
+
+        elif any(err in self.errors for err in ['empty_file', 'bad_file']):
+            self.logger.error('Required checkpoint file is bad. Fix '
+                              'manually!')
+            return {'errors': list(self.errors), 'actions': None}
+
+        elif 'missing_file' in self.errors:
+            self.logger.error('Could not find the required file. Fix manually!')
+            return {'errors': list(self.errors), 'actions': None}
+
+        elif 'syntax' in self.errors:
+            # error cannot be fixed automatically. Return None for actions
+            self.logger.info('A syntax error was detected in the input file. '
+                             'Fix manually!')
+            return {'errors': list(self.errors), 'actions': None}
+
+        else:
+            self.logger.info('Must have gotten an error that is parsed but not '
+                             'handled yet. Fix manually!')
+            return {'errors': list(self.errors), 'actions': None}
+
         os.rename(self.input_file, self.input_file + '.prev')
         self.gin.write_file(self.input_file, self.cart_coords)
         return {'errors': list(self.errors), 'actions': actions}
