@@ -349,9 +349,10 @@ class GaussianErrorHandler(ErrorHandler):
                 actions.append({'opt_max_cycles': self.opt_max_cycles})
 
             elif self.check_convergence and \
-                    all(v[-1] < v[0] for v in self.conv_data['values'].values()):
-                self.gin.mol = self.gout.final_structure
-                actions.append({'structure': 'from_final_structure'})  # this does not change structure
+                    all(v[-1] < v[0] for v in
+                        self.conv_data['values'].values()):
+                self.gin._mol = self.gout.final_structure
+                actions.append({'structure': 'from_final_structure'})
 
             elif int_actions:
                 actions.append(int_actions)
