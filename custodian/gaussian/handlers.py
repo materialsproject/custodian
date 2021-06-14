@@ -12,6 +12,8 @@ import logging
 import numpy as np
 import matplotlib.pyplot as plt
 
+from matplotlib.ticker import MaxNLocator
+
 from monty.io import zopen
 
 from pymatgen.io.gaussian import GaussianInput, GaussianOutput
@@ -276,7 +278,9 @@ class GaussianErrorHandler(ErrorHandler):
                                     float(m.group(2)))
         # TODO: it only plots after the job finishes, modify?
         if self.check_convergence and 'opt' in self.gin.route_parameters:
-            GaussianErrorHandler._monitor_convergence(self.conv_data)
+            if self.conv_data['values']:
+                plot_d = self.conv_data['values']
+                GaussianErrorHandler._monitor_convergence(self.conv_data)
 
         for patt in error_patts:
             self.logger.error(patt)
@@ -284,15 +288,16 @@ class GaussianErrorHandler(ErrorHandler):
 
     def correct(self):
         actions = []
-        backup_files = [self.input_file, self.output_file, self.stderr_file]
-        try:
-            checkpoint = glob.glob('*.chk')[0]
-            backup_files.append(checkpoint)
-            form_checkpoint = glob.glob('*.fchk')[0]
-            backup_files.append(form_checkpoint)
-            backup_files.append('convergence.png')  # TODO: this is not working!
-        except Exception:
-            pass
+        # to avoid situations like 'linear_bend', where if we backup input_file,
+        # it will not be the actual input used in the current calc
+        # shutil.copy(self.input_file, f'{self.input_file}.backup')
+        backup_files = [self.input_file, self.output_file,
+                        self.stderr_file]
+        checkpoint = glob.glob('*.[Cc][Hh][Kk]')
+        form_checkpoint = glob.glob('*.[Ff][Cc][Hh][Kk]')
+        png = glob.glob('convergence.png')
+        [backup_files.append(i[0]) for i in [checkpoint, form_checkpoint, png]
+         if i]
         backup(backup_files, self.prefix)
         if 'scf_convergence' in self.errors:
             # if the SCF procedure has failed to converge
@@ -383,8 +388,6 @@ class GaussianErrorHandler(ErrorHandler):
                                self.gin.link0_parameters.keys())):
                 raise KeyError('This remedy reads coords from checkpoint '
                                'file. Consider adding CHK to link0_parameters')
-            # TODO: check route_parameters: do I need to keep them?
-            # TODO: test
             else:
                 self.gin = GaussianInput(
                     mol=None,
