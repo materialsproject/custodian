@@ -53,6 +53,12 @@ class GaussianErrorHandler(ErrorHandler):
             r'\s+(Maximum Displacement)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)'),
         'rms_disp': re.compile(
             r'\s+(RMS {5}Displacement)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)')}
+
+    grid_patt = re.compile(r'(-?\d{5})')
+    GRID_NAMES = ['finegrid', 'fine', 'superfinegrid', 'superfine',
+                  'coarsegrid', 'coarse', 'sg1grid', 'sg1',
+                  'pass0grid', 'pass0']
+
     activate_better_guess = False
 
     def __init__(
@@ -120,8 +126,14 @@ class GaussianErrorHandler(ErrorHandler):
 
     @staticmethod
     def _int_keyword(route_params):
-        int_key = 'int' if 'int' in route_params else 'integral'
-        return int_key, route_params.get(int_key)
+        if 'int' in route_params:
+            int_key = 'int'
+        elif 'integral' in route_params:
+            int_key = 'integral'
+        else:
+            int_key = ''
+        # int_key = 'int' if 'int' in route_params else 'integral'
+        return int_key, route_params.get(int_key, '')
 
     @staticmethod
     def _int_grid(route_params):
@@ -137,8 +149,64 @@ class GaussianErrorHandler(ErrorHandler):
                 return True
         return False
 
+    def _add_int(self):
+        if GaussianErrorHandler._int_grid(self.gin.route_parameters):
+            # nothing int is set or is set to different values
+            warning_msg = 'Changing the numerical integration grid. ' \
+                          'This will bring changes in the predicted ' \
+                          'total energy. It is necessary to use the same ' \
+                          'integration grid in all the calculations in ' \
+                          'the same study in order for the computed ' \
+                          'energies and molecular properties to be ' \
+                          'comparable.'
+
+            int_key, int_value = \
+                GaussianErrorHandler._int_keyword(self.gin.route_parameters)
+            if not int_value and GaussianErrorHandler._not_g16(self.gout):
+                # if int keyword is missing and Gaussian version is 03 or
+                # 09, set integration grid to ultrafine
+                int_key = int_key or 'int'
+                self.logger.warning(warning_msg)
+                self.gin.route_parameters[int_key] = 'ultrafine'
+                return {'integral': 'ultra_fine'}
+            elif isinstance(int_value, dict):
+                # if int grid is set and is different from ultrafine,
+                # set it to ultrafine (works when others int options are
+                # specified)
+                flag = True if 'grid' in self.gin.route_parameters[int_key] \
+                    else False
+                for key in self.gin.route_parameters[int_key]:
+                    if key in self.GRID_NAMES or self.grid_patt.match(key):
+                        self.gin.route_parameters[int_key].pop(key)
+                        flag = True
+                        break
+                if flag or GaussianErrorHandler._not_g16(self.gout):
+                    self.logger.warning(warning_msg)
+                    self.gin.route_parameters[int_key]['grid'] = 'ultrafine'
+                    return {'integral': 'ultra_fine'}
+            else:
+                if int_value in self.GRID_NAMES or self.grid_patt.match(
+                        int_value):
+                    # if int grid is set and is different from ultrafine,
+                    # set it to ultrafine (works when no other int options
+                    # are specified)
+                    self.logger.warning(warning_msg)
+                    self.gin.route_parameters[int_key] = 'ultrafine'
+                    return {'integral': 'ultra_fine'}
+                elif GaussianErrorHandler._not_g16(self.gout):
+                    # if int grid is not specified, and Gaussian version is
+                    # not 16, update with ultrafine integral grid
+                    self.logger.warning(warning_msg)
+                    GaussianErrorHandler._update_route_params(
+                        self.gin.route_parameters, int_key,
+                        {'grid': 'ultrafine'})
+                    return {'integral': 'ultra_fine'}
+        else:
+            return {}
+        return {}
+
     @staticmethod
-    def _not_16(gout):
+    def _not_g16(gout):
         return '16' not in gout.version
 
     @staticmethod
@@ -190,7 +258,7 @@ class GaussianErrorHandler(ErrorHandler):
                             else:
                                 self.conv_data['values'][k].append(
                                     float(m.group(2)))
-        # TODO: it only plots after the job finishes, modify
+        # TODO: it only plots after the job finishes, modify?
         if self.check_convergence and 'opt' in self.gin.route_parameters:
             GaussianErrorHandler._monitor_convergence(self.conv_data)
 
@@ -235,8 +303,8 @@ class GaussianErrorHandler(ErrorHandler):
                 # TODO: what if inputs don't work with scf_lot? e.g. extra_basis
                 self.gin.functional = self.lower_functional
                 self.gin.basis_set = self.lower_basis_set
-                actions.append({'scf_level_of_theory': 'better_scf_guess'})
                 GaussianErrorHandler.activate_better_guess = True
+                actions.append({'scf_level_of_theory': 'better_scf_guess'})
 
             else:
                 if self.job_type != 'better_guess':
@@ -249,12 +317,13 @@ class GaussianErrorHandler(ErrorHandler):
                 return {'errors': self.errors, 'actions': None}
 
         elif 'opt_steps' in self.errors:
+            int_actions = GaussianErrorHandler._add_int()
             if self.gin.route_parameters.get('opt').get('maxcycles') != \
                     str(self.opt_max_cycles):
                 self.gin.route_parameters['opt']['maxcycles'] = \
                     self.opt_max_cycles
                 if len(self.gout.structures) > 1:
-                    self.gin.mol = self.gout.final_structure  # this does not change structure
+                    self.gin._mol = self.gout.final_structure
                     actions.append({'structure': 'from_final_structure'})
                 actions.append({'opt_max_cycles': self.opt_max_cycles})
 
@@ -263,61 +332,10 @@ class GaussianErrorHandler(ErrorHandler):
                 self.gin.mol = self.gout.final_structure
                 actions.append({'structure': 'from_final_structure'})  # this does not change structure
 
-            elif not GaussianErrorHandler._int_grid(self.gin.route_parameters):
+            elif int_actions:
+                actions.append(int_actions)
                 # TODO: check if the defined methods are clean
-                # TODO: check if the warning message is okay
-                grid_patt = re.compile(r'(-?\d{5})')
-                grid_names = ['finegrid', 'fine', 'superfinegrid', 'superfine',
-                              'coarsegrid', 'coarse', 'sg1grid', 'sg1',
-                              'pass0grid', 'pass0']
-                # nothing int is set or is set to different values
-                warning_msg = 'Changing the numerical integration grid. ' \
-                              'This will bring changes in the predicted ' \
-                              'total energy. It is necessary to use' \
-                              'the same integration grid in all the ' \
-                              'calculations in the same study in order ' \
-                              'for the computed energies and molecular ' \
-                              'properties to be comparable.'
-
-                int_key, int_value = \
-                    GaussianErrorHandler._int_keyword(self.gin.route_parameters)
-                if not int_value and GaussianErrorHandler._not_16(self.gout):
-                    # if int keyword is missing and Gaussian version is 03 or
-                    # 09, set integration grid to ultrafine
-                    self.logger.warning(warning_msg)
-                    self.gin.route_parameters[int_key] = 'ultrafine'
-                    actions.append({'integral': 'ultra_fine'})
-                elif isinstance(int_value, dict):
-                    # if int grid is set and is different from ultrafine,
-                    # set it to ultrafine (works when others int options are
-                    # specified)
-                    flag = True if 'grid' in self.gin.route_parameters[int_key] \
-                        else False
-                    for key in self.gin.route_parameters[int_key]:
-                        if key in grid_names or grid_patt.match(key):
-                            self.gin.route_parameters[int_key].pop(key)
-                            flag = True
-                    if flag or GaussianErrorHandler._not_16(self.gout):
-                        self.logger.warning(warning_msg)
-                        self.gin.route_parameters[int_key]['grid'] = 'ultrafine'
-                        actions.append({'integral': 'ultra_fine'})
-                else:
-                    # if int grid is set and is different from ultrafine,
-                    # set it to ultrafine (works when no other int options are
-                    # specified)
-                    if int_value in grid_names or grid_patt.match(int_value):
-                        self.logger.warning(warning_msg)
-                        self.gin.route_parameters[int_key] = 'ultrafine'
-                        actions.append({'integral': 'ultra_fine'})
-                    # if int grid is not specified, but other int options are
-                    # set and Gaussian version is not 16, update with ultrafine
-                    # integral grid
-                    elif GaussianErrorHandler._not_16(self.gout):
-                        self.logger.warning(warning_msg)
-                        GaussianErrorHandler._update_route_params(
-                            self.gin.route_parameters, int_key,
-                            {'grid': 'ultrafine'})
-                        actions.append({'integral': 'ultra_fine'})
+                # TODO: don't enter this if condition if g16 and ...
 
             elif self.job_type == 'better_guess' and not \
                     GaussianErrorHandler.activate_better_guess:
@@ -328,8 +346,8 @@ class GaussianErrorHandler(ErrorHandler):
                                  'initial guess of molecular geometry')
                 self.gin.functional = self.lower_functional
                 self.gin.basis_set = self.lower_basis_set
-                actions.append({'opt_level_of_theory': 'better_geom_guess'})
                 GaussianErrorHandler.activate_better_guess = True
+                actions.append({'opt_level_of_theory': 'better_geom_guess'})
 
             else:
                 if self.job_type != 'better_guess':
