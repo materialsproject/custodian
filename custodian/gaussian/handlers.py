@@ -94,6 +94,7 @@ class GaussianErrorHandler(ErrorHandler):
         self.check_convergence = check_convergence
         self.conv_data = None
         self.logger = logging.getLogger(self.__class__.__name__)
+        logging.basicConfig(level=logging.INFO)
 
     @staticmethod
     def _recursive_lowercase(obj):
@@ -304,6 +305,7 @@ class GaussianErrorHandler(ErrorHandler):
         [backup_files.append(i[0]) for i in [checkpoint, form_checkpoint, png]
          if i]
         backup(backup_files, self.prefix)
+        os.remove(f'{self.input_file}.backup')
         if 'scf_convergence' in self.errors:
             # if the SCF procedure has failed to converge
             if self.gin.route_parameters.get('scf').get('maxcycle') != \
@@ -384,7 +386,7 @@ class GaussianErrorHandler(ErrorHandler):
                         'lower level of theory')
                 else:
                     self.logger.info('Geometry optimization failed. Exiting...')
-                return {'errors': self.errors, 'actions': None}
+                return {'errors': [self.errors], 'actions': None}
 
         elif 'linear_bend' in self.errors:
             # if there is some linear bend around an angle in the geometry,
@@ -420,7 +422,8 @@ class GaussianErrorHandler(ErrorHandler):
                            key: value for key, value in
                            self.gin.input_parameters.items()}
             if input_parms.get('surface', 'none').lower() != 'sas':
-                self.gin.route_parameters.get('scrf', {}).update({'read': None})
+                GaussianErrorHandler._update_route_params(
+                    self.gin.route_parameters, 'scrf', 'read')
                 self.gin.input_parameters.update({'surface': 'SAS'})
                 actions.append({'surface': 'SAS'})
             else:
