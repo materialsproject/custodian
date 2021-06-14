@@ -107,7 +107,7 @@ class GaussianJob(Job):
                 logger.info('Failed to generate a better initial guess')
                 
         else:
-            logger.info('Calculated completed normally without having to '
+            logger.info('Calculation completed normally without having to '
                         'generate a better initial guess')
 
 
