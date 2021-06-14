@@ -7,6 +7,7 @@ This module implements error handlers for Gaussian runs.
 import os
 import re
 import glob
+import shutil
 import logging
 
 import numpy as np
@@ -246,6 +247,10 @@ class GaussianErrorHandler(ErrorHandler):
         plt.savefig('convergence.png')
 
     def check(self):
+        # TODO: this backups the original file instead of the actual one
+        if 'linear_bend' in self.errors:
+            os.rename(self.input_file + '.prev', self.input_file)
+
         self.gin = GaussianInput.from_file(self.input_file)
         self.gin.route_parameters = \
             GaussianErrorHandler._recursive_lowercase(self.gin.route_parameters)
@@ -382,7 +387,7 @@ class GaussianErrorHandler(ErrorHandler):
                 return {'errors': self.errors, 'actions': None}
 
         elif 'linear_bend' in self.errors:
-            # if there is some linear bend around an angle in the geometry
+            # if there is some linear bend around an angle in the geometry,
             # restart the job at the point it stopped while forcing Gaussian
             # to rebuild the set of redundant internals
             if not list(filter(re.compile(r'%[Cc][Hh][Kk]').match,
@@ -402,6 +407,8 @@ class GaussianErrorHandler(ErrorHandler):
                     link0_parameters=self.gin.link0_parameters,
                     dieze_tag=self.gin.dieze_tag,
                     gen_basis=self.gin.gen_basis)
+                self.gin.route_parameters.update(
+                    {'geom': '(checkpoint, newdefinition)'})
                 actions.append({'coords': 'rebuild_redundant_internals'})
 
         elif 'solute_solvent_surface' in self.errors:
