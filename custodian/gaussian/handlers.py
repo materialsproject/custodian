@@ -241,7 +241,6 @@ class GaussianErrorHandler(ErrorHandler):
                                      labelsize=16)
             ax[row, col].set_xlabel('Iteration', fontsize=16)
             ax[row, col].set_ylabel('{}'.format(k), fontsize=16)
-            # ax[row, col].set_xticks(iters)
             ax[row, col].xaxis.set_major_locator(MaxNLocator(integer=True))
             ax[row, col].grid(ls='--', zorder=1)
         plt.tight_layout()
@@ -276,18 +275,19 @@ class GaussianErrorHandler(ErrorHandler):
                         if v.search(line):
                             m = v.search(line)
                             if k not in self.conv_data['values']:
-                                self.conv_data['values'][k] = [
-                                    float(m.group(2))]
+                                self.conv_data['values'][k] = [m.group(2)]
                                 self.conv_data['thresh'][k] = float(m.group(3))
                             else:
-                                self.conv_data['values'][k].append(
-                                    float(m.group(2)))
+                                self.conv_data['values'][k].append(m.group(2))
+                    for k, v in self.conv_data['values'].items():
+                        # convert strings to float taking into account the
+                        # possibility of having ******** values
+                        self.conv_data['values'][k] = np.genfromtxt(np.array(v))
+
         # TODO: it only plots after the job finishes, modify?
         if self.check_convergence and 'opt' in self.gin.route_parameters:
             if self.conv_data['values']:
-                plot_d = self.conv_data['values']
                 GaussianErrorHandler._monitor_convergence(self.conv_data)
-
         for patt in error_patts:
             self.logger.error(patt)
         return len(self.errors) > 0
