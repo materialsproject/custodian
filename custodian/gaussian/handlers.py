@@ -167,7 +167,7 @@ class GaussianErrorHandler(ErrorHandler):
         return False
 
     def _add_int(self):
-        if GaussianErrorHandler._int_grid(self.gin.route_parameters):
+        if not GaussianErrorHandler._int_grid(self.gin.route_parameters):
             # nothing int is set or is set to different values
             warning_msg = 'Changing the numerical integration grid. ' \
                           'This will bring changes in the predicted ' \
@@ -345,7 +345,7 @@ class GaussianErrorHandler(ErrorHandler):
                 return {'errors': self.errors, 'actions': None}
 
         elif 'opt_steps' in self.errors:
-            int_actions = GaussianErrorHandler._add_int()
+            int_actions = self._add_int()
             if self.gin.route_parameters.get('opt').get('maxcycles') != \
                     str(self.opt_max_cycles):
                 self.gin.route_parameters['opt']['maxcycles'] = \
