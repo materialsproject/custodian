@@ -36,6 +36,7 @@ class GaussianErrorHandler(ErrorHandler):
                   'FormBX had a problem': 'linear_bend',
                   'Linear angle in Tors.': 'linear_bend',
                   'Inv3 failed in PCMMkU': 'solute_solvent_surface',
+                  'Error in internal coordinate system': 'internal_coords',
                   'End of file in ZSymb': 'zmatrix',
                   'There are no atoms in this input structure !': 'missing_mol',
                   'Atom specifications unexpectedly found in input stream.': 'found_coords',
@@ -430,6 +431,33 @@ class GaussianErrorHandler(ErrorHandler):
                 self.logger.info('Not sure how to fix '
                                  'solute_solvent_surface_error if surface is '
                                  'already SAS!')
+                return {'errors': [self.errors], 'actions': None}
+
+        elif 'internal_coords' in self.errors:
+            # check if optimization is requested to be performed in cartesian
+            # coords. if not, set it while overwriting other possibly requested
+            # coord systems, disable symmetry if applicable, and rerun
+            # however, this will come at a higher computational cost
+            if 'opt' in self.gin.route_parameters and \
+                    not any(n in (self.gin.route_parameters.get('opt') or {})
+                            for n in ['cart', 'cartesian']):
+                GaussianErrorHandler._update_route_params(
+                    self.gin.route_parameters, 'opt', 'cartesian')
+                if isinstance(self.gin.route_parameters['opt'], dict):
+                    [self.gin.route_parameters['opt'].pop(i, None) for i in
+                     ['redundant', 'zmatrix', 'z-matrix']]
+
+                if not self.gin.route_parameters.get('nosymmetry') or \
+                        self.gin.route_parameters.get('symmetry') != 'none':
+                    self.gin.route_parameters['symmetry'] = 'none'
+                    actions.append({'symmetry': False})
+                actions.append({'opt_cart_coords': True})
+            else:
+                self.logger.info('An error occurred in internal coordinates. '
+                                 'Your molecule might have 3 or more atoms '
+                                 'that are nearly linear making it difficult '
+                                 'to generate internal coordinates. Try to '
+                                 'modify your structure input?')
                 return {'errors': [self.errors], 'actions': None}
 
         elif 'zmatrix' in self.errors:
