@@ -6,6 +6,7 @@ This module implements error handlers for Gaussian runs.
 
 import os
 import re
+import math
 import glob
 import shutil
 import logging
@@ -45,9 +46,15 @@ class GaussianErrorHandler(ErrorHandler):
                   'No data on chk file.': 'empty_file',
                   'Bad file opened by FileIO': 'bad_file',
                   'Z-matrix optimization but no Z-matrix variables.': 'coord_inputs',
-                  'A syntax error was detected in the input line.': 'syntax'}
+                  'A syntax error was detected in the input line.': 'syntax',
+                  'The combination of multiplicity ([0-9]+) and \s+? ([0-9]+) '
+                  'electrons is impossible.': 'charge',
+                  'Out-of-memory error in routine': 'insufficient_mem'}
 
     error_patt = re.compile('|'.join(list(error_defs)))
+    recom_mem_patt = re.compile(r'Use %mem=([0-9]+)MW to provide the minimum '
+                                r'amount of memory required to complete this '
+                                r'step.')
     conv_critera = {
         'max_force': re.compile(
             r'\s+(Maximum Force)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)'),
@@ -62,6 +69,7 @@ class GaussianErrorHandler(ErrorHandler):
     GRID_NAMES = ['finegrid', 'fine', 'superfinegrid', 'superfine',
                   'coarsegrid', 'coarse', 'sg1grid', 'sg1',
                   'pass0grid', 'pass0']
+    MEM_UNITS = ['kb', 'mb', 'gb', 'tb', 'kw', 'mw', 'gw', 'tw']
 
     activate_better_guess = False
 
@@ -94,6 +102,7 @@ class GaussianErrorHandler(ErrorHandler):
         self.prefix = prefix
         self.check_convergence = check_convergence
         self.conv_data = None
+        self.recom_mem = None
         self.logger = logging.getLogger(self.__class__.__name__)
         logging.basicConfig(level=logging.INFO)
 
@@ -166,6 +175,34 @@ class GaussianErrorHandler(ErrorHandler):
             if set(int_value) & set(options):
                 return True
         return False
+
+    @staticmethod
+    def convert_mem(mem, unit):
+        # convert dynamic mem to Mb
+        conversion = {'kb': 1 / 1000, 'mb': 1, 'gb': 1000, 'tb': 1000 ** 2,
+                      '': 7.63e-6, 'kw': 7.63e-3, 'mw': 7.63, 'gw': 7.63e3,
+                      'tw': 7.63e6}
+        return mem * conversion[unit]
+
+    @staticmethod
+    def _find_dynamic_memory_allocated(link0_params):
+        mem_key = None
+        for k in link0_params:
+            if k.lower() == '%mem':
+                mem_key = k
+                break
+        dynamic_mem = link0_params.get(mem_key)
+        if dynamic_mem:
+            # default memory unit in Gaussian is words
+            mem_unit = ''
+            for unit in GaussianErrorHandler.MEM_UNITS:
+                if unit in dynamic_mem:
+                    mem_unit = unit
+                    break
+            dynamic_mem = float(dynamic_mem.strip(mem_unit))
+            dynamic_mem = GaussianErrorHandler.convert_mem(dynamic_mem,
+                                                           mem_unit)
+        return mem_key, dynamic_mem
 
     def _add_int(self):
         if not GaussianErrorHandler._int_grid(self.gin.route_parameters):
@@ -265,11 +302,16 @@ class GaussianErrorHandler(ErrorHandler):
         self.conv_data = {'values': {}, 'thresh': {}}
         with zopen(self.output_file) as f:
             for line in f:
-                if GaussianErrorHandler.error_patt.search(line):
-                    m = GaussianErrorHandler.error_patt.search(line)
-                    patt = m.group(0)
+                error_match = GaussianErrorHandler.error_patt.search(line)
+                mem_match = GaussianErrorHandler.recom_mem_patt.search(line)
+                if error_match:
+                    patt = error_match.group(0)
                     error_patts.add(patt)
                     self.errors.add(GaussianErrorHandler.error_defs[patt])
+                if mem_match:
+                    mem = mem_match.group(1)
+                    self.recom_mem = \
+                        GaussianErrorHandler.convert_mem(float(mem), 'mw')
 
                 if self.check_convergence and 'opt' in self.gin.route_parameters:
                     for k, v in GaussianErrorHandler.conv_critera.items():
@@ -556,6 +598,20 @@ class GaussianErrorHandler(ErrorHandler):
             self.logger.info('A syntax error was detected in the input file. '
                              'Fix manually!')
             return {'errors': list(self.errors), 'actions': None}
+
+        elif 'insufficient_mem' in self.errors:
+            mem_key, dynamic_mem = \
+                GaussianErrorHandler._find_dynamic_memory_allocated(
+                    self.gin.link0_parameters)
+            if dynamic_mem and self.recom_mem and dynamic_mem < self.recom_mem:
+                # this assumes that 1.5*minimum required memory is available
+                mem = math.ceil(self.recom_mem * 1.5)
+                self.gin.link0_parameters[mem_key] = f'{mem}MB'
+                actions.append({'memory': 'increase_to_gaussian_recommendation'})
+            else:
+                self.logger.info('Check job memory requirements manually and '
+                                 'set as needed.')
+                return {'errors': list(self.errors), 'actions': None}
 
         else:
             self.logger.info('Must have gotten an error that is parsed but not '
