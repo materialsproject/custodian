@@ -33,9 +33,12 @@ class ChargedDefectValidator(Validator):
 
     def __init__(self, output_file='cp2k.out'):
         self.output_file = output_file
+        self.charge = None
 
     def check(self):
-        o = Cp2kOutput(self.output_file, auto_load=True)
-        if o.band_gap:
+        o = Cp2kOutput(self.output_file)
+        o.parse_dos()
+        self.charge = o.initial_structure.charge
+        if o.band_gap or self.charge == 0:
             return False
         return True
