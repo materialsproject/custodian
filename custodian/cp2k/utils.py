@@ -258,8 +258,7 @@ def can_use_ot(output, ci, minimum_band_gap=0.1):
     if (
             not ci.check('FORCE_EVAL/DFT/SCF/OT') and
             not ci.check('FORCE_EVAL/DFT/KPOINTS') and
-            output.band_gap and
-            all(spin[-1] > minimum_band_gap for spin in output.data.get('band_gap'))
+            output.band_gap and output.band_gap > minimum_band_gap
     ):
         return True
     return False
