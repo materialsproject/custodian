@@ -254,7 +254,7 @@ def can_use_ot(output, ci, minimum_band_gap=0.1):
         ci (Cp2kInput): cp2k input object for determining if OT is already active
         minimum_band_gap (float): the minimum band gap for OT
     """
-    output.parse_homo_lumo()
+    output.parse_dos()
     if (
             not ci.check('FORCE_EVAL/DFT/SCF/OT') and
             not ci.check('FORCE_EVAL/DFT/KPOINTS') and
