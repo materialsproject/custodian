@@ -129,13 +129,13 @@ class Cp2kJob(Job):
         fs = os.listdir('.')
         if os.path.exists(self.output_file):
             if self.suffix != "":
-                os.mkdir(f"relax{self.suffix}")
+                os.mkdir(f"run{self.suffix}")
                 for f in fs:
                     if not os.path.isdir(f):
                         if self.final:
-                            shutil.move(f, f"relax{self.suffix}/{f}")
+                            shutil.move(f, f"run{self.suffix}/{f}")
                         else:
-                            shutil.copy(f, f"relax{self.suffix}/{f}")
+                            shutil.copy(f, f"run{self.suffix}/{f}")
 
         # Remove continuation so if a subsequent job is run in
         # the same directory, will not restart this job.
@@ -194,7 +194,7 @@ class Cp2kJob(Job):
 
     @classmethod
     def double_job(cls, cp2k_cmd, input_file="cp2k.inp", output_file="cp2k.out",
-                       stderr_file="std_err.txt", backup=True):
+                   stderr_file="std_err.txt", backup=True):
         """
         This creates a sequence of two jobs. The first of which is an "initialization" of the
         wfn. Using this, the "restart" function can be exploited to determine if a diagonalization
@@ -217,5 +217,70 @@ class Cp2kJob(Job):
         job2.settings_override = [
             {"dict": input_file, "action": {'_set': {'GLOBAL': {'RUN_TYPE': r}}}}
         ]
+
+        return [job1, job2]
+
+    @classmethod
+    def pre_screen_hybrid(cls, cp2k_cmd, input_file="cp2k.inp", output_file="cp2k.out",
+                          stderr_file="std_err.txt", backup=True):
+        """
+
+        """
+
+        job1_settings_override = [
+            {
+                '_set': {
+                    'FORCE_EVAL': {
+                        'DFT': {
+                            'XC': {
+                                'SCREENING': {
+                                    'SCREEN_ON_INITIAL_P': False,
+                                    'SCREEN_P_FORCES': False,
+                                }
+                            }
+                        }
+                    },
+                    'GLOBAL': {
+                        'PROJECT_NAME': 'UNSCREENED_HYBRID',
+                        'RUN_TYPE': 'ENERGY_FORCE'
+                    }
+                }
+             }
+        ]
+
+        job1 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
+                       stderr_file=stderr_file, final=False, suffix="1",
+                       settings_override=job1_settings_override)
+
+        ci = Cp2kInput.from_file(zpath(input_file))
+        r = ci['global'].get('run_type', Keyword('RUN_TYPE', 'ENERGY_FORCE')).values[0]
+        if r in ['ENERGY', 'WAVEFUNCTION_OPTIMIZATION', 'WFN_OPT', "ENERGY_FORCE"]:  # no need for double job
+            return job1
+
+        job1.ci.silence()  # Turn off all printing
+
+        job2_settings_override = [
+            {
+                '_set': {
+                    'FORCE_EVAL': {
+                        'DFT': {
+                            'XC': {
+                                'HF': {
+                                    'SCREENING': {
+                                        'SCREEN_ON_INITIAL_P': True,
+                                        'SCREEN_P_FORCES': True,
+                                    }
+                                }
+                            },
+                            'WFN_RESTART_FILE_NAME': 'UNSCREENED_HYBRID-RESTART.wfn'
+                        }
+                    }
+                },
+             }
+        ]
+
+        job2 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
+                       stderr_file=stderr_file, final=True, suffix="2", restart=True,
+                       settings_override=job2_settings_override)
 
         return [job1, job2]
