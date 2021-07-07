@@ -229,20 +229,25 @@ class Cp2kJob(Job):
 
         job1_settings_override = [
             {
-                '_set': {
-                    'FORCE_EVAL': {
-                        'DFT': {
-                            'XC': {
-                                'SCREENING': {
-                                    'SCREEN_ON_INITIAL_P': False,
-                                    'SCREEN_P_FORCES': False,
+                "dict": input_file,
+                "action": {
+                    '_set': {
+                        'FORCE_EVAL': {
+                            'DFT': {
+                                'XC': {
+                                    'HF': {
+                                        'SCREENING': {
+                                            'SCREEN_ON_INITIAL_P': False,
+                                            'SCREEN_P_FORCES': False,
+                                        }
+                                    }
                                 }
                             }
+                        },
+                        'GLOBAL': {
+                            'PROJECT_NAME': 'UNSCREENED_HYBRID',
+                            'RUN_TYPE': 'ENERGY_FORCE'
                         }
-                    },
-                    'GLOBAL': {
-                        'PROJECT_NAME': 'UNSCREENED_HYBRID',
-                        'RUN_TYPE': 'ENERGY_FORCE'
                     }
                 }
              }
@@ -255,7 +260,7 @@ class Cp2kJob(Job):
         ci = Cp2kInput.from_file(zpath(input_file))
         r = ci['global'].get('run_type', Keyword('RUN_TYPE', 'ENERGY_FORCE')).values[0]
         if r in ['ENERGY', 'WAVEFUNCTION_OPTIMIZATION', 'WFN_OPT', "ENERGY_FORCE"]:  # no need for double job
-            return job1
+            return [job1]
 
         job1.ci.silence()  # Turn off all printing
 
@@ -280,7 +285,7 @@ class Cp2kJob(Job):
         ]
 
         job2 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
-                       stderr_file=stderr_file, final=True, suffix="2", restart=True,
+                       stderr_file=stderr_file, final=True, suffix="2", restart=False,
                        settings_override=job2_settings_override)
 
         return [job1, job2]
