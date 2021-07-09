@@ -6,4 +6,4 @@ pytest-cov==2.12.1
 mypy==0.910
 pydocstyle==6.1.1
 flake8-black==0.2.1
-pylint==2.8.3
+pylint==2.9.3
