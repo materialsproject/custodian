@@ -8,7 +8,7 @@ runs.
 import logging
 import sys
 
-import ruamel.yaml as yaml
+from ruamel import yaml
 from pymatgen.io.vasp.inputs import VaspInput, Incar, Kpoints
 
 from custodian.custodian import Custodian

@@ -71,7 +71,7 @@ class NwchemJob(Job):
         Performs actual nwchem run.
         """
         with zopen(self.output_file, "w") as fout:
-            return subprocess.Popen(self.nwchem_cmd + [self.input_file], stdout=fout)
+            return subprocess.Popen(self.nwchem_cmd + [self.input_file], stdout=fout)  # pylint: disable=R1732
 
     def postprocess(self):
         """
