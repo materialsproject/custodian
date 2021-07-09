@@ -215,8 +215,8 @@ class Custodian:
             chkpt = sorted(chkpts, key=lambda c: int(c.split(".")[-3]))[0]
             restart = int(chkpt.split(".")[-3])
             logger.info("Loading from checkpoint file {}...".format(chkpt))
-            t = tarfile.open(chkpt)
-            t.extractall()
+            with tarfile.open(chkpt) as t:
+                t.extractall()
             # Log the corrections to a json file.
             run_log = loadfn(Custodian.LOG_FILE, cls=MontyDecoder)
 

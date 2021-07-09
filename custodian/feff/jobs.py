@@ -89,9 +89,7 @@ class FeffJob(Job):
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # Use line buffering for stderr
             # On TSCC, need to run shell command
-            p = subprocess.Popen(self.feff_cmd, stdout=f_std, stderr=f_err, shell=True)
-
-        return p
+            return subprocess.Popen(self.feff_cmd, stdout=f_std, stderr=f_err, shell=True)  # pylint: disable=R1732
 
     def postprocess(self):
         """
