@@ -64,12 +64,13 @@ class UnconvergedErrorHandler(ErrorHandler):
         # Process the output file and get converge information
         not_converge_pattern = re.compile("Convergence not reached.*")
         converge_pattern = re.compile("Convergence reached.*")
-        for _, line in enumerate(open(self.output_filename)):
-            if len(not_converge_pattern.findall(line)) > 0:
-                return True
+        with open(self.output_filename) as f:
+            for line in f:
+                if len(not_converge_pattern.findall(line)) > 0:
+                    return True
 
-            if len(converge_pattern.findall(line)) > 0:
-                return False
+                if len(converge_pattern.findall(line)) > 0:
+                    return False
         return None
 
     def correct(self):

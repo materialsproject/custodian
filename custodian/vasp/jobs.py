@@ -254,8 +254,7 @@ class VaspJob(Job):
         logger.info("Running {}".format(" ".join(cmd)))
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr
-            p = subprocess.Popen(cmd, stdout=f_std, stderr=f_err)
-        return p
+            return subprocess.Popen(cmd, stdout=f_std, stderr=f_err)  # pylint: disable=R1732
 
     def postprocess(self):
         """
@@ -846,10 +845,8 @@ class VaspNEBJob(Job):
                     cmd[-1] += ".gamma"
         logger.info("Running {}".format(" ".join(cmd)))
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
-
             # Use line buffering for stderr
-            p = subprocess.Popen(cmd, stdout=f_std, stderr=f_err)
-        return p
+            return subprocess.Popen(cmd, stdout=f_std, stderr=f_err)  # pylint: disable=R1732
 
     def postprocess(self):
         """
