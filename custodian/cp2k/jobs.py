@@ -262,26 +262,27 @@ class Cp2kJob(Job):
         if r in ['ENERGY', 'WAVEFUNCTION_OPTIMIZATION', 'WFN_OPT', "ENERGY_FORCE"]:  # no need for double job
             return [job1]
 
-        job1.ci.silence()  # Turn off all printing
-
         job2_settings_override = [
             {
-                '_set': {
-                    'FORCE_EVAL': {
-                        'DFT': {
-                            'XC': {
-                                'HF': {
-                                    'SCREENING': {
-                                        'SCREEN_ON_INITIAL_P': True,
-                                        'SCREEN_P_FORCES': True,
+                "dict": input_file,
+                "action": {
+                    '_set': {
+                        'FORCE_EVAL': {
+                            'DFT': {
+                                'XC': {
+                                    'HF': {
+                                        'SCREENING': {
+                                            'SCREEN_ON_INITIAL_P': True,
+                                            'SCREEN_P_FORCES': True,
+                                        }
                                     }
-                                }
-                            },
-                            'WFN_RESTART_FILE_NAME': 'UNSCREENED_HYBRID-RESTART.wfn'
+                                },
+                                'WFN_RESTART_FILE_NAME': 'UNSCREENED_HYBRID-RESTART.wfn'
+                            }
                         }
-                    }
-                },
-             }
+                    },
+                 }
+            }
         ]
 
         job2 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
