@@ -340,16 +340,23 @@ class GaussianErrorHandler(ErrorHandler):
         # to avoid situations like 'linear_bend', where if we backup input_file,
         # it will not be the actual input used in the current calc
         # shutil.copy(self.input_file, f'{self.input_file}.backup')
-        backup_files = [self.input_file, self.output_file,
-                        self.stderr_file]
-        checkpoint = glob.glob('*.[Cc][Hh][Kk]')
-        form_checkpoint = glob.glob('*.[Ff][Cc][Hh][Kk]')
-        png = glob.glob('convergence.png')
-        [backup_files.append(i[0]) for i in [checkpoint, form_checkpoint, png]
-         if i]
-        backup(backup_files, self.prefix)
-        os.remove(f'{self.input_file}.backup')
+        # backup_files = [self.input_file, self.output_file,
+        #                 self.stderr_file]
+        # checkpoint = glob.glob('*.[Cc][Hh][Kk]')
+        # form_checkpoint = glob.glob('*.[Ff][Cc][Hh][Kk]')
+        # png = glob.glob('convergence.png')
+        # [backup_files.append(i[0]) for i in [checkpoint, form_checkpoint, png]
+        #  if i]
+        # backup(backup_files, self.prefix)
+        # os.remove(f'{self.input_file}.backup')
+        backup_files = [self.input_file, self.output_file, self.stderr_file] + \
+                       list(BACKUP_FILES.values())
+        backup(backup_files, prefix=self.prefix)
+        # backup_gaussian_files(backup_files, prefix=self.prefix)
         if 'scf_convergence' in self.errors:
+            self.gin.route_parameters = \
+                GaussianErrorHandler._update_route_params(
+                    self.gin.route_parameters, 'scf', {})
             # if the SCF procedure has failed to converge
             if self.gin.route_parameters.get('scf').get('maxcycle') != \
                     str(self.scf_max_cycles):
