@@ -279,6 +279,9 @@ class Cp2kJob(Job):
                                 },
                                 'WFN_RESTART_FILE_NAME': 'UNSCREENED_HYBRID-RESTART.wfn'
                             }
+                        },
+                        'GLOBAL': {
+                            'RUN_TYPE': r
                         }
                     },
                  }

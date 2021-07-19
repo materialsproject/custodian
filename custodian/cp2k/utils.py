@@ -84,7 +84,7 @@ def activate_ot(actions, ci):
         Cp2kInput object, used to coordinate settings
     """
 
-    eps_scf = ci.by_path('force_eval/dft/scf/eps_scf')
+    eps_scf = ci['force_eval']['dft']['scf']['eps_scf']
 
     ot_actions = [
         {
