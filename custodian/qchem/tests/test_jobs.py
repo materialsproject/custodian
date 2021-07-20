@@ -24,7 +24,9 @@ __status__ = "Alpha"
 __date__ = "6/6/18"
 __credits__ = "Shyam Dwaraknath"
 
-test_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "test_files", "qchem", "new_test_files")
+test_dir = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "test_files", "qchem", "new_test_files"
+)
 
 scr_dir = os.path.join(test_dir, "scr")
 cwd = os.getcwd()
@@ -899,7 +901,7 @@ class TSFFTest(TestCase):
             input_file="test.qin",
             output_file="test.qout",
             linked=False,
-            transition_state=True
+            transition_state=True,
         )
         expected_next = QCJob(
             qchem_command="qchem",
@@ -967,7 +969,7 @@ class TSFF_freqfirst(TestCase):
             output_file="mol.qout",
             linked=True,
             transition_state=True,
-            freq_before_opt=True
+            freq_before_opt=True,
         )
         expected_next = QCJob(
             qchem_command="qchem -slurm",
@@ -1068,7 +1070,7 @@ class TSFF_freqfirst_multiple_cycles(TestCase):
             output_file="mol.qout",
             linked=True,
             transition_state=True,
-            freq_before_opt=True
+            freq_before_opt=True,
         )
         expected_next = QCJob(
             qchem_command="qchem -slurm",

@@ -167,6 +167,39 @@ class QChemErrorHandler(ErrorHandler):
             else:
                 print("Not sure how to fix hessian_eigenvalue_error if thresh is already 14!")
 
+        elif "NLebdevPts" in self.errors:
+            # this error should only be possible if resp_charges or esp_charges is set
+            if self.qcinp.rem.get("resp_charges") or self.qcinp.rem.get("esp_charges"):
+                # This error is caused by insufficient no. of Lebedev points on
+                # the grid used to compute RESP charges
+                # Increase the density of points on the Lebedev grid using the
+                # esp_surface_density argument (see manual >= v5.4)
+                # the default value is 500 (=0.001 Angstrom)
+                # or disable RESP charges as a last resort
+                if int(self.qcinp.rem.get("esp_surface_density", 500)) >= 500:
+                    self.qcinp.rem["esp_surface_density"] = "250"
+                    actions.append({"esp_surface_density": "250"})
+                elif int(self.qcinp.rem.get("esp_surface_density", 250)) >= 250:
+                    self.qcinp.rem["esp_surface_density"] = "125"
+                    actions.append({"esp_surface_density": "125"})
+                elif int(self.qcinp.rem.get("esp_surface_density", 125)) >= 125:
+                    # switch from Lebedev mode to spherical harmonics mode
+                    if self.qcinp.rem.get("resp_charges"):
+                        self.qcinp.rem["resp_charges"] = "2"
+                        actions.append({"resp_charges": "2"})
+                    if self.qcinp.rem.get("esp_charges"):
+                        self.qcinp.rem["esp_charges"] = "2"
+                        actions.append({"esp_charges": "2"})
+                else:
+                    if self.qcinp.rem.get("resp_charges"):
+                        self.qcinp.rem["resp_charges"] = "false"
+                        actions.append({"resp_charges": "false"})
+                    if self.qcinp.rem.get("esp_charges"):
+                        self.qcinp.rem["esp_charges"] = "false"
+                        actions.append({"esp_charges": "false"})
+            else:
+                print("Not sure how to fix NLebdevPts error if resp_charges is disabled!")
+
         elif "failed_to_transform_coords" in self.errors:
             # Check for symmetry flag in rem. If not False, set to False and rerun.
             # If already False, increase threshold?
