@@ -24,6 +24,10 @@ jobs:
     - name: mypy
       run: |
         mypy custodian
+    - name: black
+      run: |
+        black --version
+        black --check --diff --color custodian
     - name: flake8
       run: |
         flake8 --count --show-source --statistics custodian

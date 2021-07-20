@@ -233,6 +233,21 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ["basis_not_supported"])
         self.assertEqual(d["actions"], None)
+    
+    def test_NLebdevPts(self):
+        shutil.copyfile(
+            os.path.join(test_dir, "lebdevpts.qin"),
+            os.path.join(scr_dir, "lebdevpts.qin"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "lebdevpts.qout"),
+            os.path.join(scr_dir, "lebdevpts.qout"),
+        )
+        h = QChemErrorHandler(input_file="lebdevpts.qin", output_file="lebdevpts.qout")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["NLebdevPts"])
+        self.assertEqual(d["actions"], [{"esp_surface_density": "250"}])
 
     def test_read_error(self):
         shutil.copyfile(
