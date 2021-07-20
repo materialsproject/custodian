@@ -10,7 +10,7 @@ from pymatgen.io.qchem.outputs import QCOutput
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 
-__author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath"
+__author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath, Ryan Kingsbury"
 __copyright__ = "Copyright 2018, The Materials Project"
 __version__ = "0.1"
 __maintainer__ = "Samuel Blau"
@@ -210,6 +210,10 @@ class QChemErrorHandler(ErrorHandler):
                 actions.append({"symmetry": False})
             else:
                 print("Perhaps increase the threshold?")
+
+        elif "basis_not_supported" in self.errors:
+            print("Specify a different basis set. At least one of the atoms is not supported.")
+            return {"errors": self.errors, "actions": None}
 
         elif "input_file_error" in self.errors:
             print("Something is wrong with the input file. Examine error message by hand.")
