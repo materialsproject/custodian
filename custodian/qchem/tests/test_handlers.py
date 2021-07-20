@@ -233,7 +233,7 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ["basis_not_supported"])
         self.assertEqual(d["actions"], None)
-    
+
     def test_NLebdevPts(self):
         shutil.copyfile(
             os.path.join(test_dir, "lebdevpts.qin"),
