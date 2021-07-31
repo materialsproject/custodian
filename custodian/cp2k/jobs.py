@@ -122,6 +122,8 @@ class Cp2kJob(Job):
             p = subprocess.Popen(cmd, stdout=f_std, stderr=f_err, shell=False)
         return p
 
+    # TODO double jobs, file manipulations, etc. should be done in atomate in the future
+    # and custodian should only run the job itself
     def postprocess(self):
         """
         Postprocessing includes renaming and gzipping where necessary.
@@ -131,6 +133,8 @@ class Cp2kJob(Job):
             if self.suffix != "":
                 os.mkdir(f"run{self.suffix}")
                 for f in fs:
+                    if "json" in f:
+                        continue
                     if not os.path.isdir(f):
                         if self.final:
                             shutil.move(f, f"run{self.suffix}/{f}")

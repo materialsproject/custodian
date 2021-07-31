@@ -25,6 +25,8 @@ def restart(actions, output_file, input_file, minimum_band_gap=0.1, no_actions_n
         restart_file = restart_file[-1] if restart_file else None
         if ci.check('force_eval/dft'):
             wfn_restart = ci['force_eval']['dft'].get('wfn_restart_file_name')
+        else:
+            wfn_restart = None
 
         # If convergence is already pretty good, or we have moved to a new ionic step,
         # discard the old WFN
@@ -94,56 +96,9 @@ def activate_ot(actions, ci):
                     (
                         '_unset', {
                             'FORCE_EVAL': {
-                                'DFT': {
-                                    'SCF': 'ADDED_MOS',
-                                }
+                                'DFT': 'SCF'
                             }
                         },
-                )
-            ]
-        },
-        {
-            "dict": "cp2k.inp",
-            "action":
-            [
-                (
-                    '_unset', {
-                        'FORCE_EVAL': {
-                            'DFT': {
-                                'SCF': 'DIAGONALIZATION',
-                            }
-                        }
-                    },
-                )
-            ]
-        },
-        {
-            "dict": "cp2k.inp",
-            "action":
-            [
-                (
-                    '_unset', {
-                        'FORCE_EVAL': {
-                            'DFT': {
-                                'SCF': 'MIXING',
-                            }
-                        }
-                    },
-                )
-            ]
-        },
-        {
-            "dict": "cp2k.inp",
-            "action":
-            [
-                (
-                    '_unset', {
-                        'FORCE_EVAL': {
-                            'DFT': {
-                                'SCF': 'SMEAR',
-                            }
-                        }
-                    },
                 )
             ]
         },
