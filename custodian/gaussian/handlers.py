@@ -10,6 +10,7 @@ import math
 import glob
 import shutil
 import logging
+import datetime
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -30,8 +31,30 @@ __email__ = 'rasha.atwi@stonybrook.edu'
 __status__ = 'Alpha'
 __date__ = '5/13/21'
 
+BACKUP_FILES = {'checkpoint': '*.[Cc][Hh][Kk]',
+                'form_checkpoint': '*.[Ff][Cc][Hh][Kk]',
+                'rwf': '*.[Rr][Ww][Ff]',
+                'inp': '*.[Ii][Nn][Pp]',
+                'int': '*.[Ii][Nn][Tt]',
+                'd2e': '*.[Dd]2[Ee]',
+                'skr': '*.[Ss][Kk][Rr]',
+                'convergence': 'convergence.png'}
+
+
+def backup_gaussian_files(filenames, prefix):
+    all_files = {}
+    for k, v in BACKUP_FILES.items():
+        files = glob.glob(v)
+        if files:
+            all_files[k] = files
+            for file in files:
+                filenames.append(file)
+    backup(filenames, prefix)
+    return all_files
+
 
 class GaussianErrorHandler(ErrorHandler):
+    # definition of job errors as they appear in Gaussian output file
     error_defs = {'Optimization stopped': 'opt_steps',
                   'Convergence failure': 'scf_convergence',
                   'FormBX had a problem': 'linear_bend',
@@ -194,6 +217,7 @@ class GaussianErrorHandler(ErrorHandler):
         dynamic_mem = link0_params.get(mem_key)
         if dynamic_mem:
             # default memory unit in Gaussian is words
+            dynamic_mem = dynamic_mem.lower()
             mem_unit = ''
             for unit in GaussianErrorHandler.MEM_UNITS:
                 if unit in dynamic_mem:
@@ -223,7 +247,7 @@ class GaussianErrorHandler(ErrorHandler):
                 int_key = int_key or 'int'
                 self.logger.warning(warning_msg)
                 self.gin.route_parameters[int_key] = 'ultrafine'
-                return {'integral': 'ultra_fine'}
+                return True
             elif isinstance(int_value, dict):
                 # if int grid is set and is different from ultrafine,
                 # set it to ultrafine (works when others int options are
@@ -238,7 +262,7 @@ class GaussianErrorHandler(ErrorHandler):
                 if flag or GaussianErrorHandler._not_g16(self.gout):
                     self.logger.warning(warning_msg)
                     self.gin.route_parameters[int_key]['grid'] = 'ultrafine'
-                    return {'integral': 'ultra_fine'}
+                    return True
             else:
                 if int_value in self.GRID_NAMES or self.grid_patt.match(
                         int_value):
@@ -247,7 +271,7 @@ class GaussianErrorHandler(ErrorHandler):
                     # are specified)
                     self.logger.warning(warning_msg)
                     self.gin.route_parameters[int_key] = 'ultrafine'
-                    return {'integral': 'ultra_fine'}
+                    return True
                 elif GaussianErrorHandler._not_g16(self.gout):
                     # if int grid is not specified, and Gaussian version is
                     # not 16, update with ultrafine integral grid
@@ -255,10 +279,10 @@ class GaussianErrorHandler(ErrorHandler):
                     GaussianErrorHandler._update_route_params(
                         self.gin.route_parameters, int_key,
                         {'grid': 'ultrafine'})
-                    return {'integral': 'ultra_fine'}
+                    return True
         else:
-            return {}
-        return {}
+            return False
+        return False
 
     @staticmethod
     def _not_g16(gout):
@@ -322,15 +346,15 @@ class GaussianErrorHandler(ErrorHandler):
                                 self.conv_data['thresh'][k] = float(m.group(3))
                             else:
                                 self.conv_data['values'][k].append(m.group(2))
-                    for k, v in self.conv_data['values'].items():
-                        # convert strings to float taking into account the
-                        # possibility of having ******** values
-                        self.conv_data['values'][k] = np.genfromtxt(np.array(v))
 
         # TODO: it only plots after the job finishes, modify?
-        if self.check_convergence and 'opt' in self.gin.route_parameters:
-            if self.conv_data['values']:
-                GaussianErrorHandler._monitor_convergence(self.conv_data)
+        if self.conv_data['values'] and \
+                all(len(v) >= 2 for v in self.conv_data['values'].values()):
+            for k, v in self.conv_data['values'].items():
+                # convert strings to float taking into account the
+                # possibility of having ******** values
+                self.conv_data['values'][k] = np.genfromtxt(np.array(v))
+            GaussianErrorHandler._monitor_convergence(self.conv_data)
         for patt in error_patts:
             self.logger.error(patt)
         return len(self.errors) > 0
@@ -366,7 +390,7 @@ class GaussianErrorHandler(ErrorHandler):
                     self.scf_max_cycles
                 actions.append({'scf_max_cycles': self.scf_max_cycles})
 
-            elif not {'xqc', 'yqc', 'qc'}.intersection(
+            elif {'xqc', 'yqc', 'qc'}.intersection(
                     self.gin.route_parameters.get('scf')):
                 # use an alternate SCF converger
                 self.gin.route_parameters['scf']['xqc'] = None
@@ -395,7 +419,7 @@ class GaussianErrorHandler(ErrorHandler):
                 return {'errors': self.errors, 'actions': None}
 
         elif 'opt_steps' in self.errors:
-            int_actions = self._add_int()
+            # int_actions = self._add_int()
             if self.gin.route_parameters.get('opt').get('maxcycles') != \
                     str(self.opt_max_cycles):
                 self.gin.route_parameters['opt']['maxcycles'] = \
@@ -411,10 +435,13 @@ class GaussianErrorHandler(ErrorHandler):
                 self.gin._mol = self.gout.final_structure
                 actions.append({'structure': 'from_final_structure'})
 
-            elif int_actions:
-                actions.append(int_actions)
-                # TODO: check if the defined methods are clean
-                # TODO: don't enter this if condition if g16 and ...
+            elif self._add_int():
+                actions.append({'integral': 'ultra_fine'})
+
+            # elif int_actions:
+            #     actions.append(int_actions)
+            # TODO: check if the defined methods are clean
+            # TODO: don't enter this if condition if g16 and ...
 
             elif self.job_type == 'better_guess' and not \
                     GaussianErrorHandler.activate_better_guess:
@@ -429,6 +456,7 @@ class GaussianErrorHandler(ErrorHandler):
                 actions.append({'opt_level_of_theory': 'better_geom_guess'})
 
             else:
+                # TODO: custodian file is empty if actions are None, why?
                 if self.job_type != 'better_guess':
                     self.logger.info(
                         'Try to switch to better_guess job type to '
@@ -589,6 +617,7 @@ class GaussianErrorHandler(ErrorHandler):
                 # error cannot be fixed automatically. Return None for actions
                 self.logger.info('Molecule is not found in the input file. '
                                  'Fix manually!')
+                # TODO: check if logger.info is enough here or return is needed
                 return {'errors': list(self.errors), 'actions': None}
 
         elif any(err in self.errors for err in ['empty_file', 'bad_file']):
@@ -614,7 +643,8 @@ class GaussianErrorHandler(ErrorHandler):
                 # this assumes that 1.5*minimum required memory is available
                 mem = math.ceil(self.recom_mem * 1.5)
                 self.gin.link0_parameters[mem_key] = f'{mem}MB'
-                actions.append({'memory': 'increase_to_gaussian_recommendation'})
+                actions.append(
+                    {'memory': 'increase_to_gaussian_recommendation'})
             else:
                 self.logger.info('Check job memory requirements manually and '
                                  'set as needed.')
@@ -627,4 +657,60 @@ class GaussianErrorHandler(ErrorHandler):
 
         os.rename(self.input_file, self.input_file + '.prev')
         self.gin.write_file(self.input_file, self.cart_coords)
+        # TODO: ADDED
+        if os.path.exists(self.input_file + '.wt'):
+            shutil.copyfile(self.input_file, self.input_file + '.wt')
         return {'errors': list(self.errors), 'actions': actions}
+
+
+class WalTimeErrorHandler(ErrorHandler):
+    is_monitor = True
+
+    def __init__(self, wall_time, buffer_time, input_file, output_file,
+                 stderr_file='stderr.txt', prefix='error'):
+        self.wall_time = wall_time
+        self.buffer_time = buffer_time
+        self.input_file = input_file
+        self.output_file = output_file
+        self.stderr_file = stderr_file
+        self.prefix = prefix
+        self.logger = logging.getLogger(self.__class__.__name__)
+        logging.basicConfig(level=logging.INFO)
+
+        now_ = datetime.datetime.now()
+        now_str = datetime.datetime.strftime(now_, '%a %b %d %H:%M:%S UTC %Y')
+
+        self.init_time = os.environ.get('JOB_START_TIME', now_str)
+        os.environ['JOB_START_TIME'] = self.init_time
+        self.init_time = datetime.datetime.strptime(self.init_time,
+                                                    '%a %b %d %H:%M:%S %Z %Y')
+
+    def check(self):
+        if self.wall_time:
+            run_time = datetime.datetime.now() - self.init_time
+            remaining_time = self.wall_time - run_time.total_seconds()
+            if remaining_time <= self.buffer_time:
+                return True
+        return False
+
+    def correct(self):
+        # TODO: when using restart, the rwf file might be in a different dir
+        backup_files = [self.input_file, self.output_file, self.stderr_file] + \
+                       list(BACKUP_FILES.values())
+        backup(backup_files, prefix=self.prefix)
+        if glob.glob(BACKUP_FILES['rwf']):
+            rwf = glob.glob(BACKUP_FILES['rwf'])[0]
+            gin = GaussianInput.from_file(self.input_file)
+            # TODO: check if rwf is already there like RWF or Rwf or ...
+            # gin.link0_parameters.update({'%rwf': rwf})
+            # gin.route_parameters = {'Restart': None}
+            # os.rename(self.input_file, self.input_file + '.prev')
+            input_str = [f'%rwf={rwf}'] + \
+                        [f'{i}={j}' for i, j in gin.link0_parameters.items()]
+            input_str.append(f'{gin.dieze_tag} Restart\n\n')
+            with open(self.input_file + '.wt', 'w') as f:
+                f.write('\n'.join(input_str))
+            return {'errors': ['wall_time_limit'], 'actions': None}
+        else:
+            self.logger.info('Wall time handler requires a read-write gaussian '
+                             'file to be available. No such file is found.')
