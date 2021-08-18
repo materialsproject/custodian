@@ -16,7 +16,6 @@ from pymatgen.io.gaussian import GaussianInput, GaussianOutput
 from custodian.custodian import Job
 from custodian.gaussian.handlers import GaussianErrorHandler
 
-
 __author__ = 'Rasha Atwi'
 __version__ = '0.0'
 __maintainer__ = 'Rasha Atwi'
@@ -34,11 +33,13 @@ class GaussianJob(Job):
             input_file,
             output_file,
             stderr_file='stderr.txt',
+            suffix='',
             backup=True):
         self.gaussian_cmd = gaussian_cmd
         self.input_file = input_file
         self.output_file = output_file
         self.stderr_file = stderr_file
+        self.suffix = suffix
         self.backup = backup
 
     def setup(self):
@@ -56,7 +57,10 @@ class GaussianJob(Job):
         return process
 
     def postprocess(self):
-        pass
+        for file in [self.input_file, self.output_file]:
+            if os.path.exists(file):
+                if self.suffix != '':
+                    shutil.copy(file, f'{file}{self.suffix}')
 
     @classmethod
     def better_guess(cls,
@@ -68,12 +72,15 @@ class GaussianJob(Job):
                      cart_coords=True):
 
         orig_input = GaussianInput.from_file(input_file)
-        yield(GaussianJob(gaussian_cmd=gaussian_cmd,
-                          input_file=input_file,
-                          output_file=output_file,
-                          stderr_file=stderr_file,
-                          backup=backup))
+        yield (GaussianJob(gaussian_cmd=gaussian_cmd,
+                           input_file=input_file,
+                           output_file=output_file,
+                           stderr_file=stderr_file,
+                           suffix='.guess1',
+                           backup=backup))
         if GaussianErrorHandler.activate_better_guess:
+            # TODO: check why it comes here only if the lower job is not
+            #  failing and not in the else condition
             # continue only if other corrections are invalid or failed
             lower_output = GaussianOutput(output_file)
             if len(lower_output.errors) == 0:
@@ -98,16 +105,15 @@ class GaussianJob(Job):
                 gin.route_parameters['Geom'] = 'Checkpoint'
                 gin.write_file(input_file, cart_coords=cart_coords)
 
-                yield(GaussianJob(gaussian_cmd=gaussian_cmd,
-                                  input_file=input_file,
-                                  output_file=output_file,
-                                  stderr_file=stderr_file,
-                                  backup=backup))
+                yield (GaussianJob(gaussian_cmd=gaussian_cmd,
+                                   input_file=input_file,
+                                   output_file=output_file,
+                                   stderr_file=stderr_file,
+                                   suffix='.guess2',
+                                   backup=backup))
             else:
                 logger.info('Failed to generate a better initial guess')
-                
+
         else:
             logger.info('Calculation completed normally without having to '
                         'generate a better initial guess')
-
-
