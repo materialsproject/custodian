@@ -249,7 +249,6 @@ class Cp2kJob(Job):
                             }
                         },
                         'GLOBAL': {
-                            'PROJECT_NAME': 'UNSCREENED_HYBRID',
                             'RUN_TYPE': 'ENERGY_FORCE'
                         }
                     }
