@@ -153,12 +153,8 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         # If not static, mark not-converged if last 5 SCF loops
         # failed to converge
         scf = out.data['scf_converged'] or [True]
-        if self.is_static:
-            if not scf[0]:
-                return True
-        else:
-            if not all(scf[-5:]):
-                return True
+        if not scf[0]:
+            return True
         return False
 
     # TODO More comprehensive mixing methods for non-OT diagonalization
@@ -220,6 +216,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         else:
             # Make sure mixing and smearing are enabled
             # Try Broyden -> Pulay mixing
+
             if not ci.check('FORCE_EVAL/DFT/SCF/MIXING'):
                 actions.append({'dict': self.input_file,
                                 'action': {"_set": {
@@ -228,13 +225,92 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                             "SCF": {
                                                 "MIXING": {
                                                     'METHOD': 'BROYDEN_MIXING',
-                                                    'ALPHA': 0.2,
-                                                    'NBUFFER': 5
+                                                    'ALPHA': 0.1,
                                                 }
                                             }
                                         }
                                     }
                                 }}})
+
+            else:
+                alpha = ci['FORCE_EVAL']['DFT']['SCF']['MIXING'].get('ALPHA', Keyword('ALPHA', 0.2)).values[0]
+                beta = ci['FORCE_EVAL']['DFT']['SCF']['MIXING'].get('BETA', Keyword('BETA', 0.01)).values[0]
+                nbuffer = ci['FORCE_EVAL']['DFT']['SCF']['MIXING'].get('NBUFFER', Keyword('NBUFFER', 4)).values[0]
+
+                if nbuffer < 20:
+                    actions.append({'dict': self.input_file,
+                                    'action': {"_set": {
+                                        "FORCE_EVAL": {
+                                            "DFT": {
+                                                "SCF": {
+                                                    "MIXING": {
+                                                        "NBUFFER": 20,
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }}})
+
+                if alpha > .05:
+                    actions.append({'dict': self.input_file,
+                                    'action': {"_set": {
+                                        "FORCE_EVAL": {
+                                            "DFT": {
+                                                "SCF": {
+                                                    "MIXING": {
+                                                        "ALPHA": 0.05,
+                                                        "BETA": 0.01
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }}})
+
+                elif alpha > .01:
+                    actions.append({'dict': self.input_file,
+                                    'action': {"_set": {
+                                        "FORCE_EVAL": {
+                                            "DFT": {
+                                                "SCF": {
+                                                    "MIXING": {
+                                                        "ALPHA": 0.01,
+                                                        "BETA": 0.01
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }}})
+
+                elif alpha > .005:
+                    actions.append({'dict': self.input_file,
+                                    'action': {"_set": {
+                                        "FORCE_EVAL": {
+                                            "DFT": {
+                                                "SCF": {
+                                                    "MIXING": {
+                                                        "ALPHA": 0.005,
+                                                        "BETA": 0.01
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }}})
+
+                elif beta < 1:
+                    actions.append({'dict': self.input_file,
+                                    'action': {"_set": {
+                                        "FORCE_EVAL": {
+                                            "DFT": {
+                                                "SCF": {
+                                                    "MIXING": {
+                                                        "ALPHA": 0.005,
+                                                        "BETA": 3
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }}})
+
             if not ci.check('FORCE_EVAL/DFT/SCF/SMEAR'):
                 actions.append({'dict': self.input_file,
                                 'action': {"_set": {
@@ -242,75 +318,8 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                         "DFT": {
                                             "SCF": {
                                                 "SMEAR": {
-                                                    "ELEC_TEMP": 300,
+                                                    "ELEC_TEMP": 500,
                                                     "METHOD": "FERMI_DIRAC"
-                                                }
-                                            }
-                                        }
-                                    }
-                                }}})
-
-            _next = self.mixing_hierarchy.pop(0) if self.mixing_hierarchy else None
-            if _next == 'BROYDEN_MIXING':
-                actions.append({'dict': self.input_file,
-                                'action': {"_set": {
-                                    "FORCE_EVAL": {
-                                        "DFT": {
-                                            "SCF": {
-                                                "MIXING": {
-                                                    "METHOD": "BROYDEN_MIXING",
-                                                    "NBUFFER": 5,
-                                                    "ALPHA": 0.1,
-                                                    "BETA": 0.01
-                                                }
-                                            }
-                                        }
-                                    }
-                                }}})
-
-            elif _next == 'BROYDEN_MIXING_LINEAR':
-                actions.append({'dict': self.input_file,
-                                'action': {"_set": {
-                                    "FORCE_EVAL": {
-                                        "DFT": {
-                                            "SCF": {
-                                                "MIXING": {
-                                                    "METHOD": "BROYDEN_MIXING",
-                                                    "NBUFFER": 5,
-                                                    "ALPHA": 0.01,
-                                                    "BETA": 3
-                                                }
-                                            }
-                                        }
-                                    }
-                                }}})
-            elif _next == 'PULAY_MIXING':
-                actions.append({'dict': self.input_file,
-                                'action': {"_set": {
-                                    "FORCE_EVAL": {
-                                        "DFT": {
-                                            "SCF": {
-                                                "MIXING": {
-                                                    "METHOD": "PULAY_MIXING",
-                                                    "NBUFFER": 5,
-                                                    "ALPHA": 0.1,
-                                                    "BETA": 0.01
-                                                }
-                                            }
-                                        }
-                                    }
-                                }}})
-            elif _next == 'PULAY_MIXING_LINEAR':
-                actions.append({'dict': self.input_file,
-                                'action': {"_set": {
-                                    "FORCE_EVAL": {
-                                        "DFT": {
-                                            "SCF": {
-                                                "MIXING": {
-                                                    "METHOD": "PULAY_MIXING",
-                                                    "NBUFFER": 5,
-                                                    "ALPHA": 0.01,
-                                                    "BETA": 3
                                                 }
                                             }
                                         }
