@@ -213,7 +213,7 @@ class QCJob(Job):
         opt_rem = copy.deepcopy(orig_input.rem)
         opt_rem["job_type"] = opt_method
         first = True
-        energy_history = list()
+        energy_history = []
 
         if freq_before_opt:
             if not linked:
@@ -364,7 +364,7 @@ class QCJob(Job):
 
         else:
             orig_opt_input = QCInput.from_file(input_file)
-            history = list()
+            history = []
 
             for ii in range(max_iterations):
                 yield (
@@ -455,7 +455,7 @@ class QCJob(Job):
                 hist["num_neg_freqs"] = sum(1 for freq in outdata.get("frequencies") if freq < 0)
                 hist["energy"] = copy.deepcopy(opt_outdata.get("final_energy"))
                 hist["index"] = len(history)
-                hist["children"] = list()
+                hist["children"] = []
                 history.append(hist)
 
                 ref_mol = history[-1]["molecule"]
