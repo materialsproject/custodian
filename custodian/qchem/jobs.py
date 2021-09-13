@@ -245,6 +245,7 @@ class QCJob(Job):
                 smx=orig_input.smx,
                 vdw_mode=orig_input.vdw_mode,
                 van_der_waals=orig_input.van_der_waals,
+                nbo=orig_input.nbo,
             )
             opt_QCInput.write_file(input_file)
             first = False
@@ -289,6 +290,7 @@ class QCJob(Job):
                     smx=orig_input.smx,
                     vdw_mode=orig_input.vdw_mode,
                     van_der_waals=orig_input.van_der_waals,
+                    nbo=orig_input.nbo,
                 )
                 freq_QCInput.write_file(input_file)
                 yield (
@@ -334,6 +336,7 @@ class QCJob(Job):
                         smx=orig_input.smx,
                         vdw_mode=orig_input.vdw_mode,
                         van_der_waals=orig_input.van_der_waals,
+                        nbo=orig_input.nbo,
                     )
                     opt_QCInput.write_file(input_file)
                 else:
@@ -357,6 +360,7 @@ class QCJob(Job):
                         smx=orig_input.smx,
                         vdw_mode=orig_input.vdw_mode,
                         van_der_waals=orig_input.van_der_waals,
+                        nbo=orig_input.nbo,
                     )
                     opt_QCInput.write_file(input_file)
             if not save_final_scratch:
@@ -401,6 +405,7 @@ class QCJob(Job):
                     smx=orig_opt_input.smx,
                     vdw_mode=orig_opt_input.vdw_mode,
                     van_der_waals=orig_opt_input.van_der_waals,
+                    nbo=orig_input.nbo,
                 )
                 freq_QCInput.write_file(input_file)
                 yield (
@@ -575,5 +580,6 @@ class QCJob(Job):
                     smx=orig_opt_input.smx,
                     vdw_mode=orig_opt_input.vdw_mode,
                     van_der_waals=orig_opt_input.van_der_waals,
+                    nbo=orig_input.nbo,
                 )
                 new_opt_QCInput.write_file(input_file)
