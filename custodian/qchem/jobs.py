@@ -66,7 +66,16 @@ class QCJob(Job):
             backup (bool): Whether to backup the initial input file. If True, the
                 input will be copied with a ".orig" appended. Defaults to True.
         """
-        self.qchem_command = qchem_command.split(" ")
+        try:
+            self.qchem_command = qchem_command.split(" ")
+        except AttributeError:
+            if isinstance(qchem_command, list):
+                for val in qchem_command:
+                    if not isinstance(val, str):
+                        raise ValueError("Must either pass a string or a list of strings")
+            else:
+                raise ValueError("Must either pass a string or a list of strings")
+            self.qchem_command = qchem_command
         self.multimode = multimode
         self.input_file = input_file
         self.output_file = output_file
