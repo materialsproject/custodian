@@ -147,7 +147,6 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         """
         self.input_file = input_file
         self.output_file = output_file
-        self.scf_max_cycles = scf_max_cycles
         self.outdata = None
         self.errors = None
         self.scf = None
@@ -287,11 +286,15 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                             'FORCE_EVAL': {
                                     'DFT': {
                                         'SCF': {
+                                            'MAX_SCF': 100,
                                             'OT': {
                                                 'LINESEARCH': '2PNT',
                                                 'ROTATE': True,
                                                 'OCCUPATION_PRECONDITIONER': True,
                                                 'ALGORITHM': 'IRAC'
+                                            },
+                                            'OUTER_SCF': {
+                                                'MAX_SCF': 10
                                             }
                                         }
                                     }
@@ -879,7 +882,7 @@ class AbortHandler(ErrorHandler):
 
 
 # TODO: the same conv. value printed over and over sometimes points to imprecision but can also just be
-# a temporary thing that will be fixed by updating preconditioner. How to separate? 
+# a temporary thing that will be fixed by updating preconditioner. How to separate?
 class NumericalPrecisionHandler(ErrorHandler):
 
     """
