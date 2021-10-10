@@ -9,9 +9,9 @@ When adding more remember the following tips:
 (1) Handlers return True when the error is caught, and false if no error was caught
 (2) CP2K error handlers will be different from VASP error handlers depending on if
     you are using Cp2k-specific functionality (like OT minimization).
-(3) Not all things that could go wrong should be handled by custodian. For example
-    walltime handling can be done natively in CP2K, and will have added benefits like
-    writing a wavefunction restart file before quiting.
+(3) Not all things that could go wrong should be handled by custodian. For example,
+    most aspects of walltime handling can be done natively in CP2K, and will have added
+    benefits like writing a wavefunction restart file before quiting.
 """
 
 import numpy as np
@@ -59,7 +59,6 @@ class StdErrHandler(ErrorHandler):
     error_msgs = {
         "seg_fault": ["SIGSEGV"],
         "out_of_memory": ["insufficient virtual memory"],
-        "ORTE": ["ORTE"],
         "abort": ["SIGABRT"]
     }
 
@@ -95,21 +94,56 @@ class StdErrHandler(ErrorHandler):
 class UnconvergedScfErrorHandler(ErrorHandler):
     """
     CP2K ErrorHandler class that addresses SCF non-convergence.
+
+    SCF convergence can be broken into different categories, depending on the method
+    used to solve it. CP2K supports several, and this handler recognizes the following:
+
+    (1) Orbital Transformation Scheme
+
+        CP2K's flagshop SCF solver. These things can be modified to improve convergence:
+
+            (i) Minimizer: Easiest way to do is to move from a fast second order optimizer
+                to a first order optimizer: DIIS -> 2 point Conjugate gradient -> 3 point
+                CG. Beyond changing the minimizer itself, one can reduce stepsize for
+                the minimizer, though CP2K has good defaults.
+            (ii) Preconditioner: The preconditioners can aid in accelerating convergence,
+                although most work perfectly fine for a wide variety of systems. FULL_ALL
+                is "best" from a theoretical perspective, FULL_SINGLE_INVERSE. Separate from
+                this is whether to use a preconditioner with the occupation numbers (FD smearing).
+                Should be used with rotational constraints removed.
+            (iii) Algorithm: Standard algorithm enforces strict orthogonality, but one
+                can also use Iterative Refinement of the approximate congruency
+                transformation.
+            (iv) Once can enable rotations of the occupied subspace which allows
+                 fractional occupations with  OT. As of October 2021, this option cannot
+                 be used with 3 point CG, FULL_ALL, or FULL_SINGLE_INVERSE.
+
+    (2) Traditional Diagonalization:
+
+        The standard way to solve the scf procedure is to diagonalize the density matrix.
+        This handler implements (roughly) the same procedures for aiding convergence
+        as the original vasp handler. CP2K has less functionality for diagonalization, but
+        there are some options for charge density mixing. Procedure generally follows:
+
+            (i) Set basic alpha and beta (see docs) with broyden mixing and some small smearing
+            (ii) decrease alpha
+            (iii) Increase damping (beta) to suppress charge sloshing
+            (iv) TODO possible switch mixing method
+
+    (3) Pseudo-diagonalization (Not implemented)
+
+    (4) Purification methods (Not implemented)
     """
 
     is_monitor = True
 
-    def __init__(self,
-                 input_file="cp2k.inp",
-                 output_file="cp2k.out",
-                 scf_max_cycles=200):
+    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out"):
         """
         Initializes the error handler from a set of input and output files.
 
         Args:
             input_file (str): Name of the CP2K input file.
             output_file (str): Name of the CP2K output file.
-            scf_max_cycles (int): The max iterations to set to fix SCF failure.
         """
         self.input_file = input_file
         self.output_file = output_file
@@ -122,7 +156,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         if os.path.exists(zpath(self.input_file)):
             ci = Cp2kInput.from_file(zpath(self.input_file))
             if ci['GLOBAL']['RUN_TYPE'].values[0].__str__().upper() in [
-                "ENERGY", "ENERGY_FORCE", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT"]:
+                    "ENERGY", "ENERGY_FORCE", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT"]:
                 self.is_static = True
             else:
                 self.is_static = False
@@ -143,6 +177,9 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                 ]
 
     def check(self):
+        """
+        Check output file for failed SCF convergence
+        """
         # Checks output file for errors.
         out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
         out.convergence()
@@ -150,185 +187,240 @@ class UnconvergedScfErrorHandler(ErrorHandler):
             self.restart = out.filenames['restart'][-1]
 
         # General catch for SCF not converged
-        # If not static, mark not-converged if last 5 SCF loops
-        # failed to converge
+        # TODO: should not-static runs allow for some unconverged scf? Leads to issues in my experience
         scf = out.data['scf_converged'] or [True]
         if not scf[0]:
             return True
         return False
 
-    # TODO More comprehensive mixing methods for non-OT diagonalization
     def correct(self):
+        """
+        Apply corrections to aid convergence, if possible.
+        """
         ci = Cp2kInput.from_file(self.input_file)
-        actions = []
 
         if self.is_ot:
+            actions = self.__correct_ot(ci=ci)
+        else:
+            actions = self.__correct_diag(ci=ci)
 
+        restart(actions, self.output_file, self.input_file)
+        Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
+        return {"errors": ["Non-converging Job"], "actions": actions}
+
+    def __correct_ot(self, ci):
+
+        """
+        Apply corrections to OT calculation, if possible.
+        """
+
+        actions = []
+
+        minimizer = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
+            'MINIMIZER', Keyword('MINIMIZER', 'DIIS')).values[0].upper()
+
+        algo = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
+            'ALGORITHM', Keyword('ALGORITHM', 'STRICT')).values[0].upper()
+
+        rotate = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
+            'ROTATION', Keyword('ROTATION', False)).values[0]
+
+        on_the_fly = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
+            'ON_THE_FLY_LOC', Keyword('ON_THE_FLY_LOC', False)).values[0]
+
+        occ_prec = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
+            'OCCUPATION_PRECONDITIONER', Keyword('OCCUPATION_PRECONDITIONER', False)).values[0]
+
+        if minimizer == 'DIIS':
+            actions.append({'dict': self.input_file,
+                            "action": {"_set": {
+                                'FORCE_EVAL': {
+                                    'DFT': {
+                                        'SCF': {
+                                            'OT': {
+                                                'MINIMIZER': 'CG'
+                                            }
+                                        }
+                                    }
+                                }
+                            }}})
+        elif minimizer == 'CG':
             if ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
-                    'MINIMIZER', Keyword('MINIMIZER', 'DIIS')
-            ).values[0].upper() == 'DIIS':
+                    'LINESEARCH', Keyword('LINESEARCH', '2PNT')
+            ).values[0].upper() != '3PNT':
                 actions.append({'dict': self.input_file,
                                 "action": {"_set": {
                                     'FORCE_EVAL': {
                                         'DFT': {
                                             'SCF': {
                                                 'OT': {
-                                                    'MINIMIZER': 'CG'
+                                                    'LINESEARCH': '3PNT'
                                                 }
                                             }
                                         }
                                     }
                                 }}})
-            elif ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
-                    'MINIMIZER', Keyword('MINIMIZER', 'DIIS')
-            ).values[0].upper() == 'CG':
-                if ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
-                        'LINESEARCH', Keyword('LINESEARCH', '2PNT')
-                ).values[0].upper() != '3PNT':
-                    actions.append({'dict': self.input_file,
-                                    "action": {"_set": {
-                                        'FORCE_EVAL': {
-                                            'DFT': {
-                                                'SCF': {
-                                                    'OT': {
-                                                        'LINESEARCH': '3PNT'
-                                                    }
+            elif ci['FORCE_EVAL']['DFT']['SCF'].get(
+                    'MAX_SCF', Keyword('MAX_SCF', 50)
+            ).values[0] < 50:
+                actions.append({'dict': self.input_file,
+                                "action": {"_set": {
+                                    'FORCE_EVAL': {
+                                        'DFT': {
+                                            'SCF': {
+                                                'MAX_SCF': 50,
+                                                'OUTER_SCF': {
+                                                    'MAX_SCF': 8
                                                 }
+                                            },
+                                        }
+                                    }
+                                }}})
+
+        # Last ditch effort to save convergence. No strict orthogonality and fractional occupations
+        if not actions and (algo == 'STRICT' or not rotate or not occ_prec):
+            actions.append(
+                {
+                    'dict': self.input_file,
+                    "action": {
+                        "_set": {
+                            'FORCE_EVAL': {
+                                    'DFT': {
+                                        'SCF': {
+                                            'OT': {
+                                                'LINESEARCH': '2PNT',
+                                                'ROTATE': True,
+                                                'OCCUPATION_PRECONDITIONER': True,
+                                                'ALGORITHM': 'IRAC'
                                             }
                                         }
-                                    }}})
-                elif ci['FORCE_EVAL']['DFT']['SCF'].get(
-                            'MAX_SCF', Keyword('MAX_SCF', 50)
-                        ).values[0] < 50:
-                        actions.append({'dict': self.input_file,
-                                        "action": {"_set": {
-                                            'FORCE_EVAL': {
-                                                'DFT': {
-                                                    'SCF': {
-                                                        'MAX_SCF': 50,
-                                                        'OUTER_SCF': {
-                                                            'MAX_SCF': 8
-                                                        }
-                                                    },
-                                                }
-                                            }
-                                        }}})
-        else:
-            # Make sure mixing and smearing are enabled
-            # Try Broyden -> Pulay mixing
+                                    }
+                            }
+                        }
+                    }
+                }
+            )
 
-            if not ci.check('FORCE_EVAL/DFT/SCF/MIXING'):
+        return actions
+
+    def __correct_diag(self, ci):
+
+        """
+        Apply corrections to diagonalization calculation, if possible
+        """
+
+        actions = []
+
+        if not ci.check('FORCE_EVAL/DFT/SCF/MIXING'):
+            actions.append({'dict': self.input_file,
+                            'action': {"_set": {
+                                "FORCE_EVAL": {
+                                    "DFT": {
+                                        "SCF": {
+                                            "MIXING": {
+                                                'METHOD': 'BROYDEN_MIXING',
+                                                'ALPHA': 0.1,
+                                            }
+                                        }
+                                    }
+                                }
+                            }}})
+
+        else:
+            alpha = ci['FORCE_EVAL']['DFT']['SCF']['MIXING'].get('ALPHA', Keyword('ALPHA', 0.2)).values[0]
+            beta = ci['FORCE_EVAL']['DFT']['SCF']['MIXING'].get('BETA', Keyword('BETA', 0.01)).values[0]
+            nbuffer = ci['FORCE_EVAL']['DFT']['SCF']['MIXING'].get('NBUFFER', Keyword('NBUFFER', 4)).values[0]
+
+            if nbuffer < 20:
                 actions.append({'dict': self.input_file,
                                 'action': {"_set": {
                                     "FORCE_EVAL": {
                                         "DFT": {
                                             "SCF": {
                                                 "MIXING": {
-                                                    'METHOD': 'BROYDEN_MIXING',
-                                                    'ALPHA': 0.1,
+                                                    "NBUFFER": 20,
                                                 }
                                             }
                                         }
                                     }
                                 }}})
 
-            else:
-                alpha = ci['FORCE_EVAL']['DFT']['SCF']['MIXING'].get('ALPHA', Keyword('ALPHA', 0.2)).values[0]
-                beta = ci['FORCE_EVAL']['DFT']['SCF']['MIXING'].get('BETA', Keyword('BETA', 0.01)).values[0]
-                nbuffer = ci['FORCE_EVAL']['DFT']['SCF']['MIXING'].get('NBUFFER', Keyword('NBUFFER', 4)).values[0]
-
-                if nbuffer < 20:
-                    actions.append({'dict': self.input_file,
-                                    'action': {"_set": {
-                                        "FORCE_EVAL": {
-                                            "DFT": {
-                                                "SCF": {
-                                                    "MIXING": {
-                                                        "NBUFFER": 20,
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }}})
-
-                if alpha > .05:
-                    actions.append({'dict': self.input_file,
-                                    'action': {"_set": {
-                                        "FORCE_EVAL": {
-                                            "DFT": {
-                                                "SCF": {
-                                                    "MIXING": {
-                                                        "ALPHA": 0.05,
-                                                        "BETA": 0.01
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }}})
-
-                elif alpha > .01:
-                    actions.append({'dict': self.input_file,
-                                    'action': {"_set": {
-                                        "FORCE_EVAL": {
-                                            "DFT": {
-                                                "SCF": {
-                                                    "MIXING": {
-                                                        "ALPHA": 0.01,
-                                                        "BETA": 0.01
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }}})
-
-                elif alpha > .005:
-                    actions.append({'dict': self.input_file,
-                                    'action': {"_set": {
-                                        "FORCE_EVAL": {
-                                            "DFT": {
-                                                "SCF": {
-                                                    "MIXING": {
-                                                        "ALPHA": 0.005,
-                                                        "BETA": 0.01
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }}})
-
-                elif beta < 1:
-                    actions.append({'dict': self.input_file,
-                                    'action': {"_set": {
-                                        "FORCE_EVAL": {
-                                            "DFT": {
-                                                "SCF": {
-                                                    "MIXING": {
-                                                        "ALPHA": 0.005,
-                                                        "BETA": 3
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }}})
-
-            if not ci.check('FORCE_EVAL/DFT/SCF/SMEAR'):
+            if alpha > .05:
                 actions.append({'dict': self.input_file,
                                 'action': {"_set": {
                                     "FORCE_EVAL": {
                                         "DFT": {
                                             "SCF": {
-                                                "SMEAR": {
-                                                    "ELEC_TEMP": 500,
-                                                    "METHOD": "FERMI_DIRAC"
+                                                "MIXING": {
+                                                    "ALPHA": 0.05,
+                                                    "BETA": 0.01
                                                 }
                                             }
                                         }
                                     }
                                 }}})
 
-        restart(actions, self.output_file, self.input_file)
-        Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
-        return {"errors": ["Non-converging Job"], "actions": actions}
+            elif alpha > .01:
+                actions.append({'dict': self.input_file,
+                                'action': {"_set": {
+                                    "FORCE_EVAL": {
+                                        "DFT": {
+                                            "SCF": {
+                                                "MIXING": {
+                                                    "ALPHA": 0.01,
+                                                    "BETA": 0.01
+                                                }
+                                            }
+                                        }
+                                    }
+                                }}})
+
+            elif alpha > .005:
+                actions.append({'dict': self.input_file,
+                                'action': {"_set": {
+                                    "FORCE_EVAL": {
+                                        "DFT": {
+                                            "SCF": {
+                                                "MIXING": {
+                                                    "ALPHA": 0.005,
+                                                    "BETA": 0.01
+                                                }
+                                            }
+                                        }
+                                    }
+                                }}})
+
+            elif beta < 1:
+                actions.append({'dict': self.input_file,
+                                'action': {"_set": {
+                                    "FORCE_EVAL": {
+                                        "DFT": {
+                                            "SCF": {
+                                                "MIXING": {
+                                                    "ALPHA": 0.005,
+                                                    "BETA": 3
+                                                }
+                                            }
+                                        }
+                                    }
+                                }}})
+
+        if not ci.check('FORCE_EVAL/DFT/SCF/SMEAR'):
+            actions.append({'dict': self.input_file,
+                            'action': {"_set": {
+                                "FORCE_EVAL": {
+                                    "DFT": {
+                                        "SCF": {
+                                            "SMEAR": {
+                                                "ELEC_TEMP": 300,
+                                                "METHOD": "FERMI_DIRAC"
+                                            }
+                                        }
+                                    }
+                                }
+                            }}})
+
+        return actions
 
 
 class DivergingScfErrorHandler(ErrorHandler):
@@ -786,6 +878,8 @@ class AbortHandler(ErrorHandler):
         return {'errors': [self.responses[-1]], 'actions': actions}
 
 
+# TODO: the same conv. value printed over and over sometimes points to imprecision but can also just be
+# a temporary thing that will be fixed by updating preconditioner. How to separate? 
 class NumericalPrecisionHandler(ErrorHandler):
 
     """
@@ -795,8 +889,8 @@ class NumericalPrecisionHandler(ErrorHandler):
     separate numerical issues from things like optimizer choice, slow-to-converge
     systems, or divergence issues, this handler specifically detects the problem of
     convergence getting stuck, where the same convergence value is returned many times
-    in a row. Numerical precision can also be the cause of oscillating convergence.
-    This is a little harder to assess, as it can also just look like slow-convergence.
+    in a row. (Numerical precision can also be the cause of oscillating convergence.
+    This is a little harder to assess, as it can also just look like slow-convergence.)
     Currently, we have identified the following causes of this problem:
 
         (1) EPS_DEFAULT: Sets the overall precision of the Quickstep module (note, not
@@ -818,7 +912,7 @@ class NumericalPrecisionHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out", max_same=3):
+    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out", max_same=5):
         """
         Initialize the error handler.
 
