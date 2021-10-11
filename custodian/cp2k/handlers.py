@@ -62,21 +62,23 @@ class StdErrHandler(ErrorHandler):
         "abort": ["SIGABRT"]
     }
 
-    def __init__(self, output_file='cp2k.out', std_err="std_err.txt"):
+    def __init__(self, std_err="std_err.txt"):
         """
         Initializes the handler with the output file to check.
 
         Args:
-            output_file (str): This is the file where the stderr for vasp
+            std_err (str): This is the file where the stderr for cp2k
                 is being redirected. The error messages that are checked are
                 present in the stderr. Defaults to "std_err.txt", which is the
                 default redirect used by :class:`custodian.cp2k.jobs.Cp2kJob`.
         """
         self.std_err = std_err
-        self.output_file = output_file
         self.errors = set()
 
     def check(self):
+        """
+        Check for error in std_err file.
+        """
         self.errors = set()
         with open(self.std_err, "r") as f:
             for line in f:
@@ -88,6 +90,9 @@ class StdErrHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
+        """
+        Log error, perform no corrections.
+        """
         return {"errors": ["System error(s): {}".format(self.errors)], "actions": []}
 
 
@@ -224,12 +229,10 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         rotate = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
             'ROTATION', Keyword('ROTATION', False)).values[0]
 
-        on_the_fly = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
-            'ON_THE_FLY_LOC', Keyword('ON_THE_FLY_LOC', False)).values[0]
-
         occ_prec = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
             'OCCUPATION_PRECONDITIONER', Keyword('OCCUPATION_PRECONDITIONER', False)).values[0]
 
+        # Try going from DIIS -> CG (slower, but more robust)
         if minimizer == 'DIIS':
             actions.append({'dict': self.input_file,
                             "action": {"_set": {
@@ -243,6 +246,8 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                     }
                                 }
                             }}})
+
+        # Try going from 2pnt to 3pnt line search (slower, but more robust)
         elif minimizer == 'CG':
             if ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
                     'LINESEARCH', Keyword('LINESEARCH', '2PNT')
@@ -277,6 +282,11 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                 }}})
 
         # Last ditch effort to save convergence. No strict orthogonality and fractional occupations
+        # No strict orthogonality of MOs, use iterative refinement polynomial expansion for orthogonality
+        # Allow for rotations -> allowing for fractional occupation
+        # Rotation requires FULL_KINETIC and 2pnt line search
+        # Precondition on fractional occupation
+        # Increase SCF steps in one loop and decrease outer loops
         if not actions and (algo == 'STRICT' or not rotate or not occ_prec):
             actions.append(
                 {
@@ -290,6 +300,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                             'OT': {
                                                 'LINESEARCH': '2PNT',
                                                 'ROTATE': True,
+                                                'PRECONDITIONER': 'FULL_KINETIC',
                                                 'OCCUPATION_PRECONDITIONER': True,
                                                 'ALGORITHM': 'IRAC'
                                             },
@@ -1154,17 +1165,29 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, input_file='cp2k.inp', output_file='cp2k.out'):
+    def __init__(
+            self, input_file='cp2k.inp', output_file='cp2k.out', max_iter=20, max_total_iter=200,
+            optimizers=('BFGS', 'CG', 'BFGS', 'CG')
+    ):
         """
         Initialize the error handler.
 
         Args:
             input_file: name of the input file
             output_file: name of the output file
+            max_iter: Max iter for an "inner loop", i.e. max iterations for one optimizer before
+                switching to another.
+            max_total_iter: max total number of iterations before calling it quits.
+                (Not reached if custodian runs out of things to try on the inner loops)
+            optimizers: Which optimizers to try with custodian. Can be used to go back and forth,
+                e.g. Try BFGS then CG then BFGS again for 20 iterations each.
         """
 
         self.input_file = input_file
         self.output_file = output_file
+        self.max_iter = max_iter
+        self.max_total_iter = max_total_iter
+        self.optimizers = iter(optimizers)
 
     def check(self):
         o = Cp2kOutput(self.output_file)
@@ -1177,19 +1200,30 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
         ci = Cp2kInput.from_file(self.input_file)
         actions = list()
 
-        if ci.check('MOTION/GEO_OPT'):
-            if ci['motion']['geo_opt'].get(
+        max_iter = ci['motion']['geo_opt'].get('MAX_ITER', Keyword('', 200)).values[0]
+        optimizer = ci['motion']['geo_opt'].get(
                     'OPTIMIZER', Keyword('OPTIMIZER', 'BFGS')
-            ).values[0].upper() == ('BFGS' or 'LBFGS'):
-                max_iter = ci['motion']['geo_opt'].get('MAX_ITER', Keyword('', 200)).values[0]
+            ).values[0].upper()
+
+        # If list of optimizers includes the starting condition, iterate past it
+        next_opt = next(self.optimizers)
+        if optimizer == next_opt.upper():
+            next_opt = next(self.optimizers)
+
+        if max_iter + self.max_iter > self.max_total_iter:
+            return {"errors": ["Unsuccessful relaxation"], "actions": []}
+
+        # set optimizer. Ensure CG is 2pnt. 3pnt not fully developed for relaxations
+        if ci.check('MOTION/GEO_OPT'):
+            if optimizer == ('BFGS' or 'LBFGS'):
                 actions.append({
                     'dict': self.input_file,
                     "action": {
                         "_set": {
                             'MOTION': {
                                 'GEO_OPT': {
-                                    'OPTIMIZER': 'CG',
-                                    'MAX_ITER': max_iter*2,
+                                    'OPTIMIZER': next_opt,
+                                    'MAX_ITER': max_iter + self.max_iter,
                                     'CG': {
                                         'LINE_SEARCH': {
                                             'TYPE': '2PNT'
@@ -1221,8 +1255,6 @@ class WalltimeHandler(ErrorHandler):
 
     def __init__(self, output_file='cp2k.out', enable_checkpointing=True):
         """
-        Initialize this handler.
-
         Args:
             output_file (str): name of the cp2k output file
             enable_checkpointing (bool): whether or not to enable checkpointing when
@@ -1232,6 +1264,9 @@ class WalltimeHandler(ErrorHandler):
         self.enable_checkpointing = enable_checkpointing
 
     def check(self):
+        """
+        Check if internal CP2K walltime handler was tripped.
+        """
         if regrep(
                 filename=self.output_file,
                 patterns={"walltime": r"(exceeded requested execution time)"},
@@ -1243,6 +1278,9 @@ class WalltimeHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Dump checkpoint info if requested
+        """
         if self.enable_checkpointing:
             dumpfn({"_path": os.getcwd()}, fn="checkpoint.json")
         return {"errors": ["Walltime error"], "actions": []}
