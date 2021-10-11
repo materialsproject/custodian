@@ -5,7 +5,7 @@ from pymatgen.io.cp2k.inputs import Cp2kInput
 from pymatgen.io.cp2k.outputs import Cp2kOutput
 
 
-def restart(actions, output_file, input_file, minimum_band_gap=0.1, no_actions_needed=False):
+def restart(actions, output_file, input_file, no_actions_needed=False):
     """
     Helper function. To discard old restart if convergence is already good, and copy
     the restart file to the input file. Restart also supports switching back and forth
@@ -53,9 +53,6 @@ def restart(actions, output_file, input_file, minimum_band_gap=0.1, no_actions_n
                     }
                 }
             )
-
-        if can_use_ot(o, ci, minimum_band_gap):
-            activate_ot(actions, ci)
 
 
 # TODO Not sure I like this solution
