@@ -1167,7 +1167,7 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
 
     def __init__(
             self, input_file='cp2k.inp', output_file='cp2k.out', max_iter=20, max_total_iter=200,
-            optimizers=('BFGS', 'CG', 'BFGS', 'CG')
+            optimizers=['BFGS', 'CG', 'BFGS', 'CG']
     ):
         """
         Initialize the error handler.
