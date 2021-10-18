@@ -1187,7 +1187,8 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
         self.output_file = output_file
         self.max_iter = max_iter
         self.max_total_iter = max_total_iter
-        self.optimizers = iter(optimizers)
+        self.optimizers = optimizers
+        self.optimizer_id = 0
 
     def check(self):
         o = Cp2kOutput(self.output_file)
@@ -1206,11 +1207,12 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
             ).values[0].upper()
 
         # If list of optimizers includes the starting condition, iterate past it
-        next_opt = next(self.optimizers)
-        if optimizer == next_opt.upper():
-            next_opt = next(self.optimizers)
+        if optimizer == self.optimizers[self.optimizer_id]:
+            self.optimizer_id += 1
 
         if max_iter + self.max_iter > self.max_total_iter:
+            return {"errors": ["Unsuccessful relaxation"], "actions": []}
+        elif self.optimizer_id >= len(self.optimizers):
             return {"errors": ["Unsuccessful relaxation"], "actions": []}
 
         # set optimizer. Ensure CG is 2pnt. 3pnt not fully developed for relaxations
@@ -1222,7 +1224,7 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
                         "_set": {
                             'MOTION': {
                                 'GEO_OPT': {
-                                    'OPTIMIZER': next_opt,
+                                    'OPTIMIZER': self.optimizers[self.optimizer_id],
                                     'MAX_ITER': max_iter + self.max_iter,
                                     'CG': {
                                         'LINE_SEARCH': {
@@ -1233,6 +1235,7 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
                             }
                         }}})
 
+        self.optimizer_id += 1
         restart(actions, self.output_file, self.input_file)
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
         return {"errors": ["Unsuccessful relaxation"], "actions": actions}
