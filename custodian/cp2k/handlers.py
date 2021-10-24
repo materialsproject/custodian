@@ -251,7 +251,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         elif minimizer == 'CG':
             if ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
                     'LINESEARCH', Keyword('LINESEARCH', '2PNT')
-            ).values[0].upper() != '3PNT':
+            ).values[0].upper() != '3PNT' and not rotate:
                 actions.append({'dict': self.input_file,
                                 "action": {"_set": {
                                     'FORCE_EVAL': {
@@ -892,8 +892,6 @@ class AbortHandler(ErrorHandler):
         return {'errors': [self.responses[-1]], 'actions': actions}
 
 
-# TODO: the same conv. value printed over and over sometimes points to imprecision but can also just be
-# a temporary thing that will be fixed by updating preconditioner. How to separate?
 class NumericalPrecisionHandler(ErrorHandler):
 
     """
@@ -914,14 +912,22 @@ class NumericalPrecisionHandler(ErrorHandler):
             eps_default until 1e-16, at which point its probably something else causing the
             problem.
 
-        (2) XC_GRID: The default xc grid is usually sufficient, but systems that have strong
-            xc grid that is double precision.
+        (2) XC_GRID: The default xc grid is usually sufficient, but some systems with strong
+            correlation have been found to require the finer grid.
 
         (3) HF Screening: The numerical approximations used to speed up hybrid calculations
-            can lead to imprecision. EPS_SCHWARZ should be at least 1e-7, for example.
+            can lead to imprecision. EPS_SCHWARZ should usually be at least 1e-7, for example.
 
         (4) ADMM Basis: When using admm, the polarization term being neglected can sometimes
             lead to issues.
+
+        (5) "Fake" numerical precision error due to DIIS optimizer: it has been found that
+            in some systems, OT with the second-order DIIS optimizer will hope around the minimum
+            and report the same value, giving the impression that the issue is numerical
+            precision, when actually it is an SCF/SCF-optimizer problem. This one is rather
+            nefarious because it is hard to separate the two. At present, the best solution is
+            to simply go to the CG algorithm by default when the problem is recognized to
+            alleviate this.
     """
 
     is_monitor = True
@@ -1045,17 +1051,37 @@ class NumericalPrecisionHandler(ErrorHandler):
 
         # If no hybrid modifications were performed
         if len(actions) == 0:
-            eps_default = ci.by_path('FORCE_EVAL/DFT/QS').get('EPS_DEFAULT', Keyword('EPS_DEFAULT', 1e-10)).values[0]
+            # Overall precision
+            eps_default = ci.by_path('FORCE_EVAL/DFT/QS').get('EPS_DEFAULT', Keyword('', 1e-10)).values[0]
 
             # overlap matrix precision
             pgf = ci['force_eval']['dft']['qs'].get(
-                'EPS_PGF_ORB', Keyword('EPS_PGF_ORB', np.sqrt(eps_default))
+                'EPS_PGF_ORB', Keyword('', np.sqrt(eps_default))
             ).values[0]
 
             # realspace KS matrix precision
             gvg = ci['force_eval']['dft']['qs'].get(
-                'EPS_GVG_RSPACE', Keyword('EPS_GVG_RSPACE', np.sqrt(eps_default))
+                'EPS_GVG_RSPACE', Keyword('', np.sqrt(eps_default))
             ).values[0]
+
+            if ci.check('force_eval/dft/scf/ot'):
+                minimizer = ci['force_eval']['dft']['scf']['ot'].get_keyword('minimizer', Keyword('', 'CG')).values[0]
+
+                if minimizer.upper() == 'DIIS' or minimizer.upper() == 'BROYDEN':
+                    actions.append({
+                        'dict': self.input_file,
+                        "action": {
+                            "_set": {
+                                'FORCE_EVAL': {
+                                    'DFT': {
+                                        'SCF': {
+                                            'OT': {
+                                                'MINIMIZER': 'CG'
+                                            }
+                                        }
+                                    }
+                                }
+                            }}})
 
             if eps_default > 1e-12:
                 actions.append({
@@ -1125,9 +1151,12 @@ class NumericalPrecisionHandler(ErrorHandler):
                         }
                     )
 
-            else:
+            elif not ci.check('FORCE_EVAL/DFT/XC/XC_GRID') or \
+                    not ci.by_path('FORCE_EVAL/DFT/XC/XC_GRID').get('USE_FINER_GRID', False):
                 # Try a more expensive XC grid
-                tmp = {'dict': self.input_file,
+                actions.append(
+                    {
+                        'dict': self.input_file,
                         "action": {
                             "_set": {
                                 'FORCE_EVAL': {
@@ -1139,11 +1168,10 @@ class NumericalPrecisionHandler(ErrorHandler):
                                         }
                                     }
                                 }
-                        }}}
-                if not ci.check('FORCE_EVAL/DFT/XC/XC_GRID'):
-                    actions.append(tmp)
-                elif ci.by_path('FORCE_EVAL/DFT/XC/XC_GRID').get('XC_GRID', None):
-                    actions.append(tmp)
+                            }
+                        }
+                    }
+                )
 
         restart(actions, self.output_file, self.input_file)
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
@@ -1157,17 +1185,17 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
     as signified by a line in the output file that says the maximum number of optimization
     steps were reached.
 
-    At present, this handler does the following:
-
-        (1) If the geometry optimization failed using the fast (L)BFGS, switch to the slower, but more
-            robust CG algorithm with 2 point line search.
+    By, this handler works by jumping back-and-forth between BFGS and CG optimizers. BFGS
+    is fast, but unstable when far from the minimum, while CG is slow (and even grows slower as
+    it approaches the minimum) but robust. By switching back and forth, we have found that
+    overall convergence can be accelerated.
     """
 
     is_monitor = True
 
     def __init__(
             self, input_file='cp2k.inp', output_file='cp2k.out', max_iter=20, max_total_iter=200,
-            optimizers=['BFGS', 'CG', 'BFGS', 'CG']
+            optimizers=('BFGS', 'CG', 'BFGS', 'CG')
     ):
         """
         Initialize the error handler.
@@ -1180,7 +1208,8 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
             max_total_iter: max total number of iterations before calling it quits.
                 (Not reached if custodian runs out of things to try on the inner loops)
             optimizers: Which optimizers to try with custodian. Can be used to go back and forth,
-                e.g. Try BFGS then CG then BFGS again for 20 iterations each.
+                e.g. Try BFGS then CG then BFGS again for 20 iterations each until the max total
+                iterations is reached.
         """
 
         self.input_file = input_file
