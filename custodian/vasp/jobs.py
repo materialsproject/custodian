@@ -264,9 +264,9 @@ class VaspJob(Job):
         for f in VASP_OUTPUT_FILES + [self.output_file]:
             if os.path.exists(f):
                 if self.final and self.suffix != "":
-                    shutil.move(f, "{}{}".format(f, self.suffix))
+                    shutil.move(f, f"{f}{self.suffix}")
                 elif self.suffix != "":
-                    shutil.copy(f, "{}{}".format(f, self.suffix))
+                    shutil.copy(f, f"{f}{self.suffix}")
 
         if self.copy_magmom and not self.final:
             try:
@@ -649,7 +649,7 @@ class VaspJob(Job):
                 vasp_cmd,
                 final=False,
                 backup=backup,
-                suffix=".static.%f" % x,
+                suffix=f".static.{x}",
                 settings_override=settings,
                 **vasp_job_kwargs,
             )

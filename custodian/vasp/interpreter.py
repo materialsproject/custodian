@@ -53,6 +53,6 @@ class VaspModder(Modder):
             elif "file" in a:
                 self.modify(a["action"], a["file"])
             else:
-                raise ValueError("Unrecognized format: {}".format(a))
+                raise ValueError(f"Unrecognized format: {a}")
         for f in modified:
             self.vi[f].write_file(f)
