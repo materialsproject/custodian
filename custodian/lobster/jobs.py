@@ -71,7 +71,7 @@ class LobsterJob(Job):
         """
         if self.backup:
             for f in LOBSTERINPUT_FILES:
-                shutil.copy(f, "{}.orig".format(f))
+                shutil.copy(f, f"{f}.orig")
 
     def run(self):
         """
@@ -79,7 +79,7 @@ class LobsterJob(Job):
         """
         cmd = self.lobster_cmd
 
-        logger.info("Running {}".format(" ".join(cmd)))
+        logger.info(f"Running {' '.join(cmd)}")
 
         with zopen(self.output_file, "w") as f_std, zopen(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr

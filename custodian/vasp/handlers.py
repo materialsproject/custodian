@@ -762,7 +762,7 @@ class DriftErrorHandler(ErrorHandler):
         curr_drift = np.average([np.linalg.norm(d) for d in curr_drift])
         VaspModder(vi=vi).apply_actions(actions)
         return {
-            "errors": "Excessive drift {} > {}".format(curr_drift, self.max_drift),
+            "errors": f"Excessive drift {curr_drift} > {self.max_drift}",
             "actions": actions,
         }
 
@@ -1499,10 +1499,7 @@ class CheckpointHandler(ErrorHandler):
         Perform corrections.
         """
         content = "LSTOP = .TRUE."
-        chkpt_content = 'Index: %d\nTime: "%s"' % (
-            self.chk_counter,
-            datetime.datetime.now(),
-        )
+        chkpt_content = f'Index: {self.chk_counter}\nTime: "{datetime.datetime.now()}"'
         self.chk_counter += 1
 
         # Write STOPCAR
@@ -1524,7 +1521,7 @@ class CheckpointHandler(ErrorHandler):
         return {"errors": ["Checkpoint reached"], "actions": actions}
 
     def __str__(self):
-        return "CheckpointHandler with interval %d" % self.interval
+        return f"CheckpointHandler with interval {self.interval}"
 
 
 class StoppedRunHandler(ErrorHandler):
@@ -1563,7 +1560,7 @@ class StoppedRunHandler(ErrorHandler):
         """
         d = loadfn("chkpt.yaml")
         i = d["Index"]
-        name = shutil.make_archive(os.path.join(os.getcwd(), "vasp.chk.%d" % i), "gztar")
+        name = shutil.make_archive(os.path.join(os.getcwd(), f"vasp.chk.{i}"), "gztar")
 
         actions = [{"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}]
 

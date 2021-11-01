@@ -64,7 +64,7 @@ class NwchemJob(Job):
         Performs backup if necessary.
         """
         if self.backup:
-            shutil.copy(self.input_file, "{}.orig".format(self.input_file))
+            shutil.copy(self.input_file, f"{self.input_file}.orig")
 
     def run(self):
         """

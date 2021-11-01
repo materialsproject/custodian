@@ -95,7 +95,7 @@ class QCJob(Job):
         Sets up environment variables necessary to efficiently run QChem
         """
         if self.backup:
-            shutil.copy(self.input_file, "{}.orig".format(self.input_file))
+            shutil.copy(self.input_file, f"{self.input_file}.orig")
         if self.multimode == "openmp":
             os.environ["QCTHREADS"] = str(self.max_cores)
             os.environ["OMP_NUM_THREADS"] = str(self.max_cores)
@@ -261,14 +261,14 @@ class QCJob(Job):
                         input_file=input_file,
                         output_file=output_file,
                         qclog_file=qclog_file,
-                        suffix=".{}_".format(opt_method) + str(ii),
+                        suffix=f".{opt_method}_" + str(ii),
                         save_scratch=True,
                         backup=first,
                         **QCJob_kwargs,
                     )
                 )
-                opt_outdata = QCOutput(output_file + ".{}_".format(opt_method) + str(ii)).data
-                opt_indata = QCInput.from_file(input_file + ".{}_".format(opt_method) + str(ii))
+                opt_outdata = QCOutput(output_file + f".{opt_method}_" + str(ii)).data
+                opt_indata = QCInput.from_file(input_file + f".{opt_method}_" + str(ii))
                 if opt_indata.rem["scf_algorithm"] != freq_rem["scf_algorithm"]:
                     freq_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
                     opt_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
@@ -374,12 +374,12 @@ class QCJob(Job):
                         input_file=input_file,
                         output_file=output_file,
                         qclog_file=qclog_file,
-                        suffix=".{}_".format(opt_method) + str(ii),
+                        suffix=f".{opt_method}_" + str(ii),
                         backup=first,
                         **QCJob_kwargs,
                     )
                 )
-                opt_outdata = QCOutput(output_file + ".{}_".format(opt_method) + str(ii)).data
+                opt_outdata = QCOutput(output_file + f".{opt_method}_" + str(ii)).data
                 if first:
                     orig_species = copy.deepcopy(opt_outdata.get("species"))
                     orig_charge = copy.deepcopy(opt_outdata.get("charge"))

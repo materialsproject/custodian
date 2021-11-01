@@ -73,11 +73,11 @@ class FeffJob(Job):
 
         if self.backup:
             for f in FEFF_INPUT_FILES:
-                shutil.copy(f, "{}.orig".format(f))
+                shutil.copy(f, f"{f}.orig")
 
             for f in FEFF_BACKUP_FILES:
                 if os.path.isfile(f):
-                    shutil.copy(f, "{}.orig".format(f))
+                    shutil.copy(f, f"{f}.orig")
 
     def run(self):
 

@@ -70,7 +70,7 @@ class Modder:
             if action in self.supported_actions:
                 self.supported_actions[action].__call__(obj, settings)
             elif self.strict:
-                raise ValueError("{} is not a supported action!".format(action))
+                raise ValueError(f"{action} is not a supported action!")
 
     def modify_object(self, modification, obj):
         """

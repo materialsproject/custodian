@@ -588,7 +588,7 @@ class Custodian:
                 if v.check():
                     self.run_log[-1]["validator"] = v
                     logger.info("Failed validation based on validator")
-                    s = "Validation failed: {}".format(v)
+                    s = f"Validation failed: {v}"
                     raise ValidationError(s, True, v)
 
             logger.info(f"Postprocessing for {job.name}.run")
@@ -657,7 +657,7 @@ class Custodian:
 
                 logger.error(f"Bad handler {h}")
                 logger.error(traceback.format_exc())
-                corrections.append({"errors": ["Bad handler %s " % h], "actions": []})
+                corrections.append({"errors": [f"Bad handler {h}"], "actions": []})
         self.total_errors += len(corrections)
         self.errors_current_job += len(corrections)
         self.run_log[-1]["corrections"].extend(corrections)
