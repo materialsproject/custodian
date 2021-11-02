@@ -7,14 +7,25 @@ from custodian.ansible.interpreter import Modder
 from pymatgen.io.cp2k.inputs import Cp2kInput
 from custodian.cp2k.utils import cleanup_input
 
+__author__ = "Nicholas Winner"
+__version__ = "0.9"
+__email__ = "nwinner@berkeley.edu"
+__date__ = "October 2021"
+
 
 class Cp2kModder(Modder):
+    """
+    Cp2kModder is a lightweight class for applying modifications to cp2k input files. It
+    also supports modifications that are file operations (e.g. copying).
+    """
 
     def __init__(self, filename='cp2k.inp', actions=None, strict=True, ci=None):
         """
         Initializes a Modder for Cp2kInput sets
 
         Args:
+            filename (str): name of cp2k input file to modify. This file will be overwritten
+                if actions are applied.
             actions ([Action]): A sequence of supported actions. See
                 :mod:`custodian.ansible.actions`. Default is None,
                 which means DictActions and FileActions are supported.
