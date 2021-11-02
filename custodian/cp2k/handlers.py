@@ -425,6 +425,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                 "FORCE_EVAL": {
                                     "DFT": {
                                         "SCF": {
+                                            "ADDED_MOS": 1000,
                                             "SMEAR": {
                                                 "ELEC_TEMP": 300,
                                                 "METHOD": "FERMI_DIRAC"
