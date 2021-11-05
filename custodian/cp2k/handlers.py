@@ -299,7 +299,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                             'MAX_SCF': 100,
                                             'OT': {
                                                 'LINESEARCH': '2PNT',
-                                                'ROTATE': True,
+                                                'ROTATION': True,
                                                 'PRECONDITIONER': 'FULL_KINETIC',
                                                 'OCCUPATION_PRECONDITIONER': True,
                                                 'ALGORITHM': 'IRAC'
