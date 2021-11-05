@@ -167,34 +167,79 @@ class Cp2kJob(Job):
         depending on the hybrid run.
         """
 
-        ggaJob = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
-                         stderr_file=stderr_file, final=False, suffix=".1",
-                         settings_override=settings_override_gga)
+        job1_settings_override = [
+            {
+                "dict": input_file,
+                "action": {
+                    '_unset': {
+                        'FORCE_EVAL': {
+                            'DFT': 'XC'
+                        }
+                    },
+                    '_set': {
+                        'GLOBAL': {
+                            'PROJECT_NAME': 'GGA',
+                            'RUN_TYPE': 'ENERGY_FORCE'
+                        }
+                    }
+                },
+            },
+            {
+                "dict": input_file,
+                "action": {
+                    '_set': {
+                        'FORCE_EVAL': {
+                            'DFT': {
+                                'XC': {
+                                    'PBE': {}
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+        ]
 
-        del ggaJob.ci['force_eval']['dft']['AUXILIARY_DENSITY_MATRIX_METHOD']
-        del ggaJob.ci['force_eval']['dft']['xc']['hf']
-        r = ggaJob.ci['global'].get('run_type', Keyword('RUN_TYPE', 'ENERGY_FORCE')).values[0]
-        if r not in ['ENERGY', 'WAVEFUNCTION_OPTIMIZATION', 'WFN_OPT']:
-            ggaJob.settings_override = {'GLOBAL': {'RUN_TYPE': 'ENERGY_FORCE'}}
-        ggaJob.ci.silence()  # Turn off all printing
+        job1 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
+                       stderr_file=stderr_file, final=False, suffix="1",
+                       settings_override=job1_settings_override)
 
-        for k,v in ggaJob.ci['force_eval']['dft']['xc'].subsections.items():
-            if v.name.upper() == 'XC_FUNCTIONAL':
-                for k2, v2 in v.subsections.items():
-                    v2.keywords = {}
+        ci = Cp2kInput.from_file(zpath(input_file))
+        r = ci['global'].get('run_type', Keyword('RUN_TYPE', 'ENERGY_FORCE')).values[0]
+        if r in ['ENERGY', 'WAVEFUNCTION_OPTIMIZATION', 'WFN_OPT', "ENERGY_FORCE"]:  # no need for double job
+            return [job1]
 
-        ggaJob.ci['global']['project_name'] = 'GGA-PRE-CALC'
-        ggaJob.ci.set({'GLOBAL': {'PROJECT_NAME': 'GGA-PRE-CALC'}})
+        job2_settings_override = [
+            {
+                "dict": input_file,
+                "action": {
+                    '_set': {
+                        'FORCE_EVAL': {
+                            'DFT': {
+                                'XC': {
+                                    'HF': {
+                                        'SCREENING': {
+                                            'SCREEN_ON_INITIAL_P': True,
+                                            'SCREEN_P_FORCES': True,
+                                        }
+                                    }
+                                },
+                                'WFN_RESTART_FILE_NAME': 'GGA-RESTART.wfn'
+                            }
+                        },
+                        'GLOBAL': {
+                            'RUN_TYPE': r
+                        }
+                    },
+                }
+            }
+        ]
 
-        hybridJob = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
-                            stderr_file=stderr_file, final=False, suffix=".2",
-                            settings_override=settings_override_hybrid)
+        job2 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
+                       stderr_file=stderr_file, final=True, suffix="2", restart=False,
+                       settings_override=job2_settings_override)
 
-        # If the job has a restart file, assume that the gga should now be the restart
-        if hybridJob.ci['force_eval']['dft'].get('wfn_restart_file_name'):
-            hybridJob.ci['force_eval']['dft']['wfn_restart_file_name'] = 'GGA-PRE-CALC-RESTART.wfn'
-
-        return [ggaJob, hybridJob]
+        return [job1, job2]
 
     @classmethod
     def double_job(cls, cp2k_cmd, input_file="cp2k.inp", output_file="cp2k.out",
