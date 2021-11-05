@@ -191,7 +191,9 @@ class Cp2kJob(Job):
                         'FORCE_EVAL': {
                             'DFT': {
                                 'XC': {
-                                    'PBE': {}
+                                    'XC_FUNCTIONAL': {
+                                        'PBE': {}
+                                    }
                                 }
                             }
                         }
