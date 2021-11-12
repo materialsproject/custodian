@@ -6,7 +6,7 @@ Implements various interpreters and modders for VASP.
 
 from pymatgen.io.vasp.inputs import VaspInput
 
-from custodian.ansible.actions import FileActions, DictActions
+from custodian.ansible.actions import DictActions, FileActions
 from custodian.ansible.interpreter import Modder
 
 

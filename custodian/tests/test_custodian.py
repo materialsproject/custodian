@@ -1,20 +1,28 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division, print_function
-import unittest
-import random
-from custodian.custodian import Job, ErrorHandler, Custodian, Validator
-from custodian.custodian import ValidationError, NonRecoverableError, ReturnCodeError
-from custodian.custodian import (
-    MaxCorrectionsError,
-    MaxCorrectionsPerJobError,
-    MaxCorrectionsPerHandlerError,
-)
-import os
+from __future__ import division, print_function, unicode_literals
+
 import glob
+import os
+import random
 import shutil
 import subprocess
+import unittest
+
 import ruamel.yaml as yaml
+
+from custodian.custodian import (
+    Custodian,
+    ErrorHandler,
+    Job,
+    MaxCorrectionsError,
+    MaxCorrectionsPerHandlerError,
+    MaxCorrectionsPerJobError,
+    NonRecoverableError,
+    ReturnCodeError,
+    ValidationError,
+    Validator,
+)
 
 """
 Created on Jun 1, 2012

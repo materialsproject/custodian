@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
+from __future__ import division, unicode_literals
 
 import os
 import shutil
@@ -10,10 +10,12 @@ try:
     from unittest.mock import patch  # type: ignore
 except ImportError:
     from mock import patch  # type: ignore
+
 import unittest
 
-from custodian.qchem.jobs import QCJob
 from pymatgen.io.qchem.inputs import QCInput
+
+from custodian.qchem.jobs import QCJob
 
 __author__ = "Samuel Blau"
 __copyright__ = "Copyright 2018, The Materials Project"

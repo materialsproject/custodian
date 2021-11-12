@@ -8,7 +8,7 @@ import os
 
 from pymatgen.io.feff.sets import FEFFDictSet
 
-from custodian.ansible.actions import FileActions, DictActions
+from custodian.ansible.actions import DictActions, FileActions
 from custodian.ansible.interpreter import Modder
 
 

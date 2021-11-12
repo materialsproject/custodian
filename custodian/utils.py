@@ -4,10 +4,10 @@
 Utility function and classes.
 """
 
-from glob import glob
 import logging
 import os
 import tarfile
+from glob import glob
 
 
 def backup(filenames, prefix="error"):

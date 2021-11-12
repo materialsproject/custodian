@@ -8,8 +8,8 @@ runs.
 import logging
 import sys
 
+from pymatgen.io.vasp.inputs import Incar, Kpoints, VaspInput
 from ruamel import yaml
-from pymatgen.io.vasp.inputs import VaspInput, Incar, Kpoints
 
 from custodian.custodian import Custodian
 from custodian.vasp.jobs import VaspJob
@@ -84,8 +84,8 @@ def get_jobs(args):
 
         if job_type.startswith("static_dielectric_derived"):
             from pymatgen.io.vasp.sets import (
-                MPStaticSet,
                 MPStaticDielectricDFPTVaspInputSet,
+                MPStaticSet,
             )
 
             # vis = MPStaticSet.from_prev_calc(

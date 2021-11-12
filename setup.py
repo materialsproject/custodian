@@ -5,7 +5,7 @@
 import os
 from io import open
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 with open("README.rst") as f:
     long_desc = f.read()

@@ -21,8 +21,8 @@ from monty.dev import deprecated
 from monty.os.path import zpath
 from monty.serialization import loadfn
 from pymatgen.core.structure import Structure
-from pymatgen.io.vasp.inputs import Poscar, VaspInput, Incar, Kpoints
-from pymatgen.io.vasp.outputs import Vasprun, Oszicar, Outcar
+from pymatgen.io.vasp.inputs import Incar, Kpoints, Poscar, VaspInput
+from pymatgen.io.vasp.outputs import Oszicar, Outcar, Vasprun
 from pymatgen.io.vasp.sets import MPScanRelaxSet
 from pymatgen.transformations.standard_transformations import SupercellTransformation
 
@@ -31,7 +31,6 @@ from custodian.ansible.interpreter import Modder
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from custodian.vasp.interpreter import VaspModder
-
 
 __author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, " "Wei Chen, Stephen Dacek"
 __version__ = "0.1"

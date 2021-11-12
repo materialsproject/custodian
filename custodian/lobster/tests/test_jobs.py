@@ -2,9 +2,10 @@ import os
 import shutil
 import unittest
 
-from custodian.lobster.jobs import LobsterJob
 from monty.os import cd
 from monty.tempfile import ScratchDir
+
+from custodian.lobster.jobs import LobsterJob
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 test_files_lobster2 = os.path.join(MODULE_DIR, "../../../test_files/lobster/lobsterins")

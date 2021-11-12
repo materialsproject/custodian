@@ -6,23 +6,23 @@ given a set of error handlers, the abstract base classes for the
 ErrorHandlers and Jobs.
 """
 
+import datetime
 import logging
+import os
 import subprocess
 import sys
-import datetime
-import time
-from glob import glob
 import tarfile
-import os
-from abc import abstractmethod
-from itertools import islice
+import time
 import warnings
+from abc import abstractmethod
 from ast import literal_eval
+from glob import glob
+from itertools import islice
 
-from monty.tempfile import ScratchDir
+from monty.json import MontyDecoder, MontyEncoder, MSONable
+from monty.serialization import dumpfn, loadfn
 from monty.shutil import gzip_dir
-from monty.json import MSONable, MontyEncoder, MontyDecoder
-from monty.serialization import loadfn, dumpfn
+from monty.tempfile import ScratchDir
 
 from .utils import get_execution_host_info
 

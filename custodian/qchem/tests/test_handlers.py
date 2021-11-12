@@ -1,14 +1,15 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, division
+from __future__ import division, unicode_literals
 
 import os
 import shutil
-from unittest import TestCase
 import unittest
+from unittest import TestCase
+
+from pymatgen.io.qchem.inputs import QCInput
 
 from custodian.qchem.handlers import QChemErrorHandler
-from pymatgen.io.qchem.inputs import QCInput
 
 __author__ = "Samuel Blau, Brandon Woods, Shyam Dwaraknath, Ryan Kingsbury"
 __copyright__ = "Copyright 2018, The Materials Project"
