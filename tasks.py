@@ -17,6 +17,7 @@ from custodian import __version__ as CURRENT_VER
 
 NEW_VER = datetime.datetime.today().strftime("%Y.%-m.%-d")
 
+
 @task
 def make_doc(ctx):
     with cd("docs_rst"):
@@ -37,9 +38,7 @@ def make_doc(ctx):
                         else:
                             if not clean.endswith("tests"):
                                 suboutput.append(line)
-                            if clean.startswith("custodian") and not clean.endswith(
-                                "tests"
-                            ):
+                            if clean.startswith("custodian") and not clean.endswith("tests"):
                                 newoutput.extend(suboutput)
                                 subpackage = False
                                 suboutput = []
@@ -105,9 +104,7 @@ def set_ver(ctx):
     lines = []
     with open("setup.py", "rt") as f:
         for l in f:
-            lines.append(
-                re.sub(r"version=([^,]+),", 'version="%s",' % NEW_VER, l.rstrip())
-            )
+            lines.append(re.sub(r"version=([^,]+),", 'version="%s",' % NEW_VER, l.rstrip()))
     with open("setup.py", "wt") as f:
         f.write("\n".join(lines) + "\n")
 
