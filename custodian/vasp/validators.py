@@ -6,7 +6,7 @@ import logging
 import os
 from collections import deque
 
-from pymatgen.io.vasp import Vasprun, Incar, Outcar, Chgcar
+from pymatgen.io.vasp import Chgcar, Incar, Outcar, Vasprun
 
 from custodian.custodian import Validator
 

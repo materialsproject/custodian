@@ -11,13 +11,12 @@ __status__ = "Beta"
 __date__ = "6/18/13"
 
 
-import unittest
+import glob
 import os
 import shutil
-import glob
+import unittest
 
 from custodian.nwchem.handlers import NwchemErrorHandler
-
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files", "nwchem")
 

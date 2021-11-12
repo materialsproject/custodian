@@ -5,10 +5,10 @@ __maintainer__ = "Chen Zheng"
 __email__ = "chz022@ucsd.edu"
 __date__ = "Oct 18, 2017"
 
-import unittest
-import os
 import glob
+import os
 import shutil
+import unittest
 
 from custodian.feff.handlers import UnconvergedErrorHandler
 

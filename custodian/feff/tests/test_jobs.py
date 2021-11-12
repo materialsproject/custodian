@@ -5,12 +5,14 @@ __maintainer__ = "Chen Zheng"
 __email__ = "chz022@ucsd.edu"
 __date__ = "Oct 18, 2017"
 
-import unittest
 import os
+import unittest
+
 from monty.os import cd
 from monty.tempfile import ScratchDir
-from custodian.feff.jobs import FeffJob
 from pymatgen.io.feff.inputs import Atoms, Tags
+
+from custodian.feff.jobs import FeffJob
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files", "feff_unconverge")
 

@@ -10,31 +10,31 @@ __maintainer__ = "Shyue Ping Ong"
 __email__ = "shyue@mit.edu"
 __date__ = "Jun 1, 2012"
 
-import unittest
-import os
-import glob
-import shutil
 import datetime
+import glob
+import os
+import shutil
+import unittest
+
 import numpy as np
+from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
 
 from custodian.vasp.handlers import (
-    VaspErrorHandler,
-    UnconvergedErrorHandler,
+    AliasingErrorHandler,
+    DriftErrorHandler,
+    FrozenJobErrorHandler,
+    IncorrectSmearingHandler,
+    LargeSigmaHandler,
+    LrfCommutatorHandler,
     MeshSymmetryErrorHandler,
-    WalltimeHandler,
     PositiveEnergyErrorHandler,
     PotimErrorHandler,
-    FrozenJobErrorHandler,
-    AliasingErrorHandler,
-    StdErrHandler,
-    LrfCommutatorHandler,
-    DriftErrorHandler,
-    IncorrectSmearingHandler,
     ScanMetalHandler,
-    LargeSigmaHandler,
+    StdErrHandler,
+    UnconvergedErrorHandler,
+    VaspErrorHandler,
+    WalltimeHandler,
 )
-from pymatgen.io.vasp.inputs import Incar, Structure, Kpoints, VaspInput
-
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")
 

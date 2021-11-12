@@ -2,15 +2,17 @@
 This module implements basic kinds of jobs for QChem runs.
 """
 
+import copy
 import os
 import shutil
-import copy
 import subprocess
 import warnings
+
 import numpy as np
 from pymatgen.core import Molecule
 from pymatgen.io.qchem.inputs import QCInput
 from pymatgen.io.qchem.outputs import QCOutput, check_for_structure_changes
+
 from custodian.custodian import Job
 from custodian.qchem.utils import perturb_coordinates, vector_list_diff
 

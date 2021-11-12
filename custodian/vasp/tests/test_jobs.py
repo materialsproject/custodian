@@ -1,14 +1,16 @@
+import glob
+import multiprocessing
 import unittest
 import os
 import shutil
-import glob
-from monty.tempfile import ScratchDir
-from monty.os import cd
-import multiprocessing
-from custodian.vasp.jobs import VaspJob, VaspNEBJob, GenerateVaspInputJob
-from pymatgen.io.vasp import Incar, Kpoints, Poscar
-import pymatgen
+import unittest
 
+import pymatgen
+from monty.os import cd
+from monty.tempfile import ScratchDir
+from pymatgen.io.vasp import Incar, Kpoints, Poscar
+
+from custodian.vasp.jobs import GenerateVaspInputJob, VaspJob, VaspNEBJob
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")
 pymatgen.core.SETTINGS["PMG_VASP_PSP_DIR"] = os.path.abspath(test_dir)  # type: ignore

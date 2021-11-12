@@ -1,17 +1,25 @@
+import glob
+import os
 import unittest
 import random
-from custodian.custodian import Job, ErrorHandler, Custodian, Validator
-from custodian.custodian import ValidationError, NonRecoverableError, ReturnCodeError
-from custodian.custodian import (
-    MaxCorrectionsError,
-    MaxCorrectionsPerJobError,
-    MaxCorrectionsPerHandlerError,
-)
-import os
-import glob
 import shutil
 import subprocess
+import unittest
+
 import ruamel.yaml as yaml
+
+from custodian.custodian import (
+    Custodian,
+    ErrorHandler,
+    Job,
+    MaxCorrectionsError,
+    MaxCorrectionsPerHandlerError,
+    MaxCorrectionsPerJobError,
+    NonRecoverableError,
+    ReturnCodeError,
+    ValidationError,
+    Validator,
+)
 
 """
 Created on Jun 1, 2012

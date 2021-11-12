@@ -12,8 +12,8 @@ __date__ = "Jun 1, 2012"
 
 import unittest
 
-from custodian.ansible.interpreter import Modder
 from custodian.ansible.actions import FileActions
+from custodian.ansible.interpreter import Modder
 
 
 class ModderTest(unittest.TestCase):

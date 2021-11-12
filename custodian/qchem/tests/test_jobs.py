@@ -1,3 +1,4 @@
+
 import os
 import shutil
 from unittest import TestCase
@@ -5,11 +6,12 @@ from unittest import TestCase
 try:
     from unittest.mock import patch  # type: ignore
 except ImportError:
-    from unittest.mock import patch  # type: ignore
+    from mock import patch  # type: ignore
 import unittest
 
-from custodian.qchem.jobs import QCJob
 from pymatgen.io.qchem.inputs import QCInput
+
+from custodian.qchem.jobs import QCJob
 
 __author__ = "Samuel Blau"
 __copyright__ = "Copyright 2018, The Materials Project"

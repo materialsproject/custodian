@@ -2,8 +2,8 @@
 This module implements basic kinds of jobs for Nwchem runs.
 """
 
-import subprocess
 import shutil
+import subprocess
 
 from monty.io import zopen
 from monty.shutil import gzip_dir
