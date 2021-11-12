@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """
 This module implements the main Custodian class, which manages a list of jobs
 given a set of error handlers, the abstract base classes for the

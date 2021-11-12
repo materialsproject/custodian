@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """
 This module implements specific error handlers for VASP runs. These handlers
 tries to detect common errors in vasp runs and attempt to fix them on the fly
@@ -147,7 +145,7 @@ class VaspErrorHandler(ErrorHandler):
         incar = Incar.from_file("INCAR")
         self.errors = set()
         error_msgs = set()
-        with open(self.output_filename, "r") as f:
+        with open(self.output_filename) as f:
             for line in f:
                 l = line.strip()
                 for err, msgs in VaspErrorHandler.error_msgs.items():
@@ -477,7 +475,7 @@ class LrfCommutatorHandler(ErrorHandler):
         Check for error.
         """
         self.errors = set()
-        with open(self.output_filename, "r") as f:
+        with open(self.output_filename) as f:
             for line in f:
                 l = line.strip()
                 for err, msgs in LrfCommutatorHandler.error_msgs.items():
@@ -536,7 +534,7 @@ class StdErrHandler(ErrorHandler):
         Check for error.
         """
         self.errors = set()
-        with open(self.output_filename, "r") as f:
+        with open(self.output_filename) as f:
             for line in f:
                 l = line.strip()
                 for err, msgs in StdErrHandler.error_msgs.items():
@@ -603,7 +601,7 @@ class AliasingErrorHandler(ErrorHandler):
         """
         incar = Incar.from_file("INCAR")
         self.errors = set()
-        with open(self.output_filename, "r") as f:
+        with open(self.output_filename) as f:
             for line in f:
                 l = line.strip()
                 for err, msgs in AliasingErrorHandler.error_msgs.items():
@@ -813,7 +811,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
                 return False
         except Exception:
             pass
-        with open(self.output_filename, "r") as f:
+        with open(self.output_filename) as f:
             for line in f:
                 l = line.strip()
                 if l.find(msg) != -1:
@@ -1170,7 +1168,7 @@ class PotimErrorHandler(ErrorHandler):
         try:
             oszicar = Oszicar(self.output_filename)
             n = len(Poscar.from_file(self.input_filename).structure)
-            max_dE = max([s["dE"] for s in oszicar.ionic_steps[1:]]) / n
+            max_dE = max(s["dE"] for s in oszicar.ionic_steps[1:]) / n
             if max_dE > self.dE_threshold:
                 return True
         except Exception:

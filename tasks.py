@@ -2,7 +2,6 @@
 Deployment file to facilitate releases of custodian.
 """
 
-from __future__ import division
 
 import datetime
 import glob
@@ -28,7 +27,7 @@ def make_doc(ctx):
                 newoutput = []
                 suboutput = []
                 subpackage = False
-                with open(f, "r") as fid:
+                with open(f) as fid:
                     for line in fid:
                         clean = line.strip()
                         if clean == "Subpackages":
@@ -94,7 +93,7 @@ def test(ctx):
 @task
 def set_ver(ctx):
     lines = []
-    with open("custodian/__init__.py", "rt") as f:
+    with open("custodian/__init__.py") as f:
         for l in f:
             if "__version__" in l:
                 lines.append('__version__ = "%s"' % NEW_VER)
@@ -104,7 +103,7 @@ def set_ver(ctx):
         f.write("\n".join(lines) + "\n")
 
     lines = []
-    with open("setup.py", "rt") as f:
+    with open("setup.py") as f:
         for l in f:
             lines.append(
                 re.sub(r"version=([^,]+),", 'version="%s",' % NEW_VER, l.rstrip())

@@ -1,6 +1,3 @@
-# coding: utf-8
-
-from __future__ import division, unicode_literals
 
 import os
 import shutil
@@ -10,7 +7,6 @@ try:
     from unittest.mock import patch  # type: ignore
 except ImportError:
     from mock import patch  # type: ignore
-
 import unittest
 
 from pymatgen.io.qchem.inputs import QCInput

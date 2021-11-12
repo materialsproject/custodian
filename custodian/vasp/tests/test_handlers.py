@@ -1,7 +1,3 @@
-# coding: utf-8
-
-from __future__ import division, unicode_literals
-
 """
 Created on Jun 1, 2012
 """
@@ -97,7 +93,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["rot_matrix"])
-        self.assertEqual(set([a["dict"] for a in d["actions"]]), {"KPOINTS"})
+        self.assertEqual({a["dict"] for a in d["actions"]}, {"KPOINTS"})
 
         h = VaspErrorHandler("vasp.real_optlay")
         h.check()

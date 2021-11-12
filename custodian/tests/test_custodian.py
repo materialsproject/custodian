@@ -1,9 +1,6 @@
-# coding: utf-8
-
-from __future__ import division, print_function, unicode_literals
-
 import glob
 import os
+import unittest
 import random
 import shutil
 import subprocess
@@ -44,7 +41,7 @@ class ExitCodeJob(Job):
         pass
 
     def run(self):
-        return subprocess.Popen("exit {}".format(self.exitcode), shell=True)
+        return subprocess.Popen(f"exit {self.exitcode}", shell=True)
 
     def postprocess(self):
         pass
@@ -70,7 +67,7 @@ class ExampleJob(Job):
 
     @property
     def name(self):
-        return "ExampleJob{}".format(self.jobid)
+        return f"ExampleJob{self.jobid}"
 
 
 class ExampleHandler(ErrorHandler):
