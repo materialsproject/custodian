@@ -1,6 +1,3 @@
-# coding: utf-8
-
-from __future__ import unicode_literals, division
 import unittest
 import os
 import shutil
@@ -67,8 +64,8 @@ class VaspJobTest(unittest.TestCase):
                     "POSCAR",
                     "vasprun.xml",
                 ]:
-                    self.assertTrue(os.path.isfile("{}.test".format(f)))
-                    os.remove("{}.test".format(f))
+                    self.assertTrue(os.path.isfile(f"{f}.test"))
+                    os.remove(f"{f}.test")
                 shutil.move("INCAR.backup", "INCAR")
 
                 self.assertAlmostEqual(incar["MAGMOM"], [3.007, 1.397, -0.189, -0.189])
@@ -162,16 +159,16 @@ class VaspNEBJobTest(unittest.TestCase):
             v.postprocess()
 
             for f in neb_outputs:
-                self.assertTrue(os.path.isfile("{}.test".format(f)))
-                os.remove("{}.test".format(f))
+                self.assertTrue(os.path.isfile(f"{f}.test"))
+                os.remove(f"{f}.test")
 
             sub_folders = glob.glob("[0-9][0-9]")
             for sf in sub_folders:
                 os.chdir(os.path.join(postprocess_neb, sf))
                 for f in neb_sub_outputs:
                     if os.path.exists(f):
-                        self.assertTrue(os.path.isfile("{}.test".format(f)))
-                        os.remove("{}.test".format(f))
+                        self.assertTrue(os.path.isfile(f"{f}.test"))
+                        os.remove(f"{f}.test")
 
 
 class GenerateVaspInputJobTest(unittest.TestCase):

@@ -196,8 +196,7 @@ def get_jobs(args):
         elif job_type.startswith("relax"):
             pass
         elif job_type.startswith("full_relax"):
-            for j in VaspJob.full_opt_run(vasp_command):
-                yield j
+            yield from VaspJob.full_opt_run(vasp_command)
         else:
             print(f"Unsupported job type: {job}")
             sys.exit(-1)

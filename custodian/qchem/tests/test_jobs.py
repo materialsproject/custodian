@@ -1,7 +1,3 @@
-# coding: utf-8
-
-from __future__ import unicode_literals, division
-
 import os
 import shutil
 from unittest import TestCase
@@ -9,7 +5,7 @@ from unittest import TestCase
 try:
     from unittest.mock import patch  # type: ignore
 except ImportError:
-    from mock import patch  # type: ignore
+    from unittest.mock import patch  # type: ignore
 import unittest
 
 from custodian.qchem.jobs import QCJob

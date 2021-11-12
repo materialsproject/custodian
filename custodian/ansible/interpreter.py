@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """
 This module implements a Modder class that performs modifications on objects
 using support actions.
