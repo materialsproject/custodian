@@ -132,7 +132,7 @@ The ExampleJob has the following code.
 
         @property
         def name(self):
-            return "ExampleJob{}".format(self.jobid)
+            return f"ExampleJob{self.jobid}"
 
 
 The ExampleJob simply sums a random sequence of 100 numbers between 0 and

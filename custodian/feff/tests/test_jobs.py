@@ -1,7 +1,3 @@
-# coding: utf-8
-
-from __future__ import unicode_literals, division
-
 __author__ = "Chen Zheng"
 __copyright__ = "Copyright 2012, The Materials Project"
 __version__ = "0.1"

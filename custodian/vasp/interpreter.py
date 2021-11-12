@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """
 Implements various interpreters and modders for VASP.
 """

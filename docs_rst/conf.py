@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # pymatgen documentation build configuration file, created by
 # sphinx-quickstart on Tue Nov 15 00:13:52 2011.
@@ -49,8 +48,8 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"custodian"
-copyright = u"2013, " + __author__
+project = "custodian"
+copyright = "2013, " + __author__
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -193,7 +192,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ("index", "custodian.tex", u"custodian Documentation", __author__, "manual")
+    ("index", "custodian.tex", "custodian Documentation", __author__, "manual")
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -221,7 +220,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [("index", "custodian", u"custodian Documentation", [__author__], 1)]
+man_pages = [("index", "custodian", "custodian Documentation", [__author__], 1)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
@@ -236,7 +235,7 @@ texinfo_documents = [
     (
         "index",
         "custodian",
-        u"custodian Documentation",
+        "custodian Documentation",
         __author__,
         "custodian",
         "One line description of project.",
@@ -257,9 +256,9 @@ texinfo_documents = [
 # -- Options for Epub output ---------------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u"custodian"
+epub_title = "custodian"
 epub_author = __author__
-epub_publisher = u"Shyue Ping Ong, Anubhav Jain, Michael Kocher, Geoffroy Hautier, Dan Gunter, William Davidson Richards"
+epub_publisher = "Shyue Ping Ong, Anubhav Jain, Michael Kocher, Geoffroy Hautier, Dan Gunter, William Davidson Richards"
 epub_copyright = copyright
 
 # The language of the text. It defaults to the language option

@@ -1,6 +1,3 @@
-# coding: utf-8
-
-from __future__ import unicode_literals, division, print_function
 import unittest
 import random
 from custodian.custodian import Job, ErrorHandler, Custodian, Validator
@@ -36,7 +33,7 @@ class ExitCodeJob(Job):
         pass
 
     def run(self):
-        return subprocess.Popen("exit {}".format(self.exitcode), shell=True)
+        return subprocess.Popen(f"exit {self.exitcode}", shell=True)
 
     def postprocess(self):
         pass
@@ -62,7 +59,7 @@ class ExampleJob(Job):
 
     @property
     def name(self):
-        return "ExampleJob{}".format(self.jobid)
+        return f"ExampleJob{self.jobid}"
 
 
 class ExampleHandler(ErrorHandler):
