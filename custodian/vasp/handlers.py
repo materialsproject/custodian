@@ -1460,7 +1460,7 @@ class CheckpointHandler(ErrorHandler):
     max_errors in Custodian must be set to a very high value, and you
     probably wouldn't want to use any standard VASP error handlers. The
     checkpoint will be stored in subdirs chk_#. This should be used in
-    combiantion with the StoppedRunHandler.
+    combination with the StoppedRunHandler.
     """
 
     is_monitor = True

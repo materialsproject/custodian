@@ -369,7 +369,7 @@ class VaspJob(Job):
         # Defaults to using the SCAN metaGGA
         metaGGA = incar.get("METAGGA", "SCAN")
 
-        # Pre optimze WAVECAR and structure using regular GGA
+        # Pre optimize WAVECAR and structure using regular GGA
         pre_opt_setings = [
             {
                 "dict": "INCAR",

@@ -34,10 +34,7 @@ VASP_OUTPUT_FILES = [
 
 
 class LobsterJobTest(unittest.TestCase):
-    """
-    similar to VaspJobTest
-    ommit test of run
-    """
+    """Similar to VaspJobTest. Omit test of run."""
 
     def test_to_from_dict(self):
         v = LobsterJob(lobster_cmd="hello")

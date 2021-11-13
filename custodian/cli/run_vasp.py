@@ -357,7 +357,7 @@ def main():
         'supported at the moment. For example, "relax relax static" '
         "will run a double relaxation followed by a static "
         "run. By default, suffixes are given sequential numbering,"
-        "but this can be overrridden by adding a number to the job"
+        "but this can be overridden by adding a number to the job"
         "type, e.g. relax5 relax6 relax7",
     )
 

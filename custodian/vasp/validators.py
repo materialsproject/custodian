@@ -141,7 +141,7 @@ def check_broken_chgcar(chgcar, diff_thresh=None):
     Check if the charge density file is corrupt
     Args:
         chgcar (Chgcar): Chgcar-like object.
-        diff_thresh (Float): Threshhold for diagonal difference.
+        diff_thresh (Float): Threshold for diagonal difference.
                         None means we won't check for this.
     """
     chgcar_data = chgcar.data["total"]
@@ -154,7 +154,7 @@ def check_broken_chgcar(chgcar, diff_thresh=None):
         If any one diagonal difference accounts for more than a particular portion of
         the total difference between highest and lowest density.
         When we are looking at AECCAR data, since the charge density is so high near the core
-        and we have a course grid, this threshhold can be as high as 0.99
+        and we have a course grid, this threshold can be as high as 0.99
         """
         diff = chgcar_data[:-1, :-1, :-1] - chgcar_data[1:, 1:, 1:]
         if diff.max() / (chgcar_data.max() - chgcar_data.min()) > diff_thresh:
