@@ -464,7 +464,7 @@ class VaspJob(Job):
                 final = Poscar.from_file("CONTCAR").structure
                 vol_change = (final.volume - initial.volume) / initial.volume
 
-                logger.info(f"Vol change = {vol_change * 100} %%!")
+                logger.info(f"Vol change = {vol_change:.1%}!")
                 if abs(vol_change) < vol_change_tol:
                     logger.info("Stopping optimization!")
                     break

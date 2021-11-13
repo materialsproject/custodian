@@ -157,7 +157,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertFalse("IMIX" in vi["INCAR"])
         self.assertTrue(os.path.exists("CHGCAR"))
         if vi["KPOINTS"].style == Kpoints.supported_modes.Gamma and vi["KPOINTS"].num_kpts < 1:
-            all_kpts_even = all([bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0]])
+            all_kpts_even = all(n % 2 == 0 for n in vi["KPOINTS"].kpts[0])
             self.assertFalse(all_kpts_even)
 
         # The next correction check ISYM and no CHGCAR

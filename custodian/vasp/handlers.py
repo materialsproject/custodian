@@ -228,7 +228,7 @@ class VaspErrorHandler(ErrorHandler):
                 self.error_count["brmix"] += 1
 
                 if vi["KPOINTS"].num_kpts < 1:
-                    all_kpts_even = all(bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0])
+                    all_kpts_even = all(n % 2 == 0 for n in vi["KPOINTS"].kpts[0])
                     if all_kpts_even:
                         new_kpts = (tuple(n + 1 for n in vi["KPOINTS"].kpts[0]),)
                         actions.append(
