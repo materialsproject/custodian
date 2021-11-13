@@ -16,7 +16,6 @@ import os
 import shutil
 import unittest
 
-import numpy as np
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
 
 from custodian.vasp.handlers import (
@@ -927,11 +926,11 @@ class DriftErrorHandlerTest(unittest.TestCase):
 
         h = DriftErrorHandler(max_drift=0.0001, enaug_multiply=2)
         h.check()
-        d = h.correct()
+        h.correct()
         incar = Incar.from_file("INCAR")
         self.assertTrue(incar.get("ADDGRID", False))
 
-        d = h.correct()
+        h.correct()
         incar = Incar.from_file("INCAR")
         self.assertEqual(incar.get("PREC"), "High")
         self.assertEqual(incar.get("ENAUG", 0), incar.get("ENCUT", 2) * 2)

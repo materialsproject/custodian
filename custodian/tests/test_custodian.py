@@ -168,7 +168,7 @@ class CustodianTest(unittest.TestCase):
         )
         output = c.run()
         self.assertEqual(len(output), njobs)
-        d = ExampleHandler(params).as_dict()
+        ExampleHandler(params).as_dict()
 
     def test_run_interrupted(self):
         njobs = 100
