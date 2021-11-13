@@ -1,6 +1,5 @@
 import glob
 import os
-import unittest
 import random
 import shutil
 import subprocess

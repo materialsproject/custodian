@@ -1,0 +1,7 @@
+exclude: ^(test_files|docs)
+
+repos:
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.9.3
+    hooks:
+      - id: isort
