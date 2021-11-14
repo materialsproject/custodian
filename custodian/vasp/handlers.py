@@ -30,7 +30,7 @@ from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from custodian.vasp.interpreter import VaspModder
 
-__author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, " "Wei Chen, Stephen Dacek"
+__author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen, Stephen Dacek, Andrew Rosen"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
 __email__ = "ongsp@ucsd.edu"
@@ -103,6 +103,7 @@ class VaspErrorHandler(ErrorHandler):
         output_filename="vasp.out",
         natoms_large_cell=100,
         errors_subset_to_catch=None,
+        vtst_fixes=False,
     ):
         """
         Initializes the handler with the output file to check.
@@ -129,6 +130,8 @@ class VaspErrorHandler(ErrorHandler):
 
                 handler = VaspErrorHandler(errors_subset_to_catch=subset)
                 ```
+            vtst_fixes (bool): Whether to consider VTST optimizers. Defaults to
+                False for compatibility purposes.
         """
         self.output_filename = output_filename
         self.errors = set()
@@ -136,6 +139,7 @@ class VaspErrorHandler(ErrorHandler):
         # threshold of number of atoms to treat the cell as large.
         self.natoms_large_cell = natoms_large_cell
         self.errors_subset_to_catch = errors_subset_to_catch or list(VaspErrorHandler.error_msgs.keys())
+        self.vtst_fixes = vtst_fixes
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def check(self):
@@ -295,7 +299,7 @@ class VaspErrorHandler(ErrorHandler):
         if self.errors.intersection(["subspacematrix"]):
             if self.error_count["subspacematrix"] == 0:
                 actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
-            else:
+            elif self.error_count["subspacematrix"] == 1:
                 actions.append({"dict": "INCAR", "action": {"_set": {"PREC": "Accurate"}}})
             self.error_count["subspacematrix"] += 1
 
@@ -359,8 +363,23 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
 
         if "zbrent" in self.errors:
-            actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 1}}})
-            actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+            # ZBRENT is caused by numerical noise in the forces, often near the PES minimum
+            # This is often a severe problem for systems with many atoms and flexible
+            # structures (e.g. zeolites, MOFs)
+            if self.error_count["zbrent"] == 0:
+                # First try changing IBRION to 1 and continuing
+                actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 1}}})
+                actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+            elif self.error_count["zbrent"] == 1:
+                # If that fails, tighten the energy convergence criteria and raise minimum number of SCF steps
+                if vi["INCAR"].get("EDIFF", 1e-6) > 1e-6:
+                    actions.append({"dict": "INCAR", "action": {"_set": {"EDIFF": 1e-6}}})
+                if vi["INCAR"].get("NELMIN", 6) < 6:
+                    actions.append({"dict": "INCAR", "action": {"_set": {"NELMIN": 6}}})
+                if self.vtst_fixes == True:
+                    # FIRE almost always resolves this issue but requires VTST to be installed
+                    actions.append({"dict": "INCAR", "action": {"_set": {"IOPT": 7, "IBRION": 3, "POTIM": 0}}})
+            self.error_count["zbrent"] += 1
 
         if "too_few_bands" in self.errors:
             if "NBANDS" in vi["INCAR"]:
@@ -398,6 +417,8 @@ class VaspErrorHandler(ErrorHandler):
         if "grad_not_orth" in self.errors:
             if vi["INCAR"].get("ISMEAR", 1) < 0:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+            if vi["INCAR"].get("Algo", "Normal") == "All" and (not vi["INCAR"].get("METAGGA") and not vi["INCAR"].get("LHFCALC")):
+                actions.append({"dict": "INCAR", "action": {"_set": {"Algo": "Fast"}}})
 
         if "zheev" in self.errors:
             if vi["INCAR"].get("ALGO", "Fast").lower() != "exact":
@@ -421,9 +442,7 @@ class VaspErrorHandler(ErrorHandler):
                 # next, increase by 100x (10x the original)
                 orig_symprec = vi["INCAR"].get("SYMPREC", 1e-6)
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": orig_symprec * 100}}})
-            else:
-                # if we have already corrected twice, there's nothing else to do
-                pass
+            self.error_count["posmap"] += 1
 
         if "point_group" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
@@ -1293,31 +1312,35 @@ class NonConvergingErrorHandler(ErrorHandler):
         bmix = vi["INCAR"].get("BMIX", 1.0)
         amin = vi["INCAR"].get("AMIN", 0.1)
         actions = []
-        # Ladder from VeryFast to Fast to Fast to All
-        # These progressively switches to more stable but more
-        # expensive algorithms
-        if algo == "VeryFast":
-            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
-        elif algo == "Fast":
-            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
-        elif algo == "Normal":
-            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
-        elif amix > 0.1 and bmix > 0.01:
-            # Try linear mixing
-            actions.append(
-                {
-                    "dict": "INCAR",
-                    "action": {"_set": {"AMIX": 0.1, "BMIX": 0.01, "ICHARG": 2}},
-                }
-            )
-        elif bmix < 3.0 and amin > 0.01:
-            # Try increasing bmix
-            actions.append(
-                {
-                    "dict": "INCAR",
-                    "action": {"_set": {"AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},
-                }
-            )
+        # Ladder from VeryFast to Fast to Normal to All
+        # (except for meta-GGAs and hybrids).
+        # These progressively switch to more stable but more
+        # expensive algorithms.
+        if vi["INCAR"].get("METAGGA"):
+            if algo != "All":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+        elif vi["INCAR"].get("LHFCALC", False) == True:
+            if algo != "All":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+            # elif algo != "Damped":
+            #     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "Time": 0.5}}})
+        else:
+            if algo == "VeryFast":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
+            elif algo == "Fast":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
+            elif algo == "Normal":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+            elif amix > 0.1 and bmix > 0.01:
+                # Try linear mixing
+                actions.append(
+                    {"dict": "INCAR", "action": {"_set": {"AMIX": 0.1, "BMIX": 0.01, "ICHARG": 2}},}
+                )
+            elif bmix < 3.0 and amin > 0.01:
+                # Try increasing bmix
+                actions.append(
+                    {"dict": "INCAR", "action": {"_set": {"AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},}
+                )
 
         if actions:
             backup(VASP_BACKUP_FILES)
