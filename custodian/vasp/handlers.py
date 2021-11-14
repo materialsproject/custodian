@@ -335,10 +335,10 @@ class VaspErrorHandler(ErrorHandler):
             # ZBRENT is caused by numerical noise in the forces, often near the PES minimum
             # This is often a severe problem for systems with many atoms and flexible
             # structures (e.g. zeolites, MOFs)
+            actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
             if self.error_count["zbrent"] == 0:
                 # First try changing IBRION to 1 and continuing
                 actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 1}}})
-                actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
             elif self.error_count["zbrent"] == 1:
                 # If that fails, tighten the energy convergence criteria and raise minimum number of SCF steps
                 if vi["INCAR"].get("EDIFF", 1e-6) > 1e-6:
