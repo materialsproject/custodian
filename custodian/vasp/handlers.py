@@ -870,9 +870,10 @@ class UnconvergedErrorHandler(ErrorHandler):
         algo = v.incar.get("ALGO", "Normal")
         actions = []
         if not v.converged_electronic:
-            # Ladder from VeryFast to Fast to Fast to All
-            # These progressively switches to more stable but more
-            # expensive algorithms
+            # Ladder from VeryFast to Fast to Normal to All
+            # (except for meta-GGAs and hybrids).
+            # These progressively switch to more stable but more
+            # expensive algorithms.
             if v.incar.get("METAGGA", False) is True:
                 if algo != "All":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
