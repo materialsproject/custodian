@@ -874,7 +874,7 @@ class UnconvergedErrorHandler(ErrorHandler):
             # (except for meta-GGAs and hybrids).
             # These progressively switch to more stable but more
             # expensive algorithms.
-            if v.incar.get("METAGGA", False):
+            if v.incar.get("METAGGA"):
                 if algo != "All":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
             elif v.incar.get("LHFCALC", False) is True:
@@ -1307,7 +1307,7 @@ class NonConvergingErrorHandler(ErrorHandler):
         # (except for meta-GGAs and hybrids).
         # These progressively switch to more stable but more
         # expensive algorithms.
-        if vi["INCAR"].get("METAGGA", False):
+        if vi["INCAR"].get("METAGGA"):
             if algo != "All":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
         elif vi["INCAR"].get("LHFCALC", False) is True:
