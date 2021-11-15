@@ -404,7 +404,7 @@ class VaspErrorHandler(ErrorHandler):
             # we do not adjust ALGO in these cases. We only adjust ALGO if GGA/GGA+U 
             # is employed.
             if (
-                (vi["INCAR"].get("Algo", "Normal") == "All" or vi["INCAR"].get("ALGO", "Normal") == "Damped")
+                (vi["INCAR"].get("ALGO", "Normal") == "All" or vi["INCAR"].get("ALGO", "Normal") == "Damped")
                 and not vi["INCAR"].get("METAGGA")
                 and not vi["INCAR"].get("LHFCALC", False)
             ):
