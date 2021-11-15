@@ -103,6 +103,7 @@ class VaspErrorHandler(ErrorHandler):
         output_filename="vasp.out",
         natoms_large_cell=100,
         errors_subset_to_catch=None,
+        vtst_fixes=False
     ):
         """
         Initializes the handler with the output file to check.
@@ -122,6 +123,8 @@ class VaspErrorHandler(ErrorHandler):
                 errors, and not others. If you wish to only excluded one or
                 two of the errors, you can create this list by the following
                 lines:
+            vtst_fixes (bool): Whether to consider VTST optimizers. Defaults to
+                False for compatibility purposes.
 
                 ```
                 subset = list(VaspErrorHandler.error_msgs.keys())
@@ -136,6 +139,7 @@ class VaspErrorHandler(ErrorHandler):
         # threshold of number of atoms to treat the cell as large.
         self.natoms_large_cell = natoms_large_cell
         self.errors_subset_to_catch = errors_subset_to_catch or list(VaspErrorHandler.error_msgs.keys())
+        self.vtst_fixes = vtst_fixes
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def check(self):
@@ -359,8 +363,23 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
 
         if "zbrent" in self.errors:
-            actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 1}}})
+            # ZBRENT is caused by numerical noise in the forces, often near the PES minimum
+            # This is often a severe problem for systems with many atoms and flexible
+            # structures (e.g. zeolites, MOFs)
             actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+            if self.error_count["zbrent"] == 0:
+                # First try changing IBRION to 1 and continuing
+                actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 1}}})
+            elif self.error_count["zbrent"] == 1:
+                # If that fails, tighten the energy convergence criteria and raise minimum number of SCF steps
+                if vi["INCAR"].get("EDIFF", 1e-4) > 1e-6:
+                    actions.append({"dict": "INCAR", "action": {"_set": {"EDIFF": 1e-6}}})
+                if vi["INCAR"].get("NELMIN", 2) < 6:
+                    actions.append({"dict": "INCAR", "action": {"_set": {"NELMIN": 6}}})
+                if self.vtst_fixes is True:
+                    # FIRE almost always resolves this issue but requires VTST to be installed
+                    actions.append({"dict": "INCAR", "action": {"_set": {"IOPT": 7, "IBRION": 3, "POTIM": 0}}})
+            self.error_count["zbrent"] += 1
 
         if "too_few_bands" in self.errors:
             if "NBANDS" in vi["INCAR"]:
