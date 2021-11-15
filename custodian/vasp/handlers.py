@@ -397,15 +397,14 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
 
         if "grad_not_orth" in self.errors:
-            if (
-                (vi["INCAR"].get("Algo", "Normal") == "All"
-                and not vi["INCAR"].get("METAGGA", False)
-                and not vi["INCAR"].get("LHFCALC", False))
-                or vi["INCAR"].get("ALGO", "Normal") == "Damped"
+            if (vi["INCAR"].get("Algo", "Normal") == "All" or vi["INCAR"].get("ALGO", "Normal") == "Damped") and (
+                not vi["INCAR"].get("METAGGA", False) and not vi["INCAR"].get("LHFCALC", False)
             ):
                 actions.append({"dict": "INCAR", "action": {"_set": {"Algo": "Normal"}}})
-            warnings.warn("EDWAV error reported by VASP. You may wish to consider recompiling VASP with"
-            "the -O1 optimization if you used -O2")
+            warnings.warn(
+                "EDWAV error reported by VASP. You may wish to consider recompiling VASP with"
+                "the -O1 optimization if you used -O2"
+            )
 
         if "zheev" in self.errors:
             if vi["INCAR"].get("ALGO", "Fast").lower() != "exact":
