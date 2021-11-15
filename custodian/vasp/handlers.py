@@ -398,7 +398,7 @@ class VaspErrorHandler(ErrorHandler):
 
         if "grad_not_orth" in self.errors:
             if (vi["INCAR"].get("Algo", "Normal") == "All" or vi["INCAR"].get("ALGO", "Normal") == "Damped") and (
-                not vi["INCAR"].get("METAGGA", False) and not vi["INCAR"].get("LHFCALC", False)
+                not vi["INCAR"].get("METAGGA") and not vi["INCAR"].get("LHFCALC", False)
             ):
                 actions.append({"dict": "INCAR", "action": {"_set": {"Algo": "Normal"}}})
             warnings.warn(
