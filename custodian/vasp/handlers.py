@@ -99,7 +99,11 @@ class VaspErrorHandler(ErrorHandler):
     }
 
     def __init__(
-        self, output_filename="vasp.out", natoms_large_cell=100, errors_subset_to_catch=None, vtst_fixes=False,
+        self,
+        output_filename="vasp.out",
+        natoms_large_cell=100,
+        errors_subset_to_catch=None,
+        vtst_fixes=False,
     ):
         """
         Initializes the handler with the output file to check.
@@ -206,7 +210,10 @@ class VaspErrorHandler(ErrorHandler):
 
             elif self.error_count["brmix"] == 2 and vi["KPOINTS"].style == Kpoints.supported_modes.Gamma:
                 actions.append(
-                    {"dict": "KPOINTS", "action": {"_set": {"generation_style": "Monkhorst"}},}
+                    {
+                        "dict": "KPOINTS",
+                        "action": {"_set": {"generation_style": "Monkhorst"}},
+                    }
                 )
                 actions.append({"dict": "INCAR", "action": {"_unset": {"IMIX": 1}}})
                 self.error_count["brmix"] += 1
@@ -223,7 +230,10 @@ class VaspErrorHandler(ErrorHandler):
                     if all_kpts_even:
                         new_kpts = (tuple(n + 1 for n in vi["KPOINTS"].kpts[0]),)
                         actions.append(
-                            {"dict": "KPOINTS", "action": {"_set": {"kpoints": new_kpts}},}
+                            {
+                                "dict": "KPOINTS",
+                                "action": {"_set": {"kpoints": new_kpts}},
+                            }
                         )
 
             else:
@@ -231,17 +241,26 @@ class VaspErrorHandler(ErrorHandler):
                 if vi["KPOINTS"] is not None:
                     if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
                         actions.append(
-                            {"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma"}},}
+                            {
+                                "dict": "KPOINTS",
+                                "action": {"_set": {"generation_style": "Gamma"}},
+                            }
                         )
 
                 # Based on VASP forum's recommendation, you should delete the
                 # CHGCAR and WAVECAR when dealing with this error.
                 if vi["INCAR"].get("ICHARG", 0) < 10:
                     actions.append(
-                        {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}},}
+                        {
+                            "file": "CHGCAR",
+                            "action": {"_file_delete": {"mode": "actual"}},
+                        }
                     )
                     actions.append(
-                        {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}},}
+                        {
+                            "file": "WAVECAR",
+                            "action": {"_file_delete": {"mode": "actual"}},
+                        }
                     )
 
         if "zpotrf" in self.errors:
@@ -297,14 +316,20 @@ class VaspErrorHandler(ErrorHandler):
             if vi["KPOINTS"] is not None:
                 if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
                     actions.append(
-                        {"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma"}},}
+                        {
+                            "dict": "KPOINTS",
+                            "action": {"_set": {"generation_style": "Gamma"}},
+                        }
                     )
 
         if "rot_matrix" in self.errors:
             if vi["KPOINTS"] is not None:
                 if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
                     actions.append(
-                        {"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma"}},}
+                        {
+                            "dict": "KPOINTS",
+                            "action": {"_set": {"generation_style": "Gamma"}},
+                        }
                     )
             else:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
@@ -635,8 +660,14 @@ class AliasingErrorHandler(ErrorHandler):
                         if vi["INCAR"].get("ICHARG", 0) < 10:
                             actions.extend(
                                 [
-                                    {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}},},
-                                    {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}},},
+                                    {
+                                        "file": "CHGCAR",
+                                        "action": {"_file_delete": {"mode": "actual"}},
+                                    },
+                                    {
+                                        "file": "WAVECAR",
+                                        "action": {"_file_delete": {"mode": "actual"}},
+                                    },
                                 ]
                             )
                         break
@@ -650,8 +681,14 @@ class AliasingErrorHandler(ErrorHandler):
             if vi["INCAR"].get("ICHARG", 0) < 10:
                 actions.extend(
                     [
-                        {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}},},
-                        {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}},},
+                        {
+                            "file": "CHGCAR",
+                            "action": {"_file_delete": {"mode": "actual"}},
+                        },
+                        {
+                            "file": "WAVECAR",
+                            "action": {"_file_delete": {"mode": "actual"}},
+                        },
                     ]
                 )
 
@@ -724,7 +761,10 @@ class DriftErrorHandler(ErrorHandler):
         elif incar.get("PREC", "Accurate").lower() != "high":
             actions.append({"dict": "INCAR", "action": {"_set": {"PREC": "High"}}})
             actions.append(
-                {"dict": "INCAR", "action": {"_set": {"ENAUG": incar.get("ENCUT", 520) * 2}},}
+                {
+                    "dict": "INCAR",
+                    "action": {"_set": {"ENAUG": incar.get("ENCUT", 520) * 2}},
+                }
             )
         # PREC is already high and ENAUG set so just increase it
         else:
@@ -975,7 +1015,11 @@ class ScanMetalHandler(ErrorHandler):
         backup(VASP_BACKUP_FILES | {self.output_filename})
         vi = VaspInput.from_directory(".")
 
-        _dummy_structure = Structure([1, 0, 0, 0, 1, 0, 0, 0, 1], ["I"], [[0, 0, 0]],)
+        _dummy_structure = Structure(
+            [1, 0, 0, 0, 1, 0, 0, 0, 1],
+            ["I"],
+            [[0, 0, 0]],
+        )
         new_vis = MPScanRelaxSet(_dummy_structure, bandgap=0)
 
         actions = []
@@ -1039,7 +1083,10 @@ class LargeSigmaHandler(ErrorHandler):
         # minimum value of 0.02 in 3 steps
         if sigma > 0.08:
             actions.append(
-                {"dict": "INCAR", "action": {"_set": {"SIGMA": sigma - 0.06}},}
+                {
+                    "dict": "INCAR",
+                    "action": {"_set": {"SIGMA": sigma - 0.06}},
+                }
             )
 
         VaspModder(vi=vi).apply_actions(actions)
@@ -1285,12 +1332,18 @@ class NonConvergingErrorHandler(ErrorHandler):
             elif amix > 0.1 and bmix > 0.01:
                 # Try linear mixing
                 actions.append(
-                    {"dict": "INCAR", "action": {"_set": {"AMIX": 0.1, "BMIX": 0.01, "ICHARG": 2}},}
+                    {
+                        "dict": "INCAR",
+                        "action": {"_set": {"AMIX": 0.1, "BMIX": 0.01, "ICHARG": 2}},
+                    }
                 )
             elif bmix < 3.0 and amin > 0.01:
                 # Try increasing bmix
                 actions.append(
-                    {"dict": "INCAR", "action": {"_set": {"AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},}
+                    {
+                        "dict": "INCAR",
+                        "action": {"_set": {"AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},
+                    }
                 )
 
         if actions:
@@ -1308,7 +1361,10 @@ class NonConvergingErrorHandler(ErrorHandler):
         """
         if "change_algo" in d:
             del d["change_algo"]
-        return cls(output_filename=d.get("output_filename", "OSZICAR"), nionic_steps=d.get("nionic_steps", 10),)
+        return cls(
+            output_filename=d.get("output_filename", "OSZICAR"),
+            nionic_steps=d.get("nionic_steps", 10),
+        )
 
 
 class WalltimeHandler(ErrorHandler):
@@ -1473,7 +1529,10 @@ class CheckpointHandler(ErrorHandler):
         # Write STOPCAR
         actions = [
             {"file": "STOPCAR", "action": {"_file_create": {"content": content}}},
-            {"file": "chkpt.yaml", "action": {"_file_create": {"content": chkpt_content}},},
+            {
+                "file": "chkpt.yaml",
+                "action": {"_file_create": {"content": chkpt_content}},
+            },
         ]
 
         m = Modder(actions=[FileActions])
