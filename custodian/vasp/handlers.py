@@ -396,8 +396,13 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
 
         if "grad_not_orth" in self.errors:
-            if vi["INCAR"].get("ISMEAR", 1) < 0:
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+            if (
+                (vi["INCAR"].get("Algo", "Normal") == "All"
+                and not vi["INCAR"].get("METAGGA", False)
+                and not vi["INCAR"].get("LHFCALC", False))
+                or vi["INCAR"].get("ALGO", "Normal") == "Damped"
+            ):
+                actions.append({"dict": "INCAR", "action": {"_set": {"Algo": "Normal"}}})
 
         if "zheev" in self.errors:
             if vi["INCAR"].get("ALGO", "Fast").lower() != "exact":
