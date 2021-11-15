@@ -180,7 +180,10 @@ class VaspErrorHandler(ErrorHandler):
             if vi["INCAR"].get("KSPACING"):
                 # decrease KSPACING by 20% in each direction (approximately double no. of kpoints)
                 actions.append(
-                    {"dict": "INCAR", "action": {"_set": {"KSPACING": vi["INCAR"].get("KSPACING") * 0.8}},}
+                    {
+                        "dict": "INCAR",
+                        "action": {"_set": {"KSPACING": vi["INCAR"].get("KSPACING") * 0.8}},
+                    }
                 )
             else:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
@@ -220,7 +223,10 @@ class VaspErrorHandler(ErrorHandler):
 
             elif self.error_count["brmix"] in [2, 3] and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
                 actions.append(
-                    {"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma"}},}
+                    {
+                        "dict": "KPOINTS",
+                        "action": {"_set": {"generation_style": "Gamma"}},
+                    }
                 )
                 actions.append({"dict": "INCAR", "action": {"_unset": {"IMIX": 1}}})
                 self.error_count["brmix"] += 1
@@ -769,7 +775,10 @@ class DriftErrorHandler(ErrorHandler):
         # PREC is already high and ENAUG set so just increase it
         else:
             actions.append(
-                {"dict": "INCAR", "action": {"_set": {"ENAUG": int(incar.get("ENAUG", 1040) * self.enaug_multiply)}},}
+                {
+                    "dict": "INCAR",
+                    "action": {"_set": {"ENAUG": int(incar.get("ENAUG", 1040) * self.enaug_multiply)}},
+                }
             )
 
         curr_drift = outcar.data.get("drift", [])[::-1][: self.to_average]
