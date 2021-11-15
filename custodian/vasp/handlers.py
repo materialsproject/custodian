@@ -345,7 +345,7 @@ class VaspErrorHandler(ErrorHandler):
                     actions.append({"dict": "INCAR", "action": {"_set": {"EDIFF": 1e-6}}})
                 if vi["INCAR"].get("NELMIN", 6) < 6:
                     actions.append({"dict": "INCAR", "action": {"_set": {"NELMIN": 6}}})
-                if self.vtst_fixes == True:
+                if self.vtst_fixes is True:
                     # FIRE almost always resolves this issue but requires VTST to be installed
                     actions.append({"dict": "INCAR", "action": {"_set": {"IOPT": 7, "IBRION": 3, "POTIM": 0}}})
             self.error_count["zbrent"] += 1
@@ -1270,7 +1270,7 @@ class NonConvergingErrorHandler(ErrorHandler):
         if vi["INCAR"].get("METAGGA"):
             if algo != "All":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
-        elif vi["INCAR"].get("LHFCALC", False) == True:
+        elif vi["INCAR"].get("LHFCALC", False) is True:
             if algo != "All":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
             # elif algo != "Damped":
