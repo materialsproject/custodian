@@ -295,7 +295,7 @@ class VaspErrorHandler(ErrorHandler):
         if self.errors.intersection(["subspacematrix"]):
             if self.error_count["subspacematrix"] == 0:
                 actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
-            else:
+            elif self.error_count["subspacematrix"] == 1:
                 actions.append({"dict": "INCAR", "action": {"_set": {"PREC": "Accurate"}}})
             self.error_count["subspacematrix"] += 1
 
@@ -400,7 +400,7 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
 
         if "zheev" in self.errors:
-            if vi["INCAR"].get("ALGO", "Fast").lower() != "exact":
+            if vi["INCAR"].get("ALGO", "Normal").lower() != "exact":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Exact"}}})
         if "elf_kpar" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": 1}}})
@@ -421,9 +421,7 @@ class VaspErrorHandler(ErrorHandler):
                 # next, increase by 100x (10x the original)
                 orig_symprec = vi["INCAR"].get("SYMPREC", 1e-6)
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": orig_symprec * 100}}})
-            else:
-                # if we have already corrected twice, there's nothing else to do
-                pass
+            self.error_count["posmap"] += 1
 
         if "point_group" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
