@@ -421,8 +421,8 @@ class VaspErrorHandler(ErrorHandler):
             elif (
                 self.error_count["grad_not_orth"] == 1
                 and vi["INCAR"].get("Algo", "Normal") == "All"
-                and not vi["INCAR"].get("METAGGA")
-                and not vi["INCAR"].get("LHFCALC")
+                and not vi["INCAR"].get("METAGGA", False)
+                and not vi["INCAR"].get("LHFCALC", False)
             ):
                 actions.append({"dict": "INCAR", "action": {"_set": {"Algo": "Fast"}}})
             self.error_count["grad_not_orth"] += 1
