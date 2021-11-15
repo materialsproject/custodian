@@ -867,28 +867,37 @@ class UnconvergedErrorHandler(ErrorHandler):
         Perform corrections.
         """
         v = Vasprun(self.output_filename)
+        algo = v.incar.get("ALGO", "Normal")
         actions = []
         if not v.converged_electronic:
             # Ladder from VeryFast to Fast to Fast to All
             # These progressively switches to more stable but more
             # expensive algorithms
-            algo = v.incar.get("ALGO", "Normal")
-            if algo == "VeryFast":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
-            elif algo == "Fast":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
-            elif algo == "Normal":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+            if v.incar.get("METAGGA", False) is True:
+                if algo != "All":
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+            elif v.incar.get("LHFCALC", False) is True:
+                if algo != "All":
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+                # elif algo != "Damped":
+                #     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "Time": 0.5}}})
             else:
-                # Try mixing as last resort
-                new_settings = {
-                    "ISTART": 1,
-                    "ALGO": "Normal",
-                    "NELMDL": -6,
-                    "BMIX": 0.001,
-                    "AMIX_MAG": 0.8,
-                    "BMIX_MAG": 0.001,
-                }
+                if algo == "VeryFast":
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
+                elif algo == "Fast":
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
+                elif algo == "Normal":
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+                else:
+                    # Try mixing as last resort
+                    new_settings = {
+                        "ISTART": 1,
+                        "ALGO": "Normal",
+                        "NELMDL": -6,
+                        "BMIX": 0.001,
+                        "AMIX_MAG": 0.8,
+                        "BMIX_MAG": 0.001,
+                    }
 
                 if not all(v.incar.get(k, "") == val for k, val in new_settings.items()):
                     actions.append({"dict": "INCAR", "action": {"_set": new_settings}})
@@ -1297,7 +1306,7 @@ class NonConvergingErrorHandler(ErrorHandler):
         # (except for meta-GGAs and hybrids).
         # These progressively switch to more stable but more
         # expensive algorithms.
-        if vi["INCAR"].get("METAGGA", False):
+        if vi["INCAR"].get("METAGGA", False) is True:
             if algo != "All":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
         elif vi["INCAR"].get("LHFCALC", False) is True:
