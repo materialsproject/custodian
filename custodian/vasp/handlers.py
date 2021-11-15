@@ -11,6 +11,7 @@ import os
 import re
 import shutil
 import time
+import warnings
 from collections import Counter
 from functools import reduce
 
@@ -403,6 +404,8 @@ class VaspErrorHandler(ErrorHandler):
                 or vi["INCAR"].get("ALGO", "Normal") == "Damped"
             ):
                 actions.append({"dict": "INCAR", "action": {"_set": {"Algo": "Normal"}}})
+            warnings.warn("EDWAV error reported by VASP. You may wish to consider recompiling VASP with"
+            "the -O1 optimization if you used -O2")
 
         if "zheev" in self.errors:
             if vi["INCAR"].get("ALGO", "Fast").lower() != "exact":
