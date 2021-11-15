@@ -900,8 +900,8 @@ class UnconvergedErrorHandler(ErrorHandler):
                         "BMIX_MAG": 0.001,
                     }
 
-                if not all(v.incar.get(k, "") == val for k, val in new_settings.items()):
-                    actions.append({"dict": "INCAR", "action": {"_set": new_settings}})
+                    if not all(v.incar.get(k, "") == val for k, val in new_settings.items()):
+                        actions.append({"dict": "INCAR", "action": {"_set": new_settings}})
 
         elif not v.converged_ionic:
             # Just continue optimizing and let other handles fix ionic
