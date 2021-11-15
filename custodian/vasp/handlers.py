@@ -1293,31 +1293,41 @@ class NonConvergingErrorHandler(ErrorHandler):
         bmix = vi["INCAR"].get("BMIX", 1.0)
         amin = vi["INCAR"].get("AMIN", 0.1)
         actions = []
-        # Ladder from VeryFast to Fast to Fast to All
-        # These progressively switches to more stable but more
-        # expensive algorithms
-        if algo == "VeryFast":
-            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
-        elif algo == "Fast":
-            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
-        elif algo == "Normal":
-            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
-        elif amix > 0.1 and bmix > 0.01:
-            # Try linear mixing
-            actions.append(
-                {
-                    "dict": "INCAR",
-                    "action": {"_set": {"AMIX": 0.1, "BMIX": 0.01, "ICHARG": 2}},
-                }
-            )
-        elif bmix < 3.0 and amin > 0.01:
-            # Try increasing bmix
-            actions.append(
-                {
-                    "dict": "INCAR",
-                    "action": {"_set": {"AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},
-                }
-            )
+        # Ladder from VeryFast to Fast to Normal to All
+        # (except for meta-GGAs and hybrids).
+        # These progressively switch to more stable but more
+        # expensive algorithms.
+        if vi["INCAR"].get("METAGGA", False):
+            if algo != "All":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+        elif vi["INCAR"].get("LHFCALC", False) is True:
+            if algo != "All":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+            # elif algo != "Damped":
+            #     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "Time": 0.5}}})
+        else:
+            if algo == "VeryFast":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
+            elif algo == "Fast":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
+            elif algo == "Normal":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+            elif amix > 0.1 and bmix > 0.01:
+                # Try linear mixing
+                actions.append(
+                    {
+                        "dict": "INCAR",
+                        "action": {"_set": {"AMIX": 0.1, "BMIX": 0.01, "ICHARG": 2}},
+                    }
+                )
+            elif bmix < 3.0 and amin > 0.01:
+                # Try increasing bmix
+                actions.append(
+                    {
+                        "dict": "INCAR",
+                        "action": {"_set": {"AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},
+                    }
+                )
 
         if actions:
             backup(VASP_BACKUP_FILES)
