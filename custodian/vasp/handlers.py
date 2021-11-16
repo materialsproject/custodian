@@ -875,11 +875,16 @@ class UnconvergedErrorHandler(ErrorHandler):
             # These progressively switch to more stable but more
             # expensive algorithms.
             if v.incar.get("METAGGA"):
+                # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
+                # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
                 if algo != "All":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
             elif v.incar.get("LHFCALC", False) is True:
+                # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
+                # support these algorithms, but no warning is printed.
                 if algo != "All":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+                # uncomment below for a backup option
                 # elif algo != "Damped":
                 #     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "Time": 0.5}}})
             else:
@@ -1308,11 +1313,16 @@ class NonConvergingErrorHandler(ErrorHandler):
         # These progressively switch to more stable but more
         # expensive algorithms.
         if vi["INCAR"].get("METAGGA"):
+            # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
+            # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
             if algo != "All":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
         elif vi["INCAR"].get("LHFCALC", False) is True:
+            # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
+            # support these algorithms, but no warning is printed.
             if algo != "All":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+            # uncomment the line below for a backup option
             # elif algo != "Damped":
             #     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "Time": 0.5}}})
         else:
