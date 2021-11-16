@@ -88,6 +88,7 @@ class VaspErrorHandler(ErrorHandler):
         "eddrmm": ["WARNING in EDDRMM: call to ZHEGV failed"],
         "edddav": ["Error EDDDAV: Call to ZHEGV failed"],
         "grad_not_orth": ["EDWAV: internal error, the gradient is not orthogonal"],
+        "algo_tet": ["ALGO=A and IALGO=5X tend to fail"],
         "nicht_konv": ["ERROR: SBESSELITER : nicht konvergent"],
         "zheev": ["ERROR EDDIAG: Call to routine ZHEEV failed!"],
         "elf_kpar": ["ELF: KPAR>1 not implemented"],
@@ -396,6 +397,18 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
 
+        if "algo_tet" in self.errors:
+            # ALGO=All and IALGO=5X often fail with to fail with ISMEAR = -4/-5
+            # ISMEAR should be changed to >= 0, except for DOS calculations
+            # in which case ALGO=Damped should be used after preconverging with ISMEAR>=0
+            if vi["INCAR"].get("ISMEAR", 1) < 0:
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+                if vi["INCAR"].get("NEDOS") or vi["INCAR"].get("EMIN") or vi["INCAR"].get("EMAX"):
+                    warnings.warn(
+                        "If this is a DOS run, note that ISMEAR = 0 is now set. You may wish to"
+                        "continue this job with ALGO = Damped and the tetrahedron method (ISMEAR = -4 or -5)"
+                    )
+
         if "grad_not_orth" in self.errors:
             # This error is due to how VASP is compiled. Depending on the optimization flag and 
             # choice of compiler, the ALGO = All and Damped algorithms may not work with a
@@ -408,7 +421,7 @@ class VaspErrorHandler(ErrorHandler):
                 and not vi["INCAR"].get("METAGGA")
                 and not vi["INCAR"].get("LHFCALC", False)
             ):
-                actions.append({"dict": "INCAR", "action": {"_set": {"Algo": "Normal"}}})
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
             warnings.warn(
                 "EDWAV error reported by VASP. You may wish to consider recompiling VASP with"
                 "the -O1 optimization if you used -O2"
