@@ -300,7 +300,7 @@ class VaspErrorHandler(ErrorHandler):
             self.error_count["subspacematrix"] += 1
 
         if self.errors.intersection(["rspher", "real_optlay", "nicht_konv"]):
-            if vi["INCAR"]["LREAL"].get("LREAL", False) is not False:
+            if vi["INCAR"].get("LREAL", False) is not False:
                 actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
 
         if self.errors.intersection(["tetirr", "incorrect_shift"]):

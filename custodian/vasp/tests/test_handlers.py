@@ -101,26 +101,6 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["errors"], ["real_optlay"])
         self.assertEqual(d["actions"], [{"action": {"_set": {"LREAL": False}}, "dict": "INCAR"}])
 
-        subdir = os.path.join(test_dir, "large_cell_real_optlay")
-        os.chdir(subdir)
-        shutil.copy("INCAR", "INCAR.orig")
-        h = VaspErrorHandler()
-        h.check()
-        d = h.correct()
-        self.assertEqual(d["errors"], ["real_optlay"])
-        vi = VaspInput.from_directory(".")
-        self.assertEqual(vi["INCAR"]["LREAL"], True)
-        h.check()
-        d = h.correct()
-        self.assertEqual(d["errors"], ["real_optlay"])
-        vi = VaspInput.from_directory(".")
-        self.assertEqual(vi["INCAR"]["LREAL"], False)
-        shutil.copy("INCAR.orig", "INCAR")
-        os.remove("INCAR.orig")
-        os.remove("error.1.tar.gz")
-        os.remove("error.2.tar.gz")
-        os.chdir(test_dir)
-
     def test_mesh_symmetry(self):
         h = MeshSymmetryErrorHandler("vasp.ibzkpt")
         h.check()
@@ -229,11 +209,10 @@ class VaspErrorHandlerTest(unittest.TestCase):
 
     def test_nicht_konv(self):
         h = VaspErrorHandler("vasp.nicht_konvergent")
-        h.natoms_large_cell = 5
         self.assertEqual(h.check(), True)
         self.assertEqual(h.correct()["errors"], ["nicht_konv"])
         i = Incar.from_file("INCAR")
-        self.assertEqual(i["LREAL"], True)
+        self.assertEqual(i["LREAL"], False)
 
     def test_edddav(self):
         h = VaspErrorHandler("vasp.edddav")
