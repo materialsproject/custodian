@@ -1263,8 +1263,8 @@ class FrozenJobErrorHandler(ErrorHandler):
 class NonConvergingErrorHandler(ErrorHandler):
     """
     Check if a run is hitting the maximum number of electronic steps at the
-    last nionic_steps ionic steps (default=10). If so, change ALGO from Fast to
-    Normal or kill the job.
+    last nionic_steps ionic steps (default=10). If so, change ALGO using a
+    multi-step ladder scheme or kill the job.
     """
 
     is_monitor = True
