@@ -1081,7 +1081,7 @@ class LargeSigmaHandler(ErrorHandler):
 class MaxForceErrorHandler(ErrorHandler):
     """
     Checks that the desired force convergence has been achieved. Otherwise
-    restarts the run with smaller EDIFF. (This is necessary since energy
+    restarts the run with smaller EDIFFG. (This is necessary since energy
     and force convergence criteria cannot be set simultaneously)
     """
 
