@@ -398,16 +398,17 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
 
         if "algo_tet" in self.errors:
-            # ALGO=All and IALGO=5X often fail with to fail with ISMEAR = -4/-5
+            # ALGO=All and IALGO=5X often fail with ISMEAR = -4/-5.
             # ISMEAR should be changed to >= 0, except for DOS calculations
-            # in which case ALGO=Damped should be used after preconverging with ISMEAR>=0
+            # in which case ALGO=Damped should be used after preconverging with ISMEAR >=0
             if vi["INCAR"].get("ISMEAR", 1) < 0:
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
                 if vi["INCAR"].get("NEDOS") or vi["INCAR"].get("EMIN") or vi["INCAR"].get("EMAX"):
                     warnings.warn(
-                        "If this is a DOS run, note that ISMEAR = 0 is now set. You may wish to"
-                        "continue this job with ALGO = Damped and the tetrahedron method (ISMEAR = -4 or -5)"
+                        "This looks like a DOS run. Pre-converge with ISMEAR >= 0 and then use ALGO = Damped."
+                        "ALGO = All and IALGO = 5X often fail for ISMEAR < 0 otherwise."
                     )
+                else:
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
 
         if "grad_not_orth" in self.errors:
             # This error is due to how VASP is compiled. Depending on the optimization flag and 
