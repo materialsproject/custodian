@@ -912,7 +912,7 @@ class IncorrectSmearingHandler(ErrorHandler):
     Check if a calculation is a metal (zero bandgap), has been run with
     ISMEAR=-5, and is not a static calculation, which is only appropriate for
     semiconductors. If this occurs, this handler will rerun the calculation
-    using the smearing settings appropriate for metals (ISMEAR=-2, SIGMA=0.2).
+    using the smearing settings appropriate for metals (ISMEAR=2, SIGMA=0.2).
     """
 
     is_monitor = False
