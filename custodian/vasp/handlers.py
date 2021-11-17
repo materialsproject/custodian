@@ -1312,7 +1312,7 @@ class NonConvergingErrorHandler(ErrorHandler):
         # (except for meta-GGAs and hybrids).
         # These progressively switch to more stable but more
         # expensive algorithms.
-        if vi["INCAR"].get("METAGGA", "--") != "--":
+        if vi["INCAR"].get("METAGGA", None):
             # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
             # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
             if algo != "All":
@@ -1335,12 +1335,16 @@ class NonConvergingErrorHandler(ErrorHandler):
             elif amix > 0.1 and bmix > 0.01:
                 # Try linear mixing
                 actions.append(
-                    {"dict": "INCAR", "action": {"_set": {"ALGO": "Normal", "AMIX": 0.1, "BMIX": 0.01, "ICHARG": 2}},}
+                    {
+                        "dict": "INCAR",
+                        "action": {"_set": {"ALGO": "Normal", "AMIX": 0.1, "BMIX": 0.01, "ICHARG": 2}},}
                 )
             elif bmix < 3.0 and amin > 0.01:
                 # Try increasing bmix
                 actions.append(
-                    {"dict": "INCAR", "action": {"_set": {"Algo": "Normal", "AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},}
+                    {
+                        "dict": "INCAR",
+                        "action": {"_set": {"Algo": "Normal", "AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},}
                 )
 
         if actions:
