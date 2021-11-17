@@ -888,7 +888,7 @@ class UnconvergedErrorHandler(ErrorHandler):
                 # elif algo != "Damped":
                 #     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "Time": 0.5}}})
             else:
-                if algo == "VeryFast":
+                if algo == "Veryfast":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
                 elif algo == "Fast":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
