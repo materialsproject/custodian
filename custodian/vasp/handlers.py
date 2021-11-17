@@ -874,25 +874,25 @@ class UnconvergedErrorHandler(ErrorHandler):
             # (except for meta-GGAs and hybrids).
             # These progressively switch to more stable but more
             # expensive algorithms.
-            if v.incar.get("METAGGA"):
+            if v.incar.get("METAGGA", "--") != "--":
                 # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
                 # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
-                if algo != "All":
+                if algo.lower() != "all":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
-            elif v.incar.get("LHFCALC", False) is True:
+            elif v.incar.get("LHFCALC", False):
                 # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
                 # support these algorithms, but no warning is printed.
-                if algo != "All":
+                if algo.lower() != "all":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
                 # uncomment below for a backup option
                 # elif algo != "Damped":
                 #     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "Time": 0.5}}})
             else:
-                if algo == "Veryfast":
+                if algo.lower() == "veryfast":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
-                elif algo == "Fast":
+                elif algo.lower() == "fast":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
-                elif algo == "Normal":
+                elif algo.lower() == "normal":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
                 else:
                     # Try mixing as last resort
@@ -1312,12 +1312,12 @@ class NonConvergingErrorHandler(ErrorHandler):
         # (except for meta-GGAs and hybrids).
         # These progressively switch to more stable but more
         # expensive algorithms.
-        if vi["INCAR"].get("METAGGA"):
+        if vi["INCAR"].get("METAGGA", "--") != "--":
             # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
             # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
             if algo != "All":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
-        elif vi["INCAR"].get("LHFCALC", False) is True:
+        elif vi["INCAR"].get("LHFCALC", False):
             # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
             # support these algorithms, but no warning is printed.
             if algo != "All":
@@ -1326,7 +1326,7 @@ class NonConvergingErrorHandler(ErrorHandler):
             # elif algo != "Damped":
             #     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "Time": 0.5}}})
         else:
-            if algo == "Veryfast":
+            if algo == "VeryFast":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
             elif algo == "Fast":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
