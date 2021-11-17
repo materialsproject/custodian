@@ -411,11 +411,11 @@ class VaspErrorHandler(ErrorHandler):
                     actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
 
         if "grad_not_orth" in self.errors:
-            # This error is due to how VASP is compiled. Depending on the optimization flag and 
+            # This error is due to how VASP is compiled. Depending on the optimization flag and
             # choice of compiler, the ALGO = All and Damped algorithms may not work with a
-            # grad_not_orth error returned. The only fix is either to change ALGO or to 
+            # grad_not_orth error returned. The only fix is either to change ALGO or to
             # recompile VASP. Since meta-GGAs/hybrids are often used with ALGO = All,
-            # we do not adjust ALGO in these cases. We only adjust ALGO if GGA/GGA+U 
+            # we do not adjust ALGO in these cases. We only adjust ALGO if GGA/GGA+U
             # is employed.
             if (
                 (vi["INCAR"].get("ALGO", "Normal") == "All" or vi["INCAR"].get("ALGO", "Normal") == "Damped")

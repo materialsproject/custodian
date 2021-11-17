@@ -291,7 +291,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ALGO"], "All")
 
-        shutil.copy("INCAR.metagga_all", "INCAR")
+        shutil.copy("INCAR.metagga_fast", "INCAR")
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ALGO"], "Fast")
         h = VaspErrorHandler("vasp.gradient_not_orthogonal")
