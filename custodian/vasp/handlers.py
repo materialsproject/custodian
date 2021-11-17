@@ -11,6 +11,7 @@ import os
 import re
 import shutil
 import time
+import warnings
 from collections import Counter
 from functools import reduce
 
@@ -101,7 +102,7 @@ class VaspErrorHandler(ErrorHandler):
     def __init__(
         self,
         output_filename="vasp.out",
-        natoms_large_cell=100,
+        natoms_large_cell=None,
         errors_subset_to_catch=None,
     ):
         """
@@ -114,7 +115,7 @@ class VaspErrorHandler(ErrorHandler):
                 default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
             natoms_large_cell (int): Number of atoms threshold to treat cell
                 as large. Affects the correction of certain errors. Defaults to
-                100.
+                None (not used). Deprecated.
             errors_subset_to_detect (list): A subset of errors to catch. The
                 default is None, which means all supported errors are detected.
                 Use this to only catch only a subset of supported errors.
@@ -134,7 +135,12 @@ class VaspErrorHandler(ErrorHandler):
         self.errors = set()
         self.error_count = Counter()
         # threshold of number of atoms to treat the cell as large.
-        self.natoms_large_cell = natoms_large_cell
+        # self.natoms_large_cell = natoms_large_cell (deprecated)
+        if self.natoms_large_cell:
+            warnings.warn(
+                "natoms_large_cell is deprecated and currently does nothing.",
+                DeprecationWarning,
+            )
         self.errors_subset_to_catch = errors_subset_to_catch or list(VaspErrorHandler.error_msgs.keys())
         self.logger = logging.getLogger(self.__class__.__name__)
 
