@@ -99,7 +99,11 @@ class VaspErrorHandler(ErrorHandler):
     }
 
     def __init__(
-        self, output_filename="vasp.out", natoms_large_cell=100, errors_subset_to_catch=None, vtst_fixes=False
+        self,
+        output_filename="vasp.out",
+        natoms_large_cell=100,
+        errors_subset_to_catch=None,
+        vtst_fixes=False,
     ):
         """
         Initializes the handler with the output file to check.
