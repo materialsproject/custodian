@@ -425,7 +425,7 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
             warnings.warn(
                 "EDWAV error reported by VASP. You may wish to consider recompiling VASP with"
-                "the -O1 optimization if you used -O2"
+                " the -O1 optimization if you used -O2"
             )
 
         if "zheev" in self.errors:
