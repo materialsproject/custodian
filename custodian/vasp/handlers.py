@@ -135,7 +135,7 @@ class VaspErrorHandler(ErrorHandler):
         self.errors = set()
         self.error_count = Counter()
         # threshold of number of atoms to treat the cell as large.
-        # self.natoms_large_cell = natoms_large_cell (deprecated)
+        self.natoms_large_cell = natoms_large_cell # (deprecated)
         if self.natoms_large_cell:
             warnings.warn(
                 "natoms_large_cell is deprecated and currently does nothing.",
