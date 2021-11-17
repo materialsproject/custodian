@@ -1335,18 +1335,12 @@ class NonConvergingErrorHandler(ErrorHandler):
             elif amix > 0.1 and bmix > 0.01:
                 # Try linear mixing
                 actions.append(
-                    {
-                        "dict": "INCAR",
-                        "action": {"_set": {"ALGO": "Normal", "AMIX": 0.1, "BMIX": 0.01, "ICHARG": 2}},
-                    }
+                    {"dict": "INCAR", "action": {"_set": {"ALGO": "Normal", "AMIX": 0.1, "BMIX": 0.01, "ICHARG": 2}},}
                 )
             elif bmix < 3.0 and amin > 0.01:
                 # Try increasing bmix
                 actions.append(
-                    {
-                        "dict": "INCAR",
-                        "action": {"_set": {"Algo": "Normal", "AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},
-                    }
+                    {"dict": "INCAR", "action": {"_set": {"Algo": "Normal", "AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},}
                 )
 
         if actions:
