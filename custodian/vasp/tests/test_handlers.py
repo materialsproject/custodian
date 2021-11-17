@@ -508,6 +508,20 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
 
         os.remove("vasprun.xml")
 
+    def test_check_correct_electronic_repeat(self):
+        shutil.copy("vasprun.xml.electronic2", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(
+            d,
+            {
+                "actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}],
+                "errors": ["Unconverged"],
+            },
+        )
+        os.remove("vasprun.xml")
+
     def test_check_correct_ionic(self):
         shutil.copy("vasprun.xml.ionic", "vasprun.xml")
         h = UnconvergedErrorHandler()
