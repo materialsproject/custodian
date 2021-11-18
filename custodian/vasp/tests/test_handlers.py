@@ -264,14 +264,14 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ALGO"], "Normal")
 
-        shutil.copy("INCAR.hybrid_all", "INCAR")
+        shutil.copy("INCAR.hybrid_normal", "INCAR")
         i = Incar.from_file("INCAR")
-        self.assertEqual(i["ALGO"], "All")
+        self.assertEqual(i["ALGO"], "Normal")
         h = VaspErrorHandler("vasp.gradient_not_orthogonal")
         self.assertEqual(h.check(), True)
         self.assertIn("grad_not_orth", h.correct()["errors"])
         i = Incar.from_file("INCAR")
-        self.assertEqual(i["ALGO"], "All")
+        self.assertEqual(i["ALGO"], "Normal")
 
         shutil.copy("INCAR.hybrid_all", "INCAR")
         i = Incar.from_file("INCAR")

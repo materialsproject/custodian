@@ -418,8 +418,8 @@ class VaspErrorHandler(ErrorHandler):
             # we do not adjust ALGO in these cases. We only adjust ALGO if GGA/GGA+U
             # is employed.
             if (
-                (vi["INCAR"].get("ALGO", "Normal").lower() == "all" or vi["INCAR"].get("ALGO", "Normal").lower() == "damped")
-                and vi["INCAR"].get("METAGGA", "none") != "none"
+                (vi["INCAR"].get("ALGO", "Normal").lower() in ["all", "damped"])
+                and vi["INCAR"].get("METAGGA", "none") == "none"
                 and not vi["INCAR"].get("LHFCALC", False)
             ):
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
