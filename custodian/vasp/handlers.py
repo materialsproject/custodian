@@ -877,6 +877,8 @@ class UnconvergedErrorHandler(ErrorHandler):
             if v.incar.get("METAGGA", "--") != "--":
                 # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
                 # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
+                # I am using "--" as the check for METAGGA here because this is the default in the
+                # vasprun.xml file
                 if algo != "all":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
             elif v.incar.get("LHFCALC", False):
@@ -1315,6 +1317,7 @@ class NonConvergingErrorHandler(ErrorHandler):
         if vi["INCAR"].get("METAGGA", "none").lower() != "none":
             # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
             # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
+            # I am using "none" here because METAGGA is a string variable and this is the default
             if algo != "all":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
         elif vi["INCAR"].get("LHFCALC", False):
