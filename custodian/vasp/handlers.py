@@ -376,7 +376,7 @@ class VaspErrorHandler(ErrorHandler):
                 if ediff > 1e-6:
                     actions.append({"dict": "INCAR", "action": {"_set": {"EDIFF": 1e-6}}})
                 else:
-                    actions.append({"dict": "INCAR", "action": {"_set": {"EDIFF": ediff/10}}})
+                    actions.append({"dict": "INCAR", "action": {"_set": {"EDIFF": ediff / 10}}})
                 if vi["INCAR"].get("NELMIN", 2) < 6:
                     actions.append({"dict": "INCAR", "action": {"_set": {"NELMIN": 6}}})
                 if self.vtst_fixes is True:
