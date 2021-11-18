@@ -381,7 +381,7 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
         if "eddrmm" in self.errors:
             # RMM algorithm is not stable for this calculation
-            if vi["INCAR"].get("ALGO", "Normal") in ["Fast", "VeryFast"]:
+            if vi["INCAR"].get("ALGO", "Normal").lower() in ["fast", "veryfast"]:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
             else:
                 potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
@@ -867,7 +867,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         Perform corrections.
         """
         v = Vasprun(self.output_filename)
-        algo = v.incar.get("ALGO", "Normal")
+        algo = v.incar.get("ALGO", "Normal").lower()
         actions = []
         if not v.converged_electronic:
             # Ladder from VeryFast to Fast to Normal to All
@@ -877,22 +877,22 @@ class UnconvergedErrorHandler(ErrorHandler):
             if v.incar.get("METAGGA", "--") != "--":
                 # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
                 # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
-                if algo.lower() != "all":
+                if algo != "all":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
             elif v.incar.get("LHFCALC", False):
                 # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
                 # support these algorithms, but no warning is printed.
-                if algo.lower() != "all":
+                if algo != "all":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
                 # uncomment below for a backup option
-                # elif algo != "Damped":
+                # elif algo != "damped":
                 #     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "Time": 0.5}}})
             else:
-                if algo.lower() == "veryfast":
+                if algo == "veryfast":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
-                elif algo.lower() == "fast":
+                elif algo == "fast":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
-                elif algo.lower() == "normal":
+                elif algo == "normal":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
                 else:
                     # Try mixing as last resort
@@ -1250,7 +1250,7 @@ class FrozenJobErrorHandler(ErrorHandler):
 
         vi = VaspInput.from_directory(".")
         actions = []
-        if vi["INCAR"].get("ALGO", "Normal") == "Fast":
+        if vi["INCAR"].get("ALGO", "Normal").lower() == "fast":
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
         else:
             actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8}}})
@@ -1303,7 +1303,7 @@ class NonConvergingErrorHandler(ErrorHandler):
         Perform corrections.
         """
         vi = VaspInput.from_directory(".")
-        algo = vi["INCAR"].get("ALGO", "Normal")
+        algo = vi["INCAR"].get("ALGO", "Normal").lower()
         amix = vi["INCAR"].get("AMIX", 0.4)
         bmix = vi["INCAR"].get("BMIX", 1.0)
         amin = vi["INCAR"].get("AMIN", 0.1)
@@ -1312,25 +1312,25 @@ class NonConvergingErrorHandler(ErrorHandler):
         # (except for meta-GGAs and hybrids).
         # These progressively switch to more stable but more
         # expensive algorithms.
-        if vi["INCAR"].get("METAGGA", None):
+        if vi["INCAR"].get("METAGGA", "none").lower() != "none":
             # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
             # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
-            if algo != "All":
+            if algo != "all":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
         elif vi["INCAR"].get("LHFCALC", False):
             # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
             # support these algorithms, but no warning is printed.
-            if algo != "All":
+            if algo != "all":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
             # uncomment the line below for a backup option
-            # elif algo != "Damped":
+            # elif algo != "damped":
             #     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "Time": 0.5}}})
         else:
-            if algo == "VeryFast":
+            if algo == "veryfast":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
-            elif algo == "Fast":
+            elif algo == "fast":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
-            elif algo == "Normal":
+            elif algo == "normal":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
             elif amix > 0.1 and bmix > 0.01:
                 # Try linear mixing
@@ -1636,13 +1636,13 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         """
         # change ALGO = Fast to Normal if ALGO is !Normal
         vi = VaspInput.from_directory(".")
-        algo = vi["INCAR"].get("ALGO", "Normal")
-        if algo.lower() not in ["normal", "n"]:
+        algo = vi["INCAR"].get("ALGO", "Normal").lower()
+        if algo not in ["normal", "n"]:
             backup(VASP_BACKUP_FILES)
             actions = [{"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}}]
             VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Positive energy"], "actions": actions}
-        if algo == "Normal":
+        if algo == "normal":
             potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
             actions = [{"dict": "INCAR", "action": {"_set": {"POTIM": potim}}}]
             VaspModder(vi=vi).apply_actions(actions)
