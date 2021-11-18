@@ -372,8 +372,11 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 1}}})
             elif self.error_count["zbrent"] == 1:
                 # If that fails, tighten the energy convergence criteria and raise minimum number of SCF steps
-                if vi["INCAR"].get("EDIFF", 1e-4) > 1e-6:
+                ediff = vi["INCAR"].get("EDIFF", 1e-4)
+                if ediff > 1e-6:
                     actions.append({"dict": "INCAR", "action": {"_set": {"EDIFF": 1e-6}}})
+                else:
+                    actions.append({"dict": "INCAR", "action": {"_set": {"EDIFF": ediff/10}}})
                 if vi["INCAR"].get("NELMIN", 2) < 6:
                     actions.append({"dict": "INCAR", "action": {"_set": {"NELMIN": 6}}})
                 if self.vtst_fixes is True:
