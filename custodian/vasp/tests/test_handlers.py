@@ -308,6 +308,14 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertTrue("NPAR" not in incar)
         self.assertTrue("NCORE" not in incar)
 
+    def test_finite_difference_ncore(self):
+        h = VaspErrorHandler("vasp.fd_ncore")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["dfpt_ncore"])
+        incar = Incar.from_file("INCAR")
+        self.assertTrue("NPAR" not in incar)
+        self.assertTrue("NCORE" not in incar)
+
     def test_point_group_vasp6(self):
         # the error message is formatted differently in VASP6 compared to VASP5
         h = VaspErrorHandler("vasp6.point_group")

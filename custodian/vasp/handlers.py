@@ -98,7 +98,7 @@ class VaspErrorHandler(ErrorHandler):
         "posmap": ["POSMAP"],
         "point_group": ["group operation missing"],
         "symprec_noise": ["determination of the symmetry of your systems shows a strong"],
-        "dfpt_ncore": ["PEAD routines do not work for NCORE"],
+        "dfpt_ncore": ["PEAD routines do not work for NCORE", "remove the tag NPAR from the INCAR file"],
     }
 
     def __init__(
