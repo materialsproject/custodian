@@ -10,7 +10,7 @@ from pymatgen.io.vasp.inputs import VaspInput
 from pymatgen.io.vasp.outputs import Vasprun
 
 from custodian.custodian import Custodian
-from custodian.vasp.handlers import VaspErrorHandler, UnconvergedErrorHandler
+from custodian.vasp.handlers import UnconvergedErrorHandler, VaspErrorHandler
 from custodian.vasp.jobs import VaspJob
 
 FORMAT = "%(asctime)s %(message)s"
@@ -38,7 +38,7 @@ def get_runs(vasp_command, target=1e-3, max_steps=10, mode="linear"):
             e_per_atom = v.final_energy / len(v.final_structure)
             ediff = abs(e_per_atom - energy)
             if ediff < target:
-                logging.info("Converged to {} eV/atom!".format(ediff))
+                logging.info(f"Converged to {ediff} eV/atom!")
                 break
             energy = e_per_atom
             settings = [
@@ -53,7 +53,7 @@ def get_runs(vasp_command, target=1e-3, max_steps=10, mode="linear"):
             vasp_command,
             final=False,
             backup=backup,
-            suffix=".kpoints.{}".format("x".join(map(str, m))),
+            suffix=f".kpoints.{'x'.join(map(str, m))}",
             settings_override=settings,
         )
 

@@ -1,7 +1,3 @@
-# coding: utf-8
-
-from __future__ import unicode_literals, division
-
 __author__ = "Chen Zheng"
 __copyright__ = "Copyright 2012, The Materials Project"
 __version__ = "0.1"
@@ -9,10 +5,10 @@ __maintainer__ = "Chen Zheng"
 __email__ = "chz022@ucsd.edu"
 __date__ = "Oct 18, 2017"
 
-import unittest
-import os
 import glob
+import os
 import shutil
+import unittest
 
 from custodian.feff.handlers import UnconvergedErrorHandler
 

@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """
 Implements various interpreters and modders for FEFF calculations.
 """
@@ -8,7 +6,7 @@ import os
 
 from pymatgen.io.feff.sets import FEFFDictSet
 
-from custodian.ansible.actions import FileActions, DictActions
+from custodian.ansible.actions import DictActions, FileActions
 from custodian.ansible.interpreter import Modder
 
 
@@ -56,7 +54,7 @@ class FeffModder(Modder):
             elif "file" in a:
                 self.modify(a["action"], a["file"])
             else:
-                raise ValueError("Unrecognized format: {}".format(a))
+                raise ValueError(f"Unrecognized format: {a}")
         if modified:
             feff = self.feffinp
             feff_input = "\n\n".join(str(feff[k]) for k in ["HEADER", "PARAMETERS", "POTENTIALS", "ATOMS"] if k in feff)

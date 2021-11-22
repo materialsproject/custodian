@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """
 This module implements specific error handlers for VASP runs. These handlers
 tries to detect common errors in vasp runs and attempt to fix them on the fly
@@ -21,8 +19,8 @@ from monty.dev import deprecated
 from monty.os.path import zpath
 from monty.serialization import loadfn
 from pymatgen.core.structure import Structure
-from pymatgen.io.vasp.inputs import Poscar, VaspInput, Incar, Kpoints
-from pymatgen.io.vasp.outputs import Vasprun, Oszicar, Outcar
+from pymatgen.io.vasp.inputs import Incar, Kpoints, Poscar, VaspInput
+from pymatgen.io.vasp.outputs import Oszicar, Outcar, Vasprun
 from pymatgen.io.vasp.sets import MPScanRelaxSet
 from pymatgen.transformations.standard_transformations import SupercellTransformation
 
@@ -31,7 +29,6 @@ from custodian.ansible.interpreter import Modder
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from custodian.vasp.interpreter import VaspModder
-
 
 __author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, " "Wei Chen, Stephen Dacek"
 __version__ = "0.1"
@@ -148,7 +145,7 @@ class VaspErrorHandler(ErrorHandler):
         incar = Incar.from_file("INCAR")
         self.errors = set()
         error_msgs = set()
-        with open(self.output_filename, "r") as f:
+        with open(self.output_filename) as f:
             for line in f:
                 l = line.strip()
                 for err, msgs in VaspErrorHandler.error_msgs.items():
@@ -478,7 +475,7 @@ class LrfCommutatorHandler(ErrorHandler):
         Check for error.
         """
         self.errors = set()
-        with open(self.output_filename, "r") as f:
+        with open(self.output_filename) as f:
             for line in f:
                 l = line.strip()
                 for err, msgs in LrfCommutatorHandler.error_msgs.items():
@@ -537,7 +534,7 @@ class StdErrHandler(ErrorHandler):
         Check for error.
         """
         self.errors = set()
-        with open(self.output_filename, "r") as f:
+        with open(self.output_filename) as f:
             for line in f:
                 l = line.strip()
                 for err, msgs in StdErrHandler.error_msgs.items():
@@ -604,7 +601,7 @@ class AliasingErrorHandler(ErrorHandler):
         """
         incar = Incar.from_file("INCAR")
         self.errors = set()
-        with open(self.output_filename, "r") as f:
+        with open(self.output_filename) as f:
             for line in f:
                 l = line.strip()
                 for err, msgs in AliasingErrorHandler.error_msgs.items():
@@ -762,7 +759,7 @@ class DriftErrorHandler(ErrorHandler):
         curr_drift = np.average([np.linalg.norm(d) for d in curr_drift])
         VaspModder(vi=vi).apply_actions(actions)
         return {
-            "errors": "Excessive drift {} > {}".format(curr_drift, self.max_drift),
+            "errors": f"Excessive drift {curr_drift} > {self.max_drift}",
             "actions": actions,
         }
 
@@ -814,7 +811,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
                 return False
         except Exception:
             pass
-        with open(self.output_filename, "r") as f:
+        with open(self.output_filename) as f:
             for line in f:
                 l = line.strip()
                 if l.find(msg) != -1:
@@ -1171,7 +1168,7 @@ class PotimErrorHandler(ErrorHandler):
         try:
             oszicar = Oszicar(self.output_filename)
             n = len(Poscar.from_file(self.input_filename).structure)
-            max_dE = max([s["dE"] for s in oszicar.ionic_steps[1:]]) / n
+            max_dE = max(s["dE"] for s in oszicar.ionic_steps[1:]) / n
             if max_dE > self.dE_threshold:
                 return True
         except Exception:
@@ -1499,10 +1496,7 @@ class CheckpointHandler(ErrorHandler):
         Perform corrections.
         """
         content = "LSTOP = .TRUE."
-        chkpt_content = 'Index: %d\nTime: "%s"' % (
-            self.chk_counter,
-            datetime.datetime.now(),
-        )
+        chkpt_content = f'Index: {self.chk_counter}\nTime: "{datetime.datetime.now()}"'
         self.chk_counter += 1
 
         # Write STOPCAR
@@ -1524,7 +1518,7 @@ class CheckpointHandler(ErrorHandler):
         return {"errors": ["Checkpoint reached"], "actions": actions}
 
     def __str__(self):
-        return "CheckpointHandler with interval %d" % self.interval
+        return f"CheckpointHandler with interval {self.interval}"
 
 
 class StoppedRunHandler(ErrorHandler):
@@ -1563,7 +1557,7 @@ class StoppedRunHandler(ErrorHandler):
         """
         d = loadfn("chkpt.yaml")
         i = d["Index"]
-        name = shutil.make_archive(os.path.join(os.getcwd(), "vasp.chk.%d" % i), "gztar")
+        name = shutil.make_archive(os.path.join(os.getcwd(), f"vasp.chk.{i}"), "gztar")
 
         actions = [{"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}]
 

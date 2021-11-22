@@ -1,11 +1,9 @@
-# coding: utf-8
-
 """
 This module implements basic kinds of jobs for Nwchem runs.
 """
 
-import subprocess
 import shutil
+import subprocess
 
 from monty.io import zopen
 from monty.shutil import gzip_dir
@@ -64,7 +62,7 @@ class NwchemJob(Job):
         Performs backup if necessary.
         """
         if self.backup:
-            shutil.copy(self.input_file, "{}.orig".format(self.input_file))
+            shutil.copy(self.input_file, f"{self.input_file}.orig")
 
     def run(self):
         """

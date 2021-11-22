@@ -1,10 +1,12 @@
-import os, shutil
+import os
+import shutil
 import unittest
+
 from custodian.vasp.validators import (
-    VasprunXMLValidator,
+    VaspAECCARValidator,
     VaspFilesValidator,
     VaspNpTMDValidator,
-    VaspAECCARValidator,
+    VasprunXMLValidator,
 )
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")

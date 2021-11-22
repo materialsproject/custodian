@@ -1,17 +1,16 @@
-# coding: utf-8
-
-from __future__ import unicode_literals, division
+import glob
+import multiprocessing
 import unittest
 import os
 import shutil
-import glob
-from monty.tempfile import ScratchDir
-from monty.os import cd
-import multiprocessing
-from custodian.vasp.jobs import VaspJob, VaspNEBJob, GenerateVaspInputJob
-from pymatgen.io.vasp import Incar, Kpoints, Poscar
-import pymatgen
+import unittest
 
+import pymatgen
+from monty.os import cd
+from monty.tempfile import ScratchDir
+from pymatgen.io.vasp import Incar, Kpoints, Poscar
+
+from custodian.vasp.jobs import GenerateVaspInputJob, VaspJob, VaspNEBJob
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")
 pymatgen.core.SETTINGS["PMG_VASP_PSP_DIR"] = os.path.abspath(test_dir)  # type: ignore
@@ -67,8 +66,8 @@ class VaspJobTest(unittest.TestCase):
                     "POSCAR",
                     "vasprun.xml",
                 ]:
-                    self.assertTrue(os.path.isfile("{}.test".format(f)))
-                    os.remove("{}.test".format(f))
+                    self.assertTrue(os.path.isfile(f"{f}.test"))
+                    os.remove(f"{f}.test")
                 shutil.move("INCAR.backup", "INCAR")
 
                 self.assertAlmostEqual(incar["MAGMOM"], [3.007, 1.397, -0.189, -0.189])
@@ -162,16 +161,16 @@ class VaspNEBJobTest(unittest.TestCase):
             v.postprocess()
 
             for f in neb_outputs:
-                self.assertTrue(os.path.isfile("{}.test".format(f)))
-                os.remove("{}.test".format(f))
+                self.assertTrue(os.path.isfile(f"{f}.test"))
+                os.remove(f"{f}.test")
 
             sub_folders = glob.glob("[0-9][0-9]")
             for sf in sub_folders:
                 os.chdir(os.path.join(postprocess_neb, sf))
                 for f in neb_sub_outputs:
                     if os.path.exists(f):
-                        self.assertTrue(os.path.isfile("{}.test".format(f)))
-                        os.remove("{}.test".format(f))
+                        self.assertTrue(os.path.isfile(f"{f}.test"))
+                        os.remove(f"{f}.test")
 
 
 class GenerateVaspInputJobTest(unittest.TestCase):
