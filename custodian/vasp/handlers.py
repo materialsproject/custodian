@@ -361,6 +361,8 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
             actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
             if self.error_count["brions"] == 1 and vi["INCAR"].get("IBRION", 0) == 1:
+                # Reset POTIM to original value and switch to IBRION = 2
+                potim -= 0.1
                 actions.append(
                     {"dict": "INCAR", "action": {"_set": {"IBRION": 2, "POTIM": potim}}}
                 )

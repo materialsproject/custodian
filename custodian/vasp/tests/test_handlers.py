@@ -146,14 +146,14 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["errors"], ["brions"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["IBRION"], 2)
-        self.assertAlmostEqual(i["POTIM"], 1.6)
+        self.assertAlmostEqual(i["POTIM"], 1.4)
 
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["brions"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["IBRION"], 2)
-        self.assertAlmostEqual(i["POTIM"], 1.7)
+        self.assertAlmostEqual(i["POTIM"], 1.5)
 
     def test_dentet(self):
         h = VaspErrorHandler("vasp.dentet")
