@@ -131,6 +131,30 @@ class VaspErrorHandlerTest(unittest.TestCase):
             [{"action": {"_set": {"kpoints": [[4, 4, 4]]}}, "dict": "KPOINTS"}],
         )
 
+    def test_brions(self):
+        shutil.copy("INCAR.ibrion", "INCAR")
+        h = VaspErrorHandler("vasp.brions")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["brions"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 1)
+        self.assertAlmostEqual(i["POTIM"], 1.5)
+
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["brions"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 2)
+        self.assertAlmostEqual(i["POTIM"], 1.6)
+
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["brions"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 2)
+        self.assertAlmostEqual(i["POTIM"], 1.7)
+
     def test_dentet(self):
         h = VaspErrorHandler("vasp.dentet")
         h.check()
