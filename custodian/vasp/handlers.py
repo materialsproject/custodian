@@ -363,9 +363,7 @@ class VaspErrorHandler(ErrorHandler):
             if self.error_count["brions"] == 1 and vi["INCAR"].get("IBRION", 0) == 1:
                 # Reset POTIM to original value and switch to IBRION = 2
                 potim -= 0.2
-                actions.append(
-                    {"dict": "INCAR", "action": {"_set": {"IBRION": 2, "POTIM": potim}}}
-                )
+                actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 2, "POTIM": potim}}})
             self.error_count["brions"] += 1
 
         if "zbrent" in self.errors:
