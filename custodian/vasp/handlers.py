@@ -96,6 +96,7 @@ class VaspErrorHandler(ErrorHandler):
         "point_group": ["group operation missing"],
         "symprec_noise": ["determination of the symmetry of your systems shows a strong"],
         "dfpt_ncore": ["PEAD routines do not work for NCORE"],
+        "bravais": ["Inconsistent Bravais lattice"],
     }
 
     def __init__(
@@ -440,6 +441,13 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_unset": {"NCORE": 0}}})
             if "NPAR" in vi["INCAR"]:
                 actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 0}}})
+
+        if "bravais" in self.errors:
+            # VASP recommends refining the lattice parameters or changing SYMPREC
+            # Appears to occurs when SYMPREC is very low, so we will change it to
+            # the default if it's not already
+            if vi["INCAR"].get("SYMPREC", 1e-5) < 1e-5:
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-5}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}

@@ -268,6 +268,14 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ISYM"], 0)
 
+    def test_bravais(self):
+        shutil.copy("INCAR.symprec", "INCAR")
+        h = VaspErrorHandler("vasp6.bravais")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["bravais"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["SYMPREC"], 1e-5)
+
     def test_posmap(self):
         h = VaspErrorHandler("vasp.posmap")
         self.assertEqual(h.check(), True)
