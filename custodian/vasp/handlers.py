@@ -445,11 +445,12 @@ class VaspErrorHandler(ErrorHandler):
         if "bravais" in self.errors:
             # VASP recommends refining the lattice parameters or changing SYMPREC
             # Appears to occurs when SYMPREC is very low, so we will change it to
-            # the default if it's not already
+            # the default if it's not already. Let's not increase SYMPREC if it's
+            # already at 1e-4 though.
             symprec = vi["INCAR"].get("SYMPREC", 1e-5)
             if symprec < 1e-5:
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-5}}})
-            else:
+            elif symprec < 1e-4:
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": symprec * 10}}})
 
         VaspModder(vi=vi).apply_actions(actions)
