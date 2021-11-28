@@ -22,8 +22,7 @@ from pymatgen.core.structure import Structure
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Poscar, VaspInput
 from pymatgen.io.vasp.outputs import Oszicar, Outcar, Vasprun
 from pymatgen.io.vasp.sets import MPScanRelaxSet
-from pymatgen.transformations.standard_transformations import \
-    SupercellTransformation
+from pymatgen.transformations.standard_transformations import SupercellTransformation
 
 from custodian.ansible.actions import FileActions
 from custodian.ansible.interpreter import Modder
