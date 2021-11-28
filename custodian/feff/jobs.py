@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """ This module implements basic kinds of jobs for FEFF runs."""
 
 import logging

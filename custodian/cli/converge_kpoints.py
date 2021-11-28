@@ -10,7 +10,7 @@ from pymatgen.io.vasp.inputs import VaspInput
 from pymatgen.io.vasp.outputs import Vasprun
 
 from custodian.custodian import Custodian
-from custodian.vasp.handlers import VaspErrorHandler, UnconvergedErrorHandler
+from custodian.vasp.handlers import UnconvergedErrorHandler, VaspErrorHandler
 from custodian.vasp.jobs import VaspJob
 
 FORMAT = "%(asctime)s %(message)s"

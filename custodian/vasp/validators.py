@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """
 Implements various validatiors, e.g., check if vasprun.xml is valid, for VASP.
 """
@@ -8,7 +6,7 @@ import logging
 import os
 from collections import deque
 
-from pymatgen.io.vasp import Vasprun, Incar, Outcar, Chgcar
+from pymatgen.io.vasp import Chgcar, Incar, Outcar, Vasprun
 
 from custodian.custodian import Validator
 
@@ -40,12 +38,12 @@ class VasprunXMLValidator(Validator):
             exception_context = {}
 
             if os.path.exists(self.output_file):
-                with open(self.output_file, "r") as output_file:
+                with open(self.output_file) as output_file:
                     output_file_tail = deque(output_file, maxlen=10)
                 exception_context["output_file_tail"] = "".join(output_file_tail)
 
             if os.path.exists(self.stderr_file):
-                with open(self.stderr_file, "r") as stderr_file:
+                with open(self.stderr_file) as stderr_file:
                     stderr_file_tail = deque(stderr_file, maxlen=10)
                 exception_context["stderr_file_tail"] = "".join(stderr_file_tail)
 
@@ -56,7 +54,7 @@ class VasprunXMLValidator(Validator):
                 exception_context["vasprun_st_mtime"] = stat.st_mtime
                 exception_context["vasprun_st_ctime"] = stat.st_ctime
 
-                with open("vasprun.xml", "r") as vasprun:
+                with open("vasprun.xml") as vasprun:
                     vasprun_tail = deque(vasprun, maxlen=10)
                 exception_context["vasprun_tail"] = "".join(vasprun_tail)
 

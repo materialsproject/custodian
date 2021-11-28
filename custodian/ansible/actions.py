@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """
 This module defines various classes of supported actions. All actions are
 implemented as static methods, but are defined using classes (as opposed to

@@ -1,7 +1,3 @@
-# coding: utf-8
-
-from __future__ import unicode_literals, division
-
 """
 Created on Jun 1, 2012
 """
@@ -16,8 +12,8 @@ __date__ = "Jun 1, 2012"
 
 import unittest
 
-from custodian.ansible.interpreter import Modder
 from custodian.ansible.actions import FileActions
+from custodian.ansible.interpreter import Modder
 
 
 class ModderTest(unittest.TestCase):

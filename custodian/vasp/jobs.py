@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """
 This module implements basic kinds of jobs for VASP runs.
 """
@@ -15,10 +13,10 @@ from monty.os.path import which
 from monty.serialization import dumpfn, loadfn
 from monty.shutil import decompress_dir
 from pymatgen.core.structure import Structure
-from pymatgen.io.vasp.inputs import VaspInput, Incar, Poscar, Kpoints
-from pymatgen.io.vasp.outputs import Vasprun, Outcar
+from pymatgen.io.vasp.inputs import Incar, Kpoints, Poscar, VaspInput
+from pymatgen.io.vasp.outputs import Outcar, Vasprun
 
-from custodian.custodian import Job, SENTRY_DSN
+from custodian.custodian import SENTRY_DSN, Job
 from custodian.utils import backup
 from custodian.vasp.handlers import VASP_BACKUP_FILES
 from custodian.vasp.interpreter import VaspModder

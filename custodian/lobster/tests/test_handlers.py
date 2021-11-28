@@ -1,7 +1,11 @@
 import os
 import unittest
 
-from custodian.lobster.handlers import ChargeSpillingValidator, EnoughBandsValidator, LobsterFilesValidator
+from custodian.lobster.handlers import (
+    ChargeSpillingValidator,
+    EnoughBandsValidator,
+    LobsterFilesValidator,
+)
 
 # get location of module
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))

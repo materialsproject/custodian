@@ -1,11 +1,9 @@
-# coding: utf-8
-
 """
 This module implements error handlers for Nwchem runs. Currently tested only
 for B3LYP DFT jobs.
 """
 
-from pymatgen.io.nwchem import NwOutput, NwInput
+from pymatgen.io.nwchem import NwInput, NwOutput
 
 from custodian.ansible.interpreter import Modder
 from custodian.custodian import ErrorHandler
