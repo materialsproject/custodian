@@ -46,6 +46,7 @@ class QCJob(Job):
         qclog_file="mol.qclog",
         suffix="",
         calc_loc=None,
+        nboexe=None,
         save_scratch=False,
         backup=True,
     ):
@@ -61,6 +62,7 @@ class QCJob(Job):
             suffix (str): String to append to the file in postprocess.
             calc_loc (str): Path where Q-Chem should run. Defaults to None, in
                 which case Q-Chem will run in the system-defined QCLOCALSCR.
+            nboexe (str): Path to the NBO7 executable. Defaults to None.
             save_scratch (bool): Whether to save full scratch directory contents.
                 Defaults to False.
             backup (bool): Whether to backup the initial input file. If True, the
@@ -83,6 +85,7 @@ class QCJob(Job):
         self.qclog_file = qclog_file
         self.suffix = suffix
         self.calc_loc = calc_loc
+        self.nboexe = nboexe
         self.save_scratch = save_scratch
         self.backup = backup
 
@@ -111,6 +114,13 @@ class QCJob(Job):
         os.environ["QCSCRATCH"] = os.getcwd()
         if self.calc_loc is not None:
             os.environ["QCLOCALSCR"] = self.calc_loc
+        qcinp = QCInput.from_file(self.input_file)
+        if qcinp.rem.get("run_nbo6", "none").lower() == "true":
+            os.environ["KMP_INIT_AT_FORK"] = "FALSE"
+            if self.nboexe is None:
+                raise RuntimeError("Trying to run NBO7 without providing NBOEXE in fworker! Exiting...")
+            else:
+                os.environ["NBOEXE"] = self.nboexe
 
     def postprocess(self):
         """
