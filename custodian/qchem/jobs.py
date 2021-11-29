@@ -119,8 +119,7 @@ class QCJob(Job):
             os.environ["KMP_INIT_AT_FORK"] = "FALSE"
             if self.nboexe is None:
                 raise RuntimeError("Trying to run NBO7 without providing NBOEXE in fworker! Exiting...")
-            else:
-                os.environ["NBOEXE"] = self.nboexe
+            os.environ["NBOEXE"] = self.nboexe
 
     def postprocess(self):
         """
