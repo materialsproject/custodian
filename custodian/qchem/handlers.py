@@ -101,8 +101,11 @@ class QChemErrorHandler(ErrorHandler):
             elif self.qcinp.rem.get("scf_guess_always", "none").lower() != "true":
                 self.qcinp.rem["scf_guess_always"] = True
                 actions.append({"scf_guess_always": True})
+            elif self.qcinp.rem.get("s2thresh", "14") != "16":
+                self.qcinp.rem["s2thresh"] = "16"
+                actions.append({"s2thresh": "16"})
             else:
-                print("More advanced changes may impact the SCF result. Use the SCF error handler")
+                print("No remaining SCF error handlers!")
 
         elif "out_of_opt_cycles" in self.errors:
             # Check number of opt cycles. If less than geom_max_cycles, increase
@@ -213,12 +216,9 @@ class QChemErrorHandler(ErrorHandler):
 
         elif "failed_cpscf" in self.errors:
             # For large systems, cpscf errors can often be resolved by forcing QChem to break up
-            # the solving into two sections
-            if self.qcinp.rem.get("cpscf_nseg") != "2":
-                self.qcinp.rem["cpscf_nseg"] = "2"
-                actions.append({"cpscf_nseg": "2"})
-            else:
-                print("Not sure how to fix cpscf errors if cpscf_nseg is already 2!")
+            # the solving into more sections
+            self.qcinp.rem["cpscf_nseg"] = str(self.outdata["cpscf_nseg"]+1)
+            actions.append({"cpscf_nseg": str(self.outdata["cpscf_nseg"]+1)})
 
         elif "basis_not_supported" in self.errors:
             print("Specify a different basis set. At least one of the atoms is not supported.")
