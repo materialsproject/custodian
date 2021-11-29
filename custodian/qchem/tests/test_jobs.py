@@ -30,6 +30,22 @@ cwd = os.getcwd()
 
 
 class QCJobTest(TestCase):
+    def setUp(self):
+        os.makedirs(scr_dir)
+        shutil.copyfile(
+            os.path.join(test_dir, "no_nbo.qin"),
+            os.path.join(scr_dir, "mol.qin"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "nbo7.qin"),
+            os.path.join(scr_dir, "different.qin"),
+        )
+        os.chdir(scr_dir)
+
+    def tearDown(self):
+        os.chdir(cwd)
+        shutil.rmtree(scr_dir)
+
     def test_defaults(self):
         with patch("custodian.qchem.jobs.shutil.copy") as copy_patch:
             myjob = QCJob(qchem_command="qchem", max_cores=32)
@@ -49,12 +65,15 @@ class QCJobTest(TestCase):
             output_file="not_default.qout",
             max_cores=12,
             calc_loc="/not/default/",
+            nboexe="/path/to/nbo7.i4.exe",
             backup=False,
         )
         self.assertEqual(myjob.current_command, "qchem -slurm -np 12 different.qin not_default.qout scratch")
         myjob.setup()
         self.assertEqual(os.environ["QCSCRATCH"], os.getcwd())
         self.assertEqual(os.environ["QCLOCALSCR"], "/not/default/")
+        self.assertEqual(os.environ["NBOEXE"], "/path/to/nbo7.i4.exe")
+        self.assertEqual(os.environ["KMP_INIT_AT_FORK"], "FALSE")
 
     def test_save_scratch(self):
         with patch("custodian.qchem.jobs.shutil.copy") as copy_patch:
