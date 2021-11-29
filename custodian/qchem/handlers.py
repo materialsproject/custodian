@@ -217,8 +217,8 @@ class QChemErrorHandler(ErrorHandler):
         elif "failed_cpscf" in self.errors:
             # For large systems, cpscf errors can often be resolved by forcing QChem to break up
             # the solving into more sections
-            self.qcinp.rem["cpscf_nseg"] = str(self.outdata["cpscf_nseg"]+1)
-            actions.append({"cpscf_nseg": str(self.outdata["cpscf_nseg"]+1)})
+            self.qcinp.rem["cpscf_nseg"] = str(self.outdata["cpscf_nseg"] + 1)
+            actions.append({"cpscf_nseg": str(self.outdata["cpscf_nseg"] + 1)})
 
         elif "basis_not_supported" in self.errors:
             print("Specify a different basis set. At least one of the atoms is not supported.")
