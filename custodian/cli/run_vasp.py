@@ -8,8 +8,8 @@ runs.
 import logging
 import sys
 
+from pymatgen.io.vasp.inputs import Incar, Kpoints, VaspInput
 from ruamel import yaml
-from pymatgen.io.vasp.inputs import VaspInput, Incar, Kpoints
 
 from custodian.custodian import Custodian
 from custodian.vasp.jobs import VaspJob
@@ -52,7 +52,7 @@ def get_jobs(args):
         if any(c.isdigit() for c in job):
             suffix = "." + job
         else:
-            suffix = ".{}{}".format(job, i + 1)
+            suffix = f".{job}{i + 1}"
         settings = post_settings
         post_settings = []
         backup = i == 0
@@ -84,8 +84,8 @@ def get_jobs(args):
 
         if job_type.startswith("static_dielectric_derived"):
             from pymatgen.io.vasp.sets import (
-                MPStaticSet,
                 MPStaticDielectricDFPTVaspInputSet,
+                MPStaticSet,
             )
 
             # vis = MPStaticSet.from_prev_calc(
@@ -196,10 +196,9 @@ def get_jobs(args):
         elif job_type.startswith("relax"):
             pass
         elif job_type.startswith("full_relax"):
-            for j in VaspJob.full_opt_run(vasp_command):
-                yield j
+            yield from VaspJob.full_opt_run(vasp_command)
         else:
-            print("Unsupported job type: {}".format(job))
+            print(f"Unsupported job type: {job}")
             sys.exit(-1)
 
         if not job_type.startswith("full_relax"):
@@ -220,7 +219,7 @@ def do_run(args):
     """
     FORMAT = "%(asctime)s %(message)s"
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
-    logging.info("Handlers used are %s" % args.handlers)
+    logging.info(f"Handlers used are {args.handlers}")
     handlers = [load_class("custodian.vasp.handlers", n) for n in args.handlers]
     validators = [load_class("custodian.vasp.validators", n) for n in args.validators]
 

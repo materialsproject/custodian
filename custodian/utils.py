@@ -1,13 +1,11 @@
-# coding: utf-8
-
 """
 Utility function and classes.
 """
 
-from glob import glob
 import logging
 import os
 import tarfile
+from glob import glob
 
 
 def backup(filenames, prefix="error"):
@@ -21,9 +19,9 @@ def backup(filenames, prefix="error"):
         prefix (str): prefix to the files. Defaults to error, which means a
             series of error.1.tar.gz, error.2.tar.gz, ... will be generated.
     """
-    num = max([0] + [int(f.split(".")[1]) for f in glob("{}.*.tar.gz".format(prefix))])
-    filename = "{}.{}.tar.gz".format(prefix, num + 1)
-    logging.info("Backing up run to {}.".format(filename))
+    num = max([0] + [int(f.split(".")[1]) for f in glob(f"{prefix}.*.tar.gz")])
+    filename = f"{prefix}.{num + 1}.tar.gz"
+    logging.info(f"Backing up run to {filename}.")
     with tarfile.open(filename, "w:gz") as tar:
         for fname in filenames:
             for f in glob(fname):

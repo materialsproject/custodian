@@ -1,7 +1,3 @@
-# coding: utf-8
-
-from __future__ import unicode_literals, division
-
 __author__ = "Chen Zheng"
 __copyright__ = "Copyright 2012, The Materials Project"
 __version__ = "0.1"
@@ -9,12 +5,14 @@ __maintainer__ = "Chen Zheng"
 __email__ = "chz022@ucsd.edu"
 __date__ = "Oct 18, 2017"
 
-import unittest
 import os
+import unittest
+
 from monty.os import cd
 from monty.tempfile import ScratchDir
-from custodian.feff.jobs import FeffJob
 from pymatgen.io.feff.inputs import Atoms, Tags
+
+from custodian.feff.jobs import FeffJob
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files", "feff_unconverge")
 

@@ -10,11 +10,11 @@ from pymatgen.io.vasp.outputs import Vasprun
 
 from custodian.custodian import Custodian
 from custodian.vasp.handlers import (
-    VaspErrorHandler,
-    UnconvergedErrorHandler,
     MeshSymmetryErrorHandler,
     NonConvergingErrorHandler,
     PotimErrorHandler,
+    UnconvergedErrorHandler,
+    VaspErrorHandler,
 )
 from custodian.vasp.jobs import VaspJob
 
@@ -32,7 +32,7 @@ def get_runs(args):
 
     while (not converged) and (job_number < args.max_relax):
 
-        suffix = ".{}{}".format("relax", job_number + 1)
+        suffix = f".relax{job_number + 1}"
 
         if job_number == 0:
             backup = True

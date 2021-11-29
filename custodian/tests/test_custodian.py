@@ -1,20 +1,25 @@
-# coding: utf-8
-
-from __future__ import unicode_literals, division, print_function
+import glob
+import os
 import unittest
 import random
-from custodian.custodian import Job, ErrorHandler, Custodian, Validator
-from custodian.custodian import ValidationError, NonRecoverableError, ReturnCodeError
-from custodian.custodian import (
-    MaxCorrectionsError,
-    MaxCorrectionsPerJobError,
-    MaxCorrectionsPerHandlerError,
-)
-import os
-import glob
 import shutil
 import subprocess
+import unittest
+
 import ruamel.yaml as yaml
+
+from custodian.custodian import (
+    Custodian,
+    ErrorHandler,
+    Job,
+    MaxCorrectionsError,
+    MaxCorrectionsPerHandlerError,
+    MaxCorrectionsPerJobError,
+    NonRecoverableError,
+    ReturnCodeError,
+    ValidationError,
+    Validator,
+)
 
 """
 Created on Jun 1, 2012
@@ -36,7 +41,7 @@ class ExitCodeJob(Job):
         pass
 
     def run(self):
-        return subprocess.Popen("exit {}".format(self.exitcode), shell=True)
+        return subprocess.Popen(f"exit {self.exitcode}", shell=True)
 
     def postprocess(self):
         pass
@@ -62,7 +67,7 @@ class ExampleJob(Job):
 
     @property
     def name(self):
-        return "ExampleJob{}".format(self.jobid)
+        return f"ExampleJob{self.jobid}"
 
 
 class ExampleHandler(ErrorHandler):

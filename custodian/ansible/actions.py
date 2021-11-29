@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """
 This module defines various classes of supported actions. All actions are
 implemented as static methods, but are defined using classes (as opposed to
@@ -149,7 +147,7 @@ class DictActions:
         for k, v in settings.items():
             (d, key) = get_nested_dict(input_dict, k)
             if key in d and (not isinstance(d[key], list)):
-                raise ValueError("Keyword {} does not refer to an array.".format(k))
+                raise ValueError(f"Keyword {k} does not refer to an array.")
             if key in d and v not in d[key]:
                 d[key].append(v)
             elif key not in d:
@@ -167,7 +165,7 @@ class DictActions:
         for k, v in settings.items():
             (d, key) = get_nested_dict(input_dict, k)
             if key in d and (not isinstance(d[key], list)):
-                raise ValueError("Keyword {} does not refer to an array.".format(k))
+                raise ValueError(f"Keyword {k} does not refer to an array.")
             if key in d:
                 d[key] = [i for i in d[key] if i != v]
 
@@ -182,7 +180,7 @@ class DictActions:
         """
         for k, v in settings.items():
             if k in input_dict and (not isinstance(input_dict[k], list)):
-                raise ValueError("Keyword {} does not refer to an array.".format(k))
+                raise ValueError(f"Keyword {k} does not refer to an array.")
             for i in v:
                 DictActions.pull(input_dict, {k: i})
 
@@ -198,7 +196,7 @@ class DictActions:
         for k, v in settings.items():
             (d, key) = get_nested_dict(input_dict, k)
             if key in d and (not isinstance(d[key], list)):
-                raise ValueError("Keyword {} does not refer to an array.".format(k))
+                raise ValueError(f"Keyword {k} does not refer to an array.")
             if v == 1:
                 d[key].pop()
             elif v == -1:
@@ -263,7 +261,7 @@ class FileActions:
                     # Skip file not found error.
                     pass
             elif k == "mode" and v == "simulated":
-                print("Simulated removal of {}".format(filename))
+                print(f"Simulated removal of {filename}")
 
     @staticmethod
     def file_copy(filename, settings):
