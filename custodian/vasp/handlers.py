@@ -356,8 +356,16 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}})
 
         if "brions" in self.errors:
+            # Increase POTIM but switch to IBRION = 2 (CG) if IBRION = 1 simply isn't working out
+            # IBRION = 2 is less sensitive to POTIM
             potim = float(vi["INCAR"].get("POTIM", 0.5)) + 0.1
             actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
+            actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+            if self.error_count["brions"] == 1 and vi["INCAR"].get("IBRION", 0) == 1:
+                # Reset POTIM to original value and switch to IBRION = 2
+                potim -= 0.2
+                actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 2, "POTIM": potim}}})
+            self.error_count["brions"] += 1
 
         if "zbrent" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 1}}})
