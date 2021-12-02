@@ -1,0 +1,42 @@
+       N       E                     dE             d eps       ncg     rms          rms(c)
+DAV:   1    -0.808978395638E+03   -0.10606E-05   -0.49230E-05  2080   0.160E-02    0.333E-02
+RMM:   2    -0.808978711288E+03   -0.31565E-03   -0.12893E-04  1630   0.152E-02    0.298E-01
+RMM:   3    -0.808978163978E+03    0.54731E-03   -0.10917E-04  1576   0.167E-02    0.806E-02
+RMM:   4    -0.808978368321E+03   -0.20434E-03   -0.33170E-05  1336   0.843E-03    0.444E-02
+RMM:   5    -0.808978372128E+03   -0.38079E-05   -0.72285E-06   961   0.454E-03
+  59 F= -.80897837E+03 E0= -.80897978E+03  d E =-.204339E-02  mag=    -0.3409
+ curvature:   0.00 expect dE=-0.247E-08 dE for cont linesearch -0.117E-08
+ ZBRENT: interpolating
+ opt :   0.6785  next Energy=  -808.979501 (dE=-0.317E-02)
+ bond charge predicted
+       N       E                     dE             d eps       ncg     rms          rms(c)
+DAV:   1    -0.808978358854E+03    0.94668E-05   -0.10023E-05  2032   0.697E-03    0.182E-02
+RMM:   2    -0.808978312836E+03    0.46018E-04   -0.97341E-06  1244   0.486E-03
+  60 F= -.80897831E+03 E0= -.80898022E+03  d E =-.198409E-02  mag=    -0.3378
+ curvature:   0.00 expect dE=-0.405E-09 dE for cont linesearch -0.143E-09
+ ZBRENT: interpolating
+ opt :   0.6785  next Energy=  -808.979501 (dE=-0.317E-02)
+ bond charge predicted
+       N       E                     dE             d eps       ncg     rms          rms(c)
+DAV:   1    -0.808978272998E+03    0.85855E-04   -0.12172E-05  2032   0.996E-03    0.246E-02
+RMM:   2    -0.808978269206E+03    0.37918E-05   -0.29084E-05  1345   0.590E-03
+  61 F= -.80897827E+03 E0= -.80898068E+03  d E =-.194046E-02  mag=    -0.3340
+ curvature:   0.00 expect dE=-0.338E-09 dE for cont linesearch -0.426E-10
+ ZBRENT:  can not reach accuracy
+ opt :   0.0000  next Energy=     0.000000 (dE= 0.809E+03)
+ bond charge predicted
+       N       E                     dE             d eps       ncg     rms          rms(c)
+DAV:   1    -0.808977102563E+03    0.11704E-02   -0.10614E-01  3392   0.465E-01    0.338E-01
+RMM:   2    -0.809064633783E+03   -0.87531E-01   -0.17818E-02  3195   0.104E-01    0.746E+00
+RMM:   3    -0.808928314960E+03    0.13632E+00   -0.17136E-02  2844   0.122E-01    0.621E-01
+RMM:   4    -0.808973971408E+03   -0.45656E-01   -0.36113E-03  2723   0.868E-02    0.422E-01
+RMM:   5    -0.808976894323E+03   -0.29229E-02   -0.60123E-04  2128   0.386E-02    0.241E-01
+RMM:   6    -0.808976679739E+03    0.21458E-03   -0.11445E-04  1662   0.160E-02    0.243E-01
+RMM:   7    -0.808976527328E+03    0.15241E-03   -0.10336E-04  1656   0.154E-02    0.236E-01
+RMM:   8    -0.808976418689E+03    0.10864E-03   -0.86241E-05  1593   0.155E-02    0.179E-01
+RMM:   9    -0.808976445212E+03   -0.26523E-04   -0.54527E-05  1600   0.139E-02
+  62 F= -.80897645E+03 E0= -.80897894E+03  d E =-.116469E-03  mag=    -0.3177
+ curvature:   0.00 expect dE= 0.000E+00 dE for cont linesearch  0.000E+00
+ ZBRENT: fatal error in bracketing
+     please rerun with smaller EDIFF, or copy CONTCAR
+     to POSCAR and continue

@@ -164,6 +164,57 @@ class VaspErrorHandlerTest(unittest.TestCase):
             [{"action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}, "dict": "INCAR"}],
         )
 
+    def test_zbrent(self):
+        h = VaspErrorHandler("vasp.zbrent")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["zbrent"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 1)
+
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["zbrent"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["EDIFF"], 1e-6)
+        self.assertEqual(i["NELMIN"], 6)
+
+        shutil.copy("INCAR.orig", "INCAR")
+        h = VaspErrorHandler("vasp.zbrent")
+        h.vtst_fixes = True
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["zbrent"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 1)
+        self.assertEqual(i["EDIFF"], 0.0004)
+
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["zbrent"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["EDIFF"], 1e-6)
+        self.assertEqual(i["NELMIN"], 6)
+        self.assertEqual(i["IBRION"], 3)
+        self.assertEqual(i["IOPT"], 7)
+        self.assertEqual(i["POTIM"], 0)
+
+        shutil.copy("INCAR.ediff", "INCAR")
+        h = VaspErrorHandler("vasp.zbrent")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["zbrent"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 1)
+        self.assertEqual(i["EDIFF"], 1e-6)
+
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["zbrent"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["EDIFF"], 1e-7)
+        self.assertEqual(i["NELMIN"], 6)
+
     def test_brmix(self):
         h = VaspErrorHandler("vasp.brmix")
         self.assertEqual(h.check(), True)
