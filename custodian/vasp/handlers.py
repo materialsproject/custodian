@@ -87,6 +87,7 @@ class VaspErrorHandler(ErrorHandler):
         "pssyevx": ["ERROR in subspace rotation PSSYEVX"],
         "eddrmm": ["WARNING in EDDRMM: call to ZHEGV failed"],
         "edddav": ["Error EDDDAV: Call to ZHEGV failed"],
+        "algo_tet": ["ALGO=A and IALGO=5X tend to fail"],
         "grad_not_orth": ["EDWAV: internal error, the gradient is not orthogonal"],
         "nicht_konv": ["ERROR: SBESSELITER : nicht konvergent"],
         "zheev": ["ERROR EDDIAG: Call to routine ZHEEV failed!"],
@@ -420,9 +421,36 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
 
-        if "grad_not_orth" in self.errors:
+        if "algo_tet" in self.errors:
+            # ALGO=All and IALGO=5X often fail with ISMEAR = -4/-5.
+            # ISMEAR should be changed to >= 0, except for DOS calculations
+            # in which case ALGO=Damped should be used after preconverging with ISMEAR >=0
             if vi["INCAR"].get("ISMEAR", 1) < 0:
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+                if vi["INCAR"].get("NEDOS") or vi["INCAR"].get("EMIN") or vi["INCAR"].get("EMAX"):
+                    warnings.warn(
+                        "This looks like a DOS run. Pre-converge with ISMEAR >= 0 and then use ALGO = Damped."
+                        "ALGO = All and IALGO = 5X often fail for ISMEAR < 0 otherwise."
+                    )
+                else:
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+
+        if "grad_not_orth" in self.errors:
+            # This error is due to how VASP is compiled. Depending on the optimization flag and
+            # choice of compiler, the ALGO = All and Damped algorithms may not work with a
+            # grad_not_orth error returned. The only fix is either to change ALGO or to
+            # recompile VASP. Since meta-GGAs/hybrids are often used with ALGO = All,
+            # we do not adjust ALGO in these cases. We only adjust ALGO if GGA/GGA+U
+            # is employed.
+            if (
+                (vi["INCAR"].get("ALGO", "Normal").lower() in ["all", "damped"])
+                and vi["INCAR"].get("METAGGA", "none") == "none"
+                and not vi["INCAR"].get("LHFCALC", False)
+            ):
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
+            warnings.warn(
+                "EDWAV error reported by VASP. You may wish to consider recompiling VASP with"
+                " the -O1 optimization if you used -O2"
+            )
 
         if "zheev" in self.errors:
             if vi["INCAR"].get("ALGO", "Normal").lower() != "exact":
