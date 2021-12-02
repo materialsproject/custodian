@@ -30,7 +30,7 @@ from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from custodian.vasp.interpreter import VaspModder
 
-__author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, " "Wei Chen, Stephen Dacek"
+__author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen, Stephen Dacek, Andrew Rosen"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
 __email__ = "ongsp@ucsd.edu"
@@ -296,7 +296,7 @@ class VaspErrorHandler(ErrorHandler):
         if self.errors.intersection(["subspacematrix"]):
             if self.error_count["subspacematrix"] == 0:
                 actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
-            else:
+            elif self.error_count["subspacematrix"] == 1:
                 actions.append({"dict": "INCAR", "action": {"_set": {"PREC": "Accurate"}}})
             self.error_count["subspacematrix"] += 1
 
@@ -409,7 +409,7 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
 
         if "zheev" in self.errors:
-            if vi["INCAR"].get("ALGO", "Fast").lower() != "exact":
+            if vi["INCAR"].get("ALGO", "Normal").lower() != "exact":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Exact"}}})
         if "elf_kpar" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": 1}}})
@@ -430,9 +430,7 @@ class VaspErrorHandler(ErrorHandler):
                 # next, increase by 100x (10x the original)
                 orig_symprec = vi["INCAR"].get("SYMPREC", 1e-6)
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": orig_symprec * 100}}})
-            else:
-                # if we have already corrected twice, there's nothing else to do
-                pass
+            self.error_count["posmap"] += 1
 
         if "point_group" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
@@ -934,7 +932,7 @@ class IncorrectSmearingHandler(ErrorHandler):
     Check if a calculation is a metal (zero bandgap), has been run with
     ISMEAR=-5, and is not a static calculation, which is only appropriate for
     semiconductors. If this occurs, this handler will rerun the calculation
-    using the smearing settings appropriate for metals (ISMEAR=-2, SIGMA=0.2).
+    using the smearing settings appropriate for metals (ISMEAR=2, SIGMA=0.2).
     """
 
     is_monitor = False
@@ -1103,7 +1101,7 @@ class LargeSigmaHandler(ErrorHandler):
 class MaxForceErrorHandler(ErrorHandler):
     """
     Checks that the desired force convergence has been achieved. Otherwise
-    restarts the run with smaller EDIFF. (This is necessary since energy
+    restarts the run with smaller EDIFFG. (This is necessary since energy
     and force convergence criteria cannot be set simultaneously)
     """
 
