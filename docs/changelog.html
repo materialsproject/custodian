@@ -5,10 +5,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Change Log &#8212; custodian 2021.2.8 documentation</title>
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <title>Change Log &#8212; custodian 2021.12.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/flasky.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 2021.2.8 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 2021.12.2 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Change Log</a></li> 
       </ul>
     </div>  
@@ -48,6 +48,22 @@
             
   <div class="section" id="change-log">
 <h1>Change Log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="v2021-12-2">
+<h2>v2021.12.2<a class="headerlink" href="#v2021-12-2" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Address new VASP6 inconsistent Bravais lattice error (&#64;arosen93)</p></li>
+<li><p>Don’t check for drift if NSW = 1 (&#64;arosen93)</p></li>
+<li><p>[VASP] Switch from IBRION = 1 –&gt; 2 if the BRIONS error occurs more than once (&#64;arosen93)</p></li>
+<li><p>Handle finite difference ncore error (&#64;utf)</p></li>
+<li><p>[VASP] More robust zbrent fix (&#64;arosen93)</p></li>
+<li><p>[VASP] Increase posmap error count (&#64;arosen93)</p></li>
+<li><p>[VASP] Update real_optlay logic to avoid LREAL = True (&#64;arosen93)</p></li>
+<li><p>[VASP] More appropriate grad_not_orth fix and new algo_tet error handler (&#64;arosen93)</p></li>
+<li><p>[VASP] Adjust SCF Ladder for meta-GGAs/hybrids (&#64;arosen93)</p></li>
+<li><p>Refactor VaspErrorHandler.check() (&#64;janosh)</p></li>
+<li><p>Fix VaspErrorHandler not handling “tetrahedron method fails” (&#64;janosh)</p></li>
+</ul>
+</div>
 <div class="section" id="v2021-2-8">
 <h2>v2021.2.8<a class="headerlink" href="#v2021-2-8" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -388,6 +404,7 @@ corrections performed.</p></li>
   <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Change Log</a><ul>
+<li><a class="reference internal" href="#v2021-12-2">v2021.12.2</a></li>
 <li><a class="reference internal" href="#v2021-2-8">v2021.2.8</a></li>
 <li><a class="reference internal" href="#v2021-1-8">v2021.1.8</a></li>
 <li><a class="reference internal" href="#v2021-1-7">v2021.1.7</a></li>
@@ -448,7 +465,7 @@ corrections performed.</p></li>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
