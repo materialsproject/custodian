@@ -79,7 +79,7 @@ class Custodian:
        job, custodian will monitor for errors using the handlers that have
        is_monitor == True. If an error is detected, corrective measures are
        taken and the particular job is rerun.
-    3. At the end of each individual job, Custodian will run through the list
+    3. At the end of each individual job, Custodian will run through the list of
        error handlers that have is_monitor == False. If an error is detected,
        corrective measures are taken and the particular job is rerun.
 
@@ -129,7 +129,7 @@ class Custodian:
         terminate_on_nonzero_returncode=True,
     ):
         """
-        Initializes a Custodian from a list of jobs and error handler.s
+        Initializes a Custodian from a list of jobs and error handlers.
 
         Args:
             handlers ([ErrorHandler]): Error handlers. In order of priority of

@@ -62,6 +62,7 @@ class VaspErrorHandler(ErrorHandler):
     error_msgs = {
         "tet": [
             "Tetrahedron method fails",
+            "tetrahedron method fails",
             "Fatal error detecting k-mesh",
             "Fatal error: unable to match k-point",
             "Routine TETIRR needs special values",
