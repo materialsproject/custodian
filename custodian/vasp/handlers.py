@@ -710,7 +710,7 @@ class DriftErrorHandler(ErrorHandler):
         Check for error.
         """
         incar = Incar.from_file("INCAR")
-        if incar.get("EDIFFG", 0.1) >= 0 or incar.get("NSW", 0) == 0:
+        if incar.get("EDIFFG", 0.1) >= 0 or incar.get("NSW", 0) <= 1:
             # Only activate when force relaxing and ionic steps
             # NSW check prevents accidental effects when running DFPT
             return False
