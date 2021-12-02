@@ -130,6 +130,30 @@ class VaspErrorHandlerTest(unittest.TestCase):
             [{"action": {"_set": {"kpoints": [[4, 4, 4]]}}, "dict": "KPOINTS"}],
         )
 
+    def test_brions(self):
+        shutil.copy("INCAR.ibrion", "INCAR")
+        h = VaspErrorHandler("vasp.brions")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["brions"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 1)
+        self.assertAlmostEqual(i["POTIM"], 1.5)
+
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["brions"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 2)
+        self.assertAlmostEqual(i["POTIM"], 1.4)
+
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["brions"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 2)
+        self.assertAlmostEqual(i["POTIM"], 1.5)
+
     def test_dentet(self):
         h = VaspErrorHandler("vasp.dentet")
         h.check()
@@ -267,6 +291,20 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ISYM"], 0)
 
+    def test_bravais(self):
+        h = VaspErrorHandler("vasp6.bravais")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["bravais"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["SYMPREC"], 1e-4)
+
+        shutil.copy("INCAR.symprec", "INCAR")
+        h = VaspErrorHandler("vasp6.bravais")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["bravais"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["SYMPREC"], 1e-5)
+
     def test_posmap(self):
         h = VaspErrorHandler("vasp.posmap")
         self.assertEqual(h.check(), True)
@@ -274,12 +312,22 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertAlmostEqual(i["SYMPREC"], 1e-6)
 
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["posmap"])
+        i = Incar.from_file("INCAR")
+        self.assertAlmostEqual(i["SYMPREC"], 1e-4)
+
     def test_posmap_vasp6(self):
         h = VaspErrorHandler("vasp6.posmap")
         self.assertEqual(h.check(), True)
         self.assertEqual(h.correct()["errors"], ["posmap"])
         i = Incar.from_file("INCAR")
         self.assertAlmostEqual(i["SYMPREC"], 1e-6)
+
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["posmap"])
+        i = Incar.from_file("INCAR")
+        self.assertAlmostEqual(i["SYMPREC"], 1e-4)
 
     def test_point_group(self):
         h = VaspErrorHandler("vasp.point_group")
