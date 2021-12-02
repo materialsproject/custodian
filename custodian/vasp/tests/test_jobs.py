@@ -1,6 +1,5 @@
 import glob
 import multiprocessing
-import unittest
 import os
 import shutil
 import unittest
@@ -25,7 +24,7 @@ class VaspJobTest(unittest.TestCase):
 
     def test_setup(self):
         with cd(test_dir):
-            with ScratchDir(".", copy_from_current_on_enter=True) as d:
+            with ScratchDir(".", copy_from_current_on_enter=True):
                 v = VaspJob("hello", auto_npar=True)
                 v.setup()
                 incar = Incar.from_file("INCAR")
@@ -37,7 +36,7 @@ class VaspJobTest(unittest.TestCase):
     def test_setup_run_no_kpts(self):
         # just make sure v.setup() and v.run() exit cleanly when no KPOINTS file is present
         with cd(os.path.join(test_dir, "kspacing")):
-            with ScratchDir(".", copy_from_current_on_enter=True) as d:
+            with ScratchDir(".", copy_from_current_on_enter=True):
                 v = VaspJob("hello", auto_npar=True)
                 v.setup()
                 with self.assertRaises(FileNotFoundError):
@@ -49,7 +48,7 @@ class VaspJobTest(unittest.TestCase):
 
     def test_postprocess(self):
         with cd(os.path.join(test_dir, "postprocess")):
-            with ScratchDir(".", copy_from_current_on_enter=True) as d:
+            with ScratchDir(".", copy_from_current_on_enter=True):
                 shutil.copy("INCAR", "INCAR.backup")
 
                 v = VaspJob("hello", final=False, suffix=".test", copy_magmom=True)
@@ -77,7 +76,7 @@ class VaspJobTest(unittest.TestCase):
         # Test the continuation functionality
         with cd(os.path.join(test_dir, "postprocess")):
             # Test default functionality
-            with ScratchDir(".", copy_from_current_on_enter=True) as d:
+            with ScratchDir(".", copy_from_current_on_enter=True):
                 v = VaspJob("hello", auto_continue=True)
                 v.setup()
                 self.assertTrue(os.path.exists("continue.json"), "continue.json not created")
@@ -93,7 +92,7 @@ class VaspJobTest(unittest.TestCase):
                     "continue.json not deleted after postprocessing",
                 )
             # Test explicit action functionality
-            with ScratchDir(".", copy_from_current_on_enter=True) as d:
+            with ScratchDir(".", copy_from_current_on_enter=True):
                 v = VaspJob(
                     "hello",
                     auto_continue=[{"dict": "INCAR", "action": {"_set": {"ISTART": 1}}}],
@@ -121,7 +120,7 @@ class VaspNEBJobTest(unittest.TestCase):
 
     def test_setup(self):
         with cd(os.path.join(test_dir, "setup_neb")):
-            with ScratchDir(".", copy_from_current_on_enter=True) as d:
+            with ScratchDir(".", copy_from_current_on_enter=True):
                 v = VaspNEBJob("hello", half_kpts=True)
                 v.setup()
 
@@ -175,7 +174,7 @@ class VaspNEBJobTest(unittest.TestCase):
 
 class GenerateVaspInputJobTest(unittest.TestCase):
     def test_run(self):
-        with ScratchDir(".") as d:
+        with ScratchDir("."):
             for f in ["INCAR", "POSCAR", "POTCAR", "KPOINTS"]:
                 shutil.copy(os.path.join("..", test_dir, f), f)
             oldincar = Incar.from_file("INCAR")

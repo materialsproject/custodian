@@ -227,7 +227,7 @@ class VaspErrorHandler(ErrorHandler):
                 self.error_count["brmix"] += 1
 
                 if vi["KPOINTS"].num_kpts < 1:
-                    all_kpts_even = all(bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0])
+                    all_kpts_even = all(n % 2 == 0 for n in vi["KPOINTS"].kpts[0])
                     if all_kpts_even:
                         new_kpts = (tuple(n + 1 for n in vi["KPOINTS"].kpts[0]),)
                         actions.append(
@@ -1476,7 +1476,7 @@ class CheckpointHandler(ErrorHandler):
     max_errors in Custodian must be set to a very high value, and you
     probably wouldn't want to use any standard VASP error handlers. The
     checkpoint will be stored in subdirs chk_#. This should be used in
-    combiantion with the StoppedRunHandler.
+    combination with the StoppedRunHandler.
     """
 
     is_monitor = True

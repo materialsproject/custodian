@@ -1,4 +1,4 @@
-When reporting bugs/issues, please supply the following information. If this 
+When reporting bugs/issues, please supply the following information. If this
 is a feature request, please simply state the requested feature.
 
 ## System
@@ -6,7 +6,7 @@ is a feature request, please simply state the requested feature.
 * Custodian version: <Write "branch_name" if it is development version.>
 * Python version: <Only 2.7.* and 3.* supported.>
 * Python version: <Only 2.7.* and 3.* supported.>
-* OS version: <If you are writing Windows here, you are on your own.> 
+* OS version: <If you are writing Windows here, you are on your own.>
 
 ## Summary
 

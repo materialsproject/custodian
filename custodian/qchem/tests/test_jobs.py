@@ -5,7 +5,7 @@ from unittest import TestCase
 try:
     from unittest.mock import patch  # type: ignore
 except ImportError:
-    from mock import patch  # type: ignore
+    from unittest.mock import patch  # type: ignore
 import unittest
 
 from pymatgen.io.qchem.inputs import QCInput

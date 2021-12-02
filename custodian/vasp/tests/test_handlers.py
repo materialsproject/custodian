@@ -16,7 +16,6 @@ import os
 import shutil
 import unittest
 
-import numpy as np
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
 
 from custodian.vasp.handlers import (
@@ -182,7 +181,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertFalse("IMIX" in vi["INCAR"])
         self.assertTrue(os.path.exists("CHGCAR"))
         if vi["KPOINTS"].style == Kpoints.supported_modes.Gamma and vi["KPOINTS"].num_kpts < 1:
-            all_kpts_even = all([bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0]])
+            all_kpts_even = all(n % 2 == 0 for n in vi["KPOINTS"].kpts[0])
             self.assertFalse(all_kpts_even)
 
         # The next correction check ISYM and no CHGCAR
@@ -975,11 +974,11 @@ class DriftErrorHandlerTest(unittest.TestCase):
 
         h = DriftErrorHandler(max_drift=0.0001, enaug_multiply=2)
         h.check()
-        d = h.correct()
+        h.correct()
         incar = Incar.from_file("INCAR")
         self.assertTrue(incar.get("ADDGRID", False))
 
-        d = h.correct()
+        h.correct()
         incar = Incar.from_file("INCAR")
         self.assertEqual(incar.get("PREC"), "High")
         self.assertEqual(incar.get("ENAUG", 0), incar.get("ENCUT", 2) * 2)
