@@ -136,7 +136,7 @@ class VaspErrorHandler(ErrorHandler):
         self.error_count = Counter()
         # threshold of number of atoms to treat the cell as large.
         self.natoms_large_cell = natoms_large_cell
-        self.errors_subset_to_catch = errors_subset_to_catch or list(VaspErrorHandler.error_msgs.keys())
+        self.errors_subset_to_catch = errors_subset_to_catch or list(self.error_msgs.keys())
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def check(self):
@@ -146,21 +146,19 @@ class VaspErrorHandler(ErrorHandler):
         incar = Incar.from_file("INCAR")
         self.errors = set()
         error_msgs = set()
-        with open(self.output_filename) as f:
-            for line in f:
-                l = line.strip()
-                for err, msgs in VaspErrorHandler.error_msgs.items():
-                    if err in self.errors_subset_to_catch:
-                        for msg in msgs:
-                            if l.find(msg) != -1:
-                                # this checks if we want to run a charged
-                                # computation (e.g., defects) if yes we don't
-                                # want to kill it because there is a change in
-                                # e-density (brmix error)
-                                if err == "brmix" and "NELECT" in incar:
-                                    continue
-                                self.errors.add(err)
-                                error_msgs.add(msg)
+        with open(self.output_filename) as file:
+            text = file.read()
+            for err in self.errors_subset_to_catch:
+                for msg in self.error_msgs[err]:
+                    if text.find(msg) != -1:
+                        # this checks if we want to run a charged
+                        # computation (e.g., defects) if yes we don't
+                        # want to kill it because there is a change in
+                        # e-density (brmix error)
+                        if err == "brmix" and "NELECT" in incar:
+                            continue
+                        self.errors.add(err)
+                        error_msgs.add(msg)
         for msg in error_msgs:
             self.logger.error(msg, extra={"incar": incar.as_dict()})
         return len(self.errors) > 0
