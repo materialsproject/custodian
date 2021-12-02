@@ -407,7 +407,7 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
         if "eddrmm" in self.errors:
             # RMM algorithm is not stable for this calculation
-            if vi["INCAR"].get("ALGO", "Normal") in ["Fast", "VeryFast"]:
+            if vi["INCAR"].get("ALGO", "Normal").lower() in ["fast", "veryfast"]:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
             else:
                 potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
@@ -929,31 +929,48 @@ class UnconvergedErrorHandler(ErrorHandler):
         Perform corrections.
         """
         v = Vasprun(self.output_filename)
+        algo = v.incar.get("ALGO", "Normal").lower()
         actions = []
         if not v.converged_electronic:
-            # Ladder from VeryFast to Fast to Fast to All
-            # These progressively switches to more stable but more
-            # expensive algorithms
-            algo = v.incar.get("ALGO", "Normal")
-            if algo == "VeryFast":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
-            elif algo == "Fast":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
-            elif algo == "Normal":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+            # Ladder from VeryFast to Fast to Normal to All
+            # (except for meta-GGAs and hybrids).
+            # These progressively switch to more stable but more
+            # expensive algorithms.
+            if v.incar.get("METAGGA", "--") != "--":
+                # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
+                # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
+                # I am using "--" as the check for METAGGA here because this is the default in the
+                # vasprun.xml file
+                if algo != "all":
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+            elif v.incar.get("LHFCALC", False):
+                # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
+                # support these algorithms, but no warning is printed.
+                if algo != "all":
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+                # uncomment below for a backup option
+                # elif algo != "damped":
+                #     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "Time": 0.5}}})
             else:
-                # Try mixing as last resort
-                new_settings = {
-                    "ISTART": 1,
-                    "ALGO": "Normal",
-                    "NELMDL": -6,
-                    "BMIX": 0.001,
-                    "AMIX_MAG": 0.8,
-                    "BMIX_MAG": 0.001,
-                }
+                if algo == "veryfast":
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
+                elif algo == "fast":
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
+                elif algo == "normal":
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+                else:
+                    # Try mixing as last resort
+                    new_settings = {
+                        "ISTART": 1,
+                        "ALGO": "Normal",
+                        "NELMDL": -6,
+                        "BMIX": 0.001,
+                        "AMIX_MAG": 0.8,
+                        "BMIX_MAG": 0.001,
+                    }
 
-                if not all(v.incar.get(k, "") == val for k, val in new_settings.items()):
-                    actions.append({"dict": "INCAR", "action": {"_set": new_settings}})
+                    if not all(v.incar.get(k, "") == val for k, val in new_settings.items()):
+                        actions.append({"dict": "INCAR", "action": {"_set": new_settings}})
 
         elif not v.converged_ionic:
             # Just continue optimizing and let other handles fix ionic
@@ -1297,7 +1314,7 @@ class FrozenJobErrorHandler(ErrorHandler):
 
         vi = VaspInput.from_directory(".")
         actions = []
-        if vi["INCAR"].get("ALGO", "Normal") == "Fast":
+        if vi["INCAR"].get("ALGO", "Normal").lower() == "fast":
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
         else:
             actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8}}})
@@ -1310,8 +1327,8 @@ class FrozenJobErrorHandler(ErrorHandler):
 class NonConvergingErrorHandler(ErrorHandler):
     """
     Check if a run is hitting the maximum number of electronic steps at the
-    last nionic_steps ionic steps (default=10). If so, change ALGO from Fast to
-    Normal or kill the job.
+    last nionic_steps ionic steps (default=10). If so, change ALGO using a
+    multi-step ladder scheme or kill the job.
     """
 
     is_monitor = True
@@ -1350,36 +1367,52 @@ class NonConvergingErrorHandler(ErrorHandler):
         Perform corrections.
         """
         vi = VaspInput.from_directory(".")
-        algo = vi["INCAR"].get("ALGO", "Normal")
+        algo = vi["INCAR"].get("ALGO", "Normal").lower()
         amix = vi["INCAR"].get("AMIX", 0.4)
         bmix = vi["INCAR"].get("BMIX", 1.0)
         amin = vi["INCAR"].get("AMIN", 0.1)
         actions = []
-        # Ladder from VeryFast to Fast to Fast to All
-        # These progressively switches to more stable but more
-        # expensive algorithms
-        if algo == "VeryFast":
-            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
-        elif algo == "Fast":
-            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
-        elif algo == "Normal":
-            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
-        elif amix > 0.1 and bmix > 0.01:
-            # Try linear mixing
-            actions.append(
-                {
-                    "dict": "INCAR",
-                    "action": {"_set": {"AMIX": 0.1, "BMIX": 0.01, "ICHARG": 2}},
-                }
-            )
-        elif bmix < 3.0 and amin > 0.01:
-            # Try increasing bmix
-            actions.append(
-                {
-                    "dict": "INCAR",
-                    "action": {"_set": {"AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},
-                }
-            )
+        # Ladder from VeryFast to Fast to Normal to All
+        # (except for meta-GGAs and hybrids).
+        # These progressively switch to more stable but more
+        # expensive algorithms.
+        if vi["INCAR"].get("METAGGA", "none").lower() != "none":
+            # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
+            # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
+            # I am using "none" here because METAGGA is a string variable and this is the default
+            if algo != "all":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+        elif vi["INCAR"].get("LHFCALC", False):
+            # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
+            # support these algorithms, but no warning is printed.
+            if algo != "all":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+            # uncomment the line below for a backup option
+            # elif algo != "damped":
+            #     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "Time": 0.5}}})
+        else:
+            if algo == "veryfast":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
+            elif algo == "fast":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
+            elif algo == "normal":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+            elif amix > 0.1 and bmix > 0.01:
+                # Try linear mixing
+                actions.append(
+                    {
+                        "dict": "INCAR",
+                        "action": {"_set": {"ALGO": "Normal", "AMIX": 0.1, "BMIX": 0.01, "ICHARG": 2}},
+                    }
+                )
+            elif bmix < 3.0 and amin > 0.01:
+                # Try increasing bmix
+                actions.append(
+                    {
+                        "dict": "INCAR",
+                        "action": {"_set": {"Algo": "Normal", "AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},
+                    }
+                )
 
         if actions:
             backup(VASP_BACKUP_FILES)
@@ -1668,13 +1701,13 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         """
         # change ALGO = Fast to Normal if ALGO is !Normal
         vi = VaspInput.from_directory(".")
-        algo = vi["INCAR"].get("ALGO", "Normal")
-        if algo.lower() not in ["normal", "n"]:
+        algo = vi["INCAR"].get("ALGO", "Normal").lower()
+        if algo not in ["normal", "n"]:
             backup(VASP_BACKUP_FILES)
             actions = [{"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}}]
             VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Positive energy"], "actions": actions}
-        if algo == "Normal":
+        if algo == "normal":
             potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
             actions = [{"dict": "INCAR", "action": {"_set": {"POTIM": potim}}}]
             VaspModder(vi=vi).apply_actions(actions)

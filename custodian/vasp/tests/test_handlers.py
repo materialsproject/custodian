@@ -583,6 +583,66 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         self.assertTrue(h.check())
         d = h.correct()
         self.assertEqual(d["errors"], ["Unconverged"])
+        self.assertEqual(
+            d,
+            {
+                "actions": [{"action": {"_set": {"ALGO": "Normal"}}, "dict": "INCAR"}],
+                "errors": ["Unconverged"],
+            },
+        )
+
+        shutil.copy("vasprun.xml.electronic_veryfast", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["Unconverged"])
+        self.assertEqual(
+            d,
+            {
+                "actions": [{"action": {"_set": {"ALGO": "Fast"}}, "dict": "INCAR"}],
+                "errors": ["Unconverged"],
+            },
+        )
+
+        shutil.copy("vasprun.xml.electronic_normal", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["Unconverged"])
+        self.assertEqual(
+            d,
+            {
+                "actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}],
+                "errors": ["Unconverged"],
+            },
+        )
+
+        shutil.copy("vasprun.xml.electronic_metagga_fast", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["Unconverged"])
+        self.assertEqual(
+            d,
+            {
+                "actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}],
+                "errors": ["Unconverged"],
+            },
+        )
+
+        shutil.copy("vasprun.xml.electronic_hybrid_fast", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["Unconverged"])
+        self.assertEqual(
+            d,
+            {
+                "actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}],
+                "errors": ["Unconverged"],
+            },
+        )
+
         os.remove("vasprun.xml")
 
     def test_check_correct_electronic_repeat(self):
