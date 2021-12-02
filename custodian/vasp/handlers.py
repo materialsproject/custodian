@@ -30,7 +30,7 @@ from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from custodian.vasp.interpreter import VaspModder
 
-__author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, " "Wei Chen, Stephen Dacek"
+__author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen, Stephen Dacek, Andrew Rosen"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
 __email__ = "ongsp@ucsd.edu"
@@ -95,7 +95,8 @@ class VaspErrorHandler(ErrorHandler):
         "posmap": ["POSMAP"],
         "point_group": ["group operation missing"],
         "symprec_noise": ["determination of the symmetry of your systems shows a strong"],
-        "dfpt_ncore": ["PEAD routines do not work for NCORE"],
+        "dfpt_ncore": ["PEAD routines do not work for NCORE", "remove the tag NPAR from the INCAR file"],
+        "bravais": ["Inconsistent Bravais lattice"],
     }
 
     def __init__(
@@ -149,21 +150,19 @@ class VaspErrorHandler(ErrorHandler):
         incar = Incar.from_file("INCAR")
         self.errors = set()
         error_msgs = set()
-        with open(self.output_filename) as f:
-            for line in f:
-                l = line.strip()
-                for err, msgs in VaspErrorHandler.error_msgs.items():
-                    if err in self.errors_subset_to_catch:
-                        for msg in msgs:
-                            if l.find(msg) != -1:
-                                # this checks if we want to run a charged
-                                # computation (e.g., defects) if yes we don't
-                                # want to kill it because there is a change in
-                                # e-density (brmix error)
-                                if err == "brmix" and "NELECT" in incar:
-                                    continue
-                                self.errors.add(err)
-                                error_msgs.add(msg)
+        with open(self.output_filename) as file:
+            text = file.read()
+            for err in self.errors_subset_to_catch:
+                for msg in self.error_msgs[err]:
+                    if text.find(msg) != -1:
+                        # this checks if we want to run a charged
+                        # computation (e.g., defects) if yes we don't
+                        # want to kill it because there is a change in
+                        # e-density (brmix error)
+                        if err == "brmix" and "NELECT" in incar:
+                            continue
+                        self.errors.add(err)
+                        error_msgs.add(msg)
         for msg in error_msgs:
             self.logger.error(msg, extra={"incar": incar.as_dict()})
         return len(self.errors) > 0
@@ -232,7 +231,7 @@ class VaspErrorHandler(ErrorHandler):
                 self.error_count["brmix"] += 1
 
                 if vi["KPOINTS"].num_kpts < 1:
-                    all_kpts_even = all(bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0])
+                    all_kpts_even = all(n % 2 == 0 for n in vi["KPOINTS"].kpts[0])
                     if all_kpts_even:
                         new_kpts = (tuple(n + 1 for n in vi["KPOINTS"].kpts[0]),)
                         actions.append(
@@ -299,7 +298,7 @@ class VaspErrorHandler(ErrorHandler):
         if self.errors.intersection(["subspacematrix"]):
             if self.error_count["subspacematrix"] == 0:
                 actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
-            else:
+            elif self.error_count["subspacematrix"] == 1:
                 actions.append({"dict": "INCAR", "action": {"_set": {"PREC": "Accurate"}}})
             self.error_count["subspacematrix"] += 1
 
@@ -359,8 +358,16 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}})
 
         if "brions" in self.errors:
+            # Increase POTIM but switch to IBRION = 2 (CG) if IBRION = 1 simply isn't working out
+            # IBRION = 2 is less sensitive to POTIM
             potim = float(vi["INCAR"].get("POTIM", 0.5)) + 0.1
             actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
+            actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+            if self.error_count["brions"] == 1 and vi["INCAR"].get("IBRION", 0) == 1:
+                # Reset POTIM to original value and switch to IBRION = 2
+                potim -= 0.2
+                actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 2, "POTIM": potim}}})
+            self.error_count["brions"] += 1
 
         if "zbrent" in self.errors:
             # ZBRENT is caused by numerical noise in the forces, often near the PES minimum
@@ -422,7 +429,7 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
 
         if "zheev" in self.errors:
-            if vi["INCAR"].get("ALGO", "Fast").lower() != "exact":
+            if vi["INCAR"].get("ALGO", "Normal").lower() != "exact":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Exact"}}})
         if "elf_kpar" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": 1}}})
@@ -443,9 +450,7 @@ class VaspErrorHandler(ErrorHandler):
                 # next, increase by 100x (10x the original)
                 orig_symprec = vi["INCAR"].get("SYMPREC", 1e-6)
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": orig_symprec * 100}}})
-            else:
-                # if we have already corrected twice, there's nothing else to do
-                pass
+            self.error_count["posmap"] += 1
 
         if "point_group" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
@@ -462,6 +467,17 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_unset": {"NCORE": 0}}})
             if "NPAR" in vi["INCAR"]:
                 actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 0}}})
+
+        if "bravais" in self.errors:
+            # VASP recommends refining the lattice parameters or changing SYMPREC
+            # Appears to occurs when SYMPREC is very low, so we will change it to
+            # the default if it's not already. Let's not increase SYMPREC if it's
+            # already at 1e-4 though.
+            symprec = vi["INCAR"].get("SYMPREC", 1e-5)
+            if symprec < 1e-5:
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-5}}})
+            elif symprec < 1e-4:
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": symprec * 10}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
@@ -720,7 +736,7 @@ class DriftErrorHandler(ErrorHandler):
         Check for error.
         """
         incar = Incar.from_file("INCAR")
-        if incar.get("EDIFFG", 0.1) >= 0 or incar.get("NSW", 0) == 0:
+        if incar.get("EDIFFG", 0.1) >= 0 or incar.get("NSW", 0) <= 1:
             # Only activate when force relaxing and ionic steps
             # NSW check prevents accidental effects when running DFPT
             return False
@@ -936,7 +952,7 @@ class IncorrectSmearingHandler(ErrorHandler):
     Check if a calculation is a metal (zero bandgap), has been run with
     ISMEAR=-5, and is not a static calculation, which is only appropriate for
     semiconductors. If this occurs, this handler will rerun the calculation
-    using the smearing settings appropriate for metals (ISMEAR=-2, SIGMA=0.2).
+    using the smearing settings appropriate for metals (ISMEAR=2, SIGMA=0.2).
     """
 
     is_monitor = False
@@ -1105,7 +1121,7 @@ class LargeSigmaHandler(ErrorHandler):
 class MaxForceErrorHandler(ErrorHandler):
     """
     Checks that the desired force convergence has been achieved. Otherwise
-    restarts the run with smaller EDIFF. (This is necessary since energy
+    restarts the run with smaller EDIFFG. (This is necessary since energy
     and force convergence criteria cannot be set simultaneously)
     """
 
@@ -1482,7 +1498,7 @@ class CheckpointHandler(ErrorHandler):
     max_errors in Custodian must be set to a very high value, and you
     probably wouldn't want to use any standard VASP error handlers. The
     checkpoint will be stored in subdirs chk_#. This should be used in
-    combiantion with the StoppedRunHandler.
+    combination with the StoppedRunHandler.
     """
 
     is_monitor = True

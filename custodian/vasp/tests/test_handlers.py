@@ -16,7 +16,6 @@ import os
 import shutil
 import unittest
 
-import numpy as np
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
 
 from custodian.vasp.handlers import (
@@ -131,6 +130,30 @@ class VaspErrorHandlerTest(unittest.TestCase):
             [{"action": {"_set": {"kpoints": [[4, 4, 4]]}}, "dict": "KPOINTS"}],
         )
 
+    def test_brions(self):
+        shutil.copy("INCAR.ibrion", "INCAR")
+        h = VaspErrorHandler("vasp.brions")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["brions"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 1)
+        self.assertAlmostEqual(i["POTIM"], 1.5)
+
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["brions"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 2)
+        self.assertAlmostEqual(i["POTIM"], 1.4)
+
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["brions"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 2)
+        self.assertAlmostEqual(i["POTIM"], 1.5)
+
     def test_dentet(self):
         h = VaspErrorHandler("vasp.dentet")
         h.check()
@@ -209,7 +232,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertFalse("IMIX" in vi["INCAR"])
         self.assertTrue(os.path.exists("CHGCAR"))
         if vi["KPOINTS"].style == Kpoints.supported_modes.Gamma and vi["KPOINTS"].num_kpts < 1:
-            all_kpts_even = all([bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0]])
+            all_kpts_even = all(n % 2 == 0 for n in vi["KPOINTS"].kpts[0])
             self.assertFalse(all_kpts_even)
 
         # The next correction check ISYM and no CHGCAR
@@ -319,6 +342,20 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ISYM"], 0)
 
+    def test_bravais(self):
+        h = VaspErrorHandler("vasp6.bravais")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["bravais"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["SYMPREC"], 1e-4)
+
+        shutil.copy("INCAR.symprec", "INCAR")
+        h = VaspErrorHandler("vasp6.bravais")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["bravais"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["SYMPREC"], 1e-5)
+
     def test_posmap(self):
         h = VaspErrorHandler("vasp.posmap")
         self.assertEqual(h.check(), True)
@@ -326,12 +363,22 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertAlmostEqual(i["SYMPREC"], 1e-6)
 
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["posmap"])
+        i = Incar.from_file("INCAR")
+        self.assertAlmostEqual(i["SYMPREC"], 1e-4)
+
     def test_posmap_vasp6(self):
         h = VaspErrorHandler("vasp6.posmap")
         self.assertEqual(h.check(), True)
         self.assertEqual(h.correct()["errors"], ["posmap"])
         i = Incar.from_file("INCAR")
         self.assertAlmostEqual(i["SYMPREC"], 1e-6)
+
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["posmap"])
+        i = Incar.from_file("INCAR")
+        self.assertAlmostEqual(i["SYMPREC"], 1e-4)
 
     def test_point_group(self):
         h = VaspErrorHandler("vasp.point_group")
@@ -349,6 +396,14 @@ class VaspErrorHandlerTest(unittest.TestCase):
 
     def test_dfpt_ncore(self):
         h = VaspErrorHandler("vasp.dfpt_ncore")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["dfpt_ncore"])
+        incar = Incar.from_file("INCAR")
+        self.assertTrue("NPAR" not in incar)
+        self.assertTrue("NCORE" not in incar)
+
+    def test_finite_difference_ncore(self):
+        h = VaspErrorHandler("vasp.fd_ncore")
         self.assertEqual(h.check(), True)
         self.assertEqual(h.correct()["errors"], ["dfpt_ncore"])
         incar = Incar.from_file("INCAR")
@@ -978,11 +1033,11 @@ class DriftErrorHandlerTest(unittest.TestCase):
 
         h = DriftErrorHandler(max_drift=0.0001, enaug_multiply=2)
         h.check()
-        d = h.correct()
+        h.correct()
         incar = Incar.from_file("INCAR")
         self.assertTrue(incar.get("ADDGRID", False))
 
-        d = h.correct()
+        h.correct()
         incar = Incar.from_file("INCAR")
         self.assertEqual(incar.get("PREC"), "High")
         self.assertEqual(incar.get("ENAUG", 0), incar.get("ENCUT", 2) * 2)
