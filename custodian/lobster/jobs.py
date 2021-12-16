@@ -29,6 +29,11 @@ LOBSTEROUTPUT_FILES = [
     "ICOOPLIST.lobster",
     "lobster.out",
     "projectionData.lobster",
+    "MadelungEnergies.lobster",
+    "SitePotentials.lobster",
+    "bandOverlaps.lobster",
+    "ICOBILIST.lobster",
+    "COBICAR.lobster"
 ]
 
 logger = logging.getLogger(__name__)
@@ -45,7 +50,7 @@ class LobsterJob(Job):
         output_file: str = "lobsterout",
         stderr_file: str = "std_err_lobster.txt",
         gzipped: bool = True,
-        add_files_to_gzip=[],
+        add_files_to_gzip=['custodian.json','FW.json','FW_submit.script'],
         backup: bool = True,
     ):
         """
