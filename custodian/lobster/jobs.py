@@ -105,4 +105,5 @@ class LobsterJob(Job):
                 if os.path.exists("lobsterin.orig"):
                     compress_file("lobsterin.orig", compression="gz")
             for file in self.add_files_to_gzip:
-                compress_file(file, compression="gz")
+            	if os.path.exists(file):
+            	    compress_file(file, compression="gz")
