@@ -10,7 +10,7 @@ from monty.shutil import compress_file
 
 from custodian.custodian import Job
 
-__author__ = "Janine George, Guido Petretto"
+__author__ = "Janine George, Guido Petretto,Aakash Naik"
 __copyright__ = "Copyright 2020, The Materials Project"
 __version__ = "0.1"
 __maintainer__ = "Janine George"
@@ -36,6 +36,12 @@ LOBSTEROUTPUT_FILES = [
     "COBICAR.lobster"
 ]
 
+FW_FILES=[
+	'custodian.json',
+	'FW.json',
+	'FW_submit.script'
+]
+
 logger = logging.getLogger(__name__)
 
 
@@ -50,7 +56,7 @@ class LobsterJob(Job):
         output_file: str = "lobsterout",
         stderr_file: str = "std_err_lobster.txt",
         gzipped: bool = True,
-        add_files_to_gzip=['custodian.json','FW.json','FW_submit.script'],
+        add_files_to_gzip=[],
         backup: bool = True,
     ):
         """
@@ -104,6 +110,9 @@ class LobsterJob(Job):
             if self.backup:
                 if os.path.exists("lobsterin.orig"):
                     compress_file("lobsterin.orig", compression="gz")
+            for file in FW_FILES:
+                if os.path.exists(file):
+                    compress_file(file, compression="gz")
             for file in self.add_files_to_gzip:
-            	if os.path.exists(file):
             	    compress_file(file, compression="gz")
+            	    
