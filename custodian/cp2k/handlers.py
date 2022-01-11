@@ -281,12 +281,16 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                                     }
                                 }}})
 
-        # Last ditch effort to save convergence. No strict orthogonality and fractional occupations
-        # No strict orthogonality of MOs, use iterative refinement polynomial expansion for orthogonality
-        # Allow for rotations -> allowing for fractional occupation
-        # Rotation requires FULL_KINETIC and 2pnt line search
-        # Precondition on fractional occupation
-        # Increase SCF steps in one loop and decrease outer loops
+        """
+        Last ditch effort to save convergence. No strict orthogonality and fractional occupations
+        No strict orthogonality of MOs, use iterative refinement polynomial expansion for orthogonality
+        Allow for rotations -> allowing for fractional occupation
+        Rotation requires and 2pnt line search
+        Preconditioning on fractional occupation would be preferred but not allowed with FSI precond.
+        Increase SCF steps in one loop and decrease outer loops
+        Beyond this, nothing can be done except searching for longer, or reducing line search length
+        which are both very slow, and so should be handled by the user on a case by case basis.
+        """
         if not actions and (algo == 'STRICT' or not rotate or not occ_prec):
             actions.append(
                 {
@@ -296,16 +300,16 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                             'FORCE_EVAL': {
                                     'DFT': {
                                         'SCF': {
-                                            'MAX_SCF': 100,
+                                            'MAX_SCF': 50,
                                             'OT': {
                                                 'LINESEARCH': '2PNT',
                                                 'ROTATION': True,
-                                                'PRECONDITIONER': 'FULL_KINETIC',
-                                                'OCCUPATION_PRECONDITIONER': True,
+                                                'PRECONDITIONER': 'FULL_SINGLE_INVERSE',
+                                                'OCCUPATION_PRECONDITIONER': False,
                                                 'ALGORITHM': 'IRAC'
                                             },
                                             'OUTER_SCF': {
-                                                'MAX_SCF': 10
+                                                'MAX_SCF': 20
                                             }
                                         }
                                     }
