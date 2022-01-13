@@ -483,6 +483,11 @@ class VaspErrorHandlerTest(unittest.TestCase):
             ],
         )
 
+    def test_nbands_not_sufficient(self):
+        h = VaspErrorHandler("vasp.nbands_not_sufficient")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["bands_not_sufficient"])
+
     def tearDown(self):
         os.chdir(test_dir)
         shutil.move("INCAR.orig", "INCAR")

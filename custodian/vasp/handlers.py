@@ -100,6 +100,7 @@ class VaspErrorHandler(ErrorHandler):
         "symprec_noise": ["determination of the symmetry of your systems shows a strong"],
         "dfpt_ncore": ["PEAD routines do not work for NCORE", "remove the tag NPAR from the INCAR file"],
         "bravais": ["Inconsistent Bravais lattice"],
+        "nbands_not_sufficient": ["number of bands is not sufficient"],
     }
 
     def __init__(
@@ -503,6 +504,15 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-5}}})
             elif symprec < 1e-4:
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": symprec * 10}}})
+
+        if "nbands_not_sufficient" in self.errors:
+            # There is something very wrong about the value of NBANDS. We don't make
+            # any updates to NBANDS though because it's likely the user screwed something
+            # up pretty badly during setup. For instance, this has happened to me if
+            # MAGMOM = 1.0 np.nan*2 or something similar.
+
+            # Unfixable error. Just return None for actions.
+            return {"errors": ["nbands_not_sufficient"], "actions": None}
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
