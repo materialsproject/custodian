@@ -434,7 +434,8 @@ class VaspErrorHandler(ErrorHandler):
                 if vi["INCAR"].get("NEDOS") or vi["INCAR"].get("EMIN") or vi["INCAR"].get("EMAX"):
                     warnings.warn(
                         "This looks like a DOS run. You may want to follow-up this job with ALGO = Damped"
-                        " and ISMEAR = -5, using the wavefunction from the current job."
+                        " and ISMEAR = -5, using the wavefunction from the current job.",
+                        UserWarning,
                     )
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
 
@@ -456,7 +457,8 @@ class VaspErrorHandler(ErrorHandler):
             if "algo_tet" not in self.errors:
                 warnings.warn(
                     "EDWAV error reported by VASP. You may wish to consider recompiling VASP with"
-                    " the -O1 optimization if you used -O2"
+                    " the -O1 optimization if you used -O2",
+                    UserWarning,
                 )
 
         if "zheev" in self.errors:
