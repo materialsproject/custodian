@@ -373,6 +373,13 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ISYM"], 0)
 
+    def test_hnform(self):
+        h = VaspErrorHandler("vasp.hnform")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["hnform"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ISYM"], 0)
+
     def test_bravais(self):
         h = VaspErrorHandler("vasp6.bravais")
         self.assertEqual(h.check(), True)

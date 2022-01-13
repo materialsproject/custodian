@@ -100,6 +100,7 @@ class VaspErrorHandler(ErrorHandler):
         "symprec_noise": ["determination of the symmetry of your systems shows a strong"],
         "dfpt_ncore": ["PEAD routines do not work for NCORE", "remove the tag NPAR from the INCAR file"],
         "bravais": ["Inconsistent Bravais lattice"],
+        "hnform": ["HNFORM: k-point generating"],
     }
 
     def __init__(
@@ -503,6 +504,12 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-5}}})
             elif symprec < 1e-4:
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": symprec * 10}}})
+
+        if "hnform" in self.errors:
+            # The only solution is to change your k-point grid or disable symmetry
+            # For internal calculation compatibility's sake, we do the latter
+            if vi["INCAR"].get("ISYM", 2) > 0:
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
