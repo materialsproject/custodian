@@ -431,13 +431,13 @@ class VaspErrorHandler(ErrorHandler):
             # DOS then they should consider running a subsequent job with ISMEAR = -5 and
             # ALGO = Damped, provided the wavefunction has been stored.
             if vi["INCAR"].get("ISMEAR", 1) < 0:
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
                 if vi["INCAR"].get("NEDOS") or vi["INCAR"].get("EMIN") or vi["INCAR"].get("EMAX"):
                     warnings.warn(
                         "This looks like a DOS run. You may want to follow-up this job with ALGO = Damped"
                         " and ISMEAR = -5, using the wavefunction from the current job.",
                         UserWarning,
                     )
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
 
         if "grad_not_orth" in self.errors:
             # This error is sometimes due to how VASP is compiled. Depending on the optimization flag and
