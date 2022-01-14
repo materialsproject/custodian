@@ -288,7 +288,7 @@ class VaspErrorHandler(ErrorHandler):
                 nsteps = 0
 
             if nsteps >= 1:
-                potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
+                potim = round(vi["INCAR"].get("POTIM", 0.5) / 2.0, 2)
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0, "POTIM": potim}}})
             elif vi["INCAR"].get("NSW", 0) == 0 or vi["INCAR"].get("ISIF", 0) in range(3):
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
@@ -358,12 +358,12 @@ class VaspErrorHandler(ErrorHandler):
         if "brions" in self.errors:
             # Increase POTIM but switch to IBRION = 2 (CG) if IBRION = 1 simply isn't working out
             # IBRION = 2 is less sensitive to POTIM
-            potim = float(vi["INCAR"].get("POTIM", 0.5)) + 0.1
+            potim = round(vi["INCAR"].get("POTIM", 0.5) + 0.1, 2)
             actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
             actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
             if self.error_count["brions"] == 1 and vi["INCAR"].get("IBRION", 0) == 1:
                 # Reset POTIM to original value and switch to IBRION = 2
-                potim -= 0.2
+                potim = round(potim - 0.2, 2)
                 actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 2, "POTIM": potim}}})
             self.error_count["brions"] += 1
 
@@ -391,7 +391,7 @@ class VaspErrorHandler(ErrorHandler):
 
         if "too_few_bands" in self.errors:
             if "NBANDS" in vi["INCAR"]:
-                nbands = int(vi["INCAR"]["NBANDS"])
+                nbands = vi["INCAR"]["NBANDS"]
             else:
                 with open("OUTCAR") as f:
                     for line in f:
@@ -411,7 +411,7 @@ class VaspErrorHandler(ErrorHandler):
             if vi["INCAR"].get("ALGO", "Normal").lower() in ["fast", "veryfast"]:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
             else:
-                potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
+                potim = round(vi["INCAR"].get("POTIM", 0.5) / 2.0, 2)
                 actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
             if vi["INCAR"].get("ICHARG", 0) < 10:
                 actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
@@ -1204,8 +1204,8 @@ class MaxForceErrorHandler(ErrorHandler):
         """
         backup(VASP_BACKUP_FILES | {self.output_filename})
         vi = VaspInput.from_directory(".")
-        ediff = float(vi["INCAR"].get("EDIFF", 1e-4))
-        ediffg = float(vi["INCAR"].get("EDIFFG", ediff * 10))
+        ediff = vi["INCAR"].get("EDIFF", 1e-4)
+        ediffg = vi["INCAR"].get("EDIFFG", ediff * 10)
         actions = [
             {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}},
             {"dict": "INCAR", "action": {"_set": {"EDIFFG": ediffg * 0.5}}},
@@ -1261,8 +1261,8 @@ class PotimErrorHandler(ErrorHandler):
         """
         backup(VASP_BACKUP_FILES)
         vi = VaspInput.from_directory(".")
-        potim = float(vi["INCAR"].get("POTIM", 0.5))
-        ibrion = int(vi["INCAR"].get("IBRION", 0))
+        potim = vi["INCAR"].get("POTIM", 0.5)
+        ibrion = vi["INCAR"].get("IBRION", 0)
         if potim < 0.2 and ibrion != 3:
             actions = [{"dict": "INCAR", "action": {"_set": {"IBRION": 3, "SMASS": 0.75}}}]
         elif potim < 0.1:
@@ -1709,7 +1709,7 @@ class PositiveEnergyErrorHandler(ErrorHandler):
             VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Positive energy"], "actions": actions}
         if algo == "normal":
-            potim = float(vi["INCAR"].get("POTIM", 0.5)) / 2.0
+            potim = round(vi["INCAR"].get("POTIM", 0.5) / 2.0, 2)
             actions = [{"dict": "INCAR", "action": {"_set": {"POTIM": potim}}}]
             VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Positive energy"], "actions": actions}
