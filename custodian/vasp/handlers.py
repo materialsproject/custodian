@@ -356,37 +356,72 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}})
 
         if "brions" in self.errors:
-            # Increase POTIM but switch to IBRION = 2 (CG) if IBRION = 1 simply isn't working out
-            # IBRION = 2 is less sensitive to POTIM
-            potim = float(vi["INCAR"].get("POTIM", 0.5)) + 0.1
-            actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
+
+            # Copy CONTCAR to POSCAR so we do not lose our progress.
             actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+
+            # By default, increase POTIM per the VASP error message. But if that does not work,
+            # we should try IBRION = 2 since it is less sensitive to POTIM.
+            potim = round(vi["INCAR"].get("POTIM", 0.5) + 0.1, 2)
             if self.error_count["brions"] == 1 and vi["INCAR"].get("IBRION", 0) == 1:
-                # Reset POTIM to original value and switch to IBRION = 2
-                potim -= 0.2
-                actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 2, "POTIM": potim}}})
+                # Reset POTIM to default value and switch to IBRION = 2
+                actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 2, "POTIM": 0.5}}})
+            else:
+                # Increase POTIM
+                actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
             self.error_count["brions"] += 1
 
         if "zbrent" in self.errors:
             # ZBRENT is caused by numerical noise in the forces, often near the PES minimum
-            # This is often a severe problem for systems with many atoms and flexible
-            # structures (e.g. zeolites, MOFs)
+            # This is often a severe problem for systems with many atoms, flexible
+            # structures (e.g. zeolites, MOFs), and surfaces with adsorbates present. It is
+            # a tricky one to resolve and generally occurs with IBRION = 2, which is otherwise
+            # a fairly robust optimization algorithm.
+            #
+            # VASP recommends moving CONTCAR to POSCAR and tightening EDIFF to improve the forces.
+            # That is our first option, along with setting NELMIN to 8 to ensure the forces are
+            # high quality. Our backup option if this does not help is to switch to IBRION = 1.
+            #
+            # If the user has specified vtst_fixes = True, we instead switch right away to FIRE, which is known
+            # to be much more robust near the PES minimum. It is not the default because it requires
+            # VTST to be installed.
+
+            ediff = vi["INCAR"].get("EDIFF", 1e-4)
+
+            # Copy CONTCAR to POSCAR. This should always be done so we don't lose our progress.
             actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
-            if self.error_count["zbrent"] == 0:
-                # First try changing IBRION to 1 and continuing
-                actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 1}}})
-            elif self.error_count["zbrent"] == 1:
-                # If that fails, tighten the energy convergence criteria and raise minimum number of SCF steps
-                ediff = vi["INCAR"].get("EDIFF", 1e-4)
+
+            # Tighten EDIFF per the VASP warning message. We tighten it by a factor of 10 unless
+            # it is > 1e-6 (in which case we set it to 1e-6) or 1e-8 in which case we stop tightening
+            if ediff > 1e-8:
                 if ediff > 1e-6:
                     actions.append({"dict": "INCAR", "action": {"_set": {"EDIFF": 1e-6}}})
                 else:
                     actions.append({"dict": "INCAR", "action": {"_set": {"EDIFF": ediff / 10}}})
-                if vi["INCAR"].get("NELMIN", 2) < 6:
-                    actions.append({"dict": "INCAR", "action": {"_set": {"NELMIN": 6}}})
-                if self.vtst_fixes is True:
-                    # FIRE almost always resolves this issue but requires VTST to be installed
+
+            # Set NELMIN to 8 to further ensure we have accurate forces. NELMIN of 4 to 8 is also
+            # recommended if IBRION = 1 is set anyway.
+            if vi["INCAR"].get("NELMIN", 2) < 8:
+                actions.append({"dict": "INCAR", "action": {"_set": {"NELMIN": 8}}})
+
+            # FIRE almost always resolves this issue but requires VTST to be installed. We provide
+            # it as a non-default option for the user. It is also not very sensitive to POTIM, unlike
+            # IBRION = 1. FIRE requires accurate forces but is unlikely to run into the zbrent issue.
+            # Since accurate forces are required for FIRE, we also need EDIFF to be tight and NELMIN
+            # to be set, e.g. to 8. This was already done above.
+            if self.vtst_fixes:
+                if vi["INCAR"].get("IOPT", 0) != 7:
                     actions.append({"dict": "INCAR", "action": {"_set": {"IOPT": 7, "IBRION": 3, "POTIM": 0}}})
+            else:
+                # By default, we change IBRION to 1 if the first CONTCAR to POSCAR swap did not work.
+                # We do not do this right away because IBRION = 1 is very sensitive to POTIM, which may
+                # cause a brions error downstream. We want to avoid the loop condition of zbrent -->
+                # switch to IBRION = 1 --> brions --> increase POTIM --> brions --> switch back to IBRION = 2
+                # --> zbrent --> and so on. The best way to avoid this is trying to get it to converge in the
+                # first place without switching IBRION to 1.
+                if self.error_count["zbrent"] == 1:
+                    actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 1}}})
+
             self.error_count["zbrent"] += 1
 
         if "too_few_bands" in self.errors:
