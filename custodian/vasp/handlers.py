@@ -431,12 +431,6 @@ class VaspErrorHandler(ErrorHandler):
             # For simplicity, we go with Option 1 here, but if the user wants high-quality
             # DOS then they should consider running a subsequent job with ISMEAR = -5 and
             # ALGO = Damped, provided the wavefunction has been stored.
-            #
-            # Note: While in principle, we could also consider changing ALGO to Fast or Normal,
-            # this can be problematic. For instance, if we arrived at ALGO = All due to the UnconvergedErrorHandler,
-            # we might be stuck in an infinite loop of ALGO = Fast [not converging...] --> Normal -- All [algo_tet] -->
-            # Fast --> Normal --> etc. Also, meta-GGAs and hybrids are often used with ALGO = All/Damped,
-            # so we don't want to change that.
             if vi["INCAR"].get("ISMEAR", 1) < 0:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
                 if vi["INCAR"].get("NEDOS") or vi["INCAR"].get("EMIN") or vi["INCAR"].get("EMAX"):
@@ -447,6 +441,7 @@ class VaspErrorHandler(ErrorHandler):
                     )
 
         if "grad_not_orth" in self.errors:
+            # Often coincides with algo_tet, in which the algo_tet error handler will also resolve grad_not_orth.
             # When not present alongside algo_tet, the grad_not_orth error is due to how VASP is compiled.
             # Depending on the optimization flag and choice of compiler, the ALGO = All and Damped algorithms
             # may not work. The only fix is either to change ALGO or to recompile VASP. Since meta-GGAs/hybrids
