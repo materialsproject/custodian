@@ -435,12 +435,12 @@ class VaspErrorHandler(ErrorHandler):
                 else:
                     actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
 
-        if "grad_not_orth" in self.errors:
-            # This error is due to how VASP is compiled. Depending on the optimization flag and
-            # choice of compiler, the ALGO = All and Damped algorithms may not work with a
-            # grad_not_orth error returned. The only fix is either to change ALGO or to
-            # recompile VASP. Since meta-GGAs/hybrids are often used with ALGO = All
-            # and hybrids are incompatible with ALGO = Fast, we do not adjust ALGO in these cases.
+        if "grad_not_orth" in self.errors and "algo_tet" not in self.errors:
+            # When not present alongside algo_tet, the grad_not_orth error is due to how VASP is compiled.
+            # Depending on the optimization flag and choice of compiler, the ALGO = All and Damped algorithms
+            # may not work. The only fix is either to change ALGO or to recompile VASP. Since meta-GGAs/hybrids
+            # are often used with ALGO = All and hybrids are incompatible with ALGO = Fast, we do not adjust ALGO
+            # in these cases.
             if vi["INCAR"].get("METAGGA", "none") == "none" and not vi["INCAR"].get("LHFCALC", False):
                 if vi["INCAR"].get("ALGO", "Normal").lower() in ["all", "damped"]:
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
@@ -448,7 +448,7 @@ class VaspErrorHandler(ErrorHandler):
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}, "_unset": {"IALGO": 38}}})
             warnings.warn(
                 "EDWAV error reported by VASP. You may wish to consider recompiling VASP with"
-                " the -O1 optimization if you used -O2 and your job still crashes."
+                " the -O1 optimization if you used -O2 and this error keeps cropping up."
             )
 
         if "zheev" in self.errors:

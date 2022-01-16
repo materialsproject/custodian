@@ -300,6 +300,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertIn("algo_tet", h.correct()["errors"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ISMEAR"], 0)
+        self.assertEqual(i["SIGMA"], 0.05)
 
     def test_gradient_not_orthogonal(self):
         h = VaspErrorHandler("vasp.gradient_not_orthogonal")
@@ -309,7 +310,6 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(i["ALGO"], "Fast")
 
         shutil.copy("INCAR.gga_all", "INCAR")
-        i = Incar.from_file("INCAR")
         h = VaspErrorHandler("vasp.gradient_not_orthogonal")
         self.assertEqual(h.check(), True)
         self.assertIn("grad_not_orth", h.correct()["errors"])
@@ -317,7 +317,6 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(i["ALGO"], "Fast")
 
         shutil.copy("INCAR.gga_ialgo53", "INCAR")
-        i = Incar.from_file("INCAR")
         h = VaspErrorHandler("vasp.gradient_not_orthogonal")
         self.assertEqual(h.check(), True)
         self.assertIn("grad_not_orth", h.correct()["errors"])
@@ -326,7 +325,6 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertNotIn("IALGO", i)
 
         shutil.copy("INCAR.hybrid_normal", "INCAR")
-        i = Incar.from_file("INCAR")
         h = VaspErrorHandler("vasp.gradient_not_orthogonal")
         self.assertEqual(h.check(), True)
         self.assertIn("grad_not_orth", h.correct()["errors"])
@@ -334,7 +332,6 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(i["ALGO"], "Normal")
 
         shutil.copy("INCAR.hybrid_all", "INCAR")
-        i = Incar.from_file("INCAR")
         h = VaspErrorHandler("vasp.gradient_not_orthogonal")
         self.assertEqual(h.check(), True)
         self.assertIn("grad_not_orth", h.correct()["errors"])
@@ -342,7 +339,6 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(i["ALGO"], "All")
 
         shutil.copy("INCAR.metagga_all", "INCAR")
-        i = Incar.from_file("INCAR")
         h = VaspErrorHandler("vasp.gradient_not_orthogonal")
         self.assertEqual(h.check(), True)
         self.assertIn("grad_not_orth", h.correct()["errors"])
