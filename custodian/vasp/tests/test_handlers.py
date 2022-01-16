@@ -310,16 +310,14 @@ class VaspErrorHandlerTest(unittest.TestCase):
 
         shutil.copy("INCAR.gga_all", "INCAR")
         i = Incar.from_file("INCAR")
-        self.assertEqual(i["ALGO"], "All")
         h = VaspErrorHandler("vasp.gradient_not_orthogonal")
         self.assertEqual(h.check(), True)
         self.assertIn("grad_not_orth", h.correct()["errors"])
         i = Incar.from_file("INCAR")
-        self.assertEqual(i["ALGO"], "Normal")
+        self.assertEqual(i["ALGO"], "Fast")
 
         shutil.copy("INCAR.hybrid_normal", "INCAR")
         i = Incar.from_file("INCAR")
-        self.assertEqual(i["ALGO"], "Normal")
         h = VaspErrorHandler("vasp.gradient_not_orthogonal")
         self.assertEqual(h.check(), True)
         self.assertIn("grad_not_orth", h.correct()["errors"])
@@ -328,7 +326,6 @@ class VaspErrorHandlerTest(unittest.TestCase):
 
         shutil.copy("INCAR.hybrid_all", "INCAR")
         i = Incar.from_file("INCAR")
-        self.assertEqual(i["ALGO"], "All")
         h = VaspErrorHandler("vasp.gradient_not_orthogonal")
         self.assertEqual(h.check(), True)
         self.assertIn("grad_not_orth", h.correct()["errors"])
@@ -337,21 +334,11 @@ class VaspErrorHandlerTest(unittest.TestCase):
 
         shutil.copy("INCAR.metagga_all", "INCAR")
         i = Incar.from_file("INCAR")
-        self.assertEqual(i["ALGO"], "All")
         h = VaspErrorHandler("vasp.gradient_not_orthogonal")
         self.assertEqual(h.check(), True)
         self.assertIn("grad_not_orth", h.correct()["errors"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ALGO"], "All")
-
-        shutil.copy("INCAR.metagga_fast", "INCAR")
-        i = Incar.from_file("INCAR")
-        self.assertEqual(i["ALGO"], "Fast")
-        h = VaspErrorHandler("vasp.gradient_not_orthogonal")
-        self.assertEqual(h.check(), True)
-        self.assertIn("grad_not_orth", h.correct()["errors"])
-        i = Incar.from_file("INCAR")
-        self.assertEqual(i["ALGO"], "Fast")
 
     def test_rhosyg(self):
         h = VaspErrorHandler("vasp.rhosyg")
@@ -639,6 +626,19 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
             d,
             {
                 "actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}],
+                "errors": ["Unconverged"],
+            },
+        )
+
+        shutil.copy("vasprun.xml.electronic_hybrid_all", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["Unconverged"])
+        self.assertEqual(
+            d,
+            {
+                "actions": [{"action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}, "dict": "INCAR"}],
                 "errors": ["Unconverged"],
             },
         )

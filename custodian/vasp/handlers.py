@@ -439,18 +439,17 @@ class VaspErrorHandler(ErrorHandler):
             # This error is due to how VASP is compiled. Depending on the optimization flag and
             # choice of compiler, the ALGO = All and Damped algorithms may not work with a
             # grad_not_orth error returned. The only fix is either to change ALGO or to
-            # recompile VASP. Since meta-GGAs/hybrids are often used with ALGO = All,
-            # we do not adjust ALGO in these cases. We only adjust ALGO if GGA/GGA+U
-            # is employed.
-            if (
-                (vi["INCAR"].get("ALGO", "Normal").lower() in ["all", "damped"])
-                and vi["INCAR"].get("METAGGA", "none") == "none"
-                and not vi["INCAR"].get("LHFCALC", False)
-            ):
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
+            # recompile VASP. Since meta-GGAs/hybrids are often used with ALGO = All
+            # and hybrids are incompatible with ALGO = Fast, we do not adjust ALGO in these cases.
+            if vi["INCAR"].get("METAGGA", "none") == "none" and not vi["INCAR"].get("LHFCALC", False):
+                if (
+                    vi["INCAR"].get("ALGO", "Normal").lower() in ["all", "damped"]
+                    or 53 <= vi["INCAR"].get("IALGO", 38) <= 58
+                ):
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
             warnings.warn(
                 "EDWAV error reported by VASP. You may wish to consider recompiling VASP with"
-                " the -O1 optimization if you used -O2"
+                " the -O1 optimization if you used -O2 and your job still crashes."
             )
 
         if "zheev" in self.errors:
@@ -949,9 +948,9 @@ class UnconvergedErrorHandler(ErrorHandler):
                 # support these algorithms, but no warning is printed.
                 if algo != "all":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
-                # uncomment below for a backup option
-                # elif algo != "damped":
-                #     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "Time": 0.5}}})
+                # See the VASP manual section on LHFCALC for more information.
+                elif algo != "damped":
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "Time": 0.5}}})
             else:
                 if algo == "veryfast":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
