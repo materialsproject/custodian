@@ -423,13 +423,20 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
 
         if "algo_tet" in self.errors:
-            # ALGO=All and IALGO=5X often fail with ISMEAR = -4/-5. There are two options here
-            # for the user: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
+            # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP
+            # suggests: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
             # 2) Use ALGO = Damped but only *after* an ISMEAR = 0 run where the wavefunction
             # has been stored and read in for the subsequent run.
+            #
             # For simplicity, we go with Option 1 here, but if the user wants high-quality
             # DOS then they should consider running a subsequent job with ISMEAR = -5 and
             # ALGO = Damped, provided the wavefunction has been stored.
+            #
+            # Note: While in principle, we could also consider changing ALGO to Fast or Normal,
+            # this can be problematic. For instance, if we arrived at ALGO = All due to the UnconvergedErrorHandler,
+            # we might be stuck in an infinite loop of ALGO = Fast [not converging...] --> Normal -- All [algo_tet] -->
+            # Fast --> Normal --> etc. Also, meta-GGAs and hybrids are often used with ALGO = All/Damped,
+            # so we don't want to change that.
             if vi["INCAR"].get("ISMEAR", 1) < 0:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
                 if vi["INCAR"].get("NEDOS") or vi["INCAR"].get("EMIN") or vi["INCAR"].get("EMAX"):
@@ -439,21 +446,22 @@ class VaspErrorHandler(ErrorHandler):
                         UserWarning,
                     )
 
-        if "grad_not_orth" in self.errors and "algo_tet" not in self.errors:
+        if "grad_not_orth" in self.errors:
             # When not present alongside algo_tet, the grad_not_orth error is due to how VASP is compiled.
             # Depending on the optimization flag and choice of compiler, the ALGO = All and Damped algorithms
             # may not work. The only fix is either to change ALGO or to recompile VASP. Since meta-GGAs/hybrids
-            # are often used with ALGO = All and hybrids are incompatible with ALGO = Fast, we do not adjust ALGO
-            # in these cases.
+            # are often used with ALGO = All (and hybrids are incompatible with ALGO = VeryFast/Fast and slow with
+            # ALGO = Normal), we do not adjust ALGO in these cases.
             if vi["INCAR"].get("METAGGA", "none") == "none" and not vi["INCAR"].get("LHFCALC", False):
                 if vi["INCAR"].get("ALGO", "Normal").lower() in ["all", "damped"]:
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
                 elif 53 <= vi["INCAR"].get("IALGO", 38) <= 58:
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}, "_unset": {"IALGO": 38}}})
-            warnings.warn(
-                "EDWAV error reported by VASP. You may wish to consider recompiling VASP with"
-                " the -O1 optimization if you used -O2 and this error keeps cropping up."
-            )
+            if "algo_tet" not in self.errors:
+                warnings.warn(
+                    "EDWAV error reported by VASP without a simultaneous algo_tet error. You may wish to consider "
+                    "recompiling VASP with the -O1 optimization if you used -O2 and this error keeps cropping up."
+                )
 
         if "zheev" in self.errors:
             if vi["INCAR"].get("ALGO", "Normal").lower() != "exact":
@@ -496,14 +504,13 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 0}}})
 
         if "bravais" in self.errors:
-            # VASP recommends refining the lattice parameters or changing SYMPREC
+            # VASP recommends refining the lattice parameters or changing SYMPREC.
             # Appears to occurs when SYMPREC is very low, so we will change it to
-            # the default if it's not already. Let's not increase SYMPREC if it's
-            # already at 1e-4 though.
+            # the default if it's not already. If it's the default, we will x 10.
             symprec = vi["INCAR"].get("SYMPREC", 1e-5)
             if symprec < 1e-5:
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-5}}})
-            elif symprec < 1e-4:
+            else:
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": symprec * 10}}})
 
         VaspModder(vi=vi).apply_actions(actions)
