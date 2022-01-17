@@ -509,7 +509,7 @@ class VaspErrorHandler(ErrorHandler):
             # There is something very wrong about the value of NBANDS. We don't make
             # any updates to NBANDS though because it's likely the user screwed something
             # up pretty badly during setup. For instance, this has happened to me if
-            # MAGMOM = 1.0 2*nan or something similar.
+            # MAGMOM = 2*nan or something similar.
 
             # Unfixable error. Just return None for actions.
             return {"errors": ["nbands_not_sufficient"], "actions": None}
