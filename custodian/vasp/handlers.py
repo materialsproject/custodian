@@ -1,6 +1,6 @@
 """
 This module implements specific error handlers for VASP runs. These handlers
-tries to detect common errors in vasp runs and attempt to fix them on the fly
+try to detect common errors in vasp runs and attempt to fix them on the fly
 by modifying the input files.
 """
 
@@ -69,9 +69,9 @@ class VaspErrorHandler(ErrorHandler):
             "Tetrahedron method fails (number of k-points < 4)",
             "BZINTS",
         ],
-        "inv_rot_mat": ["rotation matrix was not found (increase " "SYMPREC)"],
+        "inv_rot_mat": ["rotation matrix was not found (increase SYMPREC)"],
         "brmix": ["BRMIX: very serious problems"],
-        "subspacematrix": ["WARNING: Sub-Space-Matrix is not hermitian in " "DAV"],
+        "subspacematrix": ["WARNING: Sub-Space-Matrix is not hermitian in DAV"],
         "tetirr": ["Routine TETIRR needs special values"],
         "incorrect_shift": ["Could not get correct shifts"],
         "real_optlay": ["REAL_OPTLAY: internal error", "REAL_OPT: internal ERROR"],
@@ -100,6 +100,7 @@ class VaspErrorHandler(ErrorHandler):
         "symprec_noise": ["determination of the symmetry of your systems shows a strong"],
         "dfpt_ncore": ["PEAD routines do not work for NCORE", "remove the tag NPAR from the INCAR file"],
         "bravais": ["Inconsistent Bravais lattice"],
+        "hnform": ["HNFORM: k-point generating"],
     }
 
     def __init__(
@@ -504,6 +505,12 @@ class VaspErrorHandler(ErrorHandler):
             elif symprec < 1e-4:
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": symprec * 10}}})
 
+        if "hnform" in self.errors:
+            # The only solution is to change your k-point grid or disable symmetry
+            # For internal calculation compatibility's sake, we do the latter
+            if vi["INCAR"].get("ISYM", 2) > 0:
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
 
@@ -574,7 +581,7 @@ class StdErrHandler(ErrorHandler):
     is_monitor = True
 
     error_msgs = {
-        "kpoints_trans": ["internal error in GENERATE_KPOINTS_TRANS: " "number of G-vector changed in star"],
+        "kpoints_trans": ["internal error in GENERATE_KPOINTS_TRANS: number of G-vector changed in star"],
         "out_of_memory": ["Allocation would exceed memory limit"],
     }
 
@@ -642,7 +649,7 @@ class AliasingErrorHandler(ErrorHandler):
 
     error_msgs = {
         "aliasing": ["WARNING: small aliasing (wrap around) errors must be expected"],
-        "aliasing_incar": ["Your FFT grids (NGX,NGY,NGZ) are not sufficient " "for an accurate"],
+        "aliasing_incar": ["Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate"],
     }
 
     def __init__(self, output_filename="vasp.out"):
@@ -855,7 +862,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         """
         Check for error.
         """
-        msg = "Reciprocal lattice and k-lattice belong to different class of" " lattices."
+        msg = "Reciprocal lattice and k-lattice belong to different class of lattices."
 
         vi = VaspInput.from_directory(".")
         # disregard this error if KSPACING is set and no KPOINTS file is generated
