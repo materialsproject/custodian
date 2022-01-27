@@ -1,6 +1,27 @@
 Change Log
 ==========
 
+v2022.1.17
+----------
+* New NBANDS not sufficient handler in VASP (@arosen93)
+* New VASP error handling for VASP 6.2.1 HNFORM error (@arosen93)
+* Improve zbrent handler by trying to get IBRION = 2 to succeed before switching to IBRION = 1 (@arosen93) 
+* Updates to ALGO handling with grad_not_orth and algo_tet (@arosen93) 
+
+v2021.12.2
+----------
+* Address new VASP6 inconsistent Bravais lattice error (@arosen93)
+* Don't check for drift if NSW = 1 (@arosen93)
+* [VASP] Switch from IBRION = 1 --> 2 if the BRIONS error occurs more than once (@arosen93)
+* Handle finite difference ncore error (@utf)
+* [VASP] More robust zbrent fix (@arosen93)
+* [VASP] Increase posmap error count (@arosen93)
+* [VASP] Update real_optlay logic to avoid LREAL = True (@arosen93)
+* [VASP] More appropriate grad_not_orth fix and new algo_tet error handler (@arosen93)
+* [VASP] Adjust SCF Ladder for meta-GGAs/hybrids (@arosen93)
+* Refactor VaspErrorHandler.check() (@janosh)
+* Fix VaspErrorHandler not handling "tetrahedron method fails" (@janosh)
+
 v2021.2.8
 ---------
 *  Allow static calculations with ISMEAR = -5 for metals (@MichaelWolloch).

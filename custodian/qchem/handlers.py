@@ -131,7 +131,7 @@ class QChemErrorHandler(ErrorHandler):
                 self.opt_error_history += [self.outdata["structure_change"]]
                 if len(self.opt_error_history) > 1:
                     if self.opt_error_history[-1] == "no_change":
-                        # If no structural changes occured in two consecutive optimizations,
+                        # If no structural changes occurred in two consecutive optimizations,
                         # and we still haven't converged, then just exit.
                         return {
                             "errors": self.errors,
@@ -143,7 +143,7 @@ class QChemErrorHandler(ErrorHandler):
 
         elif "unable_to_determine_lamda" in self.errors:
             # Set last geom as new starting geom and rerun. If no opt cycles,
-            # use diff SCF strat? Diff initial guess? Change basis? Unclear.
+            # use diff SCF start? Diff initial guess? Change basis? Unclear.
             if len(self.outdata.get("energy_trajectory")) > 1:
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})

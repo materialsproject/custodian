@@ -27,6 +27,14 @@ custodian.qchem.jobs module
    :undoc-members:
    :show-inheritance:
 
+custodian.qchem.utils module
+----------------------------
+
+.. automodule:: custodian.qchem.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

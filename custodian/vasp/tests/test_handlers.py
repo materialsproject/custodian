@@ -16,7 +16,6 @@ import os
 import shutil
 import unittest
 
-import numpy as np
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
 
 from custodian.vasp.handlers import (
@@ -101,26 +100,6 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["errors"], ["real_optlay"])
         self.assertEqual(d["actions"], [{"action": {"_set": {"LREAL": False}}, "dict": "INCAR"}])
 
-        subdir = os.path.join(test_dir, "large_cell_real_optlay")
-        os.chdir(subdir)
-        shutil.copy("INCAR", "INCAR.orig")
-        h = VaspErrorHandler()
-        h.check()
-        d = h.correct()
-        self.assertEqual(d["errors"], ["real_optlay"])
-        vi = VaspInput.from_directory(".")
-        self.assertEqual(vi["INCAR"]["LREAL"], True)
-        h.check()
-        d = h.correct()
-        self.assertEqual(d["errors"], ["real_optlay"])
-        vi = VaspInput.from_directory(".")
-        self.assertEqual(vi["INCAR"]["LREAL"], False)
-        shutil.copy("INCAR.orig", "INCAR")
-        os.remove("INCAR.orig")
-        os.remove("error.1.tar.gz")
-        os.remove("error.2.tar.gz")
-        os.chdir(test_dir)
-
     def test_mesh_symmetry(self):
         h = MeshSymmetryErrorHandler("vasp.ibzkpt")
         h.check()
@@ -131,6 +110,23 @@ class VaspErrorHandlerTest(unittest.TestCase):
             [{"action": {"_set": {"kpoints": [[4, 4, 4]]}}, "dict": "KPOINTS"}],
         )
 
+    def test_brions(self):
+        shutil.copy("INCAR.ibrion", "INCAR")
+        h = VaspErrorHandler("vasp.brions")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["brions"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 1)
+        self.assertAlmostEqual(i["POTIM"], 1.5)
+
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["brions"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 2)
+        self.assertAlmostEqual(i["POTIM"], 0.5)
+
     def test_dentet(self):
         h = VaspErrorHandler("vasp.dentet")
         h.check()
@@ -140,6 +136,65 @@ class VaspErrorHandlerTest(unittest.TestCase):
             d["actions"],
             [{"action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}, "dict": "INCAR"}],
         )
+
+    def test_zbrent(self):
+        h = VaspErrorHandler("vasp.zbrent")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["zbrent"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 2)
+        self.assertEqual(i["EDIFF"], 1e-6)
+        self.assertEqual(i["NELMIN"], 8)
+
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["zbrent"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 1)
+        self.assertEqual(i["EDIFF"], 1e-7)
+        self.assertEqual(i["NELMIN"], 8)
+
+        shutil.copy("INCAR.orig", "INCAR")
+        h = VaspErrorHandler("vasp.zbrent")
+        h.vtst_fixes = True
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["zbrent"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 3)
+        self.assertEqual(i["IOPT"], 7)
+        self.assertEqual(i["POTIM"], 0)
+        self.assertEqual(i["EDIFF"], 1e-6)
+        self.assertEqual(i["NELMIN"], 8)
+
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["zbrent"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 3)
+        self.assertEqual(i["IOPT"], 7)
+        self.assertEqual(i["POTIM"], 0)
+        self.assertEqual(i["EDIFF"], 1e-7)
+        self.assertEqual(i["NELMIN"], 8)
+
+        shutil.copy("INCAR.ediff", "INCAR")
+        h = VaspErrorHandler("vasp.zbrent")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["zbrent"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 2)
+        self.assertEqual(i["EDIFF"], 1e-7)
+        self.assertEqual(i["NELMIN"], 8)
+
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["zbrent"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["IBRION"], 1)
+        self.assertEqual(i["EDIFF"], 1e-8)
+        self.assertEqual(i["NELMIN"], 8)
 
     def test_brmix(self):
         h = VaspErrorHandler("vasp.brmix")
@@ -158,7 +213,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertFalse("IMIX" in vi["INCAR"])
         self.assertTrue(os.path.exists("CHGCAR"))
         if vi["KPOINTS"].style == Kpoints.supported_modes.Gamma and vi["KPOINTS"].num_kpts < 1:
-            all_kpts_even = all([bool(n % 2 == 0) for n in vi["KPOINTS"].kpts[0]])
+            all_kpts_even = all(n % 2 == 0 for n in vi["KPOINTS"].kpts[0])
             self.assertFalse(all_kpts_even)
 
         # The next correction check ISYM and no CHGCAR
@@ -229,11 +284,10 @@ class VaspErrorHandlerTest(unittest.TestCase):
 
     def test_nicht_konv(self):
         h = VaspErrorHandler("vasp.nicht_konvergent")
-        h.natoms_large_cell = 5
         self.assertEqual(h.check(), True)
         self.assertEqual(h.correct()["errors"], ["nicht_konv"])
         i = Incar.from_file("INCAR")
-        self.assertEqual(i["LREAL"], True)
+        self.assertEqual(i["LREAL"], False)
 
     def test_edddav(self):
         h = VaspErrorHandler("vasp.edddav")
@@ -241,12 +295,56 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.correct()["errors"], ["edddav"])
         self.assertFalse(os.path.exists("CHGCAR"))
 
+    def test_algo_tet(self):
+        h = VaspErrorHandler("vasp.algo_tet")
+        self.assertEqual(h.check(), True)
+        self.assertIn("algo_tet", h.correct()["errors"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ISMEAR"], 0)
+        self.assertEqual(i["SIGMA"], 0.05)
+
     def test_gradient_not_orthogonal(self):
         h = VaspErrorHandler("vasp.gradient_not_orthogonal")
         self.assertEqual(h.check(), True)
-        self.assertEqual(h.correct()["errors"], ["grad_not_orth"])
+        self.assertIn("grad_not_orth", h.correct()["errors"])
         i = Incar.from_file("INCAR")
-        self.assertEqual(i["ISMEAR"], 0)
+        self.assertEqual(i["ALGO"], "Fast")
+
+        shutil.copy("INCAR.gga_all", "INCAR")
+        h = VaspErrorHandler("vasp.gradient_not_orthogonal")
+        self.assertEqual(h.check(), True)
+        self.assertIn("grad_not_orth", h.correct()["errors"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ALGO"], "Fast")
+
+        shutil.copy("INCAR.gga_ialgo53", "INCAR")
+        h = VaspErrorHandler("vasp.gradient_not_orthogonal")
+        self.assertEqual(h.check(), True)
+        self.assertIn("grad_not_orth", h.correct()["errors"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ALGO"], "Fast")
+        self.assertNotIn("IALGO", i)
+
+        shutil.copy("INCAR.hybrid_normal", "INCAR")
+        h = VaspErrorHandler("vasp.gradient_not_orthogonal")
+        self.assertEqual(h.check(), True)
+        self.assertIn("grad_not_orth", h.correct()["errors"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ALGO"], "Normal")
+
+        shutil.copy("INCAR.hybrid_all", "INCAR")
+        h = VaspErrorHandler("vasp.gradient_not_orthogonal")
+        self.assertEqual(h.check(), True)
+        self.assertIn("grad_not_orth", h.correct()["errors"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ALGO"], "All")
+
+        shutil.copy("INCAR.metagga_all", "INCAR")
+        h = VaspErrorHandler("vasp.gradient_not_orthogonal")
+        self.assertEqual(h.check(), True)
+        self.assertIn("grad_not_orth", h.correct()["errors"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ALGO"], "All")
 
     def test_rhosyg(self):
         h = VaspErrorHandler("vasp.rhosyg")
@@ -268,6 +366,27 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertEqual(i["ISYM"], 0)
 
+    def test_hnform(self):
+        h = VaspErrorHandler("vasp.hnform")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["hnform"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ISYM"], 0)
+
+    def test_bravais(self):
+        h = VaspErrorHandler("vasp6.bravais")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["bravais"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["SYMPREC"], 1e-4)
+
+        shutil.copy("INCAR.symprec", "INCAR")
+        h = VaspErrorHandler("vasp6.bravais")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["bravais"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["SYMPREC"], 1e-5)
+
     def test_posmap(self):
         h = VaspErrorHandler("vasp.posmap")
         self.assertEqual(h.check(), True)
@@ -275,12 +394,22 @@ class VaspErrorHandlerTest(unittest.TestCase):
         i = Incar.from_file("INCAR")
         self.assertAlmostEqual(i["SYMPREC"], 1e-6)
 
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["posmap"])
+        i = Incar.from_file("INCAR")
+        self.assertAlmostEqual(i["SYMPREC"], 1e-4)
+
     def test_posmap_vasp6(self):
         h = VaspErrorHandler("vasp6.posmap")
         self.assertEqual(h.check(), True)
         self.assertEqual(h.correct()["errors"], ["posmap"])
         i = Incar.from_file("INCAR")
         self.assertAlmostEqual(i["SYMPREC"], 1e-6)
+
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["posmap"])
+        i = Incar.from_file("INCAR")
+        self.assertAlmostEqual(i["SYMPREC"], 1e-4)
 
     def test_point_group(self):
         h = VaspErrorHandler("vasp.point_group")
@@ -298,6 +427,14 @@ class VaspErrorHandlerTest(unittest.TestCase):
 
     def test_dfpt_ncore(self):
         h = VaspErrorHandler("vasp.dfpt_ncore")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["dfpt_ncore"])
+        incar = Incar.from_file("INCAR")
+        self.assertTrue("NPAR" not in incar)
+        self.assertTrue("NCORE" not in incar)
+
+    def test_finite_difference_ncore(self):
+        h = VaspErrorHandler("vasp.fd_ncore")
         self.assertEqual(h.check(), True)
         self.assertEqual(h.correct()["errors"], ["dfpt_ncore"])
         incar = Incar.from_file("INCAR")
@@ -345,6 +482,11 @@ class VaspErrorHandlerTest(unittest.TestCase):
                 }
             ],
         )
+
+    def test_nbands_not_sufficient(self):
+        h = VaspErrorHandler("vasp.nbands_not_sufficient")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["nbands_not_sufficient"])
 
     def tearDown(self):
         os.chdir(test_dir)
@@ -446,6 +588,79 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         self.assertTrue(h.check())
         d = h.correct()
         self.assertEqual(d["errors"], ["Unconverged"])
+        self.assertEqual(
+            d,
+            {
+                "actions": [{"action": {"_set": {"ALGO": "Normal"}}, "dict": "INCAR"}],
+                "errors": ["Unconverged"],
+            },
+        )
+
+        shutil.copy("vasprun.xml.electronic_veryfast", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["Unconverged"])
+        self.assertEqual(
+            d,
+            {
+                "actions": [{"action": {"_set": {"ALGO": "Fast"}}, "dict": "INCAR"}],
+                "errors": ["Unconverged"],
+            },
+        )
+
+        shutil.copy("vasprun.xml.electronic_normal", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["Unconverged"])
+        self.assertEqual(
+            d,
+            {
+                "actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}],
+                "errors": ["Unconverged"],
+            },
+        )
+
+        shutil.copy("vasprun.xml.electronic_metagga_fast", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["Unconverged"])
+        self.assertEqual(
+            d,
+            {
+                "actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}],
+                "errors": ["Unconverged"],
+            },
+        )
+
+        shutil.copy("vasprun.xml.electronic_hybrid_fast", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["Unconverged"])
+        self.assertEqual(
+            d,
+            {
+                "actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}],
+                "errors": ["Unconverged"],
+            },
+        )
+
+        shutil.copy("vasprun.xml.electronic_hybrid_all", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["Unconverged"])
+        self.assertEqual(
+            d,
+            {
+                "actions": [{"action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}, "dict": "INCAR"}],
+                "errors": ["Unconverged"],
+            },
+        )
+
         os.remove("vasprun.xml")
 
     def test_check_correct_electronic_repeat(self):
@@ -927,11 +1142,11 @@ class DriftErrorHandlerTest(unittest.TestCase):
 
         h = DriftErrorHandler(max_drift=0.0001, enaug_multiply=2)
         h.check()
-        d = h.correct()
+        h.correct()
         incar = Incar.from_file("INCAR")
         self.assertTrue(incar.get("ADDGRID", False))
 
-        d = h.correct()
+        h.correct()
         incar = Incar.from_file("INCAR")
         self.assertEqual(incar.get("PREC"), "High")
         self.assertEqual(incar.get("ENAUG", 0), incar.get("ENCUT", 2) * 2)

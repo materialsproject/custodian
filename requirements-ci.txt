@@ -1,10 +1,10 @@
-git+git://github.com/samblau/pymatgen@qchem#egg=pymatgen
-coverage==5.5
+pymatgen==2022.1.9
+coverage==6.2
 coveralls==3.3.1
 pytest==6.2.5
 pytest-cov==3.0.0
-mypy==0.910
+mypy==0.931
 pydocstyle==6.1.1
 flake8==4.0.1
-pylint==2.11.1
-black==21.11b1
+pylint==2.12.2
+black==21.12b0

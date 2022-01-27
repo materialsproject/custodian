@@ -549,7 +549,7 @@ class QCJob(Job):
                             else:
                                 raise Exception("ERROR: Can't deal with multiple neg frequencies yet! Exiting...")
                         else:
-                            raise AssertionError("ERROR: Parent cannot have more than two childen! Exiting...")
+                            raise AssertionError("ERROR: Parent cannot have more than two children! Exiting...")
                     # Implicitly, if the number of negative frequencies decreased from parent to child,
                     # continue normally.
                 if standard:

@@ -110,7 +110,7 @@ class VaspJob(Job):
             auto_npar (bool): Whether to automatically tune NPAR to be sqrt(
                 number of cores) as recommended by VASP for DFT calculations.
                 Generally, this results in significant speedups. Defaults to
-                True. Set to False for HF, GW and RPA calculations.
+                False. Set to False for HF, GW and RPA calculations.
             auto_gamma (bool): Whether to automatically check if run is a
                 Gamma 1x1x1 run, and whether a Gamma optimized version of
                 VASP exists with ".gamma" appended to the name of the VASP
@@ -369,7 +369,7 @@ class VaspJob(Job):
         # Defaults to using the SCAN metaGGA
         metaGGA = incar.get("METAGGA", "SCAN")
 
-        # Pre optimze WAVECAR and structure using regular GGA
+        # Pre optimize WAVECAR and structure using regular GGA
         pre_opt_setings = [
             {
                 "dict": "INCAR",
@@ -464,7 +464,7 @@ class VaspJob(Job):
                 final = Poscar.from_file("CONTCAR").structure
                 vol_change = (final.volume - initial.volume) / initial.volume
 
-                logger.info(f"Vol change = {vol_change * 100} %%!")
+                logger.info(f"Vol change = {vol_change:.1%}!")
                 if abs(vol_change) < vol_change_tol:
                     logger.info("Stopping optimization!")
                     break

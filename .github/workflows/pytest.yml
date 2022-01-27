@@ -8,7 +8,7 @@ jobs:
       max-parallel: 1
       matrix:
         os: [ubuntu-latest]
-        python-version: [3.7, 3.8]
+        python-version: ['3.8', '3.9', '3.10']
 
     runs-on: ${{ matrix.os }}
 
@@ -29,7 +29,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-ci.txt
-        pip install -e .
+        pip install .
     - name: pytest
       shell: bash -l {0}
       env:
