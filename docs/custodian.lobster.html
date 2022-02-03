@@ -4,8 +4,9 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.lobster package &#8212; custodian 2021.12.2 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>custodian.lobster package &#8212; custodian 2022.1.17 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/flasky.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -36,7 +37,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 2021.12.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 2022.1.17 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.lobster package</a></li> 
       </ul>
     </div>  
@@ -46,20 +47,79 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="custodian-lobster-package">
+  <section id="custodian-lobster-package">
 <h1>custodian.lobster package<a class="headerlink" href="#custodian-lobster-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="subpackages">
+<section id="subpackages">
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 </div>
-</div>
-<div class="section" id="submodules">
+</section>
+<section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="custodian-lobster-handlers-module">
-<h2>custodian.lobster.handlers module<a class="headerlink" href="#custodian-lobster-handlers-module" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-custodian.lobster.jobs">
+</section>
+<section id="module-custodian.lobster.handlers">
+<span id="custodian-lobster-handlers-module"></span><h2>custodian.lobster.handlers module<a class="headerlink" href="#module-custodian.lobster.handlers" title="Permalink to this headline">¶</a></h2>
+<p>This module implements specific error handler for Lobster runs.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="custodian.lobster.handlers.ChargeSpillingValidator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ChargeSpillingValidator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'lobsterout'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge_spilling_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/lobster/handlers.html#ChargeSpillingValidator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.lobster.handlers.ChargeSpillingValidator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Validator" title="custodian.custodian.Validator"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.Validator</span></code></a></p>
+<p>Check if spilling is below certain threshold!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_filename</strong> – filename of the output file of lobter, usually lobsterout</p></li>
+<li><p><strong>charge_spilling_limit</strong> – limit of the charge spilling that will be considered okay</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="custodian.lobster.handlers.ChargeSpillingValidator.check">
+<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/custodian/lobster/handlers.html#ChargeSpillingValidator.check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.lobster.handlers.ChargeSpillingValidator.check" title="Permalink to this definition">¶</a></dt>
+<dd><p>open lobsterout and find charge spilling</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="custodian.lobster.handlers.EnoughBandsValidator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EnoughBandsValidator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'lobsterout'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/lobster/handlers.html#EnoughBandsValidator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.lobster.handlers.EnoughBandsValidator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Validator" title="custodian.custodian.Validator"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.Validator</span></code></a></p>
+<p>validates if enough bands for COHP calculation are available</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_filename</strong> – filename of output file, usually lobsterout</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="custodian.lobster.handlers.EnoughBandsValidator.check">
+<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/custodian/lobster/handlers.html#EnoughBandsValidator.check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.lobster.handlers.EnoughBandsValidator.check" title="Permalink to this definition">¶</a></dt>
+<dd><p>checks if the VASP calculation had enough bands
+:returns: (bool) if True, too few bands have been applied</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="custodian.lobster.handlers.LobsterFilesValidator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LobsterFilesValidator</span></span><a class="reference internal" href="_modules/custodian/lobster/handlers.html#LobsterFilesValidator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.lobster.handlers.LobsterFilesValidator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Validator" title="custodian.custodian.Validator"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.Validator</span></code></a></p>
+<dl class="simple">
+<dt>Check for existence of some of the files that lobster</dt><dd><p>normally create upon running.</p>
+</dd>
+</dl>
+<p>Check if lobster terminated normally by looking for finished</p>
+<p>Dummy init</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="custodian.lobster.handlers.LobsterFilesValidator.check">
+<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/custodian/lobster/handlers.html#LobsterFilesValidator.check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.lobster.handlers.LobsterFilesValidator.check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check for errors.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-custodian.lobster.jobs">
 <span id="custodian-lobster-jobs-module"></span><h2>custodian.lobster.jobs module<a class="headerlink" href="#module-custodian.lobster.jobs" title="Permalink to this headline">¶</a></h2>
 <p>This module implements jobs for Lobster runs.</p>
 <dl class="py class">
@@ -99,12 +159,12 @@
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-custodian.lobster">
+</section>
+<section id="module-custodian.lobster">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-custodian.lobster" title="Permalink to this headline">¶</a></h2>
 <p>This package implements Lobster Jobs and Error Handlers.</p>
-</div>
-</div>
+</section>
+</section>
 
 
             <div class="clearer"></div>
@@ -113,18 +173,20 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">custodian.lobster package</a><ul>
 <li><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#custodian-lobster-handlers-module">custodian.lobster.handlers module</a></li>
+<li><a class="reference internal" href="#module-custodian.lobster.handlers">custodian.lobster.handlers module</a></li>
 <li><a class="reference internal" href="#module-custodian.lobster.jobs">custodian.lobster.jobs module</a></li>
 <li><a class="reference internal" href="#module-custodian.lobster">Module contents</a></li>
 </ul>
 </li>
 </ul>
-<h3>Related Topics</h3>
+
+  </div><h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
   </ul></li>
