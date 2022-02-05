@@ -1,13 +1,29 @@
+"""
+Validators for CP2K calculations.
+"""
+
 from abc import abstractmethod, abstractproperty
 
 from custodian.custodian import Validator
 from pymatgen.io.cp2k.outputs import Cp2kOutput
 
+__author__ = "Nicholas Winner"
+__version__ = "0.9"
+__email__ = "nwinner@berkeley.edu"
+__date__ = "October 2021"
+
 
 class Cp2kValidator(Validator):
+    """
+    Base validator.
+    """
 
     @abstractmethod
     def check(self):
+        """
+        Check whether validation failed. Here, True means
+        validation failed.
+        """
         pass
 
     @property
@@ -41,15 +57,23 @@ class Cp2kOutputValidator(Cp2kValidator):
     """    
 
     def __init__(self, output_file='cp2k.out'):
+        """
+        Args:
+            output_file (str): cp2k output file to analyze
+        """
         self.output_file = output_file
-        self.completed = False
         self._check = False
 
     def check(self):
+        """
+        Check fpr valid output. Simple checks that end-of-cp2k completion
+        message was reached.
+        """
         try:
             o = Cp2kOutput(self.output_file)
             o.ran_successfully()
-            if o.completed:
+            o.convergence()
+            if o.completed and self.data["scf_converged"][-1] and self.data["geo_opt_converged"][-1]:
                 return False
             else:
                 self._check = True
@@ -60,9 +84,6 @@ class Cp2kOutputValidator(Cp2kValidator):
         
     @property
     def kill(self):
-        """
-        Raise this an error
-        """
         return True
 
     @property
