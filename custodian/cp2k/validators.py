@@ -66,14 +66,17 @@ class Cp2kOutputValidator(Cp2kValidator):
 
     def check(self):
         """
-        Check fpr valid output. Simple checks that end-of-cp2k completion
-        message was reached.
+        Check for valid output. Checks that the end of the
+        program was reached, and that convergence was
+        achieved.
         """
         try:
             o = Cp2kOutput(self.output_file)
             o.ran_successfully()
             o.convergence()
-            if o.completed and self.data["scf_converged"][-1] and self.data["geo_opt_converged"][-1]:
+            if o.completed and \
+                self.data.get("scf_converged", [True])[-1] and \
+                    self.data.get("geo_opt_converged", [True])[-1]:
                 return False
             else:
                 self._check = True
