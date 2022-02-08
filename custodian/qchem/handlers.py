@@ -227,6 +227,13 @@ class QChemErrorHandler(ErrorHandler):
             actions.append({"run_nbo6": "deleted"})
             actions.append({"nbo_external": True})
 
+        elif "bad_new_nbo_external_rem" in self.errors:
+            # Have to use "run_nbo6" instead of "nbo_external" for QChem 5.4.1 or earlier
+            del self.qcinp.rem["nbo_external"]
+            self.qcinp.rem["run_nbo6"] = True
+            actions.append({"nbo_external": "deleted"})
+            actions.append({"run_nbo6": True})
+
         elif "basis_not_supported" in self.errors:
             print("Specify a different basis set. At least one of the atoms is not supported.")
             return {"errors": self.errors, "actions": None}
