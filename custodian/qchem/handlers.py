@@ -220,6 +220,13 @@ class QChemErrorHandler(ErrorHandler):
             self.qcinp.rem["cpscf_nseg"] = str(self.outdata["cpscf_nseg"] + 1)
             actions.append({"cpscf_nseg": str(self.outdata["cpscf_nseg"] + 1)})
 
+        elif "bad_old_nbo6_rem" in self.errors:
+            # "run_nbo6" has to change to "nbo_external" in QChem 5.4.2 and later
+            del self.qcinp.rem["run_nbo6"]
+            self.qcinp.rem["nbo_external"] = True
+            actions.append({"run_nbo6": "deleted"})
+            actions.append({"nbo_external": True})
+
         elif "basis_not_supported" in self.errors:
             print("Specify a different basis set. At least one of the atoms is not supported.")
             return {"errors": self.errors, "actions": None}
