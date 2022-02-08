@@ -117,6 +117,10 @@ class QCJob(Job):
         qcinp = QCInput.from_file(self.input_file)
         if qcinp.rem.get("run_nbo6", "none").lower() == "true":
             os.environ["KMP_INIT_AT_FORK"] = "FALSE"
+        if (
+            qcinp.rem.get("run_nbo6", "none").lower() == "true"
+            or qcinp.rem.get("nbo_external", "none").lower() == "true"
+        ):
             if self.nboexe is None:
                 raise RuntimeError("Trying to run NBO7 without providing NBOEXE in fworker! Exiting...")
             os.environ["NBOEXE"] = self.nboexe
