@@ -1,7 +1,6 @@
 import os
 import shutil
 import unittest
-
 from monty.os import cd
 from monty.tempfile import ScratchDir
 
@@ -30,6 +29,32 @@ VASP_OUTPUT_FILES = [
     "REPORT",
     "WAVECAR",
     "XDATCAR",
+]
+
+LOBSTERINPUT_FILES = ["lobsterin"]
+
+LOBSTEROUTPUT_FILES = [
+    "lobsterout",
+    "CHARGE.lobster",
+    "COHPCAR.lobster",
+    "COOPCAR.lobster",
+    "DOSCAR.lobster",
+    "GROSSPOP.lobster",
+    "ICOHPLIST.lobster",
+    "ICOOPLIST.lobster",
+    "lobster.out",
+    "projectionData.lobster",
+    "MadelungEnergies.lobster",
+    "SitePotentials.lobster",
+    "bandOverlaps.lobster",
+    "ICOBILIST.lobster",
+    "COBICAR.lobster"
+]
+
+FW_FILES = [
+    'custodian.json',
+    'FW.json',
+    'FW_submit.script'
 ]
 
 
@@ -77,6 +102,23 @@ class LobsterJobTest(unittest.TestCase):
                 self.assertTrue(os.path.exists("lobsterout"))
                 self.assertTrue(os.path.exists("INCAR"))
                 self.assertTrue(os.path.exists("lobsterin.orig"))
+
+           # with cd(os.path.join(test_files_lobster3)):
+            #    with ScratchDir(".", copy_from_current_on_enter=True):
+              #      shutil.copy("lobsterin", "lobsterin.orig")
+               #     v = LobsterJob("hello", gzipped=True, add_files_to_gzip=LOBSTEROUTPUT_FILES)
+                 #   v.postprocess()
+                  #  for file in LOBSTEROUTPUT_FILES:
+                   #     filegz=file+".gz"
+                    #    print(filegz)
+                        #self.assertTrue(os.path.exists(str(filegz)))
+
+            #with ScratchDir(".", copy_from_current_on_enter=True):
+              #  shutil.copy("lobsterin", "lobsterin.orig")
+               # v = LobsterJob("hello", gzipped=False, add_files_to_gzip=LOBSTEROUTPUT_FILES)
+               # v.postprocess()
+               # for file in LOBSTEROUTPUT_FILES:
+                #    self.assertTrue(os.path.exists(file))
 
 
 if __name__ == "__main__":

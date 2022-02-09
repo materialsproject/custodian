@@ -1,13 +1,29 @@
 [
     {
         "job": {
-            "@module": "custodian_here",
+            "@module": "custodian.lobster.jobs",
             "@class": "LobsterJob",
-            "@version": null,
-            "lobster_cmd": "/home/ucl/naps/jgeorge/bin/lobster-3.2.0",
+            "@version": "2021.12.2",
+            "lobster_cmd": "/home/htc/anaik/Lobster/lobster-4.1.0",
             "output_file": "lobster.out",
             "stderr_file": "std_err_lobster.txt",
             "gzipped": true,
+            "add_files_to_gzip": [
+                "OUTCAR",
+                "vasprun.xml",
+                "CHG",
+                "CHGCAR",
+                "CONTCAR",
+                "INCAR",
+                "KPOINTS",
+                "POSCAR",
+                "POTCAR",
+                "DOSCAR",
+                "EIGENVAL",
+                "IBZKPT",
+                "OSZICAR",
+                "XDATCAR"
+            ],
             "backup": true
         },
         "corrections": [],
