@@ -33,7 +33,9 @@ VASP_OUTPUT_FILES = [
 
 LOBSTERINPUT_FILES = ["lobsterin"]
 
-LOBSTEROUTPUT_FILES = [
+LOBSTER_FILES = [
+    "lobsterin",
+    "lobsterin.orig",
     "lobsterout",
     "CHARGE.lobster",
     "COHPCAR.lobster",
@@ -87,38 +89,19 @@ class LobsterJobTest(unittest.TestCase):
                 shutil.copy("lobsterin", "lobsterin.orig")
                 v = LobsterJob("hello", gzipped=True, add_files_to_gzip=VASP_OUTPUT_FILES)
                 v.postprocess()
-                self.assertTrue(os.path.exists("WAVECAR.gz"))
-                self.assertTrue(os.path.exists("lobsterin.gz"))
-                self.assertTrue(os.path.exists("lobsterout.gz"))
-                self.assertTrue(os.path.exists("INCAR.gz"))
-                self.assertTrue(os.path.exists("lobsterin.orig.gz"))
+                for file in (VASP_OUTPUT_FILES+LOBSTER_FILES+FW_FILES):
+                    filegz = file+".gz"
+                    self.assertTrue(os.path.exists(filegz))
+
+
 
             with ScratchDir(".", copy_from_current_on_enter=True):
                 shutil.copy("lobsterin", "lobsterin.orig")
                 v = LobsterJob("hello", gzipped=False, add_files_to_gzip=VASP_OUTPUT_FILES)
                 v.postprocess()
-                self.assertTrue(os.path.exists("WAVECAR"))
-                self.assertTrue(os.path.exists("lobsterin"))
-                self.assertTrue(os.path.exists("lobsterout"))
-                self.assertTrue(os.path.exists("INCAR"))
-                self.assertTrue(os.path.exists("lobsterin.orig"))
+                for file in (VASP_OUTPUT_FILES+LOBSTER_FILES+FW_FILES):
+                    self.assertTrue(os.path.exists(file))
 
-           # with cd(os.path.join(test_files_lobster3)):
-            #    with ScratchDir(".", copy_from_current_on_enter=True):
-              #      shutil.copy("lobsterin", "lobsterin.orig")
-               #     v = LobsterJob("hello", gzipped=True, add_files_to_gzip=LOBSTEROUTPUT_FILES)
-                 #   v.postprocess()
-                  #  for file in LOBSTEROUTPUT_FILES:
-                   #     filegz=file+".gz"
-                    #    print(filegz)
-                        #self.assertTrue(os.path.exists(str(filegz)))
-
-            #with ScratchDir(".", copy_from_current_on_enter=True):
-              #  shutil.copy("lobsterin", "lobsterin.orig")
-               # v = LobsterJob("hello", gzipped=False, add_files_to_gzip=LOBSTEROUTPUT_FILES)
-               # v.postprocess()
-               # for file in LOBSTEROUTPUT_FILES:
-                #    self.assertTrue(os.path.exists(file))
 
 
 if __name__ == "__main__":
