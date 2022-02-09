@@ -93,8 +93,6 @@ class LobsterJobTest(unittest.TestCase):
                     filegz = file+".gz"
                     self.assertTrue(os.path.exists(filegz))
 
-
-
             with ScratchDir(".", copy_from_current_on_enter=True):
                 shutil.copy("lobsterin", "lobsterin.orig")
                 v = LobsterJob("hello", gzipped=False, add_files_to_gzip=VASP_OUTPUT_FILES)
