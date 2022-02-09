@@ -110,7 +110,7 @@ class VaspJob(Job):
             auto_npar (bool): Whether to automatically tune NPAR to be sqrt(
                 number of cores) as recommended by VASP for DFT calculations.
                 Generally, this results in significant speedups. Defaults to
-                True. Set to False for HF, GW and RPA calculations.
+                False. Set to False for HF, GW and RPA calculations.
             auto_gamma (bool): Whether to automatically check if run is a
                 Gamma 1x1x1 run, and whether a Gamma optimized version of
                 VASP exists with ".gamma" appended to the name of the VASP

@@ -35,7 +35,6 @@ LOBSTEROUTPUT_FILES = [
     "ICOBILIST.lobster",
     "COBICAR.lobster"
 ]
-
 FW_FILES=[
 	'custodian.json',
 	'FW.json',

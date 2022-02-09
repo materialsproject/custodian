@@ -4,8 +4,9 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Custodian &#8212; custodian 2021.12.2 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Custodian &#8212; custodian 2022.1.17 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/flasky.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -36,7 +37,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">custodian 2021.12.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="#">custodian 2022.1.17 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Custodian</a></li> 
       </ul>
     </div>  
@@ -46,7 +47,7 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="custodian">
+  <section id="custodian">
 <h1>Custodian<a class="headerlink" href="#custodian" title="Permalink to this headline">¶</a></h1>
 <p>Custodian is a simple, robust and flexible just-in-time (JIT) job management
 framework written in Python. Using custodian, you can create wrappers that
@@ -68,10 +69,10 @@ calculations.</p>
 <a class="reference external image-reference" href="https://github.com/materialsproject/custodian/workflows/Testing/badge.svg"><img alt="https://github.com/materialsproject/custodian/workflows/Testing/badge.svg" src="https://github.com/materialsproject/custodian/workflows/Testing/badge.svg" /></a>
 <a class="reference external image-reference" href="https://github.com/materialsproject/custodian/workflows/Linting/badge.svg"><img alt="https://github.com/materialsproject/custodian/workflows/Linting/badge.svg" src="https://github.com/materialsproject/custodian/workflows/Linting/badge.svg" /></a>
 <p><a class="reference internal" href="changelog.html"><span class="doc">Change log</span></a></p>
-</div>
-<div class="section" id="getting-custodian">
+</section>
+<section id="getting-custodian">
 <h1>Getting custodian<a class="headerlink" href="#getting-custodian" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="stable-version">
+<section id="stable-version">
 <h2>Stable version<a class="headerlink" href="#stable-version" title="Permalink to this headline">¶</a></h2>
 <p>The version at the Python Package Index (PyPI) is always the latest stable
 release that will be hopefully, be relatively bug-free. The easiest way to
@@ -81,8 +82,8 @@ install custodian on any system is to use pip, as follows:</p>
 </div>
 <p>Some plugins (e.g., vasp management) require additional setup (please see
 <a class="reference external" href="http://pymatgen.org">pymatgen’s documentation</a>).</p>
-</div>
-<div class="section" id="developmental-version">
+</section>
+<section id="developmental-version">
 <h2>Developmental version<a class="headerlink" href="#developmental-version" title="Permalink to this headline">¶</a></h2>
 <p>The bleeding edge developmental version is at the custodian’s <a class="reference external" href="https://github.com/materialsproject/custodian">Github repo</a>. The developmental
 version is likely to be more buggy, but may contain new features. The
@@ -95,12 +96,12 @@ cloning the source, you can type:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">develop</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="requirements">
+</section>
+</section>
+<section id="requirements">
 <h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
 <p>Custodian requires Python 3.5+. There are no other required dependencies.</p>
-<div class="section" id="optional-dependencies">
+<section id="optional-dependencies">
 <h2>Optional dependencies<a class="headerlink" href="#optional-dependencies" title="Permalink to this headline">¶</a></h2>
 <p>Optional libraries that are required if you need certain features:</p>
 <ol class="arabic">
@@ -114,24 +115,26 @@ VASP, NwChem and Qchem. Please install using:</p>
 <li><p>pytest - For complete unittesting.</p></li>
 <li><p>pycodestyle - For checking pep8 compliance.</p></li>
 </ol>
-</div>
-</div>
-<div class="section" id="usage">
+</section>
+</section>
+<section id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
 <p>The main class in the workflow is known as Custodian, which manages a series
 of jobs with a list of error handlers. The general workflow for Custodian is
 presented in the figure below.</p>
-<div class="align-center figure" id="id1">
+<figure class="align-center" id="id1">
 <a class="reference internal image-reference" href="_images/Custodian.png"><img alt="Custodian workflow" src="_images/Custodian.png" style="width: 500px;" /></a>
-<p class="caption"><span class="caption-text">Overview of the Custodian workflow.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
-</div>
+<figcaption>
+<p><span class="caption-text">Overview of the Custodian workflow.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
 <p>The Custodian class takes in two general inputs - a <strong>list of Jobs</strong> and
 a <strong>list of ErrorHandlers</strong>. <strong>Jobs</strong> should be subclasses of the
 <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.Job</span></code></a> abstract base class and <strong>ErrorHandlers</strong>
 should be subclasses of the <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a> abstract
 base class. To use custodian, you need to implement concrete implementations
 of these abstract base classes.</p>
-<div class="section" id="simple-example">
+<section id="simple-example">
 <h2>Simple example<a class="headerlink" href="#simple-example" title="Permalink to this headline">¶</a></h2>
 <p>An very simple example implementation is given in the custodian_examples.py
 script in the scripts directory. We will now go through the example in detail
@@ -204,8 +207,8 @@ ErrorHandlers to a Custodian.</p>
 <p>If you run custodian_example.py in the scripts directory, you will noticed that
 a <strong>custodian.json</strong> file was generated, which summarizes the jobs that have
 been run and any corrections performed.</p>
-</div>
-<div class="section" id="practical-example-electronic-structure-calculations">
+</section>
+<section id="practical-example-electronic-structure-calculations">
 <h2>Practical example: Electronic structure calculations<a class="headerlink" href="#practical-example-electronic-structure-calculations" title="Permalink to this headline">¶</a></h2>
 <p>A practical example where the Custodian framework is particularly useful is
 in the area of electronic structure calculations. Electronic structure
@@ -214,8 +217,8 @@ random or otherwise. Such errors become a major issue in projects that
 performs such calculations in high throughput, such as the <a class="reference external" href="https://www.materialsproject.org">Materials
 Project</a>.</p>
 <p>The Custodian package comes with a fairly comprehensive plugin to deal
-with jobs (<code class="xref py py-mod docutils literal notranslate"><span class="pre">custodian.vasp.jobs</span></code>) and errors
-(<code class="xref py py-mod docutils literal notranslate"><span class="pre">custodian.vasp.handlers</span></code>) in electronic structure calculations based
+with jobs (<a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.jobs" title="custodian.vasp.jobs"><code class="xref py py-mod docutils literal notranslate"><span class="pre">custodian.vasp.jobs</span></code></a>) and errors
+(<a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.handlers" title="custodian.vasp.handlers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">custodian.vasp.handlers</span></code></a>) in electronic structure calculations based
 on the Vienna Ab Initio Simulation Package (VASP). To do this,
 Custodian uses the Python Materials Genomics (<a class="reference external" href="https://pypi.python.org/pypi/pymatgen">pymatgen</a>) package to
 perform analysis and io from VASP input and output files.</p>
@@ -244,9 +247,9 @@ converge_kpoints script in the scripts for an example.</p>
 NwChem is an open-source code for performing computational chemistry
 calculations.</p>
 </div>
-</div>
-</div>
-<div class="section" id="cstdn-a-yaml-spec-controlled-job">
+</section>
+</section>
+<section id="cstdn-a-yaml-spec-controlled-job">
 <h1>cstdn - A yaml-spec controlled job<a class="headerlink" href="#cstdn-a-yaml-spec-controlled-job" title="Permalink to this headline">¶</a></h1>
 <p>Custodian now comes with a cstdn script, which allows you to do fine-grained
 control of a job using a yaml spec file. Below is an annotated example of how
@@ -311,15 +314,15 @@ custodian_params:
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cstdn</span> <span class="n">run</span> <span class="o">&lt;</span><span class="n">path</span> <span class="n">to</span> <span class="n">yaml</span> <span class="n">file</span><span class="o">&gt;</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="api-reference-docs">
+</section>
+<section id="api-reference-docs">
 <h1>API/Reference Docs<a class="headerlink" href="#api-reference-docs" title="Permalink to this headline">¶</a></h1>
 <p>The API docs are generated using Sphinx auto-doc and outlines the purpose of all
 modules and classes, and the expected argument and returned objects for most
 methods. They are available at the link below.</p>
 <p><a class="reference internal" href="modules.html"><span class="doc">custodian API docs</span></a></p>
-</div>
-<div class="section" id="how-to-cite-custodian">
+</section>
+<section id="how-to-cite-custodian">
 <h1>How to cite custodian<a class="headerlink" href="#how-to-cite-custodian" title="Permalink to this headline">¶</a></h1>
 <p>If you use custodian in your research, especially the VASP component, please
 consider citing the following work:</p>
@@ -331,8 +334,8 @@ Materials Science, 2013, 68, 314–319. `doi:10.1016/j.commatsci.2012.10.028
 &lt;http://dx.doi.org/10.1016/j.commatsci.2012.10.028&gt;`_
 </pre></div>
 </div>
-</div>
-<div class="section" id="license">
+</section>
+<section id="license">
 <h1>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h1>
 <p>Custodian is released under the MIT License. The terms of the license are as
 follows:</p>
@@ -358,7 +361,7 @@ follows:</p>
 <span class="n">DEALINGS</span> <span class="n">IN</span> <span class="n">THE</span> <span class="n">SOFTWARE</span><span class="o">.</span>
 </pre></div>
 </div>
-</div>
+</section>
 
 
             <div class="clearer"></div>
@@ -367,8 +370,9 @@ follows:</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="#">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="#">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">Custodian</a></li>
 <li><a class="reference internal" href="#getting-custodian">Getting custodian</a><ul>
 <li><a class="reference internal" href="#stable-version">Stable version</a></li>
@@ -389,7 +393,8 @@ follows:</p>
 <li><a class="reference internal" href="#how-to-cite-custodian">How to cite custodian</a></li>
 <li><a class="reference internal" href="#license">License</a></li>
 </ul>
-<h3>Related Topics</h3>
+
+  </div><h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
   </ul></li>

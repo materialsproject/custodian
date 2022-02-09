@@ -4,8 +4,9 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.feff package &#8212; custodian 2021.12.2 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>custodian.feff package &#8212; custodian 2022.1.17 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/flasky.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -36,7 +37,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 2021.12.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 2022.1.17 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.feff package</a></li> 
       </ul>
     </div>  
@@ -46,23 +47,102 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="custodian-feff-package">
+  <section id="custodian-feff-package">
 <h1>custodian.feff package<a class="headerlink" href="#custodian-feff-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="subpackages">
+<section id="subpackages">
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 </div>
-</div>
-<div class="section" id="submodules">
+</section>
+<section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="custodian-feff-handlers-module">
-<h2>custodian.feff.handlers module<a class="headerlink" href="#custodian-feff-handlers-module" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="custodian-feff-interpreter-module">
-<h2>custodian.feff.interpreter module<a class="headerlink" href="#custodian-feff-interpreter-module" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-custodian.feff.jobs">
+</section>
+<section id="module-custodian.feff.handlers">
+<span id="custodian-feff-handlers-module"></span><h2>custodian.feff.handlers module<a class="headerlink" href="#module-custodian.feff.handlers" title="Permalink to this headline">¶</a></h2>
+<p>This module implements specific error handler for FEFF runs.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="custodian.feff.handlers.UnconvergedErrorHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UnconvergedErrorHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'log1.dat'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/handlers.html#UnconvergedErrorHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.feff.handlers.UnconvergedErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
+<p>Correct the unconverged error of FEFF’s SCF calculation.</p>
+<p>Initializes the handler with the output file to check</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_filename</strong> (<em>str</em>) – Filename for the log1.dat file. log1.dat file
+contains the SCF calculation convergence information. Change this only
+if it is different from the default (unlikely).</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="custodian.feff.handlers.UnconvergedErrorHandler.check">
+<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/handlers.html#UnconvergedErrorHandler.check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.feff.handlers.UnconvergedErrorHandler.check" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the FEFF run does not converge, the check will return
+“TRUE”</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="custodian.feff.handlers.UnconvergedErrorHandler.correct">
+<span class="sig-name descname"><span class="pre">correct</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/handlers.html#UnconvergedErrorHandler.correct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.feff.handlers.UnconvergedErrorHandler.correct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the corrections.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="custodian.feff.handlers.UnconvergedErrorHandler.is_monitor">
+<span class="sig-name descname"><span class="pre">is_monitor</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#custodian.feff.handlers.UnconvergedErrorHandler.is_monitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class property indicates whether the error handler is a monitor,
+i.e., a handler that monitors a job as it is running. If a
+monitor-type handler notices an error, the job will be sent a
+termination signal, the error is then corrected,
+and then the job is restarted. This is useful for catching errors
+that occur early in the run but do not cause immediate failure.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-custodian.feff.interpreter">
+<span id="custodian-feff-interpreter-module"></span><h2>custodian.feff.interpreter module<a class="headerlink" href="#module-custodian.feff.interpreter" title="Permalink to this headline">¶</a></h2>
+<p>Implements various interpreters and modders for FEFF calculations.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="custodian.feff.interpreter.FeffModder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FeffModder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feffinp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/interpreter.html#FeffModder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.feff.interpreter.FeffModder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="custodian.ansible.html#custodian.ansible.interpreter.Modder" title="custodian.ansible.interpreter.Modder"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.ansible.interpreter.Modder</span></code></a></p>
+<p>A Modder for FeffInput sets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>actions</strong> (<em>[</em><em>Action</em><em>]</em>) – A sequence of supported actions. See</p></li>
+<li><p><strong>actions</strong> – A sequence of supported actions. See
+<a class="reference internal" href="custodian.ansible.html#module-custodian.ansible.actions" title="custodian.ansible.actions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">custodian.ansible.actions</span></code></a>. Default is None,
+which means DictActions and FileActions are supported.</p></li>
+<li><p><strong>strict</strong> (<em>bool</em>) – Indicating whether to use strict mode. In non-strict
+mode, unsupported actions are simply ignored without any
+errors raised. In strict mode, if an unsupported action is
+supplied, a ValueError is raised. Defaults to True.</p></li>
+<li><p><strong>feffinp</strong> (<em>FEFFInput</em>) – A FeffInput object from the current directory.
+Initialized automatically if not passed (but passing it will
+avoid having to reparse the directory).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="custodian.feff.interpreter.FeffModder.apply_actions">
+<span class="sig-name descname"><span class="pre">apply_actions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/feff/interpreter.html#FeffModder.apply_actions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.feff.interpreter.FeffModder.apply_actions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a list of actions to the FEFF Input Set and rewrites modified
+files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>[</strong><strong>dict</strong><strong>]</strong> (<em>actions</em>) – A list of actions of the form {‘file’: filename,
+‘action’: moddermodification} or {‘dict’: feffinput_key,
+‘action’: moddermodification}</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-custodian.feff.jobs">
 <span id="custodian-feff-jobs-module"></span><h2>custodian.feff.jobs module<a class="headerlink" href="#module-custodian.feff.jobs" title="Permalink to this headline">¶</a></h2>
 <p>This module implements basic kinds of jobs for FEFF runs.</p>
 <dl class="py class">
@@ -111,12 +191,12 @@ Returns:</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-custodian.feff">
+</section>
+<section id="module-custodian.feff">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-custodian.feff" title="Permalink to this headline">¶</a></h2>
 <p>Jobs and Handlers for FEFF calculations.</p>
-</div>
-</div>
+</section>
+</section>
 
 
             <div class="clearer"></div>
@@ -125,19 +205,21 @@ Returns:</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">custodian.feff package</a><ul>
 <li><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#custodian-feff-handlers-module">custodian.feff.handlers module</a></li>
-<li><a class="reference internal" href="#custodian-feff-interpreter-module">custodian.feff.interpreter module</a></li>
+<li><a class="reference internal" href="#module-custodian.feff.handlers">custodian.feff.handlers module</a></li>
+<li><a class="reference internal" href="#module-custodian.feff.interpreter">custodian.feff.interpreter module</a></li>
 <li><a class="reference internal" href="#module-custodian.feff.jobs">custodian.feff.jobs module</a></li>
 <li><a class="reference internal" href="#module-custodian.feff">Module contents</a></li>
 </ul>
 </li>
 </ul>
-<h3>Related Topics</h3>
+
+  </div><h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
   </ul></li>
