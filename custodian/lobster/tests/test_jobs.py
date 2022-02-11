@@ -1,7 +1,6 @@
 import os
 import shutil
 import unittest
-
 from monty.os import cd
 from monty.tempfile import ScratchDir
 
@@ -31,6 +30,30 @@ VASP_OUTPUT_FILES = [
     "WAVECAR",
     "XDATCAR",
 ]
+
+LOBSTERINPUT_FILES = ["lobsterin"]
+
+LOBSTER_FILES = [
+    "lobsterin",
+    "lobsterin.orig",
+    "lobsterout",
+    "CHARGE.lobster",
+    "COHPCAR.lobster",
+    "COOPCAR.lobster",
+    "DOSCAR.lobster",
+    "GROSSPOP.lobster",
+    "ICOHPLIST.lobster",
+    "ICOOPLIST.lobster",
+    "lobster.out",
+    "projectionData.lobster",
+    "MadelungEnergies.lobster",
+    "SitePotentials.lobster",
+    "bandOverlaps.lobster",
+    "ICOBILIST.lobster",
+    "COBICAR.lobster",
+]
+
+FW_FILES = ["custodian.json", "FW.json", "FW_submit.script"]
 
 
 class LobsterJobTest(unittest.TestCase):
@@ -62,21 +85,16 @@ class LobsterJobTest(unittest.TestCase):
                 shutil.copy("lobsterin", "lobsterin.orig")
                 v = LobsterJob("hello", gzipped=True, add_files_to_gzip=VASP_OUTPUT_FILES)
                 v.postprocess()
-                self.assertTrue(os.path.exists("WAVECAR.gz"))
-                self.assertTrue(os.path.exists("lobsterin.gz"))
-                self.assertTrue(os.path.exists("lobsterout.gz"))
-                self.assertTrue(os.path.exists("INCAR.gz"))
-                self.assertTrue(os.path.exists("lobsterin.orig.gz"))
+                for file in VASP_OUTPUT_FILES + LOBSTER_FILES + FW_FILES:
+                    filegz = file + ".gz"
+                    self.assertTrue(os.path.exists(filegz))
 
             with ScratchDir(".", copy_from_current_on_enter=True):
                 shutil.copy("lobsterin", "lobsterin.orig")
                 v = LobsterJob("hello", gzipped=False, add_files_to_gzip=VASP_OUTPUT_FILES)
                 v.postprocess()
-                self.assertTrue(os.path.exists("WAVECAR"))
-                self.assertTrue(os.path.exists("lobsterin"))
-                self.assertTrue(os.path.exists("lobsterout"))
-                self.assertTrue(os.path.exists("INCAR"))
-                self.assertTrue(os.path.exists("lobsterin.orig"))
+                for file in VASP_OUTPUT_FILES + LOBSTER_FILES + FW_FILES:
+                    self.assertTrue(os.path.exists(file))
 
 
 if __name__ == "__main__":
