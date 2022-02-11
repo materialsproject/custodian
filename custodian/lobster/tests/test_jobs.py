@@ -50,14 +50,10 @@ LOBSTER_FILES = [
     "SitePotentials.lobster",
     "bandOverlaps.lobster",
     "ICOBILIST.lobster",
-    "COBICAR.lobster"
+    "COBICAR.lobster",
 ]
 
-FW_FILES = [
-    'custodian.json',
-    'FW.json',
-    'FW_submit.script'
-]
+FW_FILES = ["custodian.json", "FW.json", "FW_submit.script"]
 
 
 class LobsterJobTest(unittest.TestCase):
@@ -89,17 +85,16 @@ class LobsterJobTest(unittest.TestCase):
                 shutil.copy("lobsterin", "lobsterin.orig")
                 v = LobsterJob("hello", gzipped=True, add_files_to_gzip=VASP_OUTPUT_FILES)
                 v.postprocess()
-                for file in (VASP_OUTPUT_FILES+LOBSTER_FILES+FW_FILES):
-                    filegz = file+".gz"
+                for file in VASP_OUTPUT_FILES + LOBSTER_FILES + FW_FILES:
+                    filegz = file + ".gz"
                     self.assertTrue(os.path.exists(filegz))
 
             with ScratchDir(".", copy_from_current_on_enter=True):
                 shutil.copy("lobsterin", "lobsterin.orig")
                 v = LobsterJob("hello", gzipped=False, add_files_to_gzip=VASP_OUTPUT_FILES)
                 v.postprocess()
-                for file in (VASP_OUTPUT_FILES+LOBSTER_FILES+FW_FILES):
+                for file in VASP_OUTPUT_FILES + LOBSTER_FILES + FW_FILES:
                     self.assertTrue(os.path.exists(file))
-
 
 
 if __name__ == "__main__":

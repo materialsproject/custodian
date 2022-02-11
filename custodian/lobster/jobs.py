@@ -33,13 +33,9 @@ LOBSTEROUTPUT_FILES = [
     "SitePotentials.lobster",
     "bandOverlaps.lobster",
     "ICOBILIST.lobster",
-    "COBICAR.lobster"
+    "COBICAR.lobster",
 ]
-FW_FILES=[
-	'custodian.json',
-	'FW.json',
-	'FW_submit.script'
-]
+FW_FILES = ["custodian.json", "FW.json", "FW_submit.script"]
 
 logger = logging.getLogger(__name__)
 
@@ -113,5 +109,4 @@ class LobsterJob(Job):
                 if os.path.exists(file):
                     compress_file(file, compression="gz")
             for file in self.add_files_to_gzip:
-            	    compress_file(file, compression="gz")
-            	    
+                compress_file(file, compression="gz")
