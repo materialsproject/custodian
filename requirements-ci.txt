@@ -1,7 +1,7 @@
 pymatgen==2022.2.10
 coverage==6.2
 coveralls==3.3.1
-pytest==7.0.0
+pytest==7.0.1
 pytest-cov==3.0.0
 mypy==0.931
 pydocstyle==6.1.1
