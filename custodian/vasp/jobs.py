@@ -307,6 +307,11 @@ class VaspJob(Job):
             half_kpts_first_relax (bool): Whether to halve the kpoint grid
                 for the first relaxation. Speeds up difficult convergence
                 considerably. Defaults to False.
+            auto_continue (bool): Whether to automatically continue a run
+                if a STOPCAR is present. This is very useful if using the
+                wall-time handler which will write a read-only STOPCAR to
+                prevent VASP from deleting it once it finishes. Defaults to
+                False.
 
         Returns:
             List of two jobs corresponding to an AFLOW style run.
