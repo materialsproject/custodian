@@ -661,7 +661,10 @@ class VaspJob(Job):
         """
         Ensure all vasp jobs are killed.
         """
-        for k in self.vasp_cmd:
+        cmds = self.vasp_cmd
+        if self.gamma_vasp_cmd:
+            cmds += self.gamma_vasp_cmd
+        for k in cmds:
             if "vasp" in k:
                 try:
                     os.system(f"killall {k}")
@@ -669,7 +672,7 @@ class VaspJob(Job):
                     pass
 
 
-class VaspNEBJob(Job):
+class VaspNEBJob(VaspJob):
     """
     A NEB vasp job, especially for CI-NEB running at PBS clusters.
     The class is added for the purpose of handling a different folder
