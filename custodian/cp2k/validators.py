@@ -74,7 +74,7 @@ class Cp2kOutputValidator(Cp2kValidator):
             o = Cp2kOutput(self.output_file)
             o.ran_successfully()
             o.convergence()
-            if not o.data.get("geo_opt_converged"):
+            if not o.data.get("geo_opt_converged") and not o.data.get("geo_opt_not_converged"):
                 geom = True
             elif o.data.get("geo_opt_converged")[-1]:
                 geom = True
