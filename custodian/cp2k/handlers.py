@@ -1251,23 +1251,22 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
 
         # set optimizer. Ensure CG is 2pnt. 3pnt not fully developed for relaxations
         if ci.check('MOTION/GEO_OPT'):
-            if optimizer == ('BFGS' or 'LBFGS'):
-                actions.append({
-                    'dict': self.input_file,
-                    "action": {
-                        "_set": {
-                            'MOTION': {
-                                'GEO_OPT': {
-                                    'OPTIMIZER': self.optimizers[self.optimizer_id],
-                                    'MAX_ITER': max_iter + self.max_iter,
-                                    'CG': {
-                                        'LINE_SEARCH': {
-                                            'TYPE': '2PNT'
-                                        }
+            actions.append({
+                'dict': self.input_file,
+                "action": {
+                    "_set": {
+                        'MOTION': {
+                            'GEO_OPT': {
+                                'OPTIMIZER': self.optimizers[self.optimizer_id],
+                                'MAX_ITER': max_iter + self.max_iter,
+                                'CG': {
+                                    'LINE_SEARCH': {
+                                        'TYPE': '2PNT'
                                     }
                                 }
                             }
-                        }}})
+                        }
+                    }}})
 
         self.optimizer_id += 1
         restart(actions, self.output_file, self.input_file)
