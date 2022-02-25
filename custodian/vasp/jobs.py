@@ -666,6 +666,7 @@ class VaspJob(Job):
         """
         Ensure all vasp jobs are killed.
         """
+        logger.info("Custodian terminating all VASP jobs")
         cmds = self.vasp_cmd
         if self.gamma_vasp_cmd:
             cmds += self.gamma_vasp_cmd
