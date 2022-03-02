@@ -64,7 +64,7 @@ def cleanup_input(ci):
             sequences used inside do not play nice with the input parser
 
     """
-    if not ci.subsections:
+    if not hasattr(ci, "subsections") or not ci.subsections:
         return
     if any(k.upper() == 'POTENTIAL' for k in ci.subsections):
         ci.subsections.pop('POTENTIAL')
