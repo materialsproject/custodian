@@ -232,6 +232,9 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         occ_prec = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
             'OCCUPATION_PRECONDITIONER', Keyword('OCCUPATION_PRECONDITIONER', False)).values[0]
 
+        stepsize = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
+            'STEPSIZE', Keyword('STEPSIZE', None)).values[0]
+
         # Try going from DIIS -> CG (slower, but more robust)
         if minimizer == 'DIIS':
             actions.append({'dict': self.input_file,
@@ -291,7 +294,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         Beyond this, nothing can be done except searching for longer, or reducing line search length
         which are both very slow, and so should be handled by the user on a case by case basis.
         """
-        if not actions and (algo == 'STRICT' or not rotate or not occ_prec):
+        if not actions and (algo == 'STRICT' or not rotate):
             actions.append(
                 {
                     'dict': self.input_file,
@@ -1110,73 +1113,94 @@ class NumericalPrecisionHandler(ErrorHandler):
                             'FORCE_EVAL': {
                                 'DFT': {
                                     'QS': {
-                                        'EPS_DEFAULT': eps_default / 100
+                                        'EPS_DEFAULT': 1e-16
                                     }
                                 }
                             }
                         }}})
 
-            elif pgf > 1e-10 or gvg > 1e-10:
-                if pgf > 1e-10:
-                    actions.append(
-                        {
-                            "dict": self.input_file,
-                            "action": {
-                                "_set":
-                                    {
-                                        'FORCE_EVAL': {
-                                            'DFT': {
-                                                'QS': {
-                                                    'EPS_PGF_ORB': 1e-10,
-                                                }
-                                            }
-                                        }
-                                    }
-
-                            }
-                        }
-                    )
-                if gvg > 1e-10:
-                    actions.append(
-                        {
-                            "dict": self.input_file,
-                            "action": {
-                                "_set":
-                                    {
-                                        'FORCE_EVAL': {
-                                            'DFT': {
-                                                'QS': {
-                                                    'EPS_GVG_RSPACE': 1e-10
-                                                }
-                                            }
-                                        }
-                                    }
-
-                            }
-                        }
-                    )
-
-            elif not ci.check('FORCE_EVAL/DFT/XC/XC_GRID') or \
-                    not ci.by_path('FORCE_EVAL/DFT/XC/XC_GRID').get('USE_FINER_GRID', False):
-                # Try a more expensive XC grid
+            if pgf > 1e-16:
                 actions.append(
                     {
-                        'dict': self.input_file,
+                        "dict": self.input_file,
                         "action": {
-                            "_set": {
-                                'FORCE_EVAL': {
-                                    'DFT': {
-                                        'XC': {
-                                            'XC_GRID': {
-                                                'USE_FINER_GRID': True
+                            "_set":
+                                {
+                                    'FORCE_EVAL': {
+                                        'DFT': {
+                                            'QS': {
+                                                'EPS_PGF_ORB': 1e-16,
+                                            }
+                                        }
+                                    }
+                                }
+
+                        }
+                    }
+                )
+            
+            elif 1e-16 >= pgf > 1e-20:
+                actions.append(
+                    {
+                        "dict": self.input_file,
+                        "action": {
+                            "_set":
+                                {
+                                    'FORCE_EVAL': {
+                                        'DFT': {
+                                            'QS': {
+                                                'EPS_PGF_ORB': 1e-20,
+                                            }
+                                        }
+                                    }
+                                }
+
+                        }
+                    }
+                )
+            
+            if gvg > 1e-10:
+                actions.append(
+                    {
+                        "dict": self.input_file,
+                        "action": {
+                            "_set":
+                                {
+                                    'FORCE_EVAL': {
+                                        'DFT': {
+                                            'QS': {
+                                                'EPS_GVG_RSPACE': 1e-10
+                                            }
+                                        }
+                                    }
+                                }
+
+                        }
+                    }
+                )
+
+            if not actions:
+                if not ci.check('FORCE_EVAL/DFT/XC/XC_GRID') or \
+                        not ci.by_path('FORCE_EVAL/DFT/XC/XC_GRID').get('USE_FINER_GRID', False):
+                    # Try a more expensive XC grid
+                    actions.append(
+                        {
+                            'dict': self.input_file,
+                            "action": {
+                                "_set": {
+                                    'FORCE_EVAL': {
+                                        'DFT': {
+                                            'XC': {
+                                                'XC_GRID': {
+                                                    'USE_FINER_GRID': True
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
-                )
+                    )
 
         restart(actions, self.output_file, self.input_file)
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
