@@ -22,6 +22,14 @@
 			POTENTIAL GTH-PBE-q4
 			GHOST False
 		&END KIND
+		&KIND Li
+			ELEMENT Li
+			MAGNETIZATION 0.0
+			BASIS_SET DZVP-MOLOPT-GTH
+			BASIS_SET AUX_FIT cFIT4
+			POTENTIAL GTH-PBE-q4
+			GHOST False
+		&END KIND
 		! The coordinates for simple systems (like small
 		! QM cells) are specified here by default using
 		! explicit XYZ coordinates. More complex systems

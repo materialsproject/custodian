@@ -13,7 +13,7 @@ import warnings
 from custodian.cp2k.interpreter import Cp2kModder
 from custodian.cp2k.handlers import FrozenJobErrorHandler, \
     UnconvergedScfErrorHandler, AbortHandler, NumericalPrecisionHandler, \
-    StdErrHandler
+    StdErrHandler, get_conv
 from pymatgen.io.cp2k.inputs import Keyword, KeywordList
 from pymatgen.io.cp2k.sets import StaticSet
 
@@ -50,6 +50,7 @@ class HandlerTests(unittest.TestCase):
         self.output_file_unconverged = os.path.join(self.TEST_FILES_DIR, "cp2k.out.unconverged")
         self.output_file_stderr = os.path.join(self.TEST_FILES_DIR, "std_err.txt")
         self.output_file_hybrid = os.path.join(self.TEST_FILES_DIR, "cp2k.out.hybrid")
+        self.output_file_conv = os.path.join(self.TEST_FILES_DIR, "cp2k.out.conv")
 
         self.modder = Cp2kModder(filename=self.input_file)
 
@@ -128,13 +129,20 @@ class HandlerTests(unittest.TestCase):
             output_file=self.output_file_preconditioner,
             timeout=1
         )
-        h.check()
+        self.assertTrue(h.check())
         h.correct()
         ci = StaticSet.from_file(self.input_file)
         self.assertEqual(
             ci['FORCE_EVAL']['DFT']['SCF']['OT']['PRECOND_SOLVER'],
             Keyword('PRECOND_SOLVER', 'DIRECT')
         )
+
+        h = FrozenJobErrorHandler(
+            input_file=self.input_file,
+            output_file=self.output_file_imprecise,
+            timeout=1
+        )
+        h.check()
 
     def test_uncoverge_handler(self):
         ci = StaticSet.from_file(self.input_file)
@@ -166,8 +174,6 @@ class HandlerTests(unittest.TestCase):
         self.assertTrue(h.check())
         c = h.correct()
         self.assertTrue(c['errors'], ['Unsufficient precision'])
-        modder = Cp2kModder(filename=self.input_file_hybrid)
-        modder.apply_actions(actions=c['actions'])
 
         # Normal
         h = NumericalPrecisionHandler(self.input_file, output_file=self.output_file_imprecise)
@@ -183,6 +189,9 @@ class HandlerTests(unittest.TestCase):
         h = StdErrHandler(output_file=self.output_file_hybrid, std_err=self.output_file_stderr)
         self.assertTrue(h.check())
         h.correct()
+
+    def test_conv(self):
+        self.assertEqual(len(get_conv(self.output_file_conv)), 45)
 
 
 if __name__ == "__main__":
