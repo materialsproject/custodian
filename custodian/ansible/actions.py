@@ -1,24 +1,17 @@
-# coding: utf-8
-
-from __future__ import unicode_literals, division, print_function
-import os
-import shutil
-
 """
 This module defines various classes of supported actions. All actions are
 implemented as static methods, but are defined using classes (as opposed to
 modules) so that a set of well-defined actions can be namespaced easily.
 """
 
-__author__ = "Shyue Ping Ong"
-__copyright__ = "Copyright 2012, The Materials Project"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "ongsp@ucsd.edu"
-__date__ = "Jun 2, 2012"
+import os
+import shutil
 
 
 def get_nested_dict(input_dict, key):
+    """
+    Helper function to interpret a nested dict input.
+    """
     current = input_dict
     toks = key.split("->")
     n = len(toks)
@@ -28,9 +21,10 @@ def get_nested_dict(input_dict, key):
         elif i == n - 1:
             return current, toks[-1]
         current = current[tok]
+    return None
 
 
-class DictActions(object):
+class DictActions:
     """
     Class to implement the supported mongo-like modifications on a dict.
     Supported keywords include the following Mongo-based keywords, with the
@@ -55,18 +49,39 @@ class DictActions(object):
 
     @staticmethod
     def set(input_dict, settings):
+        """
+        Sets a value using MongoDB syntax.
+
+        Args:
+            input_dict (dict): The input dictionary to be modified.
+            settings (dict): The specification of the modification to be made.
+        """
         for k, v in settings.items():
             (d, key) = get_nested_dict(input_dict, k)
             d[key] = v
 
     @staticmethod
     def unset(input_dict, settings):
+        """
+        Unsets a value using MongoDB syntax.
+
+        Args:
+            input_dict (dict): The input dictionary to be modified.
+            settings (dict): The specification of the modification to be made.
+        """
         for k in settings.keys():
             (d, key) = get_nested_dict(input_dict, k)
             del d[key]
 
     @staticmethod
     def push(input_dict, settings):
+        """
+        Push to a list using MongoDB syntax.
+
+        Args:
+            input_dict (dict): The input dictionary to be modified.
+            settings (dict): The specification of the modification to be made.
+        """
         for k, v in settings.items():
             (d, key) = get_nested_dict(input_dict, k)
             if key in d:
@@ -76,6 +91,13 @@ class DictActions(object):
 
     @staticmethod
     def push_all(input_dict, settings):
+        """
+        Push multiple items to a list using MongoDB syntax.
+
+        Args:
+            input_dict (dict): The input dictionary to be modified.
+            settings (dict): The specification of the modification to be made.
+        """
         for k, v in settings.items():
             (d, key) = get_nested_dict(input_dict, k)
             if key in d:
@@ -85,6 +107,13 @@ class DictActions(object):
 
     @staticmethod
     def inc(input_dict, settings):
+        """
+        Increment a value using MongdoDB syntax.
+
+        Args:
+            input_dict (dict): The input dictionary to be modified.
+            settings (dict): The specification of the modification to be made.
+        """
         for k, v in settings.items():
             (d, key) = get_nested_dict(input_dict, k)
             if key in d:
@@ -94,6 +123,13 @@ class DictActions(object):
 
     @staticmethod
     def rename(input_dict, settings):
+        """
+        Rename a key using MongoDB syntax.
+
+        Args:
+            input_dict (dict): The input dictionary to be modified.
+            settings (dict): The specification of the modification to be made.
+        """
         for k, v in settings.items():
             if k in input_dict:
                 input_dict[v] = input_dict[k]
@@ -101,11 +137,17 @@ class DictActions(object):
 
     @staticmethod
     def add_to_set(input_dict, settings):
+        """
+        Add to set using MongoDB syntax.
+
+        Args:
+            input_dict (dict): The input dictionary to be modified.
+            settings (dict): The specification of the modification to be made.
+        """
         for k, v in settings.items():
             (d, key) = get_nested_dict(input_dict, k)
             if key in d and (not isinstance(d[key], list)):
-                raise ValueError("Keyword {} does not refer to an array."
-                                 .format(k))
+                raise ValueError(f"Keyword {k} does not refer to an array.")
             if key in d and v not in d[key]:
                 d[key].append(v)
             elif key not in d:
@@ -113,37 +155,55 @@ class DictActions(object):
 
     @staticmethod
     def pull(input_dict, settings):
+        """
+        Pull an item using MongoDB syntax.
+
+        Args:
+            input_dict (dict): The input dictionary to be modified.
+            settings (dict): The specification of the modification to be made.
+        """
         for k, v in settings.items():
             (d, key) = get_nested_dict(input_dict, k)
             if key in d and (not isinstance(d[key], list)):
-                raise ValueError("Keyword {} does not refer to an array."
-                                 .format(k))
+                raise ValueError(f"Keyword {k} does not refer to an array.")
             if key in d:
                 d[key] = [i for i in d[key] if i != v]
 
     @staticmethod
     def pull_all(input_dict, settings):
+        """
+        Pull multiple items to a list using MongoDB syntax.
+
+        Args:
+            input_dict (dict): The input dictionary to be modified.
+            settings (dict): The specification of the modification to be made.
+        """
         for k, v in settings.items():
             if k in input_dict and (not isinstance(input_dict[k], list)):
-                raise ValueError("Keyword {} does not refer to an array."
-                                 .format(k))
+                raise ValueError(f"Keyword {k} does not refer to an array.")
             for i in v:
                 DictActions.pull(input_dict, {k: i})
 
     @staticmethod
     def pop(input_dict, settings):
+        """
+        Pop item from a list using MongoDB syntax.
+
+        Args:
+            input_dict (dict): The input dictionary to be modified.
+            settings (dict): The specification of the modification to be made.
+        """
         for k, v in settings.items():
             (d, key) = get_nested_dict(input_dict, k)
             if key in d and (not isinstance(d[key], list)):
-                raise ValueError("Keyword {} does not refer to an array."
-                                 .format(k))
+                raise ValueError(f"Keyword {k} does not refer to an array.")
             if v == 1:
                 d[key].pop()
             elif v == -1:
                 d[key].pop(0)
 
 
-class FileActions(object):
+class FileActions:
     """
     Class of supported file actions. For FileActions, the modder class takes in
     a filename as a string. The filename should preferably be a full path to
@@ -160,11 +220,10 @@ class FileActions(object):
             settings (dict): Must be {"content": actual_content}
         """
         if len(settings) != 1:
-            raise ValueError("Settings must only contain one item with key "
-                             "'content'.")
+            raise ValueError("Settings must only contain one item with key " "'content'.")
         for k, v in settings.items():
             if k == "content":
-                with open(filename, 'w') as f:
+                with open(filename, "w") as f:
                     f.write(v)
 
     @staticmethod
@@ -177,8 +236,7 @@ class FileActions(object):
             settings (dict): Must be {"dest": path of new file}
         """
         if len(settings) != 1:
-            raise ValueError("Settings must only contain one item with key "
-                             "'dest'.")
+            raise ValueError("Settings must only contain one item with key " "'dest'.")
         for k, v in settings.items():
             if k == "dest":
                 shutil.move(filename, v)
@@ -194,17 +252,16 @@ class FileActions(object):
                 mode only prints the action without performing it.
         """
         if len(settings) != 1:
-            raise ValueError("Settings must only contain one item with key "
-                             "'mode'.")
+            raise ValueError("Settings must only contain one item with key " "'mode'.")
         for k, v in settings.items():
             if k == "mode" and v == "actual":
                 try:
                     os.remove(filename)
                 except OSError:
-                    #Skip file not found error.
+                    # Skip file not found error.
                     pass
             elif k == "mode" and v == "simulated":
-                print("Simulated removal of {}".format(filename))
+                print(f"Simulated removal of {filename}")
 
     @staticmethod
     def file_copy(filename, settings):
@@ -230,6 +287,6 @@ class FileActions(object):
         """
         for k, v in settings.items():
             if k == "mode":
-                os.chmod(filename,v)
+                os.chmod(filename, v)
             if k == "owners":
-                os.chown(filename,v)
+                os.chown(filename, v)

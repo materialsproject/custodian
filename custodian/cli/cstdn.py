@@ -2,16 +2,17 @@
 # Copyright (c) Materials Virtual Lab.
 # Distributed under the terms of the BSD License.
 
-from __future__ import division, unicode_literals, print_function
+"""
+A yaml based Custodian job runner. Allows for multi-step jobs with modifications along the way.
+"""
 
 import argparse
-
+import logging
 import sys
+
 from monty.serialization import loadfn
 
 from custodian.custodian import Custodian
-import logging
-
 
 example_yaml = """
 # This is an example of a Custodian yaml spec file. It shows how you can specify
@@ -66,7 +67,7 @@ validators:
 - vldr: custodian.vasp.validators.VasprunXMLValidator
 
 
-#This sets all custodian running parameters.
+# This sets all custodian running parameters.
 custodian_params:
   max_errors: 10
   scratch_dir: /tmp
@@ -76,38 +77,51 @@ custodian_params:
 
 
 def run(args):
-    FORMAT = '%(asctime)s %(message)s'
+    """
+    Perform a single run.
+    """
+    FORMAT = "%(asctime)s %(message)s"
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
-    logging.info("Spec file is %s" % args.spec_file)
+    logging.info(f"Spec file is {args.spec_file}")
     d = loadfn(args.spec_file[0])
     c = Custodian.from_spec(d)
     c.run()
 
 
 def print_example(args):
+    """
+    Print the example_yaml.
+    """
     print(example_yaml)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="""
+    """
+    Main method
+    """
+    parser = argparse.ArgumentParser(
+        description="""
     cstdn is a convenient script to run custodian style jobs using a
-    simple YAML spec.""", epilog="""Author: Shyue Ping Ong""")
+    simple YAML spec.""",
+        epilog="""Author: Shyue Ping Ong""",
+    )
 
     subparsers = parser.add_subparsers()
 
     prun = subparsers.add_parser("run", help="Run custodian.")
-    prun.add_argument("spec_file", metavar="spec_file", type=str, nargs=1,
-                      help="YAML/JSON spec file.")
+    prun.add_argument("spec_file", metavar="spec_file", type=str, nargs=1, help="YAML/JSON spec file.")
     prun.set_defaults(func=run)
 
     prun = subparsers.add_parser(
-        "example", help="Print examples. Right now, there is only one example for VASP double relaxation.")
+        "example",
+        help="Print examples. Right now, there is only one example for VASP double relaxation.",
+    )
     prun.set_defaults(func=print_example)
 
     args = parser.parse_args()
 
     try:
-        a = getattr(args, "func")
+        getattr(args, "func")
     except AttributeError:
         parser.print_help()
         sys.exit(0)

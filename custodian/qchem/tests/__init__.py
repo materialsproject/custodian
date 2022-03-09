@@ -1,3 +1,7 @@
-from __future__ import unicode_literals
+"""
+Tests for QChem Custodian
+"""
 
-__author__ = 'xiaohuiqu'
+
+__author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath"
+__credits__ = "Xiaohui Qu"

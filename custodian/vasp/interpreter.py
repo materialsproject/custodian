@@ -1,13 +1,18 @@
-# coding: utf-8
+"""
+Implements various interpreters and modders for VASP.
+"""
 
-from __future__ import unicode_literals
+from pymatgen.io.vasp.inputs import VaspInput
 
-from custodian.ansible.actions import FileActions, DictActions
+from custodian.ansible.actions import DictActions, FileActions
 from custodian.ansible.interpreter import Modder
-from pymatgen.io.vasp import VaspInput
 
 
 class VaspModder(Modder):
+    """
+    A Modder for VaspInputSets.
+    """
+
     def __init__(self, actions=None, strict=True, vi=None):
         """
         Initializes a Modder for VaspInput sets
@@ -24,9 +29,9 @@ class VaspModder(Modder):
                 Initialized automatically if not passed (but passing it will
                 avoid having to reparse the directory).
         """
-        self.vi = vi or VaspInput.from_directory('.')
+        self.vi = vi or VaspInput.from_directory(".")
         actions = actions or [FileActions, DictActions]
-        super(VaspModder, self).__init__(actions, strict)
+        super().__init__(actions, strict)
 
     def apply_actions(self, actions):
         """
@@ -46,6 +51,6 @@ class VaspModder(Modder):
             elif "file" in a:
                 self.modify(a["action"], a["file"])
             else:
-                raise ValueError("Unrecognized format: {}".format(a))
+                raise ValueError(f"Unrecognized format: {a}")
         for f in modified:
             self.vi[f].write_file(f)

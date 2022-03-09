@@ -1,18 +1,14 @@
-# coding: utf-8
-
-from __future__ import unicode_literals, division
-
-import subprocess
-import shutil
-
-from monty.io import zopen
-
-from custodian.custodian import Job
-from monty.shutil import gzip_dir
-
 """
 This module implements basic kinds of jobs for Nwchem runs.
 """
+
+import shutil
+import subprocess
+
+from monty.io import zopen
+from monty.shutil import gzip_dir
+
+from custodian.custodian import Job
 
 __author__ = "Shyue Ping Ong"
 __version__ = "0.1"
@@ -27,9 +23,15 @@ class NwchemJob(Job):
     A basic Nwchem job.
     """
 
-    def __init__(self, nwchem_cmd, input_file="mol.nw",
-                 output_file="mol.nwout", gzipped=False,
-                 backup=True, settings_override=None):
+    def __init__(
+        self,
+        nwchem_cmd,
+        input_file="mol.nw",
+        output_file="mol.nwout",
+        gzipped=False,
+        backup=True,
+        settings_override=None,
+    ):
         """
         Initializes a basic NwChem job.
 
@@ -60,15 +62,14 @@ class NwchemJob(Job):
         Performs backup if necessary.
         """
         if self.backup:
-            shutil.copy(self.input_file, "{}.orig".format(self.input_file))
+            shutil.copy(self.input_file, f"{self.input_file}.orig")
 
     def run(self):
         """
         Performs actual nwchem run.
         """
-        with zopen(self.output_file, 'w') as fout:
-            return subprocess.Popen(self.nwchem_cmd + [self.input_file],
-                                    stdout=fout)
+        with zopen(self.output_file, "w") as fout:
+            return subprocess.Popen(self.nwchem_cmd + [self.input_file], stdout=fout)  # pylint: disable=R1732
 
     def postprocess(self):
         """

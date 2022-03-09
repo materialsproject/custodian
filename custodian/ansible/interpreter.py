@@ -1,27 +1,14 @@
-# coding: utf-8
-
-from __future__ import unicode_literals, division
-
 """
 This module implements a Modder class that performs modifications on objects
 using support actions.
 """
-
-
-__author__ = "Shyue Ping Ong"
-__copyright__ = "Copyright 2012, The Materials Project"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "ongsp@ucsd.edu"
-__date__ = "Jun 1, 2012"
-
 
 import re
 
 from custodian.ansible.actions import DictActions
 
 
-class Modder(object):
+class Modder:
     """
     Class to modify a dict/file/any object using a mongo-like language.
     Keywords are mostly adopted from mongo's syntax, but instead of $, an
@@ -42,6 +29,7 @@ class Modder(object):
     >>> d['Hello']
     'Universe'
     """
+
     def __init__(self, actions=None, strict=True):
         """
         Initializes a Modder from a list of supported actions.
@@ -59,8 +47,7 @@ class Modder(object):
         actions = actions if actions is not None else [DictActions]
         for action in actions:
             for i in dir(action):
-                if (not re.match('__\w+__', i)) and \
-                        callable(getattr(action, i)):
+                if (not re.match(r"__\w+__", i)) and callable(getattr(action, i)):
                     self.supported_actions["_" + i] = getattr(action, i)
         self.strict = strict
 
@@ -81,8 +68,7 @@ class Modder(object):
             if action in self.supported_actions:
                 self.supported_actions[action].__call__(obj, settings)
             elif self.strict:
-                raise ValueError("{} is not a supported action!"
-                                 .format(action))
+                raise ValueError(f"{action} is not a supported action!")
 
     def modify_object(self, modification, obj):
         """
@@ -100,4 +86,5 @@ class Modder(object):
 
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()

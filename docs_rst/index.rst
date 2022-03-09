@@ -22,21 +22,12 @@ The current version of Custodian also comes with two sub-packages for error
 handling for Vienna Ab Initio Simulation Package (VASP), NwChem and QChem
 calculations.
 
-Change log
-==========
+.. image:: https://github.com/materialsproject/custodian/workflows/Testing/badge.svg
+    :target: https://github.com/materialsproject/custodian/workflows/Testing/badge.svg
+.. image:: https://github.com/materialsproject/custodian/workflows/Linting/badge.svg
+    :target: https://github.com/materialsproject/custodian/workflows/Linting/badge.svg
 
-v2019.2.10
-----------
-* Improved slow convergence handling. (@shyamd)
-
-v2019.2.7
----------
-* Improved error logging.
-* Improved handling of frozen jobs and potim errors.
-* Improved Exceptino handling. (Guido Petretto)
-
-
-:doc:`Older versions </changelog>`
+:doc:`Change log </changelog>`
 
 Getting custodian
 =================
@@ -46,11 +37,7 @@ Stable version
 
 The version at the Python Package Index (PyPI) is always the latest stable
 release that will be hopefully, be relatively bug-free. The easiest way to
-install custodian on any system is to use easy_install or pip, as follows::
-
-    easy_install custodian
-
-or::
+install custodian on any system is to use pip, as follows::
 
     pip install custodian
 
@@ -75,20 +62,21 @@ or to install the package in developmental mode::
 Requirements
 ============
 
-Custodian requires Python 2.7+. There are no other required dependencies.
+Custodian requires Python 3.5+. There are no other required dependencies.
 
 Optional dependencies
 ---------------------
 
 Optional libraries that are required if you need certain features:
 
-1. Python Materials Genomics (`pymatgen`_) 2.8.10+: To use the plugin for
+1. Python Materials Genomics (`pymatgen`_) 2019.8.23+: To use the plugin for
    VASP, NwChem and Qchem. Please install using::
 
     pip install pymatgen
 
    For more information, please consult `pymatgen's documentation`_.
-2. nose - For complete unittesting.
+2. pytest - For complete unittesting.
+3. pycodestyle - For checking pep8 compliance.
 
 Usage
 =====
@@ -144,7 +132,7 @@ The ExampleJob has the following code.
 
         @property
         def name(self):
-            return "ExampleJob{}".format(self.jobid)
+            return f"ExampleJob{self.jobid}"
 
 
 The ExampleJob simply sums a random sequence of 100 numbers between 0 and

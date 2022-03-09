@@ -1,7 +1,3 @@
-# coding: utf-8
-
-from __future__ import unicode_literals, division
-
 __author__ = "Chen Zheng"
 __copyright__ = "Copyright 2012, The Materials Project"
 __version__ = "0.1"
@@ -9,15 +5,14 @@ __maintainer__ = "Chen Zheng"
 __email__ = "chz022@ucsd.edu"
 __date__ = "Oct 18, 2017"
 
-import unittest
-import os
 import glob
+import os
 import shutil
+import unittest
 
 from custodian.feff.handlers import UnconvergedErrorHandler
 
-test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
-                        "test_files")
+test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")
 
 
 def clean_dir():
@@ -42,11 +37,16 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         self.assertTrue(h.check())
         d = h.correct()
         self.assertEqual(d["errors"], ["Non-converging job"])
-        self.assertEqual(d['actions'],
-                         [{"dict": "PARAMETERS",
-                           "action": {"_set": {"RESTART": []}}},
-                          {'action': {'_set': {'SCF': [7, 0, 100, 0.2, 3]}},
-                           'dict': 'PARAMETERS'}])
+        self.assertEqual(
+            d["actions"],
+            [
+                {"dict": "PARAMETERS", "action": {"_set": {"RESTART": []}}},
+                {
+                    "action": {"_set": {"SCF": [7, 0, 100, 0.2, 3]}},
+                    "dict": "PARAMETERS",
+                },
+            ],
+        )
         shutil.move("ATOMS.orig", "ATOMS")
         shutil.move("PARAMETERS.orig", "PARAMETERS")
         shutil.move("HEADER.orig", "HEADER")

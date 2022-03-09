@@ -5,6 +5,7 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 6
 
 
 Submodules
@@ -14,23 +15,30 @@ custodian.qchem.handlers module
 -------------------------------
 
 .. automodule:: custodian.qchem.handlers
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 custodian.qchem.jobs module
 ---------------------------
 
 .. automodule:: custodian.qchem.jobs
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
+custodian.qchem.utils module
+----------------------------
+
+.. automodule:: custodian.qchem.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: custodian.qchem
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
