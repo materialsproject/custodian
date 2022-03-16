@@ -940,7 +940,8 @@ class NumericalPrecisionHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out", max_same=5):
+    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out", max_same=5,
+                pgf_orb_strict=1e-20, eps_default_strict=1e-12, eps_gvg_strict=1e-10):
         """
         Initialize the error handler.
 
@@ -964,6 +965,9 @@ class NumericalPrecisionHandler(ErrorHandler):
         self.output_file = output_file
         self.max_same = max_same
         self.overlap_condition = None
+        self.pgf_orb_strict = pgf_orb_strict
+        self.eps_default_strict = eps_default_strict
+        self.eps_gvg_strict = eps_gvg_strict
 
     def check(self):
         conv = get_conv(self.output_file)
@@ -1043,20 +1047,9 @@ class NumericalPrecisionHandler(ErrorHandler):
             pgf = ci['force_eval']['dft']['qs'].get(
                 'EPS_PGF_ORB', Keyword('EPS_PGF_ORB', np.sqrt(eps_default))
             ).values[0]
-            if m.get('PGF'):
-                actions.append({
-                    'dict': self.input_file,
-                    "action": {
-                        "_set": {
-                            'FORCE_EVAL': {
-                                'DFT': {
-                                    'QS': {
-                                        'EPS_PGF_ORB': pgf / 10
-                                    }
-                                }
-                            }
-                        }}})
-
+            if m.get('PGF') and pgf.values[0] > self.pgf_orb_strict:
+                actions.append(self.__set_pgf_orb())
+                    
         # If no hybrid modifications were performed
         if len(actions) == 0:
             # Overall precision
@@ -1091,7 +1084,7 @@ class NumericalPrecisionHandler(ErrorHandler):
                                 }
                             }}})
 
-            if eps_default > 1e-12:
+            if eps_default > self.eps_default_strict:
                 actions.append({
                     'dict': self.input_file,
                     "action": {
@@ -1099,67 +1092,16 @@ class NumericalPrecisionHandler(ErrorHandler):
                             'FORCE_EVAL': {
                                 'DFT': {
                                     'QS': {
-                                        'EPS_DEFAULT': 1e-12
+                                        'EPS_DEFAULT': self.eps_default_strict
                                     }
                                 }
                             }
                         }}})
-
-            elif 1e-12 >= eps_default > 1e-16:
-                actions.append({
-                    'dict': self.input_file,
-                    "action": {
-                        "_set": {
-                            'FORCE_EVAL': {
-                                'DFT': {
-                                    'QS': {
-                                        'EPS_DEFAULT': 1e-16
-                                    }
-                                }
-                            }
-                        }}})
-
-            if pgf > 1e-16:
-                actions.append(
-                    {
-                        "dict": self.input_file,
-                        "action": {
-                            "_set":
-                                {
-                                    'FORCE_EVAL': {
-                                        'DFT': {
-                                            'QS': {
-                                                'EPS_PGF_ORB': 1e-16,
-                                            }
-                                        }
-                                    }
-                                }
-
-                        }
-                    }
-                )
             
-            elif 1e-16 >= pgf > 1e-20:
-                actions.append(
-                    {
-                        "dict": self.input_file,
-                        "action": {
-                            "_set":
-                                {
-                                    'FORCE_EVAL': {
-                                        'DFT': {
-                                            'QS': {
-                                                'EPS_PGF_ORB': 1e-20,
-                                            }
-                                        }
-                                    }
-                                }
-
-                        }
-                    }
-                )
+            if pgf > self.pgf_orb_strict:
+                actions.append(self.__set_pgf_orb())
             
-            if gvg > 1e-10:
+            if gvg > self.eps_gvg_strict:
                 actions.append(
                     {
                         "dict": self.input_file,
@@ -1169,7 +1111,7 @@ class NumericalPrecisionHandler(ErrorHandler):
                                     'FORCE_EVAL': {
                                         'DFT': {
                                             'QS': {
-                                                'EPS_GVG_RSPACE': 1e-10
+                                                'EPS_GVG_RSPACE': self.eps_gvg_strict
                                             }
                                         }
                                     }
@@ -1206,7 +1148,12 @@ class NumericalPrecisionHandler(ErrorHandler):
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
         return {"errors": ["Unsufficient precision"], "actions": actions}
 
-
+    def __set_pgf_orb(self):
+        return {'dict': self.input_file,
+                "action": {
+                    "_set": {'FORCE_EVAL': {'DFT': {'QS': {'EPS_PGF_ORB': self.pgf_orb_strict}}}}}
+                }
+                
 class UnconvergedRelaxationErrorHandler(ErrorHandler):
 
     """
