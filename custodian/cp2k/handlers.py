@@ -31,9 +31,9 @@ from monty.os.path import zpath
 from monty.serialization import dumpfn
 
 __author__ = "Nicholas Winner"
-__version__ = "0.9"
+__version__ = "1.0"
 __email__ = "nwinner@berkeley.edu"
-__date__ = "March 2021"
+__date__ = "March 2022"
 
 
 CP2K_BACKUP_FILES = {"cp2k.out", "cp2k.inp", "std_err.txt"}

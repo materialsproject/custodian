@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 __author__ = "Nicholas Winner"
-__version__ = "0.1"
+__version__ = "1.0"
 
 CP2K_INPUT_FILES = ["cp2k.inp"]
 

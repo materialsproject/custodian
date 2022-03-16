@@ -8,9 +8,9 @@ from custodian.custodian import Validator
 from pymatgen.io.cp2k.outputs import Cp2kOutput
 
 __author__ = "Nicholas Winner"
-__version__ = "0.9"
+__version__ = "1.0"
 __email__ = "nwinner@berkeley.edu"
-__date__ = "October 2021"
+__date__ = "March 2022"
 
 
 class Cp2kValidator(Validator):
@@ -103,82 +103,3 @@ class Cp2kOutputValidator(Cp2kValidator):
         return True
 
 
-class ChargedDefectValidator(Cp2kValidator):
-
-    """
-    If a output file is charged and no band gap exists, then the
-    calculation is ill-posed. Meant to be used with a double job
-    with the first being a safety check job.
-    """
-
-    def __init__(self, output_file='cp2k.out'):
-        self.output_file = output_file
-        self.charge = None
-        self._check = False
-
-    def check(self):
-        o = Cp2kOutput(self.output_file)
-        o.parse_initial_structure()
-        o.parse_dos()
-        self.charge = o.initial_structure.charge
-        if o.band_gap or self.charge == 0:
-            return False
-        self._check = True
-        return True
-    
-    @property
-    def kill(self):
-        """
-        Do not kill the job with raise error.
-        """
-        return False
-    
-    @property
-    def exit(self):
-        """
-        Don't raise error, but exit the job
-        """
-        return True if self.charge else False
-
-    @property
-    def no_children(self):
-        return True
-
-
-class HybridValidator(Cp2kValidator):
-
-    def __init__(self, output_file='cp2k.out'):
-        self.output_file = output_file
-        self.charge = None
-        self._check = False
-
-    def check(self):
-        o = Cp2kOutput(self.output_file)
-        o.parse_initial_structure()
-        o.parse_dos()
-        self.charge = o.initial_structure.charge
-        if o.band_gap is not None and o.band_gap:
-            return False
-        self._check = True
-        return True
-
-    @property
-    def kill(self):
-        """
-        Do not kill the job with raise error.
-        """
-        return False
-
-    @property
-    def exit(self):
-        """
-        Don't raise error, but exit the job
-        """
-        return True if self.charge else False
-
-    @property
-    def no_children(self):
-        """
-        No children
-        """
-        return True

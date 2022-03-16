@@ -8,7 +8,7 @@ from pymatgen.io.cp2k.inputs import Cp2kInput
 from custodian.cp2k.utils import cleanup_input
 
 __author__ = "Nicholas Winner"
-__version__ = "0.9"
+__version__ = "1.0"
 __email__ = "nwinner@berkeley.edu"
 __date__ = "October 2021"
 
