@@ -1047,7 +1047,7 @@ class NumericalPrecisionHandler(ErrorHandler):
             pgf = ci['force_eval']['dft']['qs'].get(
                 'EPS_PGF_ORB', Keyword('EPS_PGF_ORB', np.sqrt(eps_default))
             ).values[0]
-            if m.get('PGF') and pgf.values[0] > self.pgf_orb_strict:
+            if m.get('PGF') and pgf > self.pgf_orb_strict:
                 actions.append(self.__set_pgf_orb())
                     
         # If no hybrid modifications were performed
