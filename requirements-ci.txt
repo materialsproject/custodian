@@ -1,10 +1,10 @@
-pymatgen==2022.1.9
+pymatgen==2022.2.10
 coverage==6.2
 coveralls==3.3.1
-pytest==6.2.5
+pytest==7.1.0
 pytest-cov==3.0.0
-mypy==0.931
+mypy==0.941
 pydocstyle==6.1.1
 flake8==4.0.1
 pylint==2.12.2
-black==21.12b0
+black==22.1.0

@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v2022.2.13
+----------
+* Support for new Lobster versions (@naik-aakash)
+* Bug fix for termination of gamma VASP runs.
+
 v2022.1.17
 ----------
 * New NBANDS not sufficient handler in VASP (@arosen93)

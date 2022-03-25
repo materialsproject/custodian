@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.qchem.utils &#8212; custodian 2022.1.17 documentation</title>
+    <title>custodian.qchem.utils &#8212; custodian 2022.2.13 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/flasky.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2022.1.17 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2022.2.13 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.qchem.utils</a></li> 
       </ul>
@@ -69,7 +69,7 @@
 <span class="sd">    reversed_direction (bool): If True, then perturb in direction opposite of frequency modes.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">max_dis</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">vec</span><span class="p">))</span> <span class="k">for</span> <span class="n">vec</span> <span class="ow">in</span> <span class="n">negative_freq_vecs</span><span class="p">)</span>
+    <span class="n">max_dis</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">vec</span><span class="p">))</span> <span class="k">for</span> <span class="n">vec</span> <span class="ow">in</span> <span class="n">negative_freq_vecs</span><span class="p">)</span>
     <span class="n">scale</span> <span class="o">=</span> <span class="n">molecule_perturb_scale</span> <span class="o">/</span> <span class="n">max_dis</span>
     <span class="n">normalized_vecs</span> <span class="o">=</span> <span class="p">[[</span><span class="n">x</span> <span class="o">*</span> <span class="n">scale</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">vec</span><span class="p">]</span> <span class="k">for</span> <span class="n">vec</span> <span class="ow">in</span> <span class="n">negative_freq_vecs</span><span class="p">]</span>
     <span class="n">direction</span> <span class="o">=</span> <span class="mf">1.0</span>
