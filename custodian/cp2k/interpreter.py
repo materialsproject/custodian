@@ -2,9 +2,9 @@
 CP2K adapted interpreter and modder for custodian.
 """
 
+from pymatgen.io.cp2k.inputs import Cp2kInput
 from custodian.ansible.actions import FileActions, DictActions
 from custodian.ansible.interpreter import Modder
-from pymatgen.io.cp2k.inputs import Cp2kInput
 from custodian.cp2k.utils import cleanup_input
 
 __author__ = "Nicholas Winner"
@@ -19,7 +19,7 @@ class Cp2kModder(Modder):
     also supports modifications that are file operations (e.g. copying).
     """
 
-    def __init__(self, filename='cp2k.inp', actions=None, strict=True, ci=None):
+    def __init__(self, filename="cp2k.inp", actions=None, strict=True, ci=None):
         """
         Initializes a Modder for Cp2kInput sets
 
@@ -40,7 +40,7 @@ class Cp2kModder(Modder):
         self.ci = ci or Cp2kInput.from_file(filename)
         self.filename = filename
         actions = actions or [FileActions, DictActions]
-        super(Cp2kModder, self).__init__(actions, strict)
+        super().__init__(actions, strict)
 
     def apply_actions(self, actions):
         """
@@ -56,16 +56,17 @@ class Cp2kModder(Modder):
             if "dict" in a:
                 k = a["dict"]
                 modified.append(k)
-                self._modify(a['action'], self.ci)
+                Cp2kModder._modify(a["action"], self.ci)
             elif "file" in a:
                 self.modify(a["action"], a["file"])
                 self.ci = Cp2kInput.from_file(self.filename)
             else:
-                raise ValueError("Unrecognized format: {}".format(a))
+                raise ValueError(f"Unrecognized format: {a}")
         cleanup_input(self.ci)
         self.ci.write_file(self.filename)
 
-    def _modify(self, modification, obj):
+    @staticmethod
+    def _modify(modification, obj):
         """
         Note that modify makes actual in-place modifications. It does not
         return a copy.
@@ -84,10 +85,3 @@ class Cp2kModder(Modder):
                 getattr(obj, action[1:])(settings)
             except KeyError:
                 continue
-
-
-
-
-
-
-

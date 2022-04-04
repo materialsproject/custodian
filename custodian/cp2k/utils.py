@@ -1,3 +1,7 @@
+"""
+This module holds different utility functions. Mainly used by handlers.
+"""
+
 import os
 import itertools
 from collections import deque
@@ -21,10 +25,10 @@ def restart(actions, output_file, input_file, no_actions_needed=False):
     if actions or no_actions_needed:
         o = Cp2kOutput(output_file)
         ci = Cp2kInput.from_file(input_file)
-        restart_file = o.filenames.get('restart')
+        restart_file = o.filenames.get("restart")
         restart_file = restart_file[-1] if restart_file else None
-        if ci.check('force_eval/dft'):
-            wfn_restart = ci['force_eval']['dft'].get('wfn_restart_file_name')
+        if ci.check("force_eval/dft"):
+            wfn_restart = ci["force_eval"]["dft"].get("wfn_restart_file_name")
         else:
             wfn_restart = None
 
@@ -34,11 +38,7 @@ def restart(actions, output_file, input_file, no_actions_needed=False):
             conv = get_conv(output_file)
             if (conv and conv[-1] <= 1e-5) or restart_file:
                 actions.append(
-                    {'dict': input_file,
-                     'action': {
-                         '_unset': {
-                             'FORCE_EVAL': {
-                                 'DFT': 'WFN_RESTART_FILE_NAME'}}}}
+                    {"dict": input_file, "action": {"_unset": {"FORCE_EVAL": {"DFT": "WFN_RESTART_FILE_NAME"}}}}
                 )
 
         # If issues arose after some ionic steps and corrections are possible
@@ -48,10 +48,8 @@ def restart(actions, output_file, input_file, no_actions_needed=False):
                 0,
                 {
                     "file": os.path.abspath(restart_file),
-                    "action": {
-                        "_file_copy": {"dest": os.path.abspath(input_file)}
-                    }
-                }
+                    "action": {"_file_copy": {"dest": os.path.abspath(input_file)}},
+                },
             )
 
 
@@ -66,8 +64,8 @@ def cleanup_input(ci):
     """
     if not hasattr(ci, "subsections") or not ci.subsections:
         return
-    if any(k.upper() == 'POTENTIAL' for k in ci.subsections):
-        ci.subsections.pop('POTENTIAL')
+    if any(k.upper() == "POTENTIAL" for k in ci.subsections):
+        ci.subsections.pop("POTENTIAL")
     for k, v in ci.subsections.items():
         cleanup_input(v)
 
@@ -83,50 +81,43 @@ def activate_ot(actions, ci):
         Cp2kInput object, used to coordinate settings
     """
 
-    eps_scf = ci['force_eval']['dft']['scf']['eps_scf']
+    eps_scf = ci["force_eval"]["dft"]["scf"]["eps_scf"]
 
     ot_actions = [
         {
             "dict": "cp2k.inp",
-            "action":
-                [
-                    (
-                        '_unset', {
-                            'FORCE_EVAL': {
-                                'DFT': 'SCF'
-                            }
-                        },
+            "action": [
+                (
+                    "_unset",
+                    {"FORCE_EVAL": {"DFT": "SCF"}},
                 )
-            ]
+            ],
         },
         {
             "dict": "cp2k.inp",
-            "action":
-            [
+            "action": [
                 (
-                    '_set', {
-                        'FORCE_EVAL': {
-                            'DFT': {
-                                'SCF': {
-                                    'MAX_SCF': 20,
-                                    'OT': {
-                                        'ENERGY_GAP': 0.01,
-                                        'ALGORITHM': 'STRICT',
-                                        'PRECONDITIONER': 'FULL_ALL',
-                                        'MINIMIZER': 'DIIS',
-                                        'LINESEARCH': '2PNT'
+                    "_set",
+                    {
+                        "FORCE_EVAL": {
+                            "DFT": {
+                                "SCF": {
+                                    "MAX_SCF": 20,
+                                    "OT": {
+                                        "ENERGY_GAP": 0.01,
+                                        "ALGORITHM": "STRICT",
+                                        "PRECONDITIONER": "FULL_ALL",
+                                        "MINIMIZER": "DIIS",
+                                        "LINESEARCH": "2PNT",
                                     },
-                                    'OUTER_SCF': {
-                                        'MAX_SCF': 20,
-                                        'EPS_SCF': eps_scf
-                                    }
+                                    "OUTER_SCF": {"MAX_SCF": 20, "EPS_SCF": eps_scf},
                                 }
                             }
                         }
-                    }
+                    },
                 )
-            ]
-        }
+            ],
+        },
     ]
     actions.extend(ot_actions)
 
@@ -140,56 +131,27 @@ def activate_diag(actions):
     """
 
     diag_actions = [
+        {"dict": "cp2k.inp", "action": ("_unset", {"FORCE_EVAL": {"DFT": {"SCF": "OT"}}})},
+        {"dict": "cp2k.inp", "action": ("_unset", {"FORCE_EVAL": {"DFT": {"SCF": "OUTER_SCF"}}})},
         {
             "dict": "cp2k.inp",
-            "action":
-            (
-                '_unset', {
-                    'FORCE_EVAL': {
-                        'DFT': {
-                            'SCF': 'OT'
-                        }
-                    }
-                }
-            )
-        },
-        {
-            "dict": "cp2k.inp",
-            "action":
-            (
-                '_unset', {
-                    'FORCE_EVAL': {
-                        'DFT': {
-                            'SCF': 'OUTER_SCF'
-                        }
-                    }
-                }
-            )
-        },
-        {
-            "dict": "cp2k.inp",
-            "action":
-            (
-                '_set', {
-                    'FORCE_EVAL': {
-                        'DFT': {
-                            'SCF': {
-                                'MAX_SCF': 200,
-                                'ADDED_MOS': 100,  # TODO needs to be dynamic value
-                                'MAX_DIIS': 15,
-                                'DIAGONALIZATION': {},
-                                'MIXING': {
-                                    'ALPHA': .05
-                                },
-                                'SMEAR': {
-                                    'ELEC_TEMP': 300,
-                                    'METHOD': 'FERMI_DIRAC'
-                                }
+            "action": (
+                "_set",
+                {
+                    "FORCE_EVAL": {
+                        "DFT": {
+                            "SCF": {
+                                "MAX_SCF": 200,
+                                "ADDED_MOS": 100,  # TODO needs to be dynamic value
+                                "MAX_DIIS": 15,
+                                "DIAGONALIZATION": {},
+                                "MIXING": {"ALPHA": 0.05},
+                                "SMEAR": {"ELEC_TEMP": 300, "METHOD": "FERMI_DIRAC"},
                             }
                         }
                     }
                 },
-            )
+            ),
         },
     ]
     actions.extend(diag_actions)
@@ -208,9 +170,10 @@ def can_use_ot(output, ci, minimum_band_gap=0.1):
     """
     output.parse_dos()
     if (
-            not ci.check('FORCE_EVAL/DFT/SCF/OT') and
-            not ci.check('FORCE_EVAL/DFT/KPOINTS') and
-            output.band_gap and output.band_gap > minimum_band_gap
+        not ci.check("FORCE_EVAL/DFT/SCF/OT")
+        and not ci.check("FORCE_EVAL/DFT/KPOINTS")
+        and output.band_gap
+        and output.band_gap > minimum_band_gap
     ):
         return True
     return False
@@ -224,8 +187,7 @@ def tail(filename, n=10):
         t = deque(f, n)
         if t:
             return t
-        else:
-            return ['']*n
+        return [""] * n
 
 
 def get_conv(outfile):
@@ -240,4 +202,4 @@ def get_conv(outfile):
     """
     out = Cp2kOutput(outfile, auto_load=False, verbose=False)
     out.parse_scf_opt()
-    return list(itertools.chain.from_iterable(out.data['convergence']))
+    return list(itertools.chain.from_iterable(out.data["convergence"]))

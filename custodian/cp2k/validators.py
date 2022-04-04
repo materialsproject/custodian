@@ -3,9 +3,8 @@ Validators for CP2K calculations.
 """
 
 from abc import abstractmethod, abstractproperty
-
-from custodian.custodian import Validator
 from pymatgen.io.cp2k.outputs import Cp2kOutput
+from custodian.custodian import Validator
 
 __author__ = "Nicholas Winner"
 __version__ = "1.0"
@@ -26,24 +25,21 @@ class Cp2kValidator(Validator):
         """
         pass
 
-    @property
-    @abstractmethod
+    @abstractproperty
     def kill(self):
         """
         Kill the job with raise error.
         """
         pass
 
-    @property
-    @abstractmethod
+    @abstractproperty
     def exit(self):
         """
         Don't raise error, but exit the job
         """
         pass
 
-    @property
-    @abstractmethod
+    @abstractproperty
     def no_children(self):
         """
         Job should not have children
@@ -54,9 +50,9 @@ class Cp2kValidator(Validator):
 class Cp2kOutputValidator(Cp2kValidator):
     """
     Checks that a valid cp2k output file was generated
-    """    
+    """
 
-    def __init__(self, output_file='cp2k.out'):
+    def __init__(self, output_file="cp2k.out"):
         """
         Args:
             output_file (str): cp2k output file to analyze
@@ -82,24 +78,29 @@ class Cp2kOutputValidator(Cp2kValidator):
                 geom = False
             if o.completed and o.data.get("scf_converged", [True])[-1] and geom:
                 return False
-            else:
-                self._check = True
-                return True
-        except:
-            raise
             self._check = True
             return True
-        
+        except Exception:
+            self._check = True
+            return True
+
     @property
     def kill(self):
+        """
+        Kill the job with raise error.
+        """
         return True
 
     @property
     def exit(self):
+        """
+        Don't raise error, but exit the job
+        """
         return True
 
     @property
     def no_children(self):
+        """
+        Job should not have children
+        """
         return True
-
-

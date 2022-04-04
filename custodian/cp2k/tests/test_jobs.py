@@ -24,42 +24,52 @@ def clean_dir(dir):
 
 
 class HandlerTests(unittest.TestCase):
-
     def setUp(self):
-        warnings.filterwarnings('ignore')
+        warnings.filterwarnings("ignore")
 
-        self.TEST_FILES_DIR = os.path.join(Path(__file__).parent.absolute(), '../../../test_files/cp2k')
+        self.TEST_FILES_DIR = os.path.join(Path(__file__).parent.absolute(), "../../../test_files/cp2k")
 
         clean_dir(self.TEST_FILES_DIR)
 
-        self.input_file = os.path.join(self.TEST_FILES_DIR, 'cp2k.inp')
-        self.input_file_hybrid = os.path.join(self.TEST_FILES_DIR, 'cp2k.inp.hybrid')
-        self.output_file = os.path.join(self.TEST_FILES_DIR, 'cp2k.out.test')
-        self.std_err = os.path.join(self.TEST_FILES_DIR, 'std_err.tmp')
-        self.logfile = os.path.join(self.TEST_FILES_DIR, 'custodian.json')
+        self.input_file = os.path.join(self.TEST_FILES_DIR, "cp2k.inp")
+        self.input_file_hybrid = os.path.join(self.TEST_FILES_DIR, "cp2k.inp.hybrid")
+        self.output_file = os.path.join(self.TEST_FILES_DIR, "cp2k.out.test")
+        self.std_err = os.path.join(self.TEST_FILES_DIR, "std_err.tmp")
+        self.logfile = os.path.join(self.TEST_FILES_DIR, "custodian.json")
 
         if os.path.isfile(Custodian.LOG_FILE):
-            os.remove('custodian.json')
+            os.remove("custodian.json")
         if os.path.isfile(self.std_err):
             os.remove(self.std_err)
         if os.path.isfile(self.output_file):
             os.remove(self.output_file)
 
     def test_job(self):
-        job = Cp2kJob(cp2k_cmd=['echo'], input_file=self.input_file, output_file=self.output_file,
-                      stderr_file=self.std_err, suffix="", final=True,
-                      backup=False, settings_override=None)
+        job = Cp2kJob(
+            cp2k_cmd=["echo"],
+            input_file=self.input_file,
+            output_file=self.output_file,
+            stderr_file=self.std_err,
+            suffix="",
+            final=True,
+            backup=False,
+            settings_override=None,
+        )
         c = Custodian(jobs=[job], handlers=[])
         c.run()
         if os.path.isfile(Custodian.LOG_FILE):
-            os.remove('custodian.json')
+            os.remove("custodian.json")
         if os.path.isfile(self.std_err):
             os.remove(self.std_err)
 
     def test_double(self):
-        jobs = Cp2kJob.gga_static_to_hybrid(cp2k_cmd=['echo'], input_file=self.input_file_hybrid,
-                                            output_file=self.output_file, stderr_file="std_err.tmp",
-                                            backup=False)
+        jobs = Cp2kJob.gga_static_to_hybrid(
+            cp2k_cmd=["echo"],
+            input_file=self.input_file_hybrid,
+            output_file=self.output_file,
+            stderr_file="std_err.tmp",
+            backup=False,
+        )
         self.assertTrue(len(jobs) == 2)
 
 

@@ -1,4 +1,6 @@
-# coding: utf-8
+"""
+This module implements basic kinds of jobs for Cp2k runs.
+"""
 
 from __future__ import unicode_literals, division
 import subprocess
@@ -8,25 +10,19 @@ import logging
 
 from monty.shutil import decompress_dir
 from monty.os.path import zpath
+from pymatgen.io.cp2k.inputs import Cp2kInput, Keyword
 from custodian.custodian import Job
 from custodian.cp2k.interpreter import Cp2kModder
 from custodian.cp2k.utils import restart, cleanup_input
-from pymatgen.io.cp2k.inputs import Cp2kInput, Keyword
-
-"""
-This module implements basic kinds of jobs for Cp2k runs.
-"""
-
 
 logger = logging.getLogger(__name__)
-
 
 __author__ = "Nicholas Winner"
 __version__ = "1.0"
 
 CP2K_INPUT_FILES = ["cp2k.inp"]
 
-CP2K_OUTPUT_FILES = ['cp2k.out']
+CP2K_OUTPUT_FILES = ["cp2k.out"]
 
 
 class Cp2kJob(Job):
@@ -35,9 +31,18 @@ class Cp2kJob(Job):
     can be a complex processing of inputs etc. with initialization.
     """
 
-    def __init__(self, cp2k_cmd, input_file="cp2k.inp", output_file="cp2k.out",
-                 stderr_file="std_err.txt", suffix="", final=True,
-                 backup=True, settings_override=None, restart=False):
+    def __init__(
+        self,
+        cp2k_cmd,
+        input_file="cp2k.inp",
+        output_file="cp2k.out",
+        stderr_file="std_err.txt",
+        suffix="",
+        final=True,
+        backup=True,
+        settings_override=None,
+        restart=False,
+    ):
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -85,7 +90,7 @@ class Cp2kJob(Job):
         if present. Second, any additional user specified settings will be applied. Lastly, a backup of the input
         file will be made for reference.
         """
-        decompress_dir('.')
+        decompress_dir(".")
 
         self.ci = Cp2kInput.from_file(zpath(self.input_file))
         cleanup_input(self.ci)
@@ -95,7 +100,7 @@ class Cp2kJob(Job):
                 actions=self.settings_override,
                 output_file=self.output_file,
                 input_file=self.input_file,
-                no_actions_needed=True
+                no_actions_needed=True,
             )
 
         if self.settings_override or self.restart:
@@ -103,7 +108,7 @@ class Cp2kJob(Job):
             modder.apply_actions(self.settings_override)
 
         if self.backup:
-            shutil.copy(self.input_file, "{}.orig".format(self.input_file))
+            shutil.copy(self.input_file, f"{self.input_file}.orig")
 
     def run(self):
         """
@@ -114,13 +119,11 @@ class Cp2kJob(Job):
         """
         # TODO: cp2k has bizarre in/out streams. Some errors that should go to std_err are not sent anywhere...
         cmd = list(self.cp2k_cmd)
-        cmd.extend(['-i', self.input_file])
+        cmd.extend(["-i", self.input_file])
         logger.info("Running {}".format(" ".join(cmd)))
-        with open(self.output_file, 'w') as f_std, \
-                open(self.stderr_file, "w", buffering=1) as f_err:
+        with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr
-            p = subprocess.Popen(cmd, stdout=f_std, stderr=f_err, shell=False)
-        return p
+            return subprocess.Popen(cmd, stdout=f_std, stderr=f_err, shell=False)
 
     # TODO double jobs, file manipulations, etc. should be done in atomate in the future
     # and custodian should only run the job itself
@@ -128,7 +131,7 @@ class Cp2kJob(Job):
         """
         Postprocessing includes renaming and gzipping where necessary.
         """
-        fs = os.listdir('.')
+        fs = os.listdir(".")
         if os.path.exists(self.output_file):
             if self.suffix != "":
                 os.mkdir(f"run{self.suffix}")
@@ -153,14 +156,21 @@ class Cp2kJob(Job):
         for k in self.cp2k_cmd:
             if "cp2k" in k:
                 try:
-                    os.system("killall %s" % k)
-                except:
+                    os.system(f"killall {k}")
+                except Exception:
                     pass
 
     @classmethod
-    def gga_static_to_hybrid(cls, cp2k_cmd, input_file="cp2k.inp", output_file="cp2k.out",
-                             stderr_file="std_err.txt", backup=True, settings_override_gga=None,
-                             settings_override_hybrid=None):
+    def gga_static_to_hybrid(
+        cls,
+        cp2k_cmd,
+        input_file="cp2k.inp",
+        output_file="cp2k.out",
+        stderr_file="std_err.txt",
+        backup=True,
+        settings_override_gga=None,
+        settings_override_hybrid=None,
+    ):
         """
         A bare gga to hybrid calculation. Removes all unecessary features
         from the gga run, and making it only a ENERGY/ENERGY_FORCE
@@ -171,81 +181,74 @@ class Cp2kJob(Job):
             {
                 "dict": input_file,
                 "action": {
-                    '_unset': {
-                        'FORCE_EVAL': {
-                            'DFT': 'XC'
-                        }
-                    },
-                    '_set': {
-                        'GLOBAL': {
-                            'PROJECT_NAME': 'GGA',
-                            'RUN_TYPE': 'ENERGY_FORCE'
-                        }
-                    }
+                    "_unset": {"FORCE_EVAL": {"DFT": "XC"}},
+                    "_set": {"GLOBAL": {"PROJECT_NAME": "GGA", "RUN_TYPE": "ENERGY_FORCE"}},
                 },
             },
             {
                 "dict": input_file,
-                "action": {
-                    '_set': {
-                        'FORCE_EVAL': {
-                            'DFT': {
-                                'XC': {
-                                    'XC_FUNCTIONAL': {
-                                        'PBE': {}
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-            }
+                "action": {"_set": {"FORCE_EVAL": {"DFT": {"XC": {"XC_FUNCTIONAL": {"PBE": {}}}}}}},
+            },
         ]
 
-        job1 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
-                       stderr_file=stderr_file, final=False, suffix="1",
-                       settings_override=job1_settings_override)
+        job1 = Cp2kJob(
+            cp2k_cmd,
+            input_file=input_file,
+            output_file=output_file,
+            backup=backup,
+            stderr_file=stderr_file,
+            final=False,
+            suffix="1",
+            settings_override=job1_settings_override,
+        )
 
         ci = Cp2kInput.from_file(zpath(input_file))
-        r = ci['global'].get('run_type', Keyword('RUN_TYPE', 'ENERGY_FORCE')).values[0]
-        if r in ['ENERGY', 'WAVEFUNCTION_OPTIMIZATION', 'WFN_OPT', "ENERGY_FORCE"]:  # no need for double job
+        r = ci["global"].get("run_type", Keyword("RUN_TYPE", "ENERGY_FORCE")).values[0]
+        if r in ["ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT", "ENERGY_FORCE"]:  # no need for double job
             return [job1]
 
         job2_settings_override = [
             {
                 "dict": input_file,
                 "action": {
-                    '_set': {
-                        'FORCE_EVAL': {
-                            'DFT': {
-                                'XC': {
-                                    'HF': {
-                                        'SCREENING': {
-                                            'SCREEN_ON_INITIAL_P': True,
-                                            'SCREEN_P_FORCES': True,
+                    "_set": {
+                        "FORCE_EVAL": {
+                            "DFT": {
+                                "XC": {
+                                    "HF": {
+                                        "SCREENING": {
+                                            "SCREEN_ON_INITIAL_P": True,
+                                            "SCREEN_P_FORCES": True,
                                         }
                                     }
                                 },
-                                'WFN_RESTART_FILE_NAME': 'GGA-RESTART.wfn'
+                                "WFN_RESTART_FILE_NAME": "GGA-RESTART.wfn",
                             }
                         },
-                        'GLOBAL': {
-                            'RUN_TYPE': r
-                        }
+                        "GLOBAL": {"RUN_TYPE": r},
                     },
-                }
+                },
             }
         ]
 
-        job2 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
-                       stderr_file=stderr_file, final=True, suffix="2", restart=False,
-                       settings_override=job2_settings_override)
+        job2 = Cp2kJob(
+            cp2k_cmd,
+            input_file=input_file,
+            output_file=output_file,
+            backup=backup,
+            stderr_file=stderr_file,
+            final=True,
+            suffix="2",
+            restart=False,
+            settings_override=job2_settings_override,
+        )
 
         return [job1, job2]
 
     @classmethod
-    def double_job(cls, cp2k_cmd, input_file="cp2k.inp", output_file="cp2k.out",
-                   stderr_file="std_err.txt", backup=True):
+    def double_job(
+        cls, cp2k_cmd, input_file="cp2k.inp", output_file="cp2k.out", stderr_file="std_err.txt", backup=True
+    ):
         """
         This creates a sequence of two jobs. The first of which is an "initialization" of the
         wfn. Using this, the "restart" function can be exploited to determine if a diagonalization
@@ -253,93 +256,119 @@ class Cp2kJob(Job):
         diagonalization job, and there is minimal overhead from restarting.
         """
 
-        job1 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
-                       stderr_file=stderr_file, final=False, suffix="1",
-                       settings_override={})
+        job1 = Cp2kJob(
+            cp2k_cmd,
+            input_file=input_file,
+            output_file=output_file,
+            backup=backup,
+            stderr_file=stderr_file,
+            final=False,
+            suffix="1",
+            settings_override={},
+        )
         ci = Cp2kInput.from_file(zpath(input_file))
-        r = ci['global'].get('run_type', Keyword('RUN_TYPE', 'ENERGY_FORCE')).values[0]
-        if r not in ['ENERGY', 'WAVEFUNCTION_OPTIMIZATION', 'WFN_OPT']:
+        r = ci["global"].get("run_type", Keyword("RUN_TYPE", "ENERGY_FORCE")).values[0]
+        if r not in ["ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT"]:
             job1.settings_override = [
-                {"dict": input_file, "action": {'_set': {'GLOBAL': {'RUN_TYPE': 'ENERGY_FORCE'}}}}
+                {"dict": input_file, "action": {"_set": {"GLOBAL": {"RUN_TYPE": "ENERGY_FORCE"}}}}
             ]
 
-        job2 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
-                       stderr_file=stderr_file, final=True, suffix="2", restart=True)
-        job2.settings_override = [
-            {"dict": input_file, "action": {'_set': {'GLOBAL': {'RUN_TYPE': r}}}}
-        ]
+        job2 = Cp2kJob(
+            cp2k_cmd,
+            input_file=input_file,
+            output_file=output_file,
+            backup=backup,
+            stderr_file=stderr_file,
+            final=True,
+            suffix="2",
+            restart=True,
+        )
+        job2.settings_override = [{"dict": input_file, "action": {"_set": {"GLOBAL": {"RUN_TYPE": r}}}}]
 
         return [job1, job2]
 
     @classmethod
-    def pre_screen_hybrid(cls, cp2k_cmd, input_file="cp2k.inp", output_file="cp2k.out",
-                          stderr_file="std_err.txt", backup=True):
+    def pre_screen_hybrid(
+        cls, cp2k_cmd, input_file="cp2k.inp", output_file="cp2k.out", stderr_file="std_err.txt", backup=True
+    ):
         """
-
+        Build a job where the first job is an unscreened hybrid static calculation, then the second one
+        uses the wfn from the first job as a restart to do a screened calculation.
         """
 
         job1_settings_override = [
             {
                 "dict": input_file,
                 "action": {
-                    '_set': {
-                        'FORCE_EVAL': {
-                            'DFT': {
-                                'XC': {
-                                    'HF': {
-                                        'SCREENING': {
-                                            'SCREEN_ON_INITIAL_P': False,
-                                            'SCREEN_P_FORCES': False,
+                    "_set": {
+                        "FORCE_EVAL": {
+                            "DFT": {
+                                "XC": {
+                                    "HF": {
+                                        "SCREENING": {
+                                            "SCREEN_ON_INITIAL_P": False,
+                                            "SCREEN_P_FORCES": False,
                                         }
                                     }
                                 }
                             }
                         },
-                        'GLOBAL': {
-                            'RUN_TYPE': 'ENERGY_FORCE'
-                        }
+                        "GLOBAL": {"RUN_TYPE": "ENERGY_FORCE"},
                     }
-                }
-             }
+                },
+            }
         ]
 
-        job1 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
-                       stderr_file=stderr_file, final=False, suffix="1",
-                       settings_override=job1_settings_override)
+        job1 = Cp2kJob(
+            cp2k_cmd,
+            input_file=input_file,
+            output_file=output_file,
+            backup=backup,
+            stderr_file=stderr_file,
+            final=False,
+            suffix="1",
+            settings_override=job1_settings_override,
+        )
 
         ci = Cp2kInput.from_file(zpath(input_file))
-        r = ci['global'].get('run_type', Keyword('RUN_TYPE', 'ENERGY_FORCE')).values[0]
-        if r in ['ENERGY', 'WAVEFUNCTION_OPTIMIZATION', 'WFN_OPT', "ENERGY_FORCE"]:  # no need for double job
+        r = ci["global"].get("run_type", Keyword("RUN_TYPE", "ENERGY_FORCE")).values[0]
+        if r in ["ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT", "ENERGY_FORCE"]:  # no need for double job
             return [job1]
 
         job2_settings_override = [
             {
                 "dict": input_file,
                 "action": {
-                    '_set': {
-                        'FORCE_EVAL': {
-                            'DFT': {
-                                'XC': {
-                                    'HF': {
-                                        'SCREENING': {
-                                            'SCREEN_ON_INITIAL_P': True,
-                                            'SCREEN_P_FORCES': True,
+                    "_set": {
+                        "FORCE_EVAL": {
+                            "DFT": {
+                                "XC": {
+                                    "HF": {
+                                        "SCREENING": {
+                                            "SCREEN_ON_INITIAL_P": True,
+                                            "SCREEN_P_FORCES": True,
                                         }
                                     }
                                 },
-                                'WFN_RESTART_FILE_NAME': 'UNSCREENED_HYBRID-RESTART.wfn'
+                                "WFN_RESTART_FILE_NAME": "UNSCREENED_HYBRID-RESTART.wfn",
                             }
                         },
-                        'GLOBAL': {
-                            'RUN_TYPE': r
-                        }
+                        "GLOBAL": {"RUN_TYPE": r},
                     },
-                 }
+                },
             }
         ]
 
-        job2 = Cp2kJob(cp2k_cmd, input_file=input_file, output_file=output_file, backup=backup,
-                       stderr_file=stderr_file, final=True, suffix="2", restart=False,
-                       settings_override=job2_settings_override)
+        job2 = Cp2kJob(
+            cp2k_cmd,
+            input_file=input_file,
+            output_file=output_file,
+            backup=backup,
+            stderr_file=stderr_file,
+            final=True,
+            suffix="2",
+            restart=False,
+            settings_override=job2_settings_override,
+        )
 
         return [job1, job2]

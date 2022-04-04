@@ -14,21 +14,23 @@ When adding more remember the following tips:
     benefits like writing a wavefunction restart file before quiting.
 """
 
-import numpy as np
 import os
 import time
 from typing import Sequence
 import itertools
 import re
-from pymatgen.io.cp2k.inputs import Cp2kInput, Keyword
-from pymatgen.io.cp2k.outputs import Cp2kOutput
-from pymatgen.io.cp2k.utils import get_aux_basis
-from custodian.custodian import ErrorHandler
-from custodian.cp2k.interpreter import Cp2kModder
-from custodian.cp2k.utils import restart, tail, get_conv
+import numpy as np
+
 from monty.re import regrep
 from monty.os.path import zpath
 from monty.serialization import dumpfn
+from pymatgen.io.cp2k.inputs import Cp2kInput, Keyword
+from pymatgen.io.cp2k.outputs import Cp2kOutput
+from pymatgen.io.cp2k.utils import get_aux_basis
+
+from custodian.custodian import ErrorHandler
+from custodian.cp2k.interpreter import Cp2kModder
+from custodian.cp2k.utils import restart, tail, get_conv
 
 __author__ = "Nicholas Winner"
 __version__ = "1.0"
@@ -56,11 +58,7 @@ class StdErrHandler(ErrorHandler):
     is_monitor = True
     raises_runtime_error = False
 
-    error_msgs = {
-        "seg_fault": ["SIGSEGV"],
-        "out_of_memory": ["insufficient virtual memory"],
-        "abort": ["SIGABRT"]
-    }
+    error_msgs = {"seg_fault": ["SIGSEGV"], "out_of_memory": ["insufficient virtual memory"], "abort": ["SIGABRT"]}
 
     def __init__(self, std_err="std_err.txt"):
         """
@@ -93,7 +91,7 @@ class StdErrHandler(ErrorHandler):
         """
         Log error, perform no corrections.
         """
-        return {"errors": ["System error(s): {}".format(self.errors)], "actions": []}
+        return {"errors": [f"System error(s): {self.errors}"], "actions": []}
 
 
 class UnconvergedScfErrorHandler(ErrorHandler):
@@ -156,29 +154,29 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         self.errors = None
         self.scf = None
         self.restart = None
-        self.mixing_hierarchy = ['BROYDEN_MIXING', 'BROYDEN_MIXING_LINEAR', 'PULAY_MIXING', 'PULAY_MIXING_LINEAR']
+        self.mixing_hierarchy = ["BROYDEN_MIXING", "BROYDEN_MIXING_LINEAR", "PULAY_MIXING", "PULAY_MIXING_LINEAR"]
         if os.path.exists(zpath(self.input_file)):
             ci = Cp2kInput.from_file(zpath(self.input_file))
-            if ci['GLOBAL']['RUN_TYPE'].values[0].__str__().upper() in [
-                    "ENERGY", "ENERGY_FORCE", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT"]:
+            if ci["GLOBAL"]["RUN_TYPE"].values[0].__str__().upper() in [
+                "ENERGY",
+                "ENERGY_FORCE",
+                "WAVEFUNCTION_OPTIMIZATION",
+                "WFN_OPT",
+            ]:
                 self.is_static = True
             else:
                 self.is_static = False
-            self.is_ot = True if ci.check('FORCE_EVAL/DFT/SCF/OT') else False
-            if ci.check('FORCE_EVAL/DFT/SCF/MIXING'):
-                method = ci.by_path(
-                    'FORCE_EVAL/DFT/SCF/MIXING'
-                ).get('METHOD', Keyword('METHOD', 'DIRECT_P_MIXING')).values[0]
-                alpha = ci.by_path(
-                    'FORCE_EVAL/DFT/SCF/MIXING'
-                ).get('ALPHA', Keyword('ALPHA', .4)).values[0]
-                beta = ci.by_path(
-                    'FORCE_EVAL/DFT/SCF/MIXING'
-                ).get('BETA', Keyword('BETA', .5)).values[0]
-                ext = '_LINEAR' if (beta > 1 and alpha < .1) else ''
-                self.mixing_hierarchy = [
-                    m for m in self.mixing_hierarchy if m != method.upper()+ext
-                ]
+            self.is_ot = ci.check("FORCE_EVAL/DFT/SCF/OT")
+            if ci.check("FORCE_EVAL/DFT/SCF/MIXING"):
+                method = (
+                    ci.by_path("FORCE_EVAL/DFT/SCF/MIXING")
+                    .get("METHOD", Keyword("METHOD", "DIRECT_P_MIXING"))
+                    .values[0]
+                )
+                alpha = ci.by_path("FORCE_EVAL/DFT/SCF/MIXING").get("ALPHA", Keyword("ALPHA", 0.4)).values[0]
+                beta = ci.by_path("FORCE_EVAL/DFT/SCF/MIXING").get("BETA", Keyword("BETA", 0.5)).values[0]
+                ext = "_LINEAR" if (beta > 1 and alpha < 0.1) else ""
+                self.mixing_hierarchy = [m for m in self.mixing_hierarchy if m != method.upper() + ext]
 
     def check(self):
         """
@@ -187,12 +185,12 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         # Checks output file for errors.
         out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
         out.convergence()
-        if out.filenames.get('restart'):
-            self.restart = out.filenames['restart'][-1]
+        if out.filenames.get("restart"):
+            self.restart = out.filenames["restart"][-1]
 
         # General catch for SCF not converged
         # TODO: should not-static runs allow for some unconverged scf? Leads to issues in my experience
-        scf = out.data['scf_converged'] or [True]
+        scf = out.data["scf_converged"] or [True]
         if not scf[0]:
             return True
         return False
@@ -219,103 +217,101 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         """
 
         actions = []
-
-        minimizer = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
-            'MINIMIZER', Keyword('MINIMIZER', 'DIIS')).values[0].upper()
-
-        algo = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
-            'ALGORITHM', Keyword('ALGORITHM', 'STRICT')).values[0].upper()
-
-        rotate = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
-            'ROTATION', Keyword('ROTATION', False)).values[0]
-
-        occ_prec = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
-            'OCCUPATION_PRECONDITIONER', Keyword('OCCUPATION_PRECONDITIONER', False)).values[0]
-
-        stepsize = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
-            'STEPSIZE', Keyword('STEPSIZE', None)).values[0]
+        minimizer = (
+            ci["FORCE_EVAL"]["DFT"]["SCF"]["OT"].get("MINIMIZER", Keyword("MINIMIZER", "DIIS")).values[0].upper()
+        )
+        algo = ci["FORCE_EVAL"]["DFT"]["SCF"]["OT"].get("ALGORITHM", Keyword("ALGORITHM", "STRICT")).values[0].upper()
+        rotate = ci["FORCE_EVAL"]["DFT"]["SCF"]["OT"].get("ROTATION", Keyword("ROTATION", False)).values[0]
+        stepsize = ci["FORCE_EVAL"]["DFT"]["SCF"]["OT"].get("STEPSIZE", Keyword("STEPSIZE", 0.08)).values[0]
 
         # Try going from DIIS -> CG (slower, but more robust)
-        if minimizer == 'DIIS':
-            actions.append({'dict': self.input_file,
-                            "action": {"_set": {
-                                'FORCE_EVAL': {
-                                    'DFT': {
-                                        'SCF': {
-                                            'OT': {
-                                                'MINIMIZER': 'CG'
-                                            }
-                                        }
-                                    }
-                                }
-                            }}})
+        if minimizer == "DIIS":
+            actions.append(
+                {
+                    "dict": self.input_file,
+                    "action": {"_set": {"FORCE_EVAL": {"DFT": {"SCF": {"OT": {"MINIMIZER": "CG"}}}}}},
+                }
+            )
 
         # Try going from 2pnt to 3pnt line search (slower, but more robust)
-        elif minimizer == 'CG':
-            if ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
-                    'LINESEARCH', Keyword('LINESEARCH', '2PNT')
-            ).values[0].upper() != '3PNT' and not rotate:
-                actions.append({'dict': self.input_file,
-                                "action": {"_set": {
-                                    'FORCE_EVAL': {
-                                        'DFT': {
-                                            'SCF': {
-                                                'OT': {
-                                                    'LINESEARCH': '3PNT'
-                                                }
-                                            }
-                                        }
+        elif minimizer == "CG":
+            if (
+                ci["FORCE_EVAL"]["DFT"]["SCF"]["OT"].get("LINESEARCH", Keyword("LINESEARCH", "2PNT")).values[0].upper()
+                != "3PNT"
+                and not rotate
+            ):
+                actions.append(
+                    {
+                        "dict": self.input_file,
+                        "action": {"_set": {"FORCE_EVAL": {"DFT": {"SCF": {"OT": {"LINESEARCH": "3PNT"}}}}}},
+                    }
+                )
+            elif ci["FORCE_EVAL"]["DFT"]["SCF"].get("MAX_SCF", Keyword("MAX_SCF", 50)).values[0] < 50:
+                actions.append(
+                    {
+                        "dict": self.input_file,
+                        "action": {
+                            "_set": {
+                                "FORCE_EVAL": {
+                                    "DFT": {
+                                        "SCF": {"MAX_SCF": 50, "OUTER_SCF": {"MAX_SCF": 8}},
                                     }
-                                }}})
-            elif ci['FORCE_EVAL']['DFT']['SCF'].get(
-                    'MAX_SCF', Keyword('MAX_SCF', 50)
-            ).values[0] < 50:
-                actions.append({'dict': self.input_file,
-                                "action": {"_set": {
-                                    'FORCE_EVAL': {
-                                        'DFT': {
-                                            'SCF': {
-                                                'MAX_SCF': 50,
-                                                'OUTER_SCF': {
-                                                    'MAX_SCF': 8
-                                                }
-                                            },
-                                        }
-                                    }
-                                }}})
+                                }
+                            }
+                        },
+                    }
+                )
 
         """
-        Last ditch effort to save convergence. No strict orthogonality and fractional occupations
-        No strict orthogonality of MOs, use iterative refinement polynomial expansion for orthogonality
-        Allow for rotations -> allowing for fractional occupation
+        Switch to more robust OT framework.
+        No strict orthogonality of MOs. Use iterative refinement polynomial expansion for orthogonality
+        Allow for rotations (i.e., allowing for fractional occupations)
         Rotation requires and 2pnt line search
         Preconditioning on fractional occupation would be preferred but not allowed with FSI precond.
         Increase SCF steps in one loop and decrease outer loops
-        Beyond this, nothing can be done except searching for longer, or reducing line search length
-        which are both very slow, and so should be handled by the user on a case by case basis.
         """
-        if not actions and (algo == 'STRICT' or not rotate):
+        if not actions and (algo == "STRICT" or not rotate):
             actions.append(
                 {
-                    'dict': self.input_file,
+                    "dict": self.input_file,
                     "action": {
                         "_set": {
-                            'FORCE_EVAL': {
-                                    'DFT': {
-                                        'SCF': {
-                                            'MAX_SCF': 50,
-                                            'OT': {
-                                                'LINESEARCH': '2PNT',
-                                                'ROTATION': True,
-                                                'PRECONDITIONER': 'FULL_SINGLE_INVERSE',
-                                                'OCCUPATION_PRECONDITIONER': False,
-                                                'ALGORITHM': 'IRAC'
-                                            },
-                                            'OUTER_SCF': {
-                                                'MAX_SCF': 20
-                                            }
-                                        }
+                            "FORCE_EVAL": {
+                                "DFT": {
+                                    "SCF": {
+                                        "MAX_SCF": 50,
+                                        "OT": {
+                                            "LINESEARCH": "2PNT",
+                                            "ROTATION": True,
+                                            "PRECONDITIONER": "FULL_SINGLE_INVERSE",
+                                            "OCCUPATION_PRECONDITIONER": False,
+                                            "ALGORITHM": "IRAC",
+                                        },
+                                        "OUTER_SCF": {"MAX_SCF": 20},
                                     }
+                                }
+                            }
+                        }
+                    },
+                }
+            )
+
+        """
+        Beyond the method above, the only thing left to try is decreasing the stepsize a bit.
+        Stepsize is 0.15 by default for all but the FSI preconditioner, which uses .08
+        """
+        if not actions and stepsize > 0.05:
+            actions.append(
+                {
+                    "dict": self.input_file,
+                    "action": {
+                        "_set": {
+                            "FORCE_EVAL": {
+                                "DFT": {
+                                    "SCF": {
+                                        'STEPSIZE': 0.05,
+                                    }
+                                }
                             }
                         }
                     }
@@ -332,115 +328,101 @@ class UnconvergedScfErrorHandler(ErrorHandler):
 
         actions = []
 
-        if not ci.check('FORCE_EVAL/DFT/SCF/MIXING'):
-            actions.append({'dict': self.input_file,
-                            'action': {"_set": {
+        if not ci.check("FORCE_EVAL/DFT/SCF/MIXING"):
+            actions.append(
+                {
+                    "dict": self.input_file,
+                    "action": {
+                        "_set": {
+                            "FORCE_EVAL": {
+                                "DFT": {
+                                    "SCF": {
+                                        "MIXING": {
+                                            "METHOD": "BROYDEN_MIXING",
+                                            "ALPHA": 0.1,
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                }
+            )
+
+        else:
+            alpha = ci["FORCE_EVAL"]["DFT"]["SCF"]["MIXING"].get("ALPHA", Keyword("ALPHA", 0.2)).values[0]
+            beta = ci["FORCE_EVAL"]["DFT"]["SCF"]["MIXING"].get("BETA", Keyword("BETA", 0.01)).values[0]
+            nbuffer = ci["FORCE_EVAL"]["DFT"]["SCF"]["MIXING"].get("NBUFFER", Keyword("NBUFFER", 4)).values[0]
+
+            if nbuffer < 20:
+                actions.append(
+                    {
+                        "dict": self.input_file,
+                        "action": {
+                            "_set": {
                                 "FORCE_EVAL": {
                                     "DFT": {
                                         "SCF": {
                                             "MIXING": {
-                                                'METHOD': 'BROYDEN_MIXING',
-                                                'ALPHA': 0.1,
+                                                "NBUFFER": 20,
                                             }
                                         }
                                     }
                                 }
-                            }}})
+                            }
+                        },
+                    }
+                )
 
-        else:
-            alpha = ci['FORCE_EVAL']['DFT']['SCF']['MIXING'].get('ALPHA', Keyword('ALPHA', 0.2)).values[0]
-            beta = ci['FORCE_EVAL']['DFT']['SCF']['MIXING'].get('BETA', Keyword('BETA', 0.01)).values[0]
-            nbuffer = ci['FORCE_EVAL']['DFT']['SCF']['MIXING'].get('NBUFFER', Keyword('NBUFFER', 4)).values[0]
+            if alpha > 0.05:
+                actions.append(
+                    {
+                        "dict": self.input_file,
+                        "action": {"_set": {"FORCE_EVAL": {"DFT": {"SCF": {"MIXING": {"ALPHA": 0.05, "BETA": 0.01}}}}}},
+                    }
+                )
 
-            if nbuffer < 20:
-                actions.append({'dict': self.input_file,
-                                'action': {"_set": {
-                                    "FORCE_EVAL": {
-                                        "DFT": {
-                                            "SCF": {
-                                                "MIXING": {
-                                                    "NBUFFER": 20,
-                                                }
-                                            }
-                                        }
-                                    }
-                                }}})
+            elif alpha > 0.01:
+                actions.append(
+                    {
+                        "dict": self.input_file,
+                        "action": {"_set": {"FORCE_EVAL": {"DFT": {"SCF": {"MIXING": {"ALPHA": 0.01, "BETA": 0.01}}}}}},
+                    }
+                )
 
-            if alpha > .05:
-                actions.append({'dict': self.input_file,
-                                'action': {"_set": {
-                                    "FORCE_EVAL": {
-                                        "DFT": {
-                                            "SCF": {
-                                                "MIXING": {
-                                                    "ALPHA": 0.05,
-                                                    "BETA": 0.01
-                                                }
-                                            }
-                                        }
-                                    }
-                                }}})
-
-            elif alpha > .01:
-                actions.append({'dict': self.input_file,
-                                'action': {"_set": {
-                                    "FORCE_EVAL": {
-                                        "DFT": {
-                                            "SCF": {
-                                                "MIXING": {
-                                                    "ALPHA": 0.01,
-                                                    "BETA": 0.01
-                                                }
-                                            }
-                                        }
-                                    }
-                                }}})
-
-            elif alpha > .005:
-                actions.append({'dict': self.input_file,
-                                'action': {"_set": {
-                                    "FORCE_EVAL": {
-                                        "DFT": {
-                                            "SCF": {
-                                                "MIXING": {
-                                                    "ALPHA": 0.005,
-                                                    "BETA": 0.01
-                                                }
-                                            }
-                                        }
-                                    }
-                                }}})
+            elif alpha > 0.005:
+                actions.append(
+                    {
+                        "dict": self.input_file,
+                        "action": {
+                            "_set": {"FORCE_EVAL": {"DFT": {"SCF": {"MIXING": {"ALPHA": 0.005, "BETA": 0.01}}}}}
+                        },
+                    }
+                )
 
             elif beta < 1:
-                actions.append({'dict': self.input_file,
-                                'action': {"_set": {
-                                    "FORCE_EVAL": {
-                                        "DFT": {
-                                            "SCF": {
-                                                "MIXING": {
-                                                    "ALPHA": 0.005,
-                                                    "BETA": 3
-                                                }
-                                            }
-                                        }
-                                    }
-                                }}})
+                actions.append(
+                    {
+                        "dict": self.input_file,
+                        "action": {"_set": {"FORCE_EVAL": {"DFT": {"SCF": {"MIXING": {"ALPHA": 0.005, "BETA": 3}}}}}},
+                    }
+                )
 
-        if not ci.check('FORCE_EVAL/DFT/SCF/SMEAR'):
-            actions.append({'dict': self.input_file,
-                            'action': {"_set": {
-                                "FORCE_EVAL": {
-                                    "DFT": {
-                                        "SCF": {
-                                            "ADDED_MOS": 1000,
-                                            "SMEAR": {
-                                                "ELEC_TEMP": 300,
-                                                "METHOD": "FERMI_DIRAC"
-                                            }
-                                        }
-                                    }
+        if not ci.check("FORCE_EVAL/DFT/SCF/SMEAR"):
+            actions.append(
+                {
+                    "dict": self.input_file,
+                    "action": {
+                        "_set": {
+                            "FORCE_EVAL": {
+                                "DFT": {
+                                    "SCF": {"ADDED_MOS": 1000, "SMEAR": {"ELEC_TEMP": 300, "METHOD": "FERMI_DIRAC"}}
                                 }
-                            }}})
+                            }
+                        }
+                    },
+                }
+            )
 
         return actions
 
@@ -461,7 +443,7 @@ class DivergingScfErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, output_file="cp2k.out", input_file='cp2k.inp'):
+    def __init__(self, output_file="cp2k.out", input_file="cp2k.inp"):
         """
         Initializes the error handler from an output files.
 
@@ -472,64 +454,34 @@ class DivergingScfErrorHandler(ErrorHandler):
         self.input_file = input_file
 
     def check(self):
+        """
+        Check for diverging SCF.
+        """
         conv = get_conv(self.output_file)
         tmp = np.diff(conv[-10:])
-        if len(conv) > 10 and all([_ > 0 for _ in tmp]) and any([_ > 1 for _ in conv]):
+        if len(conv) > 10 and all(_ > 0 for _ in tmp) and any(_ > 1 for _ in conv):
             return True
         return False
 
     def correct(self):
+        """
+        Correct issue if possible.
+        """
         ci = Cp2kInput.from_file(self.input_file)
         actions = []
 
-        p = ci['force_eval']['dft']['qs'].get(
-            'EPS_DEFAULT',
-            Keyword('EPS_DEFAULT', 1e-10)
-        ).values[0]
+        p = ci["force_eval"]["dft"]["qs"].get("EPS_DEFAULT", Keyword("EPS_DEFAULT", 1e-10)).values[0]
         if p > 1e-16:
             actions.append(
-                {
-                    "dict": self.input_file,
-                    "action": {
-                        "_set":
-                            {
-                                'FORCE_EVAL': {
-                                    'DFT': {
-                                        'QS': {
-                                            'EPS_DEFAULT': 1e-16
-                                        }
-                                    }
-                                }
-                            }
-
-                    }
-                }
+                {"dict": self.input_file, "action": {"_set": {"FORCE_EVAL": {"DFT": {"QS": {"EPS_DEFAULT": 1e-16}}}}}}
             )
-        p = ci['force_eval']['dft']['qs'].get(
-            'EPS_PGF_ORB',
-            Keyword('EPS_PGF_ORB', np.sqrt(p))
-        ).values[0]
+        p = ci["force_eval"]["dft"]["qs"].get("EPS_PGF_ORB", Keyword("EPS_PGF_ORB", np.sqrt(p))).values[0]
         if p > 1e-12:
             actions.append(
-                {
-                    "dict": self.input_file,
-                    "action": {
-                        "_set":
-                            {
-                                'FORCE_EVAL': {
-                                    'DFT': {
-                                        'QS': {
-                                            'EPS_PGF_ORB': 1e-12
-                                        }
-                                    }
-                                }
-                            }
-
-                    }
-                }
+                {"dict": self.input_file, "action": {"_set": {"FORCE_EVAL": {"DFT": {"QS": {"EPS_PGF_ORB": 1e-12}}}}}}
             )
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
-        return {'errors': ['Diverging SCF'], 'actions': actions}
+        return {"errors": ["Diverging SCF"], "actions": actions}
 
 
 class FrozenJobErrorHandler(ErrorHandler):
@@ -579,6 +531,9 @@ class FrozenJobErrorHandler(ErrorHandler):
         self.restart = None
 
     def check(self):
+        """
+        Check for frozen jobs.
+        """
         st = os.stat(self.output_file)
         out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
         try:
@@ -592,99 +547,92 @@ class FrozenJobErrorHandler(ErrorHandler):
 
         t = tail(self.output_file, 2)
         if time.time() - st.st_mtime > self.timeout:
-            if t[0].split() == ['Step', 'Update', 'method', 'Time', 'Convergence', 'Total', 'energy', 'Change']:
+            if t[0].split() == ["Step", "Update", "method", "Time", "Convergence", "Total", "energy", "Change"]:
                 self.frozen_preconditioner = True
             return True
 
         return False
 
     def correct(self):
+        """
+        Correct issue if possible.
+        """
         ci = Cp2kInput.from_file(self.input_file)
         actions = []
         errors = []
 
         if self.frozen_preconditioner:
-            if ci.check('FORCE_EVAL/DFT/SCF/OT'):
-                p = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get('PRECONDITIONER', Keyword('PRECONDITIONER', 'FULL_ALL'))
+            if ci.check("FORCE_EVAL/DFT/SCF/OT"):
+                p = ci["FORCE_EVAL"]["DFT"]["SCF"]["OT"].get("PRECONDITIONER", Keyword("PRECONDITIONER", "FULL_ALL"))
 
-                if p == Keyword('PRECONDITIONER', 'FULL_SINGLE_INVERSE'):
-                    actions.append({'dict': self.input_file,
-                                    "action": {"_set": {
-                                        'FORCE_EVAL': {
-                                            'DFT': {
-                                                'SCF': {
-                                                    'OT': {
-                                                        'PRECONDITIONER': 'FULL_ALL'
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }}})
+                if p == Keyword("PRECONDITIONER", "FULL_SINGLE_INVERSE"):
+                    actions.append(
+                        {
+                            "dict": self.input_file,
+                            "action": {
+                                "_set": {"FORCE_EVAL": {"DFT": {"SCF": {"OT": {"PRECONDITIONER": "FULL_ALL"}}}}}
+                            },
+                        }
+                    )
 
                 else:
-                    p = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
-                        'PRECOND_SOLVER', Keyword('PRECOND_SOLVER', 'DEFAULT')
-                    )
-                    if p.values[0] == 'DEFAULT':
-                        actions.append({'dict': self.input_file,
-                                        "action": {"_set": {
-                                            'FORCE_EVAL': {
-                                                'DFT': {
-                                                    'SCF': {
-                                                        'OT': {
-                                                            'PRECOND_SOLVER': 'DIRECT'
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }}})
+                    p = ci["FORCE_EVAL"]["DFT"]["SCF"]["OT"].get("PRECOND_SOLVER", Keyword("PRECOND_SOLVER", "DEFAULT"))
+                    if p.values[0] == "DEFAULT":
+                        actions.append(
+                            {
+                                "dict": self.input_file,
+                                "action": {
+                                    "_set": {"FORCE_EVAL": {"DFT": {"SCF": {"OT": {"PRECOND_SOLVER": "DIRECT"}}}}}
+                                },
+                            }
+                        )
 
-            elif ci.check('FORCE_EVAL/DFT/SCF/DIAGONALIZATION/DAVIDSON'):
-                p = ci.by_path('FORCE_EVAL/DFT/SCF/DIAGONALIZATION/DAVIDSON').get(
-                    'PRECONDITIONER', Keyword('PRECONDITIONER', 'FULL_ALL')
+            elif ci.check("FORCE_EVAL/DFT/SCF/DIAGONALIZATION/DAVIDSON"):
+                p = ci.by_path("FORCE_EVAL/DFT/SCF/DIAGONALIZATION/DAVIDSON").get(
+                    "PRECONDITIONER", Keyword("PRECONDITIONER", "FULL_ALL")
                 )
 
-                if p == Keyword('PRECONDITIONER', 'FULL_SINGLE_INVERSE'):
-                    actions.append({'dict': self.input_file,
-                                    "action": {"_set": {
-                                        'FORCE_EVAL': {
-                                            'DFT': {
-                                                'SCF': {
-                                                    'DIAGONALIZATION': {
-                                                        'DAVIDSON': {
-                                                            'PRECONDITIONER': 'FULL_ALL'
-                                                        }
-                                                    }
-                                                }
-                                            }
+                if p == Keyword("PRECONDITIONER", "FULL_SINGLE_INVERSE"):
+                    actions.append(
+                        {
+                            "dict": self.input_file,
+                            "action": {
+                                "_set": {
+                                    "FORCE_EVAL": {
+                                        "DFT": {
+                                            "SCF": {"DIAGONALIZATION": {"DAVIDSON": {"PRECONDITIONER": "FULL_ALL"}}}
                                         }
-                                    }}})
+                                    }
+                                }
+                            },
+                        }
+                    )
 
                 else:
-                    p = ci.by_path('FORCE_EVAL/DFT/SCF/DIAGONALIZATION/DAVIDSON').get(
-                        'PRECOND_SOLVER', Keyword('PRECOND_SOLVER', 'DEFAULT')
+                    p = ci.by_path("FORCE_EVAL/DFT/SCF/DIAGONALIZATION/DAVIDSON").get(
+                        "PRECOND_SOLVER", Keyword("PRECOND_SOLVER", "DEFAULT")
                     )
-                    if p.values[0] == 'DEFAULT':
-                        actions.append({'dict': self.input_file,
-                                        "action": {"_set": {
-                                            'FORCE_EVAL': {
-                                                'DFT': {
-                                                    'SCF': {
-                                                        'DIAGONALIZATION': {
-                                                            'DAVIDSON': {
-                                                                'PRECOND_SOLVER': 'DIRECT'
-                                                            }
-                                                        }
-                                                    }
-                                                }
+                    if p.values[0] == "DEFAULT":
+                        actions.append(
+                            {
+                                "dict": self.input_file,
+                                "action": {
+                                    "_set": {
+                                        "FORCE_EVAL": {
+                                            "DFT": {
+                                                "SCF": {"DIAGONALIZATION": {"DAVIDSON": {"PRECOND_SOLVER": "DIRECT"}}}
                                             }
-                                        }}})
+                                        }
+                                    }
+                                },
+                            }
+                        )
 
             self.frozen_preconditioner = False
-            errors.append('Frozen preconditioner')
+            errors.append("Frozen preconditioner")
 
         else:
-            errors.append('Frozen job')
+            errors.append("Frozen job")
 
         restart(actions, self.output_file, self.input_file)
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
@@ -721,93 +669,69 @@ class AbortHandler(ErrorHandler):
         self.input_file = input_file
         self.output_file = output_file
         self.messages = {
-            'cholesky': r'(Cholesky decomposition failed. Matrix ill conditioned ?)',
-            'cholesky_scf': r'(Cholesky decompose failed: the matrix is not positive definite or)'
+            "cholesky": r"(Cholesky decomposition failed. Matrix ill conditioned ?)",
+            "cholesky_scf": r"(Cholesky decompose failed: the matrix is not positive definite or)",
         }
         self.responses = []
 
     def check(self):
-        matches = regrep(self.output_file, patterns=self.messages,
-                         reverse=True, terminate_on_match=True,
-                         postprocess=str)
+        """
+        Check for abort messages
+        """
+        matches = regrep(
+            self.output_file, patterns=self.messages, reverse=True, terminate_on_match=True, postprocess=str
+        )
         for m in matches:
             self.responses.append(m)
             return True
         return False
 
     def correct(self):
+        """
+        Correct issue if possible.
+        """
         ci = Cp2kInput.from_file(self.input_file)
         actions = []
 
-        if self.responses[-1] == 'cholesky':
-            n = self.responses.count('cholesky')
+        if self.responses[-1] == "cholesky":
+            n = self.responses.count("cholesky")
             if n == 1:
                 # Change preconditioner
-                p = ci['FORCE_EVAL']['DFT']['SCF']['OT'].get(
-                    'PRECONDITIONER', Keyword('PRECONDITIONER', 'FULL_ALL')
-                ).values[0]
+                p = (
+                    ci["FORCE_EVAL"]["DFT"]["SCF"]["OT"]
+                    .get("PRECONDITIONER", Keyword("PRECONDITIONER", "FULL_ALL"))
+                    .values[0]
+                )
 
-                if p == 'FULL_ALL':
+                if p == "FULL_ALL":
                     actions.append(
                         {
-                            'dict': self.input_file,
+                            "dict": self.input_file,
                             "action": {
                                 "_set": {
-                                    'FORCE_EVAL': {
-                                        'DFT': {
-                                            'SCF': {
-                                                'OT': {
-                                                    'PRECONDITIONER': 'FULL_SINGLE_INVERSE'
-                                                }
-                                            }
-                                        }
-                                    }
+                                    "FORCE_EVAL": {"DFT": {"SCF": {"OT": {"PRECONDITIONER": "FULL_SINGLE_INVERSE"}}}}
                                 }
-                            }
+                            },
                         }
                     )
-                elif p == 'FULL_SINGLE_INVERSE':
+                elif p == "FULL_SINGLE_INVERSE":
                     actions.append(
                         {
-                            'dict': self.input_file,
+                            "dict": self.input_file,
                             "action": {
-                                "_set": {
-                                    'FORCE_EVAL': {
-                                        'DFT': {
-                                            'SCF': {
-                                                'OT': {
-                                                    'PRECONDITIONER': 'FULL_ALL'
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                                "_set": {"FORCE_EVAL": {"DFT": {"SCF": {"OT": {"PRECONDITIONER": "FULL_ALL"}}}}}
+                            },
                         }
                     )
 
             if n == 2:
                 # preconditioner was fine, make sure eps_default is at least 1e-12
-                p = ci['force_eval']['dft']['qs'].get(
-                    'EPS_DEFAULT',
-                    Keyword('EPS_DEFAULT', 1e-12)
-                ).values[0]
+                p = ci["force_eval"]["dft"]["qs"].get("EPS_DEFAULT", Keyword("EPS_DEFAULT", 1e-12)).values[0]
                 if p > 1e-12:
-                    actions.append({
+                    actions.append(
+                        {
                             "dict": self.input_file,
-                            "action": {
-                                "_set":
-                                    {
-                                        'FORCE_EVAL': {
-                                            'DFT': {
-                                                'QS': {
-                                                    'EPS_DEFAULT': 1e-12
-                                                }
-                                            }
-                                        }
-                                    }
-
-                            }
+                            "action": {"_set": {"FORCE_EVAL": {"DFT": {"QS": {"EPS_DEFAULT": 1e-12}}}}},
                         }
                     )
                 else:
@@ -815,89 +739,63 @@ class AbortHandler(ErrorHandler):
 
             if n == 3:
                 # bump up overlap matrix resolution
-                eps_default = ci['force_eval']['dft']['qs'].get(
-                    'EPS_DEFAULT',
-                    Keyword('EPS_DEFAULT', 1e-12)
-                ).values[0]
-                p = ci['force_eval']['dft']['qs'].get(
-                    'EPS_PGF_ORB',
-                    Keyword('EPS_PGF_ORB', np.sqrt(eps_default))
-                ).values[0]
-                actions.append({
-                    "dict": self.input_file,
-                    "action": {
-                        "_set": {
-                                'FORCE_EVAL': {
-                                    'DFT': {
-                                        'QS': {
-                                            'EPS_PGF_ORB': 1e-10 if p > 1e-10 else p / 10
-                                        }
-                                    }
-                                }
-                            }
-
+                eps_default = ci["force_eval"]["dft"]["qs"].get("EPS_DEFAULT", Keyword("EPS_DEFAULT", 1e-12)).values[0]
+                p = (
+                    ci["force_eval"]["dft"]["qs"]
+                    .get("EPS_PGF_ORB", Keyword("EPS_PGF_ORB", np.sqrt(eps_default)))
+                    .values[0]
+                )
+                actions.append(
+                    {
+                        "dict": self.input_file,
+                        "action": {
+                            "_set": {"FORCE_EVAL": {"DFT": {"QS": {"EPS_PGF_ORB": 1e-10 if p > 1e-10 else p / 10}}}}
+                        },
                     }
-                }
                 )
 
             if n == 4:
                 # restart file could be problematic (gga restart for hybrids)
-                if ci['force_eval']['dft'].get('wfn_restart_file_name'):
+                if ci["force_eval"]["dft"].get("wfn_restart_file_name"):
                     actions.append(
                         {
-                            'dict': self.input_file,
-                            'action': {
-                                "_unset": {
-                                    'FORCE_EVAL': {
-                                        'DFT': 'WFN_RESTART_FILE_NAME'
-                                    }
-                                },
+                            "dict": self.input_file,
+                            "action": {
+                                "_unset": {"FORCE_EVAL": {"DFT": "WFN_RESTART_FILE_NAME"}},
                                 "_set": {
-                                    'FORCE_EVAL': {
-                                        'DFT': {
-                                            'XC': {
-                                                'HF': {
-                                                    'SCREENING': {
-                                                        'SCREEN_ON_INITIAL_P': False,
-                                                        'SCREEN_P_FORCES': False
+                                    "FORCE_EVAL": {
+                                        "DFT": {
+                                            "XC": {
+                                                "HF": {
+                                                    "SCREENING": {
+                                                        "SCREEN_ON_INITIAL_P": False,
+                                                        "SCREEN_P_FORCES": False,
                                                     },
                                                 }
                                             }
                                         }
                                     }
-                                }
-                            }
+                                },
+                            },
                         }
                     )
 
-        elif self.responses[-1] == 'cholesky_scf':
-            n = self.responses.count('cholesky_scf')
+        elif self.responses[-1] == "cholesky_scf":
+            n = self.responses.count("cholesky_scf")
             if n == 1:
-                p = ci['FORCE_EVAL']['DFT']['SCF'].get(
-                    'CHOLESKY', Keyword('CHOLESKY', 'RESTORE')
-                ).values[0]
+                p = ci["FORCE_EVAL"]["DFT"]["SCF"].get("CHOLESKY", Keyword("CHOLESKY", "RESTORE")).values[0]
 
-                if p == 'RESTORE':
+                if p == "RESTORE":
                     actions.append(
                         {
-                            'dict': self.input_file,
-                            "action": {
-                                "_set": {
-                                    'FORCE_EVAL': {
-                                        'DFT': {
-                                            'SCF': {
-                                                'CHOLESKY': 'INVERSE'
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            "dict": self.input_file,
+                            "action": {"_set": {"FORCE_EVAL": {"DFT": {"SCF": {"CHOLESKY": "INVERSE"}}}}},
                         }
                     )
 
         restart(actions, self.output_file, self.input_file)
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
-        return {'errors': [self.responses[-1]], 'actions': actions}
+        return {"errors": [self.responses[-1]], "actions": actions}
 
 
 class NumericalPrecisionHandler(ErrorHandler):
@@ -940,8 +838,15 @@ class NumericalPrecisionHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out", max_same=5,
-                pgf_orb_strict=1e-20, eps_default_strict=1e-12, eps_gvg_strict=1e-10):
+    def __init__(
+        self,
+        input_file="cp2k.inp",
+        output_file="cp2k.out",
+        max_same=5,
+        pgf_orb_strict=1e-20,
+        eps_default_strict=1e-12,
+        eps_gvg_strict=1e-10,
+    ):
         """
         Initialize the error handler.
 
@@ -970,177 +875,141 @@ class NumericalPrecisionHandler(ErrorHandler):
         self.eps_gvg_strict = eps_gvg_strict
 
     def check(self):
+        """
+        Check for stuck SCF convergence.
+        """
         conv = get_conv(self.output_file)
         counts = [sum(1 for i in g) for k, g in itertools.groupby(conv)]
-        if any([c > self.max_same for c in counts]):
+        if any(c > self.max_same for c in counts):
             return True
         return False
 
     def correct(self):
+        """
+        Correct issue if possible
+        """
         ci = Cp2kInput.from_file(self.input_file)
         actions = []
 
-        if ci.check('FORCE_EVAL/DFT/XC/HF'):  # Hybrid has special considerations
-            if ci.check('FORCE_EVAL/DFT/XC/HF/SCREENING'):
-                eps_schwarz = ci.by_path('FORCE_EVAL/DFT/XC/HF/SCREENING').get(
-                    'EPS_SCHWARZ', Keyword('EPS_SCHWARZ', 1e-10)).values[0]
+        if ci.check("FORCE_EVAL/DFT/XC/HF"):  # Hybrid has special considerations
+            if ci.check("FORCE_EVAL/DFT/XC/HF/SCREENING"):
+                eps_schwarz = (
+                    ci.by_path("FORCE_EVAL/DFT/XC/HF/SCREENING")
+                    .get("EPS_SCHWARZ", Keyword("EPS_SCHWARZ", 1e-10))
+                    .values[0]
+                )
                 if eps_schwarz > 1e-7:
-                    actions.append({'dict': self.input_file,
-                                    "action": {"_set": {
-                                        'FORCE_EVAL': {
-                                            'DFT': {
-                                                'XC': {
-                                                    'HF': {
-                                                        'SCREENING': {
-                                                            'EPS_SCHWARZ': 1e-7
+                    actions.append(
+                        {
+                            "dict": self.input_file,
+                            "action": {
+                                "_set": {"FORCE_EVAL": {"DFT": {"XC": {"HF": {"SCREENING": {"EPS_SCHWARZ": 1e-7}}}}}}
+                            },
+                        }
+                    )
+            for k, v in ci.by_path("FORCE_EVAL/SUBSYS").subsections.items():
+                if v.name.upper() == "KIND":
+                    el = v.get("ELEMENT").values or v.section_parameters
+                    el = el[0]
+                    bs = ci.by_path("FORCE_EVAL/SUBSYS")[k].get("BASIS_SET", None)
+                    if isinstance(bs, Sequence):
+                        for i in range(len(bs)):
+                            if "AUX_FIT" in [val.upper() for val in bs[i].values]:
+                                aux = None
+                                if el == "Li":  # special case of Li aux basis
+                                    aux = get_aux_basis({el: "cFIT4-SR"})
+                                elif not bs[i].values[1].startswith("cp"):
+                                    aux = get_aux_basis({el: None}, "cpFIT")
+                                    if not aux.get(el, "").startswith("cpFIT"):
+                                        aux = None
+                                if aux:
+                                    bs.keywords.pop(i)
+                                    actions.append(
+                                        {
+                                            "dict": self.input_file,
+                                            "action": {
+                                                "_set": {
+                                                    "FORCE_EVAL": {"SUBSYS": {k: {"BASIS_SET": "AUX_FIT " + aux[el]}}}
+                                                }
+                                            },
+                                        }
+                                    )
+                                    for _bs in bs:
+                                        actions.append(
+                                            {
+                                                "dict": self.input_file,
+                                                "action": {
+                                                    "_inc": {
+                                                        "FORCE_EVAL": {
+                                                            "SUBSYS": {k: {"BASIS_SET": " ".join(_bs.values)}}
                                                         }
                                                     }
-                                                }
+                                                },
                                             }
-                                        }
-                                    }}})
-            for k, v in ci.by_path('FORCE_EVAL/SUBSYS').subsections.items():
-                    if v.name.upper() == 'KIND':
-                        el = v.get('ELEMENT').values or v.section_parameters
-                        el = el[0]
-                        bs = ci.by_path('FORCE_EVAL/SUBSYS')[k].get('BASIS_SET', None)
-                        if isinstance(bs, Sequence):
-                            for i in range(len(bs)):
-                                if 'AUX_FIT' in [val.upper() for val in bs[i].values]:
-                                    aux = None
-                                    if el == 'Li':  # special case of Li aux basis
-                                        aux = get_aux_basis({el: 'cFIT4-SR'})
-                                    elif not bs[i].values[1].startswith('cp'):
-                                        aux = get_aux_basis({el: None}, 'cpFIT')
-                                        if not aux.get(el, '').startswith('cpFIT'):
-                                            aux = None
-                                    if aux:
-                                        bs.keywords.pop(i)
-                                        actions.append({'dict': self.input_file,
-                                                        "action": {"_set": {
-                                                            'FORCE_EVAL': {
-                                                                'SUBSYS': {
-                                                                    k: {
-                                                                        'BASIS_SET': 'AUX_FIT '+aux[el]
-                                                                    }
-                                                                }
-                                                            }
-                                                    }}})
-                                        for _bs in bs:
-                                            actions.append({
-                                                'dict': self.input_file,
-                                                'action': {
-                                                    "_inc": {
-                                                        'FORCE_EVAL': {
-                                                            'SUBSYS': {
-                                                                k: {
-                                                                    'BASIS_SET': ' '.join(_bs.values)
-                                                                }}}}}})
-                                        break
+                                        )
+                                    break
 
             m = regrep(
                 self.output_file,
-                patterns={
-                    'PGF': re.compile(r'WARNING in hfx_energy_potential.F:592 :: The Kohn Sham matrix is not')}
-                )
-            eps_default = ci.by_path('FORCE_EVAL/DFT/QS').get('EPS_DEFAULT', Keyword('EPS_DEFAULT', 1e-10)).values[0]
-            pgf = ci['force_eval']['dft']['qs'].get(
-                'EPS_PGF_ORB', Keyword('EPS_PGF_ORB', np.sqrt(eps_default))
-            ).values[0]
-            if m.get('PGF') and pgf > self.pgf_orb_strict:
+                patterns={"PGF": re.compile(r"WARNING in hfx_energy_potential.F:592 :: The Kohn Sham matrix is not")},
+            )
+            eps_default = ci.by_path("FORCE_EVAL/DFT/QS").get("EPS_DEFAULT", Keyword("EPS_DEFAULT", 1e-10)).values[0]
+            pgf = (
+                ci["force_eval"]["dft"]["qs"].get("EPS_PGF_ORB", Keyword("EPS_PGF_ORB", np.sqrt(eps_default))).values[0]
+            )
+            if m.get("PGF") and pgf > self.pgf_orb_strict:
                 actions.append(self.__set_pgf_orb())
-                    
+
         # If no hybrid modifications were performed
         if len(actions) == 0:
             # Overall precision
-            eps_default = ci.by_path('FORCE_EVAL/DFT/QS').get('EPS_DEFAULT', Keyword('', 1e-10)).values[0]
+            eps_default = ci.by_path("FORCE_EVAL/DFT/QS").get("EPS_DEFAULT", Keyword("", 1e-10)).values[0]
 
             # overlap matrix precision
-            pgf = ci['force_eval']['dft']['qs'].get(
-                'EPS_PGF_ORB', Keyword('', np.sqrt(eps_default))
-            ).values[0]
+            pgf = ci["force_eval"]["dft"]["qs"].get("EPS_PGF_ORB", Keyword("", np.sqrt(eps_default))).values[0]
 
             # realspace KS matrix precision
-            gvg = ci['force_eval']['dft']['qs'].get(
-                'EPS_GVG_RSPACE', Keyword('', np.sqrt(eps_default))
-            ).values[0]
+            gvg = ci["force_eval"]["dft"]["qs"].get("EPS_GVG_RSPACE", Keyword("", np.sqrt(eps_default))).values[0]
 
-            if ci.check('force_eval/dft/scf/ot'):
-                minimizer = ci['force_eval']['dft']['scf']['ot'].get_keyword('minimizer', Keyword('', 'CG')).values[0]
+            if ci.check("force_eval/dft/scf/ot"):
+                minimizer = ci["force_eval"]["dft"]["scf"]["ot"].get_keyword("minimizer", Keyword("", "CG")).values[0]
 
-                if minimizer.upper() == 'DIIS' or minimizer.upper() == 'BROYDEN':
-                    actions.append({
-                        'dict': self.input_file,
-                        "action": {
-                            "_set": {
-                                'FORCE_EVAL': {
-                                    'DFT': {
-                                        'SCF': {
-                                            'OT': {
-                                                'MINIMIZER': 'CG'
-                                            }
-                                        }
-                                    }
-                                }
-                            }}})
+                if minimizer.upper() == "DIIS" or minimizer.upper() == "BROYDEN":
+                    actions.append(
+                        {
+                            "dict": self.input_file,
+                            "action": {"_set": {"FORCE_EVAL": {"DFT": {"SCF": {"OT": {"MINIMIZER": "CG"}}}}}},
+                        }
+                    )
 
             if eps_default > self.eps_default_strict:
-                actions.append({
-                    'dict': self.input_file,
-                    "action": {
-                        "_set": {
-                            'FORCE_EVAL': {
-                                'DFT': {
-                                    'QS': {
-                                        'EPS_DEFAULT': self.eps_default_strict
-                                    }
-                                }
-                            }
-                        }}})
-            
+                actions.append(
+                    {
+                        "dict": self.input_file,
+                        "action": {"_set": {"FORCE_EVAL": {"DFT": {"QS": {"EPS_DEFAULT": self.eps_default_strict}}}}},
+                    }
+                )
+
             if pgf > self.pgf_orb_strict:
                 actions.append(self.__set_pgf_orb())
-            
+
             if gvg > self.eps_gvg_strict:
                 actions.append(
                     {
                         "dict": self.input_file,
-                        "action": {
-                            "_set":
-                                {
-                                    'FORCE_EVAL': {
-                                        'DFT': {
-                                            'QS': {
-                                                'EPS_GVG_RSPACE': self.eps_gvg_strict
-                                            }
-                                        }
-                                    }
-                                }
-
-                        }
+                        "action": {"_set": {"FORCE_EVAL": {"DFT": {"QS": {"EPS_GVG_RSPACE": self.eps_gvg_strict}}}}},
                     }
                 )
 
             if not actions:
-                if not ci.check('FORCE_EVAL/DFT/XC/XC_GRID') or \
-                        not ci.by_path('FORCE_EVAL/DFT/XC/XC_GRID').get('USE_FINER_GRID', False):
+                if not ci.check("FORCE_EVAL/DFT/XC/XC_GRID") or not ci.by_path("FORCE_EVAL/DFT/XC/XC_GRID").get(
+                    "USE_FINER_GRID", False
+                ):
                     # Try a more expensive XC grid
                     actions.append(
                         {
-                            'dict': self.input_file,
-                            "action": {
-                                "_set": {
-                                    'FORCE_EVAL': {
-                                        'DFT': {
-                                            'XC': {
-                                                'XC_GRID': {
-                                                    'USE_FINER_GRID': True
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            "dict": self.input_file,
+                            "action": {"_set": {"FORCE_EVAL": {"DFT": {"XC": {"XC_GRID": {"USE_FINER_GRID": True}}}}}},
                         }
                     )
 
@@ -1149,11 +1018,15 @@ class NumericalPrecisionHandler(ErrorHandler):
         return {"errors": ["Unsufficient precision"], "actions": actions}
 
     def __set_pgf_orb(self):
-        return {'dict': self.input_file,
-                "action": {
-                    "_set": {'FORCE_EVAL': {'DFT': {'QS': {'EPS_PGF_ORB': self.pgf_orb_strict}}}}}
-                }
-                
+        """
+        Helper function to set the PGF_ORB keyword
+        """
+        return {
+            "dict": self.input_file,
+            "action": {"_set": {"FORCE_EVAL": {"DFT": {"QS": {"EPS_PGF_ORB": self.pgf_orb_strict}}}}},
+        }
+
+
 class UnconvergedRelaxationErrorHandler(ErrorHandler):
 
     """
@@ -1170,8 +1043,12 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
     is_monitor = True
 
     def __init__(
-            self, input_file='cp2k.inp', output_file='cp2k.out', max_iter=20, max_total_iter=200,
-            optimizers=('BFGS', 'CG', 'BFGS', 'CG')
+        self,
+        input_file="cp2k.inp",
+        output_file="cp2k.out",
+        max_iter=20,
+        max_total_iter=200,
+        optimizers=("BFGS", "CG", "BFGS", "CG"),
     ):
         """
         Initialize the error handler.
@@ -1196,6 +1073,9 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
         self.optimizer_id = 0
 
     def check(self):
+        """
+        Check for unconverged geometry optimization
+        """
         o = Cp2kOutput(self.output_file)
         o.convergence()
         if o.data.get("geo_opt_not_converged"):
@@ -1203,13 +1083,14 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
+        """
+        Correct issue if possible.
+        """
         ci = Cp2kInput.from_file(self.input_file)
-        actions = list()
+        actions = []
 
-        max_iter = ci['motion']['geo_opt'].get('MAX_ITER', Keyword('', 200)).values[0]
-        optimizer = ci['motion']['geo_opt'].get(
-                    'OPTIMIZER', Keyword('OPTIMIZER', 'BFGS')
-            ).values[0].upper()
+        max_iter = ci["motion"]["geo_opt"].get("MAX_ITER", Keyword("", 200)).values[0]
+        optimizer = ci["motion"]["geo_opt"].get("OPTIMIZER", Keyword("OPTIMIZER", "BFGS")).values[0].upper()
 
         # If list of optimizers includes the starting condition, iterate past it
         if optimizer == self.optimizers[self.optimizer_id]:
@@ -1217,27 +1098,27 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
 
         if max_iter + self.max_iter > self.max_total_iter:
             return {"errors": ["Unsuccessful relaxation"], "actions": []}
-        elif self.optimizer_id >= len(self.optimizers):
+        if self.optimizer_id >= len(self.optimizers):
             return {"errors": ["Unsuccessful relaxation"], "actions": []}
 
         # set optimizer. Ensure CG is 2pnt. 3pnt not fully developed for relaxations
-        if ci.check('MOTION/GEO_OPT'):
-            actions.append({
-                'dict': self.input_file,
-                "action": {
-                    "_set": {
-                        'MOTION': {
-                            'GEO_OPT': {
-                                'OPTIMIZER': self.optimizers[self.optimizer_id],
-                                'MAX_ITER': max_iter + self.max_iter,
-                                'CG': {
-                                    'LINE_SEARCH': {
-                                        'TYPE': '2PNT'
-                                    }
+        if ci.check("MOTION/GEO_OPT"):
+            actions.append(
+                {
+                    "dict": self.input_file,
+                    "action": {
+                        "_set": {
+                            "MOTION": {
+                                "GEO_OPT": {
+                                    "OPTIMIZER": self.optimizers[self.optimizer_id],
+                                    "MAX_ITER": max_iter + self.max_iter,
+                                    "CG": {"LINE_SEARCH": {"TYPE": "2PNT"}},
                                 }
                             }
                         }
-                    }}})
+                    },
+                }
+            )
 
         self.optimizer_id += 1
         restart(actions, self.output_file, self.input_file)
@@ -1260,7 +1141,7 @@ class WalltimeHandler(ErrorHandler):
     raises_runtime_error = False
     is_terminating = False
 
-    def __init__(self, output_file='cp2k.out', enable_checkpointing=True):
+    def __init__(self, output_file="cp2k.out", enable_checkpointing=True):
         """
         Args:
             output_file (str): name of the cp2k output file
@@ -1275,11 +1156,11 @@ class WalltimeHandler(ErrorHandler):
         Check if internal CP2K walltime handler was tripped.
         """
         if regrep(
-                filename=self.output_file,
-                patterns={"walltime": r"(exceeded requested execution time)"},
-                reverse=True,
-                terminate_on_match=True,
-                postprocess=bool
+            filename=self.output_file,
+            patterns={"walltime": r"(exceeded requested execution time)"},
+            reverse=True,
+            terminate_on_match=True,
+            postprocess=bool,
         ).get("walltime"):
             return True
         return False
