@@ -309,7 +309,9 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                             "FORCE_EVAL": {
                                 "DFT": {
                                     "SCF": {
-                                        'STEPSIZE': 0.05,
+                                        'OT': {
+                                            'STEPSIZE': 0.05,
+                                        }
                                     }
                                 }
                             }
