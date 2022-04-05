@@ -242,7 +242,7 @@ class Cp2kJob(Job):
             restart=False,
             settings_override=job2_settings_override,
         )
-
+        print([job1, job2])
         return [job1, job2]
 
     @classmethod

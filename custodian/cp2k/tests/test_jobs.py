@@ -63,13 +63,11 @@ class HandlerTests(unittest.TestCase):
             os.remove(self.std_err)
 
     def test_double(self):
-        jobs = Cp2kJob.gga_static_to_hybrid(
-            cp2k_cmd=["echo"],
+        jobs = Cp2kJob.double_job(cp2k_cmd=['echo'],
             input_file=self.input_file_hybrid,
             output_file=self.output_file,
             stderr_file="std_err.tmp",
-            backup=False,
-        )
+            backup=False,)
         self.assertTrue(len(jobs) == 2)
 
 

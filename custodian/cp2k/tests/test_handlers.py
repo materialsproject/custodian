@@ -113,20 +113,17 @@ class HandlerTests(unittest.TestCase):
     def test_imprecision_handler(self):
 
         # Hybrid
-        h = NumericalPrecisionHandler(self.input_file_hybrid, output_file=self.output_file_imprecise)
+        h = NumericalPrecisionHandler(
+            self.input_file_hybrid,
+            output_file=self.output_file_imprecise,
+            max_same=3
+            )
         self.assertTrue(h.check())
         c = h.correct()
         self.assertTrue(c["errors"], ["Unsufficient precision"])
 
-        # Normal
-        h = NumericalPrecisionHandler(self.input_file, output_file=self.output_file_imprecise)
-        c = h.correct()
-        modder = Cp2kModder(filename=self.input_file)
-        modder.apply_actions(actions=c["actions"])
-        self.assertEqual(modder.ci["force_eval"]["dft"]["xc"]["xc_grid"].get("USE_FINER_GRID").values[0], True)
-
     def test_std_out(self):
-        h = StdErrHandler(output_file=self.output_file_hybrid, std_err=self.output_file_stderr)
+        h = StdErrHandler(std_err=self.output_file_stderr)
         self.assertTrue(h.check())
         h.correct()
 
