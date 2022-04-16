@@ -470,14 +470,10 @@ class VaspErrorHandler(ErrorHandler):
             # does not always resolve the issue. The best solution, aside from requesting fewer
             # resources, seems to be to just increase NCORE slightly. That's what I do here.
             nprocs = multiprocessing.cpu_count()
-            with open("OUTCAR", "r") as f:
-                for line in f:
-                    if "NELECT" in line:
-                        try:
-                            nelect = float(line.split("=")[-1].split("total")[0].strip())
-                            break
-                        except (IndexError, ValueError):
-                            nelect = 1  # dummy value
+            try:
+                nelect = Outcar("OUTCAR").nelect
+            except:
+                nelect = 1  # dummy value
             if (
                 nelect < nprocs
                 and vi["INCAR"].get("NCORE", 1) < nprocs
