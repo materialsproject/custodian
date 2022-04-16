@@ -5,7 +5,7 @@ import multiprocessing
 import pytest
 
 
-def mock_cpu_count(self, **kwargs):
+def mock_cpu_count(*args, **kwargs):
     # Instead of running multiprocessing.cpu_count(), we return a fixed
     # value during tests
     return 64
