@@ -82,7 +82,7 @@ class VaspErrorHandler(ErrorHandler):
         "rot_matrix": ["Found some non-integer element in rotation matrix", "SGRCON"],
         "brions": ["BRIONS problems: POTIM should be increased"],
         "pricel": ["internal error in subroutine PRICEL"],
-        "zpotrf": ["LAPACK: Routine ZPOTRF failed", "Routine ZPOTRFZTRTRI"],
+        "zpotrf": ["LAPACK: Routine ZPOTRF failed", "Routine ZPOTRF ZTRTRI"],
         "amin": ["One of the lattice vectors is very long (>50 A), but AMIN"],
         "zbrent": ["ZBRENT: fatal internal in", "ZBRENT: fatal error in bracketing"],
         "pssyevx": ["ERROR in subspace rotation PSSYEVX"],
