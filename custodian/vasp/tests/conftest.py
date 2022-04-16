@@ -1,3 +1,6 @@
+"""
+This module mocks functions needed for pytest.
+"""
 import multiprocessing
 import pytest
 
