@@ -6,6 +6,7 @@ by modifying the input files.
 
 import datetime
 import logging
+import multiprocessing
 import operator
 import os
 import re
@@ -457,7 +458,32 @@ class VaspErrorHandler(ErrorHandler):
         if "edddav" in self.errors:
             if vi["INCAR"].get("ICHARG", 0) < 10:
                 actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
-            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+
+            # This sometimes comes up with ALGO = Fast. We will switch the ALGO.
+            if vi["INCAR"].get("ALGO", "Normal").lower() != "all":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+
+            # This can sometimes be due to load-balancing issues for small systems.
+            # See bottom of https://www.vasp.at/wiki/index.php/NCORE. A.S.R. ran some
+            # tests and found: 1) Changing LPLANE and NSIM does not help. 2) The suggestion
+            # of NCORE = # cores is not robust for KNL (too high). 3) Setting NPAR = sqrt(# cores)
+            # does not always resolve the issue. The best solution, aside from requesting fewer
+            # resources, seems to be to just increase NCORE slightly. That's what I do here.
+            nprocs = multiprocessing.cpu_count()
+            with open("OUTCAR", "r") as f:
+                for line in f:
+                    if "NELECT" in line:
+                        try:
+                            nelect = float(line.split("=")[-1].split("total")[0].strip())
+                            break
+                        except (IndexError, ValueError):
+                            nelect = 1  # dummy value
+            if (
+                nelect < nprocs
+                and vi["INCAR"].get("NCORE", 1) < nprocs
+                and vi["INCAR"].get("NPAR", 1) < np.sqrt(nprocs)
+            ):
+                actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": vi["INCAR"].get("NCORE", 1) * 2}}})
 
         if "algo_tet" in self.errors:
             # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP
