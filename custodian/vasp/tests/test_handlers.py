@@ -290,16 +290,16 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(i["LREAL"], False)
 
     def test_edddav(self):
-        h = VaspErrorHandler("vasp.edddav")
-        self.assertEqual(h.check(), True)
-        self.assertEqual(h.correct()["errors"], ["edddav"])
-        self.assertFalse(os.path.exists("CHGCAR"))
-
         h = VaspErrorHandler("vasp.edddav2")
         self.assertEqual(h.check(), True)
         self.assertEqual(h.correct()["errors"], ["edddav"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["NCORE"], 2)
+
+        h = VaspErrorHandler("vasp.edddav")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["edddav"])
+        self.assertFalse(os.path.exists("CHGCAR"))
 
     def test_algo_tet(self):
         h = VaspErrorHandler("vasp.algo_tet")
