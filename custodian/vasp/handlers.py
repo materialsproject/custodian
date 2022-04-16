@@ -472,7 +472,7 @@ class VaspErrorHandler(ErrorHandler):
             nprocs = multiprocessing.cpu_count()
             try:
                 nelect = Outcar("OUTCAR").nelect
-            except:
+            except Exception:
                 nelect = 1  # dummy value
             if nelect < nprocs:
                 actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": vi["INCAR"].get("NCORE", 1) * 2}}})
