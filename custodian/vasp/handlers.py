@@ -281,7 +281,7 @@ class VaspErrorHandler(ErrorHandler):
         if "zpotrf" in self.errors:
             # Usually caused by short bond distances. If on the first step,
             # volume needs to be increased. Otherwise, it was due to a step
-            # being too big and POTIM should be decreased.  If a static run
+            # being too big and POTIM should be decreased. If a static run
             # try turning off symmetry.
             try:
                 oszicar = Oszicar("OSZICAR")
