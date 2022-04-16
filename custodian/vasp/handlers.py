@@ -474,11 +474,7 @@ class VaspErrorHandler(ErrorHandler):
                 nelect = Outcar("OUTCAR").nelect
             except:
                 nelect = 1  # dummy value
-            if (
-                nelect < nprocs
-                and vi["INCAR"].get("NCORE", 1) < nprocs
-                and vi["INCAR"].get("NPAR", 1) < np.sqrt(nprocs)
-            ):
+            if nelect < nprocs:
                 actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": vi["INCAR"].get("NCORE", 1) * 2}}})
 
         if "algo_tet" in self.errors:
