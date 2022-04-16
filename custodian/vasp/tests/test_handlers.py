@@ -295,6 +295,12 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.correct()["errors"], ["edddav"])
         self.assertFalse(os.path.exists("CHGCAR"))
 
+    def test_zpotrf(self):
+        h = VaspErrorHandler("vasp.ztrtri")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["zpotrf"])
+        self.assertFalse(os.path.exists("CHGCAR"))
+
     def test_algo_tet(self):
         h = VaspErrorHandler("vasp.algo_tet")
         self.assertEqual(h.check(), True)
@@ -855,7 +861,7 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ["zpotrf"])
         s2 = Structure.from_file("POSCAR")
-        self.assertAlmostEqual(s2.volume, s1.volume * 1.2 ** 3, 3)
+        self.assertAlmostEqual(s2.volume, s1.volume * 1.2**3, 3)
 
     def test_potim_correction(self):
         shutil.copy("OSZICAR.one_step", "OSZICAR")

@@ -82,7 +82,7 @@ class VaspErrorHandler(ErrorHandler):
         "rot_matrix": ["Found some non-integer element in rotation matrix", "SGRCON"],
         "brions": ["BRIONS problems: POTIM should be increased"],
         "pricel": ["internal error in subroutine PRICEL"],
-        "zpotrf": ["LAPACK: Routine ZPOTRF failed"],
+        "zpotrf": ["LAPACK: Routine ZPOTRF failed", "Routine ZPOTRFZTRTRI"],
         "amin": ["One of the lattice vectors is very long (>50 A), but AMIN"],
         "zbrent": ["ZBRENT: fatal internal in", "ZBRENT: fatal error in bracketing"],
         "pssyevx": ["ERROR in subspace rotation PSSYEVX"],
@@ -304,6 +304,9 @@ class VaspErrorHandler(ErrorHandler):
             if vi["INCAR"].get("ICHARG", 0) < 10:
                 actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
                 actions.append({"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}})
+
+            # A.S.R.: This can also happen if NCORE or NPAR is set to an unusually large value.
+            # We should add logic for this at some point.
 
         if self.errors.intersection(["subspacematrix"]):
             if self.error_count["subspacematrix"] == 0:
