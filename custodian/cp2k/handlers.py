@@ -309,14 +309,14 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                             "FORCE_EVAL": {
                                 "DFT": {
                                     "SCF": {
-                                        'OT': {
-                                            'STEPSIZE': 0.05,
+                                        "OT": {
+                                            "STEPSIZE": 0.05,
                                         }
                                     }
                                 }
                             }
                         }
-                    }
+                    },
                 }
             )
 
@@ -915,7 +915,7 @@ class NumericalPrecisionHandler(ErrorHandler):
                     el = el[0]
                     bs = ci.by_path("FORCE_EVAL/SUBSYS")[k].get("BASIS_SET", None)
                     if isinstance(bs, Sequence):
-                        for i in range(len(bs)):
+                        for i, _bs in enumerate(bs):
                             if "AUX_FIT" in [val.upper() for val in bs[i].values]:
                                 aux = None
                                 if el == "Li":  # special case of Li aux basis

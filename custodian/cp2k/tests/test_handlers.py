@@ -113,11 +113,7 @@ class HandlerTests(unittest.TestCase):
     def test_imprecision_handler(self):
 
         # Hybrid
-        h = NumericalPrecisionHandler(
-            self.input_file_hybrid,
-            output_file=self.output_file_imprecise,
-            max_same=3
-            )
+        h = NumericalPrecisionHandler(self.input_file_hybrid, output_file=self.output_file_imprecise, max_same=3)
         self.assertTrue(h.check())
         c = h.correct()
         self.assertTrue(c["errors"], ["Unsufficient precision"])

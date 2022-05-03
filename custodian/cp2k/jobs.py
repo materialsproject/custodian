@@ -120,7 +120,8 @@ class Cp2kJob(Job):
         # TODO: cp2k has bizarre in/out streams. Some errors that should go to std_err are not sent anywhere...
         cmd = list(self.cp2k_cmd)
         cmd.extend(["-i", self.input_file])
-        logger.info("Running {}".format(" ".join(cmd)))
+        cmdstring = " ".join(cmd)
+        logger.info(f"Running {cmdstring}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr
             return subprocess.Popen(cmd, stdout=f_std, stderr=f_err, shell=False)
@@ -242,7 +243,6 @@ class Cp2kJob(Job):
             restart=False,
             settings_override=job2_settings_override,
         )
-        print([job1, job2])
         return [job1, job2]
 
     @classmethod
