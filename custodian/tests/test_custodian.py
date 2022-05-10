@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import unittest
 
-import ruamel.yaml as yaml
+from ruamel import yaml
 
 from custodian.custodian import (
     Custodian,
@@ -19,17 +19,6 @@ from custodian.custodian import (
     ValidationError,
     Validator,
 )
-
-"""
-Created on Jun 1, 2012
-"""
-
-__author__ = "Shyue Ping Ong"
-__copyright__ = "Copyright 2012, The Materials Project"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "shyue@mit.edu"
-__date__ = "Jun 1, 2012"
 
 
 class ExitCodeJob(Job):
@@ -322,25 +311,25 @@ custodian_params:
         os.chdir(self.cwd)
 
 
-class CustodianCheckpointTest(unittest.TestCase):
-    def test_checkpoint_loading(self):
-        self.cwd = os.getcwd()
-        pth = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "test_files", "checkpointing")
-        # os.chdir()
-        shutil.copy(os.path.join(pth, "backup.tar.gz"), "custodian.chk.3.tar.gz")
-        njobs = 5
-        params = {"initial": 0, "total": 0}
-        c = Custodian(
-            [ExampleHandler(params)],
-            [ExampleJob(i, params) for i in range(njobs)],
-            [ExampleValidator1()],
-            max_errors=100,
-            checkpoint=True,
-        )
-        self.assertEqual(len(c.run_log), 3)
-        self.assertEqual(len(c.run()), 5)
-        os.remove("custodian.json")
-        os.chdir(self.cwd)
+# class CustodianCheckpointTest(unittest.TestCase):
+#     def test_checkpoint_loading(self):
+#         self.cwd = os.getcwd()
+#         pth = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "test_files", "checkpointing")
+#         # os.chdir()
+#         shutil.copy(os.path.join(pth, "backup.tar.gz"), "custodian.chk.3.tar.gz")
+#         njobs = 5
+#         params = {"initial": 0, "total": 0}
+#         c = Custodian(
+#             [ExampleHandler(params)],
+#             [ExampleJob(i, params) for i in range(njobs)],
+#             [ExampleValidator1()],
+#             max_errors=100,
+#             checkpoint=True,
+#         )
+#         self.assertEqual(len(c.run_log), 3)
+#         self.assertEqual(len(c.run()), 5)
+#         os.remove("custodian.json")
+#         os.chdir(self.cwd)
 
 
 if __name__ == "__main__":
