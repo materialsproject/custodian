@@ -325,8 +325,9 @@ custodian_params:
 class CustodianCheckpointTest(unittest.TestCase):
     def test_checkpoint_loading(self):
         self.cwd = os.getcwd()
-        os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "test_files", "checkpointing"))
-        shutil.copy("backup.tar.gz", "custodian.chk.3.tar.gz")
+        pth = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "test_files", "checkpointing")
+        # os.chdir()
+        shutil.copy(os.path.join(pth, "backup.tar.gz"), "custodian.chk.3.tar.gz")
         njobs = 5
         params = {"initial": 0, "total": 0}
         c = Custodian(
