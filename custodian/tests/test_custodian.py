@@ -323,15 +323,11 @@ custodian_params:
 
 
 class CustodianCheckpointTest(unittest.TestCase):
-    def setUp(self):
-        self.cwd = os.getcwd()
-        os.chdir(os.path.join(os.path.dirname(__file__), "..", "..", "test_files", "checkpointing"))
-        try:
-            shutil.copy(os.path.join("backup.tar.gz"), "custodian.chk.3.tar.gz")
-        except FileNotFoundError:
-            pass
 
     def test_checkpoint_loading(self):
+        self.cwd = os.getcwd()
+        os.chdir(os.path.join(os.path.dirname(__file__), "..", "..", "test_files", "checkpointing"))
+        shutil.copy(os.path.join("backup.tar.gz"), "custodian.chk.3.tar.gz")
         njobs = 5
         params = {"initial": 0, "total": 0}
         c = Custodian(
@@ -343,13 +339,8 @@ class CustodianCheckpointTest(unittest.TestCase):
         )
         self.assertEqual(len(c.run_log), 3)
         self.assertEqual(len(c.run()), 5)
-
-    def tearDown(self):
-        try:
-            os.remove("custodian.json")
-            os.chdir(self.cwd)
-        except FileNotFoundError:
-            pass
+        os.remove("custodian.json")
+        os.chdir(self.cwd)
 
 
 if __name__ == "__main__":
