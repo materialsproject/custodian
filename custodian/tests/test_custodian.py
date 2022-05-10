@@ -326,7 +326,10 @@ class CustodianCheckpointTest(unittest.TestCase):
     def setUp(self):
         self.cwd = os.getcwd()
         os.chdir(os.path.join(os.path.dirname(__file__), "..", "..", "test_files", "checkpointing"))
-        shutil.copy(os.path.join("backup.tar.gz"), "custodian.chk.3.tar.gz")
+        try:
+            shutil.copy(os.path.join("backup.tar.gz"), "custodian.chk.3.tar.gz")
+        except FileNotFoundError:
+            pass
 
     def test_checkpoint_loading(self):
         njobs = 5
