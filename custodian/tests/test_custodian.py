@@ -345,8 +345,11 @@ class CustodianCheckpointTest(unittest.TestCase):
         self.assertEqual(len(c.run()), 5)
 
     def tearDown(self):
-        os.remove("custodian.json")
-        os.chdir(self.cwd)
+        try:
+            os.remove("custodian.json")
+            os.chdir(self.cwd)
+        except FileNotFoundError:
+            pass
 
 
 if __name__ == "__main__":
