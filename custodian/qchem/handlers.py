@@ -113,7 +113,7 @@ class QChemErrorHandler(ErrorHandler):
             if str(self.qcinp.rem.get("geom_opt_max_cycles")) != str(self.geom_max_cycles):
                 self.qcinp.rem["geom_opt_max_cycles"] = self.geom_max_cycles
                 if str(self.qcinp.rem.get("geom_opt2")) == "3":
-                    if self.qcinp.geom_opt != None:
+                    if self.qcinp.geom_opt is not None:
                         self.qcinp.geom_opt["maxiter"] = self.geom_max_cycles
                     else:
                         raise RuntimeError("Must be a geom_opt section if geom_opt2 = 3!")
