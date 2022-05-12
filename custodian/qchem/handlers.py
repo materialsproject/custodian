@@ -165,7 +165,11 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
             else:
-                print("Use a different initial guess? Perhaps a different basis?")
+                # If the new optimizer failed the back transform on the first iteration,
+                # revert to the old optimizer.
+                self.qcinp.rem.pop("geom_opt2", None)
+                self.qcinp.geom_opt = None
+                actions.append("geom_opt2": "deleted")
 
         elif "premature_end_FileMan_error" in self.errors:
             if self.qcinp.rem.get("thresh", "10") != "14":
