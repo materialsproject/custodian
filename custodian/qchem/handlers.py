@@ -113,9 +113,9 @@ class QChemErrorHandler(ErrorHandler):
             if str(self.qcinp.rem.get("geom_opt_max_cycles")) != str(self.geom_max_cycles):
                 self.qcinp.rem["geom_opt_max_cycles"] = self.geom_max_cycles
                 if str(self.qcinp.rem.get("geom_opt2")) == "3":
-                    self.qcinp.geom_opt[  # pylint: disable(unsupported-assignment-operation)
+                    self.qcinp.geom_opt[  # pylint: disable=unsupported-assignment-operation
                         "maxiter"
-                    ] = self.geom_max_cycles  # pylint: disable(unsupported-assignment-operation)
+                    ] = self.geom_max_cycles
                 actions.append({"geom_max_cycles:": self.geom_max_cycles})
                 if len(self.outdata.get("energy_trajectory")) > 1:
                     self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
