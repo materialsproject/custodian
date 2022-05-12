@@ -1,0 +1,18 @@
+forrtl: severe (41): insufficient virtual memory
+Image              PC                Routine            Line        Source
+cp2k.psmp          0000000008E9DDFB  Unknown               Unknown  Unknown
+cp2k.psmp          000000000243357C  pw_grids_mp_pw_gr        1739  pw_grids.F
+cp2k.psmp          000000000242BE9F  pw_grids_mp_pw_gr         613  pw_grids.F
+cp2k.psmp          000000000242B5BC  pw_grids_mp_pw_gr         427  pw_grids.F
+cp2k.psmp          00000000019CC7A1  pw_env_methods_mp         979  pw_env_methods.F
+cp2k.psmp          00000000019C90F5  pw_env_methods_mp         308  pw_env_methods.F
+cp2k.psmp          000000000149828F  qs_environment_me         247  qs_environment_methods.F
+cp2k.psmp          00000000014967EF  qs_environment_me         155  qs_environment_methods.F
+cp2k.psmp          0000000000BBFA82  qs_environment_mp        1309  qs_environment.F
+cp2k.psmp          0000000000BC4280  qs_environment_mp         340  qs_environment.F
+cp2k.psmp          0000000000A71984  f77_interface_mp_         776  f77_interface.F
+cp2k.psmp          000000000044E3FC  cp2k_runs_mp_run_         271  cp2k_runs.F
+cp2k.psmp          0000000000445EB3  MAIN__                    281  cp2k.F
+cp2k.psmp          0000000000444B3E  Unknown               Unknown  Unknown
+libc-2.17.so       00002ABD9D3443D5  __libc_start_main     Unknown  Unknown
+cp2k.psmp          0000000000444A29  Unknown               Unknown  Unknown

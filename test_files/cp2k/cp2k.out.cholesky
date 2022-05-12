@@ -1,0 +1,35 @@
+*******************************************************************************
+ *   ___                                                                       *
+ *  /   \                                                                      *
+ * [ABORT]                                                                     *
+ *  \___/                             CPASSERT failed                          *
+ *    |                                                                        *
+ *  O/|                                                                        *
+ * /| |                                                                        *
+ * / \                                                  fm/cp_fm_cholesky.F:94 *
+ *******************************************************************************
+
+
+ ===== Routine Calling Stack =====
+
+           10 cp_fm_cholesky_decompose
+            9 make_full_inverse_cholesky
+            8 make_preconditioner
+            7 prepare_preconditioner
+            6 init_scf_loop
+            5 scf_env_do_scf
+            4 qs_energies
+            3 qs_forces
+            2 qs_mol_dyn_low
+            1 CP2K
+
+ *******************************************************************************
+ *   ___                                                                       *
+ *  /   \                                                                      *
+ * [ABORT]                                                                     *
+ *  \___/         Cholesky decomposition failed. Matrix ill conditioned ?      *
+ *    |                                                                        *
+ *  O/|                                                                        *
+ * /| |                                                                        *
+ * / \                                                 cp_dbcsr_cholesky.F:119 *
+ *******************************************************************************
