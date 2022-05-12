@@ -169,7 +169,7 @@ class QChemErrorHandler(ErrorHandler):
                 # revert to the old optimizer.
                 self.qcinp.rem.pop("geom_opt2", None)
                 self.qcinp.geom_opt = None
-                actions.append("geom_opt2": "deleted")
+                actions.append({"geom_opt2": "deleted"})
 
         elif "premature_end_FileMan_error" in self.errors:
             if self.qcinp.rem.get("thresh", "10") != "14":
