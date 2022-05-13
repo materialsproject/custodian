@@ -266,6 +266,11 @@ class QChemErrorHandler(ErrorHandler):
             else:
                 raise RuntimeError("Not sure how to fix ESPChgFit error if resp_charges is disabled!")
 
+        elif "mem_static_too_small" in self.errors:
+            # mem_static should never exceed 2000 MB according to the Q-Chem manual
+            self.qcinp.rem["mem_static"] = "2000"
+            actions.append({"mem_static": "2000"})
+
         elif "basis_not_supported" in self.errors:
             print("Specify a different basis set. At least one of the atoms is not supported.")
             return {"errors": self.errors, "actions": None}
