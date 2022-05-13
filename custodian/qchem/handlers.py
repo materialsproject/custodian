@@ -221,7 +221,7 @@ class QChemErrorHandler(ErrorHandler):
                         self.qcinp.rem["esp_charges"] = "false"
                         actions.append({"esp_charges": "false"})
             else:
-                print("Not sure how to fix NLebdevPts error if resp_charges is disabled!")
+                raise RuntimeError("Not sure how to fix NLebdevPts error if resp_charges is disabled!")
 
         elif "failed_to_transform_coords" in self.errors:
             # Check for symmetry flag in rem. If not False, set to False and rerun.
@@ -253,6 +253,18 @@ class QChemErrorHandler(ErrorHandler):
             self.qcinp.rem["run_nbo6"] = True
             actions.append({"nbo_external": "deleted"})
             actions.append({"run_nbo6": True})
+
+        elif "esp_chg_fit_error" in self.errors:
+            # this error should only be possible if resp_charges or esp_charges is set
+            if self.qcinp.rem.get("resp_charges") or self.qcinp.rem.get("esp_charges"):
+                if self.qcinp.rem.get("resp_charges"):
+                    self.qcinp.rem["resp_charges"] = "false"
+                    actions.append({"resp_charges": "false"})
+                if self.qcinp.rem.get("esp_charges"):
+                    self.qcinp.rem["esp_charges"] = "false"
+                    actions.append({"esp_charges": "false"})
+            else:
+                raise RuntimeError("Not sure how to fix ESPChgFit error if resp_charges is disabled!")
 
         elif "basis_not_supported" in self.errors:
             print("Specify a different basis set. At least one of the atoms is not supported.")
