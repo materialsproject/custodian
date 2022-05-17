@@ -295,6 +295,12 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.correct()["errors"], ["edddav"])
         self.assertFalse(os.path.exists("CHGCAR"))
 
+    def test_zpotrf(self):
+        h = VaspErrorHandler("vasp.ztrtri")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["zpotrf"])
+        self.assertFalse(os.path.exists("CHGCAR"))
+
     def test_algo_tet(self):
         h = VaspErrorHandler("vasp.algo_tet")
         self.assertEqual(h.check(), True)
