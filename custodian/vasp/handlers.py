@@ -447,7 +447,10 @@ class VaspErrorHandler(ErrorHandler):
                                 break
                             except (IndexError, ValueError):
                                 pass
-            actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": int(1.1 * nbands)}}})
+            new_nbands = int(1.1 * nbands)
+            if new_nbands == nbands:
+                new_nbands += 1
+            actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": new_nbands}}})
 
         if "pssyevx" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
