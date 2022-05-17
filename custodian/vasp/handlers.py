@@ -447,7 +447,7 @@ class VaspErrorHandler(ErrorHandler):
                                 break
                             except (IndexError, ValueError):
                                 pass
-            new_nbands = max(int(1.1 * nbands), nbands + 1)
+            new_nbands = max(int(1.1 * nbands), nbands + 1)  # This handles the case when nbands is too low (< 8).
             actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": new_nbands}}})
 
         if "pssyevx" in self.errors:
