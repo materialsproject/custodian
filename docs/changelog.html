@@ -59,81 +59,6 @@
 <li><p>PR #210 from &#64;nwinner. CP2K support.</p></li>
 </ul>
 </section>
-<section id="id1">
-<h2>v2022.5.17<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<ul>
-<li><dl>
-<dt>PR #220 from &#64;yury-lysogorskiy bugfix/too_few_bands</dt><dd><ul class="simple">
-<li><p>check if NBANDS actually increased, increment it by one if int(1.1 * nbands)==nbands to avoid infinite try-and-error loop</p></li>
-</ul>
-<p>Example: NBANDS=7 and  too_few_bands error encountered, then correction would be  int(1.1*nbands) = 7 again, so there is no update actually
-Solution:
-<code class="docutils literal notranslate"><span class="pre">`python</span>
-<span class="pre">new_nbands</span> <span class="pre">=</span> <span class="pre">int(1.1</span> <span class="pre">*</span> <span class="pre">nbands)</span>
-<span class="pre">if</span> <span class="pre">new_nbands</span> <span class="pre">==</span> <span class="pre">nbands:</span>
-<span class="pre">new_nbands</span> <span class="pre">+=</span> <span class="pre">1</span>
-<span class="pre">actions.append({&quot;dict&quot;:</span> <span class="pre">&quot;INCAR&quot;,</span> <span class="pre">&quot;action&quot;:</span> <span class="pre">{&quot;_set&quot;:</span> <span class="pre">{&quot;NBANDS&quot;:</span> <span class="pre">new_nbands}}})</span>
-<span class="pre">`</span></code></p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>PR #211 from &#64;arosen93 rosen-planewave</dt><dd><p>This PR includes a handler for the following error. The fix is to delete the WAVECAR.
-<code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">-----------------------------------------------------------------------------</span>
-<span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
-<span class="pre">|</span>&#160;&#160;&#160;&#160; <span class="pre">EEEEEEE</span>&#160; <span class="pre">RRRRRR</span>&#160;&#160; <span class="pre">RRRRRR</span>&#160;&#160; <span class="pre">OOOOOOO</span>&#160; <span class="pre">RRRRRR</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">###</span>&#160;&#160;&#160;&#160; <span class="pre">###</span>&#160;&#160;&#160;&#160; <span class="pre">###</span>&#160;&#160;&#160;&#160; <span class="pre">|</span>
-<span class="pre">|</span>&#160;&#160;&#160;&#160; <span class="pre">E</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">R</span>&#160;&#160;&#160;&#160; <span class="pre">R</span>&#160; <span class="pre">R</span>&#160;&#160;&#160;&#160; <span class="pre">R</span>&#160; <span class="pre">O</span>&#160;&#160;&#160;&#160; <span class="pre">O</span>&#160; <span class="pre">R</span>&#160;&#160;&#160;&#160; <span class="pre">R</span>&#160;&#160;&#160;&#160; <span class="pre">###</span>&#160;&#160;&#160;&#160; <span class="pre">###</span>&#160;&#160;&#160;&#160; <span class="pre">###</span>&#160;&#160;&#160;&#160; <span class="pre">|</span>
-<span class="pre">|</span>&#160;&#160;&#160;&#160; <span class="pre">E</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">R</span>&#160;&#160;&#160;&#160; <span class="pre">R</span>&#160; <span class="pre">R</span>&#160;&#160;&#160;&#160; <span class="pre">R</span>&#160; <span class="pre">O</span>&#160;&#160;&#160;&#160; <span class="pre">O</span>&#160; <span class="pre">R</span>&#160;&#160;&#160;&#160; <span class="pre">R</span>&#160;&#160;&#160;&#160; <span class="pre">###</span>&#160;&#160;&#160;&#160; <span class="pre">###</span>&#160;&#160;&#160;&#160; <span class="pre">###</span>&#160;&#160;&#160;&#160; <span class="pre">|</span>
-<span class="pre">|</span>&#160;&#160;&#160;&#160; <span class="pre">EEEEE</span>&#160;&#160;&#160; <span class="pre">RRRRRR</span>&#160;&#160; <span class="pre">RRRRRR</span>&#160;&#160; <span class="pre">O</span>&#160;&#160;&#160;&#160; <span class="pre">O</span>&#160; <span class="pre">RRRRRR</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">#</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">#</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">#</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
-<span class="pre">|</span>&#160;&#160;&#160;&#160; <span class="pre">E</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">R</span>&#160;&#160; <span class="pre">R</span>&#160;&#160;&#160; <span class="pre">R</span>&#160;&#160; <span class="pre">R</span>&#160;&#160;&#160; <span class="pre">O</span>&#160;&#160;&#160;&#160; <span class="pre">O</span>&#160; <span class="pre">R</span>&#160;&#160; <span class="pre">R</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
-<span class="pre">|</span>&#160;&#160;&#160;&#160; <span class="pre">E</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">R</span>&#160;&#160;&#160; <span class="pre">R</span>&#160;&#160; <span class="pre">R</span>&#160;&#160;&#160; <span class="pre">R</span>&#160;&#160; <span class="pre">O</span>&#160;&#160;&#160;&#160; <span class="pre">O</span>&#160; <span class="pre">R</span>&#160;&#160;&#160; <span class="pre">R</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">###</span>&#160;&#160;&#160;&#160; <span class="pre">###</span>&#160;&#160;&#160;&#160; <span class="pre">###</span>&#160;&#160;&#160;&#160; <span class="pre">|</span>
-<span class="pre">|</span>&#160;&#160;&#160;&#160; <span class="pre">EEEEEEE</span>&#160; <span class="pre">R</span>&#160;&#160;&#160;&#160; <span class="pre">R</span>&#160; <span class="pre">R</span>&#160;&#160;&#160;&#160; <span class="pre">R</span>&#160; <span class="pre">OOOOOOO</span>&#160; <span class="pre">R</span>&#160;&#160;&#160;&#160; <span class="pre">R</span>&#160;&#160;&#160;&#160; <span class="pre">###</span>&#160;&#160;&#160;&#160; <span class="pre">###</span>&#160;&#160;&#160;&#160; <span class="pre">###</span>&#160;&#160;&#160;&#160; <span class="pre">|</span>
-<span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
-<span class="pre">|</span>&#160;&#160;&#160;&#160; <span class="pre">ERROR:</span> <span class="pre">while</span> <span class="pre">reading</span> <span class="pre">plane</span> <span class="pre">wave</span> <span class="pre">coef.</span> <span class="pre">from</span> <span class="pre">WAVECAR</span> <span class="pre">13</span> <span class="pre">1</span> <span class="pre">129</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
-<span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
-<span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">----&gt;</span>&#160; <span class="pre">I</span> <span class="pre">REFUSE</span> <span class="pre">TO</span> <span class="pre">CONTINUE</span> <span class="pre">WITH</span> <span class="pre">THIS</span> <span class="pre">SICK</span> <span class="pre">JOB</span> <span class="pre">...</span> <span class="pre">BYE!!!</span> <span class="pre">&lt;----</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
-<span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
-<span class="pre">-----------------------------------------------------------------------------</span>
-<span class="pre">`</span></code></p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>PR #214 from &#64;arosen93 rosen-zhegv-again</dt><dd><p>This PR closes #192.
-Calculations on small systems with too many requested cores can cause a <cite>ZHEGV</cite> error. This is common on KNL nodes with elemental systems. In practice, the best solution is to just drop the number of cores, but that’s not trivial to do with Custodian. An easier solution is to increase <cite>NCORE</cite> so that the load-balancing is improved. That’s what I do in this PR.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>PR #215 from &#64;arosen93 rosen-ztrtri</dt><dd><p>VASP 6+ has new phrasing for the <cite>ZPOTRF</cite> error, which I’ve now included in Custodian. Closes #216.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>PR #210 from &#64;nwinner cp2k</dt><dd><p>This PR is to merge my personal custodian modules for running CP2K into the main custodian branch. This was originally a “personal” branch with lots of little commits. To keep version history clean, I can create a new branch for the PR.
-* CP2K support following the vasp module’s outline:
-* <strong>jobs.py</strong>: defines a standard cp2k job, including the ability to setup a job with modifications (used by atomate env_chk). Some constructor methods exist for defining double jobs (see below).
-* <strong>handlers.py</strong>: The meat of the PR, defines a number of handlers for detecting and correcting CP2K job errors. Fairly intricate, and very distinct from those used by vasp.
-* <strong>validators.py</strong>: Defines a base validator in case of new validators to be added. Also defines a standard validator that checks to see if a job has completed.
-* <strong>interpreter.py</strong>: similar to that in the vasp module including an overwrite of the _modify() helper function for performing in place modifications of input objects.
-* <strong>utils.py</strong>: useful utils mainly for the handlers.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>PR #1 from &#64;materialsproject master</dt><dd><p>Fixed bug in NonConvergingErrorHandler : check of the number of electronic steps for each ionic step was performed on the dictionary of results (Oszicar.ionic_steps) and not on the list of electronic steps.
-Added a possible fallback from ALGO = Fast to ALGO = Normal in NonConvergingErrorHandler.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>PR #209 from &#64;janosh bump-ci-actions</dt><dd><p><cite>checkout</cite> and <cite>setup-python</cite> to v3.</p>
-</dd>
-</dl>
-</li>
-</ul>
-</section>
 <section id="v2022-2-13">
 <h2>v2022.2.13<a class="headerlink" href="#v2022-2-13" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -342,7 +267,7 @@ deprecated).</p></li>
 <section id="v0-7-0">
 <h2>v0.7.0<a class="headerlink" href="#v0-7-0" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li><p><a href="#id2"><span class="problematic" id="id3">**</span></a>Backwards incompatible with v0.6.3. Refactoring to move commonly used
+<li><p><a href="#id1"><span class="problematic" id="id2">**</span></a>Backwards incompatible with v0.6.3. Refactoring to move commonly used
 Python utility functions to <a class="reference external" href="https://pypi.python.org/pypi/monty">Monty package</a>, which is now a depedency
 for custodian.</p></li>
 <li><p>Custodian now requires pymatgen &gt;= 2.9.0 for VASP, Qchem and Nwchem jobs
@@ -358,30 +283,30 @@ terminate gracefully once it finishes its current task. The handler to
 set the flag should not terminate the job.</p></li>
 </ol>
 </section>
-<section id="id4">
-<h2>0.6.3<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<section id="id3">
+<h2>0.6.3<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Added buffer time option in PBSWalltimeHandler.</p></li>
 <li><p>Improved Qchem jobs and handlers (Xiaohui Qu).</p></li>
 <li><p>Vastly improved API docs.</p></li>
 </ol>
 </section>
-<section id="id5">
-<h2>0.6.2<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<section id="id4">
+<h2>0.6.2<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Bug fix release to support sub dirs in run folder when using scratch.</p></li>
 <li><p>Improve handling of walltime in PBSWalltimeHander.</p></li>
 </ol>
 </section>
-<section id="id6">
-<h2>0.6.1<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<section id="id5">
+<h2>0.6.1<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Bug fix release to address minor issue with checkpointing.</p></li>
 <li><p>Checkpointing is now turned off by default.</p></li>
 </ol>
 </section>
-<section id="id7">
-<h2>0.6.0<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<section id="id6">
+<h2>0.6.0<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Checkpointing implemented for Custodian. Custodian can now checkpoint all
 files in the current working directory after every successful job. If the
@@ -391,8 +316,8 @@ checkpoint. Particularly useful for multi-job runs.</p></li>
 <li><p>Qchem error handlers and jobs.</p></li>
 </ol>
 </section>
-<section id="id8">
-<h2>0.5.0<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<section id="id7">
+<h2>0.5.0<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Added scratch_dir option to Custodian class as well as run_vasp and
 run_nwchem scripts. Many supercomputing clusters have a scratch space
@@ -401,36 +326,36 @@ to specify the jobs to be performed in the scratch. Especially useful for
 jobs which have significant file IO.</p></li>
 </ol>
 </section>
-<section id="id9">
-<h2>0.4.5<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<section id="id8">
+<h2>0.4.5<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Fix gzip of output.</p></li>
 </ol>
 </section>
-<section id="id10">
-<h2>0.4.3<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
+<section id="id9">
+<h2>0.4.3<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Added handling for ZBRENT error for VASP.</p></li>
 <li><p>Minor refactoring to consolidate backup and gzip directory methods.</p></li>
 </ol>
 </section>
-<section id="id11">
-<h2>0.4.2<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
+<section id="id10">
+<h2>0.4.2<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Rudimentary support for Nwchem error handling (by Shyue Ping Ong).</p></li>
 <li><p>Improved VASP error handling (by Steve Dacek and Will Richards).</p></li>
 </ol>
 </section>
-<section id="id12">
-<h2>0.4.1<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h2>
+<section id="id11">
+<h2>0.4.1<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Added hanlding of PRICEL error in VASP.</p></li>
 <li><p>Speed and robustness improvements.</p></li>
 <li><p>BRIONS error now handled by changing ISYM.</p></li>
 </ol>
 </section>
-<section id="id13">
-<h2>0.4.0<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
+<section id="id12">
+<h2>0.4.0<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Many VASP handlers are now consolidated into a single VaspErrorHandler.</p></li>
 <li><p>Many more fixes for VASP runs, including the “TOO FEW BANDS”,
@@ -441,8 +366,8 @@ per the VASP recommendation for DFT runs and tries to search for a
 gamma-only compiled version of VASP for gamma 1x1x1 runs.</p></li>
 </ol>
 </section>
-<section id="id14">
-<h2>0.3.5<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h2>
+<section id="id13">
+<h2>0.3.5<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Bug fix for incorrect shift error handler in VASP.</p></li>
 <li><p>More robust fix for unconverged VASP runs (switching from ALGO fast to
@@ -450,22 +375,22 @@ normal).</p></li>
 <li><p>Expanded documentation.</p></li>
 </ol>
 </section>
-<section id="id15">
-<h2>0.3.4<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h2>
+<section id="id14">
+<h2>0.3.4<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Added support for handlers that perform monitor a job as it is progressing
 and terminates it if necessary. Useful for correcting errors that come up
 by do not cause immediate job failures.</p></li>
 </ol>
 </section>
-<section id="id16">
-<h2>0.3.2<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h2>
+<section id="id15">
+<h2>0.3.2<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Important bug fix for VaspJob and converge_kpoints script.</p></li>
 </ol>
 </section>
-<section id="id17">
-<h2>0.3.0<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h2>
+<section id="id16">
+<h2>0.3.0<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Major update to custodian API. Custodian now perform more comprehensive
 logging in a file called custodian.json, which logs all jobs and
@@ -508,7 +433,6 @@ corrections performed.</p></li>
     <ul>
 <li><a class="reference internal" href="#">Change Log</a><ul>
 <li><a class="reference internal" href="#v2022-5-17">v2022.5.17</a></li>
-<li><a class="reference internal" href="#id1">v2022.5.17</a></li>
 <li><a class="reference internal" href="#v2022-2-13">v2022.2.13</a></li>
 <li><a class="reference internal" href="#v2022-1-17">v2022.1.17</a></li>
 <li><a class="reference internal" href="#v2021-12-2">v2021.12.2</a></li>
@@ -536,20 +460,20 @@ corrections performed.</p></li>
 <li><a class="reference internal" href="#v0-7-2">v0.7.2</a></li>
 <li><a class="reference internal" href="#v0-7-1">v0.7.1</a></li>
 <li><a class="reference internal" href="#v0-7-0">v0.7.0</a></li>
-<li><a class="reference internal" href="#id4">0.6.3</a></li>
-<li><a class="reference internal" href="#id5">0.6.2</a></li>
-<li><a class="reference internal" href="#id6">0.6.1</a></li>
-<li><a class="reference internal" href="#id7">0.6.0</a></li>
-<li><a class="reference internal" href="#id8">0.5.0</a></li>
-<li><a class="reference internal" href="#id9">0.4.5</a></li>
-<li><a class="reference internal" href="#id10">0.4.3</a></li>
-<li><a class="reference internal" href="#id11">0.4.2</a></li>
-<li><a class="reference internal" href="#id12">0.4.1</a></li>
-<li><a class="reference internal" href="#id13">0.4.0</a></li>
-<li><a class="reference internal" href="#id14">0.3.5</a></li>
-<li><a class="reference internal" href="#id15">0.3.4</a></li>
-<li><a class="reference internal" href="#id16">0.3.2</a></li>
-<li><a class="reference internal" href="#id17">0.3.0</a></li>
+<li><a class="reference internal" href="#id3">0.6.3</a></li>
+<li><a class="reference internal" href="#id4">0.6.2</a></li>
+<li><a class="reference internal" href="#id5">0.6.1</a></li>
+<li><a class="reference internal" href="#id6">0.6.0</a></li>
+<li><a class="reference internal" href="#id7">0.5.0</a></li>
+<li><a class="reference internal" href="#id8">0.4.5</a></li>
+<li><a class="reference internal" href="#id9">0.4.3</a></li>
+<li><a class="reference internal" href="#id10">0.4.2</a></li>
+<li><a class="reference internal" href="#id11">0.4.1</a></li>
+<li><a class="reference internal" href="#id12">0.4.0</a></li>
+<li><a class="reference internal" href="#id13">0.3.5</a></li>
+<li><a class="reference internal" href="#id14">0.3.4</a></li>
+<li><a class="reference internal" href="#id15">0.3.2</a></li>
+<li><a class="reference internal" href="#id16">0.3.0</a></li>
 <li><a class="reference internal" href="#version-0-2-6">Version 0.2.6</a></li>
 <li><a class="reference internal" href="#version-0-2-5">Version 0.2.5</a></li>
 <li><a class="reference internal" href="#version-0-2-4">Version 0.2.4</a></li>
