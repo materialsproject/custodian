@@ -2,7 +2,6 @@
 Created on Jun 1, 2012
 """
 
-
 __author__ = "Shyue Ping Ong, Stephen Dacek"
 __copyright__ = "Copyright 2012, The Materials Project"
 __version__ = "0.1"
@@ -488,6 +487,19 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.check(), True)
         self.assertEqual(h.correct()["errors"], ["nbands_not_sufficient"])
 
+    def test_too_few_bands_round_error(self):
+        # originally there are  NBANDS= 7
+        # correction should increase it
+        shutil.copy("INCAR.too_few_bands_round_error", "INCAR")
+        h = VaspErrorHandler("vasp.too_few_bands_round_error")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d['errors'], ["too_few_bands"])
+        self.assertEqual(
+            d["actions"],
+            [{'dict': 'INCAR', 'action': {'_set': {'NBANDS': 8}}}]
+        )
+
     def tearDown(self):
         os.chdir(test_dir)
         shutil.move("INCAR.orig", "INCAR")
@@ -855,7 +867,7 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ["zpotrf"])
         s2 = Structure.from_file("POSCAR")
-        self.assertAlmostEqual(s2.volume, s1.volume * 1.2**3, 3)
+        self.assertAlmostEqual(s2.volume, s1.volume * 1.2 ** 3, 3)
 
     def test_potim_correction(self):
         shutil.copy("OSZICAR.one_step", "OSZICAR")
@@ -1110,7 +1122,6 @@ class DriftErrorHandlerTest(unittest.TestCase):
         os.chdir("drift")
 
     def test_check(self):
-
         shutil.copy("INCAR", "INCAR.orig")
 
         h = DriftErrorHandler(max_drift=0.05, to_average=11)
@@ -1137,7 +1148,6 @@ class DriftErrorHandlerTest(unittest.TestCase):
         shutil.move("INCAR.orig", "INCAR")
 
     def test_correct(self):
-
         shutil.copy("INCAR", "INCAR.orig")
 
         h = DriftErrorHandler(max_drift=0.0001, enaug_multiply=2)
