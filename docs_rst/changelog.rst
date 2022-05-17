@@ -1,6 +1,64 @@
 Change Log
 ==========
 
+v2022.5.17
+----------
+* PR #220 from @yury-lysogorskiy. Fix for NBANDS when NBANDS is very small. 
+* PR #211 from @arosen93. Handler for error in reading plane wave coeff. 
+* PR #214 from @arosen93. Handler for `ZHEGV` error by reducing number of cores. 
+* PR #215 from @arosen93. Fix for new `ZPOTRF` error phrasing.
+* PR #210 from @nwinner. CP2K support.
+
+v2022.5.17
+----------
+* PR #220 from @yury-lysogorskiy bugfix/too_few_bands
+    * check if NBANDS actually increased, increment it by one if int(1.1 * nbands)==nbands to avoid infinite try-and-error loop
+    Example: NBANDS=7 and  too_few_bands error encountered, then correction would be  int(1.1*nbands) = 7 again, so there is no update actually
+    Solution:
+    ```python
+    new_nbands = int(1.1 * nbands)
+    if new_nbands == nbands:
+    new_nbands += 1
+    actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": new_nbands}}})
+    ```
+* PR #211 from @arosen93 rosen-planewave
+    This PR includes a handler for the following error. The fix is to delete the WAVECAR.
+    ```
+    -----------------------------------------------------------------------------
+    |                                                                             |
+    |     EEEEEEE  RRRRRR   RRRRRR   OOOOOOO  RRRRRR      ###     ###     ###     |
+    |     E        R     R  R     R  O     O  R     R     ###     ###     ###     |
+    |     E        R     R  R     R  O     O  R     R     ###     ###     ###     |
+    |     EEEEE    RRRRRR   RRRRRR   O     O  RRRRRR       #       #       #      |
+    |     E        R   R    R   R    O     O  R   R                               |
+    |     E        R    R   R    R   O     O  R    R      ###     ###     ###     |
+    |     EEEEEEE  R     R  R     R  OOOOOOO  R     R     ###     ###     ###     |
+    |                                                                             |
+    |     ERROR: while reading plane wave coef. from WAVECAR 13 1 129             |
+    |                                                                             |
+    |       ---->  I REFUSE TO CONTINUE WITH THIS SICK JOB ... BYE!!! <----       |
+    |                                                                             |
+    -----------------------------------------------------------------------------
+    ```
+* PR #214 from @arosen93 rosen-zhegv-again
+    This PR closes #192.
+    Calculations on small systems with too many requested cores can cause a `ZHEGV` error. This is common on KNL nodes with elemental systems. In practice, the best solution is to just drop the number of cores, but that's not trivial to do with Custodian. An easier solution is to increase `NCORE` so that the load-balancing is improved. That's what I do in this PR.
+* PR #215 from @arosen93 rosen-ztrtri
+    VASP 6+ has new phrasing for the `ZPOTRF` error, which I've now included in Custodian. Closes #216.
+* PR #210 from @nwinner cp2k
+    This PR is to merge my personal custodian modules for running CP2K into the main custodian branch. This was originally a "personal" branch with lots of little commits. To keep version history clean, I can create a new branch for the PR.
+    * CP2K support following the vasp module's outline:
+    * **jobs.py**: defines a standard cp2k job, including the ability to setup a job with modifications (used by atomate env_chk). Some constructor methods exist for defining double jobs (see below).
+    * **handlers.py**: The meat of the PR, defines a number of handlers for detecting and correcting CP2K job errors. Fairly intricate, and very distinct from those used by vasp.
+    * **validators.py**: Defines a base validator in case of new validators to be added. Also defines a standard validator that checks to see if a job has completed.
+    * **interpreter.py**: similar to that in the vasp module including an overwrite of the _modify() helper function for performing in place modifications of input objects.
+    * **utils.py**: useful utils mainly for the handlers.
+* PR #1 from @materialsproject master
+    Fixed bug in NonConvergingErrorHandler : check of the number of electronic steps for each ionic step was performed on the dictionary of results (Oszicar.ionic_steps) and not on the list of electronic steps.
+    Added a possible fallback from ALGO = Fast to ALGO = Normal in NonConvergingErrorHandler.
+* PR #209 from @janosh bump-ci-actions
+    `checkout` and `setup-python` to v3.
+
 v2022.2.13
 ----------
 * Support for new Lobster versions (@naik-aakash)

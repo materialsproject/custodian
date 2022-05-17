@@ -8,11 +8,13 @@ import glob
 import json
 import os
 import re
+import subprocess
 
 import requests
 from invoke import task
 from monty.os import cd
 
+from custodian import __version__ as CURRENT_VER
 NEW_VER = datetime.datetime.today().strftime("%Y.%-m.%-d")
 
 
@@ -105,6 +107,49 @@ def set_ver(ctx):
             lines.append(re.sub(r"version=([^,]+),", f'version="{NEW_VER}",', l.rstrip()))
     with open("setup.py", "wt") as f:
         f.write("\n".join(lines) + "\n")
+
+
+@task
+def update_changelog(ctx, version=datetime.datetime.now().strftime("%Y.%-m.%-d"), sim=False):
+    """
+    Create a preliminary change log using the git logs.
+
+    :param ctx:
+    """
+    output = subprocess.check_output(["git", "log", "--pretty=format:%s", f"v{CURRENT_VER}..HEAD"])
+    lines = []
+    misc = []
+    for l in output.decode("utf-8").strip().split("\n"):
+        m = re.match(r"Merge pull request \#(\d+) from (.*)", l)
+        if m:
+            pr_number = m.group(1)
+            contrib, pr_name = m.group(2).split("/", 1)
+            response = requests.get(f"https://api.github.com/repos/materialsproject/custodian/pulls/{pr_number}")
+            lines.append(f"* PR #{pr_number} from @{contrib} {pr_name}")
+            if "body" in response.json():
+                for ll in response.json()["body"].split("\n"):
+                    ll = ll.strip()
+                    if ll in ["", "## Summary"]:
+                        continue
+                    elif ll.startswith("## Checklist") or ll.startswith("## TODO"):
+                        break
+                    lines.append(f"    {ll}")
+        misc.append(l)
+    with open("CHANGES.rst") as f:
+        contents = f.read()
+    l = "=========="
+    toks = contents.split(l)
+    head = f"\n\nv{version}\n" + "-" * (len(version) + 1) + "\n"
+    toks.insert(-1, head + "\n".join(lines))
+    if not sim:
+        with open("docs_rst/changelog.rst", "w") as f:
+            f.write(toks[0] + l + "".join(toks[1:]))
+        ctx.run("open docs_rst/changelog.rst")
+    else:
+        print(toks[0] + l + "".join(toks[1:]))
+    print("The following commit messages were not included...")
+    print("\n".join(misc))
+
 
 
 @task
