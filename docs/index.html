@@ -63,8 +63,8 @@ random errors. For example, there may be a script that takes several days to
 run on a server, with a 1% chance of some IO error causing the job to fail.
 Using custodian, one can develop a mechanism to gracefully recover from the
 error, and restart the job with modified parameters if necessary.</p>
-<p>The current version of Custodian also comes with two sub-packages for error
-handling for Vienna Ab Initio Simulation Package (VASP), NwChem and QChem
+<p>The current version of Custodian also comes with several sub-packages for error
+handling for Vienna Ab Initio Simulation Package (VASP), NwChem, QChem, FEFF, Lobster and CP2K
 calculations.</p>
 <a class="reference external image-reference" href="https://github.com/materialsproject/custodian/workflows/Testing/badge.svg"><img alt="https://github.com/materialsproject/custodian/workflows/Testing/badge.svg" src="https://github.com/materialsproject/custodian/workflows/Testing/badge.svg" /></a>
 <a class="reference external image-reference" href="https://github.com/materialsproject/custodian/workflows/Linting/badge.svg"><img alt="https://github.com/materialsproject/custodian/workflows/Linting/badge.svg" src="https://github.com/materialsproject/custodian/workflows/Linting/badge.svg" /></a>
@@ -242,11 +242,6 @@ insufficient KPOINTS to use ISMEAR = -5.</p>
 <p>Using custodian, you can even setup potentially indefinite jobs,
 e.g. kpoints convergence jobs with a target energy convergence. Please see the
 converge_kpoints script in the scripts for an example.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">New in version 0.4.3: </span>A new package for dealing with NwChem calculations has been added.
-NwChem is an open-source code for performing computational chemistry
-calculations.</p>
-</div>
 </section>
 </section>
 <section id="cstdn-a-yaml-spec-controlled-job">
