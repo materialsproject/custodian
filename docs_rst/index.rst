@@ -62,14 +62,14 @@ or to install the package in developmental mode::
 Requirements
 ============
 
-Custodian requires Python 3.5+. There are no other required dependencies.
+Custodian requires Python 3.8+. There are no other required dependencies.
 
 Optional dependencies
 ---------------------
 
 Optional libraries that are required if you need certain features:
 
-1. Python Materials Genomics (`pymatgen`_) 2019.8.23+: To use the plugin for
+1. Python Materials Genomics (`pymatgen`_) 2022.1+: To use the plugin for
    VASP, NwChem and Qchem. Please install using::
 
     pip install pymatgen
