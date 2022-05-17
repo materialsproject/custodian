@@ -864,7 +864,7 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ["zpotrf"])
         s2 = Structure.from_file("POSCAR")
-        self.assertAlmostEqual(s2.volume, s1.volume * 1.2 ** 3, 3)
+        self.assertAlmostEqual(s2.volume, s1.volume * 1.2**3, 3)
 
     def test_potim_correction(self):
         shutil.copy("OSZICAR.one_step", "OSZICAR")
