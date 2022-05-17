@@ -82,28 +82,30 @@ class QChemErrorHandler(ErrorHandler):
         self.qcinp = QCInput.from_file(self.input_file)
 
         if "SCF_failed_to_converge" in self.errors:
-            # Check number of SCF cycles. If not set or less than scf_max_cycles,
-            # increase to that value and rerun. If already set, check if
-            # scf_algorithm is unset or set to DIIS, in which case set to GDM.
-            # Otherwise, tell user to call SCF error handler and do nothing.
             if str(self.qcinp.rem.get("max_scf_cycles")) != str(self.scf_max_cycles):
                 self.qcinp.rem["max_scf_cycles"] = self.scf_max_cycles
                 actions.append({"max_scf_cycles": self.scf_max_cycles})
             elif self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
-            elif self.qcinp.rem.get("s2thresh", "14") != "16":
+            elif self.qcinp.rem.get("s2thresh", "14") != "16" and "linear_dependence" in self.warnings:
                 self.qcinp.rem["s2thresh"] = "16"
                 actions.append({"s2thresh": "16"})
+            elif (
+                self.qcinp.rem.get("scf_guess_always", "none").lower() != "true"
+                and len(self.outdata.get("energy_trajectory", [])) > 0
+            ):
+                self.qcinp.rem["scf_guess_always"] = True
+                actions.append({"scf_guess_always": True})
             elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
+                self.qcinp.rem["scf_algorithm"] = "rca_diis"
+                actions.append({"scf_algorithm": "rca_diis"})
+            elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "rca_diis":
                 self.qcinp.rem["scf_algorithm"] = "diis_gdm"
                 actions.append({"scf_algorithm": "diis_gdm"})
             elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis_gdm":
                 self.qcinp.rem["scf_algorithm"] = "gdm"
                 actions.append({"scf_algorithm": "gdm"})
-            elif self.qcinp.rem.get("scf_guess_always", "none").lower() != "true":
-                self.qcinp.rem["scf_guess_always"] = True
-                actions.append({"scf_guess_always": True})
             else:
                 print("No remaining SCF error handlers!")
 
