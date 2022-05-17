@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.vasp.handlers &#8212; custodian 2022.1.17 documentation</title>
+    <title>custodian.vasp.handlers &#8212; custodian 2022.5.17 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/flasky.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2022.1.17 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2022.5.17 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.vasp.handlers</a></li> 
       </ul>
@@ -56,6 +56,7 @@
 
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
 <span class="kn">import</span> <span class="nn">operator</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
@@ -132,7 +133,7 @@
         <span class="s2">&quot;rot_matrix&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Found some non-integer element in rotation matrix&quot;</span><span class="p">,</span> <span class="s2">&quot;SGRCON&quot;</span><span class="p">],</span>
         <span class="s2">&quot;brions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;BRIONS problems: POTIM should be increased&quot;</span><span class="p">],</span>
         <span class="s2">&quot;pricel&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;internal error in subroutine PRICEL&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;zpotrf&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;LAPACK: Routine ZPOTRF failed&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;zpotrf&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;LAPACK: Routine ZPOTRF failed&quot;</span><span class="p">,</span> <span class="s2">&quot;Routine ZPOTRF ZTRTRI&quot;</span><span class="p">],</span>
         <span class="s2">&quot;amin&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;One of the lattice vectors is very long (&gt;50 A), but AMIN&quot;</span><span class="p">],</span>
         <span class="s2">&quot;zbrent&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ZBRENT: fatal internal in&quot;</span><span class="p">,</span> <span class="s2">&quot;ZBRENT: fatal error in bracketing&quot;</span><span class="p">],</span>
         <span class="s2">&quot;pssyevx&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ERROR in subspace rotation PSSYEVX&quot;</span><span class="p">],</span>
@@ -152,6 +153,7 @@
         <span class="s2">&quot;bravais&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Inconsistent Bravais lattice&quot;</span><span class="p">],</span>
         <span class="s2">&quot;nbands_not_sufficient&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;number of bands is not sufficient&quot;</span><span class="p">],</span>
         <span class="s2">&quot;hnform&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;HNFORM: k-point generating&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;coef&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;while reading plane&quot;</span><span class="p">],</span>
     <span class="p">}</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -331,7 +333,7 @@
         <span class="k">if</span> <span class="s2">&quot;zpotrf&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="c1"># Usually caused by short bond distances. If on the first step,</span>
             <span class="c1"># volume needs to be increased. Otherwise, it was due to a step</span>
-            <span class="c1"># being too big and POTIM should be decreased.  If a static run</span>
+            <span class="c1"># being too big and POTIM should be decreased. If a static run</span>
             <span class="c1"># try turning off symmetry.</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">oszicar</span> <span class="o">=</span> <span class="n">Oszicar</span><span class="p">(</span><span class="s2">&quot;OSZICAR&quot;</span><span class="p">)</span>
@@ -354,6 +356,9 @@
             <span class="k">if</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ICHARG&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_delete&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;actual&quot;</span><span class="p">}}})</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;WAVECAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_delete&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;actual&quot;</span><span class="p">}}})</span>
+
+            <span class="c1"># A.S.R.: This can also happen if NCORE or NPAR is set to an unusually large value.</span>
+            <span class="c1"># We should add logic for this at some point.</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">intersection</span><span class="p">([</span><span class="s2">&quot;subspacematrix&quot;</span><span class="p">]):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span><span class="p">[</span><span class="s2">&quot;subspacematrix&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -406,6 +411,9 @@
 
         <span class="k">if</span> <span class="s2">&quot;pricel&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;SYMPREC&quot;</span><span class="p">:</span> <span class="mf">1e-8</span><span class="p">,</span> <span class="s2">&quot;ISYM&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}})</span>
+
+        <span class="k">if</span> <span class="s2">&quot;coef&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;WAVECAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_delete&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;actual&quot;</span><span class="p">}}})</span>
 
         <span class="k">if</span> <span class="s2">&quot;brions&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
 
@@ -489,7 +497,8 @@
                                 <span class="k">break</span>
                             <span class="k">except</span> <span class="p">(</span><span class="ne">IndexError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
                                 <span class="k">pass</span>
-            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;NBANDS&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1.1</span> <span class="o">*</span> <span class="n">nbands</span><span class="p">)}}})</span>
+            <span class="n">new_nbands</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mf">1.1</span> <span class="o">*</span> <span class="n">nbands</span><span class="p">),</span> <span class="n">nbands</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># This handles the case when nbands is too low (&lt; 8).</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;NBANDS&quot;</span><span class="p">:</span> <span class="n">new_nbands</span><span class="p">}}})</span>
 
         <span class="k">if</span> <span class="s2">&quot;pssyevx&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;Normal&quot;</span><span class="p">}}})</span>
@@ -507,7 +516,24 @@
         <span class="k">if</span> <span class="s2">&quot;edddav&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ICHARG&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
                 <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_file_delete&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;actual&quot;</span><span class="p">}}})</span>
-            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;All&quot;</span><span class="p">}}})</span>
+
+            <span class="c1"># This sometimes comes up with ALGO = Fast. We will switch the ALGO.</span>
+            <span class="k">if</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ALGO&quot;</span><span class="p">,</span> <span class="s2">&quot;Normal&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ALGO&quot;</span><span class="p">:</span> <span class="s2">&quot;All&quot;</span><span class="p">}}})</span>
+
+            <span class="c1"># This can sometimes be due to load-balancing issues for small systems.</span>
+            <span class="c1"># See bottom of https://www.vasp.at/wiki/index.php/NCORE. A.S.R. ran some</span>
+            <span class="c1"># tests and found: 1) Changing LPLANE and NSIM does not help. 2) The suggestion</span>
+            <span class="c1"># of NCORE = # cores is not robust for KNL (too high). 3) Setting NPAR = sqrt(# cores)</span>
+            <span class="c1"># does not always resolve the issue. The best solution, aside from requesting fewer</span>
+            <span class="c1"># resources, seems to be to just increase NCORE slightly. That&#39;s what I do here.</span>
+            <span class="n">nprocs</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">nelect</span> <span class="o">=</span> <span class="n">Outcar</span><span class="p">(</span><span class="s2">&quot;OUTCAR&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">nelect</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">nelect</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># dummy value</span>
+            <span class="k">if</span> <span class="n">nelect</span> <span class="o">&lt;</span> <span class="n">nprocs</span><span class="p">:</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;NCORE&quot;</span><span class="p">:</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;INCAR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NCORE&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">}}})</span>
 
         <span class="k">if</span> <span class="s2">&quot;algo_tet&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="c1"># ALGO=All/Damped / IALGO=5X often fails with ISMEAR &lt; 0. There are two options VASP</span>

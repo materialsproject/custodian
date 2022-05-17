@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.vasp.jobs &#8212; custodian 2022.1.17 documentation</title>
+    <title>custodian.vasp.jobs &#8212; custodian 2022.5.17 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/flasky.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2022.1.17 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2022.5.17 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.vasp.jobs</a></li> 
       </ul>
@@ -357,6 +357,11 @@
 <span class="sd">            half_kpts_first_relax (bool): Whether to halve the kpoint grid</span>
 <span class="sd">                for the first relaxation. Speeds up difficult convergence</span>
 <span class="sd">                considerably. Defaults to False.</span>
+<span class="sd">            auto_continue (bool): Whether to automatically continue a run</span>
+<span class="sd">                if a STOPCAR is present. This is very useful if using the</span>
+<span class="sd">                wall-time handler which will write a read-only STOPCAR to</span>
+<span class="sd">                prevent VASP from deleting it once it finishes. Defaults to</span>
+<span class="sd">                False.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            List of two jobs corresponding to an AFLOW style run.</span>
@@ -711,7 +716,11 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Ensure all vasp jobs are killed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vasp_cmd</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Custodian terminating all VASP jobs&quot;</span><span class="p">)</span>
+        <span class="n">cmds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vasp_cmd</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span><span class="p">:</span>
+            <span class="n">cmds</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cmds</span><span class="p">:</span>
             <span class="k">if</span> <span class="s2">&quot;vasp&quot;</span> <span class="ow">in</span> <span class="n">k</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;killall </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -719,7 +728,7 @@
                     <span class="k">pass</span></div></div>
 
 
-<div class="viewcode-block" id="VaspNEBJob"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspNEBJob">[docs]</a><span class="k">class</span> <span class="nc">VaspNEBJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
+<div class="viewcode-block" id="VaspNEBJob"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspNEBJob">[docs]</a><span class="k">class</span> <span class="nc">VaspNEBJob</span><span class="p">(</span><span class="n">VaspJob</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A NEB vasp job, especially for CI-NEB running at PBS clusters.</span>
 <span class="sd">    The class is added for the purpose of handling a different folder</span>
