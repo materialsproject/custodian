@@ -109,7 +109,7 @@ class QChemErrorHandlerTest(TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["SCF_failed_to_converge"])
-        self.assertEqual(d["actions"], [{"max_scf_cycles": 200}])
+        self.assertEqual(d["actions"], [{"max_scf_cycles": 100}])
         self._check_equivalent_inputs("crowd_gradient.qin.0", "crowd_gradient.qin.1")
 
         h = QChemErrorHandler(input_file="crowd_gradient.qin.1", output_file="crowd_gradient.qout.1")

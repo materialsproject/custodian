@@ -37,7 +37,7 @@ class QChemErrorHandler(ErrorHandler):
         self,
         input_file="mol.qin",
         output_file="mol.qout",
-        scf_max_cycles=200,
+        scf_max_cycles=100,
         geom_max_cycles=200,
     ):
         """
