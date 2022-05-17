@@ -105,11 +105,11 @@ class VaspErrorHandler(ErrorHandler):
     }
 
     def __init__(
-            self,
-            output_filename="vasp.out",
-            natoms_large_cell=None,
-            errors_subset_to_catch=None,
-            vtst_fixes=False,
+        self,
+        output_filename="vasp.out",
+        natoms_large_cell=None,
+        errors_subset_to_catch=None,
+        vtst_fixes=False,
     ):
         """
         Initializes the handler with the output file to check.
@@ -1217,7 +1217,7 @@ class LargeSigmaHandler(ErrorHandler):
 
 @deprecated(
     message="This handler is no longer supported and its use is no "
-            "longer recommended. It will be removed in v2020.x."
+    "longer recommended. It will be removed in v2020.x."
 )
 class MaxForceErrorHandler(ErrorHandler):
     """
@@ -1417,7 +1417,7 @@ class NonConvergingErrorHandler(ErrorHandler):
             oszicar = Oszicar(self.output_filename)
             esteps = oszicar.electronic_steps
             if len(esteps) > self.nionic_steps:
-                return all(len(e) == nelm for e in esteps[-(self.nionic_steps + 1): -1])
+                return all(len(e) == nelm for e in esteps[-(self.nionic_steps + 1) : -1])
         except Exception:
             pass
         return False
