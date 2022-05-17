@@ -103,6 +103,7 @@ class VaspErrorHandler(ErrorHandler):
         "bravais": ["Inconsistent Bravais lattice"],
         "nbands_not_sufficient": ["number of bands is not sufficient"],
         "hnform": ["HNFORM: k-point generating"],
+        "coef": ["while reading plane"],
     }
 
     def __init__(
@@ -360,6 +361,9 @@ class VaspErrorHandler(ErrorHandler):
 
         if "pricel" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}})
+
+        if "coef" in self.errors:
+            actions.append({"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}})
 
         if "brions" in self.errors:
 

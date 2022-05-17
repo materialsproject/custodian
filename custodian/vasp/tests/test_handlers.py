@@ -259,6 +259,17 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.check(), True)
         self.assertEqual(h.correct()["errors"], ["rot_matrix"])
 
+    def test_coef(self):
+        h = VaspErrorHandler("vasp6.coef")
+        h.check()
+        d = h.correct()
+        self.assertEqual(
+            d["actions"],
+            [
+                {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}},
+            ],
+        )
+
     def test_to_from_dict(self):
         h = VaspErrorHandler("random_name")
         h2 = VaspErrorHandler.from_dict(h.as_dict())
