@@ -82,7 +82,7 @@ class QChemErrorHandler(ErrorHandler):
         self.qcinp = QCInput.from_file(self.input_file)
 
         if "SCF_failed_to_converge" in self.errors:
-            # Given defaults, the first handlers will typically be skipped
+            # Given defaults, the first handlers will typically be skipped.
             if self.qcinp.rem.get("s2thresh", "14") != "16":
                 self.qcinp.rem["s2thresh"] = "16"
                 actions.append({"s2thresh": "16"})
@@ -136,7 +136,7 @@ class QChemErrorHandler(ErrorHandler):
                 print("No remaining SCF error handlers!")
 
         elif "out_of_opt_cycles" in self.errors:
-            # Given defaults, the first two handlers will typically be skipped
+            # Given defaults, the first two handlers will typically be skipped.
             if self.qcinp.rem.get("s2thresh", "14") != "16":
                 self.qcinp.rem["s2thresh"] = "16"
                 actions.append({"s2thresh": "16"})
@@ -181,7 +181,7 @@ class QChemErrorHandler(ErrorHandler):
                     actions.append({"scf_algorithm": "diis_gdm"})
 
         elif "unable_to_determine_lamda" in self.errors:
-            # Given defaults, the first two handlers will typically be skipped
+            # Given defaults, the first two handlers will typically be skipped.
             if self.qcinp.rem.get("s2thresh", "14") != "16":
                 self.qcinp.rem["s2thresh"] = "16"
                 actions.append({"s2thresh": "16"})
@@ -198,7 +198,7 @@ class QChemErrorHandler(ErrorHandler):
                 print("Use a different initial guess? Perhaps a different basis?")
 
         elif "back_transform_error" in self.errors:
-            # Given defaults, the first two handlers will typically be skipped
+            # Given defaults, the first two handlers will typically be skipped.
             if self.qcinp.rem.get("s2thresh", "14") != "16":
                 self.qcinp.rem["s2thresh"] = "16"
                 actions.append({"s2thresh": "16"})
@@ -219,7 +219,7 @@ class QChemErrorHandler(ErrorHandler):
                 actions.append({"geom_opt2": "deleted"})
 
         elif "premature_end_FileMan_error" in self.errors:
-            # Given defaults, the first two handlers will typically be skipped
+            # Given defaults, the first two handlers will typically be skipped.
             if self.qcinp.rem.get("s2thresh", "14") != "16":
                 self.qcinp.rem["s2thresh"] = "16"
                 actions.append({"s2thresh": "16"})
