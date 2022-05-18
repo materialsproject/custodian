@@ -49,7 +49,14 @@ class QChemErrorHandlerTest(TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["unable_to_determine_lamda"])
-        self.assertEqual(d["actions"], [{"molecule": "molecule_from_last_geometry"}])
+        self.assertEqual(
+            d["actions"],
+            [
+                {"s2thresh": "16"},
+                {"molecule": "molecule_from_last_geometry"},
+                {"scf_algorithm": "diis_gdm"},
+            ],
+        )
         self._check_equivalent_inputs("unable_to_determine_lamda.qin.0", "unable_to_determine_lamda.qin.1")
 
     def test_linear_dependent_basis_and_FileMan(self):
@@ -71,7 +78,7 @@ class QChemErrorHandlerTest(TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ["premature_end_FileMan_error"])
         self.assertEqual(d["warnings"]["linear_dependence"], True)
-        self.assertEqual(d["actions"], [{"thresh": "14"}])
+        self.assertEqual(d["actions"], [{"scf_guess_always": "true"}])
 
     def test_failed_to_transform(self):
         for ii in range(2):
@@ -88,7 +95,9 @@ class QChemErrorHandlerTest(TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["failed_to_transform_coords"])
-        self.assertEqual(d["actions"], [{"sym_ignore": "true"}, {"symmetry": "false"}])
+        self.assertEqual(
+            d["actions"], [{"thresh": "14"}, {"s2thresh": "16"}, {"sym_ignore": "true"}, {"symmetry": "false"}]
+        )
         self._check_equivalent_inputs("qunino_vinyl.qin.0", "qunino_vinyl.qin.1")
 
         h = QChemErrorHandler(input_file="qunino_vinyl.qin.1", output_file="qunino_vinyl.qout.1")
@@ -109,14 +118,8 @@ class QChemErrorHandlerTest(TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["SCF_failed_to_converge"])
-        self.assertEqual(d["actions"], [{"max_scf_cycles": 100}])
+        self.assertEqual(d["actions"], [{"max_scf_cycles": 100}, {"thresh": "14"}, {"s2thresh": "16"}])
         self._check_equivalent_inputs("crowd_gradient.qin.0", "crowd_gradient.qin.1")
-
-        h = QChemErrorHandler(input_file="crowd_gradient.qin.1", output_file="crowd_gradient.qout.1")
-        h.check()
-        d = h.correct()
-        self.assertEqual(d["errors"], ["SCF_failed_to_converge"])
-        self.assertEqual(d["actions"], [{"thresh": "14"}])
 
     def test_out_of_opt_cycles(self):
         shutil.copyfile(
@@ -159,7 +162,7 @@ class QChemErrorHandlerTest(TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["out_of_opt_cycles"])
-        self.assertEqual(d["actions"], [{"molecule": "molecule_from_last_geometry"}])
+        self.assertEqual(d["actions"], [{"s2thresh": "16"}, {"molecule": "molecule_from_last_geometry"}])
         self._check_equivalent_inputs("mol.qin.opt_0", "mol.qin")
         self.assertEqual(h.opt_error_history[0], "more_bonds")
         shutil.copyfile(
@@ -294,6 +297,7 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(
             d["actions"],
             [
+                {"s2thresh": "16"},
                 {"molecule": "molecule_from_last_geometry"},
                 {"geom_opt_hessian": "deleted"},
             ],

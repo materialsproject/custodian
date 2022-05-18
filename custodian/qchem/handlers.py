@@ -82,16 +82,21 @@ class QChemErrorHandler(ErrorHandler):
         self.qcinp = QCInput.from_file(self.input_file)
 
         if "SCF_failed_to_converge" in self.errors:
-            # Given defaults, the first three handlers will typically be skipped
-            if str(self.qcinp.rem.get("max_scf_cycles")) != str(self.scf_max_cycles):
-                self.qcinp.rem["max_scf_cycles"] = self.scf_max_cycles
-                actions.append({"max_scf_cycles": self.scf_max_cycles})
-            elif self.qcinp.rem.get("thresh", "10") != "14":
-                self.qcinp.rem["thresh"] = "14"
-                actions.append({"thresh": "14"})
-            elif self.qcinp.rem.get("s2thresh", "14") != "16" and "linear_dependence" in self.warnings:
-                self.qcinp.rem["s2thresh"] = "16"
-                actions.append({"s2thresh": "16"})
+            # Given defaults, the first handler will typically be skipped
+            if (
+                int(self.qcinp.rem.get("max_scf_cycles", 50)) < self.scf_max_cycles
+                or self.qcinp.rem.get("thresh", "10") != "14"
+                or self.qcinp.rem.get("s2thresh", "14") != "16"
+            ):
+                if int(self.qcinp.rem.get("max_scf_cycles", 50)) < self.scf_max_cycles:
+                    self.qcinp.rem["max_scf_cycles"] = self.scf_max_cycles
+                    actions.append({"max_scf_cycles": self.scf_max_cycles})
+                if self.qcinp.rem.get("thresh", "10") != "14":
+                    self.qcinp.rem["thresh"] = "14"
+                    actions.append({"thresh": "14"})
+                if self.qcinp.rem.get("s2thresh", "14") != "16":
+                    self.qcinp.rem["s2thresh"] = "16"
+                    actions.append({"s2thresh": "16"})
             # First "real" handler - force a new SCF guess at each step, for geometry optimizations.
             # This can avoid DIIS getting stuck at what was previously an SCF stationary point but
             # which is no longer a stable solution or is no longer the best solution.
@@ -105,18 +110,25 @@ class QChemErrorHandler(ErrorHandler):
             # Next, switch to DIIS_GDM and return to default SCF guess behavior. Note that GDM is
             # better at not getting stuck like DIIS, and sometimes forcing a guess can actually hurt
             # convergence, so we don't want to start with it on here.
-            elif (
-                self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis"
-                and self.qcinp.rem.get("scf_guess_always", "none").lower() == "true"
-            ):
-                self.qcinp.rem["scf_guess_always"] = "false"
-                actions.append({"scf_guess_always": "false"})
+            elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
                 self.qcinp.rem["scf_algorithm"] = "diis_gdm"
                 actions.append({"scf_algorithm": "diis_gdm"})
-            # TO BE REPLACED BY GDM-DIIS???
+                if self.qcinp.rem.get("scf_guess_always", "none").lower() == "true":
+                    self.qcinp.rem["scf_guess_always"] = "false"
+                    actions.append({"scf_guess_always": "false"})
+            # Next, switch to my custom GDM_DIIS recipe. While unintuitive, this is effective for
+            # instances in which GDM gets close but then fails to totally converge, because DIIS can
+            # sometimes finish the job when GDM gets stuck.
             elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis_gdm":
-                self.qcinp.rem["scf_algorithm"] = "gdm"
-                actions.append({"scf_algorithm": "gdm"})
+                self.qcinp.rem.pop("scf_algorithm", None)
+                self.qcinp.rem["gen_scfman_hybrid_algo"] = "true"
+                self.qcinp.rem["gen_scfman_algo_1"] = "gdm"
+                self.qcinp.rem["gen_scfman_conv_1"] = "5"
+                self.qcinp.rem["gen_scfman_iter_1"] = "50"
+                self.qcinp.rem["gen_scfman_algo_2"] = "diis"
+                self.qcinp.rem["gen_scfman_conv_2"] = "8"
+                self.qcinp.rem["gen_scfman_iter_2"] = "50"
+                actions.append({"scf_algorithm": "custom_gdm_diis"})
             # Finally, try forcing the initial guess again as a last resort.
             elif self.qcinp.rem.get("scf_guess_always", "none").lower() != "true":
                 self.qcinp.rem["scf_guess_always"] = "true"
@@ -125,11 +137,18 @@ class QChemErrorHandler(ErrorHandler):
                 print("No remaining SCF error handlers!")
 
         elif "out_of_opt_cycles" in self.errors:
-            # Check number of opt cycles. If less than geom_max_cycles, increase
-            # to that value, set last geom as new starting geom and rerun.
-            if str(self.qcinp.rem.get("geom_opt_max_cycles")) != str(self.geom_max_cycles):
+            # Given defaults, the first two handlers will typically be skipped
+            if self.qcinp.rem.get("s2thresh", "14") != "16":
+                self.qcinp.rem["s2thresh"] = "16"
+                actions.append({"s2thresh": "16"})
+            if self.qcinp.rem.get("thresh", "10") != "14":
+                self.qcinp.rem["thresh"] = "14"
+                actions.append({"thresh": "14"})
+            # Check number of opt cycles. If less than geom_max_cycles, increase to that value
+            # set last geom as new starting geom, make sure using DIIS_GDM for SCF and rerun.
+            elif int(self.qcinp.rem.get("geom_opt_max_cycles", 50)) < self.geom_max_cycles:
                 self.qcinp.rem["geom_opt_max_cycles"] = self.geom_max_cycles
-                if str(self.qcinp.rem.get("geom_opt2")) == "3":
+                if str(self.qcinp.rem.get("geom_opt2", "none")) == "3":
                     self.qcinp.geom_opt[  # pylint: disable=unsupported-assignment-operation
                         "maxiter"
                     ] = self.geom_max_cycles
@@ -137,23 +156,19 @@ class QChemErrorHandler(ErrorHandler):
                 if len(self.outdata.get("energy_trajectory")) > 1:
                     self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                     actions.append({"molecule": "molecule_from_last_geometry"})
-            elif self.qcinp.rem.get("thresh", "10") != "14":
-                self.qcinp.rem["thresh"] = "14"
-                actions.append({"thresh": "14"})
-            # Will need to try and implement this dmax handler below when I have more time
-            # to fix the tests and the general handling procedure.
-            # elif self.qcinp.rem.get("geom_opt_dmax",300) != 150:
-            #     self.qcinp.rem["geom_opt_dmax"] = 150
-            #     actions.append({"geom_opt_dmax": "150"})
-            # If already at geom_max_cycles, thresh 14, and dmax 150, often can just get convergence
-            # by restarting from the geometry of the last cycle. But we'll also save any structural
-            # changes that happened along the way.
+                if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
+                    self.qcinp.rem["scf_algorithm"] = "diis_gdm"
+                    actions.append({"scf_algorithm": "diis_gdm"})
+
+            # Often can just get convergence by restarting from the geometry of the last cycle.
+            # But we'll also save any structural changes that happened along the way.
             else:
                 self.opt_error_history += [self.outdata["structure_change"]]
                 if len(self.opt_error_history) > 1:
                     if self.opt_error_history[-1] == "no_change":
                         # If no structural changes occurred in two consecutive optimizations,
-                        # and we still haven't converged, then just exit.
+                        # and we still haven't converged, then just exit. This is most common
+                        # if two species are flying away from eachother.
                         return {
                             "errors": self.errors,
                             "actions": None,
@@ -161,36 +176,54 @@ class QChemErrorHandler(ErrorHandler):
                         }
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
+                # Using DIIS_GDM for SCF convergence also often helps.
+                if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
+                    self.qcinp.rem["scf_algorithm"] = "diis_gdm"
+                    actions.append({"scf_algorithm": "diis_gdm"})
 
         elif "unable_to_determine_lamda" in self.errors:
-            # Set last geom as new starting geom and rerun. If no opt cycles,
-            # use diff SCF start? Diff initial guess? Change basis? Unclear.
-            if len(self.outdata.get("energy_trajectory")) > 1:
-                self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
-                actions.append({"molecule": "molecule_from_last_geometry"})
-            elif self.qcinp.rem.get("thresh", "10") != "14":
+            # Given defaults, the first two handlers will typically be skipped
+            if self.qcinp.rem.get("s2thresh", "14") != "16":
+                self.qcinp.rem["s2thresh"] = "16"
+                actions.append({"s2thresh": "16"})
+            if self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
+            elif len(self.outdata.get("energy_trajectory")) > 1:
+                self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
+                actions.append({"molecule": "molecule_from_last_geometry"})
+                if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
+                    self.qcinp.rem["scf_algorithm"] = "diis_gdm"
+                    actions.append({"scf_algorithm": "diis_gdm"})
             else:
                 print("Use a different initial guess? Perhaps a different basis?")
 
         elif "back_transform_error" in self.errors:
-            # Set last geom as new starting geom and rerun. If no opt cycles,
-            # use diff SCF start? Diff initial guess? Change basis? Unclear.
-            if len(self.outdata.get("energy_trajectory")) > 1:
-                self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
-                actions.append({"molecule": "molecule_from_last_geometry"})
-            elif self.qcinp.rem.get("thresh", "10") != "14":
+            # Given defaults, the first two handlers will typically be skipped
+            if self.qcinp.rem.get("s2thresh", "14") != "16":
+                self.qcinp.rem["s2thresh"] = "16"
+                actions.append({"s2thresh": "16"})
+            if self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
-            else:
-                # If the new optimizer failed the back transform on the first iteration,
-                # revert to the old optimizer.
+            elif len(self.outdata.get("energy_trajectory")) > 1:
+                self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
+                actions.append({"molecule": "molecule_from_last_geometry"})
+                if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
+                    self.qcinp.rem["scf_algorithm"] = "diis_gdm"
+                    actions.append({"scf_algorithm": "diis_gdm"})
+            # If the new optimizer failed the back transform on the first iteration,
+            # revert to the old optimizer.
+            elif str(self.qcinp.rem.get("geom_opt2", "none")) == "3":
                 self.qcinp.rem.pop("geom_opt2", None)
                 self.qcinp.geom_opt = None
                 actions.append({"geom_opt2": "deleted"})
 
         elif "premature_end_FileMan_error" in self.errors:
+            # Given defaults, the first two handlers will typically be skipped
+            if self.qcinp.rem.get("s2thresh", "14") != "16":
+                self.qcinp.rem["s2thresh"] = "16"
+                actions.append({"s2thresh": "16"})
             if self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
@@ -201,6 +234,9 @@ class QChemErrorHandler(ErrorHandler):
                 print("We're in a bad spot if we get a FileMan error while always generating a new SCF guess...")
 
         elif "hessian_eigenvalue_error" in self.errors:
+            if self.qcinp.rem.get("s2thresh", "14") != "16":
+                self.qcinp.rem["s2thresh"] = "16"
+                actions.append({"s2thresh": "16"})
             if self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
@@ -241,15 +277,20 @@ class QChemErrorHandler(ErrorHandler):
                 raise RuntimeError("Not sure how to fix NLebdevPts error if resp_charges is disabled!")
 
         elif "failed_to_transform_coords" in self.errors:
+            if self.qcinp.rem.get("thresh", "10") != "14":
+                self.qcinp.rem["thresh"] = "14"
+                actions.append({"thresh": "14"})
+            if self.qcinp.rem.get("s2thresh", "14") != "16":
+                self.qcinp.rem["s2thresh"] = "16"
+                actions.append({"s2thresh": "16"})
             # Check for symmetry flag in rem. If not False, set to False and rerun.
-            # If already False, increase threshold?
             if not self.qcinp.rem.get("sym_ignore") or self.qcinp.rem.get("symmetry"):
                 self.qcinp.rem["sym_ignore"] = "true"
                 self.qcinp.rem["symmetry"] = "false"
                 actions.append({"sym_ignore": "true"})
                 actions.append({"symmetry": "false"})
             else:
-                print("Perhaps increase the threshold?")
+                print("Not sure how else to fix a failed coordinate transformation")
 
         elif "failed_cpscf" in self.errors:
             # For large systems, cpscf errors can often be resolved by forcing QChem to break up
@@ -281,7 +322,7 @@ class QChemErrorHandler(ErrorHandler):
                     self.qcinp.rem["esp_charges"] = "false"
                     actions.append({"esp_charges": "false"})
             else:
-                raise RuntimeError("Not sure how to fix ESPChgFit error if resp_charges is disabled!")
+                print("Not sure how to fix ESPChgFit error if resp_charges is disabled!")
 
         elif "mem_static_too_small" in self.errors:
             # mem_static should never exceed 2000 MB according to the Q-Chem manual
@@ -338,51 +379,3 @@ class QChemErrorHandler(ErrorHandler):
         os.rename(self.input_file, self.input_file + ".last")
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "warnings": self.warnings, "actions": actions}
-
-
-class QChemSCFErrorHandler(ErrorHandler):
-    """
-    QChem ErrorHandler class that addresses SCF non-convergence.
-    """
-
-    is_monitor = False
-
-    def __init__(
-        self,
-        input_file="mol.qin",
-        output_file="mol.qout",
-        rca_gdm_thresh=1.0e-3,
-        scf_max_cycles=200,
-    ):
-        """
-        Initializes the error handler from a set of input and output files.
-
-        Args:
-            input_file (str): Name of the QChem input file.
-            output_file (str): Name of the QChem output file.
-            rca_gdm_thresh (float): The threshold for the prior scf algorithm.
-                If last deltaE is larger than the threshold try RCA_DIIS
-                first, else, try DIIS_GDM first.
-            scf_max_cycles (int): The max iterations to set to fix SCF failure.
-        """
-        self.input_file = input_file
-        self.output_file = output_file
-        self.scf_max_cycles = scf_max_cycles
-        self.qcinp = QCInput.from_file(self.input_file)
-        self.outdata = None
-        self.errors = None
-
-    def check(self):
-        """
-        Checks output file for errors
-        """
-        self.outdata = QCOutput(self.output_file).data
-        self.errors = self.outdata.get("errors")
-        return len(self.errors) > 0
-
-    def correct(self):
-        """
-        Corrects errors, but it hasn't been implemented yet
-        """
-        print("This hasn't been implemented yet!")
-        return {"errors": self.errors, "actions": None}

@@ -38,10 +38,11 @@ $end
 
 
 $rem
-     jobtype = opt
-    exchange = b3lyp
-       basis = 6-31+g*
-  mem_static = 3000
-   mem_total = 28000
+jobtype = opt
+exchange = b3lyp
+basis = 6-31+g*
+mem_static = 3000
+mem_total = 28000
+thresh = 14
 $end
 
