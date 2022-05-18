@@ -88,7 +88,7 @@ class QChemErrorHandlerTest(TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["failed_to_transform_coords"])
-        self.assertEqual(d["actions"], [{"sym_ignore": True}, {"symmetry": False}])
+        self.assertEqual(d["actions"], [{"sym_ignore": "true"}, {"symmetry": "false"}])
         self._check_equivalent_inputs("qunino_vinyl.qin.0", "qunino_vinyl.qin.1")
 
         h = QChemErrorHandler(input_file="qunino_vinyl.qin.1", output_file="qunino_vinyl.qout.1")

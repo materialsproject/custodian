@@ -82,6 +82,7 @@ class QChemErrorHandler(ErrorHandler):
         self.qcinp = QCInput.from_file(self.input_file)
 
         if "SCF_failed_to_converge" in self.errors:
+            # Given defaults, the first three handlers will typically be skipped
             if str(self.qcinp.rem.get("max_scf_cycles")) != str(self.scf_max_cycles):
                 self.qcinp.rem["max_scf_cycles"] = self.scf_max_cycles
                 actions.append({"max_scf_cycles": self.scf_max_cycles})
@@ -91,18 +92,35 @@ class QChemErrorHandler(ErrorHandler):
             elif self.qcinp.rem.get("s2thresh", "14") != "16" and "linear_dependence" in self.warnings:
                 self.qcinp.rem["s2thresh"] = "16"
                 actions.append({"s2thresh": "16"})
+            # First "real" handler - force a new SCF guess at each step, for geometry optimizations.
+            # This can avoid DIIS getting stuck at what was previously an SCF stationary point but
+            # which is no longer a stable solution or is no longer the best solution.
             elif (
-                self.qcinp.rem.get("scf_guess_always", "none").lower() != "true"
-                and len(self.outdata.get("energy_trajectory", [])) > 0
+                self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis"
+                and self.qcinp.rem.get("scf_guess_always", "none").lower() != "true"
+                and len(self.outdata.get("energy_trajectory", [])) > 0  # Ensure not the first SCF
             ):
-                self.qcinp.rem["scf_guess_always"] = True
-                actions.append({"scf_guess_always": True})
-            elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
+                self.qcinp.rem["scf_guess_always"] = "true"
+                actions.append({"scf_guess_always": "true"})
+            # Next, switch to DIIS_GDM and return to default SCF guess behavior. Note that GDM is
+            # better at not getting stuck like DIIS, and sometimes forcing a guess can actually hurt
+            # convergence, so we don't want to start with it on here.
+            elif (
+                self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis"
+                and self.qcinp.rem.get("scf_guess_always", "none").lower() == "true"
+            ):
+                self.qcinp.rem["scf_guess_always"] = "false"
+                actions.append({"scf_guess_always": "false"})
                 self.qcinp.rem["scf_algorithm"] = "diis_gdm"
                 actions.append({"scf_algorithm": "diis_gdm"})
+            # TO BE REPLACED BY GDM-DIIS???
             elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis_gdm":
                 self.qcinp.rem["scf_algorithm"] = "gdm"
                 actions.append({"scf_algorithm": "gdm"})
+            # Finally, try forcing the initial guess again as a last resort.
+            elif self.qcinp.rem.get("scf_guess_always", "none").lower() != "true":
+                self.qcinp.rem["scf_guess_always"] = "true"
+                actions.append({"scf_guess_always": "true"})
             else:
                 print("No remaining SCF error handlers!")
 
@@ -177,8 +195,8 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
             elif self.qcinp.rem.get("scf_guess_always", "none").lower() != "true":
-                self.qcinp.rem["scf_guess_always"] = True
-                actions.append({"scf_guess_always": True})
+                self.qcinp.rem["scf_guess_always"] = "true"
+                actions.append({"scf_guess_always": "true"})
             else:
                 print("We're in a bad spot if we get a FileMan error while always generating a new SCF guess...")
 
@@ -226,10 +244,10 @@ class QChemErrorHandler(ErrorHandler):
             # Check for symmetry flag in rem. If not False, set to False and rerun.
             # If already False, increase threshold?
             if not self.qcinp.rem.get("sym_ignore") or self.qcinp.rem.get("symmetry"):
-                self.qcinp.rem["sym_ignore"] = True
-                self.qcinp.rem["symmetry"] = False
-                actions.append({"sym_ignore": True})
-                actions.append({"symmetry": False})
+                self.qcinp.rem["sym_ignore"] = "true"
+                self.qcinp.rem["symmetry"] = "false"
+                actions.append({"sym_ignore": "true"})
+                actions.append({"symmetry": "false"})
             else:
                 print("Perhaps increase the threshold?")
 
@@ -242,16 +260,16 @@ class QChemErrorHandler(ErrorHandler):
         elif "bad_old_nbo6_rem" in self.errors:
             # "run_nbo6" has to change to "nbo_external" in QChem 5.4.2 and later
             del self.qcinp.rem["run_nbo6"]
-            self.qcinp.rem["nbo_external"] = True
+            self.qcinp.rem["nbo_external"] = "true"
             actions.append({"run_nbo6": "deleted"})
-            actions.append({"nbo_external": True})
+            actions.append({"nbo_external": "true"})
 
         elif "bad_new_nbo_external_rem" in self.errors:
             # Have to use "run_nbo6" instead of "nbo_external" for QChem 5.4.1 or earlier
             del self.qcinp.rem["nbo_external"]
-            self.qcinp.rem["run_nbo6"] = True
+            self.qcinp.rem["run_nbo6"] = "true"
             actions.append({"nbo_external": "deleted"})
-            actions.append({"run_nbo6": True})
+            actions.append({"run_nbo6": "true"})
 
         elif "esp_chg_fit_error" in self.errors:
             # this error should only be possible if resp_charges or esp_charges is set
