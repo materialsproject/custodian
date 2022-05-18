@@ -82,11 +82,13 @@ class QChemErrorHandler(ErrorHandler):
         self.qcinp = QCInput.from_file(self.input_file)
 
         if "SCF_failed_to_converge" in self.errors:
-            # Given defaults, the first handler will typically be skipped
+            # Given defaults, the first handlers will typically be skipped
+            if self.qcinp.rem.get("s2thresh", "14") != "16":
+                self.qcinp.rem["s2thresh"] = "16"
+                actions.append({"s2thresh": "16"})
             if (
                 int(self.qcinp.rem.get("max_scf_cycles", 50)) < self.scf_max_cycles
                 or self.qcinp.rem.get("thresh", "10") != "14"
-                or self.qcinp.rem.get("s2thresh", "14") != "16"
             ):
                 if int(self.qcinp.rem.get("max_scf_cycles", 50)) < self.scf_max_cycles:
                     self.qcinp.rem["max_scf_cycles"] = self.scf_max_cycles
@@ -94,9 +96,6 @@ class QChemErrorHandler(ErrorHandler):
                 if self.qcinp.rem.get("thresh", "10") != "14":
                     self.qcinp.rem["thresh"] = "14"
                     actions.append({"thresh": "14"})
-                if self.qcinp.rem.get("s2thresh", "14") != "16":
-                    self.qcinp.rem["s2thresh"] = "16"
-                    actions.append({"s2thresh": "16"})
             # First "real" handler - force a new SCF guess at each step, for geometry optimizations.
             # This can avoid DIIS getting stuck at what was previously an SCF stationary point but
             # which is no longer a stable solution or is no longer the best solution.
