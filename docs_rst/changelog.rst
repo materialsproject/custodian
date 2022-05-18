@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+v2022.5.17
+----------
+* PR #220 from @yury-lysogorskiy. Fix for NBANDS when NBANDS is very small. 
+* PR #211 from @arosen93. Handler for error in reading plane wave coeff. 
+* PR #214 from @arosen93. Handler for `ZHEGV` error by reducing number of cores. 
+* PR #215 from @arosen93. Fix for new `ZPOTRF` error phrasing.
+* PR #210 from @nwinner. CP2K support.
+
 v2022.2.13
 ----------
 * Support for new Lobster versions (@naik-aakash)

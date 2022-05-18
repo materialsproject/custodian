@@ -6,6 +6,7 @@ by modifying the input files.
 
 import datetime
 import logging
+import multiprocessing
 import operator
 import os
 import re
@@ -82,7 +83,7 @@ class VaspErrorHandler(ErrorHandler):
         "rot_matrix": ["Found some non-integer element in rotation matrix", "SGRCON"],
         "brions": ["BRIONS problems: POTIM should be increased"],
         "pricel": ["internal error in subroutine PRICEL"],
-        "zpotrf": ["LAPACK: Routine ZPOTRF failed"],
+        "zpotrf": ["LAPACK: Routine ZPOTRF failed", "Routine ZPOTRF ZTRTRI"],
         "amin": ["One of the lattice vectors is very long (>50 A), but AMIN"],
         "zbrent": ["ZBRENT: fatal internal in", "ZBRENT: fatal error in bracketing"],
         "pssyevx": ["ERROR in subspace rotation PSSYEVX"],
@@ -102,6 +103,7 @@ class VaspErrorHandler(ErrorHandler):
         "bravais": ["Inconsistent Bravais lattice"],
         "nbands_not_sufficient": ["number of bands is not sufficient"],
         "hnform": ["HNFORM: k-point generating"],
+        "coef": ["while reading plane"],
     }
 
     def __init__(
@@ -281,7 +283,7 @@ class VaspErrorHandler(ErrorHandler):
         if "zpotrf" in self.errors:
             # Usually caused by short bond distances. If on the first step,
             # volume needs to be increased. Otherwise, it was due to a step
-            # being too big and POTIM should be decreased.  If a static run
+            # being too big and POTIM should be decreased. If a static run
             # try turning off symmetry.
             try:
                 oszicar = Oszicar("OSZICAR")
@@ -304,6 +306,9 @@ class VaspErrorHandler(ErrorHandler):
             if vi["INCAR"].get("ICHARG", 0) < 10:
                 actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
                 actions.append({"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}})
+
+            # A.S.R.: This can also happen if NCORE or NPAR is set to an unusually large value.
+            # We should add logic for this at some point.
 
         if self.errors.intersection(["subspacematrix"]):
             if self.error_count["subspacematrix"] == 0:
@@ -356,6 +361,9 @@ class VaspErrorHandler(ErrorHandler):
 
         if "pricel" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}})
+
+        if "coef" in self.errors:
+            actions.append({"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}})
 
         if "brions" in self.errors:
 
@@ -439,7 +447,8 @@ class VaspErrorHandler(ErrorHandler):
                                 break
                             except (IndexError, ValueError):
                                 pass
-            actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": int(1.1 * nbands)}}})
+            new_nbands = max(int(1.1 * nbands), nbands + 1)  # This handles the case when nbands is too low (< 8).
+            actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": new_nbands}}})
 
         if "pssyevx" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
@@ -457,7 +466,24 @@ class VaspErrorHandler(ErrorHandler):
         if "edddav" in self.errors:
             if vi["INCAR"].get("ICHARG", 0) < 10:
                 actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
-            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+
+            # This sometimes comes up with ALGO = Fast. We will switch the ALGO.
+            if vi["INCAR"].get("ALGO", "Normal").lower() != "all":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+
+            # This can sometimes be due to load-balancing issues for small systems.
+            # See bottom of https://www.vasp.at/wiki/index.php/NCORE. A.S.R. ran some
+            # tests and found: 1) Changing LPLANE and NSIM does not help. 2) The suggestion
+            # of NCORE = # cores is not robust for KNL (too high). 3) Setting NPAR = sqrt(# cores)
+            # does not always resolve the issue. The best solution, aside from requesting fewer
+            # resources, seems to be to just increase NCORE slightly. That's what I do here.
+            nprocs = multiprocessing.cpu_count()
+            try:
+                nelect = Outcar("OUTCAR").nelect
+            except Exception:
+                nelect = 1  # dummy value
+            if nelect < nprocs:
+                actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": vi["INCAR"].get("NCORE", 1) * 2}}})
 
         if "algo_tet" in self.errors:
             # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP

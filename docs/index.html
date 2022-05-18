@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Custodian &#8212; custodian 2022.2.13 documentation</title>
+    <title>Custodian &#8212; custodian 2022.5.17 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/flasky.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">custodian 2022.2.13 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="#">custodian 2022.5.17 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Custodian</a></li> 
       </ul>
     </div>  
@@ -63,8 +63,8 @@ random errors. For example, there may be a script that takes several days to
 run on a server, with a 1% chance of some IO error causing the job to fail.
 Using custodian, one can develop a mechanism to gracefully recover from the
 error, and restart the job with modified parameters if necessary.</p>
-<p>The current version of Custodian also comes with two sub-packages for error
-handling for Vienna Ab Initio Simulation Package (VASP), NwChem and QChem
+<p>The current version of Custodian also comes with several sub-packages for error
+handling for Vienna Ab Initio Simulation Package (VASP), NwChem, QChem, FEFF, Lobster and CP2K
 calculations.</p>
 <a class="reference external image-reference" href="https://github.com/materialsproject/custodian/workflows/Testing/badge.svg"><img alt="https://github.com/materialsproject/custodian/workflows/Testing/badge.svg" src="https://github.com/materialsproject/custodian/workflows/Testing/badge.svg" /></a>
 <a class="reference external image-reference" href="https://github.com/materialsproject/custodian/workflows/Linting/badge.svg"><img alt="https://github.com/materialsproject/custodian/workflows/Linting/badge.svg" src="https://github.com/materialsproject/custodian/workflows/Linting/badge.svg" /></a>
@@ -100,12 +100,12 @@ cloning the source, you can type:</p>
 </section>
 <section id="requirements">
 <h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
-<p>Custodian requires Python 3.5+. There are no other required dependencies.</p>
+<p>Custodian requires Python 3.8+. There are no other required dependencies.</p>
 <section id="optional-dependencies">
 <h2>Optional dependencies<a class="headerlink" href="#optional-dependencies" title="Permalink to this headline">¶</a></h2>
 <p>Optional libraries that are required if you need certain features:</p>
 <ol class="arabic">
-<li><p>Python Materials Genomics (<a class="reference external" href="https://pypi.python.org/pypi/pymatgen">pymatgen</a>) 2019.8.23+: To use the plugin for
+<li><p>Python Materials Genomics (<a class="reference external" href="https://pypi.python.org/pypi/pymatgen">pymatgen</a>) 2022.1+: To use the plugin for
 VASP, NwChem and Qchem. Please install using:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">pymatgen</span>
 </pre></div>
@@ -217,8 +217,8 @@ random or otherwise. Such errors become a major issue in projects that
 performs such calculations in high throughput, such as the <a class="reference external" href="https://www.materialsproject.org">Materials
 Project</a>.</p>
 <p>The Custodian package comes with a fairly comprehensive plugin to deal
-with jobs (<code class="xref py py-mod docutils literal notranslate"><span class="pre">custodian.vasp.jobs</span></code>) and errors
-(<code class="xref py py-mod docutils literal notranslate"><span class="pre">custodian.vasp.handlers</span></code>) in electronic structure calculations based
+with jobs (<a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.jobs" title="custodian.vasp.jobs"><code class="xref py py-mod docutils literal notranslate"><span class="pre">custodian.vasp.jobs</span></code></a>) and errors
+(<a class="reference internal" href="custodian.vasp.html#module-custodian.vasp.handlers" title="custodian.vasp.handlers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">custodian.vasp.handlers</span></code></a>) in electronic structure calculations based
 on the Vienna Ab Initio Simulation Package (VASP). To do this,
 Custodian uses the Python Materials Genomics (<a class="reference external" href="https://pypi.python.org/pypi/pymatgen">pymatgen</a>) package to
 perform analysis and io from VASP input and output files.</p>
@@ -242,11 +242,6 @@ insufficient KPOINTS to use ISMEAR = -5.</p>
 <p>Using custodian, you can even setup potentially indefinite jobs,
 e.g. kpoints convergence jobs with a target energy convergence. Please see the
 converge_kpoints script in the scripts for an example.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">New in version 0.4.3: </span>A new package for dealing with NwChem calculations has been added.
-NwChem is an open-source code for performing computational chemistry
-calculations.</p>
-</div>
 </section>
 </section>
 <section id="cstdn-a-yaml-spec-controlled-job">

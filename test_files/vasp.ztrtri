@@ -1,0 +1,23 @@
+ -----------------------------------------------------------------------------
+|                                                                             |
+|     EEEEEEE  RRRRRR   RRRRRR   OOOOOOO  RRRRRR      ###     ###     ###     |
+|     E        R     R  R     R  O     O  R     R     ###     ###     ###     |
+|     E        R     R  R     R  O     O  R     R     ###     ###     ###     |
+|     EEEEE    RRRRRR   RRRRRR   O     O  RRRRRR       #       #       #      |
+|     E        R   R    R   R    O     O  R   R                               |
+|     E        R    R   R    R   O     O  R    R      ###     ###     ###     |
+|     EEEEEEE  R     R  R     R  OOOOOOO  R     R     ###     ###     ###     |
+|                                                                             |
+|     Orbital orthonormalization failed in the inversion of matrix            |
+|     scaLAPACK: Routine ZPOTRF ZTRTRI failed! kpoint: 7 spin: 1              |
+|                                                                             |
+|     Possible solutions for this issue are:                                  |
+|     - Please check whether the atoms are too close to each other.           |
+|     - Decreasing POTIM might help during relaxations or MDs.                |
+|     - Deleting CHGCAR or WAVECAR if incompatible with the structure.        |
+|     - Try calculating without symmetrizing (ISYM = 0 or ISYM = -1).         |
+|     - As last resort: using a different PAW for some of the atoms.          |
+|                                                                             |
+|       ---->  I REFUSE TO CONTINUE WITH THIS SICK JOB ... BYE!!! <----       |
+|                                                                             |
+ -----------------------------------------------------------------------------

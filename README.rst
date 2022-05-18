@@ -19,8 +19,8 @@ run on a server, with a 1% chance of some IO error causing the job to fail.
 Using custodian, one can develop a mechanism to gracefully recover from the
 error, and restart the job with modified parameters if necessary.
 
-The current version of Custodian also comes with two sub-packages for error
-handling for Vienna Ab Initio Simulation Package (VASP) and NwChem
+The current version of Custodian also comes with several sub-packages for error
+handling for Vienna Ab Initio Simulation Package (VASP), NwChem, QChem, FEFF, Lobster and CP2K
 calculations.
 
 Getting custodian
@@ -55,22 +55,9 @@ or to install the package in developmental mode::
 Requirements
 ============
 
-Custodian supports Python 2.7+ and 3+. There are no other required dependencies.
+Custodian supports Python 3.8+. There are no other required dependencies.
 However, if you wish to use many of the built-in error handlers and Jobs for
 VASP, NWChem, QChem, etc., you will likely need pymatgen to be install as well.
-
-Optional dependencies
----------------------
-
-Optional libraries that are required if you need certain features:
-
-1. pymatgen 2018.+: To use the plugins for VASP, NwChem and Qchem. Please
-   install using::
-
-    pip install pymatgen
-
-   For more information, please consult `pymatgen's documentation`_.
-2. nose - For complete unittesting.
 
 Usage
 =====
