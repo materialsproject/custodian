@@ -104,6 +104,7 @@ class QChemErrorHandler(ErrorHandler):
                 and self.qcinp.rem.get("scf_guess_always", "none").lower() != "true"
                 and len(self.outdata.get("energy_trajectory", [])) > 0  # Ensure not the first SCF
             ):
+                print("turning on SCF guess always")
                 self.qcinp.rem["scf_guess_always"] = "true"
                 actions.append({"scf_guess_always": "true"})
             # Next, switch to DIIS_GDM and return to default SCF guess behavior. Note that GDM is
