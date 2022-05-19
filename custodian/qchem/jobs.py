@@ -233,6 +233,7 @@ class QCJob(Job):
         freq_rem["job_type"] = "freq"
         opt_rem = copy.deepcopy(orig_input.rem)
         opt_rem["job_type"] = opt_method
+        opt_rem.pop("geom_opt2", None)
         first = True
         energy_history = []
 
@@ -358,7 +359,7 @@ class QCJob(Job):
                         vdw_mode=orig_input.vdw_mode,
                         van_der_waals=orig_input.van_der_waals,
                         nbo=orig_input.nbo,
-                        geom_opt=orig_input.geom_opt,
+                        # geom_opt=orig_input.geom_opt,
                     )
                     opt_QCInput.write_file(input_file)
                 else:
@@ -383,7 +384,7 @@ class QCJob(Job):
                         vdw_mode=orig_input.vdw_mode,
                         van_der_waals=orig_input.van_der_waals,
                         nbo=orig_input.nbo,
-                        geom_opt=orig_input.geom_opt,
+                        # geom_opt=orig_input.geom_opt,
                     )
                     opt_QCInput.write_file(input_file)
             if not save_final_scratch:
@@ -604,6 +605,6 @@ class QCJob(Job):
                     vdw_mode=orig_opt_input.vdw_mode,
                     van_der_waals=orig_opt_input.van_der_waals,
                     nbo=orig_input.nbo,
-                    geom_opt=orig_input.geom_opt,
+                    # geom_opt=orig_input.geom_opt,
                 )
                 new_opt_QCInput.write_file(input_file)

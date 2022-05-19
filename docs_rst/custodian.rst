@@ -9,6 +9,7 @@ Subpackages
 
    custodian.ansible
    custodian.cli
+   custodian.cp2k
    custodian.feff
    custodian.lobster
    custodian.nwchem

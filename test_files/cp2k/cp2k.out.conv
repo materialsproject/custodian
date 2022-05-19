@@ -1,0 +1,215 @@
+
+
+  outer SCF iter =    1 RMS gradient =   0.84E-03 energy =      -3747.1717397646
+
+  ----------------------------------- OT ---------------------------------------
+  Minimizer      : CG                  : conjugate gradient
+  Preconditioner : FULL_ALL            : diagonalization, state selective
+  Precond_solver : DEFAULT
+  Line search    : 3PNT                : 3 energies
+  stepsize       :    0.15000000                  energy_gap     :    0.01000000
+  eps_taylor     :   0.10000E-15                  max_taylor     :             4
+  ----------------------------------- OT ---------------------------------------
+
+  Step     Update method      Time    Convergence         Total energy    Change
+  ------------------------------------------------------------------------------
+     1 OT CG       0.12E+00   72.5     0.00485622     -3761.8511669919  5.35E-01
+     2 OT LS       0.17E+00   27.2                    -3764.7781882684
+     3 OT LS       0.20E+00   28.0                    -3765.2682787872
+     4 OT CG       0.16E+00   43.0     0.00354262     -3765.3731367197 -3.52E+00
+     5 OT LS       0.23E+00   28.1                    -3766.5370636048
+     6 OT LS       0.14E+00   27.5                    -3766.0152584757
+     7 OT CG       0.11E+00   42.9     0.00148908     -3766.5916590839 -1.22E+00
+     8 OT LS       0.15E+00   27.5                    -3766.8730321935
+     9 OT LS       0.29E+00   28.7                    -3766.9494729030
+    10 OT CG       0.23E+00   42.7     0.00050972     -3767.0543631793 -4.63E-01
+    11 OT LS       0.33E+00   27.6                    -3767.1062072600
+    12 OT LS       0.29E+00   27.9                    -3767.1072045610
+    13 OT CG       0.23E+00   42.9     0.00058196     -3767.1081636829 -5.38E-02
+    14 OT LS       0.32E+00   27.6                    -3767.1483981094
+    15 OT LS       0.18E+00   27.5                    -3767.1246074125
+    16 OT CG       0.14E+00   42.8     0.00026878     -3767.1518475985 -4.37E-02
+    17 OT LS       0.20E+00   27.7                    -3767.1637895104
+    18 OT LS       0.36E+00   27.7                    -3767.1668723977
+    19 OT CG       0.29E+00   41.6     0.00017473     -3767.1703580069 -1.85E-02
+    20 OT LS       0.40E+00   27.4                    -3767.1782447487
+
+  Leaving inner SCF loop after reaching    20 steps.
+
+
+OVERLAP MATRIX CONDITION NUMBER
+ 1-Norm Condition Number (Estimate)
+
+
+
+  outer SCF iter =    1 RMS gradient =   0.84E-03 energy =      -3747.1717397646
+
+  ----------------------------------- OT ---------------------------------------
+  Minimizer      : CG                  : conjugate gradient
+  Preconditioner : FULL_ALL            : diagonalization, state selective
+  Precond_solver : DEFAULT
+  Line search    : 3PNT                : 3 energies
+  stepsize       :    0.15000000                  energy_gap     :    0.01000000
+  eps_taylor     :   0.10000E-15                  max_taylor     :             4
+  ----------------------------------- OT ---------------------------------------
+
+  Step     Update method      Time    Convergence         Total energy    Change
+  ------------------------------------------------------------------------------
+     1 OT CG       0.12E+00   72.5     0.00485622     -3761.8511669919  5.35E-01
+     2 OT LS       0.17E+00   27.2                    -3764.7781882684
+     3 OT LS       0.20E+00   28.0                    -3765.2682787872
+     4 OT CG       0.16E+00   43.0     0.00354262     -3765.3731367197 -3.52E+00
+     5 OT LS       0.23E+00   28.1                    -3766.5370636048
+     6 OT LS       0.14E+00   27.5                    -3766.0152584757
+     7 OT CG       0.11E+00   42.9     0.00148908     -3766.5916590839 -1.22E+00
+     8 OT LS       0.15E+00   27.5                    -3766.8730321935
+     9 OT LS       0.29E+00   28.7                    -3766.9494729030
+    10 OT CG       0.23E+00   42.7     0.00050972     -3767.0543631793 -4.63E-01
+    11 OT LS       0.33E+00   27.6                    -3767.1062072600
+    12 OT LS       0.29E+00   27.9                    -3767.1072045610
+    13 OT CG       0.23E+00   42.9     0.00058196     -3767.1081636829 -5.38E-02
+    14 OT LS       0.32E+00   27.6                    -3767.1483981094
+    15 OT LS       0.18E+00   27.5                    -3767.1246074125
+    16 OT CG       0.14E+00   42.8     0.00026878     -3767.1518475985 -4.37E-02
+    17 OT LS       0.20E+00   27.7                    -3767.1637895104
+    18 OT LS       0.36E+00   27.7                    -3767.1668723977
+    19 OT CG       0.29E+00   41.6     0.00017473     -3767.1703580069 -1.85E-02
+    20 OT LS       0.40E+00   27.4                    -3767.1782447487
+
+  Leaving inner SCF loop after reaching    20 steps.
+
+
+OVERLAP MATRIX CONDITION NUMBER
+ 1-Norm Condition Number (Estimate)
+
+
+  ----------------------------------- OT ---------------------------------------
+  Minimizer      : CG                  : conjugate gradient
+  Preconditioner : FULL_SINGLE_INVERSE : inversion of
+                                         H + eS - 2*(Sc)(c^T*H*c+const)(Sc)^T
+  Precond_solver : DEFAULT
+  Line search    : 3PNT                : 3 energies
+  stepsize       :    0.08000000                  energy_gap     :    0.01000000
+  eps_taylor     :   0.10000E-15                  max_taylor     :             4
+  ----------------------------------- OT ---------------------------------------
+
+  Step     Update method      Time    Convergence         Total energy    Change
+  ------------------------------------------------------------------------------
+
+ HFX_MEM_INFO| Est. max. program size before HFX [MiB]:                     268
+
+ *** WARNING in hfx_energy_potential.F:592 :: The Kohn Sham matrix is not  ***
+ *** 100% occupied. This may result in incorrect Hartree-Fock results. Try ***
+ *** to decrease EPS_PGF_ORB and EPS_FILTER_MATRIX in the QS section. For  ***
+ *** more information see FAQ: https://www.cp2k.org/faq:hfx_eps_warning    ***
+
+  HFX_MEM_INFO| Number of cart. primitive ERI's calculated:        3328887050636
+  HFX_MEM_INFO| Number of sph. ERI's calculated:                    427166560793
+  HFX_MEM_INFO| Number of sph. ERI's stored in-core:                316125474278
+  HFX_MEM_INFO| Number of sph. ERI's stored on disk:                           0
+  HFX_MEM_INFO| Number of sph. ERI's calculated on the fly:         109047815966
+  HFX_MEM_INFO| Total memory consumption ERI's RAM [MiB]:                 361158
+  HFX_MEM_INFO| Whereof max-vals [MiB]:                                     2840
+  HFX_MEM_INFO| Total compression factor ERI's RAM:                         6.68
+  HFX_MEM_INFO| Total memory consumption ERI's disk [MiB]:                     0
+  HFX_MEM_INFO| Total compression factor ERI's disk:                        0.00
+  HFX_MEM_INFO| Size of density/Fock matrix [MiB]:                           112
+  HFX_MEM_INFO| Size of buffers [MiB]:                                         6
+  HFX_MEM_INFO| Number of periodic image cells considered:                    51
+  HFX_MEM_INFO| Est. max. program size after HFX  [MiB]:                    2271
+
+     1 OT CG       0.64E-01  465.7     0.00786726     -4228.1405682998 -4.23E+03
+     2 OT LS       0.90E-01  162.2                    -4266.0923334024
+     3 OT LS       0.36E+00  162.5                    -4280.8216760625
+     4 OT CG       0.29E+00  200.4     0.00610696     -4418.4667074428 -1.90E+02
+     5 OT LS       0.40E+00  162.2                    -4515.9756017205
+     6 OT LS       0.16E+01  162.3                    -4550.4387613343
+     7 OT CG       0.13E+01  200.3     0.00486382     -4707.8215945329 -2.89E+02
+     8 OT LS       0.18E+01  162.3                    -4830.0914127121
+     9 OT LS       0.12E+01  162.5                    -4798.7435025046
+    10 OT CG       0.95E+00  200.6     0.00369656     -4831.5574667728 -1.24E+02
+    11 OT LS       0.13E+01  162.5                    -4917.6413940181
+    12 OT LS       0.15E+01  162.6                    -4929.1666230487
+    13 OT CG       0.12E+01  200.7     0.00225703     -4930.1374633013 -9.86E+01
+    14 OT LS       0.17E+01  162.4                    -4969.7406115213
+    15 OT LS       0.18E+01  162.4                    -4974.3962633351
+    16 OT CG       0.14E+01  200.6     0.00234192     -4974.5536143231 -4.44E+01
+    17 OT LS       0.71E+00  162.5                    -4973.8506035326
+    18 OT LS       0.70E+00  162.4                    -5051.1970068591
+    19 OT CG       0.56E+00  200.3     0.00806794     -5051.1994938608 -7.66E+01
+    20 OT LS       0.28E+00  162.5                    -4563.8989653494
+
+  Leaving inner SCF loop after reaching    20 steps.
+
+Step     Update method      Time    Convergence         Total energy    Change
+  ------------------------------------------------------------------------------
+     1 P_Mix/Diag. 0.50E-01    8.3     0.12158464     -6026.0991570580 -6.03E+03
+     2 P_Mix/Diag. 0.50E-01   19.5     0.11914175     -6026.0997036293 -5.47E-04
+     3 P_Mix/Diag. 0.50E-01   19.2     0.11677865     -6026.1002402585 -5.37E-04
+     4 P_Mix/Diag. 0.50E-01   27.3     0.11449063     -6026.1007671518 -5.27E-04
+     5 P_Mix/Diag. 0.50E-01   19.3     0.11227357     -6026.1012842811 -5.17E-04
+     6 P_Mix/Diag. 0.50E-01   19.3     0.11012386     -6026.1017915188 -5.07E-04
+     7 P_Mix/Diag. 0.50E-01   19.4     0.10803823     -6026.1022887086 -4.97E-04
+     8 P_Mix/Diag. 0.50E-01   19.3     0.10601377     -6026.1027756999 -4.87E-04
+     9 P_Mix/Diag. 0.50E-01   19.3     0.10404776     -6026.1032523647 -4.77E-04
+    10 P_Mix/Diag. 0.50E-01   19.5     0.10213774     -6026.1037186049 -4.66E-04
+    11 P_Mix/Diag. 0.50E-01   19.3     0.10028139     -6026.1041743538 -4.56E-04
+    12 P_Mix/Diag. 0.50E-01   20.6     0.09847659     -6026.1046195761 -4.45E-04
+    13 DIIS/Diag.  0.46E-04   21.2     0.22241022     -6026.1050542658 -4.35E-04
+
+ *** WARNING in dft_plus_u.F:1458 :: DFT+U energy contibution is negative ***
+ *** possibly due to unphysical Mulliken charges!                         ***
+
+    14 P_Mix/Diag. 0.50E-01   19.5     0.04050078     -6026.1188966625 -1.38E-02
+
+ *** WARNING in dft_plus_u.F:1458 :: DFT+U energy contibution is negative ***
+ *** possibly due to unphysical Mulliken charges!                         ***
+
+    15 DIIS/Diag.  0.36E-04   19.4     0.00206202     -6026.1189121562 -1.55E-05
+
+ *** WARNING in dft_plus_u.F:1458 :: DFT+U energy contibution is negative ***
+ *** possibly due to unphysical Mulliken charges!                         ***
+
+    16 DIIS/Diag.  0.79E-03   19.4     0.01039860     -6026.1188952609  1.69E-05
+
+ *** WARNING in dft_plus_u.F:1458 :: DFT+U energy contibution is negative ***
+ *** possibly due to unphysical Mulliken charges!                         ***
+
+    17 DIIS/Diag.  0.76E-03   19.4     0.01044691     -6026.1187317941  1.63E-04
+
+ *** WARNING in dft_plus_u.F:1458 :: DFT+U energy contibution is negative ***
+ *** possibly due to unphysical Mulliken charges!                         ***
+
+    18 DIIS/Diag.  0.73E-03   19.3     0.00187314     -6026.1185521941  1.80E-04
+
+ *** WARNING in dft_plus_u.F:1458 :: DFT+U energy contibution is negative ***
+ *** possibly due to unphysical Mulliken charges!                         ***
+
+    19 DIIS/Diag.  0.74E-03   25.8     0.00461165     -6026.1185858427 -3.36E-05
+
+ *** WARNING in dft_plus_u.F:1458 :: DFT+U energy contibution is negative ***
+ *** possibly due to unphysical Mulliken charges!                         ***
+
+    20 DIIS/Diag.  0.85E-03   19.2     0.01023929     -6026.1186627394 -7.69E-05
+
+ *** WARNING in dft_plus_u.F:1458 :: DFT+U energy contibution is negative ***
+ *** possibly due to unphysical Mulliken charges!                         ***
+
+    21 DIIS/Diag.  0.11E-02   19.2     0.00004130     -6026.1188050770 -1.42E-04
+
+ *** WARNING in dft_plus_u.F:1458 :: DFT+U energy contibution is negative ***
+ *** possibly due to unphysical Mulliken charges!                         ***
+
+    22 DIIS/Diag.  0.11E-02   19.4     0.00079894     -6026.1188054416 -3.65E-07
+
+ *** WARNING in dft_plus_u.F:1458 :: DFT+U energy contibution is negative ***
+ *** possibly due to unphysical Mulliken charges!                         ***
+
+
+
+Step     Update method      Time    Convergence         Total energy    Change
+  ------------------------------------------------------------------------------
+     1 P_Mix/Diag. 0.50E-01    8.3     0.12158464     -6026.0991570580 -6.03E+03
+     2 P_Mix/Diag. 0.50E-01   19.5     0.11914175     -6026.0997036293 -5.47E-04
+
+

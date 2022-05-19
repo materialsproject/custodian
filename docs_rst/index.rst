@@ -18,8 +18,8 @@ run on a server, with a 1% chance of some IO error causing the job to fail.
 Using custodian, one can develop a mechanism to gracefully recover from the
 error, and restart the job with modified parameters if necessary.
 
-The current version of Custodian also comes with two sub-packages for error
-handling for Vienna Ab Initio Simulation Package (VASP), NwChem and QChem
+The current version of Custodian also comes with several sub-packages for error
+handling for Vienna Ab Initio Simulation Package (VASP), NwChem, QChem, FEFF, Lobster and CP2K
 calculations.
 
 .. image:: https://github.com/materialsproject/custodian/workflows/Testing/badge.svg
@@ -62,14 +62,14 @@ or to install the package in developmental mode::
 Requirements
 ============
 
-Custodian requires Python 3.5+. There are no other required dependencies.
+Custodian requires Python 3.8+. There are no other required dependencies.
 
 Optional dependencies
 ---------------------
 
 Optional libraries that are required if you need certain features:
 
-1. Python Materials Genomics (`pymatgen`_) 2019.8.23+: To use the plugin for
+1. Python Materials Genomics (`pymatgen`_) 2022.1+: To use the plugin for
    VASP, NwChem and Qchem. Please install using::
 
     pip install pymatgen
@@ -227,12 +227,6 @@ insufficient KPOINTS to use ISMEAR = -5.
 Using custodian, you can even setup potentially indefinite jobs,
 e.g. kpoints convergence jobs with a target energy convergence. Please see the
 converge_kpoints script in the scripts for an example.
-
-.. versionadded:: 0.4.3
-
-    A new package for dealing with NwChem calculations has been added.
-    NwChem is an open-source code for performing computational chemistry
-    calculations.
 
 cstdn - A yaml-spec controlled job
 ==================================

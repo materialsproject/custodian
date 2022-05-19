@@ -1,0 +1,237 @@
+ DBCSR| CPU Multiplication driver                                           BLAS
+ DBCSR| Multrec recursion limit                                              512
+ DBCSR| Multiplication stack size                                           1000
+ DBCSR| Maximum elements for images                                    UNLIMITED
+ DBCSR| Multiplicative factor virtual images                                   1
+ DBCSR| Use multiplication densification                                       T
+ DBCSR| Multiplication size stacks                                             3
+
+
+  **** **** ******  **  PROGRAM STARTED AT               2020-09-14 17:14:40.083
+ ***** ** ***  *** **   PROGRAM STARTED ON        Nicholass-MacBook-Pro.local.dh
+ **    ****   ******    PROGRAM STARTED BY                               nwinner
+ ***** **    ** ** **   PROGRAM PROCESS ID                                 14308
+  **** **  *******  **  PROGRAM STARTED IN /Users/nwinner/src/custodian/custodia
+                                           n/cp2k/tests
+
+ CP2K| version string:                                          CP2K version 7.1
+ CP2K| source code revision number:                                  git:e635599
+ CP2K| cp2kflags:
+ CP2K| is freely available from                            https://www.cp2k.org/
+ CP2K| Program compiled at                          Fri Jan 31 11:13:38 PST 2020
+ CP2K| Program compiled on                 dhcp-128-32-121-171.lips.berkeley.edu
+ CP2K| Program compiled for                       Darwin-IntelMacintosh-gfortran
+ CP2K| Data directory path                      /Users/nwinner/src/cp2k-7.1/data
+ CP2K| Input file name                             ../test_files/cp2k.inp.hybrid
+
+ GLOBAL| Force Environment number                                              1
+ GLOBAL| Basis set file name                                        BASIS_MOLOPT
+ GLOBAL| Potential file name                                      GTH_POTENTIALS
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                      __STD_INPUT__
+ GLOBAL| Method name                                                        CP2K
+ GLOBAL| Project name                                              Hybrid-Static
+ GLOBAL| Preferred FFT library                                             FFTW3
+ GLOBAL| Preferred diagonalization lib.                                       SL
+ GLOBAL| Run type                                                   ENERGY_FORCE
+ GLOBAL| All-to-all communication in single precision                          F
+ GLOBAL| FFTs using library dependent lengths                                  T
+ GLOBAL| Global print level                                               MEDIUM
+ GLOBAL| MPI I/O enabled                                                       T
+ GLOBAL| Total number of message passing processes                             1
+ GLOBAL| Number of threads for this process                                    1
+ GLOBAL| This output is from process                                           0
+ GLOBAL| CPU model name                                                  UNKNOWN
+
+ MEMORY| system memory details [Kb]
+ MEMORY|                        rank 0           min           max       average
+ MEMORY| MemTotal                    0             0             0             0
+ MEMORY| MemFree                     0             0             0             0
+ MEMORY| Buffers                     0             0             0             0
+ MEMORY| Cached                      0             0             0             0
+ MEMORY| Slab                        0             0             0             0
+ MEMORY| SReclaimable                0             0             0             0
+ MEMORY| MemLikelyFree               0             0             0             0
+
+ WARNING : FFT library FFTW3 is not available  Trying FFTSG as a default
+
+ *** Fundamental physical constants (SI units) ***
+
+ *** Literature: B. J. Mohr and B. N. Taylor,
+ ***             CODATA recommended values of the fundamental physical
+ ***             constants: 2006, Web Version 5.1
+ ***             http://physics.nist.gov/constants
+
+ Speed of light in vacuum [m/s]                             2.99792458000000E+08
+ Magnetic constant or permeability of vacuum [N/A**2]       1.25663706143592E-06
+ Electric constant or permittivity of vacuum [F/m]          8.85418781762039E-12
+ Planck constant (h) [J*s]                                  6.62606896000000E-34
+ Planck constant (h-bar) [J*s]                              1.05457162825177E-34
+ Elementary charge [C]                                      1.60217648700000E-19
+ Electron mass [kg]                                         9.10938215000000E-31
+ Electron g factor [ ]                                     -2.00231930436220E+00
+ Proton mass [kg]                                           1.67262163700000E-27
+ Fine-structure constant                                    7.29735253760000E-03
+ Rydberg constant [1/m]                                     1.09737315685270E+07
+ Avogadro constant [1/mol]                                  6.02214179000000E+23
+ Boltzmann constant [J/K]                                   1.38065040000000E-23
+ Atomic mass unit [kg]                                      1.66053878200000E-27
+ Bohr radius [m]                                            5.29177208590000E-11
+
+ *** Conversion factors ***
+
+ [u] -> [a.u.]                                              1.82288848426455E+03
+ [Angstrom] -> [Bohr] = [a.u.]                              1.88972613288564E+00
+ [a.u.] = [Bohr] -> [Angstrom]                              5.29177208590000E-01
+ [a.u.] -> [s]                                              2.41888432650478E-17
+ [a.u.] -> [fs]                                             2.41888432650478E-02
+ [a.u.] -> [J]                                              4.35974393937059E-18
+ [a.u.] -> [N]                                              8.23872205491840E-08
+ [a.u.] -> [K]                                              3.15774647902944E+05
+ [a.u.] -> [kJ/mol]                                         2.62549961709828E+03
+ [a.u.] -> [kcal/mol]                                       6.27509468713739E+02
+ [a.u.] -> [Pa]                                             2.94210107994716E+13
+ [a.u.] -> [bar]                                            2.94210107994716E+08
+ [a.u.] -> [atm]                                            2.90362800883016E+08
+ [a.u.] -> [eV]                                             2.72113838565563E+01
+ [a.u.] -> [Hz]                                             6.57968392072181E+15
+ [a.u.] -> [1/cm] (wave numbers)                            2.19474631370540E+05
+ [a.u./Bohr**2] -> [1/cm]                                   5.14048714338585E+03
+
+
+ CELL_TOP| Volume [angstrom^3]:                                           40.888
+ CELL_TOP| Vector a [angstrom     0.000     2.734     2.734    |a| =       3.867
+ CELL_TOP| Vector b [angstrom     2.734     0.000     2.734    |b| =       3.867
+ CELL_TOP| Vector c [angstrom     2.734     2.734     0.000    |c| =       3.867
+ CELL_TOP| Angle (b,c), alpha [degree]:                                   60.000
+ CELL_TOP| Angle (a,c), beta  [degree]:                                   60.000
+ CELL_TOP| Angle (a,b), gamma [degree]:                                   60.000
+ CELL_TOP| Numerically orthorhombic:                                          NO
+
+ GENERATE|  Preliminary Number of Bonds generated:                             0
+ GENERATE|  Achieved consistency in connectivity generation.
+
+ CELL| Volume [angstrom^3]:                                               40.888
+ CELL| Vector a [angstrom]:       0.000     2.734     2.734    |a| =       3.867
+ CELL| Vector b [angstrom]:       2.734     0.000     2.734    |b| =       3.867
+ CELL| Vector c [angstrom]:       2.734     2.734     0.000    |c| =       3.867
+ CELL| Angle (b,c), alpha [degree]:                                       60.000
+ CELL| Angle (a,c), beta  [degree]:                                       60.000
+ CELL| Angle (a,b), gamma [degree]:                                       60.000
+ CELL| Numerically orthorhombic:                                              NO
+
+ CELL_REF| Volume [angstrom^3]:                                           40.888
+ CELL_REF| Vector a [angstrom     0.000     2.734     2.734    |a| =       3.867
+ CELL_REF| Vector b [angstrom     2.734     0.000     2.734    |b| =       3.867
+ CELL_REF| Vector c [angstrom     2.734     2.734     0.000    |c| =       3.867
+ CELL_REF| Angle (b,c), alpha [degree]:                                   60.000
+ CELL_REF| Angle (a,c), beta  [degree]:                                   60.000
+ CELL_REF| Angle (a,b), gamma [degree]:                                   60.000
+ CELL_REF| Numerically orthorhombic:                                          NO
+
+ *******************************************************************************
+ *******************************************************************************
+ **                                                                           **
+ **     #####                         ##              ##                      **
+ **    ##   ##            ##          ##              ##                      **
+ **   ##     ##                       ##            ######                    **
+ **   ##     ##  ##   ##  ##   #####  ##  ##   ####   ##    #####    #####    **
+ **   ##     ##  ##   ##  ##  ##      ## ##   ##      ##   ##   ##  ##   ##   **
+ **   ##  ## ##  ##   ##  ##  ##      ####     ###    ##   ######   ######    **
+ **    ##  ###   ##   ##  ##  ##      ## ##      ##   ##   ##       ##        **
+ **     #######   #####   ##   #####  ##  ##  ####    ##    #####   ##        **
+ **           ##                                                    ##        **
+ **                                                                           **
+ **                                                ... make the atoms dance   **
+ **                                                                           **
+ **            Copyright (C) by CP2K developers group (2000 - 2019)           **
+ **                                                                           **
+ *******************************************************************************
+
+ DFT| Spin unrestricted (spin-polarized) Kohn-Sham calculation               UKS
+ DFT| Multiplicity                                                             1
+ DFT| Number of spin states                                                    2
+ DFT| Charge                                                                   0
+ DFT| Self-interaction correction (SIC)                                       NO
+ DFT| Cutoffs: density                                              1.000000E-10
+ DFT|          gradient                                             1.000000E-10
+ DFT|          tau                                                  1.000000E-10
+ DFT|          cutoff_smoothing_range                               0.000000E+00
+ DFT| XC density smoothing                                                  NONE
+ DFT| XC derivatives                                                          PW
+ FUNCTIONAL| ROUTINE=NEW
+ FUNCTIONAL| PBE:
+ FUNCTIONAL| J.P.Perdew, K.Burke, M.Ernzerhof, Phys. Rev. Letter, vol. 77, n 18,
+ FUNCTIONAL|  pp. 3865-3868, (1996)sx=0.750sc=1.000{spin polarized}
+
+ QS| Method:                                                                 GPW
+ QS| Density plane wave grid type                        NON-SPHERICAL FULLSPACE
+ QS| Number of grid levels:                                                    5
+ QS| Density cutoff [a.u.]:                                                600.0
+ QS| Multi grid cutoff [a.u.]: 1) grid level                               600.0
+ QS|                           2) grid level                               200.0
+ QS|                           3) grid level                                66.7
+ QS|                           4) grid level                                22.2
+ QS|                           5) grid level                                 7.4
+ QS| Grid level progression factor:                                          3.0
+ QS| Relative density cutoff [a.u.]:                                        40.0
+ QS| Consistent realspace mapping and integration
+ QS| Interaction thresholds: eps_pgf_orb:                                1.0E-06
+ QS|                         eps_filter_matrix:                          0.0E+00
+ QS|                         eps_core_charge:                            1.0E-14
+ QS|                         eps_rho_gspace:                             1.0E-12
+ QS|                         eps_rho_rspace:                             1.0E-12
+ QS|                         eps_gvg_rspace:                             1.0E-06
+ QS|                         eps_ppl:                                    1.0E-02
+ QS|                         eps_ppnl:                                   1.0E-08
+
+  ----------------------------------- OT --------------------------------------
+  Minimizer      : DIIS                : direct inversion
+                                         in the iterative subspace
+                                         using   7 DIIS vectors
+                                         safer DIIS on
+  Preconditioner : FULL_ALL            : diagonalization, state selective
+  Precond_solver : DEFAULT
+  stepsize       :    0.15000000                  energy_gap     :    0.01000000
+  eps_taylor     :   0.10000E-15                  max_taylor     :             4
+  ----------------------------------- OT ---------------------------------------
+
+  Step     Update method      Time    Convergence         Total energy    Change
+  ------------------------------------------------------------------------------
+     1 OT DIIS     0.15E+00    2.2     0.19708244        -6.7988759893 -6.80E+00
+     2 OT DIIS     0.15E+00    4.0     0.13618305        -7.0486277841 -2.50E-01
+     3 OT DIIS     0.15E+00    4.0     0.06861931        -7.1578571109 -1.09E-01
+     4 OT DIIS     0.15E+00    4.0     0.03958475        -7.2143422453 -5.65E-02
+     5 OT DIIS     0.15E+00    4.0     0.02182841        -7.2321308930 -1.78E-02
+     6 OT DIIS     0.15E+00    4.0     0.00774376        -7.2376221384 -5.49E-03
+     7 OT DIIS     0.15E+00    4.0     0.00347918        -7.2385137294 -8.92E-04
+     8 OT DIIS     0.15E+00    4.0     0.00220374        -7.2386683039 -1.55E-04
+     8 OT DIIS     0.15E+00    4.0     0.00220374        -7.2386683039 -1.55E-04
+     8 OT DIIS     0.15E+00    4.0     0.00220374        -7.2386683039 -1.55E-04
+     8 OT DIIS     0.15E+00    4.0     0.00220374        -7.2386683039 -1.55E-04
+
+ ----------------------------------- OT --------------------------------------
+  Minimizer      : DIIS                : direct inversion
+                                         in the iterative subspace
+                                         using   7 DIIS vectors
+                                         safer DIIS on
+  Preconditioner : FULL_ALL            : diagonalization, state selective
+  Precond_solver : DEFAULT
+  stepsize       :    0.15000000                  energy_gap     :    0.01000000
+  eps_taylor     :   0.10000E-15                  max_taylor     :             4
+  ----------------------------------- OT ---------------------------------------
+
+  Step     Update method      Time    Convergence         Total energy    Change
+  ------------------------------------------------------------------------------
+     1 OT DIIS     0.15E+00    2.2     0.19708244        -6.7988759893 -6.80E+00
+     2 OT DIIS     0.15E+00    4.0     0.13618305        -7.0486277841 -2.50E-01
+     3 OT DIIS     0.15E+00    4.0     0.06861931        -7.1578571109 -1.09E-01
+     4 OT DIIS     0.15E+00    4.0     0.03958475        -7.2143422453 -5.65E-02
+     5 OT DIIS     0.15E+00    4.0     0.02182841        -7.2321308930 -1.78E-02
+     6 OT DIIS     0.15E+00    4.0     0.00774376        -7.2376221384 -5.49E-03
+     7 OT DIIS     0.15E+00    4.0     0.00347918        -7.2385137294 -8.92E-04
+     8 OT DIIS     0.15E+00    4.0     0.00220374        -7.2386683039 -1.55E-04
+     8 OT DIIS     0.15E+00    4.0     0.00220374        -7.2386683039 -1.55E-04
+     8 OT DIIS     0.15E+00    4.0     0.00220374        -7.2386683039 -1.55E-04
+     8 OT DIIS     0.15E+00    4.0     0.00220375        -7.2386683039 -1.55E-04
+

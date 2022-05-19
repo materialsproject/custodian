@@ -307,6 +307,11 @@ class VaspJob(Job):
             half_kpts_first_relax (bool): Whether to halve the kpoint grid
                 for the first relaxation. Speeds up difficult convergence
                 considerably. Defaults to False.
+            auto_continue (bool): Whether to automatically continue a run
+                if a STOPCAR is present. This is very useful if using the
+                wall-time handler which will write a read-only STOPCAR to
+                prevent VASP from deleting it once it finishes. Defaults to
+                False.
 
         Returns:
             List of two jobs corresponding to an AFLOW style run.
@@ -661,7 +666,11 @@ class VaspJob(Job):
         """
         Ensure all vasp jobs are killed.
         """
-        for k in self.vasp_cmd:
+        logger.info("Custodian terminating all VASP jobs")
+        cmds = self.vasp_cmd
+        if self.gamma_vasp_cmd:
+            cmds += self.gamma_vasp_cmd
+        for k in cmds:
             if "vasp" in k:
                 try:
                     os.system(f"killall {k}")
@@ -669,7 +678,7 @@ class VaspJob(Job):
                     pass
 
 
-class VaspNEBJob(Job):
+class VaspNEBJob(VaspJob):
     """
     A NEB vasp job, especially for CI-NEB running at PBS clusters.
     The class is added for the purpose of handling a different folder
