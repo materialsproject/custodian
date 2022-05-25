@@ -233,7 +233,9 @@ class QCJob(Job):
         freq_rem["job_type"] = "freq"
         opt_rem = copy.deepcopy(orig_input.rem)
         opt_rem["job_type"] = opt_method
-        opt_rem.pop("geom_opt2", None)
+        # Next two lines will be removed once Q-Chem 6 is released:
+        if linked:
+            opt_rem.pop("geom_opt2", None)
         first = True
         energy_history = []
 
@@ -333,6 +335,8 @@ class QCJob(Job):
                 if indata.rem["scf_algorithm"] != freq_rem["scf_algorithm"]:
                     freq_rem["scf_algorithm"] = indata.rem["scf_algorithm"]
                     opt_rem["scf_algorithm"] = indata.rem["scf_algorithm"]
+                if "cpscf_nseg" in indata.rem:
+                    freq_rem["cpscf_nseg"] = indata.rem["cpscf_nseg"]
                 errors = outdata.get("errors")
                 if len(errors) != 0:
                     raise AssertionError("No errors should be encountered while flattening frequencies!")
@@ -359,7 +363,7 @@ class QCJob(Job):
                         vdw_mode=orig_input.vdw_mode,
                         van_der_waals=orig_input.van_der_waals,
                         nbo=orig_input.nbo,
-                        # geom_opt=orig_input.geom_opt,
+                        # geom_opt=orig_input.geom_opt, # Will be uncommented once Q-Chem 6 is released
                     )
                     opt_QCInput.write_file(input_file)
                 else:
@@ -384,7 +388,7 @@ class QCJob(Job):
                         vdw_mode=orig_input.vdw_mode,
                         van_der_waals=orig_input.van_der_waals,
                         nbo=orig_input.nbo,
-                        # geom_opt=orig_input.geom_opt,
+                        # geom_opt=orig_input.geom_opt, # Will be uncommented once Q-Chem 6 is released
                     )
                     opt_QCInput.write_file(input_file)
             if not save_final_scratch:
@@ -445,6 +449,9 @@ class QCJob(Job):
                     )
                 )
                 outdata = QCOutput(output_file + ".freq_" + str(ii)).data
+                indata = QCInput.from_file(input_file + ".freq_" + str(ii))
+                if "cpscf_nseg" in indata.rem:
+                    freq_rem["cpscf_nseg"] = indata.rem["cpscf_nseg"]
                 errors = outdata.get("errors")
                 if len(errors) != 0:
                     raise AssertionError("No errors should be encountered while flattening frequencies!")
@@ -605,6 +612,6 @@ class QCJob(Job):
                     vdw_mode=orig_opt_input.vdw_mode,
                     van_der_waals=orig_opt_input.van_der_waals,
                     nbo=orig_input.nbo,
-                    # geom_opt=orig_input.geom_opt,
+                    geom_opt=orig_input.geom_opt,
                 )
                 new_opt_QCInput.write_file(input_file)
