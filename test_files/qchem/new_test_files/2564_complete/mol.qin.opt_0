@@ -17,4 +17,5 @@ $rem
    method = wb97xd
    geom_opt_max_cycles = 200
    thresh = 14
+   s2thresh = 16
 $end

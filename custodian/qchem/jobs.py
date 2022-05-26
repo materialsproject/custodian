@@ -46,6 +46,7 @@ class QCJob(Job):
         qclog_file="mol.qclog",
         suffix="",
         calc_loc=None,
+        nboexe=None,
         save_scratch=False,
         backup=True,
     ):
@@ -61,12 +62,22 @@ class QCJob(Job):
             suffix (str): String to append to the file in postprocess.
             calc_loc (str): Path where Q-Chem should run. Defaults to None, in
                 which case Q-Chem will run in the system-defined QCLOCALSCR.
+            nboexe (str): Path to the NBO7 executable. Defaults to None.
             save_scratch (bool): Whether to save full scratch directory contents.
                 Defaults to False.
             backup (bool): Whether to backup the initial input file. If True, the
                 input will be copied with a ".orig" appended. Defaults to True.
         """
-        self.qchem_command = qchem_command.split(" ")
+        try:
+            self.qchem_command = qchem_command.split(" ")
+        except AttributeError:
+            if isinstance(qchem_command, list):
+                for val in qchem_command:
+                    if not isinstance(val, str):
+                        raise ValueError("Must either pass a string or a list of strings")
+            else:
+                raise ValueError("Must either pass a string or a list of strings")
+            self.qchem_command = qchem_command
         self.multimode = multimode
         self.input_file = input_file
         self.output_file = output_file
@@ -74,6 +85,7 @@ class QCJob(Job):
         self.qclog_file = qclog_file
         self.suffix = suffix
         self.calc_loc = calc_loc
+        self.nboexe = nboexe
         self.save_scratch = save_scratch
         self.backup = backup
 
@@ -102,6 +114,15 @@ class QCJob(Job):
         os.environ["QCSCRATCH"] = os.getcwd()
         if self.calc_loc is not None:
             os.environ["QCLOCALSCR"] = self.calc_loc
+        qcinp = QCInput.from_file(self.input_file)
+        if (
+            qcinp.rem.get("run_nbo6", "none").lower() == "true"
+            or qcinp.rem.get("nbo_external", "none").lower() == "true"
+        ):
+            os.environ["KMP_INIT_AT_FORK"] = "FALSE"
+            if self.nboexe is None:
+                raise RuntimeError("Trying to run NBO7 without providing NBOEXE in fworker! Exiting...")
+            os.environ["NBOEXE"] = self.nboexe
 
     def postprocess(self):
         """
@@ -205,13 +226,16 @@ class QCJob(Job):
             opt_method = "opt"
             perturb_index = 0
 
-        energy_diff_cutoff = 0.0000001
+        energy_diff_cutoff = 0.000001
 
         orig_input = QCInput.from_file(input_file)
         freq_rem = copy.deepcopy(orig_input.rem)
         freq_rem["job_type"] = "freq"
         opt_rem = copy.deepcopy(orig_input.rem)
         opt_rem["job_type"] = opt_method
+        # Next two lines will be removed once Q-Chem 6 is released:
+        if linked:
+            opt_rem.pop("geom_opt2", None)
         first = True
         energy_history = []
 
@@ -245,6 +269,7 @@ class QCJob(Job):
                 smx=orig_input.smx,
                 vdw_mode=orig_input.vdw_mode,
                 van_der_waals=orig_input.van_der_waals,
+                nbo=orig_input.nbo,
             )
             opt_QCInput.write_file(input_file)
             first = False
@@ -289,6 +314,7 @@ class QCJob(Job):
                     smx=orig_input.smx,
                     vdw_mode=orig_input.vdw_mode,
                     van_der_waals=orig_input.van_der_waals,
+                    nbo=orig_input.nbo,
                 )
                 freq_QCInput.write_file(input_file)
                 yield (
@@ -309,6 +335,8 @@ class QCJob(Job):
                 if indata.rem["scf_algorithm"] != freq_rem["scf_algorithm"]:
                     freq_rem["scf_algorithm"] = indata.rem["scf_algorithm"]
                     opt_rem["scf_algorithm"] = indata.rem["scf_algorithm"]
+                if "cpscf_nseg" in indata.rem:
+                    freq_rem["cpscf_nseg"] = indata.rem["cpscf_nseg"]
                 errors = outdata.get("errors")
                 if len(errors) != 0:
                     raise AssertionError("No errors should be encountered while flattening frequencies!")
@@ -334,6 +362,8 @@ class QCJob(Job):
                         smx=orig_input.smx,
                         vdw_mode=orig_input.vdw_mode,
                         van_der_waals=orig_input.van_der_waals,
+                        nbo=orig_input.nbo,
+                        # geom_opt=orig_input.geom_opt, # Will be uncommented once Q-Chem 6 is released
                     )
                     opt_QCInput.write_file(input_file)
                 else:
@@ -357,6 +387,8 @@ class QCJob(Job):
                         smx=orig_input.smx,
                         vdw_mode=orig_input.vdw_mode,
                         van_der_waals=orig_input.van_der_waals,
+                        nbo=orig_input.nbo,
+                        # geom_opt=orig_input.geom_opt, # Will be uncommented once Q-Chem 6 is released
                     )
                     opt_QCInput.write_file(input_file)
             if not save_final_scratch:
@@ -401,6 +433,7 @@ class QCJob(Job):
                     smx=orig_opt_input.smx,
                     vdw_mode=orig_opt_input.vdw_mode,
                     van_der_waals=orig_opt_input.van_der_waals,
+                    nbo=orig_input.nbo,
                 )
                 freq_QCInput.write_file(input_file)
                 yield (
@@ -416,6 +449,9 @@ class QCJob(Job):
                     )
                 )
                 outdata = QCOutput(output_file + ".freq_" + str(ii)).data
+                indata = QCInput.from_file(input_file + ".freq_" + str(ii))
+                if "cpscf_nseg" in indata.rem:
+                    freq_rem["cpscf_nseg"] = indata.rem["cpscf_nseg"]
                 errors = outdata.get("errors")
                 if len(errors) != 0:
                     raise AssertionError("No errors should be encountered while flattening frequencies!")
@@ -575,5 +611,7 @@ class QCJob(Job):
                     smx=orig_opt_input.smx,
                     vdw_mode=orig_opt_input.vdw_mode,
                     van_der_waals=orig_opt_input.van_der_waals,
+                    nbo=orig_input.nbo,
+                    geom_opt=orig_input.geom_opt,
                 )
                 new_opt_QCInput.write_file(input_file)

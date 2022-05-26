@@ -27,6 +27,7 @@ $rem
    ideriv = 1
    scf_guess = read
    thresh = 14
+   s2thresh = 16
 $end
 
 $smx
