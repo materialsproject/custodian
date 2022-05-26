@@ -226,7 +226,7 @@ class QCJob(Job):
             opt_method = "opt"
             perturb_index = 0
 
-        energy_diff_cutoff = 0.0000001
+        energy_diff_cutoff = 0.000001
 
         orig_input = QCInput.from_file(input_file)
         freq_rem = copy.deepcopy(orig_input.rem)
