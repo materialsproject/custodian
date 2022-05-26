@@ -123,7 +123,7 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.rem.pop("scf_algorithm", None)
                 self.qcinp.rem["gen_scfman_hybrid_algo"] = "true"
                 self.qcinp.rem["gen_scfman_algo_1"] = "gdm"
-                self.qcinp.rem["gen_scfman_conv_1"] = "5"
+                self.qcinp.rem["gen_scfman_conv_1"] = "4"
                 self.qcinp.rem["gen_scfman_iter_1"] = "50"
                 self.qcinp.rem["gen_scfman_algo_2"] = "diis"
                 self.qcinp.rem["gen_scfman_conv_2"] = "8"
