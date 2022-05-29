@@ -294,9 +294,35 @@ class QCJob(Job):
                 )
                 opt_outdata = QCOutput(output_file + f".{opt_method}_" + str(ii)).data
                 opt_indata = QCInput.from_file(input_file + f".{opt_method}_" + str(ii))
-                if opt_indata.rem["scf_algorithm"] != freq_rem["scf_algorithm"]:
-                    freq_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
-                    opt_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
+                try:
+                    if opt_indata.rem["scf_algorithm"] != freq_rem["scf_algorithm"]:
+                        freq_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
+                        opt_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
+                except KeyError:
+                    opt_scf_alg = "diis"
+                    freq_scf_alg = "diis"
+                    if "scf_algorithm" not in opt_indata.rem:
+                        if opt_indata.rem.get("gen_scfman_hybrid_algo", "false") == "true":
+                            opt_scf_alg = "custom_gdm_diis"
+                    else:
+                        opt_scf_alg = opt_indata.rem["scf_algorithm"]
+                    if "scf_algorithm" not in freq_rem:
+                        if freq_rem.get("gen_scfman_hybrid_algo", "false") == "true":
+                            freq_scf_alg = "custom_gdm_diis"
+                    else:
+                        freq_scf_alg = freq_rem["scf_algorithm"]
+                    if opt_scf_alg != freq_scf_alg:
+                        if opt_scf_alg == "custom_gdm_diis":
+                            freq_rem.pop("scf_algorithm", None)
+                            freq_rem["gen_scfman_hybrid_algo"] = "true"
+                            freq_rem["gen_scfman_algo_1"] = "gdm"
+                            freq_rem["gen_scfman_conv_1"] = "4"
+                            freq_rem["gen_scfman_iter_1"] = "50"
+                            freq_rem["gen_scfman_algo_2"] = "diis"
+                            freq_rem["gen_scfman_conv_2"] = "8"
+                            freq_rem["gen_scfman_iter_2"] = "50"
+                    else:
+                        raise RuntimeError("Not sure how to handle SCF alg difference!")
                 first = False
                 if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
                     if not transition_state:
