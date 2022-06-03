@@ -1,0 +1,164 @@
+[
+    {
+        "job": {
+            "@module": "custodian.qchem.jobs",
+            "@class": "QCJob",
+            "@version": "2022.5.17",
+            "qchem_command": [
+                "qchem"
+            ],
+            "max_cores": 40,
+            "multimode": "openmp",
+            "input_file": "mol.qin",
+            "output_file": "mol.qout",
+            "qclog_file": "mol.qclog",
+            "suffix": ".opt_0",
+            "calc_loc": "/tmp",
+            "nboexe": "/clusterfs/mp/software/nbo7/bin/nbo7.i4.exe",
+            "save_scratch": true,
+            "backup": true
+        },
+        "corrections": [
+            {
+                "errors": [
+                    "back_transform_error"
+                ],
+                "warnings": {},
+                "actions": [
+                    {
+                        "molecule": "molecule_from_last_geometry"
+                    },
+                    {
+                        "scf_algorithm": "diis_gdm"
+                    }
+                ],
+                "handler": {
+                    "@module": "custodian.qchem.handlers",
+                    "@class": "QChemErrorHandler",
+                    "@version": "2022.5.17",
+                    "input_file": "mol.qin",
+                    "output_file": "mol.qout",
+                    "scf_max_cycles": 100,
+                    "geom_max_cycles": 200
+                }
+            },
+            {
+                "errors": [
+                    "SCF_failed_to_converge"
+                ],
+                "warnings": {},
+                "actions": [
+                    {
+                        "scf_algorithm": "custom_gdm_diis"
+                    }
+                ],
+                "handler": {
+                    "@module": "custodian.qchem.handlers",
+                    "@class": "QChemErrorHandler",
+                    "@version": "2022.5.17",
+                    "input_file": "mol.qin",
+                    "output_file": "mol.qout",
+                    "scf_max_cycles": 100,
+                    "geom_max_cycles": 200
+                }
+            },
+            {
+                "errors": [
+                    "back_transform_error"
+                ],
+                "warnings": {},
+                "actions": [
+                    {
+                        "molecule": "molecule_from_last_geometry"
+                    },
+                    {
+                        "scf_algorithm": "diis_gdm"
+                    }
+                ],
+                "handler": {
+                    "@module": "custodian.qchem.handlers",
+                    "@class": "QChemErrorHandler",
+                    "@version": "2022.5.17",
+                    "input_file": "mol.qin",
+                    "output_file": "mol.qout",
+                    "scf_max_cycles": 100,
+                    "geom_max_cycles": 200
+                }
+            }
+        ],
+        "handler": null,
+        "validator": null,
+        "max_errors": false,
+        "max_errors_per_job": false,
+        "max_errors_per_handler": false,
+        "nonzero_return_code": false
+    },
+    {
+        "job": {
+            "@module": "custodian.qchem.jobs",
+            "@class": "QCJob",
+            "@version": "2022.5.17",
+            "qchem_command": [
+                "qchem"
+            ],
+            "max_cores": 40,
+            "multimode": "openmp",
+            "input_file": "mol.qin",
+            "output_file": "mol.qout",
+            "qclog_file": "mol.qclog",
+            "suffix": ".freq_0",
+            "calc_loc": "/tmp",
+            "nboexe": "/clusterfs/mp/software/nbo7/bin/nbo7.i4.exe",
+            "save_scratch": true,
+            "backup": false
+        },
+        "corrections": [
+            {
+                "errors": [
+                    "SCF_failed_to_converge"
+                ],
+                "warnings": {},
+                "actions": [
+                    {
+                        "scf_algorithm": "custom_gdm_diis"
+                    }
+                ],
+                "handler": {
+                    "@module": "custodian.qchem.handlers",
+                    "@class": "QChemErrorHandler",
+                    "@version": "2022.5.17",
+                    "input_file": "mol.qin",
+                    "output_file": "mol.qout",
+                    "scf_max_cycles": 100,
+                    "geom_max_cycles": 200
+                }
+            },
+            {
+                "errors": [
+                    "failed_cpscf"
+                ],
+                "warnings": {},
+                "actions": [
+                    {
+                        "cpscf_nseg": "3"
+                    }
+                ],
+                "handler": {
+                    "@module": "custodian.qchem.handlers",
+                    "@class": "QChemErrorHandler",
+                    "@version": "2022.5.17",
+                    "input_file": "mol.qin",
+                    "output_file": "mol.qout",
+                    "scf_max_cycles": 100,
+                    "geom_max_cycles": 200
+                }
+            }
+        ],
+        "handler": null,
+        "validator": null,
+        "max_errors": false,
+        "max_errors_per_job": false,
+        "max_errors_per_handler": false,
+        "nonzero_return_code": false
+    }
+]
