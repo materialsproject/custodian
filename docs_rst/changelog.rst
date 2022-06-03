@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v2022.5.26
+----------
+* PR #219 from @samblau. Q-Chem updates to NBO, new geometry optimizer, revamped SCF error handling.
+
 v2022.5.17
 ----------
 * PR #220 from @yury-lysogorskiy. Fix for NBANDS when NBANDS is very small. 
