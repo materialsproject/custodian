@@ -28,13 +28,13 @@ class QChemErrorHandlerTest(TestCase):
         os.chdir(scr_dir)
 
     def _check_equivalent_inputs(self, input1, input2):
-    QCinput1 = QCInput.from_file(input1)
-    QCinput2 = QCInput.from_file(input2)
-    sections1 = QCInput.find_sections(QCinput1.get_string())
-    sections2 = QCInput.find_sections(QCinput2.get_string())
-    self.assertEqual(sections1, sections2)
-    for key in sections1:
-        self.assertEqual(QCinput1.as_dict().get(key), QCinput2.as_dict().get(key))
+        QCinput1 = QCInput.from_file(input1)
+        QCinput2 = QCInput.from_file(input2)
+        sections1 = QCInput.find_sections(QCinput1.get_string())
+        sections2 = QCInput.find_sections(QCinput2.get_string())
+        self.assertEqual(sections1, sections2)
+        for key in sections1:
+            self.assertEqual(QCinput1.as_dict().get(key), QCinput2.as_dict().get(key))
 
     def test_unable_to_determine_lamda(self):
         for ii in range(2):
