@@ -321,8 +321,16 @@ class QCJob(Job):
                             freq_rem["gen_scfman_algo_2"] = "diis"
                             freq_rem["gen_scfman_conv_2"] = "8"
                             freq_rem["gen_scfman_iter_2"] = "50"
-                    else:
-                        raise RuntimeError("Not sure how to handle SCF alg difference!")
+                            opt_rem.pop("scf_algorithm", None)
+                            opt_rem["gen_scfman_hybrid_algo"] = "true"
+                            opt_rem["gen_scfman_algo_1"] = "gdm"
+                            opt_rem["gen_scfman_conv_1"] = "4"
+                            opt_rem["gen_scfman_iter_1"] = "50"
+                            opt_rem["gen_scfman_algo_2"] = "diis"
+                            opt_rem["gen_scfman_conv_2"] = "8"
+                            opt_rem["gen_scfman_iter_2"] = "50"
+                        else:
+                            raise RuntimeError("Not sure how to handle SCF alg difference!")
                 first = False
                 if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
                     if not transition_state:
@@ -356,19 +364,55 @@ class QCJob(Job):
                         **QCJob_kwargs,
                     )
                 )
-                outdata = QCOutput(output_file + ".freq_" + str(ii)).data
-                indata = QCInput.from_file(input_file + ".freq_" + str(ii))
-                if indata.rem["scf_algorithm"] != freq_rem["scf_algorithm"]:
-                    freq_rem["scf_algorithm"] = indata.rem["scf_algorithm"]
-                    opt_rem["scf_algorithm"] = indata.rem["scf_algorithm"]
-                if "cpscf_nseg" in indata.rem:
-                    freq_rem["cpscf_nseg"] = indata.rem["cpscf_nseg"]
-                errors = outdata.get("errors")
+
+                freq_outdata = QCOutput(output_file + ".freq_" + str(ii)).data
+                freq_indata = QCInput.from_file(input_file + ".freq_" + str(ii))
+                try:
+                    if freq_indata.rem["scf_algorithm"] != opt_rem["scf_algorithm"]:
+                        opt_rem["scf_algorithm"] = freq_indata.rem["scf_algorithm"]
+                        freq_rem["scf_algorithm"] = freq_indata.rem["scf_algorithm"]
+                except KeyError:
+                    opt_scf_alg = "diis"
+                    freq_scf_alg = "diis"
+                    if "scf_algorithm" not in opt_indata.rem:
+                        if opt_indata.rem.get("gen_scfman_hybrid_algo", "false") == "true":
+                            opt_scf_alg = "custom_gdm_diis"
+                    else:
+                        opt_scf_alg = opt_indata.rem["scf_algorithm"]
+                    if "scf_algorithm" not in freq_rem:
+                        if freq_rem.get("gen_scfman_hybrid_algo", "false") == "true":
+                            freq_scf_alg = "custom_gdm_diis"
+                    else:
+                        freq_scf_alg = freq_rem["scf_algorithm"]
+                    if opt_scf_alg != freq_scf_alg:
+                        if freq_scf_alg == "custom_gdm_diis":
+                            opt_rem.pop("scf_algorithm", None)
+                            opt_rem["gen_scfman_hybrid_algo"] = "true"
+                            opt_rem["gen_scfman_algo_1"] = "gdm"
+                            opt_rem["gen_scfman_conv_1"] = "4"
+                            opt_rem["gen_scfman_iter_1"] = "50"
+                            opt_rem["gen_scfman_algo_2"] = "diis"
+                            opt_rem["gen_scfman_conv_2"] = "8"
+                            opt_rem["gen_scfman_iter_2"] = "50"
+                            freq_rem.pop("scf_algorithm", None)
+                            freq_rem["gen_scfman_hybrid_algo"] = "true"
+                            freq_rem["gen_scfman_algo_1"] = "gdm"
+                            freq_rem["gen_scfman_conv_1"] = "4"
+                            freq_rem["gen_scfman_iter_1"] = "50"
+                            freq_rem["gen_scfman_algo_2"] = "diis"
+                            freq_rem["gen_scfman_conv_2"] = "8"
+                            freq_rem["gen_scfman_iter_2"] = "50"
+                        else:
+                            raise RuntimeError("Not sure how to handle SCF alg difference!")
+
+                if "cpscf_nseg" in freq_indata.rem:
+                    freq_rem["cpscf_nseg"] = freq_indata.rem["cpscf_nseg"]
+                errors = freq_outdata.get("errors")
                 if len(errors) != 0:
                     raise AssertionError("No errors should be encountered while flattening frequencies!")
                 if not transition_state:
-                    freq_0 = outdata.get("frequencies")[0]
-                    freq_1 = outdata.get("frequencies")[1]
+                    freq_0 = freq_outdata.get("frequencies")[0]
+                    freq_1 = freq_outdata.get("frequencies")[1]
                     if freq_0 > 0.0:
                         warnings.warn("All frequencies positive!")
                         break
@@ -393,9 +437,9 @@ class QCJob(Job):
                     )
                     opt_QCInput.write_file(input_file)
                 else:
-                    freq_0 = outdata.get("frequencies")[0]
-                    freq_1 = outdata.get("frequencies")[1]
-                    freq_2 = outdata.get("frequencies")[2]
+                    freq_0 = freq_outdata.get("frequencies")[0]
+                    freq_1 = freq_outdata.get("frequencies")[1]
+                    freq_2 = freq_outdata.get("frequencies")[2]
                     if freq_0 < 0.0 < freq_1:
                         warnings.warn("Saddle point found!")
                         break

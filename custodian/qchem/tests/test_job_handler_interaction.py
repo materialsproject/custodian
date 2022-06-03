@@ -98,6 +98,10 @@ class custom_GDM_DIIS_FFopt_with_handlers(TestCase):
             os.path.join(test_dir, "custom_gdm_diis_FFopt/mol.qout.freq_0"),
             os.path.join(scr_dir, "mol.qout.freq_0"),
         )
+        shutil.copyfile(
+            os.path.join(test_dir, "custom_gdm_diis_FFopt/mol.qin.opt_1"),
+            os.path.join(scr_dir, "mol.qin.opt_1"),
+        )
         os.chdir(scr_dir)
 
     def tearDown(self):
@@ -203,7 +207,7 @@ class custom_GDM_DIIS_FFopt_with_handlers(TestCase):
         ).as_dict()
         self.assertEqual(next(myjob).as_dict(), expected_next)
 
-        # self.assertRaises(StopIteration, myjob.__next__)
+        self._check_equivalent_inputs("mol.qin", "mol.qin.opt_1")
 
 
 if __name__ == "__main__":
