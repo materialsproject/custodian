@@ -66,7 +66,7 @@ class Modder:
         """
         for action, settings in modification.items():
             if action in self.supported_actions:
-                self.supported_actions[action].__call__(obj, settings)
+                self.supported_actions[action](obj, settings)
             elif self.strict:
                 raise ValueError(f"{action} is not a supported action!")
 

@@ -602,7 +602,7 @@ class AliasingErrorHandlerTest(unittest.TestCase):
 
 
 class UnconvergedErrorHandlerTest(unittest.TestCase):
-    def setUp(cls):
+    def setUp(self):
         if "PMG_VASP_PSP_DIR" not in os.environ:
             os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
@@ -743,7 +743,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
 
 
 class IncorrectSmearingHandlerTest(unittest.TestCase):
-    def setUp(cls):
+    def setUp(self):
         if "PMG_VASP_PSP_DIR" not in os.environ:
             os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
@@ -771,7 +771,8 @@ class IncorrectSmearingHandlerTest(unittest.TestCase):
 
 
 class IncorrectSmearingHandlerStaticTest(unittest.TestCase):
-    def setUp(cls):
+
+    def setUp(self):
         if "PMG_VASP_PSP_DIR" not in os.environ:
             os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
@@ -785,8 +786,7 @@ class IncorrectSmearingHandlerStaticTest(unittest.TestCase):
         h = IncorrectSmearingHandler()
         self.assertFalse(h.check())
 
-    @classmethod
-    def tearDown(cls):
+    def tearDown(self):
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("vasprun.xml.orig", "vasprun.xml")
         clean_dir()
@@ -794,7 +794,7 @@ class IncorrectSmearingHandlerStaticTest(unittest.TestCase):
 
 
 class IncorrectSmearingHandlerFermiTest(unittest.TestCase):
-    def setUp(cls):
+    def setUp(self):
         if "PMG_VASP_PSP_DIR" not in os.environ:
             os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
@@ -808,8 +808,7 @@ class IncorrectSmearingHandlerFermiTest(unittest.TestCase):
         h = IncorrectSmearingHandler()
         self.assertFalse(h.check())
 
-    @classmethod
-    def tearDown(cls):
+    def tearDown(self):
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("vasprun.xml.orig", "vasprun.xml")
         clean_dir()
@@ -817,7 +816,7 @@ class IncorrectSmearingHandlerFermiTest(unittest.TestCase):
 
 
 class ScanMetalHandlerTest(unittest.TestCase):
-    def setUp(cls):
+    def setUp(self):
         if "PMG_VASP_PSP_DIR" not in os.environ:
             os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
@@ -835,8 +834,7 @@ class ScanMetalHandlerTest(unittest.TestCase):
         self.assertEqual(Incar.from_file("INCAR")["KSPACING"], 0.22)
         os.remove("vasprun.xml")
 
-    @classmethod
-    def tearDown(cls):
+    def tearDown(self):
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("vasprun.xml.orig", "vasprun.xml")
         clean_dir()
@@ -844,7 +842,7 @@ class ScanMetalHandlerTest(unittest.TestCase):
 
 
 class LargeSigmaHandlerTest(unittest.TestCase):
-    def setUp(cls):
+    def setUp(self):
         if "PMG_VASP_PSP_DIR" not in os.environ:
             os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
@@ -862,8 +860,7 @@ class LargeSigmaHandlerTest(unittest.TestCase):
         self.assertEqual(Incar.from_file("INCAR")["SIGMA"], 1.44)
         os.remove("vasprun.xml")
 
-    @classmethod
-    def tearDown(cls):
+    def tearDown(self):
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("vasprun.xml.orig", "vasprun.xml")
         clean_dir()
@@ -1002,7 +999,7 @@ class WalltimeHandlerTest(unittest.TestCase):
 
 
 class PositiveEnergyHandlerTest(unittest.TestCase):
-    def setUp(cls):
+    def setUp(self):
         os.chdir(test_dir)
 
     def test_check_correct(self):
@@ -1031,7 +1028,7 @@ class PositiveEnergyHandlerTest(unittest.TestCase):
 
 
 class PotimHandlerTest(unittest.TestCase):
-    def setUp(cls):
+    def setUp(self):
         os.chdir(test_dir)
 
     def test_check_correct(self):

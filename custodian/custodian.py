@@ -691,7 +691,7 @@ class Job(MSONable):
         etc.
         """
 
-    def terminate(self):  # pylint: disable=R0201
+    def terminate(self):
         """
         Implement termination function.
         """

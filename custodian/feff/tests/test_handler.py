@@ -21,7 +21,7 @@ def clean_dir():
 
 
 class UnconvergedErrorHandlerTest(unittest.TestCase):
-    def setUp(cls):
+    def setUp(self):
         os.chdir(test_dir)
         subdir = os.path.join(test_dir, "feff_unconverge")
         os.chdir(subdir)
