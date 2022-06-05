@@ -3,7 +3,9 @@ Validators for CP2K calculations.
 """
 
 from abc import abstractmethod, abstractproperty
+
 from pymatgen.io.cp2k.outputs import Cp2kOutput
+
 from custodian.custodian import Validator
 
 __author__ = "Nicholas Winner"
@@ -23,28 +25,24 @@ class Cp2kValidator(Validator):
         Check whether validation failed. Here, True means
         validation failed.
         """
-        pass
 
     @abstractproperty
     def kill(self):
         """
         Kill the job with raise error.
         """
-        pass
 
     @abstractproperty
     def exit(self):
         """
         Don't raise error, but exit the job
         """
-        pass
 
     @abstractproperty
     def no_children(self):
         """
         Job should not have children
         """
-        pass
 
 
 class Cp2kOutputValidator(Cp2kValidator):

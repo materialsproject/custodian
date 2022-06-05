@@ -1,26 +1,26 @@
-# coding: utf-8
 # Copyright (c) Pymatgen Development Team.
 # Distributed under the terms of the MIT License.
 
+import glob
 import os
+import shutil
 import time
 import unittest
-import glob
-import shutil
-from pathlib import Path
 import warnings
+from pathlib import Path
 
-from custodian.cp2k.interpreter import Cp2kModder
-from custodian.cp2k.handlers import (
-    FrozenJobErrorHandler,
-    UnconvergedScfErrorHandler,
-    AbortHandler,
-    NumericalPrecisionHandler,
-    StdErrHandler,
-    get_conv,
-)
 from pymatgen.io.cp2k.inputs import Keyword, KeywordList
 from pymatgen.io.cp2k.sets import StaticSet
+
+from custodian.cp2k.handlers import (
+    AbortHandler,
+    FrozenJobErrorHandler,
+    NumericalPrecisionHandler,
+    StdErrHandler,
+    UnconvergedScfErrorHandler,
+    get_conv,
+)
+from custodian.cp2k.interpreter import Cp2kModder
 
 
 def clean_dir(d):

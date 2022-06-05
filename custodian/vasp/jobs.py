@@ -7,9 +7,9 @@ import math
 import os
 import shutil
 import subprocess
+from shutil import which
 
 import numpy as np
-from monty.os.path import which
 from monty.serialization import dumpfn, loadfn
 from monty.shutil import decompress_dir
 from pymatgen.core.structure import Structure
@@ -900,7 +900,6 @@ class GenerateVaspInputJob(Job):
         """
         Dummy setup
         """
-        pass
 
     def run(self):
         """
@@ -921,4 +920,3 @@ class GenerateVaspInputJob(Job):
         """
         Dummy postprocess.
         """
-        pass

@@ -74,7 +74,6 @@ class VaspFilesValidator(Validator):
         """
         Dummy init
         """
-        pass
 
     def check(self):
         """
@@ -96,7 +95,6 @@ class VaspNpTMDValidator(Validator):
         """
         Dummy init.
         """
-        pass
 
     def check(self):
         """
@@ -124,7 +122,6 @@ class VaspAECCARValidator(Validator):
         """
         Dummy init
         """
-        pass
 
     def check(self):
         """

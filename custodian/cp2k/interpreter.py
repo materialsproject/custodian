@@ -3,7 +3,8 @@ CP2K adapted interpreter and modder for custodian.
 """
 
 from pymatgen.io.cp2k.inputs import Cp2kInput
-from custodian.ansible.actions import FileActions, DictActions
+
+from custodian.ansible.actions import DictActions, FileActions
 from custodian.ansible.interpreter import Modder
 from custodian.cp2k.utils import cleanup_input
 

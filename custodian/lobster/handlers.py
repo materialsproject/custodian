@@ -53,7 +53,6 @@ class LobsterFilesValidator(Validator):
         """
         Dummy init
         """
-        pass
 
     def check(self) -> bool:
         """
