@@ -1721,7 +1721,6 @@ class StoppedRunHandler(ErrorHandler):
         """
         Dummy init.
         """
-        pass
 
     def check(self):
         """

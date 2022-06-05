@@ -14,23 +14,23 @@ When adding more remember the following tips:
     benefits like writing a wavefunction restart file before quiting.
 """
 
+import itertools
 import os
+import re
 import time
 from typing import Sequence
-import itertools
-import re
-import numpy as np
 
-from monty.re import regrep
+import numpy as np
 from monty.os.path import zpath
+from monty.re import regrep
 from monty.serialization import dumpfn
 from pymatgen.io.cp2k.inputs import Cp2kInput, Keyword
 from pymatgen.io.cp2k.outputs import Cp2kOutput
 from pymatgen.io.cp2k.utils import get_aux_basis
 
-from custodian.custodian import ErrorHandler
 from custodian.cp2k.interpreter import Cp2kModder
-from custodian.cp2k.utils import restart, tail, get_conv
+from custodian.cp2k.utils import get_conv, restart, tail
+from custodian.custodian import ErrorHandler
 
 __author__ = "Nicholas Winner"
 __version__ = "1.0"
@@ -78,7 +78,7 @@ class StdErrHandler(ErrorHandler):
         Check for error in std_err file.
         """
         self.errors = set()
-        with open(self.std_err, "r") as f:
+        with open(self.std_err) as f:
             for line in f:
                 l = line.strip()
                 for err, msgs in StdErrHandler.error_msgs.items():

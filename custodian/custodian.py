@@ -675,7 +675,6 @@ class Job(MSONable):
         This method is run before the start of a job. Allows for some
         pre-processing.
         """
-        pass
 
     @abstractmethod
     def run(self):
@@ -683,7 +682,6 @@ class Job(MSONable):
         This method perform the actual work for the job. If parallel error
         checking (monitoring) is desired, this must return a Popen process.
         """
-        pass
 
     @abstractmethod
     def postprocess(self):
@@ -692,7 +690,6 @@ class Job(MSONable):
         This allows post-processing, such as cleanup, analysis of results,
         etc.
         """
-        pass
 
     def terminate(self):  # pylint: disable=R0201
         """
@@ -765,7 +762,6 @@ class ErrorHandler(MSONable):
         Returns:
             (bool) Indicating if errors are detected.
         """
-        pass
 
     @abstractmethod
     def correct(self):
@@ -780,7 +776,6 @@ class ErrorHandler(MSONable):
             {"errors": list_of_errors, "actions": list_of_actions_taken}.
             If this is an unfixable error, actions should be set to None.
         """
-        pass
 
     @property
     def n_applied_corrections(self):
@@ -824,7 +819,6 @@ class Validator(MSONable):
         Returns:
             (bool) Indicating if errors are detected.
         """
-        pass
 
 
 class CustodianError(RuntimeError):
@@ -881,8 +875,6 @@ class ReturnCodeError(CustodianError):
     """
     Error raised when the process gave non zero return code
     """
-
-    pass
 
 
 class MaxCorrectionsError(CustodianError):

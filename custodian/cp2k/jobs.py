@@ -2,18 +2,18 @@
 This module implements basic kinds of jobs for Cp2k runs.
 """
 
-from __future__ import unicode_literals, division
-import subprocess
+import logging
 import os
 import shutil
-import logging
+import subprocess
 
-from monty.shutil import decompress_dir
 from monty.os.path import zpath
+from monty.shutil import decompress_dir
 from pymatgen.io.cp2k.inputs import Cp2kInput, Keyword
-from custodian.custodian import Job
+
 from custodian.cp2k.interpreter import Cp2kModder
-from custodian.cp2k.utils import restart, cleanup_input
+from custodian.cp2k.utils import cleanup_input, restart
+from custodian.custodian import Job
 
 logger = logging.getLogger(__name__)
 

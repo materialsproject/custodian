@@ -2,9 +2,10 @@
 This module holds different utility functions. Mainly used by handlers.
 """
 
-import os
 import itertools
+import os
 from collections import deque
+
 from pymatgen.io.cp2k.inputs import Cp2kInput
 from pymatgen.io.cp2k.outputs import Cp2kOutput
 
