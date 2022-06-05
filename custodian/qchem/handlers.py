@@ -209,7 +209,7 @@ class QChemErrorHandler(ErrorHandler):
             elif len(self.outdata.get("energy_trajectory")) > 1:
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
-                if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
+                if self.qcinp.rem.get("scf_algorithm", "none").lower() == "diis":
                     self.qcinp.rem["scf_algorithm"] = "diis_gdm"
                     actions.append({"scf_algorithm": "diis_gdm"})
             # If the new optimizer failed the back transform on the first iteration,

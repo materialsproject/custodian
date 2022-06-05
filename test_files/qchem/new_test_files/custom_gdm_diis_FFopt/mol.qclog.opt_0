@@ -1,0 +1,46 @@
+You are running Q-Chem version: 5.4.2
+withsave === 1
+
+#
+# job setting
+#
+local host:  n0213.lr6
+current dir: /global/home/groups/lr_mp/smblau/co2_capture/block_2022-04-05-23-25-36-079149/launcher_2022-05-28-07-09-52-283190
+input file:  mol.qin
+output file: mol.qout
+nprocs     : 0
+nthreads   : 40
+#
+# qchem installation setting
+#
+QC:          /clusterfs/mp/software/qchem5.4
+QCAUX:       /clusterfs/mp/software/qchem5.4/qcaux
+QCPROG:      /clusterfs/mp/software/qchem5.4/exe/qcprog.exe_s
+QCPROG_S:    /clusterfs/mp/software/qchem5.4/exe/qcprog.exe_s
+PARALLEL:    -DSERIAL
+QCMPI:       MPICH
+#
+# qchem directory setting
+#
+qcrun:       scratch
+QCSCRATCH:   /global/home/groups/lr_mp/smblau/co2_capture/block_2022-04-05-23-25-36-079149/launcher_2022-05-28-07-09-52-283190
+QCLOCALSCR:  /tmp
+QCTMPDIR:    /tmp
+QCFILEPREF:  /tmp/scratch
+QCSAVEDIR:   /global/home/groups/lr_mp/smblau/co2_capture/block_2022-04-05-23-25-36-079149/launcher_2022-05-28-07-09-52-283190/scratch
+workdirs:    /tmp/scratch
+workdir0:    /tmp/scratch
+partmpdirs =  
+#
+# parallel setting
+#
+QCRSH:           ssh
+QCMPI:           mpich
+QCMPIRUN:        /clusterfs/mp/software/qchem5.4/bin/mpi/mpirun_qchem
+QCMACHINEFILE:   /tmp/scratch/hostfile
+
+#
+# env setting
+#
+exported envs:   QC QCAUX QCSCRATCH QCRUNNAME QCFILEPREF QCPROG QCPROG_S GUIFILE
+copy savedir ...
