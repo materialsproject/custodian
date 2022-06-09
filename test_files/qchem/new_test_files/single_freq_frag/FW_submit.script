@@ -1,0 +1,20 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=40
+#SBATCH --qos=kpmol_savio3_normal
+#SBATCH --time=24:00:00
+#SBATCH --partition=savio3
+#SBATCH --account=co_kpmol
+#SBATCH --job-name=sam_correction_FFopt
+#SBATCH --output=sam_correction_FFopt-%j.out
+#SBATCH --error=sam_correction_FFopt-%j.error
+
+
+conda activate rg_cup
+module load qchem/5.4.2
+
+cd /global/scratch/users/rdguha/hydr_halide/frag_halide/block_2022-06-08-03-16-58-295470/launcher_2022-06-08-04-00-17-629823
+rlaunch -w /global/home/users/rdguha/miniconda3/envs/rg_cup/config/my_fworker.yaml singleshot --fw_id 340
+
+# CommonAdapter (SLURM) completed writing Template

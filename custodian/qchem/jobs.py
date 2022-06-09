@@ -408,11 +408,24 @@ class QCJob(Job):
                 if "cpscf_nseg" in freq_indata.rem:
                     freq_rem["cpscf_nseg"] = freq_indata.rem["cpscf_nseg"]
                 errors = freq_outdata.get("errors")
+
+
                 if len(errors) != 0:
                     raise AssertionError("No errors should be encountered while flattening frequencies!")
+                
                 if not transition_state:
-                    freq_0 = freq_outdata.get("frequencies")[0]
-                    freq_1 = freq_outdata.get("frequencies")[1]
+                    
+                    freq_list = freq_outdata.get("frequencies")
+
+                    if (len(freq_list) > 1):
+                        freq_0 = freq_list[0]
+                        freq_1 = freq_list[1]
+                    else:
+                        freq_0 = freq_outdata.get("frequencies")[0]
+                        freq_1 = 100000.0
+                        warnings.warn("Only single frequency. Two atom fragment")
+                        break
+
                     if freq_0 > 0.0:
                         warnings.warn("All frequencies positive!")
                         break

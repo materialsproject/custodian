@@ -1,0 +1,327 @@
+{
+    "spec": {
+        "tags": {
+            "class": "sam_correction_FFopt_production"
+        },
+        "_tasks": [
+            {
+                "molecule": {
+                    "@module": "pymatgen.core.structure",
+                    "@class": "Molecule",
+                    "charge": -1,
+                    "spin_multiplicity": 1,
+                    "sites": [
+                        {
+                            "name": "O",
+                            "species": [
+                                {
+                                    "element": "O",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                -5.36172,
+                                -2.39732,
+                                0.26938
+                            ],
+                            "properties": {}
+                        },
+                        {
+                            "name": "H",
+                            "species": [
+                                {
+                                    "element": "H",
+                                    "occu": 1
+                                }
+                            ],
+                            "xyz": [
+                                -5.43636,
+                                -2.48958,
+                                1.2553
+                            ],
+                            "properties": {}
+                        }
+                    ]
+                },
+                "qchem_input_set": "OptSet",
+                "input_file": "mol.qin",
+                "qchem_input_params": {
+                    "dft_rung": 3,
+                    "basis_set": "def2-tzvpd",
+                    "pcm_dielectric": "80",
+                    "new_geom_opt": {}
+                },
+                "_fw_name": "{{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}}"
+            },
+            {
+                "qchem_cmd": ">>qchem_cmd<<",
+                "multimode": ">>multimode<<",
+                "input_file": "mol.qin",
+                "output_file": "mol.qout",
+                "max_cores": ">>max_cores<<",
+                "job_type": "opt_with_frequency_flattener",
+                "max_iterations": 10,
+                "max_molecule_perturb_scale": 0.3,
+                "linked": true,
+                "freq_before_opt": false,
+                "max_errors": 20,
+                "_fw_name": "{{atomate.qchem.firetasks.run_calc.RunQChemCustodian}}"
+            },
+            {
+                "db_file": ">>db_file<<",
+                "input_file": "mol.qin",
+                "output_file": "mol.qout",
+                "additional_fields": {
+                    "task_label": "sam_correction_FFopt_H1 O1 E1_-1_0",
+                    "special_run_type": "frequency_flattener",
+                    "linked": true,
+                    "tags": {
+                        "class": "sam_correction_FFopt_production"
+                    }
+                },
+                "_fw_name": "{{atomate.qchem.firetasks.parse_outputs.QChemToDb}}"
+            }
+        ]
+    },
+    "fw_id": 340,
+    "created_on": "2022-06-07T23:32:29.074268",
+    "updated_on": "2022-06-08T04:00:27.623514",
+    "launches": [
+        {
+            "fworker": {
+                "name": "savio_fworker",
+                "category": "",
+                "query": "{}",
+                "env": {
+                    "db_file": "/global/home/users/rdguha/miniconda3/envs/rg_cup/config/db.json",
+                    "calc_loc": "/tmp",
+                    "max_cores": 40,
+                    "qchem_cmd": "qchem",
+                    "multimode": "openmp"
+                }
+            },
+            "fw_id": 340,
+            "launch_dir": "/global/scratch/users/rdguha/hydr_halide/frag_halide/block_2022-06-08-03-16-58-295470/launcher_2022-06-08-04-00-17-629823",
+            "host": "n0152.savio3",
+            "ip": "10.0.7.152",
+            "trackers": [],
+            "action": null,
+            "state": "RUNNING",
+            "state_history": [
+                {
+                    "state": "RESERVED",
+                    "created_on": "2022-06-08T04:00:17.581378",
+                    "updated_on": "2022-06-08T04:00:17.581381",
+                    "reservation_id": "12029505"
+                },
+                {
+                    "state": "RUNNING",
+                    "created_on": "2022-06-08T04:00:27.616300",
+                    "updated_on": "2022-06-08T04:00:27.616311"
+                }
+            ],
+            "launch_id": 1167
+        }
+    ],
+    "archived_launches": [
+        {
+            "fworker": {
+                "name": "savio_fworker",
+                "category": "",
+                "query": "{}",
+                "env": {
+                    "db_file": "/global/home/users/rdguha/miniconda3/envs/rg_cup/config/db.json",
+                    "calc_loc": "/tmp",
+                    "max_cores": 40,
+                    "qchem_cmd": "qchem",
+                    "multimode": "openmp"
+                }
+            },
+            "fw_id": 340,
+            "launch_dir": "/global/scratch/users/rdguha/hydr_halide/frag_halide/block_2022-06-07-21-29-14-296805/launcher_2022-06-07-23-33-09-455691",
+            "host": "n0155.savio3",
+            "ip": "10.0.7.155",
+            "trackers": [],
+            "action": {
+                "stored_data": {
+                    "_message": "runtime error during task",
+                    "_task": {
+                        "molecule": {
+                            "@module": "pymatgen.core.structure",
+                            "@class": "Molecule",
+                            "charge": -1,
+                            "spin_multiplicity": 1,
+                            "sites": [
+                                {
+                                    "name": "O",
+                                    "species": [
+                                        {
+                                            "element": "O",
+                                            "occu": 1
+                                        }
+                                    ],
+                                    "xyz": [
+                                        -5.36172,
+                                        -2.39732,
+                                        0.26938
+                                    ],
+                                    "properties": {}
+                                },
+                                {
+                                    "name": "H",
+                                    "species": [
+                                        {
+                                            "element": "H",
+                                            "occu": 1
+                                        }
+                                    ],
+                                    "xyz": [
+                                        -5.43636,
+                                        -2.48958,
+                                        1.2553
+                                    ],
+                                    "properties": {}
+                                }
+                            ]
+                        },
+                        "qchem_input_set": "OptSet",
+                        "input_file": "mol.qin",
+                        "qchem_input_params": {
+                            "dft_rung": 3,
+                            "basis_set": "def2-tzvpd",
+                            "pcm_dielectric": "80",
+                            "new_geom_opt": {}
+                        },
+                        "_fw_name": "{{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}}"
+                    },
+                    "_exception": {
+                        "_stacktrace": "Traceback (most recent call last):\n  File \"/global/home/users/rdguha/miniconda3/envs/rg_cup/lib/python3.9/site-packages/fireworks/core/rocket.py\", line 262, in run\n    m_action = t.run_task(my_spec)\n  File \"/global/home/users/rdguha/miniconda3/envs/rg_cup/code/atomate/atomate/qchem/firetasks/write_inputs.py\", line 99, in run_task\n    qcin = qcin_cls(self.get(\"molecule\"), **self.get(\"qchem_input_params\", {}))\nTypeError: __init__() got an unexpected keyword argument 'new_geom_opt'\n",
+                        "_details": null
+                    }
+                },
+                "exit": true,
+                "update_spec": {},
+                "mod_spec": [],
+                "additions": [],
+                "detours": [],
+                "defuse_children": false,
+                "defuse_workflow": false,
+                "propagate": false
+            },
+            "state": "FIZZLED",
+            "state_history": [
+                {
+                    "state": "RESERVED",
+                    "created_on": "2022-06-07T23:33:09.406431",
+                    "updated_on": "2022-06-07T23:33:09.406436",
+                    "reservation_id": "12029136"
+                },
+                {
+                    "state": "RUNNING",
+                    "created_on": "2022-06-07T23:33:20.935594",
+                    "updated_on": "2022-06-07T23:33:21.055697",
+                    "checkpoint": {
+                        "_task_n": 0,
+                        "_all_stored_data": {},
+                        "_all_update_spec": {},
+                        "_all_mod_spec": []
+                    }
+                },
+                {
+                    "state": "FIZZLED",
+                    "created_on": "2022-06-07T23:33:21.068128",
+                    "checkpoint": {
+                        "_task_n": 0,
+                        "_all_stored_data": {},
+                        "_all_update_spec": {},
+                        "_all_mod_spec": []
+                    }
+                }
+            ],
+            "launch_id": 1080
+        },
+        {
+            "fworker": {
+                "name": "savio_fworker",
+                "category": "",
+                "query": "{}",
+                "env": {
+                    "db_file": "/global/home/users/rdguha/miniconda3/envs/rg_cup/config/db.json",
+                    "calc_loc": "/tmp",
+                    "max_cores": 40,
+                    "qchem_cmd": "qchem",
+                    "multimode": "openmp"
+                }
+            },
+            "fw_id": 340,
+            "launch_dir": "/global/scratch/users/rdguha/hydr_halide/frag_halide/block_2022-06-08-03-16-58-295470/launcher_2022-06-08-03-17-21-302147",
+            "host": "n0152.savio3",
+            "ip": "10.0.7.152",
+            "trackers": [],
+            "action": {
+                "stored_data": {
+                    "_message": "runtime error during task",
+                    "_task": {
+                        "qchem_cmd": ">>qchem_cmd<<",
+                        "multimode": ">>multimode<<",
+                        "input_file": "mol.qin",
+                        "output_file": "mol.qout",
+                        "max_cores": ">>max_cores<<",
+                        "job_type": "opt_with_frequency_flattener",
+                        "max_iterations": 10,
+                        "max_molecule_perturb_scale": 0.3,
+                        "linked": true,
+                        "freq_before_opt": false,
+                        "max_errors": 20,
+                        "_fw_name": "{{atomate.qchem.firetasks.run_calc.RunQChemCustodian}}"
+                    },
+                    "_exception": {
+                        "_stacktrace": "Traceback (most recent call last):\n  File \"/global/home/users/rdguha/miniconda3/envs/rg_cup/code/fireworks/fireworks/core/rocket.py\", line 261, in run\n    m_action = t.run_task(my_spec)\n  File \"/global/home/users/rdguha/miniconda3/envs/rg_cup/code/atomate/atomate/qchem/firetasks/run_calc.py\", line 211, in run_task\n    c.run()\n  File \"/global/home/users/rdguha/miniconda3/envs/rg_cup/code/custodian/custodian/custodian.py\", line 366, in run\n    for job_n, job in islice(enumerate(self.jobs, 1), self.restart, None):\n  File \"/global/home/users/rdguha/miniconda3/envs/rg_cup/code/custodian/custodian/qchem/jobs.py\", line 415, in opt_with_frequency_flattener\n    freq_1 = freq_outdata.get(\"frequencies\")[1]\nIndexError: index 1 is out of bounds for axis 0 with size 1\n",
+                        "_details": null
+                    }
+                },
+                "exit": true,
+                "update_spec": {},
+                "mod_spec": [],
+                "additions": [],
+                "detours": [],
+                "defuse_children": false,
+                "defuse_workflow": false,
+                "propagate": false
+            },
+            "state": "FIZZLED",
+            "state_history": [
+                {
+                    "state": "RESERVED",
+                    "created_on": "2022-06-08T03:17:21.255331",
+                    "updated_on": "2022-06-08T03:17:21.255334",
+                    "reservation_id": "12029427"
+                },
+                {
+                    "state": "RUNNING",
+                    "created_on": "2022-06-08T03:17:31.859415",
+                    "updated_on": "2022-06-08T03:21:05.400350",
+                    "checkpoint": {
+                        "_task_n": 1,
+                        "_all_stored_data": {},
+                        "_all_update_spec": {},
+                        "_all_mod_spec": []
+                    }
+                },
+                {
+                    "state": "FIZZLED",
+                    "created_on": "2022-06-08T03:21:05.412972",
+                    "checkpoint": {
+                        "_task_n": 1,
+                        "_all_stored_data": {},
+                        "_all_update_spec": {},
+                        "_all_mod_spec": []
+                    }
+                }
+            ],
+            "launch_id": 1116
+        }
+    ],
+    "state": "RUNNING",
+    "name": "sam_correction_FFopt_H1 O1 E1_-1_0"
+}

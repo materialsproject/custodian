@@ -1124,6 +1124,84 @@ class OptFF_small_neg_freq(TestCase):
         self.assertRaises(StopIteration, myjob.__next__)
 
 
+
+class OptFF_single_freq_frags(TestCase):
+    
+    def setUp(self):
+        self.maxDiff = None
+        os.makedirs(scr_dir)
+        os.makedirs(os.path.join(scr_dir, "scratch"))
+        shutil.copyfile(
+            os.path.join(test_dir, "single_freq_frag/mol.qin.orig"),
+            os.path.join(scr_dir, "mol.qin"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "single_freq_frag/mol.qin.opt_0"),
+            os.path.join(scr_dir, "mol.qin.opt_0"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "single_freq_frag/mol.qout.opt_0"),
+            os.path.join(scr_dir, "mol.qout.opt_0"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "single_freq_frag/mol.qin.freq_0"),
+            os.path.join(scr_dir, "mol.qin.freq_0"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "single_freq_frag/mol.qout.freq_0"),
+            os.path.join(scr_dir, "mol.qout.freq_0"),
+        )
+
+        os.chdir(scr_dir)
+
+    def tearDown(self):
+        os.chdir(cwd)
+        shutil.rmtree(scr_dir)
+
+    def test_OptFF(self):
+        myjob = QCJob.opt_with_frequency_flattener(
+            qchem_command="qchem -slurm",
+            max_cores=32,
+            input_file="mol.qin",
+            output_file="mol.qout",
+            linked=True,
+        )
+        expected_next = QCJob(
+            qchem_command="qchem -slurm",
+            max_cores=32,
+            multimode="openmp",
+            input_file="mol.qin",
+            output_file="mol.qout",
+            suffix=".opt_0",
+            save_scratch=True,
+            backup=True,
+        ).as_dict()
+        self.assertEqual(next(myjob).as_dict(), expected_next)
+        expected_next = QCJob(
+            qchem_command="qchem -slurm",
+            max_cores=32,
+            multimode="openmp",
+            input_file="mol.qin",
+            output_file="mol.qout",
+            suffix=".freq_0",
+            save_scratch=True,
+            backup=False,
+        ).as_dict()
+        self.assertEqual(next(myjob).as_dict(), expected_next)
+        self.assertEqual(
+            QCInput.from_file(os.path.join(test_dir, "single_freq_frag/mol.qin.freq_0")).as_dict(),
+            QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict(),
+        )
+        shutil.copyfile(
+            os.path.join(scr_dir, "mol.qin"),
+            os.path.join(scr_dir, "mol.qin.freq_0"),
+        )
+
+
+        self.assertRaises(StopIteration, myjob.__next__)
+
+
+
 class TSFFTest(TestCase):
     def setUp(self):
         self.maxDiff = None
