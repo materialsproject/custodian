@@ -1,0 +1,610 @@
+
+Running Job 1 of 1 mol.qin
+qchem mol.qin_64333.0 /tmp/scratch/ 0
+/clusterfs/mp/software/qchem5.4/exe/qcprog.exe_s mol.qin_64333.0 /tmp/scratch/
+                  Welcome to Q-Chem
+     A Quantum Leap Into The Future Of Chemistry
+
+
+ Q-Chem 5.4, Q-Chem, Inc., Pleasanton, CA (2021)
+
+ E. Epifanovsky,  A. T. B. Gilbert,  Xintian Feng,  Joonho Lee,  Yuezhi Mao,  
+ N. Mardirossian,  P. Pokhilko,  A. White,  M. Wormit,  M. P. Coons,  
+ A. L. Dempwolff,  Zhengting Gan,  D. Hait,  P. R. Horn,  L. D. Jacobson,  
+ I. Kaliman,  J. Kussmann,  A. W. Lange,  Ka Un Lao,  D. S. Levine,  Jie Liu,  
+ S. C. McKenzie,  A. F. Morrison,  K. Nanda,  F. Plasser,  D. R. Rehn,  
+ M. L. Vidal,  Zhi-Qiang You,  Ying Zhu,  B. Alam,  B. Albrecht,  
+ A. Aldossary,  E. Alguire,  J. H. Andersen,  D. Barton,  K. Begam,  A. Behn,  
+ Y. A. Bernard,  E. J. Berquist,  H. Burton,  A. Carreras,  K. Carter-Fenk,  
+ Romit Chakraborty,  A. D. Chien,  K. D. Closser,  V. Cofer-Shabica,  
+ S. Dasgupta,  Jia Deng,  M. de Wergifosse,  M. Diedenhofen,  Hainam Do,  
+ S. Ehlert,  Po-Tung Fang,  S. Fatehi,  Qingguo Feng,  T. Friedhoff,  
+ J. Gayvert,  Qinghui Ge,  G. Gidofalvi,  M. Goldey,  J. Gomes,  
+ C. Gonzalez-Espinoza,  S. Gulania,  A. Gunina,  M. W. D. Hanson-Heine,  
+ P. H. P. Harbach,  A. W. Hauser,  M. F. Herbst,  M. Hernandez Vera,  
+ M. Hodecker,  Z. C. Holden,  S. Houck,  Xunkun Huang,  Kerwin Hui,  
+ B. C. Huynh,  M. Ivanov,  Hyunjun Ji,  Hanjie Jiang,  B. Kaduk,  S. Kaehler,  
+ K. Khistyaev,  Jaehoon Kim,  P. Klunzinger,  Z. Koczor-Benda,  
+ Joong Hoon Koh,  D. Kosenkov,  L. Koulias,  T. Kowalczyk,  C. M. Krauter,  
+ K. Kue,  A. Kunitsa,  T. Kus,  A. Landau,  K. V. Lawler,  D. Lefrancois,  
+ S. Lehtola,  Rain Li,  Yi-Pei Li,  Jiashu Liang,  M. Liebenthal,  
+ Hung-Hsuan Lin,  You-Sheng Lin,  Fenglai Liu,  Kuan-Yu Liu,  
+ M. Loipersberger,  A. Luenser,  A. Manjanath,  P. Manohar,  E. Mansoor,  
+ S. F. Manzer,  Shan-Ping Mao,  A. V. Marenich,  T. Markovich,  S. Mason,  
+ S. A. Maurer,  P. F. McLaughlin,  M. F. S. J. Menger,  J.-M. Mewes,  
+ S. A. Mewes,  P. Morgante,  J. W. Mullinax,  K. J. Oosterbaan,  G. Paran,  
+ Alexander C. Paul,  Suranjan K. Paul,  F. Pavosevic,  Zheng Pei,  S. Prager,  
+ E. I. Proynov,  E. Ramos,  B. Rana,  A. E. Rask,  A. Rettig,  R. M. Richard,  
+ F. Rob,  E. Rossomme,  T. Scheele,  M. Scheurer,  M. Schneider,  
+ N. Sergueev,  S. M. Sharada,  W. Skomorowski,  D. W. Small,  C. J. Stein,  
+ Yu-Chuan Su,  E. J. Sundstrom,  Zhen Tao,  J. Thirman,  T. Tsuchimochi,  
+ N. M. Tubman,  S. P. Veccham,  O. Vydrov,  J. Wenzel,  J. Witte,  A. Yamada,  
+ Kun Yao,  S. Yeganeh,  S. R. Yost,  A. Zech,  Igor Ying Zhang,  Xing Zhang,  
+ Yu Zhang,  D. Zuev,  A. Aspuru-Guzik,  A. T. Bell,  N. A. Besley,  
+ K. B. Bravaya,  B. R. Brooks,  D. Casanova,  Jeng-Da Chai,  S. Coriani,  
+ C. J. Cramer,  A. E. DePrince, III,  R. A. DiStasio Jr.,  A. Dreuw,  
+ B. D. Dunietz,  T. R. Furlani,  W. A. Goddard III,  S. Grimme,  
+ S. Hammes-Schiffer,  T. Head-Gordon,  W. J. Hehre,  Chao-Ping Hsu,  
+ T.-C. Jagau,  Yousung Jung,  A. Klamt,  Jing Kong,  D. S. Lambrecht,  
+ WanZhen Liang,  N. J. Mayhall,  C. W. McCurdy,  J. B. Neaton,  T. Neudecker,  
+ C. Ochsenfeld,  J. A. Parkhill,  R. Peverati,  V. A. Rassolov,  Yihan Shao,  
+ L. V. Slipchenko,  R. P. Steele,  J. E. Subotnik,  A. J. W. Thom,  
+ A. Tkatchenko,  D. G. Truhlar,  T. Van Voorhis,  T. A. Wesolowski,  
+ K. B. Whaley,  H. L. Woodcock III,  P. M. Zimmerman,  S. Faraji,  
+ P. M. W. Gill,  M. Head-Gordon,  J. M. Herbert,  A. I. Krylov
+
+ Additional authors since Version 5.4.0: 
+ Chandrima Chakravarty,  L. Cunha,  R. Kang,  Yongbin Kim,  S. Kotaru,  
+ Shaozhi Li,  Xiangyuan Li,  F. Matz,  A. Molle,  V. Parravicini,  
+ Haisheng Ren,  Hengyuan Shen,  Yingli Su,  Hung-Yi Tsai,  C. Utku,  
+ Fang Wang,  Jeff Yang,  F. Zeller
+
+ Contributors to earlier versions of Q-Chem not listed above: 
+ R. D. Adamson,  B. Austin,  R. Baer,  J. Baker,  G. J. O. Beran,  
+ K. Brandhorst,  S. T. Brown,  E. F. C. Byrd,  Arup K. Chakraborty,  
+ G. K. L. Chan,  Chun-Min Chang,  Yunqing Chen,  C.-L. Cheng,  
+ Siu Hung Chien,  D. M. Chipman,  D. L. Crittenden,  H. Dachsel,  
+ R. J. Doerksen,  A. D. Dutoi,  R. G. Edgar,  J. Fosso-Tande,  
+ L. Fusti-Molnar,  D. Ghosh,  A. Ghysels,  A. Golubeva-Zadorozhnaya,  
+ J. Gonthier,  M. S. Gordon,  S. R. Gwaltney,  G. Hawkins,  J. E. Herr,  
+ A. Heyden,  S. Hirata,  E. G. Hohenstein,  G. Kedziora,  F. J. Keil,  
+ C. Kelley,  Jihan Kim,  R. A. King,  R. Z. Khaliullin,  P. P. Korambath,  
+ W. Kurlancheek,  A. Laurent,  A. M. Lee,  M. S. Lee,  S. V. Levchenko,  
+ Ching Yeh Lin,  D. Liotard,  E. Livshits,  R. C. Lochan,  I. Lotan,  
+ L. A. Martinez-Martinez,  P. E. Maslen,  N. Nair,  D. P. O'Neill,  
+ D. Neuhauser,  E. Neuscamman,  C. M. Oana,  R. Olivares-Amaya,  R. Olson,  
+ T. M. Perrine,  B. Peters,  P. A. Pieniazek,  A. Prociuk,  Y. M. Rhee,  
+ J. Ritchie,  M. A. Rohrdanz,  E. Rosta,  N. J. Russ,  H. F. Schaefer III,  
+ M. W. Schmidt,  N. E. Schultz,  S. Sharma,  N. Shenvi,  C. D. Sherrill,  
+ A. C. Simmonett,  A. Sodt,  T. Stein,  D. Stuck,  K. S. Thanthiriwatte,  
+ V. Vanovschi,  L. Vogt,  Tao Wang,  A. Warshel,  M. A. Watson,  
+ C. F. Williams,  Q. Wu,  X. Xu,  Jun Yang,  W. Zhang,  Yan Zhao
+
+   Please cite Q-Chem as follows:
+  "Software for the frontiers of quantum chemistry:
+   An overview of developments in the Q-Chem 5 package"
+   J. Chem. Phys. 155, 084801 (2021)
+   https://doi.org/10.1063/5.0055522 (open access)
+
+ Q-Chem 5.4.2 for Intel X86 EM64T Linux
+
+ Parts of Q-Chem use Armadillo 9.900.5 (Nocturnal Misbehaviour).
+ http://arma.sourceforge.net/
+
+ Q-Chem begins on Sat May 28 20:40:12 2022  
+
+ Host: 
+0
+
+     Scratch files written to /tmp/scratch//
+ Dec1321 |scratch|qcdevops|jenkins|workspace|build_RNUM 7600   
+ Processing $rem in /clusterfs/mp/software/qchem5.4/config/preferences:
+ Processing $rem in /global/home/users/smblau/.qchemrc:
+ Symmetry turned off for PCM/SM12/SMD calculation
+
+ Checking the input file for inconsistencies... 	...done.
+
+--------------------------------------------------------------
+User input:
+--------------------------------------------------------------
+$molecule
+1 1
+N      0.2961783956      0.1685044014     -0.1601269809
+C      1.3287494163     -0.7628633125      0.4294500249
+C     -0.7171943372      0.5188221537      0.9067196491
+C     -0.3532998012     -0.5262252199     -1.3321516816
+C      0.9343948987      1.4479445296     -0.6475037803
+C      2.2298757499     -0.1748735909      1.5011038080
+C     -1.9974599061      1.1765781655      0.4190377870
+C     -1.0928199356     -1.8143139194     -1.0060292037
+C      2.0600100819      1.2924761499     -1.6577741319
+C      3.1939271177     -1.2501448920      2.0053521836
+C     -2.8581152798      1.5961969298      1.6106702177
+C     -1.9707165425     -2.2334676574     -2.1838344530
+C      2.7014567252      2.6519569034     -1.9355959829
+C      4.1302537428     -0.7307281109      3.0892058685
+C     -4.1780516968      2.2229621845      1.1778064927
+C     -2.6989117494     -3.5454532427     -1.9249591282
+C      3.8146132951      2.5637818473     -2.9728213850
+H      1.9247620910     -1.1197754037     -0.4146611413
+H      0.7744512212     -1.6128023701      0.8387430788
+H     -0.2012829783      1.1810269617      1.6086669062
+H     -0.9485199900     -0.4072898531      1.4427060329
+H      0.4445618267     -0.7292176845     -2.0519764509
+H     -1.0311638048      0.2021285263     -1.7881548551
+H      1.2919802117      1.9725512134      0.2438880361
+H      0.1283832932      2.0489627905     -1.0795415573
+H      1.6409890559      0.2070472881      2.3461742219
+H      2.8155334903      0.6651011889      1.1038862987
+H     -2.5748942069      0.4840042133     -0.2081273054
+H     -1.7785128508      2.0623266387     -0.1931433651
+H     -1.7279866342     -1.6973892314     -0.1175036043
+H     -0.3826053832     -2.6210043493     -0.7764718094
+H      1.6791494793      0.8777932107     -2.6002789470
+H      2.8318068346      0.6029235886     -1.2914495278
+H      3.7830861579     -1.6288673248      1.1560079617
+H      2.6162130075     -2.1048335870      2.3893407601
+H     -2.2930170231      2.3074376341      2.2319612898
+H     -3.0538240286      0.7169322990      2.2436126364
+H     -1.3511842882     -2.3186974460     -3.0896809897
+H     -2.7030630949     -1.4365865795     -2.3848188006
+H      3.1011647177      3.0603646536     -0.9947024878
+H      1.9285979403      3.3571672395     -2.2778642797
+H      3.5637594557     -0.3737761134      3.9611145047
+H      4.7364003329      0.1070773473      2.7159157079
+H      4.8152552564     -1.5180940767      3.4288084658
+H     -4.7711622967      1.5173220687      0.5785160736
+H     -4.0052832973      3.1200683322      0.5660175087
+H     -4.7794698306      2.5171700576      2.0474935390
+H     -3.3444496595     -3.4648356651     -1.0387214030
+H     -1.9891319478     -4.3645377395     -1.7475468234
+H     -3.3267068916     -3.8253193813     -2.7795752208
+H      3.4282222868      2.1894381698     -3.9317136131
+H      4.6081922078      1.8791786940     -2.6403814338
+H      4.2677579689      3.5475699605     -3.1503905081
+O      2.5389685539     -2.3098338313     -2.2925323642
+H      2.7007050194     -3.7666615818     -0.1335954530
+C      2.0471491376     -4.1535146299     -0.9158603026
+C      1.9486490728     -3.3749867507     -2.1641219183
+C      1.3456259709     -5.2838666899     -0.7465717235
+H      1.3980160953     -5.8653424602      0.1755495951
+C      1.0869576204     -3.9030026296     -3.2396595123
+H      1.0414769166     -3.3277855463     -4.1650939591
+C      0.4595464132     -5.8136171283     -1.8202278816
+C      0.3870594802     -5.0368454882     -3.0808037828
+O     -0.1691972264     -6.8444577655     -1.6772873698
+H     -0.2598370885     -5.4097266212     -3.8762324205
+C     -1.9245864220     -7.8669021513     -3.2929378285
+O     -2.4685074844     -6.8536598564     -3.4526060665
+O     -1.4431948628     -8.9150354600     -3.1898472153
+$end
+
+$rem
+job_type = opt
+basis = def2-svpd
+max_scf_cycles = 100
+gen_scfman = true
+xc_grid = 3
+thresh = 14
+s2thresh = 16
+scf_algorithm = diis_gdm
+resp_charges = true
+symmetry = false
+sym_ignore = true
+method = wb97xd
+geom_opt_max_cycles = 200
+solvent_method = pcm
+geom_opt2 = 3
+$end
+
+$pcm
+heavypoints 194
+hpoints 194
+radii uff
+theory cpcm
+vdwscale 1.1
+$end
+
+$solvent
+dielectric 38.88
+$end
+
+$geom_opt
+maxiter = 200
+$end
+--------------------------------------------------------------
+ ----------------------------------------------------------------
+             Standard Nuclear Orientation (Angstroms)
+    I     Atom           X                Y                Z
+ ----------------------------------------------------------------
+    1      N       0.2961783956     0.1685044014    -0.1601269809
+    2      C       1.3287494163    -0.7628633125     0.4294500249
+    3      C      -0.7171943372     0.5188221537     0.9067196491
+    4      C      -0.3532998012    -0.5262252199    -1.3321516816
+    5      C       0.9343948987     1.4479445296    -0.6475037803
+    6      C       2.2298757499    -0.1748735909     1.5011038080
+    7      C      -1.9974599061     1.1765781655     0.4190377870
+    8      C      -1.0928199356    -1.8143139194    -1.0060292037
+    9      C       2.0600100819     1.2924761499    -1.6577741319
+   10      C       3.1939271177    -1.2501448920     2.0053521836
+   11      C      -2.8581152798     1.5961969298     1.6106702177
+   12      C      -1.9707165425    -2.2334676574    -2.1838344530
+   13      C       2.7014567252     2.6519569034    -1.9355959829
+   14      C       4.1302537428    -0.7307281109     3.0892058685
+   15      C      -4.1780516968     2.2229621845     1.1778064927
+   16      C      -2.6989117494    -3.5454532427    -1.9249591282
+   17      C       3.8146132951     2.5637818473    -2.9728213850
+   18      H       1.9247620910    -1.1197754037    -0.4146611413
+   19      H       0.7744512212    -1.6128023701     0.8387430788
+   20      H      -0.2012829783     1.1810269617     1.6086669062
+   21      H      -0.9485199900    -0.4072898531     1.4427060329
+   22      H       0.4445618267    -0.7292176845    -2.0519764509
+   23      H      -1.0311638048     0.2021285263    -1.7881548551
+   24      H       1.2919802117     1.9725512134     0.2438880361
+   25      H       0.1283832932     2.0489627905    -1.0795415573
+   26      H       1.6409890559     0.2070472881     2.3461742219
+   27      H       2.8155334903     0.6651011889     1.1038862987
+   28      H      -2.5748942069     0.4840042133    -0.2081273054
+   29      H      -1.7785128508     2.0623266387    -0.1931433651
+   30      H      -1.7279866342    -1.6973892314    -0.1175036043
+   31      H      -0.3826053832    -2.6210043493    -0.7764718094
+   32      H       1.6791494793     0.8777932107    -2.6002789470
+   33      H       2.8318068346     0.6029235886    -1.2914495278
+   34      H       3.7830861579    -1.6288673248     1.1560079617
+   35      H       2.6162130075    -2.1048335870     2.3893407601
+   36      H      -2.2930170231     2.3074376341     2.2319612898
+   37      H      -3.0538240286     0.7169322990     2.2436126364
+   38      H      -1.3511842882    -2.3186974460    -3.0896809897
+   39      H      -2.7030630949    -1.4365865795    -2.3848188006
+   40      H       3.1011647177     3.0603646536    -0.9947024878
+   41      H       1.9285979403     3.3571672395    -2.2778642797
+   42      H       3.5637594557    -0.3737761134     3.9611145047
+   43      H       4.7364003329     0.1070773473     2.7159157079
+   44      H       4.8152552564    -1.5180940767     3.4288084658
+   45      H      -4.7711622967     1.5173220687     0.5785160736
+   46      H      -4.0052832973     3.1200683322     0.5660175087
+   47      H      -4.7794698306     2.5171700576     2.0474935390
+   48      H      -3.3444496595    -3.4648356651    -1.0387214030
+   49      H      -1.9891319478    -4.3645377395    -1.7475468234
+   50      H      -3.3267068916    -3.8253193813    -2.7795752208
+   51      H       3.4282222868     2.1894381698    -3.9317136131
+   52      H       4.6081922078     1.8791786940    -2.6403814338
+   53      H       4.2677579689     3.5475699605    -3.1503905081
+   54      O       2.5389685539    -2.3098338313    -2.2925323642
+   55      H       2.7007050194    -3.7666615818    -0.1335954530
+   56      C       2.0471491376    -4.1535146299    -0.9158603026
+   57      C       1.9486490728    -3.3749867507    -2.1641219183
+   58      C       1.3456259709    -5.2838666899    -0.7465717235
+   59      H       1.3980160953    -5.8653424602     0.1755495951
+   60      C       1.0869576204    -3.9030026296    -3.2396595123
+   61      H       1.0414769166    -3.3277855463    -4.1650939591
+   62      C       0.4595464132    -5.8136171283    -1.8202278816
+   63      C       0.3870594802    -5.0368454882    -3.0808037828
+   64      O      -0.1691972264    -6.8444577655    -1.6772873698
+   65      H      -0.2598370885    -5.4097266212    -3.8762324205
+   66      C      -1.9245864220    -7.8669021513    -3.2929378285
+   67      O      -2.4685074844    -6.8536598564    -3.4526060665
+   68      O      -1.4431948628    -8.9150354600    -3.1898472153
+ ----------------------------------------------------------------
+ Nuclear Repulsion Energy =        2785.36544508 hartrees
+ There are      108 alpha and      108 beta electrons
+ Requested basis set is def2-SVPD
+ There are 388 shells and 892 basis functions
+
+ Total QAlloc Memory Limit  96000 MB
+ Mega-Array Size       188 MB
+ MEM_STATIC part       192 MB
+ -----------------------------------------------------------------------
+                STARTING GEOMETRY OPTIMIZER USING LIBOPT3
+                by Peter F. McLaughlin, Yu Zhang, Evgeny Epifanovsky
+ -----------------------------------------------------------------------
+  Checking Topology for Ill-Behaving Coordinates
+  Done Checking Topology
+              Initial Energy and Gradient Calculation
+
+	Performing Iterative Coordinate Back-Transformation
+
+	  Starting from Previous Position
+	  iter:	0	rms: 0.000000	maxdev: 0.000000	 Success!
+
+	Finished Iterative Coordinate Back-Transformation
+ ----------------------------------------------------------------
+             Standard Nuclear Orientation (Angstroms)
+    I     Atom           X                Y                Z
+ ----------------------------------------------------------------
+    1      N       0.2961783956     0.1685044014    -0.1601269809
+    2      C       1.3287494163    -0.7628633125     0.4294500249
+    3      C      -0.7171943372     0.5188221537     0.9067196491
+    4      C      -0.3532998012    -0.5262252199    -1.3321516816
+    5      C       0.9343948987     1.4479445296    -0.6475037803
+    6      C       2.2298757499    -0.1748735909     1.5011038080
+    7      C      -1.9974599061     1.1765781655     0.4190377870
+    8      C      -1.0928199356    -1.8143139194    -1.0060292037
+    9      C       2.0600100819     1.2924761499    -1.6577741319
+   10      C       3.1939271177    -1.2501448920     2.0053521836
+   11      C      -2.8581152798     1.5961969298     1.6106702177
+   12      C      -1.9707165425    -2.2334676574    -2.1838344530
+   13      C       2.7014567252     2.6519569034    -1.9355959829
+   14      C       4.1302537428    -0.7307281109     3.0892058685
+   15      C      -4.1780516968     2.2229621845     1.1778064927
+   16      C      -2.6989117494    -3.5454532427    -1.9249591282
+   17      C       3.8146132951     2.5637818473    -2.9728213850
+   18      H       1.9247620910    -1.1197754037    -0.4146611413
+   19      H       0.7744512212    -1.6128023701     0.8387430788
+   20      H      -0.2012829783     1.1810269617     1.6086669062
+   21      H      -0.9485199900    -0.4072898531     1.4427060329
+   22      H       0.4445618267    -0.7292176845    -2.0519764509
+   23      H      -1.0311638048     0.2021285263    -1.7881548551
+   24      H       1.2919802117     1.9725512134     0.2438880361
+   25      H       0.1283832932     2.0489627905    -1.0795415573
+   26      H       1.6409890559     0.2070472881     2.3461742219
+   27      H       2.8155334903     0.6651011889     1.1038862987
+   28      H      -2.5748942069     0.4840042133    -0.2081273054
+   29      H      -1.7785128508     2.0623266387    -0.1931433651
+   30      H      -1.7279866342    -1.6973892314    -0.1175036043
+   31      H      -0.3826053832    -2.6210043493    -0.7764718094
+   32      H       1.6791494793     0.8777932107    -2.6002789470
+   33      H       2.8318068346     0.6029235886    -1.2914495278
+   34      H       3.7830861579    -1.6288673248     1.1560079617
+   35      H       2.6162130075    -2.1048335870     2.3893407601
+   36      H      -2.2930170231     2.3074376341     2.2319612898
+   37      H      -3.0538240286     0.7169322990     2.2436126364
+   38      H      -1.3511842882    -2.3186974460    -3.0896809897
+   39      H      -2.7030630949    -1.4365865795    -2.3848188006
+   40      H       3.1011647177     3.0603646536    -0.9947024878
+   41      H       1.9285979403     3.3571672395    -2.2778642797
+   42      H       3.5637594557    -0.3737761134     3.9611145047
+   43      H       4.7364003329     0.1070773473     2.7159157079
+   44      H       4.8152552564    -1.5180940767     3.4288084658
+   45      H      -4.7711622967     1.5173220687     0.5785160736
+   46      H      -4.0052832973     3.1200683322     0.5660175087
+   47      H      -4.7794698306     2.5171700576     2.0474935390
+   48      H      -3.3444496595    -3.4648356651    -1.0387214030
+   49      H      -1.9891319478    -4.3645377395    -1.7475468234
+   50      H      -3.3267068916    -3.8253193813    -2.7795752208
+   51      H       3.4282222868     2.1894381698    -3.9317136131
+   52      H       4.6081922078     1.8791786940    -2.6403814338
+   53      H       4.2677579689     3.5475699605    -3.1503905081
+   54      O       2.5389685539    -2.3098338313    -2.2925323642
+   55      H       2.7007050194    -3.7666615818    -0.1335954530
+   56      C       2.0471491376    -4.1535146299    -0.9158603026
+   57      C       1.9486490728    -3.3749867507    -2.1641219183
+   58      C       1.3456259709    -5.2838666899    -0.7465717235
+   59      H       1.3980160953    -5.8653424602     0.1755495951
+   60      C       1.0869576204    -3.9030026296    -3.2396595123
+   61      H       1.0414769166    -3.3277855463    -4.1650939591
+   62      C       0.4595464132    -5.8136171283    -1.8202278816
+   63      C       0.3870594802    -5.0368454882    -3.0808037828
+   64      O      -0.1691972264    -6.8444577655    -1.6772873698
+   65      H      -0.2598370885    -5.4097266212    -3.8762324205
+   66      C      -1.9245864220    -7.8669021513    -3.2929378285
+   67      O      -2.4685074844    -6.8536598564    -3.4526060665
+   68      O      -1.4431948628    -8.9150354600    -3.1898472153
+ ----------------------------------------------------------------
+ Nuclear Repulsion Energy =        2785.36544508 hartrees
+ There are      108 alpha and      108 beta electrons
+ Discretize the solute cavity surface with Lebedev spheres
+	Using 194 Lebedev grid points for each H atom
+	Using 194 Lebedev grid points for other atoms
+	Atomic van der Waals radii will be scaled by 1.10
+ Remove points where switching function is < 1.0e-08
+ Keep 4765 surface tesserae and discard 8427 interior tesserae
+ Molecular Surface Area = 543.893 Angst**2
+ Requested basis set is def2-SVPD
+ There are 388 shells and 892 basis functions
+ A cutoff of  1.0D-16 yielded  62605 shell pairs
+ There are    327807 function pairs (    369902 Cartesian)
+ Smallest overlap matrix eigenvalue = 5.98E-06
+
+ Scale SEOQF with 1.000000e-01/1.000000e-02/1.000000e-01
+
+ Standard Electronic Orientation quadrupole field applied
+ Nucleus-field energy     =    -0.0000000393 hartrees
+ Guess from superposition of atomic densities
+ Warning:  Energy on first SCF cycle will be non-variational
+ SAD guess density has 217.000000 electrons
+
+ -----------------------------------------------------------------------
+  General SCF calculation program by
+  Eric Jon Sundstrom, Paul Horn, Yuezhi Mao, Dmitri Zuev, Alec White,
+  David Stuck, Shaama M.S., Shane Yost, Joonho Lee, David Small,
+  Daniel Levine, Susi Lehtola, Hugh Burton, Evgeny Epifanovsky,
+  Bang C. Huynh
+ -----------------------------------------------------------------------
+ Exchange:     0.2220 Hartree-Fock + 1.0000 wB97X-D + LR-HF
+ Correlation:  1.0000 wB97X-D
+ Using SG-3 standard quadrature grid
+ Dispersion:   Grimme D
+ using 40 threads for integral computing
+ -------------------------------------------------------
+ OpenMP Integral computing Module                
+ Release: version 1.0, May 2013, Q-Chem Inc. Pittsburgh 
+ -------------------------------------------------------
+ A restricted SCF calculation will be
+ performed using DIIS, GDM
+ SCF converges when RMS gradient is below 1.0e-08
+ ---------------------------------------
+  Cycle       Energy         DIIS error
+ ---------------------------------------
+    1   -1262.4674059940      2.05e-02  
+    2   -1254.4224351123      2.18e-03  Done DIIS. Switching to GDM
+ ---------------------------------------
+  Cycle       Energy        RMS Gradient
+ ---------------------------------------
+    1   -1254.4224351123      1.65e-01   Descent step
+    2   -1254.7952011570      2.12e-02   Normal BFGS step
+    3   -1254.8372940490      3.36e-02   Normal BFGS step
+    4   -1254.8458401041      1.84e-02   Normal BFGS step
+    5   -1254.8479140711      5.47e-03   Normal BFGS step
+    6   -1254.8481989619      2.17e-03   Normal BFGS step
+    7   -1254.8482896576      2.62e-04   Normal BFGS step
+    8   -1254.8482908834      1.85e-04   Normal BFGS step
+    9   -1254.8482913610      1.11e-04   Normal BFGS step
+   10   -1254.8482913344      7.84e-05   Normal BFGS step
+   11   -1254.8482914712      6.54e-06   Normal BFGS step
+   12   -1254.8482913120      5.78e-06  Line search: overstep
+   13   -1254.8482912462      5.77e-06  Line search: overstep
+   14   -1254.8482914660      6.39e-06   Normal BFGS step
+   15   -1254.8482912845      6.57e-05  Line search: overstep
+   16   -1254.8482915165      4.10e-06   Normal BFGS step
+   17   -1254.8482916453      1.02e-06   Normal BFGS step
+   18   -1254.8482912813      4.73e-06  Line search: overstep
+   19   -1254.8482915261      8.93e-07  Line search: overstep
+   20   -1254.8482913189      1.00e-06  Line search: overstep
+   21   -1254.8482915028      1.01e-06  Line search: overstep
+   22   -1254.8482913464      1.01e-06  Line search: overstep
+   23   -1254.8482914901      1.01e-06  Line search: overstep
+   24   -1254.8482913646      1.01e-06  Line search: overstep
+   25   -1254.8482914822      1.01e-06  Line search: overstep
+   26   -1254.8482913773      1.01e-06  Line search: overstep
+   27   -1254.8482914765      1.01e-06  Line search: overstep
+   28   -1254.8482913865      1.01e-06  Line search: overstep
+   29   -1254.8482914719      1.01e-06  Line search: overstep
+   30   -1254.8482913933      1.01e-06  Line search: overstep
+   31   -1254.8482914679      1.01e-06  Line search: overstep
+   32   -1254.8482913986      1.01e-06  Line search: overstep
+   33   -1254.8482914643      1.01e-06  Line search: overstep
+  GDM::   16 failed line searches.  Resetting
+   34   -1254.8482914028      1.01e-06  Line search: overstep
+  GDM::   17 failed line searches.  Resetting
+   35   -1254.8482914611      1.00e-06  Line search: overstep
+  GDM::   18 failed line searches.  Resetting
+   36   -1254.8482914062      1.00e-06  Line search: overstep
+  GDM::   19 failed line searches.  Resetting
+   37   -1254.8482914582      1.00e-06  Line search: overstep
+  GDM::   20 failed line searches.  Resetting
+   38   -1254.8482914089      1.00e-06  Line search: overstep
+  GDM::   21 failed line searches.  Resetting
+   39   -1254.8482914556      1.00e-06  Line search: overstep
+  GDM::   22 failed line searches.  Resetting
+   40   -1254.8482914113      1.00e-06  Line search: overstep
+  GDM::   23 failed line searches.  Resetting
+   41   -1254.8482914532      1.00e-06  Line search: overstep
+  GDM::   24 failed line searches.  Resetting
+   42   -1254.8482914132      1.00e-06  Line search: overstep
+  GDM::   25 failed line searches.  Resetting
+   43   -1254.8482914511      1.00e-06  Line search: overstep
+  GDM::   26 failed line searches.  Resetting
+   44   -1254.8482914149      1.00e-06  Line search: overstep
+  GDM::   27 failed line searches.  Resetting
+   45   -1254.8482914491      1.00e-06  Line search: overstep
+  GDM::   28 failed line searches.  Resetting
+   46   -1254.8482914163      1.00e-06  Line search: overstep
+  GDM::   29 failed line searches.  Resetting
+   47   -1254.8482914473      1.00e-06  Line search: overstep
+  GDM::   30 failed line searches.  Resetting
+   48   -1254.8482914176      1.00e-06  Line search: overstep
+  GDM::   31 failed line searches.  Resetting
+   49   -1254.8482914457      1.00e-06  Line search: overstep
+  GDM::   32 failed line searches.  Resetting
+   50   -1254.8482914187      1.00e-06  Line search: overstep
+  GDM::   33 failed line searches.  Resetting
+   51   -1254.8482914443      1.00e-06  Line search: overstep
+  GDM::   34 failed line searches.  Resetting
+   52   -1254.8482914196      1.00e-06  Line search: overstep
+  GDM::   35 failed line searches.  Resetting
+   53   -1254.8482914430      1.00e-06  Line search: overstep
+  GDM::   36 failed line searches.  Resetting
+   54   -1254.8482914205      1.00e-06  Line search: overstep
+  GDM::   37 failed line searches.  Resetting
+   55   -1254.8482914418      1.00e-06  Line search: overstep
+  GDM::   38 failed line searches.  Resetting
+   56   -1254.8482914212      1.00e-06  Line search: overstep
+  GDM::   39 failed line searches.  Resetting
+   57   -1254.8482914407      1.00e-06  Line search: overstep
+  GDM::   40 failed line searches.  Resetting
+   58   -1254.8482914219      1.00e-06  Line search: overstep
+  GDM::   41 failed line searches.  Resetting
+   59   -1254.8482914397      1.00e-06  Line search: overstep
+  GDM::   42 failed line searches.  Resetting
+   60   -1254.8482914224      1.00e-06  Line search: overstep
+  GDM::   43 failed line searches.  Resetting
+   61   -1254.8482914388      1.00e-06  Line search: overstep
+  GDM::   44 failed line searches.  Resetting
+   62   -1254.8482914230      1.00e-06  Line search: overstep
+  GDM::   45 failed line searches.  Resetting
+   63   -1254.8482914380      1.00e-06  Line search: overstep
+  GDM::   46 failed line searches.  Resetting
+   64   -1254.8482914234      1.00e-06  Line search: overstep
+  GDM::   47 failed line searches.  Resetting
+   65   -1254.8482914373      1.00e-06  Line search: overstep
+  GDM::   48 failed line searches.  Resetting
+   66   -1254.8482914239      1.00e-06  Line search: overstep
+  GDM::   49 failed line searches.  Resetting
+   67   -1254.8482914366      1.00e-06  Line search: overstep
+  GDM::   50 failed line searches.  Resetting
+   68   -1254.8482914243      1.00e-06  Line search: overstep
+  GDM::   51 failed line searches.  Resetting
+   69   -1254.8482914360      1.00e-06  Line search: overstep
+  GDM::   52 failed line searches.  Resetting
+   70   -1254.8482914246      1.00e-06  Line search: overstep
+  GDM::   53 failed line searches.  Resetting
+   71   -1254.8482914354      1.00e-06  Line search: overstep
+  GDM::   54 failed line searches.  Resetting
+   72   -1254.8482914249      1.00e-06  Line search: overstep
+  GDM::   55 failed line searches.  Resetting
+   73   -1254.8482914349      1.00e-06  Line search: overstep
+  GDM::   56 failed line searches.  Resetting
+   74   -1254.8482914252      1.00e-06  Line search: overstep
+  GDM::   57 failed line searches.  Resetting
+   75   -1254.8482914345      1.00e-06  Line search: overstep
+  GDM::   58 failed line searches.  Resetting
+   76   -1254.8482914255      1.00e-06  Line search: overstep
+  GDM::   59 failed line searches.  Resetting
+   77   -1254.8482914340      1.00e-06  Line search: overstep
+  GDM::   60 failed line searches.  Resetting
+   78   -1254.8482914257      1.00e-06  Line search: overstep
+  GDM::   61 failed line searches.  Resetting
+   79   -1254.8482914337      1.00e-06  Line search: overstep
+  GDM::   62 failed line searches.  Resetting
+   80   -1254.8482914259      1.00e-06  Line search: overstep
+  GDM::   63 failed line searches.  Resetting
+   81   -1254.8482914333      1.00e-06  Line search: overstep
+  GDM::   64 failed line searches.  Resetting
+   82   -1254.8482914261      1.00e-06  Line search: overstep
+  GDM::   65 failed line searches.  Resetting
+   83   -1254.8482914330      1.00e-06  Line search: overstep
+  GDM::   66 failed line searches.  Resetting
+   84   -1254.8482914263      1.00e-06  Line search: overstep
+  GDM::   67 failed line searches.  Resetting
+   85   -1254.8482914327      1.00e-06  Line search: overstep
+  GDM::   68 failed line searches.  Resetting
+   86   -1254.8482914264      1.00e-06  Line search: overstep
+  GDM::   69 failed line searches.  Resetting
+   87   -1254.8482914324      1.00e-06  Line search: overstep
+  GDM::   70 failed line searches.  Resetting
+   88   -1254.8482914266      1.00e-06  Line search: overstep
+  GDM::   71 failed line searches.  Resetting
+   89   -1254.8482914321      1.00e-06  Line search: overstep
+  GDM::   72 failed line searches.  Resetting
+   90   -1254.8482914267      1.00e-06  Line search: overstep
+  GDM::   73 failed line searches.  Resetting
+   91   -1254.8482914319      1.00e-06  Line search: overstep
+  GDM::   74 failed line searches.  Resetting
+   92   -1254.8482914269      1.00e-06  Line search: overstep
+  GDM::   75 failed line searches.  Resetting
+   93   -1254.8482914317      1.00e-06  Line search: overstep
+  GDM::   76 failed line searches.  Resetting
+   94   -1254.8482914270      1.00e-06  Line search: overstep
+  GDM::   77 failed line searches.  Resetting
+   95   -1254.8482914315      1.00e-06  Line search: overstep
+  GDM::   78 failed line searches.  Resetting
+   96   -1254.8482914271      1.00e-06  Line search: overstep
+  GDM::   79 failed line searches.  Resetting
+   97   -1254.8482914313      1.00e-06  Line search: overstep
+  GDM::   80 failed line searches.  Resetting
+   98   -1254.8482914272      1.00e-06  Line search: overstep
+  GDM::   81 failed line searches.  Resetting
+   99   -1254.8482914311      1.00e-06  Line search: overstep
+  GDM::   82 failed line searches.  Resetting
+  100   -1254.8482914273      1.00e-06  Line search: overstep
+gen_scfman_exception: SCF failed to converge
+
+ Q-Chem fatal error occurred in module libgscf/gen_scfman/gen_scfman_main.C, line 243:
+
+ Error in gen_scfman
+
+
+ Please submit a crash report at q-chem.com/reporter 
+ 
+ 
