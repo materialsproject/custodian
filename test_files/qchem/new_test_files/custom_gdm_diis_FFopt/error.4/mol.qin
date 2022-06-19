@@ -85,7 +85,6 @@ $rem
    method = wb97xd
    geom_opt_max_cycles = 200
    solvent_method = pcm
-   geom_opt2 = 3
 $end
 
 $pcm

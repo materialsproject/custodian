@@ -191,7 +191,6 @@ sym_ignore = true
 method = wb97xd
 geom_opt_max_cycles = 200
 solvent_method = pcm
-geom_opt2 = 3
 cpscf_nseg = 3
 $end
 

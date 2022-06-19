@@ -193,7 +193,6 @@ sym_ignore = true
 method = wb97xd
 geom_opt_max_cycles = 200
 solvent_method = pcm
-geom_opt2 = 3
 gen_scfman_hybrid_algo = true
 gen_scfman_algo_1 = gdm
 gen_scfman_conv_1 = 4
