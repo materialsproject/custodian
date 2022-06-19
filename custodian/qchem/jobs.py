@@ -233,6 +233,7 @@ class QCJob(Job):
         freq_rem["job_type"] = "freq"
         opt_rem = copy.deepcopy(orig_input.rem)
         opt_rem["job_type"] = opt_method
+        freq_rem.pop("geom_opt2", None)
         # Next two lines will be removed once Q-Chem 6 is released:
         if linked:
             opt_rem.pop("geom_opt2", None)
