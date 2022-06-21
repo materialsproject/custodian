@@ -771,7 +771,6 @@ class IncorrectSmearingHandlerTest(unittest.TestCase):
 
 
 class IncorrectSmearingHandlerStaticTest(unittest.TestCase):
-
     def setUp(self):
         if "PMG_VASP_PSP_DIR" not in os.environ:
             os.environ["PMG_VASP_PSP_DIR"] = test_dir
