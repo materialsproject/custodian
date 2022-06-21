@@ -1124,9 +1124,7 @@ class OptFF_small_neg_freq(TestCase):
         self.assertRaises(StopIteration, myjob.__next__)
 
 
-
 class OptFF_single_freq_frags(TestCase):
-    
     def setUp(self):
         self.maxDiff = None
         os.makedirs(scr_dir)
@@ -1197,9 +1195,7 @@ class OptFF_single_freq_frags(TestCase):
             os.path.join(scr_dir, "mol.qin.freq_0"),
         )
 
-
         self.assertRaises(StopIteration, myjob.__next__)
-
 
 
 class TSFFTest(TestCase):
