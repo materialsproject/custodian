@@ -1,0 +1,6 @@
+2022-06-07 21:00:24,111 INFO Hostname/IP lookup (this will take a few seconds)
+2022-06-07 21:00:24,112 INFO Launching Rocket
+2022-06-07 21:00:27,685 INFO RUNNING fw_id: 340 in directory: /global/scratch/users/rdguha/hydr_halide/frag_halide/block_2022-06-08-03-16-58-295470/launcher_2022-06-08-04-00-17-629823
+2022-06-07 21:00:27,736 INFO Task started: {{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}}.
+2022-06-07 21:00:27,741 INFO Task completed: {{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}}
+2022-06-07 21:00:27,754 INFO Task started: {{atomate.qchem.firetasks.run_calc.RunQChemCustodian}}.
