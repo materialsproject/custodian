@@ -89,6 +89,14 @@ class QCJob(Job):
         self.save_scratch = save_scratch
         self.backup = backup
 
+        try:
+            slurm_cores = os.environ["SLURM_CPUS_ON_NODE"]
+            if slurm_cores < self.max_cores:
+                self.max_cores = slurm_cores
+            print("max_cores reduced from", max_cores, "to", self.max_cores)
+        except KeyError:
+            print("SLURM_CPUS_ON_NODE not in environment")
+
     @property
     def current_command(self):
         """
