@@ -1,0 +1,46 @@
+You are running Q-Chem version: 5.4.2
+withsave === 1
+
+#
+# job setting
+#
+local host:  n0152.savio3
+current dir: /global/scratch/users/rdguha/hydr_halide/frag_halide/block_2022-06-08-03-16-58-295470/launcher_2022-06-08-04-00-17-629823
+input file:  mol.qin
+output file: mol.qout
+nprocs     : 0
+nthreads   : 40
+#
+# qchem installation setting
+#
+QC:          /clusterfs/cloudcuckoo/software/qchem
+QCAUX:       /clusterfs/cloudcuckoo/software/qchem/qcaux
+QCPROG:      /clusterfs/cloudcuckoo/software/qchem/exe/qcprog.exe_s
+QCPROG_S:    /clusterfs/cloudcuckoo/software/qchem/exe/qcprog.exe_s
+PARALLEL:    -DSERIAL
+QCMPI:       mpich3
+#
+# qchem directory setting
+#
+qcrun:       scratch
+QCSCRATCH:   /global/scratch/users/rdguha/hydr_halide/frag_halide/block_2022-06-08-03-16-58-295470/launcher_2022-06-08-04-00-17-629823
+QCLOCALSCR:  /tmp
+QCTMPDIR:    /tmp
+QCFILEPREF:  /tmp/scratch
+QCSAVEDIR:   /global/scratch/users/rdguha/hydr_halide/frag_halide/block_2022-06-08-03-16-58-295470/launcher_2022-06-08-04-00-17-629823/scratch
+workdirs:    /tmp/scratch
+workdir0:    /tmp/scratch
+partmpdirs =  
+#
+# parallel setting
+#
+QCRSH:           /usr/bin/ssh
+QCMPI:           mpich3
+QCMPIRUN:        mpirun
+QCMACHINEFILE:   /tmp/scratch/hostfile
+
+#
+# env setting
+#
+exported envs:   QC QCAUX QCSCRATCH QCRUNNAME QCFILEPREF QCPROG QCPROG_S GUIFILE
+copy savedir ...
