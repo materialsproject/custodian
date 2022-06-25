@@ -103,6 +103,7 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis"
                 and self.qcinp.rem.get("scf_guess_always", "none").lower() != "true"
                 and len(self.outdata.get("energy_trajectory", [])) > 0  # Ensure not the first SCF
+                and self.qcinp.rem.get("gen_scfman_hybrid_algo", "false").lower() != "true"
             ):
                 print("turning on SCF guess always")
                 self.qcinp.rem["scf_guess_always"] = "true"
@@ -110,7 +111,10 @@ class QChemErrorHandler(ErrorHandler):
             # Next, switch to DIIS_GDM and return to default SCF guess behavior. Note that GDM is
             # better at not getting stuck like DIIS, and sometimes forcing a guess can actually hurt
             # convergence, so we don't want to start with it on here.
-            elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
+            elif (
+                self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis"
+                and self.qcinp.rem.get("gen_scfman_hybrid_algo", "false").lower() != "true"
+            ):
                 self.qcinp.rem["scf_algorithm"] = "diis_gdm"
                 actions.append({"scf_algorithm": "diis_gdm"})
                 if self.qcinp.rem.get("scf_guess_always", "none").lower() == "true":
@@ -130,7 +134,10 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.rem["gen_scfman_iter_2"] = "50"
                 actions.append({"scf_algorithm": "custom_gdm_diis"})
             # Finally, try forcing the initial guess again as a last resort.
-            elif self.qcinp.rem.get("scf_guess_always", "none").lower() != "true":
+            elif (
+                self.qcinp.rem.get("scf_guess_always", "none").lower() != "true"
+                and len(self.outdata.get("energy_trajectory", [])) > 0
+            ):
                 self.qcinp.rem["scf_guess_always"] = "true"
                 actions.append({"scf_guess_always": "true"})
             else:
