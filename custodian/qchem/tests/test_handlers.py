@@ -343,6 +343,26 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(d["actions"], [{"rerun_job_no_changes": True}])
         self._check_equivalent_inputs("mol.qin.last", "mol.qin")
 
+    def test_custom_gdm_gdmqls(self):
+        shutil.copyfile(
+            os.path.join(test_dir, "custom_gdm_gdmqls/mol.qin"),
+            os.path.join(scr_dir, "mol.qin"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "custom_gdm_gdmqls/mol.qin.fixed"),
+            os.path.join(scr_dir, "mol.qin.fixed"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "custom_gdm_gdmqls/mol.qout"),
+            os.path.join(scr_dir, "mol.qout"),
+        )
+        h = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["SCF_failed_to_converge"])
+        self.assertEqual(d["actions"], [{"scf_algorithm": "custom_gdm_gdmqls"}])
+        self._check_equivalent_inputs("mol.qin.fixed", "mol.qin")
+
     def test_OOS_read_hess(self):
         shutil.copyfile(
             os.path.join(test_dir, "OOS_read_hess.qin"),
