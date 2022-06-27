@@ -324,9 +324,9 @@ class QCJob(Job):
                         opt_scf_alg = opt_indata.rem["scf_algorithm"]
                     if "scf_algorithm" not in freq_rem:
                         if freq_rem.get("gen_scfman_hybrid_algo", "false") == "true":
-                            if freq_indata.rem.get("gen_scfman_algo_2", "diis") == "diis":
+                            if freq_rem.get("gen_scfman_algo_2", "diis") == "diis":
                                 freq_scf_alg = "custom_gdm_diis"
-                            elif freq_indata.rem.get("gen_scfman_algo_2", "diis") == "gdm_qls":
+                            elif freq_rem.get("gen_scfman_algo_2", "diis") == "gdm_qls":
                                 freq_scf_alg = "custom_gdm_gdmqls"
                             else:
                                 raise RuntimeError("Unknown gen_scfman_algo_2 found! Exiting...")
@@ -412,18 +412,18 @@ class QCJob(Job):
                 except KeyError:
                     opt_scf_alg = "diis"
                     freq_scf_alg = "diis"
-                    if "scf_algorithm" not in opt_indata.rem:
-                        if opt_indata.rem.get("gen_scfman_hybrid_algo", "false") == "true":
-                            if opt_indata.rem.get("gen_scfman_algo_2", "diis") == "diis":
+                    if "scf_algorithm" not in opt_rem:
+                        if opt_rem.get("gen_scfman_hybrid_algo", "false") == "true":
+                            if opt_rem.get("gen_scfman_algo_2", "diis") == "diis":
                                 opt_scf_alg = "custom_gdm_diis"
-                            elif opt_indata.rem.get("gen_scfman_algo_2", "diis") == "gdm_qls":
+                            elif opt_rem.get("gen_scfman_algo_2", "diis") == "gdm_qls":
                                 opt_scf_alg = "custom_gdm_gdmqls"
                             else:
                                 raise RuntimeError("Unknown gen_scfman_algo_2 found! Exiting...")
                     else:
-                        opt_scf_alg = opt_indata.rem["scf_algorithm"]
-                    if "scf_algorithm" not in freq_rem:
-                        if freq_rem.get("gen_scfman_hybrid_algo", "false") == "true":
+                        opt_scf_alg = opt_rem["scf_algorithm"]
+                    if "scf_algorithm" not in freq_indata.rem:
+                        if freq_indata.rem.get("gen_scfman_hybrid_algo", "false") == "true":
                             if freq_indata.rem.get("gen_scfman_algo_2", "diis") == "diis":
                                 freq_scf_alg = "custom_gdm_diis"
                             elif freq_indata.rem.get("gen_scfman_algo_2", "diis") == "gdm_qls":
@@ -431,7 +431,7 @@ class QCJob(Job):
                             else:
                                 raise RuntimeError("Unknown gen_scfman_algo_2 found! Exiting...")
                     else:
-                        freq_scf_alg = freq_rem["scf_algorithm"]
+                        freq_scf_alg = freq_indata.rem["scf_algorithm"]
                     if opt_scf_alg != freq_scf_alg:
                         if freq_scf_alg == "custom_gdm_diis":
                             opt_rem.pop("scf_algorithm", None)
