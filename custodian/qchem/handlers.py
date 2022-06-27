@@ -133,6 +133,12 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.rem["gen_scfman_conv_2"] = "8"
                 self.qcinp.rem["gen_scfman_iter_2"] = "50"
                 actions.append({"scf_algorithm": "custom_gdm_diis"})
+            elif (
+                self.qcinp.rem.get("gen_scfman_hybrid_algo", "false").lower() == "true"
+                and self.qcinp.rem.get("gen_scfman_algo_2", "diis") == "diis"
+            ):
+                self.qcinp.rem["gen_scfman_algo_2"] = "gdm_qls"
+                actions.append({"scf_algorithm": "custom_gdm_gdmqls"})
             # Finally, try forcing the initial guess again as a last resort.
             elif (
                 self.qcinp.rem.get("scf_guess_always", "none").lower() != "true"
