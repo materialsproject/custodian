@@ -314,12 +314,22 @@ class QCJob(Job):
                     freq_scf_alg = "diis"
                     if "scf_algorithm" not in opt_indata.rem:
                         if opt_indata.rem.get("gen_scfman_hybrid_algo", "false") == "true":
-                            opt_scf_alg = "custom_gdm_diis"
+                            if opt_indata.rem.get("gen_scfman_algo_2", "diis") == "diis":
+                                opt_scf_alg = "custom_gdm_diis"
+                            elif opt_indata.rem.get("gen_scfman_algo_2", "diis") == "gdm_qls":
+                                opt_scf_alg = "custom_gdm_gdmqls"
+                            else:
+                                raise RuntimeError("Unknown gen_scfman_algo_2 found! Exiting...")
                     else:
                         opt_scf_alg = opt_indata.rem["scf_algorithm"]
                     if "scf_algorithm" not in freq_rem:
                         if freq_rem.get("gen_scfman_hybrid_algo", "false") == "true":
-                            freq_scf_alg = "custom_gdm_diis"
+                            if freq_indata.rem.get("gen_scfman_algo_2", "diis") == "diis":
+                                freq_scf_alg = "custom_gdm_diis"
+                            elif freq_indata.rem.get("gen_scfman_algo_2", "diis") == "gdm_qls":
+                                freq_scf_alg = "custom_gdm_gdmqls"
+                            else:
+                                raise RuntimeError("Unknown gen_scfman_algo_2 found! Exiting...")
                     else:
                         freq_scf_alg = freq_rem["scf_algorithm"]
                     if opt_scf_alg != freq_scf_alg:
@@ -338,6 +348,23 @@ class QCJob(Job):
                             opt_rem["gen_scfman_conv_1"] = "4"
                             opt_rem["gen_scfman_iter_1"] = "50"
                             opt_rem["gen_scfman_algo_2"] = "diis"
+                            opt_rem["gen_scfman_conv_2"] = "8"
+                            opt_rem["gen_scfman_iter_2"] = "50"
+                        elif opt_scf_alg == "custom_gdm_gdmqls":
+                            freq_rem.pop("scf_algorithm", None)
+                            freq_rem["gen_scfman_hybrid_algo"] = "true"
+                            freq_rem["gen_scfman_algo_1"] = "gdm"
+                            freq_rem["gen_scfman_conv_1"] = "4"
+                            freq_rem["gen_scfman_iter_1"] = "50"
+                            freq_rem["gen_scfman_algo_2"] = "gdm_qls"
+                            freq_rem["gen_scfman_conv_2"] = "8"
+                            freq_rem["gen_scfman_iter_2"] = "50"
+                            opt_rem.pop("scf_algorithm", None)
+                            opt_rem["gen_scfman_hybrid_algo"] = "true"
+                            opt_rem["gen_scfman_algo_1"] = "gdm"
+                            opt_rem["gen_scfman_conv_1"] = "4"
+                            opt_rem["gen_scfman_iter_1"] = "50"
+                            opt_rem["gen_scfman_algo_2"] = "gdm_qls"
                             opt_rem["gen_scfman_conv_2"] = "8"
                             opt_rem["gen_scfman_iter_2"] = "50"
                         else:
@@ -387,12 +414,22 @@ class QCJob(Job):
                     freq_scf_alg = "diis"
                     if "scf_algorithm" not in opt_indata.rem:
                         if opt_indata.rem.get("gen_scfman_hybrid_algo", "false") == "true":
-                            opt_scf_alg = "custom_gdm_diis"
+                            if opt_indata.rem.get("gen_scfman_algo_2", "diis") == "diis":
+                                opt_scf_alg = "custom_gdm_diis"
+                            elif opt_indata.rem.get("gen_scfman_algo_2", "diis") == "gdm_qls":
+                                opt_scf_alg = "custom_gdm_gdmqls"
+                            else:
+                                raise RuntimeError("Unknown gen_scfman_algo_2 found! Exiting...")
                     else:
                         opt_scf_alg = opt_indata.rem["scf_algorithm"]
                     if "scf_algorithm" not in freq_rem:
                         if freq_rem.get("gen_scfman_hybrid_algo", "false") == "true":
-                            freq_scf_alg = "custom_gdm_diis"
+                            if freq_indata.rem.get("gen_scfman_algo_2", "diis") == "diis":
+                                freq_scf_alg = "custom_gdm_diis"
+                            elif freq_indata.rem.get("gen_scfman_algo_2", "diis") == "gdm_qls":
+                                freq_scf_alg = "custom_gdm_gdmqls"
+                            else:
+                                raise RuntimeError("Unknown gen_scfman_algo_2 found! Exiting...")
                     else:
                         freq_scf_alg = freq_rem["scf_algorithm"]
                     if opt_scf_alg != freq_scf_alg:
@@ -413,6 +450,23 @@ class QCJob(Job):
                             freq_rem["gen_scfman_algo_2"] = "diis"
                             freq_rem["gen_scfman_conv_2"] = "8"
                             freq_rem["gen_scfman_iter_2"] = "50"
+                        elif freq_scf_alg == "custom_gdm_gdmqls":
+                            freq_rem.pop("scf_algorithm", None)
+                            freq_rem["gen_scfman_hybrid_algo"] = "true"
+                            freq_rem["gen_scfman_algo_1"] = "gdm"
+                            freq_rem["gen_scfman_conv_1"] = "4"
+                            freq_rem["gen_scfman_iter_1"] = "50"
+                            freq_rem["gen_scfman_algo_2"] = "gdm_qls"
+                            freq_rem["gen_scfman_conv_2"] = "8"
+                            freq_rem["gen_scfman_iter_2"] = "50"
+                            opt_rem.pop("scf_algorithm", None)
+                            opt_rem["gen_scfman_hybrid_algo"] = "true"
+                            opt_rem["gen_scfman_algo_1"] = "gdm"
+                            opt_rem["gen_scfman_conv_1"] = "4"
+                            opt_rem["gen_scfman_iter_1"] = "50"
+                            opt_rem["gen_scfman_algo_2"] = "gdm_qls"
+                            opt_rem["gen_scfman_conv_2"] = "8"
+                            opt_rem["gen_scfman_iter_2"] = "50"
                         else:
                             raise RuntimeError("Not sure how to handle SCF alg difference!")
 
