@@ -241,9 +241,7 @@ class QChemErrorHandler(ErrorHandler):
                         "optimization_restart"
                     ] = "true"
                 else:
-                    print(
-                        "Back transforms error should be dealt with automatically if we're already in delocalized internal coordinates..."
-                    )
+                    print("Back transforms error should not occur if in delocalized internal coordinates...")
 
         elif "premature_end_FileMan_error" in self.errors:
             # Given defaults, the first two handlers will typically be skipped.
