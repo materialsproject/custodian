@@ -12,6 +12,7 @@ import numpy as np
 from pymatgen.core import Molecule
 from pymatgen.io.qchem.inputs import QCInput
 from pymatgen.io.qchem.outputs import QCOutput, check_for_structure_changes
+from pymatgen.io.qchem.sets import OptSet
 
 from custodian.custodian import Job
 from custodian.qchem.utils import perturb_coordinates, vector_list_diff
@@ -245,10 +246,11 @@ class QCJob(Job):
         freq_rem["job_type"] = "freq"
         opt_rem = copy.deepcopy(orig_input.rem)
         opt_rem["job_type"] = opt_method
-        freq_rem.pop("geom_opt2", None)
-        # Next two lines will be removed once Q-Chem 6 is released:
-        if linked:
-            opt_rem.pop("geom_opt2", None)
+        opt_geom_opt = None
+        if "geom_opt2" in orig_input.rem.keys():
+            freq_rem.pop("geom_opt2", None)
+            if linked:
+                opt_rem.pop("geom_opt2", None)
         first = True
         energy_history = []
 
@@ -269,9 +271,16 @@ class QCJob(Job):
                 )
             )
 
+            freq_outdata = QCOutput(output_file + ".freq_pre").data
+            if freq_outdata["version"] == "6":
+                opt_set = OptSet(molecule=freq_outdata["initial_molecule"], qchem_version=freq_outdata["version"])
+                opt_geom_opt = copy.deepcopy(opt_set.geom_opt)
+
             if linked:
                 opt_rem["geom_opt_hessian"] = "read"
                 opt_rem["scf_guess_always"] = True
+                if freq_outdata["version"] == "6":
+                    opt_geom_opt["initial_hessian"] = "read"
 
             opt_QCInput = QCInput(
                 molecule=orig_input.molecule,
@@ -283,6 +292,7 @@ class QCJob(Job):
                 vdw_mode=orig_input.vdw_mode,
                 van_der_waals=orig_input.van_der_waals,
                 nbo=orig_input.nbo,
+                geom_opt=opt_geom_opt,
             )
             opt_QCInput.write_file(input_file)
             first = False
@@ -307,6 +317,9 @@ class QCJob(Job):
                 )
                 opt_outdata = QCOutput(output_file + f".{opt_method}_" + str(ii)).data
                 opt_indata = QCInput.from_file(input_file + f".{opt_method}_" + str(ii))
+                if opt_outdata["version"] == "6":
+                    opt_geom_opt = copy.deepcopy(opt_indata.geom_opt)
+                    opt_geom_opt["initial_hessian"] = "read"
                 try:
                     if opt_indata.rem["scf_algorithm"] != freq_rem["scf_algorithm"]:
                         freq_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
@@ -512,7 +525,7 @@ class QCJob(Job):
                         vdw_mode=orig_input.vdw_mode,
                         van_der_waals=orig_input.van_der_waals,
                         nbo=orig_input.nbo,
-                        # geom_opt=orig_input.geom_opt, # Will be uncommented once Q-Chem 6 is released
+                        geom_opt=opt_geom_opt,
                     )
                     opt_QCInput.write_file(input_file)
                 else:
@@ -537,7 +550,7 @@ class QCJob(Job):
                         vdw_mode=orig_input.vdw_mode,
                         van_der_waals=orig_input.van_der_waals,
                         nbo=orig_input.nbo,
-                        # geom_opt=orig_input.geom_opt, # Will be uncommented once Q-Chem 6 is released
+                        # geom_opt=opt_geom_opt, # Will be uncommented once new optimizer supports TS calcs
                     )
                     opt_QCInput.write_file(input_file)
             if not save_final_scratch:

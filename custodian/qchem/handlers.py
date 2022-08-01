@@ -161,7 +161,7 @@ class QChemErrorHandler(ErrorHandler):
             # set last geom as new starting geom, make sure using DIIS_GDM for SCF and rerun.
             elif int(self.qcinp.rem.get("geom_opt_max_cycles", 50)) < self.geom_max_cycles:
                 self.qcinp.rem["geom_opt_max_cycles"] = self.geom_max_cycles
-                if str(self.qcinp.rem.get("geom_opt2", "none")) == "3":
+                if str(self.qcinp.rem.get("geom_opt2", "none")) == "3" or self.outdata["version"] == "6":
                     self.qcinp.geom_opt[  # pylint: disable=unsupported-assignment-operation
                         "maxiter"
                     ] = self.geom_max_cycles
@@ -231,6 +231,19 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.rem.pop("geom_opt2", None)
                 self.qcinp.geom_opt = None
                 actions.append({"geom_opt2": "deleted"})
+
+            elif self.outdata["version"] == "6":
+                if self.qcinp.geom_opt["coordinates"] == "redundant":
+                    self.qcinp.geom_opt[  # pylint: disable=unsupported-assignment-operation
+                        "coordinates"
+                    ] = "delocalized"
+                    self.qcinp.geom_opt[  # pylint: disable=unsupported-assignment-operation
+                        "optimization_restart"
+                    ] = "true"
+                else:
+                    print(
+                        "Back transforms error should be dealt with automatically if we're already in delocalized internal coordinates..."
+                    )
 
         elif "premature_end_FileMan_error" in self.errors:
             # Given defaults, the first two handlers will typically be skipped.
