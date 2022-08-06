@@ -303,7 +303,14 @@ class QCJob(Job):
             opt_rem["geom_opt_hessian"] = "read"
             opt_rem["scf_guess_always"] = True
 
+            experimental_restart = False
+
             for ii in range(max_iterations):
+                if experimental_restart:
+                    opt_rem["geom_opt_hessian"] = "read"
+                    opt_rem["scf_guess_always"] = True
+                    opt_rem["geom_opt_driver"] = "optimize"  # Will be removed once new optimizer hessian read is fixed
+                    experimental_restart = False
                 yield (
                     QCJob(
                         qchem_command=qchem_command,
@@ -515,8 +522,17 @@ class QCJob(Job):
                         break
                     if len(energy_history) > 1:
                         if abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
-                            warnings.warn("Energy change below cutoff!")
-                            break
+                            if opt_rem.get("scf_algorithm", "not_diis") == "diis":
+                                opt_rem = copy.deepcopy(orig_input.rem)
+                                opt_rem["scf_algorithm"] = "diis_gdm"
+                                opt_set = OptSet(
+                                    molecule=opt_outdata.get("molecule_from_optimized_geometry"), qchem_version=6
+                                )
+                                opt_geom_opt = copy.deepcopy(opt_set.geom_opt)
+                                experimental_restart = True
+                            else:
+                                warnings.warn("Energy change below cutoff!")
+                                break
                     opt_QCInput = QCInput(
                         molecule=opt_outdata.get("molecule_from_optimized_geometry"),
                         rem=opt_rem,
