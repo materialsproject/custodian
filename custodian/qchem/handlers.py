@@ -225,6 +225,7 @@ class QChemErrorHandler(ErrorHandler):
                 if self.qcinp.rem.get("scf_algorithm", "none").lower() == "diis":
                     self.qcinp.rem["scf_algorithm"] = "diis_gdm"
                     actions.append({"scf_algorithm": "diis_gdm"})
+
             # If the new optimizer failed the back transform on the first iteration,
             # revert to the old optimizer.
             elif str(self.qcinp.rem.get("geom_opt2", "none")) == "3":
@@ -232,7 +233,7 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.geom_opt = None
                 actions.append({"geom_opt2": "deleted"})
 
-            elif self.outdata["version"] == "6":
+            elif self.outdata["version"] == "6" and self.qcinp.rem.get("geom_opt_driver", "libopt3") != "optimize":
                 if self.qcinp.geom_opt["coordinates"] == "redundant":
                     self.qcinp.geom_opt[  # pylint: disable=unsupported-assignment-operation
                         "coordinates"
@@ -240,6 +241,7 @@ class QChemErrorHandler(ErrorHandler):
                     self.qcinp.geom_opt[  # pylint: disable=unsupported-assignment-operation
                         "optimization_restart"
                     ] = "true"
+                    actions.append({"coordinates": "redundant", "optimization_restart": "true"})
                 else:
                     print("Back transforms error should not occur if in delocalized internal coordinates...")
 
