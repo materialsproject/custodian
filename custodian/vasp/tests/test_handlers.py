@@ -294,7 +294,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         p = Structure.from_file("POSCAR")
         c = Structure.from_file("CONTCAR")
         self.assertEqual(p, c)
-        
+
     def test_nicht_konv(self):
         h = VaspErrorHandler("vasp.nicht_konvergent")
         self.assertEqual(h.check(), True)
