@@ -457,7 +457,7 @@ class VaspErrorHandler(ErrorHandler):
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
             try:
                 is_contcar = Poscar.from_file('CONTCAR')
-            except:
+            except Exception:
                 is_contcar = False
             if is_contcar:
                 actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
@@ -474,7 +474,7 @@ class VaspErrorHandler(ErrorHandler):
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
             try:
                 is_contcar = Poscar.from_file('CONTCAR')
-            except:
+            except Exception:
                 is_contcar = False
             if is_contcar:
                 actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
@@ -539,7 +539,7 @@ class VaspErrorHandler(ErrorHandler):
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
             try:
                 is_contcar = Poscar.from_file('CONTCAR')
-            except:
+            except Exception:
                 is_contcar = False
             if is_contcar:
                 actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
