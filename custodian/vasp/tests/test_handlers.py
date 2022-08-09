@@ -291,7 +291,10 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.correct()["errors"], ["eddrmm"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["POTIM"], 0.25)
-
+        p = Structure.from_file("POSCAR")
+        c = Structure.from_file("CONTCAR")
+        self.assertEqual(p, c)
+        
     def test_nicht_konv(self):
         h = VaspErrorHandler("vasp.nicht_konvergent")
         self.assertEqual(h.check(), True)
@@ -305,11 +308,17 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.correct()["errors"], ["edddav"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["NCORE"], 2)
+        p = Structure.from_file("POSCAR")
+        c = Structure.from_file("CONTCAR")
+        self.assertEqual(p, c)
 
         h = VaspErrorHandler("vasp.edddav")
         self.assertEqual(h.check(), True)
         self.assertEqual(h.correct()["errors"], ["edddav"])
         self.assertFalse(os.path.exists("CHGCAR"))
+        p = Structure.from_file("POSCAR")
+        c = Structure.from_file("CONTCAR")
+        self.assertEqual(p, c)
 
     def test_zpotrf(self):
         h = VaspErrorHandler("vasp.ztrtri")
