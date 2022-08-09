@@ -456,7 +456,7 @@ class VaspErrorHandler(ErrorHandler):
             # RMM algorithm is not stable for this calculation
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
             try:
-                is_contcar = Poscar.from_file('CONTCAR')
+                is_contcar = Poscar.from_file("CONTCAR")
             except Exception:
                 is_contcar = False
             if is_contcar:
@@ -473,7 +473,7 @@ class VaspErrorHandler(ErrorHandler):
         if "edddav" in self.errors:
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
             try:
-                is_contcar = Poscar.from_file('CONTCAR')
+                is_contcar = Poscar.from_file("CONTCAR")
             except Exception:
                 is_contcar = False
             if is_contcar:
@@ -538,7 +538,7 @@ class VaspErrorHandler(ErrorHandler):
         if "zheev" in self.errors:
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
             try:
-                is_contcar = Poscar.from_file('CONTCAR')
+                is_contcar = Poscar.from_file("CONTCAR")
             except Exception:
                 is_contcar = False
             if is_contcar:
