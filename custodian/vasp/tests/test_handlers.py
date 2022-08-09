@@ -283,6 +283,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(i["ALGO"], "Normal")
 
     def test_eddrmm(self):
+        shutil.copy("CONTCAR.eddav_eddrmm", "CONTCAR")
         h = VaspErrorHandler("vasp.eddrmm")
         self.assertEqual(h.check(), True)
         self.assertEqual(h.correct()["errors"], ["eddrmm"])
@@ -303,6 +304,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(i["LREAL"], False)
 
     def test_edddav(self):
+        shutil.copy("CONTCAR.eddav_eddrmm", "CONTCAR")
         h = VaspErrorHandler("vasp.edddav2")
         self.assertEqual(h.check(), True)
         self.assertEqual(h.correct()["errors"], ["edddav"])
