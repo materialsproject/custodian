@@ -206,4 +206,5 @@ class custom_GDM_DIIS_FFopt_with_handlers(TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    # unittest.main()
+    pass

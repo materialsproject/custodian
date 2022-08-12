@@ -251,8 +251,8 @@ class QCJob(Job):
             freq_rem.pop("geom_opt2", None)
             if linked:
                 opt_rem.pop("geom_opt2", None)
-        else:
-            opt_rem["geom_opt_driver"] = "optimize"  # Will be removed once new optimizer hessian read is fixed
+        # else:
+        #     opt_rem["geom_opt_driver"] = "optimize"  # Will be removed once new optimizer hessian read is fixed
         first = True
         energy_history = []
 
@@ -280,13 +280,15 @@ class QCJob(Job):
 
             if linked:
                 opt_rem["geom_opt_hessian"] = "read"
-                opt_rem["scf_guess_always"] = True
                 if freq_outdata["version"] == "6":
                     opt_geom_opt["initial_hessian"] = "read"
 
+            tmp_opt_rem = copy.deepcopy(opt_rem)
+            if opt_rem["scf_algorithm"] == "diis":
+                tmp_opt_rem["scf_guess_always"] = "True"
             opt_QCInput = QCInput(
                 molecule=orig_input.molecule,
-                rem=opt_rem,
+                rem=tmp_opt_rem,
                 opt=orig_input.opt,
                 pcm=orig_input.pcm,
                 solvent=orig_input.solvent,
@@ -301,16 +303,8 @@ class QCJob(Job):
 
         if linked:
             opt_rem["geom_opt_hessian"] = "read"
-            opt_rem["scf_guess_always"] = True
-
-            experimental_restart = False
 
             for ii in range(max_iterations):
-                if experimental_restart:
-                    opt_rem["geom_opt_hessian"] = "read"
-                    opt_rem["scf_guess_always"] = True
-                    opt_rem["geom_opt_driver"] = "optimize"  # Will be removed once new optimizer hessian read is fixed
-                    experimental_restart = False
                 yield (
                     QCJob(
                         qchem_command=qchem_command,
@@ -329,70 +323,13 @@ class QCJob(Job):
                 if opt_outdata["version"] == "6":
                     opt_geom_opt = copy.deepcopy(opt_indata.geom_opt)
                     opt_geom_opt["initial_hessian"] = "read"
-                try:
-                    if opt_indata.rem["scf_algorithm"] != freq_rem["scf_algorithm"]:
-                        freq_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
-                        opt_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
-                except KeyError:
-                    opt_scf_alg = "diis"
-                    freq_scf_alg = "diis"
-                    if "scf_algorithm" not in opt_indata.rem:
-                        if opt_indata.rem.get("gen_scfman_hybrid_algo", "false") == "true":
-                            if opt_indata.rem.get("gen_scfman_algo_2", "diis") == "diis":
-                                opt_scf_alg = "custom_gdm_diis"
-                            elif opt_indata.rem.get("gen_scfman_algo_2", "diis") == "gdm_qls":
-                                opt_scf_alg = "custom_gdm_gdmqls"
-                            else:
-                                raise RuntimeError("Unknown gen_scfman_algo_2 found! Exiting...")
-                    else:
-                        opt_scf_alg = opt_indata.rem["scf_algorithm"]
-                    if "scf_algorithm" not in freq_rem:
-                        if freq_rem.get("gen_scfman_hybrid_algo", "false") == "true":
-                            if freq_rem.get("gen_scfman_algo_2", "diis") == "diis":
-                                freq_scf_alg = "custom_gdm_diis"
-                            elif freq_rem.get("gen_scfman_algo_2", "diis") == "gdm_qls":
-                                freq_scf_alg = "custom_gdm_gdmqls"
-                            else:
-                                raise RuntimeError("Unknown gen_scfman_algo_2 found! Exiting...")
-                    else:
-                        freq_scf_alg = freq_rem["scf_algorithm"]
-                    if opt_scf_alg != freq_scf_alg:
-                        if opt_scf_alg == "custom_gdm_diis":
-                            freq_rem.pop("scf_algorithm", None)
-                            freq_rem["gen_scfman_hybrid_algo"] = "true"
-                            freq_rem["gen_scfman_algo_1"] = "gdm"
-                            freq_rem["gen_scfman_conv_1"] = "4"
-                            freq_rem["gen_scfman_iter_1"] = "50"
-                            freq_rem["gen_scfman_algo_2"] = "diis"
-                            freq_rem["gen_scfman_conv_2"] = "8"
-                            freq_rem["gen_scfman_iter_2"] = "50"
-                            opt_rem.pop("scf_algorithm", None)
-                            opt_rem["gen_scfman_hybrid_algo"] = "true"
-                            opt_rem["gen_scfman_algo_1"] = "gdm"
-                            opt_rem["gen_scfman_conv_1"] = "4"
-                            opt_rem["gen_scfman_iter_1"] = "50"
-                            opt_rem["gen_scfman_algo_2"] = "diis"
-                            opt_rem["gen_scfman_conv_2"] = "8"
-                            opt_rem["gen_scfman_iter_2"] = "50"
-                        elif opt_scf_alg == "custom_gdm_gdmqls":
-                            freq_rem.pop("scf_algorithm", None)
-                            freq_rem["gen_scfman_hybrid_algo"] = "true"
-                            freq_rem["gen_scfman_algo_1"] = "gdm"
-                            freq_rem["gen_scfman_conv_1"] = "4"
-                            freq_rem["gen_scfman_iter_1"] = "50"
-                            freq_rem["gen_scfman_algo_2"] = "gdm_qls"
-                            freq_rem["gen_scfman_conv_2"] = "8"
-                            freq_rem["gen_scfman_iter_2"] = "50"
-                            opt_rem.pop("scf_algorithm", None)
-                            opt_rem["gen_scfman_hybrid_algo"] = "true"
-                            opt_rem["gen_scfman_algo_1"] = "gdm"
-                            opt_rem["gen_scfman_conv_1"] = "4"
-                            opt_rem["gen_scfman_iter_1"] = "50"
-                            opt_rem["gen_scfman_algo_2"] = "gdm_qls"
-                            opt_rem["gen_scfman_conv_2"] = "8"
-                            opt_rem["gen_scfman_iter_2"] = "50"
-                        else:
-                            raise RuntimeError("Not sure how to handle SCF alg difference!")
+                for key in opt_indata.rem:
+                    if key not in ["job_type", "geom_opt2", "scf_guess_always"]:
+                        if freq_rem.get(key, None) != opt_indata.rem[key]:
+                            if "geom_opt" not in key:
+                                freq_rem[key] = opt_indata.rem[key]
+                        if opt_rem.get(key, None) != opt_indata.rem[key]:
+                            opt_rem[key] = opt_indata.rem[key]
                 first = False
                 if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
                     if not transition_state:
@@ -429,73 +366,13 @@ class QCJob(Job):
 
                 freq_outdata = QCOutput(output_file + ".freq_" + str(ii)).data
                 freq_indata = QCInput.from_file(input_file + ".freq_" + str(ii))
-                try:
-                    if freq_indata.rem["scf_algorithm"] != opt_rem["scf_algorithm"]:
-                        opt_rem["scf_algorithm"] = freq_indata.rem["scf_algorithm"]
-                        freq_rem["scf_algorithm"] = freq_indata.rem["scf_algorithm"]
-                except KeyError:
-                    opt_scf_alg = "diis"
-                    freq_scf_alg = "diis"
-                    if "scf_algorithm" not in opt_rem:
-                        if opt_rem.get("gen_scfman_hybrid_algo", "false") == "true":
-                            if opt_rem.get("gen_scfman_algo_2", "diis") == "diis":
-                                opt_scf_alg = "custom_gdm_diis"
-                            elif opt_rem.get("gen_scfman_algo_2", "diis") == "gdm_qls":
-                                opt_scf_alg = "custom_gdm_gdmqls"
-                            else:
-                                raise RuntimeError("Unknown gen_scfman_algo_2 found! Exiting...")
-                    else:
-                        opt_scf_alg = opt_rem["scf_algorithm"]
-                    if "scf_algorithm" not in freq_indata.rem:
-                        if freq_indata.rem.get("gen_scfman_hybrid_algo", "false") == "true":
-                            if freq_indata.rem.get("gen_scfman_algo_2", "diis") == "diis":
-                                freq_scf_alg = "custom_gdm_diis"
-                            elif freq_indata.rem.get("gen_scfman_algo_2", "diis") == "gdm_qls":
-                                freq_scf_alg = "custom_gdm_gdmqls"
-                            else:
-                                raise RuntimeError("Unknown gen_scfman_algo_2 found! Exiting...")
-                    else:
-                        freq_scf_alg = freq_indata.rem["scf_algorithm"]
-                    if opt_scf_alg != freq_scf_alg:
-                        if freq_scf_alg == "custom_gdm_diis":
-                            opt_rem.pop("scf_algorithm", None)
-                            opt_rem["gen_scfman_hybrid_algo"] = "true"
-                            opt_rem["gen_scfman_algo_1"] = "gdm"
-                            opt_rem["gen_scfman_conv_1"] = "4"
-                            opt_rem["gen_scfman_iter_1"] = "50"
-                            opt_rem["gen_scfman_algo_2"] = "diis"
-                            opt_rem["gen_scfman_conv_2"] = "8"
-                            opt_rem["gen_scfman_iter_2"] = "50"
-                            freq_rem.pop("scf_algorithm", None)
-                            freq_rem["gen_scfman_hybrid_algo"] = "true"
-                            freq_rem["gen_scfman_algo_1"] = "gdm"
-                            freq_rem["gen_scfman_conv_1"] = "4"
-                            freq_rem["gen_scfman_iter_1"] = "50"
-                            freq_rem["gen_scfman_algo_2"] = "diis"
-                            freq_rem["gen_scfman_conv_2"] = "8"
-                            freq_rem["gen_scfman_iter_2"] = "50"
-                        elif freq_scf_alg == "custom_gdm_gdmqls":
-                            freq_rem.pop("scf_algorithm", None)
-                            freq_rem["gen_scfman_hybrid_algo"] = "true"
-                            freq_rem["gen_scfman_algo_1"] = "gdm"
-                            freq_rem["gen_scfman_conv_1"] = "4"
-                            freq_rem["gen_scfman_iter_1"] = "50"
-                            freq_rem["gen_scfman_algo_2"] = "gdm_qls"
-                            freq_rem["gen_scfman_conv_2"] = "8"
-                            freq_rem["gen_scfman_iter_2"] = "50"
-                            opt_rem.pop("scf_algorithm", None)
-                            opt_rem["gen_scfman_hybrid_algo"] = "true"
-                            opt_rem["gen_scfman_algo_1"] = "gdm"
-                            opt_rem["gen_scfman_conv_1"] = "4"
-                            opt_rem["gen_scfman_iter_1"] = "50"
-                            opt_rem["gen_scfman_algo_2"] = "gdm_qls"
-                            opt_rem["gen_scfman_conv_2"] = "8"
-                            opt_rem["gen_scfman_iter_2"] = "50"
-                        else:
-                            raise RuntimeError("Not sure how to handle SCF alg difference!")
-
-                if "cpscf_nseg" in freq_indata.rem:
-                    freq_rem["cpscf_nseg"] = freq_indata.rem["cpscf_nseg"]
+                for key in freq_indata.rem:
+                    if key not in ["job_type", "geom_opt2", "scf_guess_always"]:
+                        if freq_rem.get(key, None) != freq_indata.rem[key]:
+                            freq_rem[key] = freq_indata.rem[key]
+                        if opt_rem.get(key, None) != freq_indata.rem[key]:
+                            if key != "cpscf_nseg":
+                                opt_rem[key] = freq_indata.rem[key]
                 errors = freq_outdata.get("errors")
 
                 if len(errors) != 0:
@@ -533,9 +410,12 @@ class QCJob(Job):
                             else:
                                 warnings.warn("Energy change below cutoff!")
                                 break
+                    tmp_opt_rem = copy.deepcopy(opt_rem)
+                    if opt_rem["scf_algorithm"] == "diis":
+                        tmp_opt_rem["scf_guess_always"] = "True"
                     opt_QCInput = QCInput(
                         molecule=opt_outdata.get("molecule_from_optimized_geometry"),
-                        rem=opt_rem,
+                        rem=tmp_opt_rem,
                         opt=orig_input.opt,
                         pcm=orig_input.pcm,
                         solvent=orig_input.solvent,
@@ -558,9 +438,12 @@ class QCJob(Job):
                             "Second small imaginary frequency (smaller than 15.0) - not worth further flattening!"
                         )
                         break
+                    tmp_opt_rem = copy.deepcopy(opt_rem)
+                    if opt_rem["scf_algorithm"] == "diis":
+                        tmp_opt_rem["scf_guess_always"] = "True"
                     opt_QCInput = QCInput(
                         molecule=opt_outdata.get("molecule_from_optimized_geometry"),
-                        rem=opt_rem,
+                        rem=tmp_opt_rem,
                         opt=orig_input.opt,
                         pcm=orig_input.pcm,
                         solvent=orig_input.solvent,

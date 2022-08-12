@@ -96,50 +96,11 @@ class QChemErrorHandler(ErrorHandler):
                 if self.qcinp.rem.get("thresh", "10") != "14":
                     self.qcinp.rem["thresh"] = "14"
                     actions.append({"thresh": "14"})
-            # First "real" handler - force a new SCF guess at each step, for geometry optimizations.
-            # This can avoid DIIS getting stuck at what was previously an SCF stationary point but
-            # which is no longer a stable solution or is no longer the best solution.
-            elif (
-                self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis"
-                and self.qcinp.rem.get("scf_guess_always", "none").lower() != "true"
-                and len(self.outdata.get("energy_trajectory", [])) > 0  # Ensure not the first SCF
-                and self.qcinp.rem.get("gen_scfman_hybrid_algo", "false").lower() != "true"
-            ):
-                print("turning on SCF guess always")
-                self.qcinp.rem["scf_guess_always"] = "true"
-                actions.append({"scf_guess_always": "true"})
-            # Next, switch to DIIS_GDM and return to default SCF guess behavior. Note that GDM is
-            # better at not getting stuck like DIIS, and sometimes forcing a guess can actually hurt
-            # convergence, so we don't want to start with it on here.
-            elif (
-                self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis"
-                and self.qcinp.rem.get("gen_scfman_hybrid_algo", "false").lower() != "true"
-            ):
-                self.qcinp.rem["scf_algorithm"] = "diis_gdm"
-                actions.append({"scf_algorithm": "diis_gdm"})
-                if self.qcinp.rem.get("scf_guess_always", "none").lower() == "true":
-                    self.qcinp.rem["scf_guess_always"] = "false"
-                    actions.append({"scf_guess_always": "false"})
-            # Next, switch to my custom GDM_DIIS recipe. While unintuitive, this is effective for
-            # instances in which GDM gets close but then fails to totally converge, because DIIS can
-            # sometimes finish the job when GDM gets stuck.
-            elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis_gdm":
-                self.qcinp.rem.pop("scf_algorithm", None)
-                self.qcinp.rem["gen_scfman_hybrid_algo"] = "true"
-                self.qcinp.rem["gen_scfman_algo_1"] = "gdm"
-                self.qcinp.rem["gen_scfman_conv_1"] = "4"
-                self.qcinp.rem["gen_scfman_iter_1"] = "50"
-                self.qcinp.rem["gen_scfman_algo_2"] = "diis"
-                self.qcinp.rem["gen_scfman_conv_2"] = "8"
-                self.qcinp.rem["gen_scfman_iter_2"] = "50"
-                actions.append({"scf_algorithm": "custom_gdm_diis"})
-            elif (
-                self.qcinp.rem.get("gen_scfman_hybrid_algo", "false").lower() == "true"
-                and self.qcinp.rem.get("gen_scfman_algo_2", "diis") == "diis"
-            ):
-                self.qcinp.rem["gen_scfman_algo_2"] = "gdm_qls"
-                actions.append({"scf_algorithm": "custom_gdm_gdmqls"})
-            # Finally, try forcing the initial guess again as a last resort.
+            # Turn on GDM
+            elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
+                self.qcinp.rem["scf_algorithm"] = "gdm"
+                actions.append({"scf_algorithm": "gdm"})
+            # Try forcing a new initial guess at each iteration
             elif (
                 self.qcinp.rem.get("scf_guess_always", "none").lower() != "true"
                 and len(self.outdata.get("energy_trajectory", [])) > 0
@@ -169,9 +130,6 @@ class QChemErrorHandler(ErrorHandler):
                 if len(self.outdata.get("energy_trajectory")) > 1:
                     self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                     actions.append({"molecule": "molecule_from_last_geometry"})
-                if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
-                    self.qcinp.rem["scf_algorithm"] = "diis_gdm"
-                    actions.append({"scf_algorithm": "diis_gdm"})
 
             # Often can just get convergence by restarting from the geometry of the last cycle.
             # But we'll also save any structural changes that happened along the way.
@@ -189,10 +147,10 @@ class QChemErrorHandler(ErrorHandler):
                         }
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
-                # Using DIIS_GDM for SCF convergence also often helps.
+                # Using GDM for SCF convergence also often helps.
                 if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
-                    self.qcinp.rem["scf_algorithm"] = "diis_gdm"
-                    actions.append({"scf_algorithm": "diis_gdm"})
+                    self.qcinp.rem["scf_algorithm"] = "gdm"
+                    actions.append({"scf_algorithm": "gdm"})
 
         elif "unable_to_determine_lamda" in self.errors:
             # Given defaults, the first two handlers will typically be skipped.
@@ -206,10 +164,10 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
                 if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
-                    self.qcinp.rem["scf_algorithm"] = "diis_gdm"
-                    actions.append({"scf_algorithm": "diis_gdm"})
+                    self.qcinp.rem["scf_algorithm"] = "gdm"
+                    actions.append({"scf_algorithm": "gdm"})
             else:
-                print("Use a different initial guess? Perhaps a different basis?")
+                print("Not sure how to fix Lambda error in this case!")
 
         elif "back_transform_error" in self.errors:
             # Given defaults, the first two handlers will typically be skipped.
@@ -222,9 +180,6 @@ class QChemErrorHandler(ErrorHandler):
             elif len(self.outdata.get("energy_trajectory")) > 1:
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
-                if self.qcinp.rem.get("scf_algorithm", "none").lower() == "diis":
-                    self.qcinp.rem["scf_algorithm"] = "diis_gdm"
-                    actions.append({"scf_algorithm": "diis_gdm"})
 
             # If the new optimizer failed the back transform on the first iteration,
             # revert to the old optimizer.
@@ -257,7 +212,7 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.rem["scf_guess_always"] = "true"
                 actions.append({"scf_guess_always": "true"})
             else:
-                print("We're in a bad spot if we get a FileMan error while always generating a new SCF guess...")
+                print("Don't know how to fix a FileMan error while always generating a new SCF guess!")
 
         elif "hessian_eigenvalue_error" in self.errors:
             if self.qcinp.rem.get("s2thresh", "14") != "16":
