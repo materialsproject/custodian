@@ -251,8 +251,8 @@ class QCJob(Job):
             freq_rem.pop("geom_opt2", None)
             if linked:
                 opt_rem.pop("geom_opt2", None)
-        # else:
-        #     opt_rem["geom_opt_driver"] = "optimize"  # Will be removed once new optimizer hessian read is fixed
+        else:
+            opt_rem["geom_opt_driver"] = "optimize"  # Will be removed once new optimizer hessian read is fixed
         first = True
         energy_history = []
 
