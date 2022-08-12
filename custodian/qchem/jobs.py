@@ -399,17 +399,8 @@ class QCJob(Job):
                         break
                     if len(energy_history) > 1:
                         if abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
-                            if opt_rem.get("scf_algorithm", "not_diis") == "diis":
-                                opt_rem = copy.deepcopy(orig_input.rem)
-                                opt_rem["scf_algorithm"] = "diis_gdm"
-                                opt_set = OptSet(
-                                    molecule=opt_outdata.get("molecule_from_optimized_geometry"), qchem_version=6
-                                )
-                                opt_geom_opt = copy.deepcopy(opt_set.geom_opt)
-                                experimental_restart = True
-                            else:
-                                warnings.warn("Energy change below cutoff!")
-                                break
+                            warnings.warn("Energy change below cutoff!")
+                            break
                     tmp_opt_rem = copy.deepcopy(opt_rem)
                     if opt_rem["scf_algorithm"] == "diis":
                         tmp_opt_rem["scf_guess_always"] = "True"
