@@ -154,7 +154,10 @@ class QCJob(Job):
                 if os.path.exists(file):
                     shutil.move(file, file + self.suffix)
         if not self.save_scratch:
-            shutil.rmtree(scratch_dir)
+            try:
+                shutil.rmtree(scratch_dir)
+            except FileNotFoundError:
+                pass
 
     def run(self):
         """
