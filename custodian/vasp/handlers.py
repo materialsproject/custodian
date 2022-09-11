@@ -454,6 +454,13 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
         if "eddrmm" in self.errors:
             # RMM algorithm is not stable for this calculation
+            # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
+            try:
+                is_contcar = Poscar.from_file("CONTCAR")
+            except Exception:
+                is_contcar = False
+            if is_contcar:
+                actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
             if vi["INCAR"].get("ALGO", "Normal").lower() in ["fast", "veryfast"]:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
             else:
@@ -464,6 +471,13 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}})
 
         if "edddav" in self.errors:
+            # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
+            try:
+                is_contcar = Poscar.from_file("CONTCAR")
+            except Exception:
+                is_contcar = False
+            if is_contcar:
+                actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
             if vi["INCAR"].get("ICHARG", 0) < 10:
                 actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
 
@@ -522,6 +536,13 @@ class VaspErrorHandler(ErrorHandler):
                 )
 
         if "zheev" in self.errors:
+            # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
+            try:
+                is_contcar = Poscar.from_file("CONTCAR")
+            except Exception:
+                is_contcar = False
+            if is_contcar:
+                actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
             if vi["INCAR"].get("ALGO", "Normal").lower() != "exact":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Exact"}}})
         if "elf_kpar" in self.errors:
