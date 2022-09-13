@@ -169,7 +169,7 @@ class QChemErrorHandler(ErrorHandler):
             else:
                 print("Not sure how to fix Lambda error in this case!")
 
-        elif "back_transform_error" in self.errors:
+        elif "back_transform_error" in self.errors or "svd_failed" in self.errors:
             # Given defaults, the first two handlers will typically be skipped.
             if self.qcinp.rem.get("s2thresh", "14") != "16":
                 self.qcinp.rem["s2thresh"] = "16"
@@ -181,39 +181,6 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
 
-            # If the new optimizer failed the back transform on the first iteration,
-            # revert to the old optimizer.
-            elif str(self.qcinp.rem.get("geom_opt2", "none")) == "3":
-                self.qcinp.rem.pop("geom_opt2", None)
-                self.qcinp.geom_opt = None
-                actions.append({"geom_opt2": "deleted"})
-
-            elif self.outdata["version"] == "6" and self.qcinp.rem.get("geom_opt_driver", "libopt3") != "optimize":
-                if self.qcinp.geom_opt["coordinates"] == "redundant":
-                    self.qcinp.geom_opt[  # pylint: disable=unsupported-assignment-operation
-                        "coordinates"
-                    ] = "delocalized"
-                    self.qcinp.geom_opt[  # pylint: disable=unsupported-assignment-operation
-                        "optimization_restart"
-                    ] = "true"
-                    actions.append({"coordinates": "delocalized", "optimization_restart": "true"})
-                else:
-                    print("Back transforms error should not occur if in delocalized internal coordinates...")
-
-        elif "svd_failed" in self.errors:
-            # Given defaults, the first two handlers will typically be skipped.
-            if self.qcinp.rem.get("s2thresh", "14") != "16":
-                self.qcinp.rem["s2thresh"] = "16"
-                actions.append({"s2thresh": "16"})
-            if self.qcinp.rem.get("thresh", "10") != "14":
-                self.qcinp.rem["thresh"] = "14"
-                actions.append({"thresh": "14"})
-            elif len(self.outdata.get("energy_trajectory")) > 1:
-                self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
-                actions.append({"molecule": "molecule_from_last_geometry"})
-
-            # If the new optimizer failed the back transform on the first iteration,
-            # revert to the old optimizer.
             elif str(self.qcinp.rem.get("geom_opt2", "none")) == "3":
                 self.qcinp.rem.pop("geom_opt2", None)
                 self.qcinp.geom_opt = None
@@ -226,9 +193,7 @@ class QChemErrorHandler(ErrorHandler):
                     ] = "delocalized"
                     actions.append({"coordinates": "delocalized"})
                 elif self.qcinp.geom_opt["coordinates"] == "delocalized":
-                    self.qcinp.geom_opt[  # pylint: disable=unsupported-assignment-operation
-                        "coordinates"
-                    ] = "redunudant"
+                    self.qcinp.geom_opt["coordinates"] = "redundant"  # pylint: disable=unsupported-assignment-operation
                     actions.append({"coordinates": "redundant"})
 
         elif "premature_end_FileMan_error" in self.errors:
