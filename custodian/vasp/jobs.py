@@ -5,8 +5,8 @@ This module implements basic kinds of jobs for VASP runs.
 import logging
 import math
 import os
-import signal
 import shutil
+import signal
 import subprocess
 from shutil import which
 
