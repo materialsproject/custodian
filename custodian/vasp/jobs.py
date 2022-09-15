@@ -257,7 +257,7 @@ class VaspJob(Job):
             self.sbprcss = subprocess.Popen(
                 cmd, stdout=f_std, stderr=f_err, start_new_session=True
             )  # pylint: disable=R1732
-            return self.sbrpcss
+            return self.sbprcss
 
     def postprocess(self):
         """
@@ -857,7 +857,7 @@ class VaspNEBJob(VaspJob):
             self.sbprcss = subprocess.Popen(
                 cmd, stdout=f_std, stderr=f_err, start_new_session=True
             )  # pylint: disable=R1732
-            return self.sbrpcss
+            return self.sbprcss
 
     def postprocess(self):
         """
