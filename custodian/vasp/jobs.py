@@ -151,6 +151,7 @@ class VaspJob(Job):
         self.gamma_vasp_cmd = gamma_vasp_cmd
         self.copy_magmom = copy_magmom
         self.auto_continue = auto_continue
+        self.sbprcss = None
 
         if SENTRY_DSN:
             # if using Sentry logging, add specific VASP executable to scope
@@ -765,6 +766,7 @@ class VaspNEBJob(VaspJob):
         self.settings_override = settings_override
         self.neb_dirs = []  # 00, 01, etc.
         self.neb_sub = []  # 01, 02, etc.
+        self.sbprcss = None
 
         for path in os.listdir("."):
             if os.path.isdir(path) and path.isdigit():
