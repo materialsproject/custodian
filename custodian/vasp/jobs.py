@@ -253,10 +253,9 @@ class VaspJob(Job):
         logger.info(f"Running {' '.join(cmd)}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr
-            self.sbprcss = subprocess.Popen(cmd,
-                                            stdout=f_std,
-                                            stderr=f_err,
-                                            start_new_session=True)  # pylint: disable=R1732
+            self.sbprcss = subprocess.Popen(
+                cmd, stdout=f_std, stderr=f_err, start_new_session=True
+            )  # pylint: disable=R1732
             return self.sbrpcss
 
     def postprocess(self):
@@ -853,10 +852,9 @@ class VaspNEBJob(VaspJob):
         logger.info(f"Running {' '.join(cmd)}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # Use line buffering for stderr
-            self.sbprcss = subprocess.Popen(cmd,
-                                            stdout=f_std,
-                                            stderr=f_err,
-                                            start_new_session=True)  # pylint: disable=R1732
+            self.sbprcss = subprocess.Popen(
+                cmd, stdout=f_std, stderr=f_err, start_new_session=True
+            )  # pylint: disable=R1732
             return self.sbrpcss
 
     def postprocess(self):
