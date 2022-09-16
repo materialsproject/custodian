@@ -6,6 +6,7 @@ import logging
 import math
 import os
 import shutil
+import signal
 import subprocess
 from shutil import which
 
@@ -150,6 +151,7 @@ class VaspJob(Job):
         self.gamma_vasp_cmd = gamma_vasp_cmd
         self.copy_magmom = copy_magmom
         self.auto_continue = auto_continue
+        self.sbprcss = None
 
         if SENTRY_DSN:
             # if using Sentry logging, add specific VASP executable to scope
@@ -252,7 +254,10 @@ class VaspJob(Job):
         logger.info(f"Running {' '.join(cmd)}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr
-            return subprocess.Popen(cmd, stdout=f_std, stderr=f_err)  # pylint: disable=R1732
+            self.sbprcss = subprocess.Popen(
+                cmd, stdout=f_std, stderr=f_err, start_new_session=True
+            )  # pylint: disable=R1732
+            return self.sbprcss
 
     def postprocess(self):
         """
@@ -664,18 +669,13 @@ class VaspJob(Job):
 
     def terminate(self):
         """
-        Ensure all vasp jobs are killed.
+        Kill all vasp processes associated with the current job.
         """
-        logger.info("Custodian terminating all VASP jobs")
-        cmds = self.vasp_cmd
-        if self.gamma_vasp_cmd:
-            cmds += self.gamma_vasp_cmd
-        for k in cmds:
-            if "vasp" in k:
-                try:
-                    os.system(f"killall {k}")
-                except Exception:
-                    pass
+        logger.info(f"Custodian terminating all VASP processes within process group {self.sbprcss.pid}")
+        try:
+            os.killpg(os.getpgid(self.sbprcss.pid), signal.SIGTERM)
+        except Exception:
+            pass
 
 
 class VaspNEBJob(VaspJob):
@@ -766,6 +766,7 @@ class VaspNEBJob(VaspJob):
         self.settings_override = settings_override
         self.neb_dirs = []  # 00, 01, etc.
         self.neb_sub = []  # 01, 02, etc.
+        self.sbprcss = None
 
         for path in os.listdir("."):
             if os.path.isdir(path) and path.isdigit():
@@ -853,7 +854,10 @@ class VaspNEBJob(VaspJob):
         logger.info(f"Running {' '.join(cmd)}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # Use line buffering for stderr
-            return subprocess.Popen(cmd, stdout=f_std, stderr=f_err)  # pylint: disable=R1732
+            self.sbprcss = subprocess.Popen(
+                cmd, stdout=f_std, stderr=f_err, start_new_session=True
+            )  # pylint: disable=R1732
+            return self.sbprcss
 
     def postprocess(self):
         """
