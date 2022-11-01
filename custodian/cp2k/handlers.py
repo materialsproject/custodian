@@ -154,29 +154,6 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         self.errors = None
         self.scf = None
         self.restart = None
-        self.mixing_hierarchy = ["BROYDEN_MIXING", "BROYDEN_MIXING_LINEAR", "PULAY_MIXING", "PULAY_MIXING_LINEAR"]
-        if os.path.exists(zpath(self.input_file)):
-            ci = Cp2kInput.from_file(zpath(self.input_file))
-            if ci["GLOBAL"]["RUN_TYPE"].values[0].__str__().upper() in [
-                "ENERGY",
-                "ENERGY_FORCE",
-                "WAVEFUNCTION_OPTIMIZATION",
-                "WFN_OPT",
-            ]:
-                self.is_static = True
-            else:
-                self.is_static = False
-            self.is_ot = ci.check("FORCE_EVAL/DFT/SCF/OT")
-            if ci.check("FORCE_EVAL/DFT/SCF/MIXING"):
-                method = (
-                    ci.by_path("FORCE_EVAL/DFT/SCF/MIXING")
-                    .get("METHOD", Keyword("METHOD", "DIRECT_P_MIXING"))
-                    .values[0]
-                )
-                alpha = ci.by_path("FORCE_EVAL/DFT/SCF/MIXING").get("ALPHA", Keyword("ALPHA", 0.4)).values[0]
-                beta = ci.by_path("FORCE_EVAL/DFT/SCF/MIXING").get("BETA", Keyword("BETA", 0.5)).values[0]
-                ext = "_LINEAR" if (beta > 1 and alpha < 0.1) else ""
-                self.mixing_hierarchy = [m for m in self.mixing_hierarchy if m != method.upper() + ext]
 
     def check(self):
         """
@@ -185,6 +162,8 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         # Checks output file for errors.
         out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
         out.convergence()
+        ci = Cp2kInput.from_file(zpath(self.input_file))
+        self.is_ot = ci.check("FORCE_EVAL/DFT/SCF/OT")
         if out.filenames.get("restart"):
             self.restart = out.filenames["restart"][-1]
 
