@@ -193,10 +193,8 @@ class QChemErrorHandler(ErrorHandler):
                     ] = "delocalized"
                     actions.append({"coordinates": "delocalized"})
                 elif self.qcinp.geom_opt["coordinates"] == "delocalized":
-                    self.qcinp.geom_opt["coordinates"] = "redundant"  # pylint: disable=unsupported-assignment-operation
-                    self.qcinp.geom_opt["optimization_restart"] = "true"  # pylint: disable=unsupported-assignment-operation
-                    actions.append({"coordinates": "redundant"})
-                    actions.append({"optimization_restart": "true"})
+                    self.qcinp.geom_opt["coordinates"] = "cartesian"  # pylint: disable=unsupported-assignment-operation
+                    actions.append({"coordinates": "cartesian"})
 
         elif "premature_end_FileMan_error" in self.errors:
             # Given defaults, the first two handlers will typically be skipped.
