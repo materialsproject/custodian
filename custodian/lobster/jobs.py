@@ -34,6 +34,7 @@ LOBSTEROUTPUT_FILES = [
     "bandOverlaps.lobster",
     "ICOBILIST.lobster",
     "COBICAR.lobster",
+    "DOSCAR.LSO.lobster",
 ]
 FW_FILES = ["custodian.json", "FW.json", "FW_submit.script"]
 
