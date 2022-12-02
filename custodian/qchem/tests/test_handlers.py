@@ -60,6 +60,7 @@ class QChemErrorHandlerTest(TestCase):
                 {"s2thresh": "16"},
                 {"molecule": "molecule_from_last_geometry"},
                 {"scf_algorithm": "gdm"},
+                {"max_scf_cycles": "500"},
             ],
         )
         self._check_equivalent_inputs("unable_to_determine_lamda.qin.0", "unable_to_determine_lamda.qin.1")
@@ -144,7 +145,7 @@ class QChemErrorHandlerTest(TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["SCF_failed_to_converge"])
-        self.assertEqual(d["actions"], [{"scf_algorithm": "gdm"}])
+        self.assertEqual(d["actions"], [{"scf_algorithm": "gdm"}, {"max_scf_cycles": "500"}])
         self._check_equivalent_inputs("mol.qin", "mol.qin.1")
 
     def test_out_of_opt_cycles(self):

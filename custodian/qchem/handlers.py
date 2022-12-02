@@ -100,6 +100,8 @@ class QChemErrorHandler(ErrorHandler):
             elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
                 self.qcinp.rem["scf_algorithm"] = "gdm"
                 actions.append({"scf_algorithm": "gdm"})
+                self.qcinp.rem["max_scf_cycles"] = "500"
+                actions.append({"max_scf_cycles": "500"})
             # Try forcing a new initial guess at each iteration
             elif (
                 self.qcinp.rem.get("scf_guess_always", "none").lower() != "true"
@@ -151,6 +153,8 @@ class QChemErrorHandler(ErrorHandler):
                 if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
                     self.qcinp.rem["scf_algorithm"] = "gdm"
                     actions.append({"scf_algorithm": "gdm"})
+                    self.qcinp.rem["max_scf_cycles"] = "500"
+                    actions.append({"max_scf_cycles": "500"})
 
         elif "unable_to_determine_lamda" in self.errors:
             # Given defaults, the first two handlers will typically be skipped.
@@ -166,6 +170,8 @@ class QChemErrorHandler(ErrorHandler):
                 if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
                     self.qcinp.rem["scf_algorithm"] = "gdm"
                     actions.append({"scf_algorithm": "gdm"})
+                    self.qcinp.rem["max_scf_cycles"] = "500"
+                    actions.append({"max_scf_cycles": "500"})
             else:
                 print("Not sure how to fix Lambda error in this case!")
 
