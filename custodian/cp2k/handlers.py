@@ -887,47 +887,6 @@ class NumericalPrecisionHandler(ErrorHandler):
                             },
                         }
                     )
-            for k, v in ci.by_path("FORCE_EVAL/SUBSYS").subsections.items():
-                if v.name.upper() == "KIND":
-                    el = v.get("ELEMENT").values or v.section_parameters
-                    el = el[0]
-                    bs = ci.by_path("FORCE_EVAL/SUBSYS")[k].get("BASIS_SET", None)
-                    if isinstance(bs, Sequence):
-                        for i, _bs in enumerate(bs):
-                            if "AUX_FIT" in [val.upper() for val in bs[i].values]:
-                                aux = None
-                                if el == "Li":  # special case of Li aux basis
-                                    aux = get_aux_basis({el: "cFIT4-SR"})
-                                elif not bs[i].values[1].startswith("cp"):
-                                    aux = get_aux_basis({el: None}, "cpFIT")
-                                    if not aux.get(el, "").startswith("cpFIT"):
-                                        aux = None
-                                if aux:
-                                    bs.keywords.pop(i)
-                                    actions.append(
-                                        {
-                                            "dict": self.input_file,
-                                            "action": {
-                                                "_set": {
-                                                    "FORCE_EVAL": {"SUBSYS": {k: {"BASIS_SET": "AUX_FIT " + aux[el]}}}
-                                                }
-                                            },
-                                        }
-                                    )
-                                    for _bs in bs:
-                                        actions.append(
-                                            {
-                                                "dict": self.input_file,
-                                                "action": {
-                                                    "_inc": {
-                                                        "FORCE_EVAL": {
-                                                            "SUBSYS": {k: {"BASIS_SET": " ".join(_bs.values)}}
-                                                        }
-                                                    }
-                                                },
-                                            }
-                                        )
-                                    break
 
             m = regrep(
                 self.output_file,
