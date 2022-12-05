@@ -26,7 +26,6 @@ from monty.re import regrep
 from monty.serialization import dumpfn
 from pymatgen.io.cp2k.inputs import Cp2kInput, Keyword
 from pymatgen.io.cp2k.outputs import Cp2kOutput
-from pymatgen.io.cp2k.utils import get_aux_basis
 
 from custodian.cp2k.interpreter import Cp2kModder
 from custodian.cp2k.utils import get_conv, restart, tail
