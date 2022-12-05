@@ -18,7 +18,6 @@ import itertools
 import os
 import re
 import time
-from typing import Sequence
 
 import numpy as np
 from monty.os.path import zpath
