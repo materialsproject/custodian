@@ -99,14 +99,14 @@ def set_ver(ctx):
                 lines.append(f'__version__ = "{NEW_VER}"')
             else:
                 lines.append(l.rstrip())
-    with open("custodian/__init__.py", "wt") as f:
+    with open("custodian/__init__.py", "w") as f:
         f.write("\n".join(lines) + "\n")
 
     lines = []
     with open("setup.py") as f:
         for l in f:
             lines.append(re.sub(r"version=([^,]+),", f'version="{NEW_VER}",', l.rstrip()))
-    with open("setup.py", "wt") as f:
+    with open("setup.py", "w") as f:
         f.write("\n".join(lines) + "\n")
 
 

@@ -662,7 +662,7 @@ class VaspJob(Job):
                 **vasp_job_kwargs,
             )
 
-        with open("EOS.txt", "wt") as f:
+        with open("EOS.txt", "w") as f:
             f.write(f"# {lattice_direction} energy\n")
             for k in sorted(energies.keys()):
                 f.write(f"{k} {energies[k]}\n")
