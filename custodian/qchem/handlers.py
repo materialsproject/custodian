@@ -326,6 +326,10 @@ class QChemErrorHandler(ErrorHandler):
             self.qcinp.rem["mem_static"] = "2000"
             actions.append({"mem_static": "2000"})
 
+        elif "mem_total_too_small" in self.errors:
+            print("Run on a node with more memory! Current mem_total = " + str(self.outdata["mem_total"]))
+            return {"errors": self.errors, "actions": None}
+
         elif "basis_not_supported" in self.errors:
             print("Specify a different basis set. At least one of the atoms is not supported.")
             return {"errors": self.errors, "actions": None}
