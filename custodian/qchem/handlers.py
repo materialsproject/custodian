@@ -311,6 +311,16 @@ class QChemErrorHandler(ErrorHandler):
             else:
                 print("Not sure how to fix ESPChgFit error if resp_charges is disabled!")
 
+        elif "probably_out_of_memory" in self.errors:
+            # A frequency job that probably needs to be split into more cpscf segments
+            # but did not exit gracefully
+            if self.outdata["cpscf_nseg"] == 1:
+                self.qcinp.rem["cpscf_nseg"] = "3"
+                actions.append({"cpscf_nseg": "3"})
+            else:
+                self.qcinp.rem["cpscf_nseg"] = str(self.outdata["cpscf_nseg"] + 1)
+                actions.append({"cpscf_nseg": str(self.outdata["cpscf_nseg"] + 1)})
+
         elif "mem_static_too_small" in self.errors:
             # mem_static should never exceed 2000 MB according to the Q-Chem manual
             self.qcinp.rem["mem_static"] = "2000"
