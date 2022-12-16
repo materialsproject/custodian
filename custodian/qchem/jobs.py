@@ -109,8 +109,8 @@ class QCJob(Job):
         if self.multimode not in multi:
             raise RuntimeError("ERROR: Multimode should only be set to openmp or mpi")
         command = [multi[self.multimode], str(self.max_cores), self.input_file, self.output_file, "scratch"]
-        if self.save_scratch:
-            command.insert(0, "-save")
+        # if self.save_scratch:
+        #     command.insert(0, "-save")
         command = self.qchem_command + command
         com_str = " ".join(command)
         return com_str
@@ -169,6 +169,9 @@ class QCJob(Job):
         local_scratch = os.path.join(os.environ["QCLOCALSCR"], "scratch")
         if os.path.exists(local_scratch):
             shutil.rmtree(local_scratch)
+        if os.path.exists(os.path.join(os.environ["QCSCRATCH"], "132.0")):
+            os.mkdir(local_scratch)
+            shutil.move(os.path.join(os.environ["QCSCRATCH"], "132.0"), local_scratch)
         with open(self.qclog_file, "w") as qclog:
             return subprocess.Popen(self.current_command, stdout=qclog, shell=True)  # pylint: disable=R1732
 
