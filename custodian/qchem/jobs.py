@@ -109,8 +109,6 @@ class QCJob(Job):
         if self.multimode not in multi:
             raise RuntimeError("ERROR: Multimode should only be set to openmp or mpi")
         command = [multi[self.multimode], str(self.max_cores), self.input_file, self.output_file, "scratch"]
-        # if self.save_scratch:
-        #     command.insert(0, "-save")
         command = self.qchem_command + command
         com_str = " ".join(command)
         return com_str
@@ -257,8 +255,6 @@ class QCJob(Job):
             freq_rem.pop("geom_opt2", None)
             if linked:
                 opt_rem.pop("geom_opt2", None)
-        else:
-            opt_rem["geom_opt_driver"] = "optimize"  # Will be removed once new optimizer hessian read is fixed
         first = True
         energy_history = []
 
