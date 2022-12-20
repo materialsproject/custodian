@@ -85,7 +85,7 @@ class QCJobTest(TestCase):
             )
             self.assertEqual(
                 myjob.current_command,
-                "qchem -slurm -save -nt 32 mol.qin mol.qout scratch",
+                "qchem -slurm -nt 32 mol.qin mol.qout scratch",
             )
             myjob.setup()
             self.assertEqual(copy_patch.call_args_list[0][0][0], "mol.qin")
