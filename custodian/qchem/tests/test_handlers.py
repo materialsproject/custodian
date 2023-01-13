@@ -179,6 +179,37 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(d["errors"], ["out_of_opt_cycles"])
         self.assertEqual(d["actions"], [{"molecule": "molecule_from_last_geometry"}])
 
+    def test_custom_smd(self):
+        shutil.copyfile(
+            os.path.join(test_dir, "custom_smd/mol.qin.0"),
+            os.path.join(scr_dir, "mol.qin"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "custom_smd/mol.qout.0"),
+            os.path.join(scr_dir, "mol.qout"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "custom_smd/mol.qin.1"),
+            os.path.join(scr_dir, "mol.qin.1"),
+        )
+
+        h = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["SCF_failed_to_converge"])
+        self.assertEqual(d["actions"], [{"scf_algorithm": "gdm"}, {"max_scf_cycles": "500"}])
+        self._check_equivalent_inputs("mol.qin", "mol.qin.1")
+
+        shutil.copyfile(
+            os.path.join(test_dir, "custom_smd/mol.qout.1"),
+            os.path.join(scr_dir, "mol.qout"),
+        )
+
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], [])
+        self.assertEqual(d["actions"], None)
+
     def test_out_of_opt_cycles(self):
         shutil.copyfile(
             os.path.join(test_dir, "crowd_gradient.qin.2"),
