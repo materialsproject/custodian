@@ -18,7 +18,6 @@ import itertools
 import os
 import re
 import time
-from typing import Sequence
 
 import numpy as np
 from monty.os.path import zpath
@@ -26,7 +25,6 @@ from monty.re import regrep
 from monty.serialization import dumpfn
 from pymatgen.io.cp2k.inputs import Cp2kInput, Keyword
 from pymatgen.io.cp2k.outputs import Cp2kOutput
-from pymatgen.io.cp2k.utils import get_aux_basis
 
 from custodian.cp2k.interpreter import Cp2kModder
 from custodian.cp2k.utils import get_conv, restart, tail
@@ -154,29 +152,6 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         self.errors = None
         self.scf = None
         self.restart = None
-        self.mixing_hierarchy = ["BROYDEN_MIXING", "BROYDEN_MIXING_LINEAR", "PULAY_MIXING", "PULAY_MIXING_LINEAR"]
-        if os.path.exists(zpath(self.input_file)):
-            ci = Cp2kInput.from_file(zpath(self.input_file))
-            if ci["GLOBAL"]["RUN_TYPE"].values[0].__str__().upper() in [
-                "ENERGY",
-                "ENERGY_FORCE",
-                "WAVEFUNCTION_OPTIMIZATION",
-                "WFN_OPT",
-            ]:
-                self.is_static = True
-            else:
-                self.is_static = False
-            self.is_ot = ci.check("FORCE_EVAL/DFT/SCF/OT")
-            if ci.check("FORCE_EVAL/DFT/SCF/MIXING"):
-                method = (
-                    ci.by_path("FORCE_EVAL/DFT/SCF/MIXING")
-                    .get("METHOD", Keyword("METHOD", "DIRECT_P_MIXING"))
-                    .values[0]
-                )
-                alpha = ci.by_path("FORCE_EVAL/DFT/SCF/MIXING").get("ALPHA", Keyword("ALPHA", 0.4)).values[0]
-                beta = ci.by_path("FORCE_EVAL/DFT/SCF/MIXING").get("BETA", Keyword("BETA", 0.5)).values[0]
-                ext = "_LINEAR" if (beta > 1 and alpha < 0.1) else ""
-                self.mixing_hierarchy = [m for m in self.mixing_hierarchy if m != method.upper() + ext]
 
     def check(self):
         """
@@ -185,6 +160,8 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         # Checks output file for errors.
         out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
         out.convergence()
+        ci = Cp2kInput.from_file(zpath(self.input_file))
+        self.is_ot = ci.check("FORCE_EVAL/DFT/SCF/OT")
         if out.filenames.get("restart"):
             self.restart = out.filenames["restart"][-1]
 
@@ -909,47 +886,6 @@ class NumericalPrecisionHandler(ErrorHandler):
                             },
                         }
                     )
-            for k, v in ci.by_path("FORCE_EVAL/SUBSYS").subsections.items():
-                if v.name.upper() == "KIND":
-                    el = v.get("ELEMENT").values or v.section_parameters
-                    el = el[0]
-                    bs = ci.by_path("FORCE_EVAL/SUBSYS")[k].get("BASIS_SET", None)
-                    if isinstance(bs, Sequence):
-                        for i, _bs in enumerate(bs):
-                            if "AUX_FIT" in [val.upper() for val in bs[i].values]:
-                                aux = None
-                                if el == "Li":  # special case of Li aux basis
-                                    aux = get_aux_basis({el: "cFIT4-SR"})
-                                elif not bs[i].values[1].startswith("cp"):
-                                    aux = get_aux_basis({el: None}, "cpFIT")
-                                    if not aux.get(el, "").startswith("cpFIT"):
-                                        aux = None
-                                if aux:
-                                    bs.keywords.pop(i)
-                                    actions.append(
-                                        {
-                                            "dict": self.input_file,
-                                            "action": {
-                                                "_set": {
-                                                    "FORCE_EVAL": {"SUBSYS": {k: {"BASIS_SET": "AUX_FIT " + aux[el]}}}
-                                                }
-                                            },
-                                        }
-                                    )
-                                    for _bs in bs:
-                                        actions.append(
-                                            {
-                                                "dict": self.input_file,
-                                                "action": {
-                                                    "_inc": {
-                                                        "FORCE_EVAL": {
-                                                            "SUBSYS": {k: {"BASIS_SET": " ".join(_bs.values)}}
-                                                        }
-                                                    }
-                                                },
-                                            }
-                                        )
-                                    break
 
             m = regrep(
                 self.output_file,

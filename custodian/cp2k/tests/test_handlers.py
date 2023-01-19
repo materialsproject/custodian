@@ -41,13 +41,8 @@ class HandlerTests(unittest.TestCase):
         time.sleep(1)  # for frozenhandler
 
         shutil.copy(os.path.join(self.TEST_FILES_DIR, "cp2k.inp.orig"), os.path.join(self.TEST_FILES_DIR, "cp2k.inp"))
-        shutil.copy(
-            os.path.join(self.TEST_FILES_DIR, "cp2k.inp.hybrid.orig"),
-            os.path.join(self.TEST_FILES_DIR, "cp2k.inp.hybrid"),
-        )
 
         self.input_file = os.path.join(self.TEST_FILES_DIR, "cp2k.inp")
-        self.input_file_hybrid = os.path.join(self.TEST_FILES_DIR, "cp2k.inp.hybrid")
 
         self.output_file_preconditioner = os.path.join(self.TEST_FILES_DIR, "cp2k.out.precondstuck")
         self.output_file_choleesky = os.path.join(self.TEST_FILES_DIR, "cp2k.out.cholesky")
@@ -60,6 +55,7 @@ class HandlerTests(unittest.TestCase):
         self.modder = Cp2kModder(filename=self.input_file)
 
     def test(self):
+        """Ensure modder works"""
         kwdlst = KeywordList(
             keywords=[Keyword("BASIS_SET_FILE_NAME", "FILE1"), Keyword("BASIS_SET_FILE_NAME", "FILE2")]
         )
@@ -75,7 +71,13 @@ class HandlerTests(unittest.TestCase):
         self.assertEqual(self.modder.ci["FORCE_EVAL"]["METHOD"], Keyword("METHOD", "NOT QA"))
         self.assertIsInstance(self.modder.ci["FORCE_EVAL"]["DFT"]["BASIS_SET_FILE_NAME"], KeywordList)
 
+    def test_handler_inits(self):
+        """Ensure handlers initialize fine without real input/output files"""
+        for handler in [AbortHandler, FrozenJobErrorHandler, NumericalPrecisionHandler, UnconvergedScfErrorHandler]:
+            handler()
+
     def test_frozenjobhandler(self):
+        """Handler for frozen job"""
         h = FrozenJobErrorHandler(input_file=self.input_file, output_file=self.output_file_preconditioner, timeout=1)
         self.assertTrue(h.check())
         ci = StaticSet.from_file(self.input_file)
@@ -97,33 +99,44 @@ class HandlerTests(unittest.TestCase):
         h.check()
 
     def test_uncoverge_handler(self):
+        """Handler for SCF handling not working"""
         ci = StaticSet.from_file(self.input_file)
-        self.assertEqual(ci["force_eval"]["dft"]["scf"]["ot"]["minimizer"], Keyword("MINIMIZER", "DIIS"))
         h = UnconvergedScfErrorHandler(input_file=self.input_file, output_file=self.output_file_unconverged)
         h.check()
+        self.assertTrue(h.is_ot)
+        self.assertEqual(ci["force_eval"]["dft"]["scf"]["ot"]["minimizer"], Keyword("MINIMIZER", "DIIS"))
         actions = h.correct()
         self.assertTrue(actions["errors"], ["Non-converging Job"])
         ci = StaticSet.from_file(self.input_file)
         self.assertEqual(ci["force_eval"]["dft"]["scf"]["ot"]["minimizer"], Keyword("MINIMIZER", "CG"))
 
+        # Fake diag check. Turns on mixing
+        h.is_ot = False
+        actions = h.correct()
+        self.assertTrue(actions["errors"], ["Non-converging Job"])
+        ci = StaticSet.from_file(self.input_file)
+        self.assertEqual(ci["force_eval"]["dft"]["scf"]["MIXING"]["ALPHA"], Keyword("ALPHA", 0.1))
+
     def test_abort_handler(self):
+        """Checks if cp2k called abort"""
         h = AbortHandler(input_file=self.input_file, output_file=self.output_file_choleesky)
         self.assertTrue(h.check())
 
     def test_imprecision_handler(self):
-
-        # Hybrid
-        h = NumericalPrecisionHandler(self.input_file_hybrid, output_file=self.output_file_imprecise, max_same=3)
+        """Check for low precision leading to stagnant SCF"""
+        h = NumericalPrecisionHandler(self.input_file, output_file=self.output_file_imprecise, max_same=3)
         self.assertTrue(h.check())
         c = h.correct()
         self.assertTrue(c["errors"], ["Unsufficient precision"])
 
     def test_std_out(self):
+        """Errors sent to the std out instead of cp2k out"""
         h = StdErrHandler(std_err=self.output_file_stderr)
         self.assertTrue(h.check())
         h.correct()
 
     def test_conv(self):
+        """Check that SCF convergence can be read"""
         self.assertEqual(len(get_conv(self.output_file_conv)), 45)
 
 
