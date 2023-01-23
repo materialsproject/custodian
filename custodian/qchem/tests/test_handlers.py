@@ -128,18 +128,9 @@ class QChemErrorHandlerTest(TestCase):
         self._check_equivalent_inputs("crowd_gradient.qin.0", "crowd_gradient.qin.1")
 
     def test_scf_failed_to_converge_gdm_add_cycles(self):
-        shutil.copyfile(
-            os.path.join(test_dir, "gdm_add_cycles/mol.qin"),
-            os.path.join(scr_dir, "mol.qin")
-        )
-        shutil.copyfile(
-            os.path.join(test_dir, "gdm_add_cycles/mol.qin.1"),
-            os.path.join(scr_dir, "mol.qin.1")
-        )
-        shutil.copyfile(
-            os.path.join(test_dir, "gdm_add_cycles/mol.qout"),
-            os.path.join(scr_dir, "mol.qout")
-        )
+        shutil.copyfile(os.path.join(test_dir, "gdm_add_cycles/mol.qin"), os.path.join(scr_dir, "mol.qin"))
+        shutil.copyfile(os.path.join(test_dir, "gdm_add_cycles/mol.qin.1"), os.path.join(scr_dir, "mol.qin.1"))
+        shutil.copyfile(os.path.join(test_dir, "gdm_add_cycles/mol.qout"), os.path.join(scr_dir, "mol.qout"))
 
         h = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         h.check()

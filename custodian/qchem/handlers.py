@@ -103,7 +103,10 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.rem["max_scf_cycles"] = "500"
                 actions.append({"max_scf_cycles": "500"})
             # Ensure we have 500 cycles for GDM
-            elif self.qcinp.rem.get("scf_algorithm", "diis").lower() == "gdm" and self.qcinp.rem.get("max_scf_cycles") != "500":
+            elif (
+                self.qcinp.rem.get("scf_algorithm", "diis").lower() == "gdm"
+                and self.qcinp.rem.get("max_scf_cycles") != "500"
+            ):
                 self.qcinp.rem["max_scf_cycles"] = "500"
                 actions.append({"max_scf_cycles": "500"})
             # Try forcing a new initial guess at each iteration
