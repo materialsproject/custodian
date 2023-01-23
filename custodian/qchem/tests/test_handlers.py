@@ -127,6 +127,27 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(d["actions"], [{"s2thresh": "16"}, {"max_scf_cycles": 100}, {"thresh": "14"}])
         self._check_equivalent_inputs("crowd_gradient.qin.0", "crowd_gradient.qin.1")
 
+    def test_scf_failed_to_converge_gdm_add_cycles(self):
+        shutil.copyfile(
+            os.path.join(test_dir, "gdm_add_cycles/mol.qin"),
+            os.path.join(scr_dir, "mol.qin")
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "gdm_add_cycles/mol.qin.1"),
+            os.path.join(scr_dir, "mol.qin.1")
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "gdm_add_cycles/mol.qout"),
+            os.path.join(scr_dir, "mol.qout")
+        )
+
+        h = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["SCF_failed_to_converge"])
+        self.assertEqual(d["actions"], [{"max_scf_cycles": "500"}])
+        self._check_equivalent_inputs("mol.qin", "mol.qin.1")
+
     def test_advanced_scf_failed_to_converge_1(self):
         shutil.copyfile(
             os.path.join(test_dir, "diis_guess_always/mol.qin.0"),
