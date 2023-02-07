@@ -188,7 +188,6 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         return {"errors": ["Non-converging Job"], "actions": actions}
 
     def __correct_ot(self, ci):
-
         """
         Apply corrections to OT calculation, if possible.
         """
@@ -300,7 +299,6 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         return actions
 
     def __correct_diag(self, ci):
-
         """
         Apply corrections to diagonalization calculation, if possible
         """

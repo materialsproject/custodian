@@ -31,7 +31,6 @@ def get_runs(args):
     job_number = 0
 
     while (not converged) and (job_number < args.max_relax):
-
         suffix = f".relax{job_number + 1}"
 
         if job_number == 0:
@@ -48,7 +47,6 @@ def get_runs(args):
                 converged = True
 
             if job_number < 2 and not converged:
-
                 settings = [
                     {"dict": "INCAR", "action": {"_set": {"ISTART": 1}}},
                     {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}},

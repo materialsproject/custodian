@@ -322,7 +322,6 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
 
         if self.errors.intersection(["tetirr", "incorrect_shift"]):
-
             if vi["KPOINTS"] is not None:
                 if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
                     actions.append(
@@ -366,7 +365,6 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}})
 
         if "brions" in self.errors:
-
             # Copy CONTCAR to POSCAR so we do not lose our progress.
             actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
 

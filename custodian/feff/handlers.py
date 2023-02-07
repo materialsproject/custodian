@@ -58,7 +58,6 @@ class UnconvergedErrorHandler(ErrorHandler):
         return self._notconverge_check()
 
     def _notconverge_check(self):
-
         # Process the output file and get converge information
         not_converge_pattern = re.compile("Convergence not reached.*")
         converge_pattern = re.compile("Convergence reached.*")

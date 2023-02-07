@@ -78,7 +78,6 @@ class FeffJob(Job):
                     shutil.copy(f, f"{f}.orig")
 
     def run(self):
-
         """
         Performs the actual FEFF run
         Returns:
