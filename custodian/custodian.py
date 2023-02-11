@@ -49,13 +49,11 @@ elif "CUSTODIAN_REPORTING_OPT_IN" in os.environ:
         SENTRY_DSN = "https://0f7291738eb042a3af671df9fc68ae2a@sentry.io/1470881"
 
 if SENTRY_DSN:
-
     import sentry_sdk
 
     sentry_sdk.init(dsn=SENTRY_DSN)
 
     with sentry_sdk.configure_scope() as scope:
-
         from getpass import getuser
 
         try:
@@ -216,7 +214,6 @@ class Custodian:
             with tarfile.open(chkpt) as t:
 
                 def is_within_directory(directory, target):
-
                     abs_directory = os.path.abspath(directory)
                     abs_target = os.path.abspath(target)
 
@@ -225,7 +222,6 @@ class Custodian:
                     return prefix == abs_directory
 
                 def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
-
                     for member in tar.getmembers():
                         member_path = os.path.join(path, member.name)
                         if not is_within_directory(path, member_path):

@@ -381,7 +381,6 @@ class QCJob(Job):
                     raise AssertionError("No errors should be encountered while flattening frequencies!")
 
                 if not transition_state:
-
                     freq_list = freq_outdata.get("frequencies")
 
                     if len(freq_list) > 1:
