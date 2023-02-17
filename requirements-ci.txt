@@ -1,4 +1,4 @@
-git+https://github.com/samblau/pymatgen@qchem#egg=pymatgen
+pymatgen==2023.1.30
 coverage==6.3.2
 coveralls==3.3.1
 pytest==7.1.2
