@@ -59,8 +59,7 @@ class QChemErrorHandlerTest(TestCase):
             [
                 {"s2thresh": "16"},
                 {"molecule": "molecule_from_last_geometry"},
-                {"scf_algorithm": "gdm"},
-                {"max_scf_cycles": "500"},
+                {"scf_algorithm": "diis_gdm"},
             ],
         )
         self._check_equivalent_inputs("unable_to_determine_lamda.qin.0", "unable_to_determine_lamda.qin.1")
@@ -127,18 +126,6 @@ class QChemErrorHandlerTest(TestCase):
         self.assertEqual(d["actions"], [{"s2thresh": "16"}, {"max_scf_cycles": 100}, {"thresh": "14"}])
         self._check_equivalent_inputs("crowd_gradient.qin.0", "crowd_gradient.qin.1")
 
-    def test_scf_failed_to_converge_gdm_add_cycles(self):
-        shutil.copyfile(os.path.join(test_dir, "gdm_add_cycles/mol.qin"), os.path.join(scr_dir, "mol.qin"))
-        shutil.copyfile(os.path.join(test_dir, "gdm_add_cycles/mol.qin.1"), os.path.join(scr_dir, "mol.qin.1"))
-        shutil.copyfile(os.path.join(test_dir, "gdm_add_cycles/mol.qout"), os.path.join(scr_dir, "mol.qout"))
-
-        h = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
-        h.check()
-        d = h.correct()
-        self.assertEqual(d["errors"], ["SCF_failed_to_converge"])
-        self.assertEqual(d["actions"], [{"max_scf_cycles": "500"}])
-        self._check_equivalent_inputs("mol.qin", "mol.qin.1")
-
     def test_advanced_scf_failed_to_converge_1(self):
         shutil.copyfile(
             os.path.join(test_dir, "diis_guess_always/mol.qin.0"),
@@ -157,70 +144,44 @@ class QChemErrorHandlerTest(TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["SCF_failed_to_converge"])
-        self.assertEqual(d["actions"], [{"scf_algorithm": "gdm"}, {"max_scf_cycles": "500"}])
+        self.assertEqual(d["actions"], [{"scf_guess_always": "true"}])
         self._check_equivalent_inputs("mol.qin", "mol.qin.1")
 
-    def test_scf_into_opt(self):
+    def test_advanced_scf_failed_to_converge_2(self):
         shutil.copyfile(
-            os.path.join(test_dir, "scf_into_opt/mol.qin.0"),
-            os.path.join(scr_dir, "mol.qin"),
+            os.path.join(test_dir, "custom_gdm_diis/mol.qin.0"),
+            os.path.join(scr_dir, "mol.qin.0"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "scf_into_opt/mol.qout.0"),
-            os.path.join(scr_dir, "mol.qout"),
+            os.path.join(test_dir, "custom_gdm_diis/mol.qout.0"),
+            os.path.join(scr_dir, "mol.qout.0"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "scf_into_opt/mol.qin.1"),
+            os.path.join(test_dir, "custom_gdm_diis/mol.qin.1"),
             os.path.join(scr_dir, "mol.qin.1"),
         )
+        shutil.copyfile(
+            os.path.join(test_dir, "custom_gdm_diis/mol.qout.1"),
+            os.path.join(scr_dir, "mol.qout.1"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "custom_gdm_diis/mol.qin.2"),
+            os.path.join(scr_dir, "mol.qin.2"),
+        )
 
-        h = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
+        h = QChemErrorHandler(input_file="mol.qin.0", output_file="mol.qout.0")
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["SCF_failed_to_converge"])
-        self.assertEqual(d["actions"], [{"scf_algorithm": "gdm"}, {"max_scf_cycles": "500"}])
-        self._check_equivalent_inputs("mol.qin", "mol.qin.1")
+        self.assertEqual(d["actions"], [{"s2thresh": "16"}, {"scf_algorithm": "diis_gdm"}])
+        self._check_equivalent_inputs("mol.qin.0", "mol.qin.1")
 
-        shutil.copyfile(
-            os.path.join(test_dir, "scf_into_opt/mol.qout.1"),
-            os.path.join(scr_dir, "mol.qout"),
-        )
-
-        h.check()
-        d = h.correct()
-        self.assertEqual(d["errors"], ["out_of_opt_cycles"])
-        self.assertEqual(d["actions"], [{"molecule": "molecule_from_last_geometry"}])
-
-    def test_custom_smd(self):
-        shutil.copyfile(
-            os.path.join(test_dir, "custom_smd/mol.qin.0"),
-            os.path.join(scr_dir, "mol.qin"),
-        )
-        shutil.copyfile(
-            os.path.join(test_dir, "custom_smd/mol.qout.0"),
-            os.path.join(scr_dir, "mol.qout"),
-        )
-        shutil.copyfile(
-            os.path.join(test_dir, "custom_smd/mol.qin.1"),
-            os.path.join(scr_dir, "mol.qin.1"),
-        )
-
-        h = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
+        h = QChemErrorHandler(input_file="mol.qin.1", output_file="mol.qout.1")
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["SCF_failed_to_converge"])
-        self.assertEqual(d["actions"], [{"scf_algorithm": "gdm"}, {"max_scf_cycles": "500"}])
-        self._check_equivalent_inputs("mol.qin", "mol.qin.1")
-
-        shutil.copyfile(
-            os.path.join(test_dir, "custom_smd/mol.qout.1"),
-            os.path.join(scr_dir, "mol.qout"),
-        )
-
-        h.check()
-        d = h.correct()
-        self.assertEqual(d["errors"], [])
-        self.assertEqual(d["actions"], None)
+        self.assertEqual(d["actions"], [{"scf_algorithm": "custom_gdm_diis"}])
+        self._check_equivalent_inputs("mol.qin.1", "mol.qin.2")
 
     def test_out_of_opt_cycles(self):
         shutil.copyfile(
