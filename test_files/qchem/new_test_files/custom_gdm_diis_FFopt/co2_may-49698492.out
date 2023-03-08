@@ -1,7 +1,0 @@
-foobar
-2022-05-28 13:12:36,902 INFO Hostname/IP lookup (this will take a few seconds)
-2022-05-28 13:12:36,905 INFO Launching Rocket
-2022-05-28 13:13:00,338 INFO RUNNING fw_id: 1664707 in directory: /global/home/groups/lr_mp/smblau/co2_capture/block_2022-04-05-23-25-36-079149/launcher_2022-05-28-07-09-52-283190
-2022-05-28 13:13:00,360 INFO Task started: {{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}}.
-2022-05-28 13:13:00,364 INFO Task completed: {{atomate.qchem.firetasks.write_inputs.WriteInputFromIOSet}}
-2022-05-28 13:13:00,368 INFO Task started: {{atomate.qchem.firetasks.run_calc.RunQChemCustodian}}.
