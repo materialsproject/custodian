@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v2023.3.8
+---------
+* Updates for QChem6 support (@samblau)
+* Updates for CP2K support (@nwinner)
+
 v2022.5.26
 ----------
 * PR #219 from @samblau. Q-Chem updates to NBO, new geometry optimizer, revamped SCF error handling.
