@@ -12,6 +12,7 @@ import numpy as np
 from pymatgen.core import Molecule
 from pymatgen.io.qchem.inputs import QCInput
 from pymatgen.io.qchem.outputs import QCOutput, check_for_structure_changes
+from pymatgen.io.qchem.sets import OptSet
 
 from custodian.custodian import Job
 from custodian.qchem.utils import perturb_coordinates, vector_list_diff
@@ -89,6 +90,16 @@ class QCJob(Job):
         self.save_scratch = save_scratch
         self.backup = backup
 
+        try:
+            slurm_cores = int(os.environ["SLURM_CPUS_ON_NODE"])
+            if slurm_cores < self.max_cores:
+                self.max_cores = slurm_cores
+                print("max_cores reduced from", max_cores, "to", self.max_cores)
+            else:
+                print("max_cores remain at", self.max_cores)
+        except KeyError:
+            print("SLURM_CPUS_ON_NODE not in environment")
+
     @property
     def current_command(self):
         """
@@ -141,7 +152,10 @@ class QCJob(Job):
                 if os.path.exists(file):
                     shutil.move(file, file + self.suffix)
         if not self.save_scratch:
-            shutil.rmtree(scratch_dir)
+            try:
+                shutil.rmtree(scratch_dir)
+            except FileNotFoundError:
+                pass
 
     def run(self):
         """
@@ -153,6 +167,9 @@ class QCJob(Job):
         local_scratch = os.path.join(os.environ["QCLOCALSCR"], "scratch")
         if os.path.exists(local_scratch):
             shutil.rmtree(local_scratch)
+        if os.path.exists(os.path.join(os.environ["QCSCRATCH"], "132.0")):
+            os.mkdir(local_scratch)
+            shutil.move(os.path.join(os.environ["QCSCRATCH"], "132.0"), local_scratch)
         with open(self.qclog_file, "w") as qclog:
             return subprocess.Popen(self.current_command, stdout=qclog, shell=True)  # pylint: disable=R1732
 
@@ -233,9 +250,11 @@ class QCJob(Job):
         freq_rem["job_type"] = "freq"
         opt_rem = copy.deepcopy(orig_input.rem)
         opt_rem["job_type"] = opt_method
-        # Next two lines will be removed once Q-Chem 6 is released:
-        if linked:
-            opt_rem.pop("geom_opt2", None)
+        opt_geom_opt = None
+        if "geom_opt2" in orig_input.rem.keys():
+            freq_rem.pop("geom_opt2", None)
+            if linked:
+                opt_rem.pop("geom_opt2", None)
         first = True
         energy_history = []
 
@@ -256,13 +275,22 @@ class QCJob(Job):
                 )
             )
 
+            freq_outdata = QCOutput(output_file + ".freq_pre").data
+            if freq_outdata["version"] == "6":
+                opt_set = OptSet(molecule=freq_outdata["initial_molecule"], qchem_version=freq_outdata["version"])
+                opt_geom_opt = copy.deepcopy(opt_set.geom_opt)
+
             if linked:
                 opt_rem["geom_opt_hessian"] = "read"
-                opt_rem["scf_guess_always"] = True
+                if freq_outdata["version"] == "6":
+                    opt_geom_opt["initial_hessian"] = "read"
 
+            tmp_opt_rem = copy.deepcopy(opt_rem)
+            if opt_rem["scf_algorithm"] == "diis":
+                tmp_opt_rem["scf_guess_always"] = "True"
             opt_QCInput = QCInput(
                 molecule=orig_input.molecule,
-                rem=opt_rem,
+                rem=tmp_opt_rem,
                 opt=orig_input.opt,
                 pcm=orig_input.pcm,
                 solvent=orig_input.solvent,
@@ -270,13 +298,13 @@ class QCJob(Job):
                 vdw_mode=orig_input.vdw_mode,
                 van_der_waals=orig_input.van_der_waals,
                 nbo=orig_input.nbo,
+                geom_opt=opt_geom_opt,
             )
             opt_QCInput.write_file(input_file)
             first = False
 
         if linked:
             opt_rem["geom_opt_hessian"] = "read"
-            opt_rem["scf_guess_always"] = True
 
             for ii in range(max_iterations):
                 yield (
@@ -294,43 +322,16 @@ class QCJob(Job):
                 )
                 opt_outdata = QCOutput(output_file + f".{opt_method}_" + str(ii)).data
                 opt_indata = QCInput.from_file(input_file + f".{opt_method}_" + str(ii))
-                try:
-                    if opt_indata.rem["scf_algorithm"] != freq_rem["scf_algorithm"]:
-                        freq_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
-                        opt_rem["scf_algorithm"] = opt_indata.rem["scf_algorithm"]
-                except KeyError:
-                    opt_scf_alg = "diis"
-                    freq_scf_alg = "diis"
-                    if "scf_algorithm" not in opt_indata.rem:
-                        if opt_indata.rem.get("gen_scfman_hybrid_algo", "false") == "true":
-                            opt_scf_alg = "custom_gdm_diis"
-                    else:
-                        opt_scf_alg = opt_indata.rem["scf_algorithm"]
-                    if "scf_algorithm" not in freq_rem:
-                        if freq_rem.get("gen_scfman_hybrid_algo", "false") == "true":
-                            freq_scf_alg = "custom_gdm_diis"
-                    else:
-                        freq_scf_alg = freq_rem["scf_algorithm"]
-                    if opt_scf_alg != freq_scf_alg:
-                        if opt_scf_alg == "custom_gdm_diis":
-                            freq_rem.pop("scf_algorithm", None)
-                            freq_rem["gen_scfman_hybrid_algo"] = "true"
-                            freq_rem["gen_scfman_algo_1"] = "gdm"
-                            freq_rem["gen_scfman_conv_1"] = "4"
-                            freq_rem["gen_scfman_iter_1"] = "50"
-                            freq_rem["gen_scfman_algo_2"] = "diis"
-                            freq_rem["gen_scfman_conv_2"] = "8"
-                            freq_rem["gen_scfman_iter_2"] = "50"
-                            opt_rem.pop("scf_algorithm", None)
-                            opt_rem["gen_scfman_hybrid_algo"] = "true"
-                            opt_rem["gen_scfman_algo_1"] = "gdm"
-                            opt_rem["gen_scfman_conv_1"] = "4"
-                            opt_rem["gen_scfman_iter_1"] = "50"
-                            opt_rem["gen_scfman_algo_2"] = "diis"
-                            opt_rem["gen_scfman_conv_2"] = "8"
-                            opt_rem["gen_scfman_iter_2"] = "50"
-                        else:
-                            raise RuntimeError("Not sure how to handle SCF alg difference!")
+                if opt_outdata["version"] == "6":
+                    opt_geom_opt = copy.deepcopy(opt_indata.geom_opt)
+                    opt_geom_opt["initial_hessian"] = "read"
+                for key in opt_indata.rem:
+                    if key not in ["job_type", "geom_opt2", "scf_guess_always"]:
+                        if freq_rem.get(key, None) != opt_indata.rem[key]:
+                            if "geom_opt" not in key:
+                                freq_rem[key] = opt_indata.rem[key]
+                        if opt_rem.get(key, None) != opt_indata.rem[key]:
+                            opt_rem[key] = opt_indata.rem[key]
                 first = False
                 if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
                     if not transition_state:
@@ -367,46 +368,13 @@ class QCJob(Job):
 
                 freq_outdata = QCOutput(output_file + ".freq_" + str(ii)).data
                 freq_indata = QCInput.from_file(input_file + ".freq_" + str(ii))
-                try:
-                    if freq_indata.rem["scf_algorithm"] != opt_rem["scf_algorithm"]:
-                        opt_rem["scf_algorithm"] = freq_indata.rem["scf_algorithm"]
-                        freq_rem["scf_algorithm"] = freq_indata.rem["scf_algorithm"]
-                except KeyError:
-                    opt_scf_alg = "diis"
-                    freq_scf_alg = "diis"
-                    if "scf_algorithm" not in opt_indata.rem:
-                        if opt_indata.rem.get("gen_scfman_hybrid_algo", "false") == "true":
-                            opt_scf_alg = "custom_gdm_diis"
-                    else:
-                        opt_scf_alg = opt_indata.rem["scf_algorithm"]
-                    if "scf_algorithm" not in freq_rem:
-                        if freq_rem.get("gen_scfman_hybrid_algo", "false") == "true":
-                            freq_scf_alg = "custom_gdm_diis"
-                    else:
-                        freq_scf_alg = freq_rem["scf_algorithm"]
-                    if opt_scf_alg != freq_scf_alg:
-                        if freq_scf_alg == "custom_gdm_diis":
-                            opt_rem.pop("scf_algorithm", None)
-                            opt_rem["gen_scfman_hybrid_algo"] = "true"
-                            opt_rem["gen_scfman_algo_1"] = "gdm"
-                            opt_rem["gen_scfman_conv_1"] = "4"
-                            opt_rem["gen_scfman_iter_1"] = "50"
-                            opt_rem["gen_scfman_algo_2"] = "diis"
-                            opt_rem["gen_scfman_conv_2"] = "8"
-                            opt_rem["gen_scfman_iter_2"] = "50"
-                            freq_rem.pop("scf_algorithm", None)
-                            freq_rem["gen_scfman_hybrid_algo"] = "true"
-                            freq_rem["gen_scfman_algo_1"] = "gdm"
-                            freq_rem["gen_scfman_conv_1"] = "4"
-                            freq_rem["gen_scfman_iter_1"] = "50"
-                            freq_rem["gen_scfman_algo_2"] = "diis"
-                            freq_rem["gen_scfman_conv_2"] = "8"
-                            freq_rem["gen_scfman_iter_2"] = "50"
-                        else:
-                            raise RuntimeError("Not sure how to handle SCF alg difference!")
-
-                if "cpscf_nseg" in freq_indata.rem:
-                    freq_rem["cpscf_nseg"] = freq_indata.rem["cpscf_nseg"]
+                for key in freq_indata.rem:
+                    if key not in ["job_type", "geom_opt2", "scf_guess_always"]:
+                        if freq_rem.get(key, None) != freq_indata.rem[key]:
+                            freq_rem[key] = freq_indata.rem[key]
+                        if opt_rem.get(key, None) != freq_indata.rem[key]:
+                            if key != "cpscf_nseg":
+                                opt_rem[key] = freq_indata.rem[key]
                 errors = freq_outdata.get("errors")
 
                 if len(errors) != 0:
@@ -434,9 +402,12 @@ class QCJob(Job):
                         if abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
                             warnings.warn("Energy change below cutoff!")
                             break
+                    tmp_opt_rem = copy.deepcopy(opt_rem)
+                    if opt_rem["scf_algorithm"] == "diis":
+                        tmp_opt_rem["scf_guess_always"] = "True"
                     opt_QCInput = QCInput(
                         molecule=opt_outdata.get("molecule_from_optimized_geometry"),
-                        rem=opt_rem,
+                        rem=tmp_opt_rem,
                         opt=orig_input.opt,
                         pcm=orig_input.pcm,
                         solvent=orig_input.solvent,
@@ -444,7 +415,7 @@ class QCJob(Job):
                         vdw_mode=orig_input.vdw_mode,
                         van_der_waals=orig_input.van_der_waals,
                         nbo=orig_input.nbo,
-                        # geom_opt=orig_input.geom_opt, # Will be uncommented once Q-Chem 6 is released
+                        geom_opt=opt_geom_opt,
                     )
                     opt_QCInput.write_file(input_file)
                 else:
@@ -459,9 +430,12 @@ class QCJob(Job):
                             "Second small imaginary frequency (smaller than 15.0) - not worth further flattening!"
                         )
                         break
+                    tmp_opt_rem = copy.deepcopy(opt_rem)
+                    if opt_rem["scf_algorithm"] == "diis":
+                        tmp_opt_rem["scf_guess_always"] = "True"
                     opt_QCInput = QCInput(
                         molecule=opt_outdata.get("molecule_from_optimized_geometry"),
-                        rem=opt_rem,
+                        rem=tmp_opt_rem,
                         opt=orig_input.opt,
                         pcm=orig_input.pcm,
                         solvent=orig_input.solvent,
@@ -469,7 +443,7 @@ class QCJob(Job):
                         vdw_mode=orig_input.vdw_mode,
                         van_der_waals=orig_input.van_der_waals,
                         nbo=orig_input.nbo,
-                        # geom_opt=orig_input.geom_opt, # Will be uncommented once Q-Chem 6 is released
+                        # geom_opt=opt_geom_opt, # Will be uncommented once new optimizer supports TS calcs
                     )
                     opt_QCInput.write_file(input_file)
             if not save_final_scratch:

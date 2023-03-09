@@ -24,7 +24,7 @@ scr_dir = os.path.join(test_dir, "scr")
 cwd = os.getcwd()
 
 
-class custom_GDM_DIIS_FFopt_with_handlers(TestCase):
+class FFopt_job_handler_interaction(TestCase):
     def _check_equivalent_inputs(self, input1, input2):
         QCinput1 = QCInput.from_file(input1)
         QCinput2 = QCInput.from_file(input2)
@@ -38,63 +38,55 @@ class custom_GDM_DIIS_FFopt_with_handlers(TestCase):
         os.makedirs(scr_dir)
         os.makedirs(os.path.join(scr_dir, "scratch"))
         shutil.copyfile(
-            os.path.join(test_dir, "custom_gdm_diis_FFopt/mol.qin.orig"),
+            os.path.join(test_dir, "job_handler_interaction/mol.qin.orig"),
             os.path.join(scr_dir, "mol.qin"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "custom_gdm_diis_FFopt/error.1/mol.qout"),
+            os.path.join(test_dir, "job_handler_interaction/error.1/mol.qout"),
             os.path.join(scr_dir, "mol.qout.error1"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "custom_gdm_diis_FFopt/error.2/mol.qin"),
+            os.path.join(test_dir, "job_handler_interaction/error.2/mol.qin"),
             os.path.join(scr_dir, "mol.qin.error2"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "custom_gdm_diis_FFopt/error.2/mol.qout"),
+            os.path.join(test_dir, "job_handler_interaction/error.2/mol.qout"),
             os.path.join(scr_dir, "mol.qout.error2"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "custom_gdm_diis_FFopt/error.3/mol.qin"),
+            os.path.join(test_dir, "job_handler_interaction/error.3/mol.qin"),
             os.path.join(scr_dir, "mol.qin.error3"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "custom_gdm_diis_FFopt/error.3/mol.qout"),
+            os.path.join(test_dir, "job_handler_interaction/error.3/mol.qout"),
             os.path.join(scr_dir, "mol.qout.error3"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "custom_gdm_diis_FFopt/mol.qin.opt_0"),
+            os.path.join(test_dir, "job_handler_interaction/mol.qin.opt_0"),
             os.path.join(scr_dir, "mol.qin.opt_0"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "custom_gdm_diis_FFopt/mol.qout.opt_0"),
+            os.path.join(test_dir, "job_handler_interaction/mol.qout.opt_0"),
             os.path.join(scr_dir, "mol.qout.opt_0"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "custom_gdm_diis_FFopt/error.4/mol.qin"),
-            os.path.join(scr_dir, "mol.qin.error4"),
-        )
-        shutil.copyfile(
-            os.path.join(test_dir, "custom_gdm_diis_FFopt/error.4/mol.qout"),
-            os.path.join(scr_dir, "mol.qout.error4"),
-        )
-        shutil.copyfile(
-            os.path.join(test_dir, "custom_gdm_diis_FFopt/error.5/mol.qin"),
+            os.path.join(test_dir, "job_handler_interaction/error.5/mol.qin"),
             os.path.join(scr_dir, "mol.qin.error5"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "custom_gdm_diis_FFopt/error.5/mol.qout"),
+            os.path.join(test_dir, "job_handler_interaction/error.5/mol.qout"),
             os.path.join(scr_dir, "mol.qout.error5"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "custom_gdm_diis_FFopt/mol.qin.freq_0"),
+            os.path.join(test_dir, "job_handler_interaction/mol.qin.freq_0"),
             os.path.join(scr_dir, "mol.qin.freq_0"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "custom_gdm_diis_FFopt/mol.qout.freq_0"),
+            os.path.join(test_dir, "job_handler_interaction/mol.qout.freq_0"),
             os.path.join(scr_dir, "mol.qout.freq_0"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "custom_gdm_diis_FFopt/mol.qin.opt_1"),
+            os.path.join(test_dir, "job_handler_interaction/mol.qin.opt_1"),
             os.path.join(scr_dir, "mol.qin.opt_1"),
         )
         os.chdir(scr_dir)
@@ -130,7 +122,7 @@ class custom_GDM_DIIS_FFopt_with_handlers(TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["back_transform_error"])
-        self.assertEqual(d["actions"], [{"molecule": "molecule_from_last_geometry"}, {"scf_algorithm": "diis_gdm"}])
+        self.assertEqual(d["actions"], [{"molecule": "molecule_from_last_geometry"}])
         self._check_equivalent_inputs("mol.qin", "mol.qin.error2")
 
         h = QChemErrorHandler(
@@ -140,7 +132,7 @@ class custom_GDM_DIIS_FFopt_with_handlers(TestCase):
         h.check()
         d = h.correct()
         self.assertEqual(d["errors"], ["SCF_failed_to_converge"])
-        self.assertEqual(d["actions"], [{"scf_algorithm": "custom_gdm_diis"}])
+        self.assertEqual(d["actions"], [{"scf_algorithm": "gdm"}, {"max_scf_cycles": "500"}])
         self._check_equivalent_inputs("mol.qin", "mol.qin.error3")
 
         h = QChemErrorHandler(
