@@ -112,7 +112,7 @@ class QChemErrorHandler(ErrorHandler):
             # Try forcing a new initial guess at each iteration
             elif (
                 self.qcinp.rem.get("scf_guess_always", "none").lower() != "true"
-                and len(self.outdata.get("energy_trajectory", [])) > 0
+                and self.outdata.get("initial_molecule") != self.outdata.get("molecule_from_last_geometry")
             ):
                 self.qcinp.rem["scf_guess_always"] = "true"
                 actions.append({"scf_guess_always": "true"})
@@ -136,7 +136,7 @@ class QChemErrorHandler(ErrorHandler):
                         "maxiter"
                     ] = self.geom_max_cycles
                 actions.append({"geom_max_cycles:": self.geom_max_cycles})
-                if len(self.outdata.get("energy_trajectory")) > 1:
+                if self.outdata.get("initial_molecule") != self.outdata.get("molecule_from_last_geometry"):
                     self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                     actions.append({"molecule": "molecule_from_last_geometry"})
 
@@ -171,7 +171,7 @@ class QChemErrorHandler(ErrorHandler):
             if self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
-            elif len(self.outdata.get("energy_trajectory")) > 1:
+            elif self.outdata.get("initial_molecule") != self.outdata.get("molecule_from_last_geometry"):
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
                 if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
@@ -190,7 +190,7 @@ class QChemErrorHandler(ErrorHandler):
             if self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
-            elif len(self.outdata.get("energy_trajectory")) > 1:
+            elif self.outdata.get("initial_molecule") != self.outdata.get("molecule_from_last_geometry"):
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
 
@@ -327,6 +327,13 @@ class QChemErrorHandler(ErrorHandler):
             else:
                 self.qcinp.rem["cpscf_nseg"] = str(self.outdata["cpscf_nseg"] + 1)
                 actions.append({"cpscf_nseg": str(self.outdata["cpscf_nseg"] + 1)})
+
+        elif "gdm_neg_precon_error" in self.errors:
+            if self.outdata.get("initial_molecule") != self.outdata.get("molecule_from_last_geometry"):
+                self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
+                actions.append({"molecule": "molecule_from_last_geometry"})
+            else:
+                print("Not sure how to fix gdm_neg_precon_error on the first SCF!")
 
         elif "mem_static_too_small" in self.errors:
             # mem_static should never exceed 2000 MB according to the Q-Chem manual

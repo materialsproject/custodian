@@ -405,6 +405,21 @@ class QChemErrorHandlerTest(TestCase):
         )
         self._check_equivalent_inputs(os.path.join(test_dir, "OOS_read_hess_next.qin"), "mol.qin")
 
+    def test_gdm_neg_precon_error(self):
+        shutil.copyfile(
+            os.path.join(test_dir, "gdm_neg_precon_error.qin"),
+            os.path.join(scr_dir, "mol.qin"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "gdm_neg_precon_error.qout"),
+            os.path.join(scr_dir, "mol.qout"),
+        )
+        h = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["gdm_neg_precon_error"])
+        self.assertEqual(d["actions"], [{"molecule": "molecule_from_last_geometry"}])
+
     def tearDown(self):
         os.chdir(cwd)
         shutil.rmtree(scr_dir)
