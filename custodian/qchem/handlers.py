@@ -205,13 +205,13 @@ class QChemErrorHandler(ErrorHandler):
                         "coordinates"
                     ] = "delocalized"
                     actions.append({"coordinates": "delocalized"})
-                    if self.qcinp.geom_opt["initial_hessian"] != "read":
+                    if self.qcinp.geom_opt.get("initial_hessian", "none") != "read":
                         self.qcinp.geom_opt["initial_hessian"] = "model"
                         actions.append({"initial_hessian": "model"})
                 elif self.qcinp.geom_opt["coordinates"] == "delocalized":
                     self.qcinp.geom_opt["coordinates"] = "cartesian"  # pylint: disable=unsupported-assignment-operation
                     actions.append({"coordinates": "cartesian"})
-                    if self.qcinp.geom_opt["initial_hessian"] == "model":
+                    if self.qcinp.geom_opt.get("initial_hessian", "none") == "model":
                         del self.qcinp.geom_opt["initial_hessian"]
                         actions.append({"initial_hessian": "deleted"})
 
