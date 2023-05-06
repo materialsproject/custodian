@@ -497,24 +497,6 @@ class VaspErrorHandler(ErrorHandler):
             if nelect < nprocs:
                 actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": vi["INCAR"].get("NCORE", 1) * 2}}})
 
-        if "algo_tet" in self.errors:
-            # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP
-            # suggests: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
-            # 2) Use ALGO = Damped but only *after* an ISMEAR = 0 run where the wavefunction
-            # has been stored and read in for the subsequent run.
-            #
-            # For simplicity, we go with Option 1 here, but if the user wants high-quality
-            # DOS then they should consider running a subsequent job with ISMEAR = -5 and
-            # ALGO = Damped, provided the wavefunction has been stored.
-            if vi["INCAR"].get("ISMEAR", 1) < 0:
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
-                if vi["INCAR"].get("NEDOS") or vi["INCAR"].get("EMIN") or vi["INCAR"].get("EMAX"):
-                    warnings.warn(
-                        "This looks like a DOS run. You may want to follow-up this job with ALGO = Damped"
-                        " and ISMEAR = -5, using the wavefunction from the current job.",
-                        UserWarning,
-                    )
-
         if "grad_not_orth" in self.errors:
             # Often coincides with algo_tet, in which the algo_tet error handler will also resolve grad_not_orth.
             # When not present alongside algo_tet, the grad_not_orth error is due to how VASP is compiled.
@@ -1515,6 +1497,24 @@ class NonConvergingErrorHandler(ErrorHandler):
                         "action": {"_set": {"Algo": "Normal", "AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},
                     }
                 )
+
+        if "algo_tet" in self.errors:
+            # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP
+            # suggests: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
+            # 2) Use ALGO = Damped but only *after* an ISMEAR = 0 run where the wavefunction
+            # has been stored and read in for the subsequent run.
+            #
+            # For simplicity, we go with Option 1 here, but if the user wants high-quality
+            # DOS then they should consider running a subsequent job with ISMEAR = -5 and
+            # ALGO = Damped, provided the wavefunction has been stored.
+            if vi["INCAR"].get("ISMEAR", 1) < 0:
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+                if vi["INCAR"].get("NEDOS") or vi["INCAR"].get("EMIN") or vi["INCAR"].get("EMAX"):
+                    warnings.warn(
+                        "This looks like a DOS run. You may want to follow-up this job with ALGO = Damped"
+                        " and ISMEAR = -5, using the wavefunction from the current job.",
+                        UserWarning,
+                    )
 
         if actions:
             backup(VASP_BACKUP_FILES)
