@@ -612,6 +612,7 @@ class VaspErrorHandler(ErrorHandler):
             warnings.warn(
                 "We suggest using a new version of the POTCAR files to resolve the SET_CORE_WF error.", UserWarning
             )
+            return {"errors": ["set_core_wf"], "actions": None}
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
