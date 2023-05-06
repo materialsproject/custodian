@@ -284,14 +284,20 @@ class VaspErrorHandler(ErrorHandler):
             # Usually caused by short bond distances. If on the first step,
             # volume needs to be increased. Otherwise, it was due to a step
             # being too big and POTIM should be decreased. If a static run
-            # try turning off symmetry.
+            # try turning off symmetry. This also happens if NCORE or NPAR
+            # is set to a large value for a small structure.
+
             try:
                 oszicar = Oszicar("OSZICAR")
                 nsteps = len(oszicar.ionic_steps)
             except Exception:
                 nsteps = 0
 
-            if nsteps >= 1:
+            if len(vi["POSCAR"].structure) < 5 and (vi["INCAR"].get("NCORE", 1) > 1 or vi["INCAR"].get("NPAR", 1) > 1):
+                actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": 1}}})
+                if vi["INCAR"].get("NPAR", 1) > 1:
+                    actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
+            elif nsteps >= 1:
                 potim = round(vi["INCAR"].get("POTIM", 0.5) / 2.0, 2)
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0, "POTIM": potim}}})
             elif vi["INCAR"].get("NSW", 0) == 0 or vi["INCAR"].get("ISIF", 0) in range(3):
@@ -306,12 +312,6 @@ class VaspErrorHandler(ErrorHandler):
             if vi["INCAR"].get("ICHARG", 0) < 10:
                 actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
                 actions.append({"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}})
-
-            # This can also happen if NCORE or NPAR is set to a large value for a small structure.
-            if len(vi["POSCAR"].structure) < 10 (vi["INCAR"].get("NCORE", 1) > 1 or vi["INCAR"].get("NPAR", 1) > 1):
-                actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": 1}}})
-                if vi["INCAR"].get("NPAR",1)>1:
-                    actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
 
         if self.errors.intersection(["subspacematrix"]):
             if self.error_count["subspacematrix"] == 0:
