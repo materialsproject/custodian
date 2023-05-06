@@ -1489,6 +1489,9 @@ class NonConvergingErrorHandler(ErrorHandler):
             # uncomment the line below for a backup option
             # elif algo != "damped":
             #     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "Time": 0.5}}})
+        elif np.max(vi["POSCAR"].structure.lattice.abc) > 50.0 and amin > 0.01:
+            # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
+            actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": "0.01"}}})
         else:
             if algo == "veryfast":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
@@ -1512,10 +1515,6 @@ class NonConvergingErrorHandler(ErrorHandler):
                         "action": {"_set": {"Algo": "Normal", "AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},
                     }
                 )
-
-        # Sometimes an AMIN warning can appear, so we'll address it now
-        if "amin" in self.errors:
-            actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": "0.01"}}})
 
         if actions:
             backup(VASP_BACKUP_FILES)
