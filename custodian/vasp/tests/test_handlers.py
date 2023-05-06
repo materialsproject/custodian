@@ -949,7 +949,7 @@ class ZpotrfErrorHandlerSmallTest(unittest.TestCase):
         if "PMG_VASP_PSP_DIR" not in os.environ:
             os.environ["PMG_VASP_PSP_DIR"] = test_dir
         os.chdir(test_dir)
-        os.chdir("zpotrf")
+        os.chdir("zpotrf_small")
         shutil.copy("POSCAR", "POSCAR.orig")
         shutil.copy("INCAR", "INCAR.orig")
 
