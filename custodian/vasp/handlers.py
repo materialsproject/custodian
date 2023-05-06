@@ -293,6 +293,7 @@ class VaspErrorHandler(ErrorHandler):
             except Exception:
                 nsteps = 0
 
+            # The natoms of 5 was chosen somewhat arbitrarily. Could be worth revisiting to fine-tune.
             if len(vi["POSCAR"].structure) < 5 and (vi["INCAR"].get("NCORE", 1) > 1 or vi["INCAR"].get("NPAR", 1) > 1):
                 actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": 1}}})
                 if vi["INCAR"].get("NPAR", 1) > 1:

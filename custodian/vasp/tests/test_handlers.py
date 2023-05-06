@@ -944,6 +944,33 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         os.chdir(cwd)
 
 
+class ZpotrfErrorHandlerSmallTest(unittest.TestCase):
+    def setUp(self):
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.chdir(test_dir)
+        os.chdir("zpotrf")
+        shutil.copy("POSCAR", "POSCAR.orig")
+        shutil.copy("INCAR", "INCAR.orig")
+
+    def test_small(self):
+        h = VaspErrorHandler("vasp.out")
+        shutil.copy("OSZICAR.empty", "OSZICAR")
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["zpotrf"])
+        self.assertEqual(d["actions"], [{"dict": "INCAR", "action": {"_set": {"NCORE": 1}, "_unset": {"NPAR": 1}}}])
+
+    def tearDown(self):
+        os.chdir(test_dir)
+        os.chdir("zpotrf_small")
+        shutil.move("POSCAR.orig", "POSCAR")
+        shutil.move("INCAR.orig", "INCAR")
+        os.remove("OSZICAR")
+        clean_dir()
+        os.chdir(cwd)
+
+
 class WalltimeHandlerTest(unittest.TestCase):
     def setUp(self):
         os.chdir(os.path.join(test_dir, "postprocess"))
