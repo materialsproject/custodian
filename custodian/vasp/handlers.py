@@ -343,9 +343,6 @@ class VaspErrorHandler(ErrorHandler):
             else:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
-        if "amin" in self.errors:
-            actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": "0.01"}}})
-
         if "triple_product" in self.errors:
             s = vi["POSCAR"].structure
             trans = SupercellTransformation(((1, 0, 0), (0, 0, 1), (0, 1, 0)))
@@ -1515,6 +1512,10 @@ class NonConvergingErrorHandler(ErrorHandler):
                         "action": {"_set": {"Algo": "Normal", "AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},
                     }
                 )
+
+        # Sometimes an AMIN warning can appear, so we'll address it now
+        if "amin" in self.errors:
+            actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": "0.01"}}})
 
         if actions:
             backup(VASP_BACKUP_FILES)
