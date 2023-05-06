@@ -1460,10 +1460,11 @@ class NonConvergingErrorHandler(ErrorHandler):
         if (
             vi["INCAR"].get("ALGO", "Normal").lower() in ["all", "damped"] or (50 <= vi["INCAR"].get("IALGO", 38) <= 59)
         ) and vi["INCAR"].get("ISMEAR", 1) < 0:
+            # NOTE: This is the algo_tet handler response.
             # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP
             # suggests: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
             # 2) Use ALGO = Damped but only *after* an ISMEAR = 0 run where the wavefunction
-            # has been stored and read in for the subsequent run.s
+            # has been stored and read in for the subsequent run.
             #
             # For simplicity, we go with Option 1 here, but if the user wants high-quality
             # DOS then they should consider running a subsequent job with ISMEAR = -5 and
