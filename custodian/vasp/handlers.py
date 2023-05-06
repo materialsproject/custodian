@@ -531,7 +531,8 @@ class VaspErrorHandler(ErrorHandler):
             if "algo_tet" not in self.errors:
                 warnings.warn(
                     "EDWAV error reported by VASP without a simultaneous algo_tet error. You may wish to consider "
-                    "recompiling VASP with the -O1 optimization if you used -O2 and this error keeps cropping up."
+                    "recompiling VASP with the -O1 optimization if you used -O2 and this error keeps cropping up.",
+                    UserWarning,
                 )
 
         if "zheev" in self.errors:
