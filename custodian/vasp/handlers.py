@@ -313,12 +313,6 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
                 actions.append({"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}})
 
-            # This can also happen if NCORE or NPAR is set to a large value for a small structure.
-            if len(vi["POSCAR"].structure) < 10(vi["INCAR"].get("NCORE", 1) > 1 or vi["INCAR"].get("NPAR", 1) > 1):
-                actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": 1}}})
-                if vi["INCAR"].get("NPAR", 1) > 1:
-                    actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
-
         if self.errors.intersection(["subspacematrix"]):
             if self.error_count["subspacematrix"] == 0:
                 actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
