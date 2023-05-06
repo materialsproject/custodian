@@ -605,6 +605,7 @@ class VaspErrorHandler(ErrorHandler):
             # MAGMOM = 2*nan or something similar.
 
             # Unfixable error. Just return None for actions.
+            warnings.warn("Double-check your INCAR. Something is potentially wrong.", UserWarning)
             return {"errors": ["nbands_not_sufficient"], "actions": None}
 
         if "set_core_wf" in self.errors:
