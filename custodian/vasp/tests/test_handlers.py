@@ -322,12 +322,6 @@ class VaspErrorHandlerTest(unittest.TestCase):
         c = Structure.from_file("CONTCAR")
         self.assertEqual(p, c)
 
-    def test_zpotrf(self):
-        h = VaspErrorHandler("vasp.ztrtri")
-        self.assertEqual(h.check(), True)
-        self.assertEqual(h.correct()["errors"], ["zpotrf"])
-        self.assertFalse(os.path.exists("CHGCAR"))
-
     def test_algo_tet(self):
         h = VaspErrorHandler("vasp.algo_tet")
         self.assertEqual(h.check(), True)
@@ -974,8 +968,6 @@ class ZpotrfErrorHandlerSmallTest(unittest.TestCase):
             [
                 {"dict": "INCAR", "action": {"_set": {"NCORE": 1}}},
                 {"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}},
-                {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}},
-                {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}},
             ],
         )
 

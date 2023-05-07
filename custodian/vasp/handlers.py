@@ -313,13 +313,6 @@ class VaspErrorHandler(ErrorHandler):
                     potim = round(vi["INCAR"].get("POTIM", 0.5) / 2.0, 2)
                     actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
 
-            # Based on VASP forum's recommendation, you should delete the
-            # CHGCAR and WAVECAR when dealing with this error.
-            # A.S.R: Source?
-            if vi["INCAR"].get("ICHARG", 0) < 10:
-                actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
-                actions.append({"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}})
-
         if self.errors.intersection(["subspacematrix"]):
             if self.error_count["subspacematrix"] == 0 and vi["INCAR"].get("LREAL", False) is not False:
                 actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
