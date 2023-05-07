@@ -462,7 +462,9 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": new_nbands}}})
 
         if "pssyevx" in self.errors:
-            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
+            if vi["INCAR"].get("ALGO", "Normal").lower() != "normal":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
+
         if "eddrmm" in self.errors:
             # RMM algorithm is not stable for this calculation
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
@@ -556,13 +558,16 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
             if vi["INCAR"].get("ALGO", "Normal").lower() != "exact":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Exact"}}})
+
         if "elf_kpar" in self.errors:
-            actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": 1}}})
+            if vi["INCAR"].get("KPAR", 1) != 1:
+                actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": 1}}})
 
         if "rhosyg" in self.errors:
-            if vi["INCAR"].get("SYMPREC", 1e-4) == 1e-4:
+            if vi["INCAR"].get("SYMPREC", 1e-4) < 1e-4:
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-4}}})
+            else:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
-            actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-4}}})
 
         if "posmap" in self.errors:
             # VASP advises to decrease or increase SYMPREC by an order of magnitude
@@ -578,13 +583,15 @@ class VaspErrorHandler(ErrorHandler):
             self.error_count["posmap"] += 1
 
         if "point_group" in self.errors:
-            actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+            if vi["INCAR"].get("ISYM", 2) > 0:
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
         if "symprec_noise" in self.errors:
-            if (vi["INCAR"].get("ISYM", 2) > 0) and (vi["INCAR"].get("SYMPREC", 1e-5) > 1e-6):
-                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-6}}})
-            else:
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+            if vi["INCAR"].get("ISYM", 2) > 0:
+                if vi["INCAR"].get("SYMPREC", 1e-5) > 1e-6:
+                    actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-6}}})
+                else:
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
         if "dfpt_ncore" in self.errors:
             # note that when using "_unset" action, the value is ignored
