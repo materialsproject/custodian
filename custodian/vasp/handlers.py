@@ -304,7 +304,9 @@ class VaspErrorHandler(ErrorHandler):
             elif nsteps >= 1:
                 potim = round(vi["INCAR"].get("POTIM", 0.5) / 2.0, 2)
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0, "POTIM": potim}}})
-            elif (vi["INCAR"].get("NSW", 0) == 0 or vi["INCAR"].get("ISIF", 0) in range(3)) and vi["INCAR"].get("ISYM", 2) > 0:
+            elif (vi["INCAR"].get("NSW", 0) == 0 or vi["INCAR"].get("ISIF", 0) in range(3)) and vi["INCAR"].get(
+                "ISYM", 2
+            ) > 0:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
             if vi["INCAR"].get("NSW", 0) > 0:
