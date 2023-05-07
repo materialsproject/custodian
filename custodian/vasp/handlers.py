@@ -564,7 +564,7 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": 1}}})
 
         if "rhosyg" in self.errors:
-            if vi["INCAR"].get("SYMPREC", 1e-4) < 1e-4:
+            if vi["INCAR"].get("SYMPREC", 1e-5) < 1e-4:
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-4}}})
             else:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
