@@ -763,8 +763,8 @@ class UnconvergedErrorHandlerTestSmall(unittest.TestCase):
 
         shutil.copy("INCAR", "INCAR.orig")
         shutil.copy("KPOINTS", "KPOINTS.orig")
-        shutil.copy("POSCAR_large", "POSCAR.orig")
-        shutil.copy("CONTCAR", "CONTCAR.orig")
+        shutil.copy("POSCAR", "POSCAR.orig")
+        shutil.copy("CONTCAR_large", "CONTCAR.orig")
 
     def test_check_correct_electronic(self):
         h = VaspErrorHandler("vasprun.xml.electronic")
@@ -778,8 +778,8 @@ class UnconvergedErrorHandlerTestSmall(unittest.TestCase):
     def tearDown(cls):
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("KPOINTS.orig", "KPOINTS")
-        shutil.move("POSCAR.orig", "POSCAR_large")
-        shutil.move("CONTCAR.orig", "CONTCAR")
+        shutil.move("POSCAR.orig", "POSCAR")
+        shutil.move("CONTCAR.orig", "CONTCAR_large")
         clean_dir()
         os.chdir(cwd)
 

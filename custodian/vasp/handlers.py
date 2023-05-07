@@ -1484,7 +1484,7 @@ class NonConvergingErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
 
         # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
-        if np.max(vi["POSCAR"].structure.lattice.abc) > 50.0 and amin > 0.01:
+        if np.max(Structure.from_file("CONTCAR").structure.lattice.abc) > 50.0 and amin > 0.01:
             actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": "0.01"}}})
 
         # Ladder from VeryFast to Fast to Normal to All
