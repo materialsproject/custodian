@@ -625,7 +625,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         shutil.copy("POSCAR", "POSCAR.orig")
         shutil.copy("CONTCAR", "CONTCAR.orig")
 
-    def test_check_correct_electronic(self):
         shutil.copy("vasprun.xml.electronic", "vasprun.xml")
         h = UnconvergedErrorHandler()
         self.assertTrue(h.check())
@@ -748,6 +747,49 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("KPOINTS.orig", "KPOINTS")
         shutil.move("POSCAR.orig", "POSCAR")
+        shutil.move("CONTCAR.orig", "CONTCAR")
+        clean_dir()
+        os.chdir(cwd)
+
+
+class UnconvergedErrorHandlerTestSmall(unittest.TestCase):
+    def setUp(self):
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.chdir(test_dir)
+        subdir = os.path.join(test_dir, "unconverged")
+        os.chdir(subdir)
+
+        shutil.copy("INCAR", "INCAR.orig")
+        shutil.copy("KPOINTS", "KPOINTS.orig")
+        shutil.copy("POSCAR_large", "POSCAR.orig")
+        shutil.copy("CONTCAR", "CONTCAR.orig")
+
+    def test_check_correct_electronic(self):
+        shutil.copy("vasprun.xml.electronic", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["Unconverged"])
+        self.assertEqual(
+            d,
+            {
+                "actions": [
+                    {
+                        "dict": "INCAR",
+                        "action": {"_set": {"ALGO": "Normal"}},
+                    },
+                    {"dict": "INCAR", "action": {"_set": {"AMIN": "0.01"}}},
+                ],
+                "errors": ["Unconverged"],
+            },
+        )
+
+    @classmethod
+    def tearDown(cls):
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("KPOINTS.orig", "KPOINTS")
+        shutil.move("POSCAR.orig", "POSCAR_large")
         shutil.move("CONTCAR.orig", "CONTCAR")
         clean_dir()
         os.chdir(cwd)
