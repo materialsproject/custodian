@@ -435,6 +435,7 @@ class VaspErrorHandler(ErrorHandler):
             self.error_count["zbrent"] += 1
 
         if "too_few_bands" in self.errors:
+            nbands = None
             with open("OUTCAR") as f:
                 for line in f:
                     # Have to take the last NBANDS line since sometimes VASP
@@ -446,8 +447,9 @@ class VaspErrorHandler(ErrorHandler):
                             break
                         except (IndexError, ValueError):
                             pass
-            new_nbands = max(int(1.1 * nbands), nbands + 1)  # This handles the case when nbands is too low (< 8).
-            actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": new_nbands}}})
+            if nbands:
+                new_nbands = max(int(1.1 * nbands), nbands + 1)  # This handles the case when nbands is too low (< 8).
+                actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": new_nbands}}})
 
         if "pssyevx" in self.errors:
             if vi["INCAR"].get("ALGO", "Normal").lower() != "normal":
