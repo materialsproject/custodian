@@ -688,7 +688,13 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         self.assertTrue(h.check())
         d = h.correct()
         self.assertEqual(d["errors"], ["Unconverged"])
-        self.assertIn({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}}, d["actions"])
+        self.assertEqual(
+            [
+                {"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}},
+                {"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}},
+            ],
+            d["actions"],
+        )
         os.remove("vasprun.xml")
 
     def test_check_correct_electronic_repeat(self):
@@ -727,7 +733,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         h = UnconvergedErrorHandler()
         self.assertTrue(h.check())
         d = h.correct()
-        self.assertIn({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}}, d["actions"])
+        self.assertEqual([{"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}}], d["actions"])
         os.remove("vasprun.xml")
 
     def test_to_from_dict(self):
