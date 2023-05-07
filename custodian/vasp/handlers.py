@@ -17,7 +17,6 @@ from collections import Counter
 from functools import reduce
 
 import numpy as np
-from monty.dev import deprecated
 from monty.os.path import zpath
 from monty.serialization import loadfn
 from pymatgen.core.structure import Structure
@@ -110,7 +109,6 @@ class VaspErrorHandler(ErrorHandler):
     def __init__(
         self,
         output_filename="vasp.out",
-        natoms_large_cell=None,
         errors_subset_to_catch=None,
         vtst_fixes=False,
     ):
@@ -122,9 +120,6 @@ class VaspErrorHandler(ErrorHandler):
                 is being redirected. The error messages that are checked are
                 present in the stdout. Defaults to "vasp.out", which is the
                 default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
-            natoms_large_cell (int): Number of atoms threshold to treat cell
-                as large. Affects the correction of certain errors. Defaults to
-                None (not used). Deprecated.
             errors_subset_to_detect (list): A subset of errors to catch. The
                 default is None, which means all supported errors are detected.
                 Use this to only catch only a subset of supported errors.
@@ -145,13 +140,6 @@ class VaspErrorHandler(ErrorHandler):
         self.output_filename = output_filename
         self.errors = set()
         self.error_count = Counter()
-        # threshold of number of atoms to treat the cell as large.
-        self.natoms_large_cell = natoms_large_cell  # (deprecated)
-        if self.natoms_large_cell:
-            warnings.warn(
-                "natoms_large_cell is deprecated and currently does nothing.",
-                DeprecationWarning,
-            )
         self.errors_subset_to_catch = errors_subset_to_catch or list(VaspErrorHandler.error_msgs.keys())
         self.vtst_fixes = vtst_fixes
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -1265,65 +1253,6 @@ class LargeSigmaHandler(ErrorHandler):
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": ["LargeSigma"], "actions": actions}
-
-
-@deprecated(
-    message="This handler is no longer supported and its use is no "
-    "longer recommended. It will be removed in v2020.x."
-)
-class MaxForceErrorHandler(ErrorHandler):
-    """
-    Checks that the desired force convergence has been achieved. Otherwise
-    restarts the run with smaller EDIFFG. (This is necessary since energy
-    and force convergence criteria cannot be set simultaneously)
-    """
-
-    is_monitor = False
-
-    def __init__(self, output_filename="vasprun.xml", max_force_threshold=0.25):
-        """
-        Args:
-            input_filename (str): name of the vasp INCAR file
-            output_filename (str): name to look for the vasprun
-            max_force_threshold (float): Threshold for max force for
-                restarting the run. (typically should be set to the value
-                that the creator looks for)
-        """
-        self.output_filename = output_filename
-        self.max_force_threshold = max_force_threshold
-
-    def check(self):
-        """
-        Check for error.
-        """
-        try:
-            v = Vasprun(self.output_filename)
-            forces = np.array(v.ionic_steps[-1]["forces"])
-            sdyn = v.final_structure.site_properties.get("selective_dynamics")
-            if sdyn:
-                forces[np.logical_not(sdyn)] = 0
-            max_force = max(np.linalg.norm(forces, axis=1))
-            if max_force > self.max_force_threshold and v.converged is True:
-                return True
-        except Exception:
-            pass
-        return False
-
-    def correct(self):
-        """
-        Perform corrections.
-        """
-        backup(VASP_BACKUP_FILES | {self.output_filename})
-        vi = VaspInput.from_directory(".")
-        ediff = vi["INCAR"].get("EDIFF", 1e-4)
-        ediffg = vi["INCAR"].get("EDIFFG", ediff * 10)
-        actions = [
-            {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}},
-            {"dict": "INCAR", "action": {"_set": {"EDIFFG": ediffg * 0.5}}},
-        ]
-        VaspModder(vi=vi).apply_actions(actions)
-
-        return {"errors": ["MaxForce"], "actions": actions}
 
 
 class PotimErrorHandler(ErrorHandler):
