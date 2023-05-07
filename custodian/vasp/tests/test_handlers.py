@@ -746,7 +746,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         h = UnconvergedErrorHandler()
         self.assertTrue(h.check())
         d = h.correct()
-        self.assertIn({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}}, d["actions"])
+        self.assertEqual([{"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}}], d["actions"])
         os.remove("vasprun.xml")
 
     def test_to_from_dict(self):
