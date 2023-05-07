@@ -741,14 +741,12 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         self.assertIn({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}}, d["actions"])
         os.remove("vasprun.xml")
 
-    def test_algotet(self):
-        shutil.copy("vasprun.xml.electronic", "vasprun.xml")
-        h = VaspErrorHandler(os.path.join(test_dir, "vasp.algo_tet"))
-        self.assertEqual(h.check(), True)
-        self.assertIn("algo_tet", h.correct()["errors"])
-        i = Incar.from_file("INCAR")
-        self.assertEqual(i["ISMEAR"], 0)
-        self.assertEqual(i["SIGMA"], 0.05)
+    def test_amin(self):
+        shutil.copy("vasprun.xml.electronic_amin", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertIn({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}}, d["actions"])
         os.remove("vasprun.xml")
 
     def test_to_from_dict(self):
