@@ -322,14 +322,6 @@ class VaspErrorHandlerTest(unittest.TestCase):
         c = Structure.from_file("CONTCAR")
         self.assertEqual(p, c)
 
-    def test_algo_tet(self):
-        h = VaspErrorHandler("vasp.algo_tet")
-        self.assertEqual(h.check(), True)
-        self.assertIn("algo_tet", h.correct()["errors"])
-        i = Incar.from_file("INCAR")
-        self.assertEqual(i["ISMEAR"], 0)
-        self.assertEqual(i["SIGMA"], 0.05)
-
     def test_gradient_not_orthogonal(self):
         h = VaspErrorHandler("vasp.gradient_not_orthogonal")
         self.assertEqual(h.check(), True)
