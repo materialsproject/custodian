@@ -189,7 +189,8 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
 
         if "inv_rot_mat" in self.errors:
-            actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8}}})
+            if vi["INCAR"].get("SYMPREC", 1e-5) > 1e-8:
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8}}})
 
         if "brmix" in self.errors:
             # If there is not a valid OUTCAR already, increment
@@ -206,19 +207,24 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISTART": 1}}})
                 self.error_count["brmix"] += 1
 
-            elif self.error_count["brmix"] == 1:
+            elif self.error_count["brmix"] == 1 and vi["INCAR"].get("IMIX", 4) != 1:
                 # Use Kerker mixing w/default values for other parameters
                 actions.append({"dict": "INCAR", "action": {"_set": {"IMIX": 1}}})
                 self.error_count["brmix"] += 1
 
-            elif self.error_count["brmix"] == 2 and vi["KPOINTS"].style == Kpoints.supported_modes.Gamma:
+            elif (
+                self.error_count["brmix"] == 2
+                and vi["KPOINTS"] is not None
+                and vi["KPOINTS"].style == Kpoints.supported_modes.Gamma
+            ):
                 actions.append(
                     {
                         "dict": "KPOINTS",
                         "action": {"_set": {"generation_style": "Monkhorst"}},
                     }
                 )
-                actions.append({"dict": "INCAR", "action": {"_unset": {"IMIX": 1}}})
+                if "IMIX" in vi["INCAR"]:
+                    actions.append({"dict": "INCAR", "action": {"_unset": {"IMIX": 1}}})
                 self.error_count["brmix"] += 1
 
             elif self.error_count["brmix"] in [2, 3] and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
@@ -228,33 +234,40 @@ class VaspErrorHandler(ErrorHandler):
                         "action": {"_set": {"generation_style": "Gamma"}},
                     }
                 )
-                actions.append({"dict": "INCAR", "action": {"_unset": {"IMIX": 1}}})
+                if "IMIX" in vi["INCAR"]:
+                    actions.append({"dict": "INCAR", "action": {"_unset": {"IMIX": 1}}})
                 self.error_count["brmix"] += 1
 
-                if vi["KPOINTS"].num_kpts < 1:
-                    all_kpts_even = all(n % 2 == 0 for n in vi["KPOINTS"].kpts[0])
-                    if all_kpts_even:
-                        new_kpts = (tuple(n + 1 for n in vi["KPOINTS"].kpts[0]),)
-                        actions.append(
-                            {
-                                "dict": "KPOINTS",
-                                "action": {"_set": {"kpoints": new_kpts}},
-                            }
-                        )
+                if vi["KPOINTS"].num_kpts < 1 and all(n % 2 == 0 for n in vi["KPOINTS"].kpts[0]):
+                    new_kpts = (tuple(n + 1 for n in vi["KPOINTS"].kpts[0]),)
+                    actions.append(
+                        {
+                            "dict": "KPOINTS",
+                            "action": {"_set": {"kpoints": new_kpts}},
+                        }
+                    )
 
             else:
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
-                if vi["KPOINTS"] is not None:
-                    if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
-                        actions.append(
-                            {
-                                "dict": "KPOINTS",
-                                "action": {"_set": {"generation_style": "Gamma"}},
-                            }
-                        )
+                if vi["INCAR"].get("ISYM", 2) > 0:
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+                if vi["KPOINTS"] is not None and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                    actions.append(
+                        {
+                            "dict": "KPOINTS",
+                            "action": {"_set": {"generation_style": "Gamma"}},
+                        }
+                    )
+                if vi["KPOINTS"] is not None and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                    actions.append(
+                        {
+                            "dict": "KPOINTS",
+                            "action": {"_set": {"generation_style": "Gamma"}},
+                        }
+                    )
 
                 # Based on VASP forum's recommendation, you should delete the
                 # CHGCAR and WAVECAR when dealing with this error.
+                # A.S.R.: Source??? And why only delete them now?
                 if vi["INCAR"].get("ICHARG", 0) < 10:
                     actions.append(
                         {
@@ -268,6 +281,7 @@ class VaspErrorHandler(ErrorHandler):
                             "action": {"_file_delete": {"mode": "actual"}},
                         }
                     )
+                self.error_count["brmix"] += 1
 
         if "zpotrf" in self.errors:
             # Usually caused by short bond distances. If on the first step,
@@ -280,18 +294,21 @@ class VaspErrorHandler(ErrorHandler):
             except Exception:
                 nsteps = 0
 
-            if nsteps >= 1:
-                potim = round(vi["INCAR"].get("POTIM", 0.5) / 2.0, 2)
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0, "POTIM": potim}}})
-            elif vi["INCAR"].get("NSW", 0) == 0 or vi["INCAR"].get("ISIF", 0) in range(3):
+            if vi["INCAR"].get("ISYM", 2) > 0:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
-            else:
-                s = vi["POSCAR"].structure
-                s.apply_strain(0.2)
-                actions.append({"dict": "POSCAR", "action": {"_set": {"structure": s.as_dict()}}})
+
+            if vi["INCAR"].get("NSW", 0) > 0:
+                if nsteps == 0:
+                    s = vi["POSCAR"].structure
+                    s.apply_strain(0.2)
+                    actions.append({"dict": "POSCAR", "action": {"_set": {"structure": s.as_dict()}}})
+                else:
+                    potim = round(vi["INCAR"].get("POTIM", 0.5) / 2.0, 2)
+                    actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
 
             # Based on VASP forum's recommendation, you should delete the
             # CHGCAR and WAVECAR when dealing with this error.
+            # A.S.R: Source?
             if vi["INCAR"].get("ICHARG", 0) < 10:
                 actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
                 actions.append({"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}})
@@ -300,9 +317,9 @@ class VaspErrorHandler(ErrorHandler):
             # We should add logic for this at some point.
 
         if self.errors.intersection(["subspacematrix"]):
-            if self.error_count["subspacematrix"] == 0:
+            if self.error_count["subspacematrix"] == 0 and vi["INCAR"].get("LREAL", False) is not False:
                 actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
-            elif self.error_count["subspacematrix"] == 1:
+            elif self.error_count["subspacematrix"] == 1 and vi["INCAR"].get("PREC", "Normal") != "Accurate":
                 actions.append({"dict": "INCAR", "action": {"_set": {"PREC": "Accurate"}}})
             self.error_count["subspacematrix"] += 1
 
@@ -311,25 +328,23 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
 
         if self.errors.intersection(["tetirr", "incorrect_shift"]):
-            if vi["KPOINTS"] is not None:
-                if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
-                    actions.append(
-                        {
-                            "dict": "KPOINTS",
-                            "action": {"_set": {"generation_style": "Gamma"}},
-                        }
-                    )
+            if vi["KPOINTS"] is not None and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                actions.append(
+                    {
+                        "dict": "KPOINTS",
+                        "action": {"_set": {"generation_style": "Gamma"}},
+                    }
+                )
 
         if "rot_matrix" in self.errors:
-            if vi["KPOINTS"] is not None:
-                if vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
-                    actions.append(
-                        {
-                            "dict": "KPOINTS",
-                            "action": {"_set": {"generation_style": "Gamma"}},
-                        }
-                    )
-            else:
+            if vi["KPOINTS"] is not None and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                actions.append(
+                    {
+                        "dict": "KPOINTS",
+                        "action": {"_set": {"generation_style": "Gamma"}},
+                    }
+                )
+            elif vi["INCAR"].get("ISYM", 2) > 0:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
         if "triple_product" in self.errors:
@@ -345,7 +360,8 @@ class VaspErrorHandler(ErrorHandler):
             )
 
         if "pricel" in self.errors:
-            actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}})
+            if vi["INCAR"].get("SYMPREC", 1e-5) > 1e-8:
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}})
 
         if "coef" in self.errors:
             actions.append({"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}})
@@ -435,7 +451,9 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": new_nbands}}})
 
         if "pssyevx" in self.errors:
-            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
+            if vi["INCAR"].get("ALGO", "Normal").lower() != "normal":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
+
         if "eddrmm" in self.errors:
             # RMM algorithm is not stable for this calculation
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
@@ -530,13 +548,16 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
             if vi["INCAR"].get("ALGO", "Normal").lower() != "exact":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Exact"}}})
+
         if "elf_kpar" in self.errors:
-            actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": 1}}})
+            if vi["INCAR"].get("KPAR", 1) != 1:
+                actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": 1}}})
 
         if "rhosyg" in self.errors:
-            if vi["INCAR"].get("SYMPREC", 1e-4) == 1e-4:
+            if vi["INCAR"].get("SYMPREC", 1e-5) < 1e-4:
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-4}}})
+            else:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
-            actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-4}}})
 
         if "posmap" in self.errors:
             # VASP advises to decrease or increase SYMPREC by an order of magnitude
@@ -552,13 +573,15 @@ class VaspErrorHandler(ErrorHandler):
             self.error_count["posmap"] += 1
 
         if "point_group" in self.errors:
-            actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+            if vi["INCAR"].get("ISYM", 2) > 0:
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
         if "symprec_noise" in self.errors:
-            if (vi["INCAR"].get("ISYM", 2) > 0) and (vi["INCAR"].get("SYMPREC", 1e-5) > 1e-6):
-                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-6}}})
-            else:
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+            if vi["INCAR"].get("ISYM", 2) > 0:
+                if vi["INCAR"].get("SYMPREC", 1e-5) > 1e-6:
+                    actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-6}}})
+                else:
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
         if "dfpt_ncore" in self.errors:
             # note that when using "_unset" action, the value is ignored
@@ -652,9 +675,8 @@ class LrfCommutatorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
 
         if "lrf_comm" in self.errors:
-            if Outcar(zpath(os.path.join(os.getcwd(), "OUTCAR"))).is_stopped is False:
-                if not vi["INCAR"].get("LPEAD"):
-                    actions.append({"dict": "INCAR", "action": {"_set": {"LPEAD": True}}})
+            if Outcar(zpath(os.path.join(os.getcwd(), "OUTCAR"))).is_stopped is False and not vi["INCAR"].get("LPEAD"):
+                actions.append({"dict": "INCAR", "action": {"_set": {"LPEAD": True}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
