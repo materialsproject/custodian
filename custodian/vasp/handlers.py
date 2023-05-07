@@ -1471,35 +1471,34 @@ class NonConvergingErrorHandler(ErrorHandler):
         bmix = vi["INCAR"].get("BMIX", 1.0)
         amin = vi["INCAR"].get("AMIN", 0.1)
         actions = []
+
+        if (
+            vi["INCAR"].get("LHFCALC", False) or vi["INCAR"].get("METAGGA", "none").lower() != "none"
+        ) and algo != "all":
+            # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
+            # support these algorithms, but no warning is printed.
+
+            # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
+            # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
+            # I am using "none" here because METAGGA is a string variable and this is the default
+            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+
+        if np.max(vi["POSCAR"].structure.lattice.abc) > 50.0 and amin > 0.01:
+            # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
+            actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": "0.01"}}})
+
         # Ladder from VeryFast to Fast to Normal to All
         # (except for meta-GGAs and hybrids).
         # These progressively switch to more stable but more
         # expensive algorithms.
-        if vi["INCAR"].get("METAGGA", "none").lower() != "none":
-            # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
-            # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
-            # I am using "none" here because METAGGA is a string variable and this is the default
-            if algo != "all":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
-        elif vi["INCAR"].get("LHFCALC", False):
-            # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
-            # support these algorithms, but no warning is printed.
-            if algo != "all":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
-            # uncomment the line below for a backup option
-            # elif algo != "damped":
-            #     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "Time": 0.5}}})
-        elif np.max(vi["POSCAR"].structure.lattice.abc) > 50.0 and amin > 0.01:
-            # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
-            actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": "0.01"}}})
-        else:
-            if algo == "veryfast":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
-            elif algo == "fast":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
-            elif algo == "normal":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
-            elif amix > 0.1 and bmix > 0.01:
+        if algo == "veryfast":
+            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
+        elif algo == "fast":
+            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
+        elif algo == "normal":
+            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+        elif algo == "all":
+            if amix > 0.1 and bmix > 0.01:
                 # Try linear mixing
                 actions.append(
                     {
