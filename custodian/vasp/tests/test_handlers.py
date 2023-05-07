@@ -767,15 +767,12 @@ class UnconvergedErrorHandlerTestSmall(unittest.TestCase):
         shutil.copy("CONTCAR", "CONTCAR.orig")
 
     def test_check_correct_electronic(self):
-        shutil.copy("vasprun.xml.electronic", "vasprun.xml")
-        h = UnconvergedErrorHandler()
-        self.assertTrue(h.check())
-        d = h.correct()
-        self.assertEqual(["Unconverged"], d["errors"])
+        h = VaspErrorHandler("vasprun.xml.electronic")
+        self.assertEqual(h.check(), True)
+        self.assertEqual(h.correct()["errors"], ["Unconverged"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["AMIN"], 0.01)
         self.assertEqual(i["ALGO"], "Normal")
-        shutil.copy("POSCAR_large", "POSCAR.orig")
 
     @classmethod
     def tearDown(cls):
