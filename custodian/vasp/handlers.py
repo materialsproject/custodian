@@ -435,7 +435,7 @@ class VaspErrorHandler(ErrorHandler):
             self.error_count["zbrent"] += 1
 
         if "too_few_bands" in self.errors:
-            with open("OUTCAR", "r") as f:
+            with open("OUTCAR") as f:
                 for line in f:
                     # Have to take the last NBANDS line since sometimes VASP
                     # updates it automatically even if the user specifies it
