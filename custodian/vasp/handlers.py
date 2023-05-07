@@ -441,6 +441,9 @@ class VaspErrorHandler(ErrorHandler):
             else:
                 with open("OUTCAR") as f:
                     for line in f:
+                        # Have to take the last NBANDS line since sometimes VASP
+                        # updates it automatically even if the user specifies it.
+                        # The last one is marked by NBANDS= (no space).
                         if "NBANDS=" in line:
                             try:
                                 d = line.split("=")
