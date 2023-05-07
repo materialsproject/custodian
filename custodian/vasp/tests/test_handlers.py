@@ -328,14 +328,6 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.correct()["errors"], ["zpotrf"])
         self.assertFalse(os.path.exists("CHGCAR"))
 
-    def test_algo_tet(self):
-        h = VaspErrorHandler("vasp.algo_tet")
-        self.assertEqual(h.check(), True)
-        self.assertIn("algo_tet", h.correct()["errors"])
-        i = Incar.from_file("INCAR")
-        self.assertEqual(i["ISMEAR"], 0)
-        self.assertEqual(i["SIGMA"], 0.05)
-
     def test_gradient_not_orthogonal(self):
         h = VaspErrorHandler("vasp.gradient_not_orthogonal")
         self.assertEqual(h.check(), True)
@@ -711,11 +703,11 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ["Unconverged"])
         self.assertEqual(
-            d,
-            {
-                "actions": [{"action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}, "dict": "INCAR"}],
-                "errors": ["Unconverged"],
-            },
+            [
+                {"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}},
+                {"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}},
+            ],
+            d["actions"],
         )
         os.remove("vasprun.xml")
 
@@ -748,6 +740,14 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ["Unconverged"])
         self.assertIn({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}}, d["actions"])
+        os.remove("vasprun.xml")
+
+    def test_algotet(self):
+        shutil.copy("vasprun.xml.electronic_algotet", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual([{"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}}], d["actions"])
         os.remove("vasprun.xml")
 
     def test_amin(self):

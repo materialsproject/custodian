@@ -501,24 +501,6 @@ class VaspErrorHandler(ErrorHandler):
             if nelect < nprocs:
                 actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": vi["INCAR"].get("NCORE", 1) * 2}}})
 
-        if "algo_tet" in self.errors:
-            # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP
-            # suggests: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
-            # 2) Use ALGO = Damped but only *after* an ISMEAR = 0 run where the wavefunction
-            # has been stored and read in for the subsequent run.
-            #
-            # For simplicity, we go with Option 1 here, but if the user wants high-quality
-            # DOS then they should consider running a subsequent job with ISMEAR = -5 and
-            # ALGO = Damped, provided the wavefunction has been stored.
-            if vi["INCAR"].get("ISMEAR", 1) < 0:
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
-                if vi["INCAR"].get("NEDOS") or vi["INCAR"].get("EMIN") or vi["INCAR"].get("EMAX"):
-                    warnings.warn(
-                        "This looks like a DOS run. You may want to follow-up this job with ALGO = Damped"
-                        " and ISMEAR = -5, using the wavefunction from the current job.",
-                        UserWarning,
-                    )
-
         if "grad_not_orth" in self.errors:
             # Often coincides with algo_tet, in which the algo_tet error handler will also resolve grad_not_orth.
             # When not present alongside algo_tet, the grad_not_orth error is due to how VASP is compiled.
@@ -1048,6 +1030,25 @@ class UnconvergedErrorHandler(ErrorHandler):
         algo = v.incar.get("ALGO", "Normal").lower()
         actions = []
         if not v.converged_electronic:
+            # NOTE: This is the algo_tet handler response.
+            if (
+                v.incar.get("ALGO", "Normal").lower() in ["all", "damped"] or (50 <= v.incar.get("IALGO", 38) <= 59)
+            ) and v.incar.get("ISMEAR", 1) < 0:
+                # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP
+                # suggests: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
+                # 2) Use ALGO = Damped but only *after* an ISMEAR = 0 run where the wavefunction
+                # has been stored and read in for the subsequent run.
+                #
+                # For simplicity, we go with Option 1 here, but if the user wants high-quality
+                # DOS then they should consider running a subsequent job with ISMEAR = -5 and
+                # ALGO = Damped, provided the wavefunction has been stored.
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+                if v.incar.get("NEDOS") or v.incar.get("EMIN") or v.incar.get("EMAX"):
+                    warnings.warn(
+                        "This looks like a DOS run. You may want to follow-up this job with ALGO = Damped"
+                        " and ISMEAR = -5, using the wavefunction from the current job.",
+                        UserWarning,
+                    )
             # NOTE: This is the amin error handler
             # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
             if np.max(v.final_structure.lattice.abc) > 50.0 and v.incar.get("AMIN", 0.1) > 0.01:
@@ -1436,6 +1437,31 @@ class NonConvergingErrorHandler(ErrorHandler):
         amin = vi["INCAR"].get("AMIN", 0.1)
         actions = []
 
+        # NOTE: This is the algo_tet handler response.
+        if (
+            vi["INCAR"].get("ALGO", "Normal").lower() in ["all", "damped"] or (50 <= vi["INCAR"].get("IALGO", 38) <= 59)
+        ) and vi["INCAR"].get("ISMEAR", 1) < 0:
+            # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP
+            # suggests: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
+            # 2) Use ALGO = Damped but only *after* an ISMEAR = 0 run where the wavefunction
+            # has been stored and read in for the subsequent run.
+            #
+            # For simplicity, we go with Option 1 here, but if the user wants high-quality
+            # DOS then they should consider running a subsequent job with ISMEAR = -5 and
+            # ALGO = Damped, provided the wavefunction has been stored.
+            actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+            if vi["INCAR"].get("NEDOS") or vi["INCAR"].get("EMIN") or vi["INCAR"].get("EMAX"):
+                warnings.warn(
+                    "This looks like a DOS run. You may want to follow-up this job with ALGO = Damped"
+                    " and ISMEAR = -5, using the wavefunction from the current job.",
+                    UserWarning,
+                )
+
+        # NOTE: This is the amin error handler
+        # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
+        if np.max(Structure.from_file("CONTCAR").structure.lattice.abc) > 50.0 and amin > 0.01:
+            actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}})
+
         # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
         # support these algorithms, but no warning is printed.
         # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
@@ -1445,11 +1471,6 @@ class NonConvergingErrorHandler(ErrorHandler):
             vi["INCAR"].get("LHFCALC", False) or vi["INCAR"].get("METAGGA", "none").lower() != "none"
         ) and algo != "all":
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
-
-        # NOTE: This is the amin error handler
-        # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
-        if np.max(Structure.from_file("CONTCAR").structure.lattice.abc) > 50.0 and amin > 0.01:
-            actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}})
 
         # Ladder from VeryFast to Fast to Normal to All
         # (except for meta-GGAs and hybrids).
