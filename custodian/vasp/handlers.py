@@ -592,12 +592,6 @@ class VaspErrorHandler(ErrorHandler):
             else:
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": symprec * 10}}})
 
-        if "hnform" in self.errors:
-            # The only solution is to change your k-point grid or disable symmetry
-            # For internal calculation compatibility's sake, we do the latter
-            if vi["INCAR"].get("ISYM", 2) > 0:
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
-
         if "nbands_not_sufficient" in self.errors:
             # There is something very wrong about the value of NBANDS. We don't make
             # any updates to NBANDS though because it's likely the user screwed something
@@ -614,6 +608,12 @@ class VaspErrorHandler(ErrorHandler):
                 "We suggest using a new version of the POTCAR files to resolve the SET_CORE_WF error.", UserWarning
             )
             return {"errors": ["set_core_wf"], "actions": None}
+
+        if "hnform" in self.errors:
+            # The only solution is to change your k-point grid or disable symmetry
+            # For internal calculation compatibility's sake, we do the latter
+            if vi["INCAR"].get("ISYM", 2) > 0:
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
