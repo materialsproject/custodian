@@ -959,7 +959,10 @@ class ZpotrfErrorHandlerSmallTest(unittest.TestCase):
         self.assertTrue(h.check())
         d = h.correct()
         self.assertEqual(d["errors"], ["zpotrf"])
-        self.assertEqual(d["actions"], [{"dict": "INCAR", "action": {"_set": {"NCORE": 1}, "_unset": {"NPAR": 1}}}])
+        self.assertEqual(
+            d["actions"],
+            [{"dict": "INCAR", "action": {"_set": {"NCORE": 1}}}, {"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}}],
+        )
 
     def tearDown(self):
         os.chdir(test_dir)
