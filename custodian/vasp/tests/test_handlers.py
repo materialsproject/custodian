@@ -688,14 +688,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         self.assertTrue(h.check())
         d = h.correct()
         self.assertEqual(d["errors"], ["Unconverged"])
-        self.assertIn(
-            d,
-            {
-                "actions": [{"action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}, "dict": "INCAR"}],
-                "errors": ["Unconverged"],
-            },
-        )
-
+        self.assertIn({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}}, d["actions"])
         os.remove("vasprun.xml")
 
     def test_check_correct_electronic_repeat(self):
