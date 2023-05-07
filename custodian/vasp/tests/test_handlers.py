@@ -961,7 +961,12 @@ class ZpotrfErrorHandlerSmallTest(unittest.TestCase):
         self.assertEqual(d["errors"], ["zpotrf"])
         self.assertEqual(
             d["actions"],
-            [{"dict": "INCAR", "action": {"_set": {"NCORE": 1}}}, {"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}}],
+            [
+                {"dict": "INCAR", "action": {"_set": {"NCORE": 1}}},
+                {"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}},
+                {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}},
+                {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}},
+            ],
         )
 
     def tearDown(self):
