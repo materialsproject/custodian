@@ -1472,19 +1472,19 @@ class NonConvergingErrorHandler(ErrorHandler):
         amin = vi["INCAR"].get("AMIN", 0.1)
         actions = []
 
+        # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
+        # support these algorithms, but no warning is printed.
+
+        # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
+        # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
+        # I am using "none" here because METAGGA is a string variable and this is the default
         if (
             vi["INCAR"].get("LHFCALC", False) or vi["INCAR"].get("METAGGA", "none").lower() != "none"
         ) and algo != "all":
-            # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
-            # support these algorithms, but no warning is printed.
-
-            # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
-            # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
-            # I am using "none" here because METAGGA is a string variable and this is the default
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
 
+        # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
         if np.max(vi["POSCAR"].structure.lattice.abc) > 50.0 and amin > 0.01:
-            # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
             actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": "0.01"}}})
 
         # Ladder from VeryFast to Fast to Normal to All
