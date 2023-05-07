@@ -775,11 +775,11 @@ class UnconvergedErrorHandlerTestSmall(unittest.TestCase):
             d,
             {
                 "actions": [
+                    {"dict": "INCAR", "action": {"_set": {"AMIN": "0.01"}}},
                     {
                         "dict": "INCAR",
                         "action": {"_set": {"ALGO": "Normal"}},
                     },
-                    {"dict": "INCAR", "action": {"_set": {"AMIN": "0.01"}}},
                 ],
                 "errors": ["Unconverged"],
             },
