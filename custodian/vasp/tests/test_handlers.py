@@ -638,6 +638,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                 "errors": ["Unconverged"],
             },
         )
+        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_veryfast", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -651,6 +652,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                 "errors": ["Unconverged"],
             },
         )
+        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_normal", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -664,6 +666,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                 "errors": ["Unconverged"],
             },
         )
+        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_metagga_fast", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -677,6 +680,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                 "errors": ["Unconverged"],
             },
         )
+        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_hybrid_fast", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -690,6 +694,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                 "errors": ["Unconverged"],
             },
         )
+        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_hybrid_all", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -767,12 +772,14 @@ class UnconvergedErrorHandlerTestSmall(unittest.TestCase):
         shutil.copy("CONTCAR_large", "CONTCAR.orig")
 
     def test_check_correct_electronic(self):
-        h = VaspErrorHandler("vasprun.xml.electronic")
+        shutil.copy("vasprun.xml.electronic", "vasprun.xml")
+        h = UnconvergedErrorHandler()
         self.assertEqual(h.check(), True)
         self.assertEqual(h.correct()["errors"], ["Unconverged"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["AMIN"], 0.01)
         self.assertEqual(i["ALGO"], "Normal")
+        os.remove("vasprun.xml")
 
     @classmethod
     def tearDown(cls):
