@@ -625,6 +625,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         shutil.copy("POSCAR", "POSCAR.orig")
         shutil.copy("CONTCAR", "CONTCAR.orig")
 
+    def test_check_correct_electronic(self):
         shutil.copy("vasprun.xml.electronic", "vasprun.xml")
         h = UnconvergedErrorHandler()
         self.assertTrue(h.check())
