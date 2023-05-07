@@ -128,7 +128,8 @@ class VaspErrorHandler(ErrorHandler):
                 two of the errors, you can create this list by the following
                 lines:
             vtst_fixes (bool): Whether to consider VTST optimizers. Defaults to
-                False for compatibility purposes.
+                False for compatibility purposes, but if you have VTST, you
+                would likely benefit from setting this to True.
 
                 ```
                 subset = list(VaspErrorHandler.error_msgs.keys())
@@ -153,6 +154,8 @@ class VaspErrorHandler(ErrorHandler):
         error_msgs = set()
         with open(self.output_filename) as file:
             text = file.read()
+
+            # Check for errors
             for err in self.errors_subset_to_catch:
                 for msg in self.error_msgs[err]:
                     if text.find(msg) != -1:
@@ -267,7 +270,7 @@ class VaspErrorHandler(ErrorHandler):
 
                 # Based on VASP forum's recommendation, you should delete the
                 # CHGCAR and WAVECAR when dealing with this error.
-                # A.S.R.: Source??? And why only delete them now?
+                # A.S.R.: Then why only delete them now?
                 if vi["INCAR"].get("ICHARG", 0) < 10:
                     actions.append(
                         {
@@ -434,10 +437,12 @@ class VaspErrorHandler(ErrorHandler):
         if "too_few_bands" in self.errors:
             if "NBANDS" in vi["INCAR"]:
                 nbands = vi["INCAR"]["NBANDS"]
-            else:
-                with open("OUTCAR") as f:
+            elif os.path.exists("OUTCAR"):
+                with open("OUTCAR", "r") as f:
                     for line in f:
-                        if "NBANDS" in line:
+                        # Have to take the last NBANDS line since sometimes VASP
+                        # updates it automatically even if the user specifies it
+                        if "NBANDS=" in line:
                             try:
                                 d = line.split("=")
                                 nbands = int(d[-1].strip())
