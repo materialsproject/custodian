@@ -1474,7 +1474,6 @@ class NonConvergingErrorHandler(ErrorHandler):
 
         # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
         # support these algorithms, but no warning is printed.
-
         # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
         # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
         # I am using "none" here because METAGGA is a string variable and this is the default
