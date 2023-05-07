@@ -322,11 +322,13 @@ class VaspErrorHandlerTest(unittest.TestCase):
         c = Structure.from_file("CONTCAR")
         self.assertEqual(p, c)
 
-    def test_zpotrf(self):
-        h = VaspErrorHandler("vasp.ztrtri")
+    def test_algo_tet(self):
+        h = VaspErrorHandler("vasp.algo_tet")
         self.assertEqual(h.check(), True)
-        self.assertEqual(h.correct()["errors"], ["zpotrf"])
-        self.assertFalse(os.path.exists("CHGCAR"))
+        self.assertIn("algo_tet", h.correct()["errors"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ISMEAR"], 0)
+        self.assertEqual(i["SIGMA"], 0.05)
 
     def test_gradient_not_orthogonal(self):
         h = VaspErrorHandler("vasp.gradient_not_orthogonal")
@@ -947,6 +949,39 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
     def tearDown(self):
         os.chdir(test_dir)
         os.chdir("zpotrf")
+        shutil.move("POSCAR.orig", "POSCAR")
+        shutil.move("INCAR.orig", "INCAR")
+        os.remove("OSZICAR")
+        clean_dir()
+        os.chdir(cwd)
+
+
+class ZpotrfErrorHandlerSmallTest(unittest.TestCase):
+    def setUp(self):
+        if "PMG_VASP_PSP_DIR" not in os.environ:
+            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.chdir(test_dir)
+        os.chdir("zpotrf_small")
+        shutil.copy("POSCAR", "POSCAR.orig")
+        shutil.copy("INCAR", "INCAR.orig")
+
+    def test_small(self):
+        h = VaspErrorHandler("vasp.out")
+        shutil.copy("OSZICAR.empty", "OSZICAR")
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual(d["errors"], ["zpotrf"])
+        self.assertEqual(
+            d["actions"],
+            [
+                {"dict": "INCAR", "action": {"_set": {"NCORE": 1}}},
+                {"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}},
+            ],
+        )
+
+    def tearDown(self):
+        os.chdir(test_dir)
+        os.chdir("zpotrf_small")
         shutil.move("POSCAR.orig", "POSCAR")
         shutil.move("INCAR.orig", "INCAR")
         os.remove("OSZICAR")
