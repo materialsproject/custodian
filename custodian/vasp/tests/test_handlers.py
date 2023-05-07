@@ -638,6 +638,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                 "errors": ["Unconverged"],
             },
         )
+        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_veryfast", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -651,6 +652,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                 "errors": ["Unconverged"],
             },
         )
+        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_normal", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -664,6 +666,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                 "errors": ["Unconverged"],
             },
         )
+        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_metagga_fast", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -677,6 +680,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                 "errors": ["Unconverged"],
             },
         )
+        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_hybrid_fast", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -690,6 +694,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                 "errors": ["Unconverged"],
             },
         )
+        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_hybrid_all", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -703,7 +708,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                 "errors": ["Unconverged"],
             },
         )
-
         os.remove("vasprun.xml")
 
     def test_check_correct_electronic_repeat(self):
@@ -735,6 +739,14 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ["Unconverged"])
         self.assertIn({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}}, d["actions"])
+        os.remove("vasprun.xml")
+
+    def test_amin(self):
+        shutil.copy("vasprun.xml.electronic_amin", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual([{"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}}], d["actions"])
         os.remove("vasprun.xml")
 
     def test_to_from_dict(self):

@@ -343,9 +343,6 @@ class VaspErrorHandler(ErrorHandler):
             else:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
-        if "amin" in self.errors:
-            actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": "0.01"}}})
-
         if "triple_product" in self.errors:
             s = vi["POSCAR"].structure
             trans = SupercellTransformation(((1, 0, 0), (0, 0, 1), (0, 1, 0)))
@@ -1031,26 +1028,32 @@ class UnconvergedErrorHandler(ErrorHandler):
         algo = v.incar.get("ALGO", "Normal").lower()
         actions = []
         if not v.converged_electronic:
-            # Ladder from VeryFast to Fast to Normal to All
-            # (except for meta-GGAs and hybrids).
-            # These progressively switch to more stable but more
-            # expensive algorithms.
-            if v.incar.get("METAGGA", "--") != "--":
-                # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
-                # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
-                # I am using "--" as the check for METAGGA here because this is the default in the
-                # vasprun.xml file
-                if algo != "all":
-                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
-            elif v.incar.get("LHFCALC", False):
-                # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
-                # support these algorithms, but no warning is printed.
+            # NOTE: This is the amin error handler
+            # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
+            if np.max(v.final_structure.lattice.abc) > 50.0 and v.incar.get("AMIN", 0.1) > 0.01:
+                actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}})
+
+            # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
+            # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
+            # I am using "--" as the check for METAGGA here because this is the default in the
+            # vasprun.xml file
+            if v.incar.get("METAGGA", "--") != "--" and algo != "all":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+
+            # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
+            # support these algorithms, but no warning is printed.
+            if v.incar.get("LHFCALC", False):
                 if algo != "all":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
                 # See the VASP manual section on LHFCALC for more information.
                 elif algo != "damped":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}})
-            else:
+
+            # Ladder from VeryFast to Fast to Normal to All
+            # (except for meta-GGAs and hybrids).
+            # These progressively switch to more stable but more
+            # expensive algorithms.
+            if len(actions) == 0:
                 if algo == "veryfast":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
                 elif algo == "fast":
@@ -1471,47 +1474,50 @@ class NonConvergingErrorHandler(ErrorHandler):
         bmix = vi["INCAR"].get("BMIX", 1.0)
         amin = vi["INCAR"].get("AMIN", 0.1)
         actions = []
+
+        # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
+        # support these algorithms, but no warning is printed.
+        # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
+        # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
+        # I am using "none" here because METAGGA is a string variable and this is the default
+        if (
+            vi["INCAR"].get("LHFCALC", False) or vi["INCAR"].get("METAGGA", "none").lower() != "none"
+        ) and algo != "all":
+            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+
+        # NOTE: This is the amin error handler
+        # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
+        if np.max(Structure.from_file("CONTCAR").structure.lattice.abc) > 50.0 and amin > 0.01:
+            actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}})
+
         # Ladder from VeryFast to Fast to Normal to All
         # (except for meta-GGAs and hybrids).
         # These progressively switch to more stable but more
         # expensive algorithms.
-        if vi["INCAR"].get("METAGGA", "none").lower() != "none":
-            # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
-            # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
-            # I am using "none" here because METAGGA is a string variable and this is the default
-            if algo != "all":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
-        elif vi["INCAR"].get("LHFCALC", False):
-            # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
-            # support these algorithms, but no warning is printed.
-            if algo != "all":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
-            # uncomment the line below for a backup option
-            # elif algo != "damped":
-            #     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "Time": 0.5}}})
-        else:
+        if len(actions) == 0:
             if algo == "veryfast":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
             elif algo == "fast":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
             elif algo == "normal":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
-            elif amix > 0.1 and bmix > 0.01:
-                # Try linear mixing
-                actions.append(
-                    {
-                        "dict": "INCAR",
-                        "action": {"_set": {"ALGO": "Normal", "AMIX": 0.1, "BMIX": 0.01, "ICHARG": 2}},
-                    }
-                )
-            elif bmix < 3.0 and amin > 0.01:
-                # Try increasing bmix
-                actions.append(
-                    {
-                        "dict": "INCAR",
-                        "action": {"_set": {"Algo": "Normal", "AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},
-                    }
-                )
+            elif algo == "all":
+                if amix > 0.1 and bmix > 0.01:
+                    # Try linear mixing
+                    actions.append(
+                        {
+                            "dict": "INCAR",
+                            "action": {"_set": {"ALGO": "Normal", "AMIX": 0.1, "BMIX": 0.01, "ICHARG": 2}},
+                        }
+                    )
+                elif bmix < 3.0 and amin > 0.01:
+                    # Try increasing bmix
+                    actions.append(
+                        {
+                            "dict": "INCAR",
+                            "action": {"_set": {"Algo": "Normal", "AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},
+                        }
+                    )
 
         if actions:
             backup(VASP_BACKUP_FILES)
