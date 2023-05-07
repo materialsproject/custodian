@@ -771,20 +771,11 @@ class UnconvergedErrorHandlerTestSmall(unittest.TestCase):
         h = UnconvergedErrorHandler()
         self.assertTrue(h.check())
         d = h.correct()
-        self.assertEqual(d["errors"], ["Unconverged"])
-        self.assertEqual(
-            d,
-            {
-                "actions": [
-                    {"dict": "INCAR", "action": {"_set": {"AMIN": "0.01"}}},
-                    {
-                        "dict": "INCAR",
-                        "action": {"_set": {"ALGO": "Normal"}},
-                    },
-                ],
-                "errors": ["Unconverged"],
-            },
-        )
+        self.assertEqual("Unconverged", d["errors"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["AMIN"], 0.01)
+        self.assertEqual(i["ALGO"], "Normal")
+        shutil.copy("POSCAR_large", "POSCAR.orig")
 
     @classmethod
     def tearDown(cls):
