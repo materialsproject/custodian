@@ -708,7 +708,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                 "errors": ["Unconverged"],
             },
         )
-
         os.remove("vasprun.xml")
 
     def test_check_correct_electronic_repeat(self):
@@ -742,6 +741,16 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         self.assertIn({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}}, d["actions"])
         os.remove("vasprun.xml")
 
+    def test_algotet(self):
+        shutil.copy("vasprun.xml.electronic", "vasprun.xml")
+        h = VaspErrorHandler(os.path.join(test_dir, "vasp.algo_tet"))
+        self.assertEqual(h.check(), True)
+        self.assertIn("algo_tet", h.correct()["errors"])
+        i = Incar.from_file("INCAR")
+        self.assertEqual(i["ISMEAR"], 0)
+        self.assertEqual(i["SIGMA"], 0.05)
+        os.remove("vasprun.xml")
+
     def test_to_from_dict(self):
         h = UnconvergedErrorHandler("random_name.xml")
         h2 = UnconvergedErrorHandler.from_dict(h.as_dict())
@@ -754,39 +763,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         shutil.move("KPOINTS.orig", "KPOINTS")
         shutil.move("POSCAR.orig", "POSCAR")
         shutil.move("CONTCAR.orig", "CONTCAR")
-        clean_dir()
-        os.chdir(cwd)
-
-
-class UnconvergedErrorHandlerTestSmall(unittest.TestCase):
-    def setUp(self):
-        if "PMG_VASP_PSP_DIR" not in os.environ:
-            os.environ["PMG_VASP_PSP_DIR"] = test_dir
-        os.chdir(test_dir)
-        subdir = os.path.join(test_dir, "unconverged")
-        os.chdir(subdir)
-
-        shutil.copy("INCAR", "INCAR.orig")
-        shutil.copy("KPOINTS", "KPOINTS.orig")
-        shutil.copy("POSCAR", "POSCAR.orig")
-        shutil.copy("CONTCAR_large", "CONTCAR.orig")
-
-    def test_check_correct_electronic(self):
-        shutil.copy("vasprun.xml.electronic", "vasprun.xml")
-        h = UnconvergedErrorHandler()
-        self.assertEqual(h.check(), True)
-        self.assertEqual(h.correct()["errors"], ["Unconverged"])
-        i = Incar.from_file("INCAR")
-        self.assertEqual(i["AMIN"], 0.01)
-        self.assertEqual(i["ALGO"], "Normal")
-        os.remove("vasprun.xml")
-
-    @classmethod
-    def tearDown(cls):
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("KPOINTS.orig", "KPOINTS")
-        shutil.move("POSCAR.orig", "POSCAR")
-        shutil.move("CONTCAR.orig", "CONTCAR_large")
         clean_dir()
         os.chdir(cwd)
 
