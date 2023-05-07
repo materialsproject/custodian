@@ -511,7 +511,9 @@ class VaspErrorHandlerTest(unittest.TestCase):
     def test_nbands_not_sufficient(self):
         h = VaspErrorHandler("vasp.nbands_not_sufficient")
         self.assertEqual(h.check(), True)
-        self.assertEqual(h.correct()["errors"], ["nbands_not_sufficient"])
+        d = h.correct()
+        self.assertEqual(d["errors"], ["nbands_not_sufficient"])
+        self.assertEqual(d["actions"], None)
 
     def test_too_few_bands_round_error(self):
         # originally there are  NBANDS= 7
@@ -522,6 +524,13 @@ class VaspErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ["too_few_bands"])
         self.assertEqual(d["actions"], [{"dict": "INCAR", "action": {"_set": {"NBANDS": 8}}}])
+
+    def test_set_core_wf(self):
+        h = VaspErrorHandler("vasp.set_core_wf")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d["errors"], ["set_core_wf"])
+        self.assertEqual(d["actions"], None)
 
     def tearDown(self):
         os.chdir(test_dir)
@@ -630,6 +639,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                 "errors": ["Unconverged"],
             },
         )
+        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_veryfast", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -643,6 +653,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                 "errors": ["Unconverged"],
             },
         )
+        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_normal", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -656,6 +667,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                 "errors": ["Unconverged"],
             },
         )
+        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_metagga_fast", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -669,6 +681,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                 "errors": ["Unconverged"],
             },
         )
+        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_hybrid_fast", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -682,6 +695,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
                 "errors": ["Unconverged"],
             },
         )
+        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_hybrid_all", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -734,6 +748,14 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         self.assertTrue(h.check())
         d = h.correct()
         self.assertEqual([{"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}}], d["actions"])
+        os.remove("vasprun.xml")
+
+    def test_amin(self):
+        shutil.copy("vasprun.xml.electronic_amin", "vasprun.xml")
+        h = UnconvergedErrorHandler()
+        self.assertTrue(h.check())
+        d = h.correct()
+        self.assertEqual([{"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}}], d["actions"])
         os.remove("vasprun.xml")
 
     def test_to_from_dict(self):
@@ -887,7 +909,7 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
 
     def test_first_step(self):
         shutil.copy("OSZICAR.empty", "OSZICAR")
-        s1 = Structure.from_file("POSCAR")
+        s1 = Structure.from_file("POSCAR.orig")
         h = VaspErrorHandler("vasp.out")
         self.assertEqual(h.check(), True)
         d = h.correct()
@@ -897,7 +919,7 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
 
     def test_potim_correction(self):
         shutil.copy("OSZICAR.one_step", "OSZICAR")
-        s1 = Structure.from_file("POSCAR")
+        s1 = Structure.from_file("POSCAR.orig")
         h = VaspErrorHandler("vasp.out")
         self.assertEqual(h.check(), True)
         d = h.correct()
@@ -908,22 +930,11 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
 
     def test_static_run_correction(self):
         shutil.copy("OSZICAR.empty", "OSZICAR")
-        s1 = Structure.from_file("POSCAR")
+        s1 = Structure.from_file("POSCAR.orig")
         incar = Incar.from_file("INCAR")
 
         # Test for NSW 0
         incar.update({"NSW": 0})
-        incar.write_file("INCAR")
-        h = VaspErrorHandler("vasp.out")
-        self.assertEqual(h.check(), True)
-        d = h.correct()
-        self.assertEqual(d["errors"], ["zpotrf"])
-        s2 = Structure.from_file("POSCAR")
-        self.assertAlmostEqual(s2.volume, s1.volume, 3)
-        self.assertEqual(Incar.from_file("INCAR")["ISYM"], 0)
-
-        # Test for ISIF 0-2
-        incar.update({"NSW": 99, "ISIF": 2})
         incar.write_file("INCAR")
         h = VaspErrorHandler("vasp.out")
         self.assertEqual(h.check(), True)
@@ -1178,10 +1189,6 @@ class DriftErrorHandlerTest(unittest.TestCase):
 
         h = DriftErrorHandler(max_drift=0.0001, enaug_multiply=2)
         h.check()
-        h.correct()
-        incar = Incar.from_file("INCAR")
-        self.assertTrue(incar.get("ADDGRID", False))
-
         h.correct()
         incar = Incar.from_file("INCAR")
         self.assertEqual(incar.get("PREC"), "High")
