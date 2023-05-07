@@ -1036,10 +1036,10 @@ class UnconvergedErrorHandler(ErrorHandler):
                         UserWarning,
                     )
 
-            # Ladder from VeryFast to Fast to Normal to All
-            # (except for meta-GGAs and hybrids).
-            # These progressively switch to more stable but more
-            # expensive algorithms.
+            # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
+            # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
+            # I am using "--" as the check for METAGGA here because this is the default in the
+            # vasprun.xml file
             if v.incar.get("METAGGA", "--") != "--" and algo != "all":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
 
