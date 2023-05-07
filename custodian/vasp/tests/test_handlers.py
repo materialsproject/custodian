@@ -1181,10 +1181,6 @@ class DriftErrorHandlerTest(unittest.TestCase):
         h.check()
         h.correct()
         incar = Incar.from_file("INCAR")
-        self.assertTrue(incar.get("ADDGRID", False))
-
-        h.correct()
-        incar = Incar.from_file("INCAR")
         self.assertEqual(incar.get("PREC"), "High")
         self.assertEqual(incar.get("ENAUG", 0), incar.get("ENCUT", 2) * 2)
 

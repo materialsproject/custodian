@@ -898,11 +898,8 @@ class DriftErrorHandler(ErrorHandler):
         # Move CONTCAR to POSCAR
         actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
 
-        # First try adding ADDGRID
-        if not incar.get("ADDGRID", False):
-            actions.append({"dict": "INCAR", "action": {"_set": {"ADDGRID": True}}})
-        # Otherwise set PREC to High so ENAUG can be used to control Augmentation Grid Size
-        elif incar.get("PREC", "Accurate").lower() != "high":
+        # Set PREC to High so ENAUG can be used to control Augmentation Grid Size
+        if incar.get("PREC", "Accurate").lower() != "high":
             actions.append({"dict": "INCAR", "action": {"_set": {"PREC": "High"}}})
             actions.append(
                 {
