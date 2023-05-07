@@ -771,7 +771,7 @@ class UnconvergedErrorHandlerTestSmall(unittest.TestCase):
         h = UnconvergedErrorHandler()
         self.assertTrue(h.check())
         d = h.correct()
-        self.assertEqual("Unconverged", d["errors"])
+        self.assertEqual(["Unconverged"], d["errors"])
         i = Incar.from_file("INCAR")
         self.assertEqual(i["AMIN"], 0.01)
         self.assertEqual(i["ALGO"], "Normal")
