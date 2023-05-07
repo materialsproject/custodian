@@ -296,20 +296,15 @@ class VaspErrorHandler(ErrorHandler):
             except Exception:
                 nsteps = 0
 
+            if vi["INCAR"].get("ISYM", 2) > 0:
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+
             # The natoms of 5 was chosen somewhat arbitrarily. Could be worth revisiting to fine-tune.
             if len(vi["POSCAR"].structure) < 5 and (vi["INCAR"].get("NCORE", 1) > 1 or vi["INCAR"].get("NPAR", 1) > 1):
                 actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": 1}}})
                 if vi["INCAR"].get("NPAR", 1) > 1:
                     actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
-            elif nsteps >= 1:
-                potim = round(vi["INCAR"].get("POTIM", 0.5) / 2.0, 2)
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0, "POTIM": potim}}})
-            elif (vi["INCAR"].get("NSW", 0) == 0 or vi["INCAR"].get("ISIF", 0) in range(3)) and vi["INCAR"].get(
-                "ISYM", 2
-            ) > 0:
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
-
-            if vi["INCAR"].get("NSW", 0) > 0:
+            elif vi["INCAR"].get("NSW", 0) > 0:
                 if nsteps == 0:
                     s = vi["POSCAR"].structure
                     s.apply_strain(0.2)
