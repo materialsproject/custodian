@@ -104,6 +104,7 @@ class VaspErrorHandler(ErrorHandler):
         "nbands_not_sufficient": ["number of bands is not sufficient"],
         "hnform": ["HNFORM: k-point generating"],
         "coef": ["while reading plane"],
+        "set_core_wf": ["internal error in SET_CORE_WF"],
     }
 
     def __init__(
@@ -527,7 +528,8 @@ class VaspErrorHandler(ErrorHandler):
             if "algo_tet" not in self.errors:
                 warnings.warn(
                     "EDWAV error reported by VASP without a simultaneous algo_tet error. You may wish to consider "
-                    "recompiling VASP with the -O1 optimization if you used -O2 and this error keeps cropping up."
+                    "recompiling VASP with the -O1 optimization if you used -O2 and this error keeps cropping up.",
+                    UserWarning,
                 )
 
         if "zheev" in self.errors:
@@ -594,7 +596,15 @@ class VaspErrorHandler(ErrorHandler):
             # MAGMOM = 2*nan or something similar.
 
             # Unfixable error. Just return None for actions.
+            warnings.warn("Double-check your INCAR. Something is potentially wrong.", UserWarning)
             return {"errors": ["nbands_not_sufficient"], "actions": None}
+
+        if "set_core_wf" in self.errors:
+            # Unfixable error where the solution is to update the POTCARs
+            warnings.warn(
+                "We suggest using a new version of the POTCAR files to resolve the SET_CORE_WF error.", UserWarning
+            )
+            return {"errors": ["set_core_wf"], "actions": None}
 
         if "hnform" in self.errors:
             # The only solution is to change your k-point grid or disable symmetry

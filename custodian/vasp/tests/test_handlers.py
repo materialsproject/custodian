@@ -519,7 +519,9 @@ class VaspErrorHandlerTest(unittest.TestCase):
     def test_nbands_not_sufficient(self):
         h = VaspErrorHandler("vasp.nbands_not_sufficient")
         self.assertEqual(h.check(), True)
-        self.assertEqual(h.correct()["errors"], ["nbands_not_sufficient"])
+        d = h.correct()
+        self.assertEqual(d["errors"], ["nbands_not_sufficient"])
+        self.assertEqual(d["actions"], None)
 
     def test_too_few_bands_round_error(self):
         # originally there are  NBANDS= 7
@@ -530,6 +532,13 @@ class VaspErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ["too_few_bands"])
         self.assertEqual(d["actions"], [{"dict": "INCAR", "action": {"_set": {"NBANDS": 8}}}])
+
+    def test_set_core_wf(self):
+        h = VaspErrorHandler("vasp.set_core_wf")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d["errors"], ["set_core_wf"])
+        self.assertEqual(d["actions"], None)
 
     def tearDown(self):
         os.chdir(test_dir)
