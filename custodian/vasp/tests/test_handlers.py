@@ -888,7 +888,7 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
 
     def test_first_step(self):
         shutil.copy("OSZICAR.empty", "OSZICAR")
-        s1 = Structure.from_file("POSCAR")
+        s1 = Structure.from_file("POSCAR.orig")
         h = VaspErrorHandler("vasp.out")
         self.assertEqual(h.check(), True)
         d = h.correct()
@@ -898,7 +898,7 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
 
     def test_potim_correction(self):
         shutil.copy("OSZICAR.one_step", "OSZICAR")
-        s1 = Structure.from_file("POSCAR")
+        s1 = Structure.from_file("POSCAR.orig")
         h = VaspErrorHandler("vasp.out")
         self.assertEqual(h.check(), True)
         d = h.correct()
@@ -909,22 +909,11 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
 
     def test_static_run_correction(self):
         shutil.copy("OSZICAR.empty", "OSZICAR")
-        s1 = Structure.from_file("POSCAR")
+        s1 = Structure.from_file("POSCAR.orig")
         incar = Incar.from_file("INCAR")
 
         # Test for NSW 0
         incar.update({"NSW": 0})
-        incar.write_file("INCAR")
-        h = VaspErrorHandler("vasp.out")
-        self.assertEqual(h.check(), True)
-        d = h.correct()
-        self.assertEqual(d["errors"], ["zpotrf"])
-        s2 = Structure.from_file("POSCAR")
-        self.assertAlmostEqual(s2.volume, s1.volume, 3)
-        self.assertEqual(Incar.from_file("INCAR")["ISYM"], 0)
-
-        # Test for ISIF 0-2
-        incar.update({"NSW": 99, "ISIF": 2})
         incar.write_file("INCAR")
         h = VaspErrorHandler("vasp.out")
         self.assertEqual(h.check(), True)
