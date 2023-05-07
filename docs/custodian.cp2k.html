@@ -1,18 +1,17 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>custodian.cp2k package &#8212; custodian 2022.5.26 documentation</title>
+    <title>custodian.cp2k package &#8212; custodian 2023.3.10 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/flasky.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 
@@ -37,7 +36,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 2022.5.26 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 2023.3.10 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.cp2k package</a></li> 
       </ul>
     </div>  
@@ -48,17 +47,17 @@
           <div class="body" role="main">
             
   <section id="custodian-cp2k-package">
-<h1>custodian.cp2k package<a class="headerlink" href="#custodian-cp2k-package" title="Permalink to this headline">¶</a></h1>
+<h1>custodian.cp2k package<a class="headerlink" href="#custodian-cp2k-package" title="Permalink to this heading">¶</a></h1>
 <section id="subpackages">
-<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 </div>
 </section>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">¶</a></h2>
 </section>
 <section id="module-custodian.cp2k.handlers">
-<span id="custodian-cp2k-handlers-module"></span><h2>custodian.cp2k.handlers module<a class="headerlink" href="#module-custodian.cp2k.handlers" title="Permalink to this headline">¶</a></h2>
+<span id="custodian-cp2k-handlers-module"></span><h2>custodian.cp2k.handlers module<a class="headerlink" href="#module-custodian.cp2k.handlers" title="Permalink to this heading">¶</a></h2>
 <p>Error handlers for CP2K calculations.</p>
 <p>Handlers should be specific enough that they are not bulky (keep overhead low),
 but if two handlers will always be called together, then consider joining them
@@ -77,7 +76,7 @@ benefits like writing a wavefunction restart file before quiting.</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="custodian.cp2k.handlers.AbortHandler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbortHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp2k.inp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp2k.out'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/cp2k/handlers.html#AbortHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.cp2k.handlers.AbortHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">ErrorHandler</span></code></a></p>
 <p>These are errors that cp2k recognizes internally, and causes a kill-signal,
 as opposed to things like slow scf convergence, which is an unwanted feature of
 optimization rather than an error per se. Currently this error handler recognizes
@@ -93,7 +92,7 @@ handler will try switching from the restore algorithm to inverse cholesky</p></l
 </div></blockquote>
 <p>Initialize handler for CP2K abort messages.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>input_file</strong> – (str) name of the input file</p></li>
 <li><p><strong>output_file</strong> – (str) nam eof the output file</p></li>
@@ -142,7 +141,7 @@ not terminate the job.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="custodian.cp2k.handlers.DivergingScfErrorHandler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DivergingScfErrorHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp2k.out'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp2k.inp'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/cp2k/handlers.html#DivergingScfErrorHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.cp2k.handlers.DivergingScfErrorHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">ErrorHandler</span></code></a></p>
 <p>CP2K ErrorHandler that detects if calculation is diverging. This is
 done by seeing if, on average, the last 10 convergence print outs were
 increasing rather than decreasing.</p>
@@ -154,7 +153,7 @@ is set to a normal value. So, this error handler will bump up the precision
 in an attempt to remedy the problem.</p>
 <p>Initializes the error handler from an output files.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>output_file</strong> (<em>str</em>) – Name of the CP2K output file.</p>
 </dd>
 </dl>
@@ -186,7 +185,7 @@ that occur early in the run but do not cause immediate failure.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="custodian.cp2k.handlers.FrozenJobErrorHandler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrozenJobErrorHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp2k.inp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp2k.out'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3600</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/cp2k/handlers.html#FrozenJobErrorHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.cp2k.handlers.FrozenJobErrorHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">ErrorHandler</span></code></a></p>
 <p>Detects an error when the output file has not been updated
 in timeout seconds.</p>
 <p>3 types of frozen jobs are considered:</p>
@@ -211,7 +210,7 @@ update the output file.</p></li>
 </div></blockquote>
 <p>Initializes the handler with the output file to check.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>input_file</strong> (<em>str</em>) – Name of the input file to modify if needed</p></li>
 <li><p><strong>output_file</strong> (<em>str</em>) – Name of the output file to monitor</p></li>
@@ -251,7 +250,7 @@ that occur early in the run but do not cause immediate failure.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="custodian.cp2k.handlers.NumericalPrecisionHandler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NumericalPrecisionHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp2k.inp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp2k.out'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_same</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pgf_orb_strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps_default_strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps_gvg_strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/cp2k/handlers.html#NumericalPrecisionHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.cp2k.handlers.NumericalPrecisionHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">ErrorHandler</span></code></a></p>
 <p>CP2K offers lots of functionality for decreasing numerical
 precision in order to speed-up calculations. This can, unfortunately,
 lead to convergence cycles getting ‘stuck’. While it can be hard to
@@ -286,7 +285,7 @@ alleviate this.</p></li>
 </div></blockquote>
 <p>Initialize the error handler.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>input_file</strong> (<em>str</em>) – name of the input file to modify (if needed)</p></li>
 <li><p><strong>output_file</strong> (<em>str</em>) – name of the output file to monitor</p></li>
@@ -336,7 +335,7 @@ that occur early in the run but do not cause immediate failure.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="custodian.cp2k.handlers.StdErrHandler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StdErrHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">std_err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'std_err.txt'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/cp2k/handlers.html#StdErrHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.cp2k.handlers.StdErrHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">ErrorHandler</span></code></a></p>
 <p>Master StdErr class that handles a number of common errors
 that occur during Cp2k runs with error messages only in
 the standard error.</p>
@@ -346,7 +345,7 @@ with hardware/slurm/memory/etc.</p>
 error is non-recoverable, then cp2k will stop itself.</p>
 <p>Initializes the handler with the output file to check.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>std_err</strong> (<em>str</em>) – This is the file where the stderr for cp2k
 is being redirected. The error messages that are checked are
 present in the stderr. Defaults to “std_err.txt”, which is the
@@ -394,7 +393,7 @@ handle the error (i.e. if correct returns a dict with “actions”:None, or
 <dl class="py class">
 <dt class="sig sig-object py" id="custodian.cp2k.handlers.UnconvergedRelaxationErrorHandler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UnconvergedRelaxationErrorHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp2k.inp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp2k.out'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_total_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('BFGS',</span> <span class="pre">'CG',</span> <span class="pre">'BFGS',</span> <span class="pre">'CG')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/cp2k/handlers.html#UnconvergedRelaxationErrorHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.cp2k.handlers.UnconvergedRelaxationErrorHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">ErrorHandler</span></code></a></p>
 <p>This handler checks to see if geometry optimization has failed to converge,
 as signified by a line in the output file that says the maximum number of optimization
 steps were reached.</p>
@@ -404,7 +403,7 @@ it approaches the minimum) but robust. By switching back and forth, we have foun
 overall convergence can be accelerated.</p>
 <p>Initialize the error handler.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>input_file</strong> – name of the input file</p></li>
 <li><p><strong>output_file</strong> – name of the output file</p></li>
@@ -446,7 +445,7 @@ that occur early in the run but do not cause immediate failure.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="custodian.cp2k.handlers.UnconvergedScfErrorHandler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UnconvergedScfErrorHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp2k.inp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp2k.out'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/cp2k/handlers.html#UnconvergedScfErrorHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.cp2k.handlers.UnconvergedScfErrorHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">ErrorHandler</span></code></a></p>
 <p>CP2K ErrorHandler class that addresses SCF non-convergence.</p>
 <p>SCF convergence can be broken into different categories, depending on the method
 used to solve it. CP2K supports several, and this handler recognizes the following:</p>
@@ -500,7 +499,7 @@ there are some options for charge density mixing. Procedure generally follows:</
 </ol>
 <p>Initializes the error handler from a set of input and output files.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>input_file</strong> (<em>str</em>) – Name of the CP2K input file.</p></li>
 <li><p><strong>output_file</strong> (<em>str</em>) – Name of the CP2K output file.</p></li>
@@ -535,7 +534,7 @@ that occur early in the run but do not cause immediate failure.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="custodian.cp2k.handlers.WalltimeHandler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WalltimeHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp2k.out'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_checkpointing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/cp2k/handlers.html#WalltimeHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.cp2k.handlers.WalltimeHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.ErrorHandler</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.ErrorHandler" title="custodian.custodian.ErrorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">ErrorHandler</span></code></a></p>
 <p>This walltime error handler, when enabled, will detect whether
 the CP2K internal walltime handler has been tripped. If walltime
 has been reached (plus some buffer), then the walltime handler will create a
@@ -543,7 +542,7 @@ has been reached (plus some buffer), then the walltime handler will create a
 different than saving successful runs as custodian.chk.#.tar.gz
 (see Custodian), and simply creates checkpoint.json</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>output_file</strong> (<em>str</em>) – name of the cp2k output file</p></li>
 <li><p><strong>enable_checkpointing</strong> (<em>bool</em>) – whether or not to enable checkpointing when
@@ -600,17 +599,17 @@ handle the error (i.e. if correct returns a dict with “actions”:None, or
 
 </section>
 <section id="module-custodian.cp2k.interpreter">
-<span id="custodian-cp2k-interpreter-module"></span><h2>custodian.cp2k.interpreter module<a class="headerlink" href="#module-custodian.cp2k.interpreter" title="Permalink to this headline">¶</a></h2>
+<span id="custodian-cp2k-interpreter-module"></span><h2>custodian.cp2k.interpreter module<a class="headerlink" href="#module-custodian.cp2k.interpreter" title="Permalink to this heading">¶</a></h2>
 <p>CP2K adapted interpreter and modder for custodian.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="custodian.cp2k.interpreter.Cp2kModder">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Cp2kModder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp2k.inp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ci</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/cp2k/interpreter.html#Cp2kModder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.cp2k.interpreter.Cp2kModder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.ansible.html#custodian.ansible.interpreter.Modder" title="custodian.ansible.interpreter.Modder"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.ansible.interpreter.Modder</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="custodian.ansible.html#custodian.ansible.interpreter.Modder" title="custodian.ansible.interpreter.Modder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Modder</span></code></a></p>
 <p>Cp2kModder is a lightweight class for applying modifications to cp2k input files. It
 also supports modifications that are file operations (e.g. copying).</p>
 <p>Initializes a Modder for Cp2kInput sets</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>str</em>) – name of cp2k input file to modify. This file will be overwritten
 if actions are applied.</p></li>
@@ -643,19 +642,19 @@ files.
 
 </section>
 <section id="module-custodian.cp2k.jobs">
-<span id="custodian-cp2k-jobs-module"></span><h2>custodian.cp2k.jobs module<a class="headerlink" href="#module-custodian.cp2k.jobs" title="Permalink to this headline">¶</a></h2>
+<span id="custodian-cp2k-jobs-module"></span><h2>custodian.cp2k.jobs module<a class="headerlink" href="#module-custodian.cp2k.jobs" title="Permalink to this heading">¶</a></h2>
 <p>This module implements basic kinds of jobs for Cp2k runs.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="custodian.cp2k.jobs.Cp2kJob">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Cp2kJob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cp2k_cmd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp2k.inp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp2k.out'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stderr_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'std_err.txt'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings_override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/cp2k/jobs.html#Cp2kJob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.cp2k.jobs.Cp2kJob" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.Job</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Job" title="custodian.custodian.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a></p>
 <p>A basic cp2k job. Just runs whatever is in the directory. But conceivably
 can be a complex processing of inputs etc. with initialization.</p>
 <p>This constructor is necessarily complex due to the need for
 flexibility. For standard kinds of runs, it’s often better to use one
 of the static constructors. The defaults are usually fine too.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>cp2k_cmd</strong> (<em>list</em>) – Command to run cp2k as a list of args. For example,
 if you are using mpirun, it can be something like
@@ -716,7 +715,7 @@ uses the wfn from the first job as a restart to do a screened calculation.</p>
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/cp2k/jobs.html#Cp2kJob.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.cp2k.jobs.Cp2kJob.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the actual CP2K run.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(subprocess.Popen) Used for monitoring.</p>
 </dd>
 </dl>
@@ -741,7 +740,7 @@ file will be made for reference.</p>
 
 </section>
 <section id="module-custodian.cp2k.utils">
-<span id="custodian-cp2k-utils-module"></span><h2>custodian.cp2k.utils module<a class="headerlink" href="#module-custodian.cp2k.utils" title="Permalink to this headline">¶</a></h2>
+<span id="custodian-cp2k-utils-module"></span><h2>custodian.cp2k.utils module<a class="headerlink" href="#module-custodian.cp2k.utils" title="Permalink to this heading">¶</a></h2>
 <p>This module holds different utility functions. Mainly used by handlers.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="custodian.cp2k.utils.activate_diag">
@@ -774,7 +773,7 @@ The output should show that the system has a band gap that is greater than minim
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>output</strong> (<em>Cp2kOutput</em>) – cp2k output object for determining band gap</p></li>
 <li><p><strong>ci</strong> (<em>Cp2kInput</em>) – cp2k input object for determining if OT is already active</p></li>
@@ -801,10 +800,10 @@ sequences used inside do not play nice with the input parser</p></li>
 <span class="sig-name descname"><span class="pre">get_conv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/cp2k/utils.html#get_conv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.cp2k.utils.get_conv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Helper function to get the convergence info from SCF loops</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>outfile</strong> (<em>str</em>) – output file to parse</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>returns convergence info (change in energy between SCF steps) as a
 single list (flattened across outer scf loops).</p>
 </dd>
@@ -819,7 +818,7 @@ the restart file to the input file. Restart also supports switching back and for
 between OT and diagonalization as needed based on convergence behavior. If OT is not
 being used and a band gap exists, then OT will be activated.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>actions</strong> (<em>list</em>) – list of actions that the handler is going to return to custodian. If
 no actions are present, then non are added by this function</p></li>
@@ -838,15 +837,15 @@ no actions are present, then non are added by this function</p></li>
 
 </section>
 <section id="module-custodian.cp2k.validators">
-<span id="custodian-cp2k-validators-module"></span><h2>custodian.cp2k.validators module<a class="headerlink" href="#module-custodian.cp2k.validators" title="Permalink to this headline">¶</a></h2>
+<span id="custodian-cp2k-validators-module"></span><h2>custodian.cp2k.validators module<a class="headerlink" href="#module-custodian.cp2k.validators" title="Permalink to this heading">¶</a></h2>
 <p>Validators for CP2K calculations.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="custodian.cp2k.validators.Cp2kOutputValidator">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Cp2kOutputValidator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp2k.out'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custodian/cp2k/validators.html#Cp2kOutputValidator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.cp2k.validators.Cp2kOutputValidator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#custodian.cp2k.validators.Cp2kValidator" title="custodian.cp2k.validators.Cp2kValidator"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.cp2k.validators.Cp2kValidator</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#custodian.cp2k.validators.Cp2kValidator" title="custodian.cp2k.validators.Cp2kValidator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cp2kValidator</span></code></a></p>
 <p>Checks that a valid cp2k output file was generated</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>output_file</strong> (<em>str</em>) – cp2k output file to analyze</p>
 </dd>
 </dl>
@@ -881,7 +880,7 @@ achieved.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="custodian.cp2k.validators.Cp2kValidator">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Cp2kValidator</span></span><a class="reference internal" href="_modules/custodian/cp2k/validators.html#Cp2kValidator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custodian.cp2k.validators.Cp2kValidator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Validator" title="custodian.custodian.Validator"><code class="xref py py-class docutils literal notranslate"><span class="pre">custodian.custodian.Validator</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="custodian.html#custodian.custodian.Validator" title="custodian.custodian.Validator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Validator</span></code></a></p>
 <p>Base validator.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="custodian.cp2k.validators.Cp2kValidator.check">
@@ -912,7 +911,7 @@ validation failed.</p>
 
 </section>
 <section id="module-custodian.cp2k">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-custodian.cp2k" title="Permalink to this headline">¶</a></h2>
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-custodian.cp2k" title="Permalink to this heading">¶</a></h2>
 <p>This package implements various CP2K Jobs and Error Handlers.</p>
 </section>
 </section>
@@ -930,11 +929,109 @@ validation failed.</p>
 <li><a class="reference internal" href="#">custodian.cp2k package</a><ul>
 <li><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-custodian.cp2k.handlers">custodian.cp2k.handlers module</a></li>
-<li><a class="reference internal" href="#module-custodian.cp2k.interpreter">custodian.cp2k.interpreter module</a></li>
-<li><a class="reference internal" href="#module-custodian.cp2k.jobs">custodian.cp2k.jobs module</a></li>
-<li><a class="reference internal" href="#module-custodian.cp2k.utils">custodian.cp2k.utils module</a></li>
-<li><a class="reference internal" href="#module-custodian.cp2k.validators">custodian.cp2k.validators module</a></li>
+<li><a class="reference internal" href="#module-custodian.cp2k.handlers">custodian.cp2k.handlers module</a><ul>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.AbortHandler"><code class="docutils literal notranslate"><span class="pre">AbortHandler</span></code></a><ul>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.AbortHandler.check"><code class="docutils literal notranslate"><span class="pre">AbortHandler.check()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.AbortHandler.correct"><code class="docutils literal notranslate"><span class="pre">AbortHandler.correct()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.AbortHandler.is_monitor"><code class="docutils literal notranslate"><span class="pre">AbortHandler.is_monitor</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.AbortHandler.is_terminating"><code class="docutils literal notranslate"><span class="pre">AbortHandler.is_terminating</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.DivergingScfErrorHandler"><code class="docutils literal notranslate"><span class="pre">DivergingScfErrorHandler</span></code></a><ul>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.DivergingScfErrorHandler.check"><code class="docutils literal notranslate"><span class="pre">DivergingScfErrorHandler.check()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.DivergingScfErrorHandler.correct"><code class="docutils literal notranslate"><span class="pre">DivergingScfErrorHandler.correct()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.DivergingScfErrorHandler.is_monitor"><code class="docutils literal notranslate"><span class="pre">DivergingScfErrorHandler.is_monitor</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.FrozenJobErrorHandler"><code class="docutils literal notranslate"><span class="pre">FrozenJobErrorHandler</span></code></a><ul>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.FrozenJobErrorHandler.check"><code class="docutils literal notranslate"><span class="pre">FrozenJobErrorHandler.check()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.FrozenJobErrorHandler.correct"><code class="docutils literal notranslate"><span class="pre">FrozenJobErrorHandler.correct()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.FrozenJobErrorHandler.is_monitor"><code class="docutils literal notranslate"><span class="pre">FrozenJobErrorHandler.is_monitor</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.NumericalPrecisionHandler"><code class="docutils literal notranslate"><span class="pre">NumericalPrecisionHandler</span></code></a><ul>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.NumericalPrecisionHandler.check"><code class="docutils literal notranslate"><span class="pre">NumericalPrecisionHandler.check()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.NumericalPrecisionHandler.correct"><code class="docutils literal notranslate"><span class="pre">NumericalPrecisionHandler.correct()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.NumericalPrecisionHandler.is_monitor"><code class="docutils literal notranslate"><span class="pre">NumericalPrecisionHandler.is_monitor</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.StdErrHandler"><code class="docutils literal notranslate"><span class="pre">StdErrHandler</span></code></a><ul>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.StdErrHandler.check"><code class="docutils literal notranslate"><span class="pre">StdErrHandler.check()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.StdErrHandler.correct"><code class="docutils literal notranslate"><span class="pre">StdErrHandler.correct()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.StdErrHandler.error_msgs"><code class="docutils literal notranslate"><span class="pre">StdErrHandler.error_msgs</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.StdErrHandler.is_monitor"><code class="docutils literal notranslate"><span class="pre">StdErrHandler.is_monitor</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.StdErrHandler.raises_runtime_error"><code class="docutils literal notranslate"><span class="pre">StdErrHandler.raises_runtime_error</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.UnconvergedRelaxationErrorHandler"><code class="docutils literal notranslate"><span class="pre">UnconvergedRelaxationErrorHandler</span></code></a><ul>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.UnconvergedRelaxationErrorHandler.check"><code class="docutils literal notranslate"><span class="pre">UnconvergedRelaxationErrorHandler.check()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.UnconvergedRelaxationErrorHandler.correct"><code class="docutils literal notranslate"><span class="pre">UnconvergedRelaxationErrorHandler.correct()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.UnconvergedRelaxationErrorHandler.is_monitor"><code class="docutils literal notranslate"><span class="pre">UnconvergedRelaxationErrorHandler.is_monitor</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.UnconvergedScfErrorHandler"><code class="docutils literal notranslate"><span class="pre">UnconvergedScfErrorHandler</span></code></a><ul>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.UnconvergedScfErrorHandler.check"><code class="docutils literal notranslate"><span class="pre">UnconvergedScfErrorHandler.check()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.UnconvergedScfErrorHandler.correct"><code class="docutils literal notranslate"><span class="pre">UnconvergedScfErrorHandler.correct()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.UnconvergedScfErrorHandler.is_monitor"><code class="docutils literal notranslate"><span class="pre">UnconvergedScfErrorHandler.is_monitor</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.WalltimeHandler"><code class="docutils literal notranslate"><span class="pre">WalltimeHandler</span></code></a><ul>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.WalltimeHandler.check"><code class="docutils literal notranslate"><span class="pre">WalltimeHandler.check()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.WalltimeHandler.correct"><code class="docutils literal notranslate"><span class="pre">WalltimeHandler.correct()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.WalltimeHandler.is_monitor"><code class="docutils literal notranslate"><span class="pre">WalltimeHandler.is_monitor</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.WalltimeHandler.is_terminating"><code class="docutils literal notranslate"><span class="pre">WalltimeHandler.is_terminating</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.handlers.WalltimeHandler.raises_runtime_error"><code class="docutils literal notranslate"><span class="pre">WalltimeHandler.raises_runtime_error</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-custodian.cp2k.interpreter">custodian.cp2k.interpreter module</a><ul>
+<li><a class="reference internal" href="#custodian.cp2k.interpreter.Cp2kModder"><code class="docutils literal notranslate"><span class="pre">Cp2kModder</span></code></a><ul>
+<li><a class="reference internal" href="#custodian.cp2k.interpreter.Cp2kModder.apply_actions"><code class="docutils literal notranslate"><span class="pre">Cp2kModder.apply_actions()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-custodian.cp2k.jobs">custodian.cp2k.jobs module</a><ul>
+<li><a class="reference internal" href="#custodian.cp2k.jobs.Cp2kJob"><code class="docutils literal notranslate"><span class="pre">Cp2kJob</span></code></a><ul>
+<li><a class="reference internal" href="#custodian.cp2k.jobs.Cp2kJob.double_job"><code class="docutils literal notranslate"><span class="pre">Cp2kJob.double_job()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.jobs.Cp2kJob.gga_static_to_hybrid"><code class="docutils literal notranslate"><span class="pre">Cp2kJob.gga_static_to_hybrid()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.jobs.Cp2kJob.postprocess"><code class="docutils literal notranslate"><span class="pre">Cp2kJob.postprocess()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.jobs.Cp2kJob.pre_screen_hybrid"><code class="docutils literal notranslate"><span class="pre">Cp2kJob.pre_screen_hybrid()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.jobs.Cp2kJob.run"><code class="docutils literal notranslate"><span class="pre">Cp2kJob.run()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.jobs.Cp2kJob.setup"><code class="docutils literal notranslate"><span class="pre">Cp2kJob.setup()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.jobs.Cp2kJob.terminate"><code class="docutils literal notranslate"><span class="pre">Cp2kJob.terminate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-custodian.cp2k.utils">custodian.cp2k.utils module</a><ul>
+<li><a class="reference internal" href="#custodian.cp2k.utils.activate_diag"><code class="docutils literal notranslate"><span class="pre">activate_diag()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.utils.activate_ot"><code class="docutils literal notranslate"><span class="pre">activate_ot()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.utils.can_use_ot"><code class="docutils literal notranslate"><span class="pre">can_use_ot()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.utils.cleanup_input"><code class="docutils literal notranslate"><span class="pre">cleanup_input()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.utils.get_conv"><code class="docutils literal notranslate"><span class="pre">get_conv()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.utils.restart"><code class="docutils literal notranslate"><span class="pre">restart()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.utils.tail"><code class="docutils literal notranslate"><span class="pre">tail()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-custodian.cp2k.validators">custodian.cp2k.validators module</a><ul>
+<li><a class="reference internal" href="#custodian.cp2k.validators.Cp2kOutputValidator"><code class="docutils literal notranslate"><span class="pre">Cp2kOutputValidator</span></code></a><ul>
+<li><a class="reference internal" href="#custodian.cp2k.validators.Cp2kOutputValidator.check"><code class="docutils literal notranslate"><span class="pre">Cp2kOutputValidator.check()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.validators.Cp2kOutputValidator.exit"><code class="docutils literal notranslate"><span class="pre">Cp2kOutputValidator.exit</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.validators.Cp2kOutputValidator.kill"><code class="docutils literal notranslate"><span class="pre">Cp2kOutputValidator.kill</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.validators.Cp2kOutputValidator.no_children"><code class="docutils literal notranslate"><span class="pre">Cp2kOutputValidator.no_children</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#custodian.cp2k.validators.Cp2kValidator"><code class="docutils literal notranslate"><span class="pre">Cp2kValidator</span></code></a><ul>
+<li><a class="reference internal" href="#custodian.cp2k.validators.Cp2kValidator.check"><code class="docutils literal notranslate"><span class="pre">Cp2kValidator.check()</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.validators.Cp2kValidator.exit"><code class="docutils literal notranslate"><span class="pre">Cp2kValidator.exit</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.validators.Cp2kValidator.kill"><code class="docutils literal notranslate"><span class="pre">Cp2kValidator.kill</span></code></a></li>
+<li><a class="reference internal" href="#custodian.cp2k.validators.Cp2kValidator.no_children"><code class="docutils literal notranslate"><span class="pre">Cp2kValidator.no_children</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-custodian.cp2k">Module contents</a></li>
 </ul>
 </li>
@@ -961,7 +1058,7 @@ validation failed.</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>

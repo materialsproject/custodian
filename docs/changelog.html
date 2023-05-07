@@ -1,18 +1,17 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Change Log &#8212; custodian 2022.5.26 documentation</title>
+    <title>Change Log &#8212; custodian 2023.3.10 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/flasky.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 
@@ -37,7 +36,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">custodian 2022.5.26 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">custodian 2023.3.10 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Change Log</a></li> 
       </ul>
     </div>  
@@ -48,15 +47,22 @@
           <div class="body" role="main">
             
   <section id="change-log">
-<h1>Change Log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
+<h1>Change Log<a class="headerlink" href="#change-log" title="Permalink to this heading">¶</a></h1>
+<section id="v2023-3-8">
+<h2>v2023.3.8<a class="headerlink" href="#v2023-3-8" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Updates for QChem6 support (&#64;samblau)</p></li>
+<li><p>Updates for CP2K support (&#64;nwinner)</p></li>
+</ul>
+</section>
 <section id="v2022-5-26">
-<h2>v2022.5.26<a class="headerlink" href="#v2022-5-26" title="Permalink to this headline">¶</a></h2>
+<h2>v2022.5.26<a class="headerlink" href="#v2022-5-26" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>PR #219 from &#64;samblau. Q-Chem updates to NBO, new geometry optimizer, revamped SCF error handling.</p></li>
 </ul>
 </section>
 <section id="v2022-5-17">
-<h2>v2022.5.17<a class="headerlink" href="#v2022-5-17" title="Permalink to this headline">¶</a></h2>
+<h2>v2022.5.17<a class="headerlink" href="#v2022-5-17" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>PR #220 from &#64;yury-lysogorskiy. Fix for NBANDS when NBANDS is very small.</p></li>
 <li><p>PR #211 from &#64;arosen93. Handler for error in reading plane wave coeff.</p></li>
@@ -66,14 +72,14 @@
 </ul>
 </section>
 <section id="v2022-2-13">
-<h2>v2022.2.13<a class="headerlink" href="#v2022-2-13" title="Permalink to this headline">¶</a></h2>
+<h2>v2022.2.13<a class="headerlink" href="#v2022-2-13" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Support for new Lobster versions (&#64;naik-aakash)</p></li>
 <li><p>Bug fix for termination of gamma VASP runs.</p></li>
 </ul>
 </section>
 <section id="v2022-1-17">
-<h2>v2022.1.17<a class="headerlink" href="#v2022-1-17" title="Permalink to this headline">¶</a></h2>
+<h2>v2022.1.17<a class="headerlink" href="#v2022-1-17" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>New NBANDS not sufficient handler in VASP (&#64;arosen93)</p></li>
 <li><p>New VASP error handling for VASP 6.2.1 HNFORM error (&#64;arosen93)</p></li>
@@ -82,7 +88,7 @@
 </ul>
 </section>
 <section id="v2021-12-2">
-<h2>v2021.12.2<a class="headerlink" href="#v2021-12-2" title="Permalink to this headline">¶</a></h2>
+<h2>v2021.12.2<a class="headerlink" href="#v2021-12-2" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Address new VASP6 inconsistent Bravais lattice error (&#64;arosen93)</p></li>
 <li><p>Don’t check for drift if NSW = 1 (&#64;arosen93)</p></li>
@@ -98,25 +104,25 @@
 </ul>
 </section>
 <section id="v2021-2-8">
-<h2>v2021.2.8<a class="headerlink" href="#v2021-2-8" title="Permalink to this headline">¶</a></h2>
+<h2>v2021.2.8<a class="headerlink" href="#v2021-2-8" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Allow static calculations with ISMEAR = -5 for metals (&#64;MichaelWolloch).</p></li>
 </ul>
 </section>
 <section id="v2021-1-8">
-<h2>v2021.1.8<a class="headerlink" href="#v2021-1-8" title="Permalink to this headline">¶</a></h2>
+<h2>v2021.1.8<a class="headerlink" href="#v2021-1-8" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>New handlers for VASP6 (&#64;mkhorton, &#64;rkingsbury)</p></li>
 </ul>
 </section>
 <section id="v2021-1-7">
-<h2>v2021.1.7<a class="headerlink" href="#v2021-1-7" title="Permalink to this headline">¶</a></h2>
+<h2>v2021.1.7<a class="headerlink" href="#v2021-1-7" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Improved handling of scratch directories and update for QChem.</p></li>
 </ul>
 </section>
 <section id="v2019-8-24">
-<h2>v2019.8.24<a class="headerlink" href="#v2019-8-24" title="Permalink to this headline">¶</a></h2>
+<h2>v2019.8.24<a class="headerlink" href="#v2019-8-24" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Cleanup codestyle, which is now enforced.</p></li>
 <li><p>Py3k support only, in line with pymatgen.</p></li>
@@ -127,13 +133,13 @@ handlers) (&#64;samblau)</p></li>
 </ul>
 </section>
 <section id="v2019-2-10">
-<h2>v2019.2.10<a class="headerlink" href="#v2019-2-10" title="Permalink to this headline">¶</a></h2>
+<h2>v2019.2.10<a class="headerlink" href="#v2019-2-10" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Improved slow convergence handling. (&#64;shyamd)</p></li>
 </ul>
 </section>
 <section id="v2019-2-7">
-<h2>v2019.2.7<a class="headerlink" href="#v2019-2-7" title="Permalink to this headline">¶</a></h2>
+<h2>v2019.2.7<a class="headerlink" href="#v2019-2-7" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Improved error logging.</p></li>
 <li><p>Improved handling of frozen jobs and potim errors.</p></li>
@@ -141,7 +147,7 @@ handlers) (&#64;samblau)</p></li>
 </ul>
 </section>
 <section id="v2017-12-23">
-<h2>v2017.12.23<a class="headerlink" href="#v2017-12-23" title="Permalink to this headline">¶</a></h2>
+<h2>v2017.12.23<a class="headerlink" href="#v2017-12-23" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>cstdn command line tool is now official with docs.</p></li>
 <li><p>Fine-grained control of VaspErrorHandler is now possible using
@@ -150,37 +156,37 @@ handlers) (&#64;samblau)</p></li>
 </ul>
 </section>
 <section id="v1-1-1">
-<h2>v1.1.1<a class="headerlink" href="#v1-1-1" title="Permalink to this headline">¶</a></h2>
+<h2>v1.1.1<a class="headerlink" href="#v1-1-1" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>DriftErrorHandler (Shyam)</p></li>
 </ul>
 </section>
 <section id="v1-1-0">
-<h2>v1.1.0<a class="headerlink" href="#v1-1-0" title="Permalink to this headline">¶</a></h2>
+<h2>v1.1.0<a class="headerlink" href="#v1-1-0" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Improved error handling for Qchem calculations.</p></li>
 </ul>
 </section>
 <section id="v1-0-4">
-<h2>v1.0.4<a class="headerlink" href="#v1-0-4" title="Permalink to this headline">¶</a></h2>
+<h2>v1.0.4<a class="headerlink" href="#v1-0-4" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Improved handling of non-zero return codes.</p></li>
 </ul>
 </section>
 <section id="v1-0-2">
-<h2>v1.0.2<a class="headerlink" href="#v1-0-2" title="Permalink to this headline">¶</a></h2>
+<h2>v1.0.2<a class="headerlink" href="#v1-0-2" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Interrupted run feature. (Shyam Dwaraknath)</p></li>
 </ul>
 </section>
 <section id="v1-0-1">
-<h2>v1.0.1<a class="headerlink" href="#v1-0-1" title="Permalink to this headline">¶</a></h2>
+<h2>v1.0.1<a class="headerlink" href="#v1-0-1" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Pymatgen 4.0.0 compatible release.</p></li>
 </ul>
 </section>
 <section id="v1-0-0">
-<h2>v1.0.0<a class="headerlink" href="#v1-0-0" title="Permalink to this headline">¶</a></h2>
+<h2>v1.0.0<a class="headerlink" href="#v1-0-0" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Custodian now comes with a “cstdn” script that enables the arbitrary creation
 of simple job sequences using a yaml file, and the running of calculations
@@ -188,31 +194,31 @@ based on these yaml specifications.</p></li>
 </ul>
 </section>
 <section id="v0-8-8">
-<h2>v0.8.8<a class="headerlink" href="#v0-8-8" title="Permalink to this headline">¶</a></h2>
+<h2>v0.8.8<a class="headerlink" href="#v0-8-8" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Fix setup.py.</p></li>
 </ol>
 </section>
 <section id="v0-8-5">
-<h2>v0.8.5<a class="headerlink" href="#v0-8-5" title="Permalink to this headline">¶</a></h2>
+<h2>v0.8.5<a class="headerlink" href="#v0-8-5" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Refactoring to support pymatgen 3.1.4.</p></li>
 </ol>
 </section>
 <section id="v0-8-2">
-<h2>v0.8.2<a class="headerlink" href="#v0-8-2" title="Permalink to this headline">¶</a></h2>
+<h2>v0.8.2<a class="headerlink" href="#v0-8-2" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Made auto_npar optional for double relaxation VASP run.</p></li>
 </ol>
 </section>
 <section id="v0-8-1">
-<h2>v0.8.1<a class="headerlink" href="#v0-8-1" title="Permalink to this headline">¶</a></h2>
+<h2>v0.8.1<a class="headerlink" href="#v0-8-1" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Misc bug fixes (minor).</p></li>
 </ol>
 </section>
 <section id="v0-8-0">
-<h2>v0.8.0<a class="headerlink" href="#v0-8-0" title="Permalink to this headline">¶</a></h2>
+<h2>v0.8.0<a class="headerlink" href="#v0-8-0" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Major refactoring of Custodian to introdce Validators,
 which are effectively post-Job checking mechanisms that do not perform
@@ -229,7 +235,7 @@ v0.7.6
 </div></blockquote>
 </section>
 <section id="v0-7-5">
-<h2>v0.7.5<a class="headerlink" href="#v0-7-5" title="Permalink to this headline">¶</a></h2>
+<h2>v0.7.5<a class="headerlink" href="#v0-7-5" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p><strong>Major</strong> Custodian now exits with RuntimeError when max_errors or
 unrecoverable_error is encountered.</p></li>
@@ -237,7 +243,7 @@ unrecoverable_error is encountered.</p></li>
 </ol>
 </section>
 <section id="v0-7-4">
-<h2>v0.7.4<a class="headerlink" href="#v0-7-4" title="Permalink to this headline">¶</a></h2>
+<h2>v0.7.4<a class="headerlink" href="#v0-7-4" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>auto_npar option in VaspJob now properly handles Hessian calculations.</p></li>
 <li><p>WalltimeHandler now supports termination at electronic step (David
@@ -246,7 +252,7 @@ Waroquiers).</p></li>
 </ol>
 </section>
 <section id="v0-7-3">
-<h2>v0.7.3<a class="headerlink" href="#v0-7-3" title="Permalink to this headline">¶</a></h2>
+<h2>v0.7.3<a class="headerlink" href="#v0-7-3" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Improved backwards compatibility for WallTimeHandler.</p></li>
 <li><p>Improvements to VaspErrorHandler. No longer catches spurious BRMIX error
@@ -256,7 +262,7 @@ are now fixed with symmetry precision and gamma centered KPOINTS instead.</p></l
 </ol>
 </section>
 <section id="v0-7-2">
-<h2>v0.7.2<a class="headerlink" href="#v0-7-2" title="Permalink to this headline">¶</a></h2>
+<h2>v0.7.2<a class="headerlink" href="#v0-7-2" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Improved WalltimeHandler (PBSWalltimeHandler is a subset and is now
 deprecated).</p></li>
@@ -264,14 +270,14 @@ deprecated).</p></li>
 </ol>
 </section>
 <section id="v0-7-1">
-<h2>v0.7.1<a class="headerlink" href="#v0-7-1" title="Permalink to this headline">¶</a></h2>
+<h2>v0.7.1<a class="headerlink" href="#v0-7-1" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Much improved qchem error handling (Xiaohui Qu).</p></li>
 <li><p>New Monty required version (&gt;= 0.2.0).</p></li>
 </ol>
 </section>
 <section id="v0-7-0">
-<h2>v0.7.0<a class="headerlink" href="#v0-7-0" title="Permalink to this headline">¶</a></h2>
+<h2>v0.7.0<a class="headerlink" href="#v0-7-0" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p><a href="#id1"><span class="problematic" id="id2">**</span></a>Backwards incompatible with v0.6.3. Refactoring to move commonly used
 Python utility functions to <a class="reference external" href="https://pypi.python.org/pypi/monty">Monty package</a>, which is now a depedency
@@ -290,7 +296,7 @@ set the flag should not terminate the job.</p></li>
 </ol>
 </section>
 <section id="id3">
-<h2>0.6.3<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<h2>0.6.3<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Added buffer time option in PBSWalltimeHandler.</p></li>
 <li><p>Improved Qchem jobs and handlers (Xiaohui Qu).</p></li>
@@ -298,21 +304,21 @@ set the flag should not terminate the job.</p></li>
 </ol>
 </section>
 <section id="id4">
-<h2>0.6.2<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<h2>0.6.2<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Bug fix release to support sub dirs in run folder when using scratch.</p></li>
 <li><p>Improve handling of walltime in PBSWalltimeHander.</p></li>
 </ol>
 </section>
 <section id="id5">
-<h2>0.6.1<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<h2>0.6.1<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Bug fix release to address minor issue with checkpointing.</p></li>
 <li><p>Checkpointing is now turned off by default.</p></li>
 </ol>
 </section>
 <section id="id6">
-<h2>0.6.0<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<h2>0.6.0<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Checkpointing implemented for Custodian. Custodian can now checkpoint all
 files in the current working directory after every successful job. If the
@@ -323,7 +329,7 @@ checkpoint. Particularly useful for multi-job runs.</p></li>
 </ol>
 </section>
 <section id="id7">
-<h2>0.5.0<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<h2>0.5.0<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Added scratch_dir option to Custodian class as well as run_vasp and
 run_nwchem scripts. Many supercomputing clusters have a scratch space
@@ -333,27 +339,27 @@ jobs which have significant file IO.</p></li>
 </ol>
 </section>
 <section id="id8">
-<h2>0.4.5<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<h2>0.4.5<a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Fix gzip of output.</p></li>
 </ol>
 </section>
 <section id="id9">
-<h2>0.4.3<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<h2>0.4.3<a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Added handling for ZBRENT error for VASP.</p></li>
 <li><p>Minor refactoring to consolidate backup and gzip directory methods.</p></li>
 </ol>
 </section>
 <section id="id10">
-<h2>0.4.2<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
+<h2>0.4.2<a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Rudimentary support for Nwchem error handling (by Shyue Ping Ong).</p></li>
 <li><p>Improved VASP error handling (by Steve Dacek and Will Richards).</p></li>
 </ol>
 </section>
 <section id="id11">
-<h2>0.4.1<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
+<h2>0.4.1<a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Added hanlding of PRICEL error in VASP.</p></li>
 <li><p>Speed and robustness improvements.</p></li>
@@ -361,7 +367,7 @@ jobs which have significant file IO.</p></li>
 </ol>
 </section>
 <section id="id12">
-<h2>0.4.0<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h2>
+<h2>0.4.0<a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Many VASP handlers are now consolidated into a single VaspErrorHandler.</p></li>
 <li><p>Many more fixes for VASP runs, including the “TOO FEW BANDS”,
@@ -373,7 +379,7 @@ gamma-only compiled version of VASP for gamma 1x1x1 runs.</p></li>
 </ol>
 </section>
 <section id="id13">
-<h2>0.3.5<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
+<h2>0.3.5<a class="headerlink" href="#id13" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Bug fix for incorrect shift error handler in VASP.</p></li>
 <li><p>More robust fix for unconverged VASP runs (switching from ALGO fast to
@@ -382,7 +388,7 @@ normal).</p></li>
 </ol>
 </section>
 <section id="id14">
-<h2>0.3.4<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h2>
+<h2>0.3.4<a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Added support for handlers that perform monitor a job as it is progressing
 and terminates it if necessary. Useful for correcting errors that come up
@@ -390,13 +396,13 @@ by do not cause immediate job failures.</p></li>
 </ol>
 </section>
 <section id="id15">
-<h2>0.3.2<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h2>
+<h2>0.3.2<a class="headerlink" href="#id15" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Important bug fix for VaspJob and converge_kpoints script.</p></li>
 </ol>
 </section>
 <section id="id16">
-<h2>0.3.0<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h2>
+<h2>0.3.0<a class="headerlink" href="#id16" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Major update to custodian API. Custodian now perform more comprehensive
 logging in a file called custodian.json, which logs all jobs and
@@ -404,13 +410,13 @@ corrections performed.</p></li>
 </ol>
 </section>
 <section id="version-0-2-6">
-<h2>Version 0.2.6<a class="headerlink" href="#version-0-2-6" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.2.6<a class="headerlink" href="#version-0-2-6" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Bug fix for run_vasp script for static runs.</p></li>
 </ol>
 </section>
 <section id="version-0-2-5">
-<h2>Version 0.2.5<a class="headerlink" href="#version-0-2-5" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.2.5<a class="headerlink" href="#version-0-2-5" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>run_vasp script that now provides flexible specification of vasp runs.</p></li>
 <li><p>Vastly improved error handling for VASP runs.</p></li>
@@ -420,7 +426,7 @@ corrections performed.</p></li>
 </ol>
 </section>
 <section id="version-0-2-4">
-<h2>Version 0.2.4<a class="headerlink" href="#version-0-2-4" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.2.4<a class="headerlink" href="#version-0-2-4" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Bug fixes for aflow style runs assimilation.</p></li>
 </ol>
@@ -438,6 +444,7 @@ corrections performed.</p></li>
     <h3><a href="index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">Change Log</a><ul>
+<li><a class="reference internal" href="#v2023-3-8">v2023.3.8</a></li>
 <li><a class="reference internal" href="#v2022-5-26">v2022.5.26</a></li>
 <li><a class="reference internal" href="#v2022-5-17">v2022.5.17</a></li>
 <li><a class="reference internal" href="#v2022-2-13">v2022.2.13</a></li>
@@ -509,7 +516,7 @@ corrections performed.</p></li>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>

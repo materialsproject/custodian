@@ -1,17 +1,16 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.custodian &#8212; custodian 2022.5.26 documentation</title>
+    <title>custodian.custodian &#8212; custodian 2023.3.10 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/flasky.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
 
@@ -36,7 +35,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">custodian 2022.5.26 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">custodian 2023.3.10 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.custodian</a></li> 
       </ul>
@@ -99,13 +98,11 @@
         <span class="n">SENTRY_DSN</span> <span class="o">=</span> <span class="s2">&quot;https://0f7291738eb042a3af671df9fc68ae2a@sentry.io/1470881&quot;</span>
 
 <span class="k">if</span> <span class="n">SENTRY_DSN</span><span class="p">:</span>
-
     <span class="kn">import</span> <span class="nn">sentry_sdk</span>
 
     <span class="n">sentry_sdk</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">dsn</span><span class="o">=</span><span class="n">SENTRY_DSN</span><span class="p">)</span>
 
     <span class="k">with</span> <span class="n">sentry_sdk</span><span class="o">.</span><span class="n">configure_scope</span><span class="p">()</span> <span class="k">as</span> <span class="n">scope</span><span class="p">:</span>
-
         <span class="kn">from</span> <span class="nn">getpass</span> <span class="kn">import</span> <span class="n">getuser</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -264,7 +261,24 @@
             <span class="n">restart</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">chkpt</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">3</span><span class="p">])</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading from checkpoint file </span><span class="si">{</span><span class="n">chkpt</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
             <span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">chkpt</span><span class="p">)</span> <span class="k">as</span> <span class="n">t</span><span class="p">:</span>
-                <span class="n">t</span><span class="o">.</span><span class="n">extractall</span><span class="p">()</span>
+
+                <span class="k">def</span> <span class="nf">is_within_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+                    <span class="n">abs_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+                    <span class="n">abs_target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+
+                    <span class="n">prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">([</span><span class="n">abs_directory</span><span class="p">,</span> <span class="n">abs_target</span><span class="p">])</span>
+
+                    <span class="k">return</span> <span class="n">prefix</span> <span class="o">==</span> <span class="n">abs_directory</span>
+
+                <span class="k">def</span> <span class="nf">safe_extract</span><span class="p">(</span><span class="n">tar</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">members</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">numeric_owner</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">tar</span><span class="o">.</span><span class="n">getmembers</span><span class="p">():</span>
+                        <span class="n">member_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">member</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_within_directory</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">member_path</span><span class="p">):</span>
+                            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Attempted Path Traversal in Tar File&quot;</span><span class="p">)</span>
+
+                    <span class="n">tar</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">members</span><span class="p">,</span> <span class="n">numeric_owner</span><span class="o">=</span><span class="n">numeric_owner</span><span class="p">)</span>
+
+                <span class="n">safe_extract</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
             <span class="c1"># Log the corrections to a json file.</span>
             <span class="n">run_log</span> <span class="o">=</span> <span class="n">loadfn</span><span class="p">(</span><span class="n">Custodian</span><span class="o">.</span><span class="n">LOG_FILE</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">MontyDecoder</span><span class="p">)</span>
 
@@ -724,16 +738,14 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method is run before the start of a job. Allows for some</span>
 <span class="sd">        pre-processing.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+<span class="sd">        &quot;&quot;&quot;</span></div>
 
 <div class="viewcode-block" id="Job.run"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Job.run">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method perform the actual work for the job. If parallel error</span>
 <span class="sd">        checking (monitoring) is desired, this must return a Popen process.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+<span class="sd">        &quot;&quot;&quot;</span></div>
 
 <div class="viewcode-block" id="Job.postprocess"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Job.postprocess">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -741,10 +753,9 @@
 <span class="sd">        This method is called at the end of a job, *after* error detection.</span>
 <span class="sd">        This allows post-processing, such as cleanup, analysis of results,</span>
 <span class="sd">        etc.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+<span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="Job.terminate"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Job.terminate">[docs]</a>    <span class="k">def</span> <span class="nf">terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pylint: disable=R0201</span>
+<div class="viewcode-block" id="Job.terminate"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Job.terminate">[docs]</a>    <span class="k">def</span> <span class="nf">terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Implement termination function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -814,8 +825,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            (bool) Indicating if errors are detected.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+<span class="sd">        &quot;&quot;&quot;</span></div>
 
 <div class="viewcode-block" id="ErrorHandler.correct"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.ErrorHandler.correct">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -829,8 +839,7 @@
 <span class="sd">            actions taken. E.g.</span>
 <span class="sd">            {&quot;errors&quot;: list_of_errors, &quot;actions&quot;: list_of_actions_taken}.</span>
 <span class="sd">            If this is an unfixable error, actions should be set to None.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+<span class="sd">        &quot;&quot;&quot;</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_applied_corrections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -873,8 +882,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            (bool) Indicating if errors are detected.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div></div>
+<span class="sd">        &quot;&quot;&quot;</span></div></div>
 
 
 <div class="viewcode-block" id="CustodianError"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.CustodianError">[docs]</a><span class="k">class</span> <span class="nc">CustodianError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
@@ -930,9 +938,7 @@
 <div class="viewcode-block" id="ReturnCodeError"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.ReturnCodeError">[docs]</a><span class="k">class</span> <span class="nc">ReturnCodeError</span><span class="p">(</span><span class="n">CustodianError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Error raised when the process gave non zero return code</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">pass</span></div>
+<span class="sd">    &quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="MaxCorrectionsError"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.MaxCorrectionsError">[docs]</a><span class="k">class</span> <span class="nc">MaxCorrectionsError</span><span class="p">(</span><span class="n">CustodianError</span><span class="p">):</span>
@@ -1008,7 +1014,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>

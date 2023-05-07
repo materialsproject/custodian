@@ -1,18 +1,17 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Custodian &#8212; custodian 2022.5.26 documentation</title>
+    <title>Custodian &#8212; custodian 2023.3.10 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/flasky.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 
@@ -37,7 +36,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">custodian 2022.5.26 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="#">custodian 2023.3.10 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Custodian</a></li> 
       </ul>
     </div>  
@@ -48,7 +47,7 @@
           <div class="body" role="main">
             
   <section id="custodian">
-<h1>Custodian<a class="headerlink" href="#custodian" title="Permalink to this headline">¶</a></h1>
+<h1>Custodian<a class="headerlink" href="#custodian" title="Permalink to this heading">¶</a></h1>
 <p>Custodian is a simple, robust and flexible just-in-time (JIT) job management
 framework written in Python. Using custodian, you can create wrappers that
 perform error checking, job management and error recovery. It has a simple
@@ -71,9 +70,9 @@ calculations.</p>
 <p><a class="reference internal" href="changelog.html"><span class="doc">Change log</span></a></p>
 </section>
 <section id="getting-custodian">
-<h1>Getting custodian<a class="headerlink" href="#getting-custodian" title="Permalink to this headline">¶</a></h1>
+<h1>Getting custodian<a class="headerlink" href="#getting-custodian" title="Permalink to this heading">¶</a></h1>
 <section id="stable-version">
-<h2>Stable version<a class="headerlink" href="#stable-version" title="Permalink to this headline">¶</a></h2>
+<h2>Stable version<a class="headerlink" href="#stable-version" title="Permalink to this heading">¶</a></h2>
 <p>The version at the Python Package Index (PyPI) is always the latest stable
 release that will be hopefully, be relatively bug-free. The easiest way to
 install custodian on any system is to use pip, as follows:</p>
@@ -84,7 +83,7 @@ install custodian on any system is to use pip, as follows:</p>
 <a class="reference external" href="http://pymatgen.org">pymatgen’s documentation</a>).</p>
 </section>
 <section id="developmental-version">
-<h2>Developmental version<a class="headerlink" href="#developmental-version" title="Permalink to this headline">¶</a></h2>
+<h2>Developmental version<a class="headerlink" href="#developmental-version" title="Permalink to this heading">¶</a></h2>
 <p>The bleeding edge developmental version is at the custodian’s <a class="reference external" href="https://github.com/materialsproject/custodian">Github repo</a>. The developmental
 version is likely to be more buggy, but may contain new features. The
 Github version include test files as well for complete unit testing. After
@@ -99,10 +98,10 @@ cloning the source, you can type:</p>
 </section>
 </section>
 <section id="requirements">
-<h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
+<h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading">¶</a></h1>
 <p>Custodian requires Python 3.8+. There are no other required dependencies.</p>
 <section id="optional-dependencies">
-<h2>Optional dependencies<a class="headerlink" href="#optional-dependencies" title="Permalink to this headline">¶</a></h2>
+<h2>Optional dependencies<a class="headerlink" href="#optional-dependencies" title="Permalink to this heading">¶</a></h2>
 <p>Optional libraries that are required if you need certain features:</p>
 <ol class="arabic">
 <li><p>Python Materials Genomics (<a class="reference external" href="https://pypi.python.org/pypi/pymatgen">pymatgen</a>) 2022.1+: To use the plugin for
@@ -118,7 +117,7 @@ VASP, NwChem and Qchem. Please install using:</p>
 </section>
 </section>
 <section id="usage">
-<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h1>
 <p>The main class in the workflow is known as Custodian, which manages a series
 of jobs with a list of error handlers. The general workflow for Custodian is
 presented in the figure below.</p>
@@ -135,7 +134,7 @@ should be subclasses of the <a class="reference internal" href="custodian.html#c
 base class. To use custodian, you need to implement concrete implementations
 of these abstract base classes.</p>
 <section id="simple-example">
-<h2>Simple example<a class="headerlink" href="#simple-example" title="Permalink to this headline">¶</a></h2>
+<h2>Simple example<a class="headerlink" href="#simple-example" title="Permalink to this heading">¶</a></h2>
 <p>An very simple example implementation is given in the custodian_examples.py
 script in the scripts directory. We will now go through the example in detail
 here.</p>
@@ -209,7 +208,7 @@ a <strong>custodian.json</strong> file was generated, which summarizes the jobs 
 been run and any corrections performed.</p>
 </section>
 <section id="practical-example-electronic-structure-calculations">
-<h2>Practical example: Electronic structure calculations<a class="headerlink" href="#practical-example-electronic-structure-calculations" title="Permalink to this headline">¶</a></h2>
+<h2>Practical example: Electronic structure calculations<a class="headerlink" href="#practical-example-electronic-structure-calculations" title="Permalink to this heading">¶</a></h2>
 <p>A practical example where the Custodian framework is particularly useful is
 in the area of electronic structure calculations. Electronic structure
 calculations tend to be long running and often terminates due to errors,
@@ -245,7 +244,7 @@ converge_kpoints script in the scripts for an example.</p>
 </section>
 </section>
 <section id="cstdn-a-yaml-spec-controlled-job">
-<h1>cstdn - A yaml-spec controlled job<a class="headerlink" href="#cstdn-a-yaml-spec-controlled-job" title="Permalink to this headline">¶</a></h1>
+<h1>cstdn - A yaml-spec controlled job<a class="headerlink" href="#cstdn-a-yaml-spec-controlled-job" title="Permalink to this heading">¶</a></h1>
 <p>Custodian now comes with a cstdn script, which allows you to do fine-grained
 control of a job using a yaml spec file. Below is an annotated example of how
 you can specify a double VASP relaxation followed by a static calculation.
@@ -311,14 +310,14 @@ custodian_params:
 </div>
 </section>
 <section id="api-reference-docs">
-<h1>API/Reference Docs<a class="headerlink" href="#api-reference-docs" title="Permalink to this headline">¶</a></h1>
+<h1>API/Reference Docs<a class="headerlink" href="#api-reference-docs" title="Permalink to this heading">¶</a></h1>
 <p>The API docs are generated using Sphinx auto-doc and outlines the purpose of all
 modules and classes, and the expected argument and returned objects for most
 methods. They are available at the link below.</p>
 <p><a class="reference internal" href="modules.html"><span class="doc">custodian API docs</span></a></p>
 </section>
 <section id="how-to-cite-custodian">
-<h1>How to cite custodian<a class="headerlink" href="#how-to-cite-custodian" title="Permalink to this headline">¶</a></h1>
+<h1>How to cite custodian<a class="headerlink" href="#how-to-cite-custodian" title="Permalink to this heading">¶</a></h1>
 <p>If you use custodian in your research, especially the VASP component, please
 consider citing the following work:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Geoffroy Hautier,
@@ -331,7 +330,7 @@ Materials Science, 2013, 68, 314–319. `doi:10.1016/j.commatsci.2012.10.028
 </div>
 </section>
 <section id="license">
-<h1>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h1>
+<h1>License<a class="headerlink" href="#license" title="Permalink to this heading">¶</a></h1>
 <p>Custodian is released under the MIT License. The terms of the license are as
 follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">MIT</span> <span class="n">License</span> <span class="p">(</span><span class="n">MIT</span><span class="p">)</span>
@@ -410,7 +409,7 @@ follows:</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>

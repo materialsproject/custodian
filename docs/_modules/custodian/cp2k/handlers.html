@@ -1,17 +1,16 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.cp2k.handlers &#8212; custodian 2022.5.26 documentation</title>
+    <title>custodian.cp2k.handlers &#8212; custodian 2023.3.10 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/flasky.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
 
@@ -36,7 +35,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2022.5.26 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.3.10 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.cp2k.handlers</a></li> 
       </ul>
@@ -64,23 +63,21 @@
 <span class="sd">    benefits like writing a wavefunction restart file before quiting.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">time</span>
 
-<span class="kn">from</span> <span class="nn">monty.re</span> <span class="kn">import</span> <span class="n">regrep</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">monty.os.path</span> <span class="kn">import</span> <span class="n">zpath</span>
+<span class="kn">from</span> <span class="nn">monty.re</span> <span class="kn">import</span> <span class="n">regrep</span>
 <span class="kn">from</span> <span class="nn">monty.serialization</span> <span class="kn">import</span> <span class="n">dumpfn</span>
 <span class="kn">from</span> <span class="nn">pymatgen.io.cp2k.inputs</span> <span class="kn">import</span> <span class="n">Cp2kInput</span><span class="p">,</span> <span class="n">Keyword</span>
 <span class="kn">from</span> <span class="nn">pymatgen.io.cp2k.outputs</span> <span class="kn">import</span> <span class="n">Cp2kOutput</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.cp2k.utils</span> <span class="kn">import</span> <span class="n">get_aux_basis</span>
 
-<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">ErrorHandler</span>
 <span class="kn">from</span> <span class="nn">custodian.cp2k.interpreter</span> <span class="kn">import</span> <span class="n">Cp2kModder</span>
-<span class="kn">from</span> <span class="nn">custodian.cp2k.utils</span> <span class="kn">import</span> <span class="n">restart</span><span class="p">,</span> <span class="n">tail</span><span class="p">,</span> <span class="n">get_conv</span>
+<span class="kn">from</span> <span class="nn">custodian.cp2k.utils</span> <span class="kn">import</span> <span class="n">get_conv</span><span class="p">,</span> <span class="n">restart</span><span class="p">,</span> <span class="n">tail</span>
+<span class="kn">from</span> <span class="nn">custodian.custodian</span> <span class="kn">import</span> <span class="n">ErrorHandler</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Nicholas Winner&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.0&quot;</span>
@@ -128,7 +125,7 @@
 <span class="sd">        Check for error in std_err file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std_err</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std_err</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">l</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                 <span class="k">for</span> <span class="n">err</span><span class="p">,</span> <span class="n">msgs</span> <span class="ow">in</span> <span class="n">StdErrHandler</span><span class="o">.</span><span class="n">error_msgs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -204,29 +201,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scf</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">restart</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mixing_hierarchy</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;BROYDEN_MIXING&quot;</span><span class="p">,</span> <span class="s2">&quot;BROYDEN_MIXING_LINEAR&quot;</span><span class="p">,</span> <span class="s2">&quot;PULAY_MIXING&quot;</span><span class="p">,</span> <span class="s2">&quot;PULAY_MIXING_LINEAR&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">zpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">)):</span>
-            <span class="n">ci</span> <span class="o">=</span> <span class="n">Cp2kInput</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">zpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">))</span>
-            <span class="k">if</span> <span class="n">ci</span><span class="p">[</span><span class="s2">&quot;GLOBAL&quot;</span><span class="p">][</span><span class="s2">&quot;RUN_TYPE&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span>
-                <span class="s2">&quot;ENERGY&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;ENERGY_FORCE&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;WAVEFUNCTION_OPTIMIZATION&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;WFN_OPT&quot;</span><span class="p">,</span>
-            <span class="p">]:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">is_static</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">is_static</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">is_ot</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="s2">&quot;FORCE_EVAL/DFT/SCF/OT&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">ci</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="s2">&quot;FORCE_EVAL/DFT/SCF/MIXING&quot;</span><span class="p">):</span>
-                <span class="n">method</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">ci</span><span class="o">.</span><span class="n">by_path</span><span class="p">(</span><span class="s2">&quot;FORCE_EVAL/DFT/SCF/MIXING&quot;</span><span class="p">)</span>
-                    <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;METHOD&quot;</span><span class="p">,</span> <span class="n">Keyword</span><span class="p">(</span><span class="s2">&quot;METHOD&quot;</span><span class="p">,</span> <span class="s2">&quot;DIRECT_P_MIXING&quot;</span><span class="p">))</span>
-                    <span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="p">)</span>
-                <span class="n">alpha</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">by_path</span><span class="p">(</span><span class="s2">&quot;FORCE_EVAL/DFT/SCF/MIXING&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ALPHA&quot;</span><span class="p">,</span> <span class="n">Keyword</span><span class="p">(</span><span class="s2">&quot;ALPHA&quot;</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">))</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">beta</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">by_path</span><span class="p">(</span><span class="s2">&quot;FORCE_EVAL/DFT/SCF/MIXING&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;BETA&quot;</span><span class="p">,</span> <span class="n">Keyword</span><span class="p">(</span><span class="s2">&quot;BETA&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">ext</span> <span class="o">=</span> <span class="s2">&quot;_LINEAR&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="n">beta</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">mixing_hierarchy</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mixing_hierarchy</span> <span class="k">if</span> <span class="n">m</span> <span class="o">!=</span> <span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="n">ext</span><span class="p">]</span>
 
 <div class="viewcode-block" id="UnconvergedScfErrorHandler.check"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.UnconvergedScfErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -235,6 +209,8 @@
         <span class="c1"># Checks output file for errors.</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">Cp2kOutput</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="n">auto_load</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">out</span><span class="o">.</span><span class="n">convergence</span><span class="p">()</span>
+        <span class="n">ci</span> <span class="o">=</span> <span class="n">Cp2kInput</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">zpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_ot</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="s2">&quot;FORCE_EVAL/DFT/SCF/OT&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">filenames</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;restart&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">restart</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">filenames</span><span class="p">[</span><span class="s2">&quot;restart&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
@@ -261,7 +237,6 @@
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Non-converging Job&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div>
 
     <span class="k">def</span> <span class="nf">__correct_ot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ci</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply corrections to OT calculation, if possible.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -373,7 +348,6 @@
         <span class="k">return</span> <span class="n">actions</span>
 
     <span class="k">def</span> <span class="nf">__correct_diag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ci</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply corrections to diagonalization calculation, if possible</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -959,47 +933,6 @@
                             <span class="p">},</span>
                         <span class="p">}</span>
                     <span class="p">)</span>
-            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">ci</span><span class="o">.</span><span class="n">by_path</span><span class="p">(</span><span class="s2">&quot;FORCE_EVAL/SUBSYS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">subsections</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;KIND&quot;</span><span class="p">:</span>
-                    <span class="n">el</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ELEMENT&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span> <span class="ow">or</span> <span class="n">v</span><span class="o">.</span><span class="n">section_parameters</span>
-                    <span class="n">el</span> <span class="o">=</span> <span class="n">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="n">bs</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">by_path</span><span class="p">(</span><span class="s2">&quot;FORCE_EVAL/SUBSYS&quot;</span><span class="p">)[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;BASIS_SET&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bs</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">):</span>
-                        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_bs</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bs</span><span class="p">):</span>
-                            <span class="k">if</span> <span class="s2">&quot;AUX_FIT&quot;</span> <span class="ow">in</span> <span class="p">[</span><span class="n">val</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">bs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]:</span>
-                                <span class="n">aux</span> <span class="o">=</span> <span class="kc">None</span>
-                                <span class="k">if</span> <span class="n">el</span> <span class="o">==</span> <span class="s2">&quot;Li&quot;</span><span class="p">:</span>  <span class="c1"># special case of Li aux basis</span>
-                                    <span class="n">aux</span> <span class="o">=</span> <span class="n">get_aux_basis</span><span class="p">({</span><span class="n">el</span><span class="p">:</span> <span class="s2">&quot;cFIT4-SR&quot;</span><span class="p">})</span>
-                                <span class="k">elif</span> <span class="ow">not</span> <span class="n">bs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;cp&quot;</span><span class="p">):</span>
-                                    <span class="n">aux</span> <span class="o">=</span> <span class="n">get_aux_basis</span><span class="p">({</span><span class="n">el</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span> <span class="s2">&quot;cpFIT&quot;</span><span class="p">)</span>
-                                    <span class="k">if</span> <span class="ow">not</span> <span class="n">aux</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;cpFIT&quot;</span><span class="p">):</span>
-                                        <span class="n">aux</span> <span class="o">=</span> <span class="kc">None</span>
-                                <span class="k">if</span> <span class="n">aux</span><span class="p">:</span>
-                                    <span class="n">bs</span><span class="o">.</span><span class="n">keywords</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-                                    <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                                        <span class="p">{</span>
-                                            <span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span>
-                                            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span>
-                                                <span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span>
-                                                    <span class="s2">&quot;FORCE_EVAL&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;SUBSYS&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;BASIS_SET&quot;</span><span class="p">:</span> <span class="s2">&quot;AUX_FIT &quot;</span> <span class="o">+</span> <span class="n">aux</span><span class="p">[</span><span class="n">el</span><span class="p">]}}}</span>
-                                                <span class="p">}</span>
-                                            <span class="p">},</span>
-                                        <span class="p">}</span>
-                                    <span class="p">)</span>
-                                    <span class="k">for</span> <span class="n">_bs</span> <span class="ow">in</span> <span class="n">bs</span><span class="p">:</span>
-                                        <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                                            <span class="p">{</span>
-                                                <span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span>
-                                                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span>
-                                                    <span class="s2">&quot;_inc&quot;</span><span class="p">:</span> <span class="p">{</span>
-                                                        <span class="s2">&quot;FORCE_EVAL&quot;</span><span class="p">:</span> <span class="p">{</span>
-                                                            <span class="s2">&quot;SUBSYS&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;BASIS_SET&quot;</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_bs</span><span class="o">.</span><span class="n">values</span><span class="p">)}}</span>
-                                                        <span class="p">}</span>
-                                                    <span class="p">}</span>
-                                                <span class="p">},</span>
-                                            <span class="p">}</span>
-                                        <span class="p">)</span>
-                                    <span class="k">break</span>
 
             <span class="n">m</span> <span class="o">=</span> <span class="n">regrep</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span>
@@ -1247,7 +1180,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>

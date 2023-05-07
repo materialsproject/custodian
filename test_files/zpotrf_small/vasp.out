@@ -1,0 +1,31 @@
+ running on    8 total cores
+ distrk:  each k-point on    8 cores,    1 groups
+ distr:  one band on    2 cores,    4 groups
+ using from now: INCAR
+ vasp.5.3.5 31Mar14 (build Sep 02 2014 18:36:44) complex
+
+ POSCAR found type information on POSCAR  Rb Sb Cl
+ POSCAR found :  3 types and      10 ions
+ scaLAPACK will be used
+ WARNING: PSMAXN for non-local potential too small
+ LDA part: xc-table for Pade appr. of Perdew
+ POSCAR, INCAR and KPOINTS ok, starting setup
+ FFT: planning ...
+ WAVECAR not read
+ WARNING: chargedensity file is incomplete
+ LAPACK: Routine ZPOTRF failed!           1           1           1
+ LAPACK: Routine ZPOTRF failed!
+ LAPACK: Routine ZPOTRF failed!           1           1           1
+ LAPACK: Routine ZPOTRF failed!
+ LAPACK: Routine ZPOTRF failed!           1           1           1
+ LAPACK: Routine ZPOTRF failed!
+ LAPACK: Routine ZPOTRF failed!           1           1           1
+ LAPACK: Routine ZPOTRF failed!
+ LAPACK: Routine ZPOTRF failed!           1           1           1
+ LAPACK: Routine ZPOTRF failed!
+ LAPACK: Routine ZPOTRF failed!           1           1           1
+ LAPACK: Routine ZPOTRF failed!
+ LAPACK: Routine ZPOTRF failed!           1           1           1
+ LAPACK: Routine ZPOTRF failed!
+ LAPACK: Routine ZPOTRF failed!           1           1           1
+ LAPACK: Routine ZPOTRF failed!
