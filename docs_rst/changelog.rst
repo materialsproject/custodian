@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v2023.5.12
+----------
+- Add back kwargs to VaspHandler to maintain backward compatibility (@arosen93)
+
 v2023.5.7
 ---------
 - VASP Handler: Better error checking for too_few_nbands (@arosen93)
