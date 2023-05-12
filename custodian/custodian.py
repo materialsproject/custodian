@@ -125,6 +125,7 @@ class Custodian:
         checkpoint=False,
         terminate_func=None,
         terminate_on_nonzero_returncode=True,
+        **kwargs,
     ):
         """
         Initializes a Custodian from a list of jobs and error handlers.
