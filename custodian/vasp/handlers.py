@@ -111,6 +111,7 @@ class VaspErrorHandler(ErrorHandler):
         output_filename="vasp.out",
         errors_subset_to_catch=None,
         vtst_fixes=False,
+        **kwargs,
     ):
         """
         Initializes the handler with the output file to check.
