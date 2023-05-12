@@ -1,6 +1,17 @@
 Change Log
 ==========
 
+v2023.5.7
+---------
+- VASP Handler: Better error checking for too_few_nbands (@arosen93)
+- VASP Handler: General clean up and mitigating unnecessary INCAR swaps (@arosen93)
+- VASP Handler: Remove deprecated handlers and kwargs (@arosen93)
+- VASP Handler: Add a new correction for the ZPOTRF ZTRTRI error that is specific to small structures (@arosen93)
+- VASP Handler: Add a new handler for the SET_CORE_WF error (@arosen93)
+- VASP Handler: Only apply the algo_tet handler if SCF convergence failed (@arosen93)
+- VASP Handler: AMIN handler should only be applied if SCF is not converged (@arosen93)
+- VASP Handler: Do not set ADDGRID to True (@arosen93)
+
 v2023.3.8
 ---------
 * Updates for QChem6 support (@samblau)
