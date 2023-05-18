@@ -673,7 +673,16 @@ class VaspJob(Job):
         """
         logger.info(f"Custodian terminating all VASP processes within process group {self.sbprcss.pid}")
         try:
-            os.killpg(os.getpgid(self.sbprcss.pid), signal.SIGTERM)
+            try: # first try to terminate all VASP processes based on sbprcss.pid
+                os.killpg(os.getpgid(self.sbprcss.pid), signal.SIGTERM)
+            except Exception: # As a backup method, try to kill using "killall"
+                cmds = self.vasp_cmd
+                if self.gamma_vasp_cmd:
+                    cmds += self.gamma_vasp_cmd
+                for k in cmds:
+                    if "vasp" in k:
+                        try:
+                            os.system(f"killall {k}")
         except Exception:
             pass
 
