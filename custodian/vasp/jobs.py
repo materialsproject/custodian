@@ -681,8 +681,10 @@ class VaspJob(Job):
                     cmds += self.gamma_vasp_cmd
                 for k in cmds:
                     if "vasp" in k:
-                        try:
+                    	try:
                             os.system(f"killall {k}")
+                        except Exception:
+                            pass
         except Exception:
             pass
 
