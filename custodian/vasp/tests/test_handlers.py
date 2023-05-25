@@ -279,7 +279,6 @@ class VaspErrorHandlerTest(unittest.TestCase):
             ],
         )
 
-
     def test_to_from_dict(self):
         h = VaspErrorHandler("random_name")
         h2 = VaspErrorHandler.from_dict(h.as_dict())
