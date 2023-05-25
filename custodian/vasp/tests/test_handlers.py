@@ -262,12 +262,12 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h = VaspErrorHandler("vasp6.coef")
         h.check()
         d = h.correct()
-        self.assertEqual(
-            d["actions"],
-            [
-                {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}},
-            ],
-        )
+        self.assertEqual(d["actions"], [{"dict": "INCAR", "action": {"_set": {"ISTART": 0}}}])
+
+        h = VaspErrorHandler("vasp6.coef2")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["actions"], [{"dict": "INCAR", "action": {"_set": {"ISTART": 0}}}])
 
     def test_to_from_dict(self):
         h = VaspErrorHandler("random_name")
@@ -510,7 +510,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["actions"], None)
 
     def test_too_few_bands_round_error(self):
-        # originally there are  NBANDS= 7
+        # originally there are NBANDS= 7
         # correction should increase it
         shutil.copy("INCAR.too_few_bands_round_error", "INCAR")
         h = VaspErrorHandler("vasp.too_few_bands_round_error")
