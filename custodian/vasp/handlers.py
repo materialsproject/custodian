@@ -102,7 +102,7 @@ class VaspErrorHandler(ErrorHandler):
         "bravais": ["Inconsistent Bravais lattice"],
         "nbands_not_sufficient": ["number of bands is not sufficient"],
         "hnform": ["HNFORM: k-point generating"],
-        "coef": ["while reading plane"],
+        "coef": ["while reading plane", "while reading WAVECAR"],
         "set_core_wf": ["internal error in SET_CORE_WF"],
     }
 
