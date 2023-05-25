@@ -262,12 +262,23 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h = VaspErrorHandler("vasp6.coef")
         h.check()
         d = h.correct()
-        self.assertEqual(d["actions"], [{"dict": "INCAR", "action": {"_set": {"ISTART": 0}}}])
+        self.assertEqual(
+            d["actions"],
+            [
+                {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}},
+            ],
+        )
 
         h = VaspErrorHandler("vasp6.coef2")
         h.check()
         d = h.correct()
-        self.assertEqual(d["actions"], [{"dict": "INCAR", "action": {"_set": {"ISTART": 0}}}])
+        self.assertEqual(
+            d["actions"],
+            [
+                {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}},
+            ],
+        )
+
 
     def test_to_from_dict(self):
         h = VaspErrorHandler("random_name")

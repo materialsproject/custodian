@@ -365,7 +365,7 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}})
 
         if "coef" in self.errors:
-            actions.append({"dict": "INCAR", "action": {"_set": {"ISTART": 0}}})
+            actions.append({"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}})
 
         if "brions" in self.errors:
             # Copy CONTCAR to POSCAR so we do not lose our progress.
