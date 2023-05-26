@@ -674,7 +674,7 @@ class VaspJob(Job):
         runs vasp (e.g. mpirun)
         """
         logger.info(f"Custodian terminating all VASP processes that are "
-                    "children of  {self.sbprcss.pid}")
+                    f"children of {self.sbprcss.pid}")
         child_processes = self.sbprcss.children(recursive=True)
         for child in child_processes:
             if 'vasp' in child.name():
@@ -688,7 +688,7 @@ class VaspJob(Job):
                           "with pid {child.pid}: Permission denied.")
                 except Exception as e:
                     logger.warning(f"Failed to kill process {child.name()} "
-                          "with pid {child.pid}: {str(e)}")
+                          f"with pid {child.pid}: {str(e)}")
 
 
 class VaspNEBJob(VaspJob):
