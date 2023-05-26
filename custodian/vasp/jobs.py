@@ -676,7 +676,7 @@ class VaspJob(Job):
         """
         logger.info(f"Custodian terminating all VASP processes that are "
                     f"children of {self.sbprcss.pid}")
-        parent_process = psutil.Process(pid=self.sbprcss)
+        parent_process = psutil.Process(pid=self.sbprcss.pid)
         child_processes = parent_process.children(recursive=True)
         for child in child_processes:
             if 'vasp' in child.name().lower():
