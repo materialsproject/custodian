@@ -8,6 +8,7 @@ import os
 import shutil
 import signal
 import psutil
+import subprocess
 from shutil import which
 
 import numpy as np
@@ -239,7 +240,7 @@ class VaspJob(Job):
         Perform the actual VASP run.
 
         Returns:
-            (psutil.Popen) Used for monitoring.
+            (subprocess.Popen) Used for monitoring.
         """
         cmd = list(self.vasp_cmd)
         if self.auto_gamma:
@@ -254,7 +255,7 @@ class VaspJob(Job):
         logger.info(f"Running {' '.join(cmd)}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr
-            self.sbprcss = psutil.Popen(
+            self.sbprcss = subprocess.Popen(
                 cmd, stdout=f_std, stderr=f_err, start_new_session=True
             )  # pylint: disable=R1732
             return self.sbprcss
@@ -675,7 +676,8 @@ class VaspJob(Job):
         """
         logger.info(f"Custodian terminating all VASP processes that are "
                     f"children of {self.sbprcss.pid}")
-        child_processes = self.sbprcss.children(recursive=True)
+        parent_process = psutil.Process(pid=self.sbprcss)
+        child_processes = parent_process.children(recursive=True)
         for child in child_processes:
             if 'vasp' in child.name().lower():
                 try:
@@ -754,7 +756,7 @@ class VaspNEBJob(VaspJob):
                 prevent VASP from deleting it once it finishes.
             gamma_vasp_cmd (str): Command for gamma vasp version when
                 auto_gamma is True. Should follow the list style of
-                psutil. Defaults to None, which means ".gamma" is added
+                subprocess. Defaults to None, which means ".gamma" is added
                 to the last argument of the standard vasp_cmd.
             settings_override ([dict]): An ansible style list of dict to
                 override changes. For example, to set ISTART=1 for subsequent
@@ -850,7 +852,7 @@ class VaspNEBJob(VaspJob):
         Perform the actual VASP run.
 
         Returns:
-            (psutil.Popen) Used for monitoring.
+            (subprocess.Popen) Used for monitoring.
         """
         cmd = list(self.vasp_cmd)
         if self.auto_gamma:
@@ -868,7 +870,7 @@ class VaspNEBJob(VaspJob):
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # Use line buffering for stderr
             self.sbprcss_group_id = 1234
-            self.sbprcss = psutil.Popen(
+            self.sbprcss = subprocess.Popen(
                 cmd, stdout=f_std, stderr=f_err,
                 start_new_session=True, process_group=self.sbprcss_group_id
             )  # pylint: disable=R1732
