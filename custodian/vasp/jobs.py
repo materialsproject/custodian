@@ -869,10 +869,8 @@ class VaspNEBJob(VaspJob):
         logger.info(f"Running {' '.join(cmd)}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # Use line buffering for stderr
-            self.sbprcss_group_id = 1234
             self.sbprcss = subprocess.Popen(
-                cmd, stdout=f_std, stderr=f_err,
-                start_new_session=True, process_group=self.sbprcss_group_id
+                cmd, stdout=f_std, stderr=f_err, start_new_session=True
             )  # pylint: disable=R1732
             return self.sbprcss
 
