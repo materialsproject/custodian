@@ -7,7 +7,7 @@ import math
 import os
 import shutil
 import signal
-import subprocess
+import psutil
 from shutil import which
 
 import numpy as np
@@ -239,7 +239,7 @@ class VaspJob(Job):
         Perform the actual VASP run.
 
         Returns:
-            (subprocess.Popen) Used for monitoring.
+            (psutil.Popen) Used for monitoring.
         """
         cmd = list(self.vasp_cmd)
         if self.auto_gamma:
@@ -254,7 +254,7 @@ class VaspJob(Job):
         logger.info(f"Running {' '.join(cmd)}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr
-            self.sbprcss = subprocess.Popen(
+            self.sbprcss = psutil.Popen(
                 cmd, stdout=f_std, stderr=f_err, start_new_session=True
             )  # pylint: disable=R1732
             return self.sbprcss
@@ -670,23 +670,25 @@ class VaspJob(Job):
     def terminate(self):
         """
         Kill all vasp processes associated with the current job.
+        This is done by looking for child processes of the subprocess that
+        runs vasp (e.g. mpirun)
         """
-        logger.info(f"Custodian terminating all VASP processes within process group {self.sbprcss.pid}")
-        try:
-            try:  # first try to terminate all VASP processes based on sbprcss.pid
-                os.killpg(os.getpgid(self.sbprcss.pid), signal.SIGTERM)
-            except Exception:  # As a backup method, try to kill using "killall"
-                cmds = self.vasp_cmd
-                if self.gamma_vasp_cmd:
-                    cmds += self.gamma_vasp_cmd
-                for k in cmds:
-                    if "vasp" in k:
-                        try:
-                            os.system(f"killall {k}")
-                        except Exception:
-                            pass
-        except Exception:
-            pass
+        logger.info(f"Custodian terminating all VASP processes that are "
+                    "children of  {self.sbprcss.pid}")
+        child_processes = self.sbprcss.children(recursive=True)
+        for child in child_processes:
+            if 'vasp' in child.name():
+                try:
+                    os.kill(child.pid,signal.SIGTERM)
+                except ProcessLookupError:
+                    print(f"Failed to kill process {child.name()} "
+                          "with pid {child.pid}: Process not found.")
+                except PermissionError:
+                    print(f"Failed to kill process {child.name()} "
+                          "with pid {child.pid}: Permission denied.")
+                except Exception as e:
+                    print(f"Failed to kill process {child.name()} "
+                          "with pid {child.pid}: {str(e)}")
 
 
 class VaspNEBJob(VaspJob):
@@ -752,7 +754,7 @@ class VaspNEBJob(VaspJob):
                 prevent VASP from deleting it once it finishes.
             gamma_vasp_cmd (str): Command for gamma vasp version when
                 auto_gamma is True. Should follow the list style of
-                subprocess. Defaults to None, which means ".gamma" is added
+                psutil. Defaults to None, which means ".gamma" is added
                 to the last argument of the standard vasp_cmd.
             settings_override ([dict]): An ansible style list of dict to
                 override changes. For example, to set ISTART=1 for subsequent
@@ -848,7 +850,7 @@ class VaspNEBJob(VaspJob):
         Perform the actual VASP run.
 
         Returns:
-            (subprocess.Popen) Used for monitoring.
+            (psutil.Popen) Used for monitoring.
         """
         cmd = list(self.vasp_cmd)
         if self.auto_gamma:
@@ -865,8 +867,10 @@ class VaspNEBJob(VaspJob):
         logger.info(f"Running {' '.join(cmd)}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # Use line buffering for stderr
-            self.sbprcss = subprocess.Popen(
-                cmd, stdout=f_std, stderr=f_err, start_new_session=True
+            self.sbprcss_group_id = 1234
+            self.sbprcss = psutil.Popen(
+                cmd, stdout=f_std, stderr=f_err,
+                start_new_session=True, process_group=self.sbprcss_group_id
             )  # pylint: disable=R1732
             return self.sbprcss
 
