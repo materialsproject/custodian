@@ -677,7 +677,7 @@ class VaspJob(Job):
                     f"children of {self.sbprcss.pid}")
         child_processes = self.sbprcss.children(recursive=True)
         for child in child_processes:
-            if 'vasp' in child.name():
+            if 'vasp' in child.name().lower():
                 try:
                     os.kill(child.pid,signal.SIGTERM)
                 except ProcessLookupError:
