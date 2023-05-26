@@ -681,13 +681,13 @@ class VaspJob(Job):
                 try:
                     os.kill(child.pid,signal.SIGTERM)
                 except ProcessLookupError:
-                    print(f"Failed to kill process {child.name()} "
+                    logger.warning(f"Failed to kill process {child.name()} "
                           "with pid {child.pid}: Process not found.")
                 except PermissionError:
-                    print(f"Failed to kill process {child.name()} "
+                    logger.warning(f"Failed to kill process {child.name()} "
                           "with pid {child.pid}: Permission denied.")
                 except Exception as e:
-                    print(f"Failed to kill process {child.name()} "
+                    logger.warning(f"Failed to kill process {child.name()} "
                           "with pid {child.pid}: {str(e)}")
 
 
