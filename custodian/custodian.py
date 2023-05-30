@@ -118,7 +118,7 @@ class Custodian:
         max_errors_per_job=None,
         max_errors=1,
         polling_time_step=10,
-        monitor_freq=30,
+        monitor_freq=20,
         skip_over_errors=False,
         scratch_dir=None,
         gzipped_output=False,
@@ -461,7 +461,8 @@ class Custodian:
 
             # While the job is running, we use the handlers that are
             # monitors to monitor the job.
-            if isinstance(p, subprocess.Popen):
+            import psutil
+            if isinstance(p, psutil.Popen):
                 if self.monitors:
                     n = 0
                     while True:

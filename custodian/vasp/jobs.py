@@ -255,7 +255,7 @@ class VaspJob(Job):
         logger.info(f"Running {' '.join(cmd)}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr
-            self.sbprcss = subprocess.Popen(
+            self.sbprcss = psutil.Popen(
                 cmd, stdout=f_std, stderr=f_err, start_new_session=True
             )  # pylint: disable=R1732
             return self.sbprcss
@@ -674,23 +674,24 @@ class VaspJob(Job):
         This is done by looking for child processes of the subprocess that
         runs vasp (e.g. mpirun)
         """
-        logger.info(f"Custodian terminating all VASP processes that are "
-                    f"children of {self.sbprcss.pid}")
-        parent_process = psutil.Process(pid=self.sbprcss.pid)
-        child_processes = parent_process.children(recursive=True)
-        for child in child_processes:
-            if 'vasp' in child.name().lower():
-                try:
-                    os.kill(child.pid,signal.SIGTERM)
-                except ProcessLookupError:
-                    logger.warning(f"Failed to kill process {child.name()} "
-                          "with pid {child.pid}: Process not found.")
-                except PermissionError:
-                    logger.warning(f"Failed to kill process {child.name()} "
-                          "with pid {child.pid}: Permission denied.")
-                except Exception as e:
-                    logger.warning(f"Failed to kill process {child.name()} "
-                          f"with pid {child.pid}: {str(e)}")
+        if psutil.pid_exists(self.sbprcss.pid):
+            parent_process = psutil.Process(pid=self.sbprcss.pid)
+            child_processes = parent_process.children(recursive=True)
+            for child in child_processes:
+                if psutil.pid_exists(child.pid) and 'vasp' in child.name().lower():
+                    try:
+                        os.kill(child.pid, signal.SIGTERM)
+                    # except ProcessLookupError:
+                    #     logger.warning(f"Failed to kill process {child.name()} "
+                    #           "with pid {child.pid}: Process not found.")
+                    except PermissionError:
+                        logger.warning(f"Failed to kill process {child.name()} "
+                              "with pid {child.pid}: Permission denied.")
+                    except Exception as e:
+                        logger.warning(f"Failed to kill process {child.name()} "
+                              f"with pid {child.pid}: {str(e)}")
+        logger.warning(f"Failed to kill process with pid {self.sbprcss.pid} "
+                       "probably it has already finished.")
 
 
 class VaspNEBJob(VaspJob):
