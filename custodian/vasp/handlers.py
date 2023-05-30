@@ -1125,7 +1125,7 @@ class IncorrectSmearingHandler(ErrorHandler):
     using the smearing settings appropriate for metals (ISMEAR=2, SIGMA=0.2).
     """
 
-    is_monitor = False
+    is_monitor = True
 
     def __init__(self, output_filename="vasprun.xml"):
         """

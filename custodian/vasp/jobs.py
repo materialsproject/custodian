@@ -258,6 +258,14 @@ class VaspJob(Job):
             self.sbprcss = psutil.Popen(
                 cmd, stdout=f_std, stderr=f_err, start_new_session=True
             )  # pylint: disable=R1732
+            import time
+            time.sleep(1)
+            print(f'parent process started with name {self.sbprcss.name()} and pid {self.sbprcss.pid}')
+            self.child_processes = self.sbprcss.children(recursive=True)
+            from pprint import pprint
+            print(f' we have spawned {len(self.child_processes)} children')
+            for child in self.child_processes:
+                pprint(f'subprocess exists with name {child.name()}, pid {child.pid}, running on cpu {child.cpu_num()}')
             return self.sbprcss
 
     def postprocess(self):
@@ -675,34 +683,38 @@ class VaspJob(Job):
         runs vasp (e.g. mpirun)
         """
         if psutil.pid_exists(self.sbprcss.pid):
-            parent_process = psutil.Process(pid=self.sbprcss.pid)
-            child_processes = parent_process.children(recursive=True)
-            for child in child_processes:
-                if psutil.pid_exists(child.pid) and 'vasp' in child.name().lower():
-                    try:
-                        os.kill(child.pid, signal.SIGTERM)
-                    # except ProcessLookupError:
-                    #     logger.warning(f"Failed to kill process {child.name()} "
-                    #           "with pid {child.pid}: Process not found.")
-                    except PermissionError:
-                        logger.warning(f"Failed to kill process {child.name()} "
-                              "with pid {child.pid}: Permission denied.")
-                    except Exception as e:
-                        logger.warning(f"Failed to kill process {child.name()} "
-                              f"with pid {child.pid}: {str(e)}")
+            #parent_process = psutil.Process(pid=self.sbprcss.pid)
+            print(f'parent procesess {self.sbprcss.name()} with pid {self.sbprcss.pid} still exists')
         else:
-            logger.warning(f"Failed to kill process with pid {self.sbprcss.pid} "
-                           "probably it has already finished.")
-            logger.info("Custodian terminating all VASP jobs")
-            cmds = self.vasp_cmd
-            if self.gamma_vasp_cmd:
-                cmds += self.gamma_vasp_cmd
-            for k in cmds:
-                if "vasp" in k:
-                    try:
-                        os.system(f"killall {k}")
-                    except Exception:
-                        pass
+            print('parent procesess is gone, children might survive.')
+            print(self.child_processes)
+        for child in self.child_processes:
+            if psutil.pid_exists(child.pid) and 'vasp' in child.name().lower():
+                print(f'killing child {child.name()} with pid {child.pid}')
+                try:
+                    child.kill()
+                # except ProcessLookupError:
+                #     logger.warning(f"Failed to kill process {child.name()} "
+                #           "with pid {child.pid}: Process not found.")
+                except PermissionError:
+                    logger.warning(f"Failed to kill process {child.name()} "
+                          "with pid {child.pid}: Permission denied.")
+                except Exception as e:
+                    logger.warning(f"Failed to kill process {child.name()} "
+                          f"with pid {child.pid}: {str(e)}")
+        # else:
+        #     logger.warning(f"Failed to kill process with pid {self.sbprcss.pid} "
+        #                    "probably it has already finished.")
+            # logger.info("Custodian terminating all VASP jobs")
+            # cmds = self.vasp_cmd
+            # if self.gamma_vasp_cmd:
+            #     cmds += self.gamma_vasp_cmd
+            # for k in cmds:
+            #     if "vasp" in k:
+            #         try:
+            #             os.system(f"killall {k}")
+            #         except Exception:
+            #             pass
                
 
 
