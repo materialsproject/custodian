@@ -690,8 +690,20 @@ class VaspJob(Job):
                     except Exception as e:
                         logger.warning(f"Failed to kill process {child.name()} "
                               f"with pid {child.pid}: {str(e)}")
-        logger.warning(f"Failed to kill process with pid {self.sbprcss.pid} "
-                       "probably it has already finished.")
+        else:
+            logger.warning(f"Failed to kill process with pid {self.sbprcss.pid} "
+                           "probably it has already finished.")
+            logger.info("Custodian terminating all VASP jobs")
+            cmds = self.vasp_cmd
+            if self.gamma_vasp_cmd:
+                cmds += self.gamma_vasp_cmd
+            for k in cmds:
+                if "vasp" in k:
+                    try:
+                        os.system(f"killall {k}")
+                    except Exception:
+                        pass
+               
 
 
 class VaspNEBJob(VaspJob):

@@ -118,7 +118,7 @@ class Custodian:
         max_errors_per_job=None,
         max_errors=1,
         polling_time_step=10,
-        monitor_freq=20,
+        monitor_freq=30,
         skip_over_errors=False,
         scratch_dir=None,
         gzipped_output=False,
