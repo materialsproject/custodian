@@ -87,6 +87,7 @@ class VaspJob(Job):
         gamma_vasp_cmd=None,
         copy_magmom=False,
         auto_continue=False,
+        start_time_buffer=2,
     ):
         """
         This constructor is necessarily complex due to the need for
@@ -152,7 +153,7 @@ class VaspJob(Job):
         self.gamma_vasp_cmd = gamma_vasp_cmd
         self.copy_magmom = copy_magmom
         self.auto_continue = auto_continue
-        self.sbprcss = None
+        self.start_time_buffer = start_time_buffer
 
         if SENTRY_DSN:
             # if using Sentry logging, add specific VASP executable to scope
@@ -255,11 +256,11 @@ class VaspJob(Job):
         logger.info(f"Running {' '.join(cmd)}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr
-            self.sbprcss = psutil.Popen(
+            sbprcss = subprocess.Popen(
                 cmd, stdout=f_std, stderr=f_err, start_new_session=True
             )  # pylint: disable=R1732
-            self.create_time = self.sbprcss.create_time()
-            return self.sbprcss
+            self.create_time = psutil.Process(sbprcss.pid).create_time()
+            return sbprcss
 
     def postprocess(self):
         """
@@ -672,51 +673,38 @@ class VaspJob(Job):
     def terminate(self):
         """
         Kill all vasp processes associated with the current job.
-        This is done by looking for child processes of the subprocess that
-        runs vasp (e.g. mpirun)
+        This is done by looking for vasp processes that started within
+        time_buffer seconds of the evocation of the vasp_cmd in the self
+        self.run method.
         """
+        # for proc in psutil.process_iter():      
+        #     if 'vasp' in proc.name().lower():
+        #         proc_time = proc.create_time()
+        #         if (proc_time > self.create_time and 
+        #             proc_time < self.create_time+self.start_time_buffer):
+        #             if psutil.pid_exists(proc.pid):
+        #                 proc.kill()
+        #             else:
+        #                 pass
+        workdir = os.getcwd()
+        is_killed = False
         for proc in psutil.process_iter():      
-            if 'vasp' in proc.name().lower():
-                proc_time = proc.create_time()
-                if proc_time > self.create_time and proc_time < self.create_time+2:
-                    logger.info(f'kill process with pid {proc.pid}')
-                    proc.kill()
-        from time import sleep
-        sleep(3)
-        # if psutil.pid_exists(self.sbprcss.pid):
-        #     #parent_process = psutil.Process(pid=self.sbprcss.pid)
-        #     print(f'parent procesess {self.sbprcss.name()} with pid {self.sbprcss.pid} still exists')
-        # else:
-        #     print('parent procesess is gone, children might survive.')
-        #     print(self.child_processes)
-        # for child in self.child_processes:
-        #     if psutil.pid_exists(child.pid) and 'vasp' in child.name().lower():
-        #         print(f'killing child {child.name()} with pid {child.pid}')
-        #         try:
-        #             child.kill()
-        #         # except ProcessLookupError:
-        #         #     logger.warning(f"Failed to kill process {child.name()} "
-        #         #           "with pid {child.pid}: Process not found.")
-        #         except PermissionError:
-        #             logger.warning(f"Failed to kill process {child.name()} "
-        #                   "with pid {child.pid}: Permission denied.")
-        #         except Exception as e:
-        #             logger.warning(f"Failed to kill process {child.name()} "
-        #                   f"with pid {child.pid}: {str(e)}")
-        # else:
-        #     logger.warning(f"Failed to kill process with pid {self.sbprcss.pid} "
-        #                    "probably it has already finished.")
-            # logger.info("Custodian terminating all VASP jobs")
-            # cmds = self.vasp_cmd
-            # if self.gamma_vasp_cmd:
-            #     cmds += self.gamma_vasp_cmd
-            # for k in cmds:
-            #     if "vasp" in k:
-            #         try:
-            #             os.system(f"killall {k}")
-            #         except Exception:
-            #             pass
-               
+            try:
+                if 'vasp' in proc.name().lower():
+                    for file in proc.open_files():
+                        if workdir+"/CHGCAR" == file.path and psutil.pid_exists(proc.pid):
+                            proc.kill()
+                            print(f'kill process with pid {proc.pid}')
+                            is_killed = True
+            except(psutil.NoSuchProcess, psutil.AccessDenied):
+                continue
+        if not is_killed:
+            cmds = self.vasp_cmd
+            if self.gamma_vasp_cmd:
+                cmds += self.gamma_vasp_cmd
+                for k in cmds:
+                    if "vasp" in k:
+                        subprocess.run(["killall", f"{k}"])
 
 
 class VaspNEBJob(VaspJob):
@@ -807,7 +795,6 @@ class VaspNEBJob(VaspJob):
         self.settings_override = settings_override
         self.neb_dirs = []  # 00, 01, etc.
         self.neb_sub = []  # 01, 02, etc.
-        self.sbprcss = None
 
         for path in os.listdir("."):
             if os.path.isdir(path) and path.isdigit():
@@ -895,10 +882,9 @@ class VaspNEBJob(VaspJob):
         logger.info(f"Running {' '.join(cmd)}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # Use line buffering for stderr
-            self.sbprcss = subprocess.Popen(
+            return subprocess.Popen(
                 cmd, stdout=f_std, stderr=f_err, start_new_session=True
             )  # pylint: disable=R1732
-            return self.sbprcss
 
     def postprocess(self):
         """

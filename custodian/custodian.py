@@ -461,8 +461,7 @@ class Custodian:
 
             # While the job is running, we use the handlers that are
             # monitors to monitor the job.
-            import psutil
-            if isinstance(p, psutil.Popen):
+            if isinstance(p, subprocess.Popen):
                 if self.monitors:
                     n = 0
                     while True:
