@@ -153,7 +153,6 @@ class VaspJob(Job):
         self.gamma_vasp_cmd = gamma_vasp_cmd
         self.copy_magmom = copy_magmom
         self.auto_continue = auto_continue
-        self.start_time_buffer = start_time_buffer
 
         if SENTRY_DSN:
             # if using Sentry logging, add specific VASP executable to scope
@@ -259,7 +258,6 @@ class VaspJob(Job):
             sbprcss = subprocess.Popen(
                 cmd, stdout=f_std, stderr=f_err, start_new_session=True
             )  # pylint: disable=R1732
-            self.create_time = psutil.Process(sbprcss.pid).create_time()
             return sbprcss
 
     def postprocess(self):
@@ -673,32 +671,30 @@ class VaspJob(Job):
     def terminate(self):
         """
         Kill all vasp processes associated with the current job.
-        This is done by looking for vasp processes that started within
-        time_buffer seconds of the evocation of the vasp_cmd in the self
-        self.run method.
+        This is done by looping over all processes and selecting the ones
+        that contain "vasp" as well as access files (CHGCAR in particular)
+        in the custodian working directory.
+        There is also a safety that kills all vasp processes if non of the
+        processes can be killed (This is bad if more than one vasp runs are
+        simultaneously executed on the same node). However, this should never
+        happen.
         """
-        # for proc in psutil.process_iter():      
-        #     if 'vasp' in proc.name().lower():
-        #         proc_time = proc.create_time()
-        #         if (proc_time > self.create_time and 
-        #             proc_time < self.create_time+self.start_time_buffer):
-        #             if psutil.pid_exists(proc.pid):
-        #                 proc.kill()
-        #             else:
-        #                 pass
         workdir = os.getcwd()
+        logger.info(f'kill vasp processes in work dir {workdir}')
         is_killed = False
-        for proc in psutil.process_iter():      
+        for proc in psutil.process_iter():
             try:
                 if 'vasp' in proc.name().lower():
                     for file in proc.open_files():
-                        if workdir+"/CHGCAR" == file.path and psutil.pid_exists(proc.pid):
+                        if (workdir+"/CHGCAR" == file.path
+                            and psutil.pid_exists(proc.pid)):
                             proc.kill()
-                            print(f'kill process with pid {proc.pid}')
                             is_killed = True
             except(psutil.NoSuchProcess, psutil.AccessDenied):
                 continue
         if not is_killed:
+            logger.warning(f'killing vasp processes in work dir {workdir} '
+                           'failed. Resorting to "killall".')
             cmds = self.vasp_cmd
             if self.gamma_vasp_cmd:
                 cmds += self.gamma_vasp_cmd
