@@ -6,9 +6,9 @@ import logging
 import math
 import os
 import shutil
-import psutil
 import subprocess
 from shutil import which
+import psutil
 
 import numpy as np
 from monty.serialization import dumpfn, loadfn
