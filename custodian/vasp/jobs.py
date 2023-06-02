@@ -6,7 +6,6 @@ import logging
 import math
 import os
 import shutil
-import signal
 import psutil
 import subprocess
 from shutil import which
@@ -87,7 +86,6 @@ class VaspJob(Job):
         gamma_vasp_cmd=None,
         copy_magmom=False,
         auto_continue=False,
-        start_time_buffer=2,
     ):
         """
         This constructor is necessarily complex due to the need for
@@ -255,10 +253,7 @@ class VaspJob(Job):
         logger.info(f"Running {' '.join(cmd)}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr
-            sbprcss = subprocess.Popen(
-                cmd, stdout=f_std, stderr=f_err, start_new_session=True
-            )  # pylint: disable=R1732
-            return sbprcss
+            return subprocess.Popen(cmd, stdout=f_std, stderr=f_err, start_new_session=True)  # pylint: disable=R1732
 
     def postprocess(self):
         """
@@ -680,21 +675,19 @@ class VaspJob(Job):
         happen.
         """
         workdir = os.getcwd()
-        logger.info(f'kill vasp processes in work dir {workdir}')
+        logger.info(f"kill vasp processes in work dir {workdir}")
         is_killed = False
         for proc in psutil.process_iter():
             try:
-                if 'vasp' in proc.name().lower():
+                if "vasp" in proc.name().lower():
                     for file in proc.open_files():
-                        if (workdir+"/CHGCAR" == file.path
-                            and psutil.pid_exists(proc.pid)):
+                        if (workdir+"/CHGCAR" == file.path and psutil.pid_exists(proc.pid)):
                             proc.kill()
                             is_killed = True
-            except(psutil.NoSuchProcess, psutil.AccessDenied):
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
                 continue
         if not is_killed:
-            logger.warning(f'killing vasp processes in work dir {workdir} '
-                           'failed. Resorting to "killall".')
+            logger.warning(f"killing vasp processes in work dir {workdir} failed. Resorting to 'killall'.")
             cmds = self.vasp_cmd
             if self.gamma_vasp_cmd:
                 cmds += self.gamma_vasp_cmd
@@ -878,9 +871,7 @@ class VaspNEBJob(VaspJob):
         logger.info(f"Running {' '.join(cmd)}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # Use line buffering for stderr
-            return subprocess.Popen(
-                cmd, stdout=f_std, stderr=f_err, start_new_session=True
-            )  # pylint: disable=R1732
+            return subprocess.Popen(cmd, stdout=f_std, stderr=f_err, start_new_session=True)  # pylint: disable=R1732
 
     def postprocess(self):
         """
