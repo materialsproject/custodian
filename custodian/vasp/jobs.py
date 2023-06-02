@@ -681,7 +681,7 @@ class VaspJob(Job):
             try:
                 if "vasp" in proc.name().lower():
                     for file in proc.open_files():
-                        if (workdir+"/CHGCAR" == file.path and psutil.pid_exists(proc.pid)):
+                        if workdir + "/CHGCAR" == file.path and psutil.pid_exists(proc.pid):
                             proc.kill()
                             is_killed = True
             except (psutil.NoSuchProcess, psutil.AccessDenied):
