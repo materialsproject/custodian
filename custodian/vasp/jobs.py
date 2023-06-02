@@ -8,9 +8,9 @@ import os
 import shutil
 import subprocess
 from shutil import which
-import psutil
 
 import numpy as np
+import psutil
 from monty.serialization import dumpfn, loadfn
 from monty.shutil import decompress_dir
 from pymatgen.core.structure import Structure
