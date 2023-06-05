@@ -605,7 +605,7 @@ class VaspErrorHandler(ErrorHandler):
                 "We suggest using a new version of the POTCAR files to resolve the SET_CORE_WF error.", UserWarning
             )
             return {"errors": ["set_core_wf"], "actions": None}
-        
+
         if "read_error" in self.errors:
             # Unfixable error --- the user made a mistake in the INCAR
             warnings.warn("Looks like you made a typo in the INCAR. Please double-check it.", UserWarning)
