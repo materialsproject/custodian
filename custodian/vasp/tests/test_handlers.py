@@ -536,6 +536,13 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["errors"], ["set_core_wf"])
         self.assertEqual(d["actions"], None)
 
+    def test_read_error(self):
+        h = VaspErrorHandler("vasp.read_error")
+        self.assertEqual(h.check(), True)
+        d = h.correct()
+        self.assertEqual(d["errors"], ["read_error"])
+        self.assertEqual(d["actions"], None)
+
     def tearDown(self):
         os.chdir(test_dir)
         shutil.move("INCAR.orig", "INCAR")

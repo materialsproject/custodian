@@ -104,6 +104,7 @@ class VaspErrorHandler(ErrorHandler):
         "hnform": ["HNFORM: k-point generating"],
         "coef": ["while reading plane", "while reading WAVECAR"],
         "set_core_wf": ["internal error in SET_CORE_WF"],
+        "read_error": ["Error reading item", "Error code was IERR= 5"],
     }
 
     def __init__(
@@ -604,6 +605,11 @@ class VaspErrorHandler(ErrorHandler):
                 "We suggest using a new version of the POTCAR files to resolve the SET_CORE_WF error.", UserWarning
             )
             return {"errors": ["set_core_wf"], "actions": None}
+
+        if "read_error" in self.errors:
+            # Unfixable error --- the user made a mistake in the INCAR
+            warnings.warn("Looks like you made a typo in the INCAR. Please double-check it.", UserWarning)
+            return {"errors": ["read_error"], "actions": None}
 
         if "hnform" in self.errors:
             # The only solution is to change your k-point grid or disable symmetry
