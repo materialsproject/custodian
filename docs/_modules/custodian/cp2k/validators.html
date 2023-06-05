@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.cp2k.validators &#8212; custodian 2023.5.12 documentation</title>
+    <title>custodian.cp2k.validators &#8212; custodian 2023.6.5 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/flasky.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.5.12 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.6.5 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.cp2k.validators</a></li> 
       </ul>
@@ -63,43 +63,43 @@
 
 
 <div class="viewcode-block" id="Cp2kValidator"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.validators.Cp2kValidator">[docs]</a><span class="k">class</span> <span class="nc">Cp2kValidator</span><span class="p">(</span><span class="n">Validator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base validator.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Cp2kValidator.check"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.validators.Cp2kValidator.check">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check whether validation failed. Here, True means</span>
 <span class="sd">        validation failed.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
     <span class="nd">@abstractproperty</span>
     <span class="k">def</span> <span class="nf">kill</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Kill the job with raise error.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="nd">@abstractproperty</span>
     <span class="k">def</span> <span class="nf">exit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Don&#39;t raise error, but exit the job</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="nd">@abstractproperty</span>
     <span class="k">def</span> <span class="nf">no_children</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Job should not have children</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="Cp2kOutputValidator"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.validators.Cp2kOutputValidator">[docs]</a><span class="k">class</span> <span class="nc">Cp2kOutputValidator</span><span class="p">(</span><span class="n">Cp2kValidator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Checks that a valid cp2k output file was generated</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;cp2k.out&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            output_file (str): cp2k output file to analyze</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -107,7 +107,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span> <span class="o">=</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="Cp2kOutputValidator.check"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.validators.Cp2kOutputValidator.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for valid output. Checks that the end of the</span>
 <span class="sd">        program was reached, and that convergence was</span>
 <span class="sd">        achieved.</span>
@@ -132,21 +132,21 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">kill</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Kill the job with raise error.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">exit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Don&#39;t raise error, but exit the job</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">no_children</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Job should not have children</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">True</span></div>

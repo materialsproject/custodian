@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.feff.jobs &#8212; custodian 2023.5.12 documentation</title>
+    <title>custodian.feff.jobs &#8212; custodian 2023.6.5 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/flasky.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.5.12 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.6.5 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.feff.jobs</a></li> 
       </ul>
@@ -72,7 +72,7 @@
 
 
 <div class="viewcode-block" id="FeffJob"><a class="viewcode-back" href="../../../custodian.feff.html#custodian.feff.jobs.FeffJob">[docs]</a><span class="k">class</span> <span class="nc">FeffJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A basic FEFF job, run whatever is in the directory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -85,7 +85,7 @@
         <span class="n">gzipped</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">gzipped_prefix</span><span class="o">=</span><span class="s2">&quot;feff_out&quot;</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This constructor is used for a standard FEFF initialization</span>
 
 <span class="sd">        Args:</span>
@@ -110,7 +110,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">gzipped_prefix</span> <span class="o">=</span> <span class="n">gzipped_prefix</span>
 
 <div class="viewcode-block" id="FeffJob.setup"><a class="viewcode-back" href="../../../custodian.feff.html#custodian.feff.jobs.FeffJob.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs initial setup for FeffJob, do backing up.</span>
 <span class="sd">        Returns:</span>
 
@@ -126,7 +126,7 @@
                     <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">.orig&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="FeffJob.run"><a class="viewcode-back" href="../../../custodian.feff.html#custodian.feff.jobs.FeffJob.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs the actual FEFF run</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            (subprocess.Popen) Used for monitoring.</span>
@@ -137,7 +137,7 @@
             <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feff_cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">f_std</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">f_err</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># pylint: disable=R1732</span></div>
 
 <div class="viewcode-block" id="FeffJob.postprocess"><a class="viewcode-back" href="../../../custodian.feff.html#custodian.feff.jobs.FeffJob.postprocess">[docs]</a>    <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Renaming or gzipping all the output as needed</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gzipped</span><span class="p">:</span>

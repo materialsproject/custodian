@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.cp2k.handlers &#8212; custodian 2023.5.12 documentation</title>
+    <title>custodian.cp2k.handlers &#8212; custodian 2023.6.5 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/flasky.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.5.12 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.6.5 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.cp2k.handlers</a></li> 
       </ul>
@@ -89,7 +89,7 @@
 
 
 <div class="viewcode-block" id="StdErrHandler"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.StdErrHandler">[docs]</a><span class="k">class</span> <span class="nc">StdErrHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Master StdErr class that handles a number of common errors</span>
 <span class="sd">    that occur during Cp2k runs with error messages only in</span>
 <span class="sd">    the standard error.</span>
@@ -107,7 +107,7 @@
     <span class="n">error_msgs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;seg_fault&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;SIGSEGV&quot;</span><span class="p">],</span> <span class="s2">&quot;out_of_memory&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;insufficient virtual memory&quot;</span><span class="p">],</span> <span class="s2">&quot;abort&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;SIGABRT&quot;</span><span class="p">]}</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">std_err</span><span class="o">=</span><span class="s2">&quot;std_err.txt&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes the handler with the output file to check.</span>
 
 <span class="sd">        Args:</span>
@@ -120,7 +120,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
 <div class="viewcode-block" id="StdErrHandler.check"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.StdErrHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for error in std_err file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -134,14 +134,14 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="StdErrHandler.correct"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.StdErrHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Log error, perform no corrections.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;System error(s): </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[]}</span></div></div>
 
 
 <div class="viewcode-block" id="UnconvergedScfErrorHandler"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.UnconvergedScfErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">UnconvergedScfErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    CP2K ErrorHandler class that addresses SCF non-convergence.</span>
 
 <span class="sd">    SCF convergence can be broken into different categories, depending on the method</span>
@@ -187,7 +187,7 @@
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_file</span><span class="o">=</span><span class="s2">&quot;cp2k.inp&quot;</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;cp2k.out&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes the error handler from a set of input and output files.</span>
 
 <span class="sd">        Args:</span>
@@ -202,7 +202,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">restart</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="UnconvergedScfErrorHandler.check"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.UnconvergedScfErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check output file for failed SCF convergence</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Checks output file for errors.</span>
@@ -221,7 +221,7 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="UnconvergedScfErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.UnconvergedScfErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply corrections to aid convergence, if possible.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ci</span> <span class="o">=</span> <span class="n">Cp2kInput</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">)</span>
@@ -236,7 +236,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Non-converging Job&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div>
 
     <span class="k">def</span> <span class="nf">__correct_ot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ci</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply corrections to OT calculation, if possible.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -286,7 +286,7 @@
                     <span class="p">}</span>
                 <span class="p">)</span>
 
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Switch to more robust OT framework.</span>
 <span class="sd">        No strict orthogonality of MOs. Use iterative refinement polynomial expansion for orthogonality</span>
 <span class="sd">        Allow for rotations (i.e., allowing for fractional occupations)</span>
@@ -320,7 +320,7 @@
                 <span class="p">}</span>
             <span class="p">)</span>
 
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Beyond the method above, the only thing left to try is decreasing the stepsize a bit.</span>
 <span class="sd">        Stepsize is 0.15 by default for all but the FSI preconditioner, which uses .08</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -347,7 +347,7 @@
         <span class="k">return</span> <span class="n">actions</span>
 
     <span class="k">def</span> <span class="nf">__correct_diag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ci</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply corrections to diagonalization calculation, if possible</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -453,7 +453,7 @@
 
 
 <div class="viewcode-block" id="DivergingScfErrorHandler"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.DivergingScfErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">DivergingScfErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    CP2K ErrorHandler that detects if calculation is diverging. This is</span>
 <span class="sd">    done by seeing if, on average, the last 10 convergence print outs were</span>
 <span class="sd">    increasing rather than decreasing.</span>
@@ -469,7 +469,7 @@
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;cp2k.out&quot;</span><span class="p">,</span> <span class="n">input_file</span><span class="o">=</span><span class="s2">&quot;cp2k.inp&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes the error handler from an output files.</span>
 
 <span class="sd">        Args:</span>
@@ -479,7 +479,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">input_file</span> <span class="o">=</span> <span class="n">input_file</span>
 
 <div class="viewcode-block" id="DivergingScfErrorHandler.check"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.DivergingScfErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for diverging SCF.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">conv</span> <span class="o">=</span> <span class="n">get_conv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">)</span>
@@ -489,7 +489,7 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="DivergingScfErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.DivergingScfErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Correct issue if possible.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ci</span> <span class="o">=</span> <span class="n">Cp2kInput</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">)</span>
@@ -510,7 +510,7 @@
 
 
 <div class="viewcode-block" id="FrozenJobErrorHandler"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.FrozenJobErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">FrozenJobErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Detects an error when the output file has not been updated</span>
 <span class="sd">    in timeout seconds.</span>
 
@@ -537,7 +537,7 @@
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_file</span><span class="o">=</span><span class="s2">&quot;cp2k.inp&quot;</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;cp2k.out&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">3600</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes the handler with the output file to check.</span>
 
 <span class="sd">        Args:</span>
@@ -556,7 +556,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">restart</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="FrozenJobErrorHandler.check"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.FrozenJobErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for frozen jobs.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">st</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">)</span>
@@ -579,7 +579,7 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="FrozenJobErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.FrozenJobErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Correct issue if possible.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ci</span> <span class="o">=</span> <span class="n">Cp2kInput</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">)</span>
@@ -665,7 +665,7 @@
 
 
 <div class="viewcode-block" id="AbortHandler"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.AbortHandler">[docs]</a><span class="k">class</span> <span class="nc">AbortHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    These are errors that cp2k recognizes internally, and causes a kill-signal,</span>
 <span class="sd">    as opposed to things like slow scf convergence, which is an unwanted feature of</span>
 <span class="sd">    optimization rather than an error per se. Currently this error handler recognizes</span>
@@ -683,7 +683,7 @@
     <span class="n">is_terminating</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_file</span><span class="o">=</span><span class="s2">&quot;cp2k.inp&quot;</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;cp2k.out&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize handler for CP2K abort messages.</span>
 
 <span class="sd">        Args:</span>
@@ -700,7 +700,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">responses</span> <span class="o">=</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="AbortHandler.check"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.AbortHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for abort messages</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">matches</span> <span class="o">=</span> <span class="n">regrep</span><span class="p">(</span>
@@ -712,7 +712,7 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="AbortHandler.correct"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.AbortHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Correct issue if possible.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ci</span> <span class="o">=</span> <span class="n">Cp2kInput</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">)</span>
@@ -825,7 +825,7 @@
 
 <div class="viewcode-block" id="NumericalPrecisionHandler"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.NumericalPrecisionHandler">[docs]</a><span class="k">class</span> <span class="nc">NumericalPrecisionHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    CP2K offers lots of functionality for decreasing numerical</span>
 <span class="sd">    precision in order to speed-up calculations. This can, unfortunately,</span>
 <span class="sd">    lead to convergence cycles getting &#39;stuck&#39;. While it can be hard to</span>
@@ -872,7 +872,7 @@
         <span class="n">eps_default_strict</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span>
         <span class="n">eps_gvg_strict</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the error handler.</span>
 
 <span class="sd">        Args:</span>
@@ -900,7 +900,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">eps_gvg_strict</span> <span class="o">=</span> <span class="n">eps_gvg_strict</span>
 
 <div class="viewcode-block" id="NumericalPrecisionHandler.check"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.NumericalPrecisionHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for stuck SCF convergence.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">conv</span> <span class="o">=</span> <span class="n">get_conv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">)</span>
@@ -910,7 +910,7 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="NumericalPrecisionHandler.correct"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.NumericalPrecisionHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Correct issue if possible</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ci</span> <span class="o">=</span> <span class="n">Cp2kInput</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">)</span>
@@ -1002,7 +1002,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Unsufficient precision&quot;</span><span class="p">],</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">}</span></div>
 
     <span class="k">def</span> <span class="nf">__set_pgf_orb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Helper function to set the PGF_ORB keyword</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span>
@@ -1013,7 +1013,7 @@
 
 <div class="viewcode-block" id="UnconvergedRelaxationErrorHandler"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.UnconvergedRelaxationErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">UnconvergedRelaxationErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This handler checks to see if geometry optimization has failed to converge,</span>
 <span class="sd">    as signified by a line in the output file that says the maximum number of optimization</span>
 <span class="sd">    steps were reached.</span>
@@ -1034,7 +1034,7 @@
         <span class="n">max_total_iter</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
         <span class="n">optimizers</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;BFGS&quot;</span><span class="p">,</span> <span class="s2">&quot;CG&quot;</span><span class="p">,</span> <span class="s2">&quot;BFGS&quot;</span><span class="p">,</span> <span class="s2">&quot;CG&quot;</span><span class="p">),</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the error handler.</span>
 
 <span class="sd">        Args:</span>
@@ -1057,7 +1057,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_id</span> <span class="o">=</span> <span class="mi">0</span>
 
 <div class="viewcode-block" id="UnconvergedRelaxationErrorHandler.check"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.UnconvergedRelaxationErrorHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for unconverged geometry optimization</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">o</span> <span class="o">=</span> <span class="n">Cp2kOutput</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">)</span>
@@ -1067,7 +1067,7 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="UnconvergedRelaxationErrorHandler.correct"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.UnconvergedRelaxationErrorHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Correct issue if possible.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ci</span> <span class="o">=</span> <span class="n">Cp2kInput</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_file</span><span class="p">)</span>
@@ -1112,7 +1112,7 @@
 
 <div class="viewcode-block" id="WalltimeHandler"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.WalltimeHandler">[docs]</a><span class="k">class</span> <span class="nc">WalltimeHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This walltime error handler, when enabled, will detect whether</span>
 <span class="sd">    the CP2K internal walltime handler has been tripped. If walltime</span>
 <span class="sd">    has been reached (plus some buffer), then the walltime handler will create a</span>
@@ -1126,7 +1126,7 @@
     <span class="n">is_terminating</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;cp2k.out&quot;</span><span class="p">,</span> <span class="n">enable_checkpointing</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            output_file (str): name of the cp2k output file</span>
 <span class="sd">            enable_checkpointing (bool): whether or not to enable checkpointing when</span>
@@ -1136,7 +1136,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">enable_checkpointing</span> <span class="o">=</span> <span class="n">enable_checkpointing</span>
 
 <div class="viewcode-block" id="WalltimeHandler.check"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.WalltimeHandler.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if internal CP2K walltime handler was tripped.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">regrep</span><span class="p">(</span>
@@ -1150,7 +1150,7 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="WalltimeHandler.correct"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.handlers.WalltimeHandler.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Dump checkpoint info if requested</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enable_checkpointing</span><span class="p">:</span>

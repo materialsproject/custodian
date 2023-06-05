@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.utils &#8212; custodian 2023.5.12 documentation</title>
+    <title>custodian.utils &#8212; custodian 2023.6.5 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/flasky.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">custodian 2023.5.12 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">custodian 2023.6.5 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.utils</a></li> 
       </ul>
@@ -57,7 +57,7 @@
 
 
 <div class="viewcode-block" id="backup"><a class="viewcode-back" href="../../custodian.html#custodian.utils.backup">[docs]</a><span class="k">def</span> <span class="nf">backup</span><span class="p">(</span><span class="n">filenames</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;error&quot;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Backup files to a tar.gz file. Used, for example, in backing up the</span>
 <span class="sd">    files of an errored run before performing corrections.</span>
 
@@ -68,7 +68,7 @@
 <span class="sd">            series of error.1.tar.gz, error.2.tar.gz, ... will be generated.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">num</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">.*.tar.gz&quot;</span><span class="p">)])</span>
-    <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">num</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2">.tar.gz&quot;</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">num</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.tar.gz&quot;</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Backing up run to </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w:gz&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tar</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
@@ -77,7 +77,7 @@
 
 
 <div class="viewcode-block" id="get_execution_host_info"><a class="viewcode-back" href="../../custodian.html#custodian.utils.get_execution_host_info">[docs]</a><span class="k">def</span> <span class="nf">get_execution_host_info</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Tries to return a tuple describing the execution host.</span>
 <span class="sd">    Doesn&#39;t work for all queueing systems</span>
 
