@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+v2023.6.5
+---------
+- New VASP error handler for invalid INCAR parameter (@arosen93)
+- Change VASP terminate function to be sensitive to execution directory (@MichaelWolloch)
+- Add handler for invalid WAVECAR when going from vasp_gam to vasp_std (@arosen93)
+
 v2023.5.12
 ----------
 - Add back kwargs to VaspHandler to maintain backward compatibility (@arosen93)
