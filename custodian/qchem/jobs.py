@@ -140,7 +140,7 @@ class QCJob(Job):
         Renames and removes scratch files after running QChem
         """
         scratch_dir = os.path.join(os.environ["QCSCRATCH"], "scratch")
-        for file in ["HESS", "GRAD", "plots/dens.0.cube"]:
+        for file in ["HESS", "GRAD", "plots/dens.0.cube", "131.0"]:
             file_path = os.path.join(scratch_dir, file)
             if os.path.exists(file_path):
                 shutil.copy(file_path, os.getcwd())
