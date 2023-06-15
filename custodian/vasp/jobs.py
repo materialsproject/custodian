@@ -665,35 +665,36 @@ class VaspJob(Job):
 
     def terminate(self):
         """
-        Kill all vasp processes associated with the current job.
+        Kill all VASP processes associated with the current job.
         This is done by looping over all processes and selecting the ones
-        that contain "vasp" as well as access files (CHGCAR in particular)
+        that contain "vasp" as well as access files (vasprun.xml in particular)
         in the custodian working directory.
-        There is also a safety that kills all vasp processes if non of the
-        processes can be killed (This is bad if more than one vasp runs are
+        There is also a safety that kills all VASP processes if none of the
+        processes can be killed (This is bad if more than one VASP runs are
         simultaneously executed on the same node). However, this should never
         happen.
         """
         workdir = os.getcwd()
-        logger.info(f"kill vasp processes in work dir {workdir}")
-        is_killed = False
+        logger.info(f"Killing VASP processes in workdir {workdir}.")
         for proc in psutil.process_iter():
             try:
                 if "vasp" in proc.name().lower():
-                    for file in proc.open_files():
-                        if workdir + "/CHGCAR" == file.path and psutil.pid_exists(proc.pid):
-                            proc.kill()
-                            is_killed = True
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    open_paths = [file.path for file in proc.open_files()]
+                    outcar_path = os.path.join(workdir, 'OUTCAR')
+                    if (outcar_path in open_paths) and psutil.pid_exists(proc.pid):
+                        proc.kill()
+                        return
+            except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+                logger.warning(f"Exception {e} encountered while killing VASP.")
                 continue
-        if not is_killed:
-            logger.warning(f"killing vasp processes in work dir {workdir} failed. Resorting to 'killall'.")
-            cmds = self.vasp_cmd
-            if self.gamma_vasp_cmd:
-                cmds += self.gamma_vasp_cmd
-                for k in cmds:
-                    if "vasp" in k:
-                        subprocess.run(["killall", f"{k}"])
+
+        logger.warning(f"Killing VASP processes in workdir {workdir} failed with subprocess.Popen.terminate(). Resorting to 'killall'.")
+        cmds = self.vasp_cmd
+        if self.gamma_vasp_cmd:
+            cmds += self.gamma_vasp_cmd
+        for k in cmds:
+            if "vasp" in k:
+                subprocess.run(["killall", f"{k}"])
 
 
 class VaspNEBJob(VaspJob):
