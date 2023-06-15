@@ -680,7 +680,7 @@ class VaspJob(Job):
             try:
                 if "vasp" in proc.name().lower():
                     open_paths = [file.path for file in proc.open_files()]
-                    outcar_path = os.path.join(workdir, 'OUTCAR')
+                    outcar_path = os.path.join(workdir, "OUTCAR")
                     if (outcar_path in open_paths) and psutil.pid_exists(proc.pid):
                         proc.kill()
                         return
@@ -688,7 +688,9 @@ class VaspJob(Job):
                 logger.warning(f"Exception {e} encountered while killing VASP.")
                 continue
 
-        logger.warning(f"Killing VASP processes in workdir {workdir} failed with subprocess.Popen.terminate(). Resorting to 'killall'.")
+        logger.warning(
+            f"Killing VASP processes in workdir {workdir} failed with subprocess.Popen.terminate(). Resorting to 'killall'."
+        )
         cmds = self.vasp_cmd
         if self.gamma_vasp_cmd:
             cmds += self.gamma_vasp_cmd
