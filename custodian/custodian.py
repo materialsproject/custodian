@@ -458,7 +458,6 @@ class Custodian:
             # corrections.
             has_error = False
             zero_return_code = True
-            job_alive = True
 
             # While the job is running, we use the handlers that are
             # monitors to monitor the job.
@@ -469,7 +468,6 @@ class Custodian:
                         n += 1
                         time.sleep(self.polling_time_step)
                         if p.poll() is not None:
-                            job_alive = False
                             break
                         terminate = self.terminate_func or p.terminate
                         if n % self.monitor_freq == 0:
@@ -493,7 +491,7 @@ class Custodian:
             else:
                 has_error = self._do_check(self.handlers)
 
-            if has_error and job_alive:
+            if has_error:
                 # This makes sure the job is killed cleanly for certain systems.
                 job.terminate()
 
