@@ -461,6 +461,7 @@ class Custodian:
 
             # While the job is running, we use the handlers that are
             # monitors to monitor the job.
+            terminate = self.terminate_func or job.terminate or p.terminate
             if isinstance(p, subprocess.Popen):
                 if self.monitors:
                     n = 0
@@ -469,11 +470,8 @@ class Custodian:
                         time.sleep(self.polling_time_step)
                         if p.poll() is not None:
                             break
-                        terminate = self.terminate_func or p.terminate
                         if n % self.monitor_freq == 0:
                             has_error = self._do_check(self.monitors, terminate)
-                        if terminate is not None and terminate != p.terminate:
-                            time.sleep(self.polling_time_step)
                 else:
                     p.wait()
                     if self.terminate_func is not None and self.terminate_func != p.terminate:
@@ -490,10 +488,6 @@ class Custodian:
                 self._do_check([h for h in self.handlers if not h.is_monitor])
             else:
                 has_error = self._do_check(self.handlers)
-
-            if has_error:
-                # This makes sure the job is killed cleanly for certain systems.
-                job.terminate()
 
             # If there are no errors detected, perform
             # postprocessing and exit.
