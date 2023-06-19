@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.cp2k.utils &#8212; custodian 2023.3.10 documentation</title>
+    <title>custodian.cp2k.utils &#8212; custodian 2023.6.5 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/flasky.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -35,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.3.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.6.5 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.cp2k.utils</a></li> 
       </ul>
@@ -60,7 +59,7 @@
 
 
 <div class="viewcode-block" id="restart"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.utils.restart">[docs]</a><span class="k">def</span> <span class="nf">restart</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">input_file</span><span class="p">,</span> <span class="n">no_actions_needed</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Helper function. To discard old restart if convergence is already good, and copy</span>
 <span class="sd">    the restart file to the input file. Restart also supports switching back and forth</span>
 <span class="sd">    between OT and diagonalization as needed based on convergence behavior. If OT is not</span>
@@ -105,7 +104,7 @@
 
 <span class="c1"># TODO Not sure I like this solution</span>
 <div class="viewcode-block" id="cleanup_input"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.utils.cleanup_input">[docs]</a><span class="k">def</span> <span class="nf">cleanup_input</span><span class="p">(</span><span class="n">ci</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Intention is to use this to remove problematic parts of the input file.</span>
 
 <span class="sd">        (1) The &quot;POTENTIAL&quot; section within KIND cannot be empty, but the number</span>
@@ -121,7 +120,7 @@
 
 
 <div class="viewcode-block" id="activate_ot"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.utils.activate_ot">[docs]</a><span class="k">def</span> <span class="nf">activate_ot</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="n">ci</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Activate OT scheme.</span>
 
 <span class="sd">    actions (list):</span>
@@ -173,7 +172,7 @@
 
 
 <div class="viewcode-block" id="activate_diag"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.utils.activate_diag">[docs]</a><span class="k">def</span> <span class="nf">activate_diag</span><span class="p">(</span><span class="n">actions</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Activate diagonalization</span>
 
 <span class="sd">    actions (list):</span>
@@ -208,7 +207,7 @@
 
 
 <div class="viewcode-block" id="can_use_ot"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.utils.can_use_ot">[docs]</a><span class="k">def</span> <span class="nf">can_use_ot</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">ci</span><span class="p">,</span> <span class="n">minimum_band_gap</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check whether OT can be used:</span>
 <span class="sd">        OT should not already be activated</span>
 <span class="sd">        The output should show that the system has a band gap that is greater than minimum_band_gap</span>
@@ -230,7 +229,7 @@
 
 
 <div class="viewcode-block" id="tail"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.utils.tail">[docs]</a><span class="k">def</span> <span class="nf">tail</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the last n lines of a file as a list (including empty lines)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -241,7 +240,7 @@
 
 
 <div class="viewcode-block" id="get_conv"><a class="viewcode-back" href="../../../custodian.cp2k.html#custodian.cp2k.utils.get_conv">[docs]</a><span class="k">def</span> <span class="nf">get_conv</span><span class="p">(</span><span class="n">outfile</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Helper function to get the convergence info from SCF loops</span>
 
 <span class="sd">    Args:</span>

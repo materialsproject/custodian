@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.custodian &#8212; custodian 2023.3.10 documentation</title>
+    <title>custodian.custodian &#8212; custodian 2023.6.5 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/flasky.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -35,7 +34,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">custodian 2023.3.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">custodian 2023.6.5 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.custodian</a></li> 
       </ul>
@@ -116,7 +115,7 @@
 
 
 <div class="viewcode-block" id="Custodian"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Custodian">[docs]</a><span class="k">class</span> <span class="nc">Custodian</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The Custodian class is the manager for a list of jobs given a list of</span>
 <span class="sd">    error handlers. The way it works is as follows:</span>
 
@@ -174,8 +173,9 @@
         <span class="n">checkpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">terminate_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">terminate_on_nonzero_returncode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes a Custodian from a list of jobs and error handlers.</span>
 
 <span class="sd">        Args:</span>
@@ -305,7 +305,7 @@
 
 <div class="viewcode-block" id="Custodian.from_spec"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Custodian.from_spec">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_spec</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a Custodian instance where the jobs are specified from a</span>
 <span class="sd">        structure and a spec dict. This allows simple</span>
 <span class="sd">        custom job sequences to be constructed quickly via a YAML file.</span>
@@ -394,7 +394,7 @@
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">jobs</span><span class="o">=</span><span class="n">jobs</span><span class="p">,</span> <span class="n">handlers</span><span class="o">=</span><span class="n">handlers</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="n">validators</span><span class="p">,</span> <span class="o">**</span><span class="n">custodian_params</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Custodian.run"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Custodian.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Runs all jobs.</span>
 
 <span class="sd">        Returns:</span>
@@ -457,7 +457,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_log</span></div>
 
     <span class="k">def</span> <span class="nf">_run_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_n</span><span class="p">,</span> <span class="n">job</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Runs a single job.</span>
 
 <span class="sd">        Args:</span>
@@ -585,7 +585,7 @@
         <span class="k">raise</span> <span class="n">MaxCorrectionsError</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_errors</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Custodian.run_interrupted"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Custodian.run_interrupted">[docs]</a>    <span class="k">def</span> <span class="nf">run_interrupted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Runs custodian in a interuppted mode, which sets up and</span>
 <span class="sd">        validates jobs but doesn&#39;t run the executable</span>
 
@@ -687,7 +687,7 @@
         <span class="k">return</span> <span class="kc">None</span></div>
 
     <span class="k">def</span> <span class="nf">_do_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handlers</span><span class="p">,</span> <span class="n">terminate_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        checks the specified handlers. Returns True iff errors caught</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">corrections</span> <span class="o">=</span> <span class="p">[]</span>
@@ -729,53 +729,53 @@
 
 
 <div class="viewcode-block" id="Job"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Job">[docs]</a><span class="k">class</span> <span class="nc">Job</span><span class="p">(</span><span class="n">MSONable</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract base class defining the interface for a Job.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Job.setup"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Job.setup">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method is run before the start of a job. Allows for some</span>
 <span class="sd">        pre-processing.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
 <div class="viewcode-block" id="Job.run"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Job.run">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method perform the actual work for the job. If parallel error</span>
 <span class="sd">        checking (monitoring) is desired, this must return a Popen process.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
 <div class="viewcode-block" id="Job.postprocess"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Job.postprocess">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method is called at the end of a job, *after* error detection.</span>
 <span class="sd">        This allows post-processing, such as cleanup, analysis of results,</span>
 <span class="sd">        etc.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
 <div class="viewcode-block" id="Job.terminate"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Job.terminate">[docs]</a>    <span class="k">def</span> <span class="nf">terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Implement termination function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A nice string name for the job.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span></div>
 
 
 <div class="viewcode-block" id="ErrorHandler"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.ErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">ErrorHandler</span><span class="p">(</span><span class="n">MSONable</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract base class defining the interface for an ErrorHandler.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class property indicates whether the error handler is a monitor,</span>
 <span class="sd">    i.e., a handler that monitors a job as it is running. If a</span>
 <span class="sd">    monitor-type handler notices an error, the job will be sent a</span>
@@ -785,7 +785,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">is_terminating</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Whether this handler terminates a job upon error detection. By</span>
 <span class="sd">    default, this is True, which means that the current Job will be</span>
 <span class="sd">    terminated upon error detection, corrections applied,</span>
@@ -798,7 +798,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">raises_runtime_error</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Whether this handler causes custodian to raise a runtime error if it cannot</span>
 <span class="sd">    handle the error (i.e. if correct returns a dict with &quot;actions&quot;:None, or</span>
 <span class="sd">    &quot;actions&quot;:[])</span>
@@ -806,7 +806,7 @@
 
     <span class="n">max_num_corrections</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">raise_on_max</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Whether corrections from this specific handler should be applied only a</span>
 <span class="sd">    fixed maximum number of times on a single job (i.e. the counter is reset</span>
 <span class="sd">    at the beginning of each job). If the maximum number is reached the code</span>
@@ -819,7 +819,7 @@
 
 <div class="viewcode-block" id="ErrorHandler.check"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.ErrorHandler.check">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method is called during the job (for monitors) or at the end of</span>
 <span class="sd">        the job to check for errors.</span>
 
@@ -829,7 +829,7 @@
 
 <div class="viewcode-block" id="ErrorHandler.correct"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.ErrorHandler.correct">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method is called at the end of a job when an error is detected.</span>
 <span class="sd">        It should perform any corrective measures relating to the detected</span>
 <span class="sd">        error.</span>
@@ -843,7 +843,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_applied_corrections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The number of times the handler has given a correction and this</span>
 <span class="sd">        has been applied.</span>
 
@@ -858,7 +858,7 @@
 
     <span class="nd">@n_applied_corrections</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">n_applied_corrections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Setter for the number of corrections applied.</span>
 
 <span class="sd">        Args:</span>
@@ -868,7 +868,7 @@
 
 
 <div class="viewcode-block" id="Validator"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Validator">[docs]</a><span class="k">class</span> <span class="nc">Validator</span><span class="p">(</span><span class="n">MSONable</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract base class defining the interface for a Validator. A Validator</span>
 <span class="sd">    differs from an ErrorHandler in that it does not correct a run and is run</span>
 <span class="sd">    only at the end of a Job. If errors are detected by a Validator, a run is</span>
@@ -877,7 +877,7 @@
 
 <div class="viewcode-block" id="Validator.check"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.Validator.check">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method is called at the end of a job.</span>
 
 <span class="sd">        Returns:</span>
@@ -886,12 +886,12 @@
 
 
 <div class="viewcode-block" id="CustodianError"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.CustodianError">[docs]</a><span class="k">class</span> <span class="nc">CustodianError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Exception class for Custodian errors.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">raises</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes the error with a message.</span>
 
 <span class="sd">        Args:</span>
@@ -904,12 +904,12 @@
 
 
 <div class="viewcode-block" id="ValidationError"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.ValidationError">[docs]</a><span class="k">class</span> <span class="nc">ValidationError</span><span class="p">(</span><span class="n">CustodianError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Error raised when a validator does not pass the check</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">raises</span><span class="p">,</span> <span class="n">validator</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            message (str): Message passed to Exception</span>
 <span class="sd">            raises (bool): Whether this should be raised outside custodian</span>
@@ -920,12 +920,12 @@
 
 
 <div class="viewcode-block" id="NonRecoverableError"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.NonRecoverableError">[docs]</a><span class="k">class</span> <span class="nc">NonRecoverableError</span><span class="p">(</span><span class="n">CustodianError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Error raised when a handler found an error but could not fix it</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">raises</span><span class="p">,</span> <span class="n">handler</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            message (str): Message passed to Exception</span>
 <span class="sd">            raises (bool): Whether this should be raised outside custodian</span>
@@ -936,18 +936,18 @@
 
 
 <div class="viewcode-block" id="ReturnCodeError"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.ReturnCodeError">[docs]</a><span class="k">class</span> <span class="nc">ReturnCodeError</span><span class="p">(</span><span class="n">CustodianError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Error raised when the process gave non zero return code</span>
 <span class="sd">    &quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="MaxCorrectionsError"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.MaxCorrectionsError">[docs]</a><span class="k">class</span> <span class="nc">MaxCorrectionsError</span><span class="p">(</span><span class="n">CustodianError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Error raised when the maximum allowed number of errors is reached</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">raises</span><span class="p">,</span> <span class="n">max_errors</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            message (str): Message passed to Exception</span>
 <span class="sd">            raises (bool): Whether this should be raised outside custodian</span>
@@ -958,12 +958,12 @@
 
 
 <div class="viewcode-block" id="MaxCorrectionsPerJobError"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.MaxCorrectionsPerJobError">[docs]</a><span class="k">class</span> <span class="nc">MaxCorrectionsPerJobError</span><span class="p">(</span><span class="n">CustodianError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Error raised when the maximum allowed number of errors per job is reached</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">raises</span><span class="p">,</span> <span class="n">max_errors_per_job</span><span class="p">,</span> <span class="n">job</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            message (str): Message passed to Exception</span>
 <span class="sd">            raises (bool): Whether this should be raised outside custodian</span>
@@ -976,12 +976,12 @@
 
 
 <div class="viewcode-block" id="MaxCorrectionsPerHandlerError"><a class="viewcode-back" href="../../custodian.html#custodian.custodian.MaxCorrectionsPerHandlerError">[docs]</a><span class="k">class</span> <span class="nc">MaxCorrectionsPerHandlerError</span><span class="p">(</span><span class="n">CustodianError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Error raised when the maximum allowed number of errors per handler is reached</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">raises</span><span class="p">,</span> <span class="n">max_errors_per_handler</span><span class="p">,</span> <span class="n">handler</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            message (str): Message passed to Exception</span>
 <span class="sd">            raises (bool): Whether this should be raised outside custodian</span>

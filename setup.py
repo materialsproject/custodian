@@ -11,8 +11,8 @@ with open("README.rst") as f:
 setup(
     name="custodian",
     packages=find_packages(),
-    version="2023.3.10",
-    install_requires=["monty>=2.0.6", "ruamel.yaml>=0.15.6", "sentry-sdk>=0.8.0"],
+    version="2023.6.5",
+    install_requires=["monty>=2.0.6", "ruamel.yaml>=0.15.6", "sentry-sdk>=0.8.0", "psutil"],
     extras_require={"vasp, nwchem, qchem": ["pymatgen>=2019.8.23"]},
     package_data={},
     author="Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu, Matthew Horton, Samuel M. Blau",

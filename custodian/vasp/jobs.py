@@ -6,11 +6,11 @@ import logging
 import math
 import os
 import shutil
-import signal
 import subprocess
 from shutil import which
 
 import numpy as np
+import psutil
 from monty.serialization import dumpfn, loadfn
 from monty.shutil import decompress_dir
 from pymatgen.core.structure import Structure
@@ -151,7 +151,6 @@ class VaspJob(Job):
         self.gamma_vasp_cmd = gamma_vasp_cmd
         self.copy_magmom = copy_magmom
         self.auto_continue = auto_continue
-        self.sbprcss = None
 
         if SENTRY_DSN:
             # if using Sentry logging, add specific VASP executable to scope
@@ -254,10 +253,7 @@ class VaspJob(Job):
         logger.info(f"Running {' '.join(cmd)}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr
-            self.sbprcss = subprocess.Popen(
-                cmd, stdout=f_std, stderr=f_err, start_new_session=True
-            )  # pylint: disable=R1732
-            return self.sbprcss
+            return subprocess.Popen(cmd, stdout=f_std, stderr=f_err, start_new_session=True)  # pylint: disable=R1732
 
     def postprocess(self):
         """
@@ -670,12 +666,34 @@ class VaspJob(Job):
     def terminate(self):
         """
         Kill all vasp processes associated with the current job.
+        This is done by looping over all processes and selecting the ones
+        that contain "vasp" as well as access files (CHGCAR in particular)
+        in the custodian working directory.
+        There is also a safety that kills all vasp processes if non of the
+        processes can be killed (This is bad if more than one vasp runs are
+        simultaneously executed on the same node). However, this should never
+        happen.
         """
-        logger.info(f"Custodian terminating all VASP processes within process group {self.sbprcss.pid}")
-        try:
-            os.killpg(os.getpgid(self.sbprcss.pid), signal.SIGTERM)
-        except Exception:
-            pass
+        workdir = os.getcwd()
+        logger.info(f"kill vasp processes in work dir {workdir}")
+        is_killed = False
+        for proc in psutil.process_iter():
+            try:
+                if "vasp" in proc.name().lower():
+                    for file in proc.open_files():
+                        if workdir + "/CHGCAR" == file.path and psutil.pid_exists(proc.pid):
+                            proc.kill()
+                            is_killed = True
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                continue
+        if not is_killed:
+            logger.warning(f"killing vasp processes in work dir {workdir} failed. Resorting to 'killall'.")
+            cmds = self.vasp_cmd
+            if self.gamma_vasp_cmd:
+                cmds += self.gamma_vasp_cmd
+                for k in cmds:
+                    if "vasp" in k:
+                        subprocess.run(["killall", f"{k}"])
 
 
 class VaspNEBJob(VaspJob):
@@ -766,7 +784,6 @@ class VaspNEBJob(VaspJob):
         self.settings_override = settings_override
         self.neb_dirs = []  # 00, 01, etc.
         self.neb_sub = []  # 01, 02, etc.
-        self.sbprcss = None
 
         for path in os.listdir("."):
             if os.path.isdir(path) and path.isdigit():
@@ -854,10 +871,7 @@ class VaspNEBJob(VaspJob):
         logger.info(f"Running {' '.join(cmd)}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # Use line buffering for stderr
-            self.sbprcss = subprocess.Popen(
-                cmd, stdout=f_std, stderr=f_err, start_new_session=True
-            )  # pylint: disable=R1732
-            return self.sbprcss
+            return subprocess.Popen(cmd, stdout=f_std, stderr=f_err, start_new_session=True)  # pylint: disable=R1732
 
     def postprocess(self):
         """

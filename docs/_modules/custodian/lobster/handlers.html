@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.lobster.handlers &#8212; custodian 2023.3.10 documentation</title>
+    <title>custodian.lobster.handlers &#8212; custodian 2023.6.5 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/flasky.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -35,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.3.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.6.5 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.lobster.handlers</a></li> 
       </ul>
@@ -64,12 +63,12 @@
 
 
 <div class="viewcode-block" id="EnoughBandsValidator"><a class="viewcode-back" href="../../../custodian.lobster.html#custodian.lobster.handlers.EnoughBandsValidator">[docs]</a><span class="k">class</span> <span class="nc">EnoughBandsValidator</span><span class="p">(</span><span class="n">Validator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    validates if enough bands for COHP calculation are available</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;lobsterout&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            output_filename: filename of output file, usually lobsterout</span>
@@ -77,7 +76,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span> <span class="o">=</span> <span class="n">output_filename</span>
 
 <div class="viewcode-block" id="EnoughBandsValidator.check"><a class="viewcode-back" href="../../../custodian.lobster.html#custodian.lobster.handlers.EnoughBandsValidator.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        checks if the VASP calculation had enough bands</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            (bool) if True, too few bands have been applied</span>
@@ -92,19 +91,19 @@
 
 
 <div class="viewcode-block" id="LobsterFilesValidator"><a class="viewcode-back" href="../../../custodian.lobster.html#custodian.lobster.handlers.LobsterFilesValidator">[docs]</a><span class="k">class</span> <span class="nc">LobsterFilesValidator</span><span class="p">(</span><span class="n">Validator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check for existence of some of the files that lobster</span>
 <span class="sd">        normally create upon running.</span>
 <span class="sd">    Check if lobster terminated normally by looking for finished</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Dummy init</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="LobsterFilesValidator.check"><a class="viewcode-back" href="../../../custodian.lobster.html#custodian.lobster.handlers.LobsterFilesValidator.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for errors.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">vfile</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;lobsterout&quot;</span><span class="p">]:</span>
@@ -116,12 +115,12 @@
 
 
 <div class="viewcode-block" id="ChargeSpillingValidator"><a class="viewcode-back" href="../../../custodian.lobster.html#custodian.lobster.handlers.ChargeSpillingValidator">[docs]</a><span class="k">class</span> <span class="nc">ChargeSpillingValidator</span><span class="p">(</span><span class="n">Validator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if spilling is below certain threshold!</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;lobsterout&quot;</span><span class="p">,</span> <span class="n">charge_spilling_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            output_filename: filename of the output file of lobter, usually lobsterout</span>
@@ -132,7 +131,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">charge_spilling_limit</span> <span class="o">=</span> <span class="n">charge_spilling_limit</span>
 
 <div class="viewcode-block" id="ChargeSpillingValidator.check"><a class="viewcode-back" href="../../../custodian.lobster.html#custodian.lobster.handlers.ChargeSpillingValidator.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;open lobsterout and find charge spilling&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;open lobsterout and find charge spilling&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">):</span>
             <span class="n">lobsterout</span> <span class="o">=</span> <span class="n">Lobsterout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span><span class="p">)</span>

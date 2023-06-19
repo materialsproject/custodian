@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.vasp.validators &#8212; custodian 2023.3.10 documentation</title>
+    <title>custodian.vasp.validators &#8212; custodian 2023.6.5 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/flasky.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -35,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.3.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.6.5 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.vasp.validators</a></li> 
       </ul>
@@ -61,12 +60,12 @@
 
 
 <div class="viewcode-block" id="VasprunXMLValidator"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VasprunXMLValidator">[docs]</a><span class="k">class</span> <span class="nc">VasprunXMLValidator</span><span class="p">(</span><span class="n">Validator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Checks that a valid vasprun.xml was generated</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;vasp.out&quot;</span><span class="p">,</span> <span class="n">stderr_file</span><span class="o">=</span><span class="s2">&quot;std_err.txt&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            output_file (str): Name of file VASP standard output is directed to.</span>
 <span class="sd">                Defaults to &quot;vasp.out&quot;.</span>
@@ -78,7 +77,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
 
 <div class="viewcode-block" id="VasprunXMLValidator.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VasprunXMLValidator.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for error.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
@@ -114,18 +113,18 @@
 
 
 <div class="viewcode-block" id="VaspFilesValidator"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VaspFilesValidator">[docs]</a><span class="k">class</span> <span class="nc">VaspFilesValidator</span><span class="p">(</span><span class="n">Validator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check for existence of some of the files that VASP</span>
 <span class="sd">        normally create upon running.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Dummy init</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="VaspFilesValidator.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VaspFilesValidator.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for error.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">vfile</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;CONTCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;OSZICAR&quot;</span><span class="p">,</span> <span class="s2">&quot;OUTCAR&quot;</span><span class="p">]:</span>
@@ -135,18 +134,18 @@
 
 
 <div class="viewcode-block" id="VaspNpTMDValidator"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VaspNpTMDValidator">[docs]</a><span class="k">class</span> <span class="nc">VaspNpTMDValidator</span><span class="p">(</span><span class="n">Validator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check NpT-AIMD settings is loaded by VASP compiled with -Dtbdyn.</span>
 <span class="sd">    Currently, VASP only have Langevin thermostat (MDALGO = 3) for NpT ensemble.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Dummy init.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="VaspNpTMDValidator.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VaspNpTMDValidator.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for error.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -163,17 +162,17 @@
 
 
 <div class="viewcode-block" id="VaspAECCARValidator"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VaspAECCARValidator">[docs]</a><span class="k">class</span> <span class="nc">VaspAECCARValidator</span><span class="p">(</span><span class="n">Validator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if the data in the AECCAR is corrupted</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Dummy init</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="VaspAECCARValidator.check"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.VaspAECCARValidator.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for error.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">aeccar0</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;AECCAR0&quot;</span><span class="p">)</span>
@@ -183,7 +182,7 @@
 
 
 <div class="viewcode-block" id="check_broken_chgcar"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.validators.check_broken_chgcar">[docs]</a><span class="k">def</span> <span class="nf">check_broken_chgcar</span><span class="p">(</span><span class="n">chgcar</span><span class="p">,</span> <span class="n">diff_thresh</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if the charge density file is corrupt</span>
 <span class="sd">    Args:</span>
 <span class="sd">        chgcar (Chgcar): Chgcar-like object.</span>
@@ -196,7 +195,7 @@
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">if</span> <span class="n">diff_thresh</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If any one diagonal difference accounts for more than a particular portion of</span>
 <span class="sd">        the total difference between highest and lowest density.</span>
 <span class="sd">        When we are looking at AECCAR data, since the charge density is so high near the core</span>

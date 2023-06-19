@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.ansible.interpreter &#8212; custodian 2023.3.10 documentation</title>
+    <title>custodian.ansible.interpreter &#8212; custodian 2023.6.5 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/flasky.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -35,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.3.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.6.5 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.ansible.interpreter</a></li> 
       </ul>
@@ -58,7 +57,7 @@
 
 
 <div class="viewcode-block" id="Modder"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.interpreter.Modder">[docs]</a><span class="k">class</span> <span class="nc">Modder</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class to modify a dict/file/any object using a mongo-like language.</span>
 <span class="sd">    Keywords are mostly adopted from mongo&#39;s syntax, but instead of $, an</span>
 <span class="sd">    underscore precedes action keywords. This is so that the modification can</span>
@@ -80,7 +79,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes a Modder from a list of supported actions.</span>
 
 <span class="sd">        Args:</span>
@@ -96,12 +95,12 @@
         <span class="n">actions</span> <span class="o">=</span> <span class="n">actions</span> <span class="k">if</span> <span class="n">actions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="n">DictActions</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">action</span><span class="p">):</span>
-                <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;__\w+__&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span> <span class="ow">and</span> <span class="n">callable</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">i</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;__\w+__&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">i</span><span class="p">)):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">supported_actions</span><span class="p">[</span><span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">strict</span> <span class="o">=</span> <span class="n">strict</span>
 
 <div class="viewcode-block" id="Modder.modify"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.interpreter.Modder.modify">[docs]</a>    <span class="k">def</span> <span class="nf">modify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modification</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Note that modify makes actual in-place modifications. It does not</span>
 <span class="sd">        return a copy.</span>
 
@@ -120,7 +119,7 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">action</span><span class="si">}</span><span class="s2"> is not a supported action!&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Modder.modify_object"><a class="viewcode-back" href="../../../custodian.ansible.html#custodian.ansible.interpreter.Modder.modify_object">[docs]</a>    <span class="k">def</span> <span class="nf">modify_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modification</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Modify an object that supports pymatgen&#39;s as_dict() and from_dict API.</span>
 
 <span class="sd">        Args:</span>
