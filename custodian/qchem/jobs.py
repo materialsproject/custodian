@@ -140,7 +140,7 @@ class QCJob(Job):
         Renames and removes scratch files after running QChem
         """
         scratch_dir = os.path.join(os.environ["QCSCRATCH"], "scratch")
-        for file in ["HESS", "GRAD", "plots/dens.0.cube", "131.0"]:
+        for file in ["HESS", "GRAD", "plots/dens.0.cube", "131.0", "53.0"]:
             file_path = os.path.join(scratch_dir, file)
             if os.path.exists(file_path):
                 shutil.copy(file_path, os.getcwd())
@@ -170,6 +170,10 @@ class QCJob(Job):
         if os.path.exists(os.path.join(os.environ["QCSCRATCH"], "132.0")):
             os.mkdir(local_scratch)
             shutil.move(os.path.join(os.environ["QCSCRATCH"], "132.0"), local_scratch)
+        if os.path.exists(os.path.join(os.environ["QCSCRATCH"], "53.0")):
+            if not os.path.exists(local_scratch):
+                os.mkdir(local_scratch)
+            shutil.move(os.path.join(os.environ["QCSCRATCH"], "53.0"), local_scratch)
         with open(self.qclog_file, "w") as qclog:
             return subprocess.Popen(self.current_command, stdout=qclog, shell=True)  # pylint: disable=R1732
 
