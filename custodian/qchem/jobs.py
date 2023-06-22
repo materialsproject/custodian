@@ -165,15 +165,22 @@ class QCJob(Job):
             (subprocess.Popen) Used for monitoring.
         """
         local_scratch = os.path.join(os.environ["QCLOCALSCR"], "scratch")
+        print("Local scratch:", local_scratch)
         if os.path.exists(local_scratch):
             shutil.rmtree(local_scratch)
         if os.path.exists(os.path.join(os.environ["QCSCRATCH"], "132.0")):
             os.mkdir(local_scratch)
             shutil.move(os.path.join(os.environ["QCSCRATCH"], "132.0"), local_scratch)
+            print("Hessian moved!")
+        else:
+            print("No Hessian found...")
         if os.path.exists(os.path.join(os.environ["QCSCRATCH"], "53.0")):
             if not os.path.exists(local_scratch):
                 os.mkdir(local_scratch)
             shutil.move(os.path.join(os.environ["QCSCRATCH"], "53.0"), local_scratch)
+            print("Orbital coeffs moved!")
+        else:
+            print("No orbital coeffs found...")
         with open(self.qclog_file, "w") as qclog:
             return subprocess.Popen(self.current_command, stdout=qclog, shell=True)  # pylint: disable=R1732
 
