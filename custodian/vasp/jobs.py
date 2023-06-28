@@ -680,8 +680,8 @@ class VaspJob(Job):
             try:
                 if "vasp" in proc.name().lower():
                     open_paths = [file.path for file in proc.open_files()]
-                    outcar_path = os.path.join(workdir, "OUTCAR")
-                    if (outcar_path in open_paths) and psutil.pid_exists(proc.pid):
+                    vasprun_path = os.path.join(workdir, "vasprun.xml")
+                    if (vasprun_path in open_paths) and psutil.pid_exists(proc.pid):
                         proc.kill()
                         return
             except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
