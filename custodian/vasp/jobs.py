@@ -139,7 +139,7 @@ class VaspJob(Job):
                 wall-time handler which will write a read-only STOPCAR to
                 prevent VASP from deleting it once it finishes
         """
-        self.vasp_cmd = vasp_cmd
+        self.vasp_cmd = tuple(vasp_cmd)
         self.output_file = output_file
         self.stderr_file = stderr_file
         self.final = final
@@ -148,7 +148,7 @@ class VaspJob(Job):
         self.settings_override = settings_override
         self.auto_npar = auto_npar
         self.auto_gamma = auto_gamma
-        self.gamma_vasp_cmd = gamma_vasp_cmd
+        self.gamma_vasp_cmd = tuple(gamma_vasp_cmd) if gamma_vasp_cmd else None
         self.copy_magmom = copy_magmom
         self.auto_continue = auto_continue
 
