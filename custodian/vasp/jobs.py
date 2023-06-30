@@ -773,7 +773,7 @@ class VaspNEBJob(VaspJob):
                       "action": {"_file_copy": {"dest": "POSCAR"}}}]
         """
 
-        self.vasp_cmd = vasp_cmd
+        self.vasp_cmd = tuple(vasp_cmd)
         self.output_file = output_file
         self.stderr_file = stderr_file
         self.final = final
@@ -782,7 +782,7 @@ class VaspNEBJob(VaspJob):
         self.auto_npar = auto_npar
         self.half_kpts = half_kpts
         self.auto_gamma = auto_gamma
-        self.gamma_vasp_cmd = gamma_vasp_cmd
+        self.gamma_vasp_cmd = tuple(gamma_vasp_cmd) if gamma_vasp_cmd else None
         self.auto_continue = auto_continue
         self.settings_override = settings_override
         self.neb_dirs = []  # 00, 01, etc.
