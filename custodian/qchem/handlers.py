@@ -223,13 +223,13 @@ class QChemErrorHandler(ErrorHandler):
             if self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
-            elif self.qcinp.rem.get("job_type") == "opt" or "optimization":
+            elif self.qcinp.rem.get("job_type") == "opt" or self.qcinp.rem.get("job_type") == "optimization":
                 if self.qcinp.rem.get("scf_guess_always", "none").lower() != "true":
                     self.qcinp.rem["scf_guess_always"] = "true"
                     actions.append({"scf_guess_always": "true"})
                 else:
                     print("Don't know how to fix a FileMan error for an opt while always generating a new SCF guess!")
-            elif self.qcinp.rem.get("job_type") == "freq" or "frequency":
+            elif self.qcinp.rem.get("job_type") == "freq" or self.qcinp.rem.get("job_type") == "frequency":
                 self.qcinp.rem["cpscf_nseg"] = str(self.outdata["cpscf_nseg"] + 1)
                 actions.append({"cpscf_nseg": str(self.outdata["cpscf_nseg"] + 1)})
 
