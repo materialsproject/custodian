@@ -124,21 +124,21 @@ class VaspErrorHandler(ErrorHandler):
                 default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
             errors_subset_to_detect (list): A subset of errors to catch. The
                 default is None, which means all supported errors are detected.
-                Use this to only catch only a subset of supported errors.
-                E.g., ["eddrrm", "zheev"] will only catch the eddrmm and zheev
-                errors, and not others. If you wish to only excluded one or
+                Use this to catch only a subset of supported errors.
+                E.g., ["eddrmm", "zheev"] will only catch the eddrmm and zheev
+                errors, and not others. If you wish to only exclude one or
                 two of the errors, you can create this list by the following
                 lines:
-            vtst_fixes (bool): Whether to consider VTST optimizers. Defaults to
-                False for compatibility purposes, but if you have VTST, you
-                would likely benefit from setting this to True.
 
                 ```
-                subset = list(VaspErrorHandler.error_msgs.keys())
-                subset.pop("eddrrm")
+                subset = list(VaspErrorHandler().error_msgs.keys())
+                subset.remove("eddrmm")
 
                 handler = VaspErrorHandler(errors_subset_to_catch=subset)
                 ```
+            vtst_fixes (bool): Whether to consider VTST optimizers. Defaults to
+                False for compatibility purposes, but if you have VTST, you
+                would likely benefit from setting this to True.
         """
         self.output_filename = output_filename
         self.errors = set()
