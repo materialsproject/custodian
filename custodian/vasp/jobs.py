@@ -246,7 +246,7 @@ class VaspJob(Job):
             kpts = vi["KPOINTS"]
             if kpts is not None:
                 if kpts.style == Kpoints.supported_modes.Gamma and tuple(kpts.kpts[0]) == (1, 1, 1):
-                    if self.gamma_vasp_cmd is not None and which(self.gamma_vasp_cmd[-1]):
+                    if self.gamma_vasp_cmd is not None and which(self.gamma_vasp_cmd[-1]):  # pylint: disable=E1136
                         cmd = self.gamma_vasp_cmd
                     elif which(cmd[-1] + ".gamma"):
                         cmd[-1] += ".gamma"
@@ -689,7 +689,8 @@ class VaspJob(Job):
                 continue
 
         logger.warning(
-            f"Killing VASP processes in workdir {workdir} failed with subprocess.Popen.terminate(). Resorting to 'killall'."
+            f"Killing VASP processes in workdir {workdir} failed with subprocess.Popen.terminate(). "
+            "Resorting to 'killall'."
         )
         cmds = self.vasp_cmd
         if self.gamma_vasp_cmd:
@@ -867,7 +868,7 @@ class VaspNEBJob(VaspJob):
                 1,
                 1,
             ):
-                if self.gamma_vasp_cmd is not None and which(self.gamma_vasp_cmd[-1]):
+                if self.gamma_vasp_cmd is not None and which(self.gamma_vasp_cmd[-1]):  # pylint: disable=E1136
                     cmd = self.gamma_vasp_cmd
                 elif which(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
