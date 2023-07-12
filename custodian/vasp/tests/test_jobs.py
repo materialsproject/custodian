@@ -17,15 +17,15 @@ pymatgen.core.SETTINGS["PMG_VASP_PSP_DIR"] = os.path.abspath(test_dir)  # type: 
 
 class VaspJobTest(unittest.TestCase):
     def test_to_from_dict(self):
-        v = VaspJob("hello")
+        v = VaspJob(["hello"])
         v2 = VaspJob.from_dict(v.as_dict())
-        self.assertEqual(type(v2), type(v))
-        self.assertEqual(v2.vasp_cmd, "hello")
+        assert type(v2) == type(v)
+        assert v2.vasp_cmd == ("hello",)
 
     def test_setup(self):
         with cd(test_dir):
             with ScratchDir(".", copy_from_current_on_enter=True):
-                v = VaspJob("hello", auto_npar=True)
+                v = VaspJob(["hello"], auto_npar=True)
                 v.setup()
                 incar = Incar.from_file("INCAR")
                 count = multiprocessing.cpu_count()
@@ -37,7 +37,7 @@ class VaspJobTest(unittest.TestCase):
         # just make sure v.setup() and v.run() exit cleanly when no KPOINTS file is present
         with cd(os.path.join(test_dir, "kspacing")):
             with ScratchDir(".", copy_from_current_on_enter=True):
-                v = VaspJob("hello", auto_npar=True)
+                v = VaspJob(["hello"], auto_npar=True)
                 v.setup()
                 with self.assertRaises(FileNotFoundError):
                     # a FileNotFoundError indicates that v.run() tried to run
@@ -51,7 +51,7 @@ class VaspJobTest(unittest.TestCase):
             with ScratchDir(".", copy_from_current_on_enter=True):
                 shutil.copy("INCAR", "INCAR.backup")
 
-                v = VaspJob("hello", final=False, suffix=".test", copy_magmom=True)
+                v = VaspJob(["hello"], final=False, suffix=".test", copy_magmom=True)
                 v.postprocess()
                 incar = Incar.from_file("INCAR")
                 incar_prev = Incar.from_file("INCAR.test")
@@ -94,7 +94,7 @@ class VaspJobTest(unittest.TestCase):
             # Test explicit action functionality
             with ScratchDir(".", copy_from_current_on_enter=True):
                 v = VaspJob(
-                    "hello",
+                    ["hello"],
                     auto_continue=[{"dict": "INCAR", "action": {"_set": {"ISTART": 1}}}],
                 )
                 v.setup()
@@ -113,10 +113,10 @@ class VaspJobTest(unittest.TestCase):
 
 class VaspNEBJobTest(unittest.TestCase):
     def test_to_from_dict(self):
-        v = VaspNEBJob("hello")
+        v = VaspNEBJob(["hello"])
         v2 = VaspNEBJob.from_dict(v.as_dict())
-        self.assertEqual(type(v2), type(v))
-        self.assertEqual(v2.vasp_cmd, "hello")
+        assert type(v2) == type(v)
+        assert v2.vasp_cmd == ("hello",)
 
     def test_setup(self):
         with cd(os.path.join(test_dir, "setup_neb")):

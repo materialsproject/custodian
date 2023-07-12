@@ -139,7 +139,7 @@ class VaspJob(Job):
                 wall-time handler which will write a read-only STOPCAR to
                 prevent VASP from deleting it once it finishes
         """
-        self.vasp_cmd = vasp_cmd
+        self.vasp_cmd = tuple(vasp_cmd)
         self.output_file = output_file
         self.stderr_file = stderr_file
         self.final = final
@@ -148,7 +148,7 @@ class VaspJob(Job):
         self.settings_override = settings_override
         self.auto_npar = auto_npar
         self.auto_gamma = auto_gamma
-        self.gamma_vasp_cmd = gamma_vasp_cmd
+        self.gamma_vasp_cmd = tuple(gamma_vasp_cmd) if gamma_vasp_cmd else None
         self.copy_magmom = copy_magmom
         self.auto_continue = auto_continue
 
@@ -665,35 +665,38 @@ class VaspJob(Job):
 
     def terminate(self):
         """
-        Kill all vasp processes associated with the current job.
+        Kill all VASP processes associated with the current job.
         This is done by looping over all processes and selecting the ones
-        that contain "vasp" as well as access files (CHGCAR in particular)
+        that contain "vasp" as well as access files (vasprun.xml in particular)
         in the custodian working directory.
-        There is also a safety that kills all vasp processes if non of the
-        processes can be killed (This is bad if more than one vasp runs are
+        There is also a safety that kills all VASP processes if none of the
+        processes can be killed (This is bad if more than one VASP runs are
         simultaneously executed on the same node). However, this should never
         happen.
         """
         workdir = os.getcwd()
-        logger.info(f"kill vasp processes in work dir {workdir}")
-        is_killed = False
+        logger.info(f"Killing VASP processes in workdir {workdir}.")
         for proc in psutil.process_iter():
             try:
                 if "vasp" in proc.name().lower():
-                    for file in proc.open_files():
-                        if workdir + "/CHGCAR" == file.path and psutil.pid_exists(proc.pid):
-                            proc.kill()
-                            is_killed = True
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    open_paths = [file.path for file in proc.open_files()]
+                    vasprun_path = os.path.join(workdir, "vasprun.xml")
+                    if (vasprun_path in open_paths) and psutil.pid_exists(proc.pid):
+                        proc.kill()
+                        return
+            except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+                logger.warning(f"Exception {e} encountered while killing VASP.")
                 continue
-        if not is_killed:
-            logger.warning(f"killing vasp processes in work dir {workdir} failed. Resorting to 'killall'.")
-            cmds = self.vasp_cmd
-            if self.gamma_vasp_cmd:
-                cmds += self.gamma_vasp_cmd
-                for k in cmds:
-                    if "vasp" in k:
-                        subprocess.run(["killall", f"{k}"])
+
+        logger.warning(
+            f"Killing VASP processes in workdir {workdir} failed with subprocess.Popen.terminate(). Resorting to 'killall'."
+        )
+        cmds = self.vasp_cmd
+        if self.gamma_vasp_cmd:
+            cmds += self.gamma_vasp_cmd
+        for k in cmds:
+            if "vasp" in k:
+                subprocess.run(["killall", f"{k}"])
 
 
 class VaspNEBJob(VaspJob):
@@ -770,7 +773,7 @@ class VaspNEBJob(VaspJob):
                       "action": {"_file_copy": {"dest": "POSCAR"}}}]
         """
 
-        self.vasp_cmd = vasp_cmd
+        self.vasp_cmd = tuple(vasp_cmd)
         self.output_file = output_file
         self.stderr_file = stderr_file
         self.final = final
@@ -779,7 +782,7 @@ class VaspNEBJob(VaspJob):
         self.auto_npar = auto_npar
         self.half_kpts = half_kpts
         self.auto_gamma = auto_gamma
-        self.gamma_vasp_cmd = gamma_vasp_cmd
+        self.gamma_vasp_cmd = tuple(gamma_vasp_cmd) if gamma_vasp_cmd else None
         self.auto_continue = auto_continue
         self.settings_override = settings_override
         self.neb_dirs = []  # 00, 01, etc.
