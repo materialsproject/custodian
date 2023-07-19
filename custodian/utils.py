@@ -1,7 +1,7 @@
 """
 Utility function and classes.
 """
-
+import functools
 import logging
 import os
 import tarfile
@@ -46,3 +46,33 @@ def get_execution_host_info():
         except Exception:
             pass
     return host or "unknown", cluster or "unknown"
+
+
+class tracked_lru_cache:
+    """
+    Decorator wrapping the functools.lru_cache adding a tracking of the
+    functions that have been wrapped.
+
+    Exposes a method to clear the cache of all the wrapped functions.
+
+    Used to cache the parsed outputs in handlers/validators, to avoid
+    multiple parsing of the same file.
+    Allows Custodian to clear the cache after all the checks have been performed.
+    """
+
+    cached_functions: set = set()
+
+    def __init__(self, func):
+        self.func = functools.lru_cache(func)
+        functools.update_wrapper(self, func)
+
+    def __call__(self, *args, **kwargs):
+        result = self.func(*args, **kwargs)
+        self.cached_functions.add(self.func)
+        return result
+
+    @classmethod
+    def cache_clear(cls):
+        while cls.cached_functions:
+            f = cls.cached_functions.pop()
+            f.cache_clear()

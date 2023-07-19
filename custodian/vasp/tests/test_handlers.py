@@ -17,6 +17,7 @@ import unittest
 
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
 
+from custodian.utils import tracked_lru_cache
 from custodian.vasp.handlers import (
     AliasingErrorHandler,
     DriftErrorHandler,
@@ -651,6 +652,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
             },
         )
         os.remove("vasprun.xml")
+        tracked_lru_cache.cache_clear()
 
         shutil.copy("vasprun.xml.electronic_veryfast", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -665,6 +667,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
             },
         )
         os.remove("vasprun.xml")
+        tracked_lru_cache.cache_clear()
 
         shutil.copy("vasprun.xml.electronic_normal", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -679,6 +682,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
             },
         )
         os.remove("vasprun.xml")
+        tracked_lru_cache.cache_clear()
 
         shutil.copy("vasprun.xml.electronic_metagga_fast", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -693,6 +697,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
             },
         )
         os.remove("vasprun.xml")
+        tracked_lru_cache.cache_clear()
 
         shutil.copy("vasprun.xml.electronic_hybrid_fast", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -707,6 +712,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
             },
         )
         os.remove("vasprun.xml")
+        tracked_lru_cache.cache_clear()
 
         shutil.copy("vasprun.xml.electronic_hybrid_all", "vasprun.xml")
         h = UnconvergedErrorHandler()

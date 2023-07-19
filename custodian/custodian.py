@@ -22,7 +22,7 @@ from monty.serialization import dumpfn, loadfn
 from monty.shutil import gzip_dir
 from monty.tempfile import ScratchDir
 
-from .utils import get_execution_host_info
+from .utils import get_execution_host_info, tracked_lru_cache
 
 __author__ = "Shyue Ping Ong, William Davidson Richards"
 __copyright__ = "Copyright 2012, The Materials Project"
@@ -683,6 +683,8 @@ class Custodian:
         self.run_log[-1]["corrections"].extend(corrections)
         # We do a dump of the run log after each check.
         dumpfn(self.run_log, Custodian.LOG_FILE, cls=MontyEncoder, indent=4)
+        # Clear all the cached values to avoid reusing them in a subsequent check
+        tracked_lru_cache.cache_clear()
         return len(corrections) > 0
 
 

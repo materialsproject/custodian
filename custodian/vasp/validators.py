@@ -6,9 +6,10 @@ import logging
 import os
 from collections import deque
 
-from pymatgen.io.vasp import Chgcar, Incar, Outcar, Vasprun
+from pymatgen.io.vasp import Chgcar, Incar
 
 from custodian.custodian import Validator
+from custodian.vasp.io import load_outcar, load_vasprun
 
 
 class VasprunXMLValidator(Validator):
@@ -33,7 +34,7 @@ class VasprunXMLValidator(Validator):
         Check for error.
         """
         try:
-            Vasprun("vasprun.xml")
+            load_vasprun("vasprun.xml")
         except Exception:
             exception_context = {}
 
@@ -105,7 +106,7 @@ class VaspNpTMDValidator(Validator):
         if not is_npt:
             return False
 
-        outcar = Outcar("OUTCAR")
+        outcar = load_outcar("OUTCAR")
         patterns = {"MDALGO": r"MDALGO\s+=\s+([\d]+)"}
         outcar.read_pattern(patterns=patterns)
         if outcar.data["MDALGO"] == [["3"]]:

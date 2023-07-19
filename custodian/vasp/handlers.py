@@ -21,7 +21,7 @@ from monty.os.path import zpath
 from monty.serialization import loadfn
 from pymatgen.core.structure import Structure
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Poscar, VaspInput
-from pymatgen.io.vasp.outputs import Oszicar, Outcar, Vasprun
+from pymatgen.io.vasp.outputs import Oszicar
 from pymatgen.io.vasp.sets import MPScanRelaxSet
 from pymatgen.transformations.standard_transformations import SupercellTransformation
 
@@ -30,6 +30,7 @@ from custodian.ansible.interpreter import Modder
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from custodian.vasp.interpreter import VaspModder
+from custodian.vasp.io import load_outcar, load_vasprun
 
 __author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen, Stephen Dacek, Andrew Rosen"
 __version__ = "0.1"
@@ -202,7 +203,7 @@ class VaspErrorHandler(ErrorHandler):
             # error count to 1 to skip first fix
             if self.error_count["brmix"] == 0:
                 try:
-                    assert Outcar(zpath(os.path.join(os.getcwd(), "OUTCAR"))).is_stopped is False
+                    assert load_outcar(zpath(os.path.join(os.getcwd(), "OUTCAR"))).is_stopped is False
                 except Exception:
                     self.error_count["brmix"] += 1
 
@@ -502,7 +503,7 @@ class VaspErrorHandler(ErrorHandler):
             # resources, seems to be to just increase NCORE slightly. That's what I do here.
             nprocs = multiprocessing.cpu_count()
             try:
-                nelect = Outcar("OUTCAR").nelect
+                nelect = load_outcar("OUTCAR").nelect
             except Exception:
                 nelect = 1  # dummy value
             if nelect < nprocs:
@@ -669,7 +670,9 @@ class LrfCommutatorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
 
         if "lrf_comm" in self.errors:
-            if Outcar(zpath(os.path.join(os.getcwd(), "OUTCAR"))).is_stopped is False and not vi["INCAR"].get("LPEAD"):
+            if load_outcar(zpath(os.path.join(os.getcwd(), "OUTCAR"))).is_stopped is False and not vi["INCAR"].get(
+                "LPEAD"
+            ):
                 actions.append({"dict": "INCAR", "action": {"_set": {"LPEAD": True}}})
 
         VaspModder(vi=vi).apply_actions(actions)
@@ -882,7 +885,7 @@ class DriftErrorHandler(ErrorHandler):
             self.max_drift = incar["EDIFFG"] * -1
 
         try:
-            outcar = Outcar("OUTCAR")
+            outcar = load_outcar("OUTCAR")
         except Exception:
             # Can't perform check if Outcar not valid
             return False
@@ -904,7 +907,7 @@ class DriftErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
 
         incar = vi["INCAR"]
-        outcar = Outcar("OUTCAR")
+        outcar = load_outcar("OUTCAR")
 
         # Move CONTCAR to POSCAR
         actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
@@ -978,7 +981,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
             return False
 
         try:
-            v = Vasprun(self.output_vasprun)
+            v = load_vasprun(self.output_vasprun)
             if v.converged:
                 return False
         except Exception:
@@ -1027,7 +1030,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         Check for error.
         """
         try:
-            v = Vasprun(self.output_filename)
+            v = load_vasprun(self.output_filename)
             if not v.converged:
                 return True
         except Exception:
@@ -1038,7 +1041,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         """
         Perform corrections.
         """
-        v = Vasprun(self.output_filename)
+        v = load_vasprun(self.output_filename)
         algo = v.incar.get("ALGO", "Normal").lower()
         actions = []
         if not v.converged_electronic:
@@ -1148,7 +1151,7 @@ class IncorrectSmearingHandler(ErrorHandler):
         Check for error.
         """
         try:
-            v = Vasprun(self.output_filename)
+            v = load_vasprun(self.output_filename)
             # check whether bandgap is zero, tetrahedron smearing was used
             # and relaxation is performed.
             if v.eigenvalue_band_properties[0] == 0 and v.incar.get("ISMEAR", 1) < -3 and v.incar.get("NSW", 0) > 1:
@@ -1197,7 +1200,7 @@ class ScanMetalHandler(ErrorHandler):
         Check for error.
         """
         try:
-            v = Vasprun(self.output_filename)
+            v = load_vasprun(self.output_filename)
             # check whether bandgap is zero and tetrahedron smearing was used
             if v.eigenvalue_band_properties[0] == 0 and v.incar.get("KSPACING", 1) > 0.22:
                 return True
@@ -1246,7 +1249,7 @@ class LargeSigmaHandler(ErrorHandler):
         """
         incar = Incar.from_file("INCAR")
         try:
-            outcar = Outcar("OUTCAR")
+            outcar = load_outcar("OUTCAR")
         except Exception:
             # Can't perform check if Outcar not valid
             return False
@@ -1613,7 +1616,7 @@ class WalltimeHandler(ErrorHandler):
         if self.wall_time:
             run_time = datetime.datetime.now() - self.start_time
             total_secs = run_time.total_seconds()
-            outcar = Outcar("OUTCAR")
+            outcar = load_outcar("OUTCAR")
             if not self.electronic_step_stop:
                 # Determine max time per ionic step.
                 outcar.read_pattern({"timings": r"LOOP\+.+real time(.+)"}, postprocess=float)
