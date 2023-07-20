@@ -503,7 +503,7 @@ class VaspErrorHandler(ErrorHandler):
             # resources, seems to be to just increase NCORE slightly. That's what I do here.
             nprocs = multiprocessing.cpu_count()
             try:
-                nelect = load_outcar("OUTCAR").nelect
+                nelect = load_outcar(os.path.join(os.getcwd(), "OUTCAR")).nelect
             except Exception:
                 nelect = 1  # dummy value
             if nelect < nprocs:
@@ -885,7 +885,7 @@ class DriftErrorHandler(ErrorHandler):
             self.max_drift = incar["EDIFFG"] * -1
 
         try:
-            outcar = load_outcar("OUTCAR")
+            outcar = load_outcar(os.path.join(os.getcwd(), "OUTCAR"))
         except Exception:
             # Can't perform check if Outcar not valid
             return False
@@ -907,7 +907,7 @@ class DriftErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
 
         incar = vi["INCAR"]
-        outcar = load_outcar("OUTCAR")
+        outcar = load_outcar(os.path.join(os.getcwd(), "OUTCAR"))
 
         # Move CONTCAR to POSCAR
         actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
@@ -981,7 +981,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
             return False
 
         try:
-            v = load_vasprun(self.output_vasprun)
+            v = load_vasprun(os.path.join(os.getcwd(), self.output_vasprun))
             if v.converged:
                 return False
         except Exception:
@@ -1030,7 +1030,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         Check for error.
         """
         try:
-            v = load_vasprun(self.output_filename)
+            v = load_vasprun(os.path.join(os.getcwd(), self.output_filename))
             if not v.converged:
                 return True
         except Exception:
@@ -1041,7 +1041,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         """
         Perform corrections.
         """
-        v = load_vasprun(self.output_filename)
+        v = load_vasprun(os.path.join(os.getcwd(), self.output_filename))
         algo = v.incar.get("ALGO", "Normal").lower()
         actions = []
         if not v.converged_electronic:
@@ -1151,7 +1151,7 @@ class IncorrectSmearingHandler(ErrorHandler):
         Check for error.
         """
         try:
-            v = load_vasprun(self.output_filename)
+            v = load_vasprun(os.path.join(os.getcwd(), self.output_filename))
             # check whether bandgap is zero, tetrahedron smearing was used
             # and relaxation is performed.
             if v.eigenvalue_band_properties[0] == 0 and v.incar.get("ISMEAR", 1) < -3 and v.incar.get("NSW", 0) > 1:
@@ -1200,7 +1200,7 @@ class ScanMetalHandler(ErrorHandler):
         Check for error.
         """
         try:
-            v = load_vasprun(self.output_filename)
+            v = load_vasprun(os.path.join(os.getcwd(), self.output_filename))
             # check whether bandgap is zero and tetrahedron smearing was used
             if v.eigenvalue_band_properties[0] == 0 and v.incar.get("KSPACING", 1) > 0.22:
                 return True
@@ -1249,7 +1249,7 @@ class LargeSigmaHandler(ErrorHandler):
         """
         incar = Incar.from_file("INCAR")
         try:
-            outcar = load_outcar("OUTCAR")
+            outcar = load_outcar(os.path.join(os.getcwd(), "OUTCAR"))
         except Exception:
             # Can't perform check if Outcar not valid
             return False
@@ -1616,7 +1616,7 @@ class WalltimeHandler(ErrorHandler):
         if self.wall_time:
             run_time = datetime.datetime.now() - self.start_time
             total_secs = run_time.total_seconds()
-            outcar = load_outcar("OUTCAR")
+            outcar = load_outcar(os.path.join(os.getcwd(), "OUTCAR"))
             if not self.electronic_step_stop:
                 # Determine max time per ionic step.
                 outcar.read_pattern({"timings": r"LOOP\+.+real time(.+)"}, postprocess=float)

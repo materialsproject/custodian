@@ -34,7 +34,7 @@ class VasprunXMLValidator(Validator):
         Check for error.
         """
         try:
-            load_vasprun("vasprun.xml")
+            load_vasprun(os.path.join(os.getcwd(), "vasprun.xml"))
         except Exception:
             exception_context = {}
 
@@ -106,7 +106,7 @@ class VaspNpTMDValidator(Validator):
         if not is_npt:
             return False
 
-        outcar = load_outcar("OUTCAR")
+        outcar = load_outcar(os.path.join(os.getcwd(), "OUTCAR"))
         patterns = {"MDALGO": r"MDALGO\s+=\s+([\d]+)"}
         outcar.read_pattern(patterns=patterns)
         if outcar.data["MDALGO"] == [["3"]]:

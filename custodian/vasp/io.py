@@ -1,3 +1,7 @@
+"""
+Helper functions for dealing with vasp files.
+"""
+
 from pymatgen.io.vasp.outputs import Outcar, Vasprun
 
 from custodian.utils import tracked_lru_cache
