@@ -1065,42 +1065,39 @@ class WalltimeHandlerTest(unittest.TestCase):
 class PositiveEnergyHandlerTest(unittest.TestCase):
     def setUp(self):
         os.chdir(test_dir)
-
-    def test_check_correct(self):
-        subdir = os.path.join(test_dir, "positive_energy")
-        os.chdir(subdir)
+        self.subdir = os.path.join(test_dir, "positive_energy")
+        os.chdir(self.subdir)
         shutil.copy("INCAR", "INCAR.orig")
         shutil.copy("POSCAR", "POSCAR.orig")
 
+    def test_check_correct(self):
         h = PositiveEnergyErrorHandler()
         self.assertTrue(h.check())
         d = h.correct()
         self.assertEqual(d["errors"], ["Positive energy"])
 
-        os.remove(os.path.join(subdir, "error.1.tar.gz"))
+        os.remove(os.path.join(self.subdir, "error.1.tar.gz"))
 
         incar = Incar.from_file("INCAR")
-
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("POSCAR.orig", "POSCAR")
 
         self.assertEqual(incar["ALGO"], "Normal")
 
     @classmethod
     def tearDownClass(cls):
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("POSCAR.orig", "POSCAR")
         os.chdir(cwd)
 
 
 class PotimHandlerTest(unittest.TestCase):
     def setUp(self):
         os.chdir(test_dir)
-
-    def test_check_correct(self):
-        subdir = os.path.join(test_dir, "potim")
-        os.chdir(subdir)
+        self.subdir = os.path.join(test_dir, "potim")
+        os.chdir(self.subdir)
         shutil.copy("INCAR", "INCAR.orig")
         shutil.copy("POSCAR", "POSCAR.orig")
 
+    def test_check_correct(self):
         incar = Incar.from_file("INCAR")
         original_potim = incar["POTIM"]
 
@@ -1109,19 +1106,18 @@ class PotimHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ["POTIM"])
 
-        os.remove(os.path.join(subdir, "error.1.tar.gz"))
+        os.remove(os.path.join(self.subdir, "error.1.tar.gz"))
 
         incar = Incar.from_file("INCAR")
         new_potim = incar["POTIM"]
-
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("POSCAR.orig", "POSCAR")
 
         self.assertEqual(original_potim, new_potim)
         self.assertEqual(incar["IBRION"], 3)
 
     @classmethod
     def tearDownClass(cls):
+        shutil.move("INCAR.orig", "INCAR")
+        shutil.move("POSCAR.orig", "POSCAR")
         os.chdir(cwd)
 
 
@@ -1201,10 +1197,9 @@ class DriftErrorHandlerTest(unittest.TestCase):
     def setUp(self):
         os.chdir(os.path.abspath(test_dir))
         os.chdir("drift")
-
-    def test_check(self):
         shutil.copy("INCAR", "INCAR.orig")
 
+    def test_check(self):
         h = DriftErrorHandler(max_drift=0.05, to_average=11)
         self.assertFalse(h.check())
 
@@ -1226,11 +1221,8 @@ class DriftErrorHandlerTest(unittest.TestCase):
         self.assertEqual(h.max_drift, 0.01)
 
         clean_dir()
-        shutil.move("INCAR.orig", "INCAR")
 
     def test_correct(self):
-        shutil.copy("INCAR", "INCAR.orig")
-
         h = DriftErrorHandler(max_drift=0.0001, enaug_multiply=2)
         h.check()
         h.correct()
@@ -1239,9 +1231,9 @@ class DriftErrorHandlerTest(unittest.TestCase):
         self.assertEqual(incar.get("ENAUG", 0), incar.get("ENCUT", 2) * 2)
 
         clean_dir()
-        shutil.move("INCAR.orig", "INCAR")
 
     def tearDown(self):
+        shutil.move("INCAR.orig", "INCAR")
         clean_dir()
         os.chdir(cwd)
 
