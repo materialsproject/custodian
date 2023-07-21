@@ -70,6 +70,10 @@ class tracked_lru_cache:
         self.func = functools.lru_cache(func)
         functools.update_wrapper(self, func)
 
+        # expose standard lru_cache functions
+        self.cache_info = self.func.cache_info
+        self.cache_clear = self.func.cache_clear
+
     def __call__(self, *args, **kwargs):
         """
         Call the decorated function
