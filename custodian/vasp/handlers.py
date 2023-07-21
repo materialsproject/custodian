@@ -1287,11 +1287,11 @@ class LargeSigmaHandler(ErrorHandler):
             )
         else:
             # https://vasp.at/wiki/index.php/ISMEAR recommends ISMEAR = 0 if you have
-            # no a priori knowledge of your system ("then always use Gaussian smearing")
+            # no a priori knowledge of your system ("then always use Gaussian smearing"
             actions.append(
                 {
                     "dict": "INCAR",
-                    "action": {"_set": {"ISMEAR": 0}},
+                    "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}},
                 }
             )
 
