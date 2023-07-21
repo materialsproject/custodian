@@ -652,7 +652,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
             },
         )
         os.remove("vasprun.xml")
-        tracked_lru_cache.cache_clear()
+        tracked_lru_cache.tracked_cache_clear()
 
         shutil.copy("vasprun.xml.electronic_veryfast", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -667,7 +667,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
             },
         )
         os.remove("vasprun.xml")
-        tracked_lru_cache.cache_clear()
+        tracked_lru_cache.tracked_cache_clear()
 
         shutil.copy("vasprun.xml.electronic_normal", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -682,7 +682,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
             },
         )
         os.remove("vasprun.xml")
-        tracked_lru_cache.cache_clear()
+        tracked_lru_cache.tracked_cache_clear()
 
         shutil.copy("vasprun.xml.electronic_metagga_fast", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -697,7 +697,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
             },
         )
         os.remove("vasprun.xml")
-        tracked_lru_cache.cache_clear()
+        tracked_lru_cache.tracked_cache_clear()
 
         shutil.copy("vasprun.xml.electronic_hybrid_fast", "vasprun.xml")
         h = UnconvergedErrorHandler()
@@ -712,7 +712,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
             },
         )
         os.remove("vasprun.xml")
-        tracked_lru_cache.cache_clear()
+        tracked_lru_cache.tracked_cache_clear()
 
         shutil.copy("vasprun.xml.electronic_hybrid_all", "vasprun.xml")
         h = UnconvergedErrorHandler()

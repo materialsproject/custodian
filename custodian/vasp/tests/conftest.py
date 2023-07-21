@@ -30,4 +30,4 @@ def clear_tracked_cache():
     """
     from custodian.utils import tracked_lru_cache
 
-    tracked_lru_cache.cache_clear()
+    tracked_lru_cache.tracked_cache_clear()

@@ -7,7 +7,7 @@ class TrackedLruCacheTest(unittest.TestCase):
     def setUp(self):
         # clear cache before and after each test to avoid
         # unexpected caching from other tests
-        tracked_lru_cache.cache_clear()
+        tracked_lru_cache.tracked_cache_clear()
 
     def test_cache_and_clear(self):
         n_calls = 0
@@ -27,7 +27,7 @@ class TrackedLruCacheTest(unittest.TestCase):
 
         assert len(tracked_lru_cache.cached_functions) == 1
 
-        tracked_lru_cache.cache_clear()
+        tracked_lru_cache.tracked_cache_clear()
 
         assert len(tracked_lru_cache.cached_functions) == 0
 
@@ -35,4 +35,4 @@ class TrackedLruCacheTest(unittest.TestCase):
         assert n_calls == 3
 
     def tearDown(self):
-        tracked_lru_cache.cache_clear()
+        tracked_lru_cache.tracked_cache_clear()

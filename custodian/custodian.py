@@ -684,7 +684,7 @@ class Custodian:
         # We do a dump of the run log after each check.
         dumpfn(self.run_log, Custodian.LOG_FILE, cls=MontyEncoder, indent=4)
         # Clear all the cached values to avoid reusing them in a subsequent check
-        tracked_lru_cache.cache_clear()
+        tracked_lru_cache.tracked_cache_clear()
         return len(corrections) > 0
 
 

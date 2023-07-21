@@ -83,7 +83,7 @@ class tracked_lru_cache:
         return result
 
     @classmethod
-    def cache_clear(cls):
+    def tracked_cache_clear(cls):
         """
         Clear the cache of all the decorated functions.
         """
