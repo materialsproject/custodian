@@ -1285,6 +1285,15 @@ class LargeSigmaHandler(ErrorHandler):
                     "action": {"_set": {"SIGMA": sigma - 0.06}},
                 }
             )
+        else:
+            # https://vasp.at/wiki/index.php/ISMEAR recommends ISMEAR = 0 if you have
+            # no a priori knowledge of your system ("then always use Gaussian smearing")
+            actions.append(
+                {
+                    "dict": "INCAR",
+                    "action": {"_set": {"ISMEAR": 0}},
+                }
+            )
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": ["LargeSigma"], "actions": actions}
