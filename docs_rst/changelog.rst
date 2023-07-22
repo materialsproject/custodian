@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+v2023.7.22
+----------
+* Fix for LargeSigmaHandler. Now defaults to ISMEAR=1 and fallback to ISMEAR=0 if SIGMA has been modified 
+  three times from 0.2 (@arosen93, @janosh)
+* More robust VASP job termination (@fyalcin)
+
 v2023.6.5
 ---------
 - New VASP error handler for invalid INCAR parameter (@arosen93)

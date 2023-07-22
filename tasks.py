@@ -136,7 +136,7 @@ def update_changelog(ctx, version=datetime.datetime.now().strftime("%Y.%-m.%-d")
                         break
                     lines.append(f"    {ll}")
         misc.append(l)
-    with open("changelog.rst") as f:
+    with open("docs_rst/changelog.rst") as f:
         contents = f.read()
     l = "=========="
     toks = contents.split(l)
