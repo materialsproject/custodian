@@ -240,8 +240,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         os.chdir(test_dir)
 
     def test_rot_matrix(self):
-        if "PMG_VASP_PSP_DIR" not in os.environ:
-            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
         subdir = os.path.join(test_dir, "poscar_error")
         os.chdir(subdir)
         shutil.copy("KPOINTS", "KPOINTS.orig")
@@ -555,8 +554,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
 
 class AliasingErrorHandlerTest(unittest.TestCase):
     def setUp(self):
-        if "PMG_VASP_PSP_DIR" not in os.environ:
-            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
         os.chdir(test_dir)
         shutil.copy("INCAR", "INCAR.orig")
         shutil.copy("KPOINTS", "KPOINTS.orig")
@@ -626,8 +624,7 @@ class AliasingErrorHandlerTest(unittest.TestCase):
 
 class UnconvergedErrorHandlerTest(unittest.TestCase):
     def setUp(self):
-        if "PMG_VASP_PSP_DIR" not in os.environ:
-            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
         os.chdir(test_dir)
         subdir = os.path.join(test_dir, "unconverged")
         os.chdir(subdir)
@@ -787,8 +784,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
 
 class IncorrectSmearingHandlerTest(unittest.TestCase):
     def setUp(self):
-        if "PMG_VASP_PSP_DIR" not in os.environ:
-            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
         os.chdir(test_dir)
         subdir = os.path.join(test_dir, "scan_metal")
         os.chdir(subdir)
@@ -815,8 +811,7 @@ class IncorrectSmearingHandlerTest(unittest.TestCase):
 
 class IncorrectSmearingHandlerStaticTest(unittest.TestCase):
     def setUp(self):
-        if "PMG_VASP_PSP_DIR" not in os.environ:
-            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
         os.chdir(test_dir)
         subdir = os.path.join(test_dir, "static_smearing")
         os.chdir(subdir)
@@ -837,8 +832,7 @@ class IncorrectSmearingHandlerStaticTest(unittest.TestCase):
 
 class IncorrectSmearingHandlerFermiTest(unittest.TestCase):
     def setUp(self):
-        if "PMG_VASP_PSP_DIR" not in os.environ:
-            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
         os.chdir(test_dir)
         subdir = os.path.join(test_dir, "fermi_smearing")
         os.chdir(subdir)
@@ -859,8 +853,7 @@ class IncorrectSmearingHandlerFermiTest(unittest.TestCase):
 
 class ScanMetalHandlerTest(unittest.TestCase):
     def setUp(self):
-        if "PMG_VASP_PSP_DIR" not in os.environ:
-            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
         os.chdir(test_dir)
         subdir = os.path.join(test_dir, "scan_metal")
         os.chdir(subdir)
@@ -885,8 +878,7 @@ class ScanMetalHandlerTest(unittest.TestCase):
 
 class LargeSigmaHandlerTest(unittest.TestCase):
     def setUp(self):
-        if "PMG_VASP_PSP_DIR" not in os.environ:
-            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
         os.chdir(test_dir)
         subdir = os.path.join(test_dir, "large_sigma")
         os.chdir(subdir)
@@ -911,8 +903,7 @@ class LargeSigmaHandlerTest(unittest.TestCase):
 
 class ZpotrfErrorHandlerTest(unittest.TestCase):
     def setUp(self):
-        if "PMG_VASP_PSP_DIR" not in os.environ:
-            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
         os.chdir(test_dir)
         os.chdir("zpotrf")
         shutil.copy("POSCAR", "POSCAR.orig")
@@ -967,8 +958,7 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
 
 class ZpotrfErrorHandlerSmallTest(unittest.TestCase):
     def setUp(self):
-        if "PMG_VASP_PSP_DIR" not in os.environ:
-            os.environ["PMG_VASP_PSP_DIR"] = test_dir
+        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
         os.chdir(test_dir)
         os.chdir("zpotrf_small")
         shutil.copy("POSCAR", "POSCAR.orig")
