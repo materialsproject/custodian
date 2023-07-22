@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.vasp.jobs &#8212; custodian 2023.6.5 documentation</title>
+    <title>custodian.vasp.jobs &#8212; custodian 2023.7.22 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/flasky.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.6.5 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.7.22 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.vasp.jobs</a></li> 
       </ul>
@@ -187,7 +187,7 @@
 <span class="sd">                wall-time handler which will write a read-only STOPCAR to</span>
 <span class="sd">                prevent VASP from deleting it once it finishes</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vasp_cmd</span> <span class="o">=</span> <span class="n">vasp_cmd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vasp_cmd</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span> <span class="o">=</span> <span class="n">output_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stderr_file</span> <span class="o">=</span> <span class="n">stderr_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">final</span> <span class="o">=</span> <span class="n">final</span>
@@ -196,7 +196,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">settings_override</span> <span class="o">=</span> <span class="n">settings_override</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auto_npar</span> <span class="o">=</span> <span class="n">auto_npar</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auto_gamma</span> <span class="o">=</span> <span class="n">auto_gamma</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span> <span class="o">=</span> <span class="n">gamma_vasp_cmd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">gamma_vasp_cmd</span><span class="p">)</span> <span class="k">if</span> <span class="n">gamma_vasp_cmd</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">copy_magmom</span> <span class="o">=</span> <span class="n">copy_magmom</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auto_continue</span> <span class="o">=</span> <span class="n">auto_continue</span>
 
@@ -294,7 +294,7 @@
             <span class="n">kpts</span> <span class="o">=</span> <span class="n">vi</span><span class="p">[</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">kpts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">kpts</span><span class="o">.</span><span class="n">style</span> <span class="o">==</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">supported_modes</span><span class="o">.</span><span class="n">Gamma</span> <span class="ow">and</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">kpts</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">which</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">which</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>  <span class="c1"># pylint: disable=E1136</span>
                         <span class="n">cmd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span>
                     <span class="k">elif</span> <span class="n">which</span><span class="p">(</span><span class="n">cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.gamma&quot;</span><span class="p">):</span>
                         <span class="n">cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;.gamma&quot;</span>
@@ -713,35 +713,39 @@
 
 <div class="viewcode-block" id="VaspJob.terminate"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspJob.terminate">[docs]</a>    <span class="k">def</span> <span class="nf">terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Kill all vasp processes associated with the current job.</span>
+<span class="sd">        Kill all VASP processes associated with the current job.</span>
 <span class="sd">        This is done by looping over all processes and selecting the ones</span>
-<span class="sd">        that contain &quot;vasp&quot; as well as access files (CHGCAR in particular)</span>
+<span class="sd">        that contain &quot;vasp&quot; as well as access files (vasprun.xml in particular)</span>
 <span class="sd">        in the custodian working directory.</span>
-<span class="sd">        There is also a safety that kills all vasp processes if non of the</span>
-<span class="sd">        processes can be killed (This is bad if more than one vasp runs are</span>
+<span class="sd">        There is also a safety that kills all VASP processes if none of the</span>
+<span class="sd">        processes can be killed (This is bad if more than one VASP runs are</span>
 <span class="sd">        simultaneously executed on the same node). However, this should never</span>
 <span class="sd">        happen.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">workdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;kill vasp processes in work dir </span><span class="si">{</span><span class="n">workdir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">is_killed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Killing VASP processes in workdir </span><span class="si">{</span><span class="n">workdir</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">proc</span> <span class="ow">in</span> <span class="n">psutil</span><span class="o">.</span><span class="n">process_iter</span><span class="p">():</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s2">&quot;vasp&quot;</span> <span class="ow">in</span> <span class="n">proc</span><span class="o">.</span><span class="n">name</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-                    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">proc</span><span class="o">.</span><span class="n">open_files</span><span class="p">():</span>
-                        <span class="k">if</span> <span class="n">workdir</span> <span class="o">+</span> <span class="s2">&quot;/CHGCAR&quot;</span> <span class="o">==</span> <span class="n">file</span><span class="o">.</span><span class="n">path</span> <span class="ow">and</span> <span class="n">psutil</span><span class="o">.</span><span class="n">pid_exists</span><span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">pid</span><span class="p">):</span>
-                            <span class="n">proc</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
-                            <span class="n">is_killed</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">except</span> <span class="p">(</span><span class="n">psutil</span><span class="o">.</span><span class="n">NoSuchProcess</span><span class="p">,</span> <span class="n">psutil</span><span class="o">.</span><span class="n">AccessDenied</span><span class="p">):</span>
+                    <span class="n">open_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">file</span><span class="o">.</span><span class="n">path</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">proc</span><span class="o">.</span><span class="n">open_files</span><span class="p">()]</span>
+                    <span class="n">vasprun_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">workdir</span><span class="p">,</span> <span class="s2">&quot;vasprun.xml&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">vasprun_path</span> <span class="ow">in</span> <span class="n">open_paths</span><span class="p">)</span> <span class="ow">and</span> <span class="n">psutil</span><span class="o">.</span><span class="n">pid_exists</span><span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">pid</span><span class="p">):</span>
+                        <span class="n">proc</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+                        <span class="k">return</span>
+            <span class="k">except</span> <span class="p">(</span><span class="n">psutil</span><span class="o">.</span><span class="n">NoSuchProcess</span><span class="p">,</span> <span class="n">psutil</span><span class="o">.</span><span class="n">AccessDenied</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exception </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2"> encountered while killing VASP.&quot;</span><span class="p">)</span>
                 <span class="k">continue</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_killed</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;killing vasp processes in work dir </span><span class="si">{</span><span class="n">workdir</span><span class="si">}</span><span class="s2"> failed. Resorting to &#39;killall&#39;.&quot;</span><span class="p">)</span>
-            <span class="n">cmds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vasp_cmd</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span><span class="p">:</span>
-                <span class="n">cmds</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span>
-                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cmds</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="s2">&quot;vasp&quot;</span> <span class="ow">in</span> <span class="n">k</span><span class="p">:</span>
-                        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;killall&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">])</span></div></div>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Killing VASP processes in workdir </span><span class="si">{</span><span class="n">workdir</span><span class="si">}</span><span class="s2"> failed with subprocess.Popen.terminate(). &quot;</span>
+            <span class="s2">&quot;Resorting to &#39;killall&#39;.&quot;</span>
+        <span class="p">)</span>
+        <span class="n">cmds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vasp_cmd</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span><span class="p">:</span>
+            <span class="n">cmds</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cmds</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;vasp&quot;</span> <span class="ow">in</span> <span class="n">k</span><span class="p">:</span>
+                <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;killall&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">])</span></div></div>
 
 
 <div class="viewcode-block" id="VaspNEBJob"><a class="viewcode-back" href="../../../custodian.vasp.html#custodian.vasp.jobs.VaspNEBJob">[docs]</a><span class="k">class</span> <span class="nc">VaspNEBJob</span><span class="p">(</span><span class="n">VaspJob</span><span class="p">):</span>
@@ -818,7 +822,7 @@
 <span class="sd">                      &quot;action&quot;: {&quot;_file_copy&quot;: {&quot;dest&quot;: &quot;POSCAR&quot;}}}]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">vasp_cmd</span> <span class="o">=</span> <span class="n">vasp_cmd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vasp_cmd</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">vasp_cmd</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span> <span class="o">=</span> <span class="n">output_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stderr_file</span> <span class="o">=</span> <span class="n">stderr_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">final</span> <span class="o">=</span> <span class="n">final</span>
@@ -827,7 +831,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">auto_npar</span> <span class="o">=</span> <span class="n">auto_npar</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">half_kpts</span> <span class="o">=</span> <span class="n">half_kpts</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auto_gamma</span> <span class="o">=</span> <span class="n">auto_gamma</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span> <span class="o">=</span> <span class="n">gamma_vasp_cmd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">gamma_vasp_cmd</span><span class="p">)</span> <span class="k">if</span> <span class="n">gamma_vasp_cmd</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auto_continue</span> <span class="o">=</span> <span class="n">auto_continue</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings_override</span> <span class="o">=</span> <span class="n">settings_override</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">neb_dirs</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 00, 01, etc.</span>
@@ -912,7 +916,7 @@
                 <span class="mi">1</span><span class="p">,</span>
                 <span class="mi">1</span><span class="p">,</span>
             <span class="p">):</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">which</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">which</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>  <span class="c1"># pylint: disable=E1136</span>
                     <span class="n">cmd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_vasp_cmd</span>
                 <span class="k">elif</span> <span class="n">which</span><span class="p">(</span><span class="n">cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.gamma&quot;</span><span class="p">):</span>
                     <span class="n">cmd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;.gamma&quot;</span>

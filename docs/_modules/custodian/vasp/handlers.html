@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>custodian.vasp.handlers &#8212; custodian 2023.6.5 documentation</title>
+    <title>custodian.vasp.handlers &#8212; custodian 2023.7.22 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/flasky.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.6.5 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">custodian 2023.7.22 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">custodian.vasp.handlers</a></li> 
       </ul>
@@ -172,21 +172,21 @@
 <span class="sd">                default redirect used by :class:`custodian.vasp.jobs.VaspJob`.</span>
 <span class="sd">            errors_subset_to_detect (list): A subset of errors to catch. The</span>
 <span class="sd">                default is None, which means all supported errors are detected.</span>
-<span class="sd">                Use this to only catch only a subset of supported errors.</span>
-<span class="sd">                E.g., [&quot;eddrrm&quot;, &quot;zheev&quot;] will only catch the eddrmm and zheev</span>
-<span class="sd">                errors, and not others. If you wish to only excluded one or</span>
+<span class="sd">                Use this to catch only a subset of supported errors.</span>
+<span class="sd">                E.g., [&quot;eddrmm&quot;, &quot;zheev&quot;] will only catch the eddrmm and zheev</span>
+<span class="sd">                errors, and not others. If you wish to only exclude one or</span>
 <span class="sd">                two of the errors, you can create this list by the following</span>
 <span class="sd">                lines:</span>
-<span class="sd">            vtst_fixes (bool): Whether to consider VTST optimizers. Defaults to</span>
-<span class="sd">                False for compatibility purposes, but if you have VTST, you</span>
-<span class="sd">                would likely benefit from setting this to True.</span>
 
 <span class="sd">                ```</span>
-<span class="sd">                subset = list(VaspErrorHandler.error_msgs.keys())</span>
-<span class="sd">                subset.pop(&quot;eddrrm&quot;)</span>
+<span class="sd">                subset = list(VaspErrorHandler().error_msgs.keys())</span>
+<span class="sd">                subset.remove(&quot;eddrmm&quot;)</span>
 
 <span class="sd">                handler = VaspErrorHandler(errors_subset_to_catch=subset)</span>
 <span class="sd">                ```</span>
+<span class="sd">            vtst_fixes (bool): Whether to consider VTST optimizers. Defaults to</span>
+<span class="sd">                False for compatibility purposes, but if you have VTST, you</span>
+<span class="sd">                would likely benefit from setting this to True.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_filename</span> <span class="o">=</span> <span class="n">output_filename</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -1299,7 +1299,7 @@
             <span class="c1"># Can&#39;t perform check if Outcar not valid</span>
             <span class="k">return</span> <span class="kc">False</span>
 
-        <span class="k">if</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ISMEAR&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ISMEAR&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># Read the latest entropy term.</span>
             <span class="n">outcar</span><span class="o">.</span><span class="n">read_pattern</span><span class="p">(</span>
                 <span class="p">{</span><span class="s2">&quot;entropy&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;entropy T\*S.*= *(\D\d*\.\d*)&quot;</span><span class="p">},</span> <span class="n">postprocess</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">terminate_on_match</span><span class="o">=</span><span class="kc">True</span>
@@ -1331,6 +1331,15 @@
                 <span class="p">{</span>
                     <span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;SIGMA&quot;</span><span class="p">:</span> <span class="n">sigma</span> <span class="o">-</span> <span class="mf">0.06</span><span class="p">}},</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># https://vasp.at/wiki/index.php/ISMEAR recommends ISMEAR = 0 if you have</span>
+            <span class="c1"># no a priori knowledge of your system (&quot;then always use Gaussian smearing&quot;</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_set&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ISMEAR&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;SIGMA&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">}},</span>
                 <span class="p">}</span>
             <span class="p">)</span>
 
