@@ -1251,7 +1251,7 @@ class LargeSigmaHandler(ErrorHandler):
             # Can't perform check if Outcar not valid
             return False
 
-        if incar.get("ISMEAR", 0) > 0:
+        if incar.get("ISMEAR", 1) > 0:
             # Read the latest entropy term.
             outcar.read_pattern(
                 {"entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"}, postprocess=float, reverse=True, terminate_on_match=True
