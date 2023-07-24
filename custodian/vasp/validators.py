@@ -6,9 +6,8 @@ import logging
 import os
 from collections import deque
 
-from monty.os.path import zpath
 from monty.io import zopen
-
+from monty.os.path import zpath
 from pymatgen.io.vasp import Chgcar, Incar, Outcar, Vasprun
 
 from custodian.custodian import Validator

@@ -17,8 +17,8 @@ from collections import Counter
 from functools import reduce
 
 import numpy as np
-from monty.os.path import zpath
 from monty.io import zopen
+from monty.os.path import zpath
 from monty.serialization import loadfn
 from pymatgen.core.structure import Structure
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Poscar, VaspInput
