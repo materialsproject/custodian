@@ -18,6 +18,7 @@ from functools import reduce
 
 import numpy as np
 from monty.os.path import zpath
+from monty.io import zopen
 from monty.serialization import loadfn
 from pymatgen.core.structure import Structure
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Poscar, VaspInput
@@ -151,10 +152,10 @@ class VaspErrorHandler(ErrorHandler):
         """
         Check for error.
         """
-        incar = Incar.from_file("INCAR")
+        incar = Incar.from_file(zpath("INCAR"))
         self.errors = set()
         error_msgs = set()
-        with open(self.output_filename) as file:
+        with zopen(zpath(self.output_filename), "rt") as file:
             text = file.read()
 
             # Check for errors
@@ -296,7 +297,7 @@ class VaspErrorHandler(ErrorHandler):
             # is set to a large value for a small structure.
 
             try:
-                oszicar = Oszicar("OSZICAR")
+                oszicar = Oszicar(zpath("OSZICAR"))
                 nsteps = len(oszicar.ionic_steps)
             except Exception:
                 nsteps = 0
@@ -441,7 +442,7 @@ class VaspErrorHandler(ErrorHandler):
             if "NBANDS" in vi["INCAR"]:
                 nbands = vi["INCAR"]["NBANDS"]
             else:
-                with open("OUTCAR") as f:
+                with zopen(zpath("OUTCAR"), "rt") as f:
                     for line in f:
                         # Have to take the last NBANDS line since sometimes VASP
                         # updates it automatically even if the user specifies it.
@@ -502,7 +503,7 @@ class VaspErrorHandler(ErrorHandler):
             # resources, seems to be to just increase NCORE slightly. That's what I do here.
             nprocs = multiprocessing.cpu_count()
             try:
-                nelect = Outcar("OUTCAR").nelect
+                nelect = Outcar(zpath("OUTCAR")).nelect
             except Exception:
                 nelect = 1  # dummy value
             if nelect < nprocs:
@@ -651,7 +652,7 @@ class LrfCommutatorHandler(ErrorHandler):
         Check for error.
         """
         self.errors = set()
-        with open(self.output_filename) as f:
+        with zopen(zpath(self.output_filename), "rt") as f:
             for line in f:
                 l = line.strip()
                 for err, msgs in LrfCommutatorHandler.error_msgs.items():
@@ -709,7 +710,7 @@ class StdErrHandler(ErrorHandler):
         Check for error.
         """
         self.errors = set()
-        with open(self.output_filename) as f:
+        with zopen(zpath(self.output_filename), "rt") as f:
             for line in f:
                 l = line.strip()
                 for err, msgs in StdErrHandler.error_msgs.items():
@@ -774,9 +775,9 @@ class AliasingErrorHandler(ErrorHandler):
         """
         Check for error.
         """
-        incar = Incar.from_file("INCAR")
+        incar = Incar.from_file(zpath("INCAR"))
         self.errors = set()
-        with open(self.output_filename) as f:
+        with zopen(zpath(self.output_filename), "rt") as f:
             for line in f:
                 l = line.strip()
                 for err, msgs in AliasingErrorHandler.error_msgs.items():
@@ -800,7 +801,7 @@ class AliasingErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
 
         if "aliasing" in self.errors:
-            with open("OUTCAR") as f:
+            with zopen(zpath("OUTCAR"), "rt") as f:
                 grid_adjusted = False
                 changes_dict = {}
                 r = re.compile(r".+aliasing errors.*(NG.)\s*to\s*(\d+)")
@@ -872,7 +873,7 @@ class DriftErrorHandler(ErrorHandler):
         """
         Check for error.
         """
-        incar = Incar.from_file("INCAR")
+        incar = Incar.from_file(zpath("INCAR"))
         if incar.get("EDIFFG", 0.1) >= 0 or incar.get("NSW", 0) <= 1:
             # Only activate when force relaxing and ionic steps
             # NSW check prevents accidental effects when running DFPT
@@ -882,7 +883,7 @@ class DriftErrorHandler(ErrorHandler):
             self.max_drift = incar["EDIFFG"] * -1
 
         try:
-            outcar = Outcar("OUTCAR")
+            outcar = Outcar(zpath("OUTCAR"))
         except Exception:
             # Can't perform check if Outcar not valid
             return False
@@ -904,7 +905,7 @@ class DriftErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
 
         incar = vi["INCAR"]
-        outcar = Outcar("OUTCAR")
+        outcar = Outcar(zpath("OUTCAR"))
 
         # Move CONTCAR to POSCAR
         actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
@@ -978,12 +979,12 @@ class MeshSymmetryErrorHandler(ErrorHandler):
             return False
 
         try:
-            v = Vasprun(self.output_vasprun)
+            v = Vasprun(zpath(self.output_vasprun))
             if v.converged:
                 return False
         except Exception:
             pass
-        with open(self.output_filename) as f:
+        with zopen(zpath(self.output_filename), "rt") as f:
             for line in f:
                 l = line.strip()
                 if l.find(msg) != -1:
@@ -1027,7 +1028,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         Check for error.
         """
         try:
-            v = Vasprun(self.output_filename)
+            v = Vasprun(zpath(self.output_filename))
             if not v.converged:
                 return True
         except Exception:
@@ -1038,7 +1039,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         """
         Perform corrections.
         """
-        v = Vasprun(self.output_filename)
+        v = Vasprun(zpath(self.output_filename))
         algo = v.incar.get("ALGO", "Normal").lower()
         actions = []
         if not v.converged_electronic:
@@ -1148,7 +1149,7 @@ class IncorrectSmearingHandler(ErrorHandler):
         Check for error.
         """
         try:
-            v = Vasprun(self.output_filename)
+            v = Vasprun(zpath(self.output_filename))
             # check whether bandgap is zero, tetrahedron smearing was used
             # and relaxation is performed.
             if v.eigenvalue_band_properties[0] == 0 and v.incar.get("ISMEAR", 1) < -3 and v.incar.get("NSW", 0) > 1:
@@ -1197,7 +1198,7 @@ class ScanMetalHandler(ErrorHandler):
         Check for error.
         """
         try:
-            v = Vasprun(self.output_filename)
+            v = Vasprun(zpath(self.output_filename))
             # check whether bandgap is zero and tetrahedron smearing was used
             if v.eigenvalue_band_properties[0] == 0 and v.incar.get("KSPACING", 1) > 0.22:
                 return True
@@ -1244,9 +1245,9 @@ class LargeSigmaHandler(ErrorHandler):
         """
         Check for error.
         """
-        incar = Incar.from_file("INCAR")
+        incar = Incar.from_file(zpath("INCAR"))
         try:
-            outcar = Outcar("OUTCAR")
+            outcar = Outcar(zpath("OUTCAR"))
         except Exception:
             # Can't perform check if Outcar not valid
             return False
@@ -1256,7 +1257,7 @@ class LargeSigmaHandler(ErrorHandler):
             outcar.read_pattern(
                 {"entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"}, postprocess=float, reverse=True, terminate_on_match=True
             )
-            n_atoms = Structure.from_file("POSCAR").num_sites
+            n_atoms = Structure.from_file(zpath("POSCAR")).num_sites
             if outcar.data.get("entropy", []):
                 entropy_per_atom = abs(np.max(outcar.data.get("entropy"))) / n_atoms
 
@@ -1321,8 +1322,8 @@ class PotimErrorHandler(ErrorHandler):
         Check for error.
         """
         try:
-            oszicar = Oszicar(self.output_filename)
-            n = len(Poscar.from_file(self.input_filename).structure)
+            oszicar = Oszicar(zpath(self.output_filename))
+            n = len(Poscar.from_file(zpath(self.input_filename)).structure)
             max_dE = max(s["dE"] for s in oszicar.ionic_steps[1:]) / n
             if max_dE > self.dE_threshold:
                 return True
@@ -1377,7 +1378,7 @@ class FrozenJobErrorHandler(ErrorHandler):
         """
         Check for error.
         """
-        st = os.stat(self.output_filename)
+        st = os.stat(zpath(self.output_filename))
         if time.time() - st.st_mtime > self.timeout:
             return True
         return None
@@ -1430,7 +1431,7 @@ class NonConvergingErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
         nelm = vi["INCAR"].get("NELM", 60)
         try:
-            oszicar = Oszicar(self.output_filename)
+            oszicar = Oszicar(zpath(self.output_filename))
             esteps = oszicar.electronic_steps
             if len(esteps) > self.nionic_steps:
                 return all(len(e) == nelm for e in esteps[-(self.nionic_steps + 1) : -1])
@@ -1613,7 +1614,7 @@ class WalltimeHandler(ErrorHandler):
         if self.wall_time:
             run_time = datetime.datetime.now() - self.start_time
             total_secs = run_time.total_seconds()
-            outcar = Outcar("OUTCAR")
+            outcar = Outcar(zpath("OUTCAR"))
             if not self.electronic_step_stop:
                 # Determine max time per ionic step.
                 outcar.read_pattern({"timings": r"LOOP\+.+real time(.+)"}, postprocess=float)
@@ -1786,7 +1787,7 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         Check for error.
         """
         try:
-            oszicar = Oszicar(self.output_filename)
+            oszicar = Oszicar(zpath(self.output_filename))
             if oszicar.final_energy > 0:
                 return True
         except Exception:

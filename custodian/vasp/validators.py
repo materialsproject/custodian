@@ -6,6 +6,9 @@ import logging
 import os
 from collections import deque
 
+from monty.os.path import zpath
+from monty.io import zopen
+
 from pymatgen.io.vasp import Chgcar, Incar, Outcar, Vasprun
 
 from custodian.custodian import Validator
@@ -33,28 +36,28 @@ class VasprunXMLValidator(Validator):
         Check for error.
         """
         try:
-            Vasprun("vasprun.xml")
+            Vasprun(zpath("vasprun.xml"))
         except Exception:
             exception_context = {}
 
             if os.path.exists(self.output_file):
-                with open(self.output_file) as output_file:
+                with zopen(zpath(self.output_file), "rt") as output_file:
                     output_file_tail = deque(output_file, maxlen=10)
                 exception_context["output_file_tail"] = "".join(output_file_tail)
 
             if os.path.exists(self.stderr_file):
-                with open(self.stderr_file) as stderr_file:
+                with zopen(zpath(self.stderr_file), "rt") as stderr_file:
                     stderr_file_tail = deque(stderr_file, maxlen=10)
                 exception_context["stderr_file_tail"] = "".join(stderr_file_tail)
 
-            if os.path.exists("vasprun.xml"):
-                stat = os.stat("vasprun.xml")
+            if os.path.exists(zpath("vasprun.xml")):
+                stat = os.stat(zpath("vasprun.xml"))
                 exception_context["vasprun_st_size"] = stat.st_size
                 exception_context["vasprun_st_atime"] = stat.st_atime
                 exception_context["vasprun_st_mtime"] = stat.st_mtime
                 exception_context["vasprun_st_ctime"] = stat.st_ctime
 
-                with open("vasprun.xml") as vasprun:
+                with zopen(zpath("vasprun.xml"), "rt") as vasprun:
                     vasprun_tail = deque(vasprun, maxlen=10)
                 exception_context["vasprun_tail"] = "".join(vasprun_tail)
 
@@ -80,7 +83,7 @@ class VaspFilesValidator(Validator):
         Check for error.
         """
         for vfile in ["CONTCAR", "OSZICAR", "OUTCAR"]:
-            if not os.path.exists(vfile):
+            if not os.path.exists(zpath(vfile)):
                 return True
         return False
 
@@ -100,12 +103,12 @@ class VaspNpTMDValidator(Validator):
         """
         Check for error.
         """
-        incar = Incar.from_file("INCAR")
+        incar = Incar.from_file(zpath("INCAR"))
         is_npt = incar.get("MDALGO") == 3
         if not is_npt:
             return False
 
-        outcar = Outcar("OUTCAR")
+        outcar = Outcar(zpath("OUTCAR"))
         patterns = {"MDALGO": r"MDALGO\s+=\s+([\d]+)"}
         outcar.read_pattern(patterns=patterns)
         if outcar.data["MDALGO"] == [["3"]]:
@@ -127,8 +130,8 @@ class VaspAECCARValidator(Validator):
         """
         Check for error.
         """
-        aeccar0 = Chgcar.from_file("AECCAR0")
-        aeccar2 = Chgcar.from_file("AECCAR2")
+        aeccar0 = Chgcar.from_file(zpath("AECCAR0"))
+        aeccar2 = Chgcar.from_file(zpath("AECCAR2"))
         aeccar = aeccar0 + aeccar2
         return check_broken_chgcar(aeccar)
 
