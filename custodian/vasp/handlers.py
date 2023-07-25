@@ -17,7 +17,6 @@ from collections import Counter
 from functools import reduce
 
 import numpy as np
-from monty.io import zopen
 from monty.os.path import zpath
 from monty.serialization import loadfn
 from pymatgen.core.structure import Structure
