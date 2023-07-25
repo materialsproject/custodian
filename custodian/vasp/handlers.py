@@ -17,6 +17,7 @@ from collections import Counter
 from functools import reduce
 
 import numpy as np
+from monty.io import zopen
 from monty.os.path import zpath
 from monty.serialization import loadfn
 from pymatgen.core.structure import Structure
@@ -617,6 +618,32 @@ class VaspErrorHandler(ErrorHandler):
             if vi["INCAR"].get("ISYM", 2) > 0:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
+        # NOTE: This is the algo_tet handler response.
+        # set ALGO to normal
+        algo = vi["INCAR"].get("ALGO", "Normal").lower()
+        if (algo in ["all", "damped"] or (50 <= vi.incar.get("IALGO", 38) <= 59)) and vi.incar.get("ISMEAR", 1) < 0:
+            if self.error_count["algo_tet"] == 0:
+                # first recovery attempt is to set ALGO to fast. Could fail again in which
+                # case we end up here again if some other handler switches algo back to all/damped.
+                # This time try the recovery below.
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
+            if self.error_count["algo_tet"] == 1:
+                # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP
+                # suggests: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
+                # 2) Use ALGO = Damped but only *after* an ISMEAR = 0 run where the wavefunction
+                # has been stored and read in for the subsequent run.
+                #
+                # For simplicity, we go with Option 1 here, but if the user wants high-quality
+                # DOS then they should consider running a subsequent job with ISMEAR = -5 and
+                # ALGO = Damped, provided the wavefunction has been stored.
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+                if vi.incar.get("NEDOS") or vi.incar.get("EMIN") or vi.incar.get("EMAX"):
+                    warnings.warn(
+                        "This looks like a DOS run. You may want to follow-up this job with ALGO = Damped"
+                        " and ISMEAR = -5, using the wavefunction from the current job.",
+                        UserWarning,
+                    )
+
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
 
@@ -1042,25 +1069,6 @@ class UnconvergedErrorHandler(ErrorHandler):
         algo = v.incar.get("ALGO", "Normal").lower()
         actions = []
         if not v.converged_electronic:
-            # NOTE: This is the algo_tet handler response.
-            if (
-                v.incar.get("ALGO", "Normal").lower() in ["all", "damped"] or (50 <= v.incar.get("IALGO", 38) <= 59)
-            ) and v.incar.get("ISMEAR", 1) < 0:
-                # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP
-                # suggests: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
-                # 2) Use ALGO = Damped but only *after* an ISMEAR = 0 run where the wavefunction
-                # has been stored and read in for the subsequent run.
-                #
-                # For simplicity, we go with Option 1 here, but if the user wants high-quality
-                # DOS then they should consider running a subsequent job with ISMEAR = -5 and
-                # ALGO = Damped, provided the wavefunction has been stored.
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
-                if v.incar.get("NEDOS") or v.incar.get("EMIN") or v.incar.get("EMAX"):
-                    warnings.warn(
-                        "This looks like a DOS run. You may want to follow-up this job with ALGO = Damped"
-                        " and ISMEAR = -5, using the wavefunction from the current job.",
-                        UserWarning,
-                    )
             # NOTE: This is the amin error handler
             # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
             if np.max(v.final_structure.lattice.abc) > 50.0 and v.incar.get("AMIN", 0.1) > 0.01:
