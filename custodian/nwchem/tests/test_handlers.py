@@ -36,7 +36,3 @@ class NwchemErrorHandlerTest(unittest.TestCase):
         shutil.move("Li1_1.nw.orig", "Li1_1.nw")
         for f in glob.glob("error.*.tar.gz"):
             os.remove(f)
-
-
-if __name__ == "__main__":
-    unittest.main()

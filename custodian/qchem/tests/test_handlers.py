@@ -1,6 +1,5 @@
 import os
 import shutil
-import unittest
 from unittest import TestCase
 
 from pymatgen.io.qchem.inputs import QCInput
@@ -397,7 +396,3 @@ class QChemErrorHandlerTest(TestCase):
     def tearDown(self):
         os.chdir(cwd)
         shutil.rmtree(scr_dir)
-
-
-if __name__ == "__main__":
-    unittest.main()

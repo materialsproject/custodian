@@ -1148,7 +1148,3 @@ class DriftErrorHandlerTest(unittest.TestCase):
         shutil.move("INCAR.orig", "INCAR")
         clean_dir()
         os.chdir(cwd)
-
-
-if __name__ == "__main__":
-    unittest.main()

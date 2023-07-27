@@ -70,7 +70,3 @@ class HandlerTests(unittest.TestCase):
             backup=False,
         )
         assert len(jobs) == 2
-
-
-if __name__ == "__main__":
-    unittest.main()

@@ -1,6 +1,5 @@
 import os
 import shutil
-import unittest
 from unittest import TestCase
 
 from pymatgen.io.qchem.inputs import QCInput
@@ -195,7 +194,3 @@ class FFopt_job_handler_interaction(TestCase):
         assert next(myjob).as_dict() == expected_next
 
         self._check_equivalent_inputs("mol.qin", "mol.qin.opt_1")
-
-
-if __name__ == "__main__":
-    unittest.main()

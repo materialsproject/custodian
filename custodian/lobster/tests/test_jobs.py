@@ -97,7 +97,3 @@ class LobsterJobTest(unittest.TestCase):
                 v.postprocess()
                 for file in VASP_OUTPUT_FILES + LOBSTER_FILES + FW_FILES:
                     assert os.path.exists(file)
-
-
-if __name__ == "__main__":
-    unittest.main()

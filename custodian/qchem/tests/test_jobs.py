@@ -6,7 +6,6 @@ try:
     from unittest.mock import patch  # type: ignore
 except ImportError:
     from unittest.mock import patch  # type: ignore
-import unittest
 
 from pymatgen.io.qchem.inputs import QCInput
 
@@ -1489,7 +1488,3 @@ class TSFF_freqfirst_multiple_cycles(TestCase):
         )
 
         self.assertRaises(StopIteration, myjob.__next__)
-
-
-if __name__ == "__main__":
-    unittest.main()

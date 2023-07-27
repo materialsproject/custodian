@@ -138,7 +138,3 @@ class HandlerTests(unittest.TestCase):
     def test_conv(self):
         """Check that SCF convergence can be read"""
         assert len(get_conv(self.output_file_conv)) == 45
-
-
-if __name__ == "__main__":
-    unittest.main()

@@ -74,7 +74,3 @@ class TestEnoughBandsValidator(unittest.TestCase):
         d = v.as_dict()
         v2 = EnoughBandsValidator.from_dict(d)
         assert isinstance(v2, EnoughBandsValidator)
-
-
-if __name__ == "__main__":
-    unittest.main()

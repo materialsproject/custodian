@@ -88,7 +88,3 @@ class VaspAECCARValidatorTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         os.chdir(cwd)
-
-
-if __name__ == "__main__":
-    unittest.main()

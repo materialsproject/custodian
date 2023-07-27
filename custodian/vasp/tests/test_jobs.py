@@ -173,7 +173,3 @@ class GenerateVaspInputJobTest(unittest.TestCase):
             assert oldincar["ICHARG"] == 1
             kpoints = Kpoints.from_file("KPOINTS")
             assert str(kpoints.style) == "Reciprocal"
-
-
-if __name__ == "__main__":
-    unittest.main()

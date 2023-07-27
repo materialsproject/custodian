@@ -329,7 +329,3 @@ custodian_params:
 #         self.assertEqual(len(c.run()), 5)
 #         os.remove("custodian.json")
 #         os.chdir(self.cwd)
-
-
-if __name__ == "__main__":
-    unittest.main()
