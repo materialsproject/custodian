@@ -11,7 +11,7 @@ When adding more remember the following tips:
     you are using Cp2k-specific functionality (like OT minimization).
 (3) Not all things that could go wrong should be handled by custodian. For example,
     most aspects of walltime handling can be done natively in CP2K, and will have added
-    benefits like writing a wavefunction restart file before quiting.
+    benefits like writing a wavefunction restart file before quitting.
 """
 
 import itertools
@@ -450,7 +450,7 @@ class FrozenJobErrorHandler(ErrorHandler):
         (1) Frozen preconditioner: in rare cases, the preconditioner
             can get stuck. This has been noticed for the FULL_SINGLE_INVERSE
             preconditioner, and so this handler will try first switching
-            to FULL_ALL, and otheerwise change the preconditioner solver
+            to FULL_ALL, and otherwise change the preconditioner solver
             from default to direct
         (2) Frozen SCF: CP2K can get stuck in the scf loop itself. Reasons
             for this cannot be determined by the handler, but since the scf
@@ -460,7 +460,7 @@ class FrozenJobErrorHandler(ErrorHandler):
             if the file has not been updated in 4 times the last scf loop time.
         (3) General frozen: CP2K hangs for some other, unknown reason. Experience
             has shown this can be a hardware issue. Timeout for this is quite large
-            as some sub-routines, like ethe HFX module, can take a long time to
+            as some sub-routines, like the HFX module, can take a long time to
             update the output file.
 
     """
@@ -615,7 +615,7 @@ class AbortHandler(ErrorHandler):
 
         Args:
             input_file: (str) name of the input file
-            output_file: (str) nam eof the output file
+            output_file: (str) name of the output file
         """
         self.input_file = input_file
         self.output_file = output_file
@@ -916,7 +916,7 @@ class NumericalPrecisionHandler(ErrorHandler):
 
         restart(actions, self.output_file, self.input_file)
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
-        return {"errors": ["Unsufficient precision"], "actions": actions}
+        return {"errors": ["Insufficient precision"], "actions": actions}
 
     def __set_pgf_orb(self):
         """Helper function to set the PGF_ORB keyword."""

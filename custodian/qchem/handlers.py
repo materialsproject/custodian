@@ -141,7 +141,7 @@ class QChemErrorHandler(ErrorHandler):
                 if len(self.opt_error_history) > 1 and self.opt_error_history[-1] == "no_change":
                     # If no structural changes occurred in two consecutive optimizations,
                     # and we still haven't converged, then just exit. This is most common
-                    # if two species are flying away from eachother.
+                    # if two species are flying away from each other.
                     return {
                         "errors": self.errors,
                         "actions": None,

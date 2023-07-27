@@ -127,7 +127,7 @@ class HandlerTests(unittest.TestCase):
         h = NumericalPrecisionHandler(self.input_file, output_file=self.output_file_imprecise, max_same=3)
         assert h.check()
         c = h.correct()
-        assert c["errors"], ["Unsufficient precision"]
+        assert c["errors"], ["Insufficient precision"]
 
     def test_std_out(self):
         """Errors sent to the std out instead of cp2k out"""

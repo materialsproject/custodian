@@ -166,7 +166,7 @@ class Cp2kJob(Job):
         settings_override_hybrid=None,
     ):
         """
-        A bare gga to hybrid calculation. Removes all unecessary features
+        A bare gga to hybrid calculation. Removes all unnecessary features
         from the gga run, and making it only a ENERGY/ENERGY_FORCE
         depending on the hybrid run.
         """
