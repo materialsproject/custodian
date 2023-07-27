@@ -1,4 +1,3 @@
-#
 # pymatgen documentation build configuration file, created by
 # sphinx-quickstart on Tue Nov 15 00:13:52 2011.
 #
@@ -21,7 +20,7 @@ sys.path.insert(0, os.path.dirname(".."))
 sys.path.insert(0, os.path.dirname("../custodian"))
 sys.path.insert(0, os.path.dirname("../.."))
 
-from custodian import __author__, __version__
+from custodian import __author__, __version__  # noqa: E402
 
 # -- General configuration -----------------------------------------------------
 

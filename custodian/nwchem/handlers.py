@@ -30,9 +30,7 @@ class NwchemErrorHandler(ErrorHandler):
         self.output_filename = output_filename
 
     def check(self):
-        """
-        Check for errors.
-        """
+        """Check for errors."""
         out = NwOutput(self.output_filename)
         self.errors = []
         self.input_file = out.job_info["input"]
@@ -43,19 +41,19 @@ class NwchemErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def _mod_input(self, search_string_func, mod_string_func):
-        with open(self.input_file) as f:
+        with open(self.input_file) as file:
             lines = []
-            for l in f:
-                if search_string_func(l):
-                    lines.append(mod_string_func(l))
+            for line in file:
+                if search_string_func(line):
+                    lines.append(mod_string_func(line))
                 else:
-                    lines.append(l)
+                    lines.append(line)
 
         with open(self.input_file, "w") as fout:
             fout.write("".join(lines))
 
     def correct(self):
-        """Correct errors"""
+        """Correct errors."""
         backup("*.nw*")
         actions = []
         nwi = NwInput.from_file(self.input_file)

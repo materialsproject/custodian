@@ -1,6 +1,4 @@
-"""
-Implements various validatiors, e.g., check if vasprun.xml is valid, for VASP.
-"""
+"""Implements various validatiors, e.g., check if vasprun.xml is valid, for VASP."""
 
 import logging
 import os
@@ -12,9 +10,7 @@ from custodian.custodian import Validator
 
 
 class VasprunXMLValidator(Validator):
-    """
-    Checks that a valid vasprun.xml was generated
-    """
+    """Checks that a valid vasprun.xml was generated."""
 
     def __init__(self, output_file="vasp.out", stderr_file="std_err.txt"):
         """
@@ -29,9 +25,7 @@ class VasprunXMLValidator(Validator):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def check(self):
-        """
-        Check for error.
-        """
+        """Check for error."""
         try:
             Vasprun("vasprun.xml")
         except Exception:
@@ -71,18 +65,11 @@ class VaspFilesValidator(Validator):
     """
 
     def __init__(self):
-        """
-        Dummy init
-        """
+        """Dummy init."""
 
     def check(self):
-        """
-        Check for error.
-        """
-        for vfile in ["CONTCAR", "OSZICAR", "OUTCAR"]:
-            if not os.path.exists(vfile):
-                return True
-        return False
+        """Check for error."""
+        return any(not os.path.exists(vfile) for vfile in ["CONTCAR", "OSZICAR", "OUTCAR"])
 
 
 class VaspNpTMDValidator(Validator):
@@ -92,14 +79,10 @@ class VaspNpTMDValidator(Validator):
     """
 
     def __init__(self):
-        """
-        Dummy init.
-        """
+        """Dummy init."""
 
     def check(self):
-        """
-        Check for error.
-        """
+        """Check for error."""
         incar = Incar.from_file("INCAR")
         is_npt = incar.get("MDALGO") == 3
         if not is_npt:
@@ -114,19 +97,13 @@ class VaspNpTMDValidator(Validator):
 
 
 class VaspAECCARValidator(Validator):
-    """
-    Check if the data in the AECCAR is corrupted
-    """
+    """Check if the data in the AECCAR is corrupted."""
 
     def __init__(self):
-        """
-        Dummy init
-        """
+        """Dummy init."""
 
     def check(self):
-        """
-        Check for error.
-        """
+        """Check for error."""
         aeccar0 = Chgcar.from_file("AECCAR0")
         aeccar2 = Chgcar.from_file("AECCAR2")
         aeccar = aeccar0 + aeccar2

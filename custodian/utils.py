@@ -1,6 +1,4 @@
-"""
-Utility function and classes.
-"""
+"""Utility function and classes."""
 
 import logging
 import os
@@ -31,7 +29,7 @@ def backup(filenames, prefix="error"):
 def get_execution_host_info():
     """
     Tries to return a tuple describing the execution host.
-    Doesn't work for all queueing systems
+    Doesn't work for all queueing systems.
 
     Returns:
         (HOSTNAME, CLUSTER_NAME)
