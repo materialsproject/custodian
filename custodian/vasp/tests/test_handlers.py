@@ -848,7 +848,8 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         assert d["errors"] == ["zpotrf"]
         s2 = Structure.from_file("POSCAR")
-        assert s2.volume == pytest.approx(s1.volume * 1.2**3) == pytest.approx(3)
+        assert s2.volume == pytest.approx(s1.volume * 1.2**3)
+        assert s1.volume == pytest.approx(64.346221)
 
     def test_potim_correction(self):
         shutil.copy("OSZICAR.one_step", "OSZICAR")
@@ -858,7 +859,8 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         assert d["errors"] == ["zpotrf"]
         s2 = Structure.from_file("POSCAR")
-        assert s2.volume == pytest.approx(s1.volume) == pytest.approx(3)
+        assert s2.volume == pytest.approx(s1.volume)
+        assert s1.volume == pytest.approx(64.3462)
         assert Incar.from_file("INCAR")["POTIM"] == pytest.approx(0.25)
 
     def test_static_run_correction(self):
@@ -874,7 +876,8 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         assert d["errors"] == ["zpotrf"]
         s2 = Structure.from_file("POSCAR")
-        assert s2.volume == pytest.approx(s1.volume) == pytest.approx(3)
+        assert s2.volume == pytest.approx(s1.volume)
+        assert s2.volume == pytest.approx(64.346221)
         assert Incar.from_file("INCAR")["ISYM"] == 0
 
     def tearDown(self):

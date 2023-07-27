@@ -901,9 +901,8 @@ class NumericalPrecisionHandler(ErrorHandler):
                     }
                 )
 
-            if (
-                not actions
-                and not ci.check("FORCE_EVAL/DFT/XC/XC_GRID")
+            if not actions and (
+                not ci.check("FORCE_EVAL/DFT/XC/XC_GRID")
                 or not ci.by_path("FORCE_EVAL/DFT/XC/XC_GRID").get("USE_FINER_GRID", False)
             ):
                 # Try a more expensive XC grid
