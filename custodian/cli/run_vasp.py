@@ -169,7 +169,7 @@ def get_jobs(args):
                 post_settings.append({"dict": "INCAR", "action": {"_unset": {"ISMEAR": 1}}})
             post_settings.append({"dict": "KPOINTS", "action": {"_set": kpoints.as_dict()}})
             # lattice vectors with length < 9 will get >1 KPOINT
-            low_kpoints = Kpoints.gamma_automatic([max(int(18 / l), 1) for l in structure.lattice.abc])
+            low_kpoints = Kpoints.gamma_automatic([max(int(18 / length), 1) for length in structure.lattice.abc])
             settings.extend(
                 [
                     {"dict": "INCAR", "action": {"_set": {"ISMEAR": 0}}},
@@ -239,7 +239,7 @@ def main():
         nargs="?",
         default="pvasp",
         type=str,
-        help="VASP command. Defaults to pvasp. If you are using mpirun, " 'set this to something like "mpirun pvasp".',
+        help="VASP command. Defaults to pvasp. If you are using mpirun, set this to something like 'mpirun pvasp'.",
     )
 
     parser.add_argument(

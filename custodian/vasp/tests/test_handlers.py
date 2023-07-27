@@ -15,6 +15,7 @@ import os
 import shutil
 import unittest
 
+import pytest
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
 
 from custodian.vasp.handlers import (
@@ -127,14 +128,14 @@ class VaspErrorHandlerTest(unittest.TestCase):
         assert d["errors"] == ["brions"]
         i = Incar.from_file("INCAR")
         assert i["IBRION"] == 1
-        self.assertAlmostEqual(i["POTIM"], 1.5)
+        assert i["POTIM"] == pytest.approx(1.5)
 
         h.check()
         d = h.correct()
         assert d["errors"] == ["brions"]
         i = Incar.from_file("INCAR")
         assert i["IBRION"] == 2
-        self.assertAlmostEqual(i["POTIM"], 0.5)
+        assert i["POTIM"] == pytest.approx(0.5)
 
     def test_dentet(self):
         h = VaspErrorHandler("vasp.dentet")
@@ -417,24 +418,24 @@ class VaspErrorHandlerTest(unittest.TestCase):
         assert h.check() is True
         assert h.correct()["errors"] == ["posmap"]
         i = Incar.from_file("INCAR")
-        self.assertAlmostEqual(i["SYMPREC"], 1e-6)
+        assert i["SYMPREC"] == pytest.approx(1e-6)
 
         assert h.check() is True
         assert h.correct()["errors"] == ["posmap"]
         i = Incar.from_file("INCAR")
-        self.assertAlmostEqual(i["SYMPREC"], 1e-4)
+        assert i["SYMPREC"] == pytest.approx(1e-4)
 
     def test_posmap_vasp6(self):
         h = VaspErrorHandler("vasp6.posmap")
         assert h.check() is True
         assert h.correct()["errors"] == ["posmap"]
         i = Incar.from_file("INCAR")
-        self.assertAlmostEqual(i["SYMPREC"], 1e-6)
+        assert i["SYMPREC"] == pytest.approx(1e-6)
 
         assert h.check() is True
         assert h.correct()["errors"] == ["posmap"]
         i = Incar.from_file("INCAR")
-        self.assertAlmostEqual(i["SYMPREC"], 1e-4)
+        assert i["SYMPREC"] == pytest.approx(1e-4)
 
     def test_point_group(self):
         h = VaspErrorHandler("vasp.point_group")
@@ -847,7 +848,7 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         assert d["errors"] == ["zpotrf"]
         s2 = Structure.from_file("POSCAR")
-        self.assertAlmostEqual(s2.volume, s1.volume * 1.2**3, 3)
+        assert s2.volume == pytest.approx(s1.volume * 1.2**3) == pytest.approx(3)
 
     def test_potim_correction(self):
         shutil.copy("OSZICAR.one_step", "OSZICAR")
@@ -857,8 +858,8 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         assert d["errors"] == ["zpotrf"]
         s2 = Structure.from_file("POSCAR")
-        self.assertAlmostEqual(s2.volume, s1.volume, 3)
-        self.assertAlmostEqual(Incar.from_file("INCAR")["POTIM"], 0.25)
+        assert s2.volume == pytest.approx(s1.volume) == pytest.approx(3)
+        assert Incar.from_file("INCAR")["POTIM"] == pytest.approx(0.25)
 
     def test_static_run_correction(self):
         shutil.copy("OSZICAR.empty", "OSZICAR")
@@ -873,7 +874,7 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         assert d["errors"] == ["zpotrf"]
         s2 = Structure.from_file("POSCAR")
-        self.assertAlmostEqual(s2.volume, s1.volume, 3)
+        assert s2.volume == pytest.approx(s1.volume) == pytest.approx(3)
         assert Incar.from_file("INCAR")["ISYM"] == 0
 
     def tearDown(self):

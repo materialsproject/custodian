@@ -101,7 +101,7 @@ if __name__ == "__main__":
         nargs="?",
         default="pvasp",
         type=str,
-        help="VASP command. Defaults to pvasp. If you are using mpirun, " 'set this to something like "mpirun pvasp".',
+        help="VASP command. Defaults to pvasp. If you are using mpirun, set this to something like 'mpirun pvasp'.",
     )
 
     parser.add_argument(

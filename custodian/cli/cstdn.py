@@ -113,7 +113,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        args.func
+        _ = args.func
     except AttributeError:
         parser.print_help()
         sys.exit(0)

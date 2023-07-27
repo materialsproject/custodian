@@ -321,12 +321,15 @@ class QCJob(Job):
                         if opt_rem.get(key, None) != opt_indata.rem[key]:
                             opt_rem[key] = opt_indata.rem[key]
                 first = False
-                if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
-                    if not transition_state:
-                        warnings.warn(
-                            "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
-                        )
-                        break
+                if (
+                    opt_outdata["structure_change"] == "unconnected_fragments"
+                    and not opt_outdata["completion"]
+                    and not transition_state
+                ):
+                    warnings.warn(
+                        "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
+                    )
+                    break
                 energy_history.append(opt_outdata.get("final_energy"))
                 freq_QCInput = QCInput(
                     molecule=opt_outdata.get("molecule_from_optimized_geometry"),
@@ -459,12 +462,15 @@ class QCJob(Job):
                     orig_multiplicity = copy.deepcopy(opt_outdata.get("multiplicity"))
                     orig_energy = copy.deepcopy(opt_outdata.get("final_energy"))
                 first = False
-                if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
-                    if not transition_state:
-                        warnings.warn(
-                            "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
-                        )
-                        break
+                if (
+                    opt_outdata["structure_change"] == "unconnected_fragments"
+                    and not opt_outdata["completion"]
+                    and not transition_state
+                ):
+                    warnings.warn(
+                        "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
+                    )
+                    break
                 freq_QCInput = QCInput(
                     molecule=opt_outdata.get("molecule_from_optimized_geometry"),
                     rem=freq_rem,
@@ -581,9 +587,7 @@ class QCJob(Job):
                                     raise Exception(
                                         "ERROR: Child with lower energy has more negative frequencies! Exiting..."
                                     )
-                                if good_child["energy"] < parent_hist["energy"]:
-                                    make_good_child_next_parent = True
-                                elif (
+                                if good_child["energy"] < parent_hist["energy"] or (
                                     vector_list_diff(
                                         good_child["frequency_mode_vectors"][perturb_index],
                                         parent_hist["frequency_mode_vectors"][perturb_index],

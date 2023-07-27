@@ -320,18 +320,23 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"PREC": "Accurate"}}})
             self.error_count["subspacematrix"] += 1
 
-        if self.errors.intersection(["rspher", "real_optlay", "nicht_konv"]):
-            if vi["INCAR"].get("LREAL", False) is not False:
-                actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
+        if (
+            self.errors.intersection(["rspher", "real_optlay", "nicht_konv"])
+            and vi["INCAR"].get("LREAL", False) is not False
+        ):
+            actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
 
-        if self.errors.intersection(["tetirr", "incorrect_shift"]):
-            if vi["KPOINTS"] is not None and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
-                actions.append(
-                    {
-                        "dict": "KPOINTS",
-                        "action": {"_set": {"generation_style": "Gamma"}},
-                    }
-                )
+        if (
+            self.errors.intersection(["tetirr", "incorrect_shift"])
+            and vi["KPOINTS"] is not None
+            and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst
+        ):
+            actions.append(
+                {
+                    "dict": "KPOINTS",
+                    "action": {"_set": {"generation_style": "Gamma"}},
+                }
+            )
 
         if "rot_matrix" in self.errors:
             if vi["KPOINTS"] is not None and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
@@ -601,11 +606,10 @@ class VaspErrorHandler(ErrorHandler):
             warnings.warn("Looks like you made a typo in the INCAR. Please double-check it.", UserWarning)
             return {"errors": ["read_error"], "actions": None}
 
-        if "hnform" in self.errors:
+        if "hnform" in self.errors and vi["INCAR"].get("ISYM", 2) > 0:
             # The only solution is to change your k-point grid or disable symmetry
             # For internal calculation compatibility's sake, we do the latter
-            if vi["INCAR"].get("ISYM", 2) > 0:
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+            actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
         if "algo_tet" in self.errors:
             # NOTE: This is the algo_tet handler response.
@@ -671,10 +675,10 @@ class LrfCommutatorHandler(ErrorHandler):
         self.errors = set()
         with open(self.output_filename) as f:
             for line in f:
-                l = line.strip()
+                line = line.strip()
                 for err, msgs in LrfCommutatorHandler.error_msgs.items():
                     for msg in msgs:
-                        if l.find(msg) != -1:
+                        if line.find(msg) != -1:
                             self.errors.add(err)
         return len(self.errors) > 0
 
@@ -684,9 +688,12 @@ class LrfCommutatorHandler(ErrorHandler):
         actions = []
         vi = VaspInput.from_directory(".")
 
-        if "lrf_comm" in self.errors:
-            if Outcar(zpath(os.path.join(os.getcwd(), "OUTCAR"))).is_stopped is False and not vi["INCAR"].get("LPEAD"):
-                actions.append({"dict": "INCAR", "action": {"_set": {"LPEAD": True}}})
+        if (
+            "lrf_comm" in self.errors
+            and Outcar(zpath(os.path.join(os.getcwd(), "OUTCAR"))).is_stopped is False
+            and not vi["INCAR"].get("LPEAD")
+        ):
+            actions.append({"dict": "INCAR", "action": {"_set": {"LPEAD": True}}})
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
@@ -723,12 +730,12 @@ class StdErrHandler(ErrorHandler):
     def check(self):
         """Check for error."""
         self.errors = set()
-        with open(self.output_filename) as f:
-            for line in f:
-                l = line.strip()
+        with open(self.output_filename) as file:
+            for line in file:
+                line = line.strip()
                 for err, msgs in StdErrHandler.error_msgs.items():
                     for msg in msgs:
-                        if l.find(msg) != -1:
+                        if line.find(msg) != -1:
                             self.errors.add(err)
         return len(self.errors) > 0
 
@@ -786,10 +793,10 @@ class AliasingErrorHandler(ErrorHandler):
         self.errors = set()
         with open(self.output_filename) as f:
             for line in f:
-                l = line.strip()
+                line = line.strip()
                 for err, msgs in AliasingErrorHandler.error_msgs.items():
                     for msg in msgs:
-                        if l.find(msg) != -1:
+                        if line.find(msg) != -1:
                             # this checks if we want to run a charged
                             # computation (e.g., defects) if yes we don't
                             # want to kill it because there is a change in e-
@@ -982,8 +989,8 @@ class MeshSymmetryErrorHandler(ErrorHandler):
             pass
         with open(self.output_filename) as f:
             for line in f:
-                l = line.strip()
-                if l.find(msg) != -1:
+                line = line.strip()
+                if line.find(msg) != -1:
                     return True
         return False
 
@@ -1036,13 +1043,17 @@ class UnconvergedErrorHandler(ErrorHandler):
             if np.max(v.final_structure.lattice.abc) > 50.0 and v.incar.get("AMIN", 0.1) > 0.01:
                 actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}})
 
-            if v.incar.get("ISMEAR", -1) >= 0 or not 50 <= v.incar.get("IALGO", 38) <= 59:
-                if v.incar.get("METAGGA", "--") != "--" and algo != "all":
-                    # If meta-GGA, go straight to Algo = All only if ISMEAR is greater or equal 0.
-                    # Algo = All is recommended in the VASP manual and some meta-GGAs explicitly
-                    # say to set Algo = All for proper convergence. I am using "--" as the check
-                    # for METAGGA here because this is the default in the vasprun.xml file
-                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+            if (
+                v.incar.get("ISMEAR", -1) >= 0
+                or not 50 <= v.incar.get("IALGO", 38) <= 59
+                and v.incar.get("METAGGA", "--") != "--"
+                and algo != "all"
+            ):
+                # If meta-GGA, go straight to Algo = All only if ISMEAR is greater or equal 0.
+                # Algo = All is recommended in the VASP manual and some meta-GGAs explicitly
+                # say to set Algo = All for proper convergence. I am using "--" as the check
+                # for METAGGA here because this is the default in the vasprun.xml file
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
 
             # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
             # support these algorithms, but no warning is printed.

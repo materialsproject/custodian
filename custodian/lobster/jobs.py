@@ -50,7 +50,7 @@ class LobsterJob(Job):
         output_file: str = "lobsterout",
         stderr_file: str = "std_err_lobster.txt",
         gzipped: bool = True,
-        add_files_to_gzip=[],
+        add_files_to_gzip=(),
         backup: bool = True,
     ):
         """

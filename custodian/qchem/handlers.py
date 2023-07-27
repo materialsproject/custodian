@@ -338,19 +338,10 @@ class QChemErrorHandler(ErrorHandler):
             print("Something is wrong with the input file. Examine error message by hand.")
             return {"errors": self.errors, "actions": None}
 
-        elif "failed_to_read_input" in self.errors:
-            # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
-            actions.append({"rerun_job_no_changes": True})
-
-        elif "read_molecule_error" in self.errors:
-            # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
-            actions.append({"rerun_job_no_changes": True})
-
-        elif "never_called_qchem" in self.errors:
-            # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
-            actions.append({"rerun_job_no_changes": True})
-
-        elif "licensing_error" in self.errors:
+        elif any(
+            err in self.errors
+            for err in ["failed_to_read_input", "read_molecule_error", "never_called_qchem", "licensing_error"]
+        ):
             # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
             actions.append({"rerun_job_no_changes": True})
 
@@ -377,11 +368,13 @@ class QChemErrorHandler(ErrorHandler):
         ).lower() == "read":
             del self.qcinp.rem["geom_opt_hessian"]
             actions.append({"geom_opt_hessian": "deleted"})
-        if {"molecule": "molecule_from_last_geometry"} in actions and self.outdata["version"] == "6":
-            if "initial_hessian" in self.qcinp.geom_opt:
-                if str(self.qcinp.geom_opt["initial_hessian"]).lower() == "read":
-                    del self.qcinp.geom_opt["initial_hessian"]
-                    actions.append({"geom_opt.initial_hessian-read": "deleted"})
+        if (
+            {"molecule": "molecule_from_last_geometry"} in actions
+            and self.outdata["version"] == "6"
+            and "initial_hessian" in self.qcinp.geom_opt
+        ) and str(self.qcinp.geom_opt["initial_hessian"]).lower() == "read":
+            del self.qcinp.geom_opt["initial_hessian"]
+            actions.append({"geom_opt.initial_hessian-read": "deleted"})
         os.rename(self.input_file, self.input_file + ".last")
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "warnings": self.warnings, "actions": actions}

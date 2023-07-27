@@ -42,11 +42,12 @@ logger = logging.getLogger(__name__)
 SENTRY_DSN = None
 if "SENTRY_DSN" in os.environ:
     SENTRY_DSN = os.environ["SENTRY_DSN"]
-elif "CUSTODIAN_REPORTING_OPT_IN" in os.environ:
+elif "CUSTODIAN_REPORTING_OPT_IN" in os.environ and literal_eval(
+    os.environ.get("CUSTODIAN_REPORTING_OPT_IN", "False").title()
+):
     # check for environment variable to automatically set SENTRY_DSN
     # will set for True, true, TRUE, etc.
-    if literal_eval(os.environ.get("CUSTODIAN_REPORTING_OPT_IN", "False").title()):
-        SENTRY_DSN = "https://0f7291738eb042a3af671df9fc68ae2a@sentry.io/1470881"
+    SENTRY_DSN = "https://0f7291738eb042a3af671df9fc68ae2a@sentry.io/1470881"
 
 if SENTRY_DSN:
     import sentry_sdk
@@ -491,7 +492,7 @@ class Custodian:
 
                 zero_return_code = p.returncode == 0
 
-            logger.info(f"{job.name}.run has completed. " "Checking remaining handlers")
+            logger.info(f"{job.name}.run has completed. Checking remaining handlers")
             # Check for errors again, since in some cases non-monitor
             # handlers fix the problems detected by monitors
             # if an error has been found, not all handlers need to run

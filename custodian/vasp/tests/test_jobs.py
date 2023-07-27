@@ -5,6 +5,7 @@ import shutil
 import unittest
 
 import pymatgen
+import pytest
 from monty.os import cd
 from monty.tempfile import ScratchDir
 from pymatgen.io.vasp import Incar, Kpoints, Poscar
@@ -66,8 +67,8 @@ class VaspJobTest(unittest.TestCase):
                 os.remove(f"{f}.test")
             shutil.move("INCAR.backup", "INCAR")
 
-            self.assertAlmostEqual(incar["MAGMOM"], [3.007, 1.397, -0.189, -0.189])
-            self.assertAlmostEqual(incar_prev["MAGMOM"], [5, -5, 0.6, 0.6])
+            assert incar["MAGMOM"] == pytest.approx([3.007, 1.397, -0.189, -0.189])
+            assert incar_prev["MAGMOM"] == pytest.approx([5, -5, 0.6, 0.6])
 
     def test_continue(self):
         # Test the continuation functionality

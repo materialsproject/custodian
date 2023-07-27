@@ -74,12 +74,12 @@ class StdErrHandler(ErrorHandler):
     def check(self):
         """Check for error in std_err file."""
         self.errors = set()
-        with open(self.std_err) as f:
-            for line in f:
-                l = line.strip()
+        with open(self.std_err) as file:
+            for line in file:
+                line = line.strip()
                 for err, msgs in StdErrHandler.error_msgs.items():
                     for msg in msgs:
-                        if l.find(msg) != -1:
+                        if line.find(msg) != -1:
                             self.errors.add(err)
         return len(self.errors) > 0
 
@@ -701,31 +701,30 @@ class AbortHandler(ErrorHandler):
                     }
                 )
 
-            if n == 4:
+            if n == 4 and ci["force_eval"]["dft"].get("wfn_restart_file_name"):
                 # restart file could be problematic (gga restart for hybrids)
-                if ci["force_eval"]["dft"].get("wfn_restart_file_name"):
-                    actions.append(
-                        {
-                            "dict": self.input_file,
-                            "action": {
-                                "_unset": {"FORCE_EVAL": {"DFT": "WFN_RESTART_FILE_NAME"}},
-                                "_set": {
-                                    "FORCE_EVAL": {
-                                        "DFT": {
-                                            "XC": {
-                                                "HF": {
-                                                    "SCREENING": {
-                                                        "SCREEN_ON_INITIAL_P": False,
-                                                        "SCREEN_P_FORCES": False,
-                                                    },
-                                                }
+                actions.append(
+                    {
+                        "dict": self.input_file,
+                        "action": {
+                            "_unset": {"FORCE_EVAL": {"DFT": "WFN_RESTART_FILE_NAME"}},
+                            "_set": {
+                                "FORCE_EVAL": {
+                                    "DFT": {
+                                        "XC": {
+                                            "HF": {
+                                                "SCREENING": {
+                                                    "SCREEN_ON_INITIAL_P": False,
+                                                    "SCREEN_P_FORCES": False,
+                                                },
                                             }
                                         }
                                     }
-                                },
+                                }
                             },
-                        }
-                    )
+                        },
+                    }
+                )
 
         elif self.responses[-1] == "cholesky_scf":
             n = self.responses.count("cholesky_scf")
@@ -902,17 +901,18 @@ class NumericalPrecisionHandler(ErrorHandler):
                     }
                 )
 
-            if not actions:
-                if not ci.check("FORCE_EVAL/DFT/XC/XC_GRID") or not ci.by_path("FORCE_EVAL/DFT/XC/XC_GRID").get(
-                    "USE_FINER_GRID", False
-                ):
-                    # Try a more expensive XC grid
-                    actions.append(
-                        {
-                            "dict": self.input_file,
-                            "action": {"_set": {"FORCE_EVAL": {"DFT": {"XC": {"XC_GRID": {"USE_FINER_GRID": True}}}}}},
-                        }
-                    )
+            if (
+                not actions
+                and not ci.check("FORCE_EVAL/DFT/XC/XC_GRID")
+                or not ci.by_path("FORCE_EVAL/DFT/XC/XC_GRID").get("USE_FINER_GRID", False)
+            ):
+                # Try a more expensive XC grid
+                actions.append(
+                    {
+                        "dict": self.input_file,
+                        "action": {"_set": {"FORCE_EVAL": {"DFT": {"XC": {"XC_GRID": {"USE_FINER_GRID": True}}}}}},
+                    }
+                )
 
         restart(actions, self.output_file, self.input_file)
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
