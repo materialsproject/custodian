@@ -61,6 +61,22 @@ class VaspErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["errors"], ["Frozen job"])
         self.assertEqual(Incar.from_file("INCAR")["ALGO"], "Normal")
 
+    def test_algotet(self):
+        shutil.copy("INCAR.algo_tet_only", "INCAR")
+        h = VaspErrorHandler("vasp.algo_tet_only")
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["algo_tet"])
+        self.assertEqual(d["actions"], [{"action": {"_set": {"ALGO": "Fast"}}, "dict": "INCAR"}])
+        assert h.error_count["algo_tet"] == 1
+
+        # 2nd error should set ISMEAR to 0.
+        h.check()
+        d = h.correct()
+        self.assertEqual(d["errors"], ["algo_tet"])
+        assert h.error_count["algo_tet"] == 2
+        self.assertEqual(d["actions"], [{"action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}, "dict": "INCAR"}])
+
     def test_subspace(self):
         h = VaspErrorHandler("vasp.subspace")
         h.check()
@@ -712,7 +728,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         self.assertEqual(d["errors"], ["Unconverged"])
         self.assertEqual(
             [
-                {"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}},
                 {"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}},
             ],
             d["actions"],
@@ -748,14 +763,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         self.assertEqual(d["errors"], ["Unconverged"])
         self.assertIn({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}}, d["actions"])
-        os.remove("vasprun.xml")
-
-    def test_algotet(self):
-        shutil.copy("vasprun.xml.electronic_algotet", "vasprun.xml")
-        h = UnconvergedErrorHandler()
-        self.assertTrue(h.check())
-        d = h.correct()
-        self.assertEqual([{"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}}], d["actions"])
         os.remove("vasprun.xml")
 
     def test_amin(self):

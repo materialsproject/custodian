@@ -617,6 +617,35 @@ class VaspErrorHandler(ErrorHandler):
             if vi["INCAR"].get("ISYM", 2) > 0:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
+        if "algo_tet" in self.errors:
+            # NOTE: This is the algo_tet handler response.
+            algo = vi["INCAR"].get("ALGO", "Normal").lower()
+            # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP
+            # suggests: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
+            # 2) Use ALGO = Damped but only *after* an ISMEAR = 0 run where the wavefunction
+            # has been stored and read in for the subsequent run.
+            if (algo in ["all", "damped"] or (50 <= vi["INCAR"].get("IALGO", 38) <= 59)) and vi["INCAR"].get(
+                "ISMEAR", 1
+            ) < 0:
+                if self.error_count["algo_tet"] == 0:
+                    # first recovery attempt is to set ALGO to fast. Could fail again in which
+                    # case we end up here again if some other handler switches algo back to all/damped.
+                    # This time try the recovery below.
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
+            #
+            # We will only hit the 2nd algo_teet error if the ALGO was changed back from Fast to All/Damped
+            # by e.g. NonConvergingErrorHandler
+            # NOTE this relies on self.errors being reset on empty set on every .check call
+            if self.error_count["algo_tet"] > 0:
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+                if vi["INCAR"].get("NEDOS") or vi["INCAR"].get("EMIN") or vi["INCAR"].get("EMAX"):
+                    warnings.warn(
+                        "This looks like a DOS run. You may want to follow-up this job with ALGO = Damped"
+                        " and ISMEAR = -5, using the wavefunction from the current job.",
+                        UserWarning,
+                    )
+            self.error_count["algo_tet"] += 1
+
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
 
@@ -1042,45 +1071,30 @@ class UnconvergedErrorHandler(ErrorHandler):
         algo = v.incar.get("ALGO", "Normal").lower()
         actions = []
         if not v.converged_electronic:
-            # NOTE: This is the algo_tet handler response.
-            if (
-                v.incar.get("ALGO", "Normal").lower() in ["all", "damped"] or (50 <= v.incar.get("IALGO", 38) <= 59)
-            ) and v.incar.get("ISMEAR", 1) < 0:
-                # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP
-                # suggests: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
-                # 2) Use ALGO = Damped but only *after* an ISMEAR = 0 run where the wavefunction
-                # has been stored and read in for the subsequent run.
-                #
-                # For simplicity, we go with Option 1 here, but if the user wants high-quality
-                # DOS then they should consider running a subsequent job with ISMEAR = -5 and
-                # ALGO = Damped, provided the wavefunction has been stored.
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
-                if v.incar.get("NEDOS") or v.incar.get("EMIN") or v.incar.get("EMAX"):
-                    warnings.warn(
-                        "This looks like a DOS run. You may want to follow-up this job with ALGO = Damped"
-                        " and ISMEAR = -5, using the wavefunction from the current job.",
-                        UserWarning,
-                    )
             # NOTE: This is the amin error handler
             # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
             if np.max(v.final_structure.lattice.abc) > 50.0 and v.incar.get("AMIN", 0.1) > 0.01:
                 actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}})
 
-            # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
-            # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
-            # I am using "--" as the check for METAGGA here because this is the default in the
-            # vasprun.xml file
-            if v.incar.get("METAGGA", "--") != "--" and algo != "all":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+            if v.incar.get("ISMEAR", -1) >= 0 or not 50 <= v.incar.get("IALGO", 38) <= 59:
+                if v.incar.get("METAGGA", "--") != "--" and algo != "all":
+                    # If meta-GGA, go straight to Algo = All only if ISMEAR is greater or equal 0.
+                    # Algo = All is recommended in the VASP manual and some meta-GGAs explicitly
+                    # say to set Algo = All for proper convergence. I am using "--" as the check
+                    # for METAGGA here because this is the default in the vasprun.xml file
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
 
             # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
             # support these algorithms, but no warning is printed.
             if v.incar.get("LHFCALC", False):
-                if algo != "all":
-                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
-                # See the VASP manual section on LHFCALC for more information.
-                elif algo != "damped":
-                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}})
+                if v.incar.get("ISMEAR", -1) >= 0 or not 50 <= v.incar.get("IALGO", 38) <= 59:
+                    if algo != "all":
+                        actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+                    # See the VASP manual section on LHFCALC for more information.
+                    elif algo != "damped":
+                        actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}})
+                else:
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
 
             # Ladder from VeryFast to Fast to Normal to All
             # (except for meta-GGAs and hybrids).
