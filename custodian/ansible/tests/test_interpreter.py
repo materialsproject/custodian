@@ -22,85 +22,85 @@ class ModderTest(unittest.TestCase):
         d = {"Hello": "World"}
         mod = {"_set": {"Hello": "Universe", "Bye": "World"}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"Bye": "World", "Hello": "Universe"})
+        assert d == {"Bye": "World", "Hello": "Universe"}
         mod = {"_unset": {"Hello": 1}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"Bye": "World"})
+        assert d == {"Bye": "World"}
         mod = {"_push": {"List": 1}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"Bye": "World", "List": [1]})
+        assert d == {"Bye": "World", "List": [1]}
         mod = {"_push": {"List": 2}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"Bye": "World", "List": [1, 2]})
+        assert d == {"Bye": "World", "List": [1, 2]}
         mod = {"_inc": {"num": 5}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"Bye": "World", "List": [1, 2], "num": 5})
+        assert d == {"Bye": "World", "List": [1, 2], "num": 5}
         mod = {"_inc": {"num": 5}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"Bye": "World", "List": [1, 2], "num": 10})
+        assert d == {"Bye": "World", "List": [1, 2], "num": 10}
         mod = {"_rename": {"num": "number"}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"Bye": "World", "List": [1, 2], "number": 10})
+        assert d == {"Bye": "World", "List": [1, 2], "number": 10}
         mod = {"_add_to_set": {"List": 2}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"Bye": "World", "List": [1, 2], "number": 10})
+        assert d == {"Bye": "World", "List": [1, 2], "number": 10}
         mod = {"_add_to_set": {"List": 3}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"Bye": "World", "List": [1, 2, 3], "number": 10})
+        assert d == {"Bye": "World", "List": [1, 2, 3], "number": 10}
         mod = {"_add_to_set": {"number": 3}}
         self.assertRaises(ValueError, modder.modify, mod, d)
         mod = {"_pull": {"List": 1}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"Bye": "World", "List": [2, 3], "number": 10})
+        assert d == {"Bye": "World", "List": [2, 3], "number": 10}
         mod = {"_pull_all": {"List": [2, 3]}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"Bye": "World", "List": [], "number": 10})
+        assert d == {"Bye": "World", "List": [], "number": 10}
         mod = {"_push_all": {"List": list(range(10))}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"Bye": "World", "List": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "number": 10})
+        assert d == {"Bye": "World", "List": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "number": 10}
         mod = {"_pop": {"List": 1}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"Bye": "World", "List": [0, 1, 2, 3, 4, 5, 6, 7, 8], "number": 10})
+        assert d == {"Bye": "World", "List": [0, 1, 2, 3, 4, 5, 6, 7, 8], "number": 10}
         mod = {"_pop": {"List": -1}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"Bye": "World", "List": [1, 2, 3, 4, 5, 6, 7, 8], "number": 10})
+        assert d == {"Bye": "World", "List": [1, 2, 3, 4, 5, 6, 7, 8], "number": 10}
         d = {}
         mod = {"_set": {"a->b->c": 100}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"a": {"b": {"c": 100}}})
+        assert d == {"a": {"b": {"c": 100}}}
         mod = {"_set": {"a->b->d": 200}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"a": {"b": {"c": 100, "d": 200}}})
+        assert d == {"a": {"b": {"c": 100, "d": 200}}}
         mod = {"_set": {"a->b->d": 300}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"a": {"b": {"c": 100, "d": 300}}})
+        assert d == {"a": {"b": {"c": 100, "d": 300}}}
         mod = {"_unset": {"a->b->d": 300}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"a": {"b": {"c": 100}}})
+        assert d == {"a": {"b": {"c": 100}}}
         mod = {"_push": {"a->e->f": 300}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"a": {"b": {"c": 100}, "e": {"f": [300]}}})
+        assert d == {"a": {"b": {"c": 100}, "e": {"f": [300]}}}
         mod = {"_push_all": {"a->e->f": [100, 200]}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"a": {"b": {"c": 100}, "e": {"f": [300, 100, 200]}}})
+        assert d == {"a": {"b": {"c": 100}, "e": {"f": [300, 100, 200]}}}
         mod = {"_inc": {"a->b->c": 2}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"a": {"b": {"c": 102}, "e": {"f": [300, 100, 200]}}})
+        assert d == {"a": {"b": {"c": 102}, "e": {"f": [300, 100, 200]}}}
         mod = {"_pull": {"a->e->f": 300}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"a": {"b": {"c": 102}, "e": {"f": [100, 200]}}})
+        assert d == {"a": {"b": {"c": 102}, "e": {"f": [100, 200]}}}
         mod = {"_pull_all": {"a->e->f": [100, 200]}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"a": {"b": {"c": 102}, "e": {"f": []}}})
+        assert d == {"a": {"b": {"c": 102}, "e": {"f": []}}}
         mod = {"_push_all": {"a->e->f": [101, 201, 301, 401]}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"a": {"b": {"c": 102}, "e": {"f": [101, 201, 301, 401]}}})
+        assert d == {"a": {"b": {"c": 102}, "e": {"f": [101, 201, 301, 401]}}}
         mod = {"_pop": {"a->e->f": 1}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"a": {"b": {"c": 102}, "e": {"f": [101, 201, 301]}}})
+        assert d == {"a": {"b": {"c": 102}, "e": {"f": [101, 201, 301]}}}
         mod = {"_pop": {"a->e->f": -1}}
         modder.modify(mod, d)
-        self.assertEqual(d, {"a": {"b": {"c": 102}, "e": {"f": [201, 301]}}})
+        assert d == {"a": {"b": {"c": 102}, "e": {"f": [201, 301]}}}
 
     def test_file_modify(self):
         modder = Modder(actions=[FileActions])
@@ -127,7 +127,7 @@ class ModderTest(unittest.TestCase):
         d = {"Hello": "World"}
         modder = Modder(actions=[FileActions], strict=False)
         modder.modify(mod, d)
-        self.assertEqual(d, {"Hello": "World"})
+        assert d == {"Hello": "World"}
 
         # File actions not supported
         modder = Modder()
@@ -141,9 +141,9 @@ class ModderTest(unittest.TestCase):
     def test_modify_object(self):
         modder = Modder()
         o = MyObject(1)
-        self.assertEqual(o.b["a"], 1)
+        assert o.b["a"] == 1
         mod_o = modder.modify_object({"_set": {"b->a": 20}}, o)
-        self.assertEqual(mod_o.b["a"], 20)
+        assert mod_o.b["a"] == 20
 
 
 class MyObject:

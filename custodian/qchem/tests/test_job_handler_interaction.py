@@ -30,9 +30,9 @@ class FFopt_job_handler_interaction(TestCase):
         QCinput2 = QCInput.from_file(input2)
         sections1 = QCInput.find_sections(QCinput1.get_string())
         sections2 = QCInput.find_sections(QCinput2.get_string())
-        self.assertEqual(sections1, sections2)
+        assert sections1 == sections2
         for key in sections1:
-            self.assertEqual(QCinput1.as_dict().get(key), QCinput2.as_dict().get(key))
+            assert QCinput1.as_dict().get(key) == QCinput2.as_dict().get(key)
 
     def setUp(self):
         os.makedirs(scr_dir)
@@ -113,7 +113,7 @@ class FFopt_job_handler_interaction(TestCase):
             save_scratch=True,
             backup=True,
         ).as_dict()
-        self.assertEqual(next(myjob).as_dict(), expected_next)
+        assert next(myjob).as_dict() == expected_next
 
         h = QChemErrorHandler(
             input_file="mol.qin",
@@ -121,8 +121,8 @@ class FFopt_job_handler_interaction(TestCase):
         )
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ["back_transform_error"])
-        self.assertEqual(d["actions"], [{"molecule": "molecule_from_last_geometry"}])
+        assert d["errors"] == ["back_transform_error"]
+        assert d["actions"] == [{"molecule": "molecule_from_last_geometry"}]
         self._check_equivalent_inputs("mol.qin", "mol.qin.error2")
 
         h = QChemErrorHandler(
@@ -131,8 +131,8 @@ class FFopt_job_handler_interaction(TestCase):
         )
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ["SCF_failed_to_converge"])
-        self.assertEqual(d["actions"], [{"scf_algorithm": "gdm"}, {"max_scf_cycles": "500"}])
+        assert d["errors"] == ["SCF_failed_to_converge"]
+        assert d["actions"] == [{"scf_algorithm": "gdm"}, {"max_scf_cycles": "500"}]
         self._check_equivalent_inputs("mol.qin", "mol.qin.error3")
 
         h = QChemErrorHandler(
@@ -141,8 +141,8 @@ class FFopt_job_handler_interaction(TestCase):
         )
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ["back_transform_error"])
-        self.assertEqual(d["actions"], [{"molecule": "molecule_from_last_geometry"}])
+        assert d["errors"] == ["back_transform_error"]
+        assert d["actions"] == [{"molecule": "molecule_from_last_geometry"}]
         self._check_equivalent_inputs("mol.qin", "mol.qin.opt_0")
 
         h = QChemErrorHandler(
@@ -150,7 +150,7 @@ class FFopt_job_handler_interaction(TestCase):
             output_file="mol.qout.opt_0",
         )
         h.check()
-        self.assertFalse(h.check())
+        assert not h.check()
 
         expected_next = QCJob(
             qchem_command="qchem",
@@ -162,7 +162,7 @@ class FFopt_job_handler_interaction(TestCase):
             save_scratch=True,
             backup=False,
         ).as_dict()
-        self.assertEqual(next(myjob).as_dict(), expected_next)
+        assert next(myjob).as_dict() == expected_next
         self._check_equivalent_inputs("mol.qin", "mol.qin.error5")
 
         h = QChemErrorHandler(
@@ -171,8 +171,8 @@ class FFopt_job_handler_interaction(TestCase):
         )
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ["failed_cpscf"])
-        self.assertEqual(d["actions"], [{"cpscf_nseg": "3"}])
+        assert d["errors"] == ["failed_cpscf"]
+        assert d["actions"] == [{"cpscf_nseg": "3"}]
         self._check_equivalent_inputs("mol.qin", "mol.qin.freq_0")
 
         h = QChemErrorHandler(
@@ -180,7 +180,7 @@ class FFopt_job_handler_interaction(TestCase):
             output_file="mol.qout.freq_0",
         )
         h.check()
-        self.assertFalse(h.check())
+        assert not h.check()
 
         expected_next = QCJob(
             qchem_command="qchem",
@@ -192,7 +192,7 @@ class FFopt_job_handler_interaction(TestCase):
             save_scratch=True,
             backup=False,
         ).as_dict()
-        self.assertEqual(next(myjob).as_dict(), expected_next)
+        assert next(myjob).as_dict() == expected_next
 
         self._check_equivalent_inputs("mol.qin", "mol.qin.opt_1")
 

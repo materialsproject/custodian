@@ -16,9 +16,7 @@ from custodian.vasp.jobs import VaspJob
 
 
 def load_class(mod, name):
-    """
-    Load the class from mod and name specification.
-    """
+    """Load the class from mod and name specification."""
     toks = name.split("?")
     params = {}
     if len(toks) == 2:
@@ -33,9 +31,7 @@ def load_class(mod, name):
 
 
 def get_jobs(args):
-    """
-    Returns a generator of jobs. Allows of "infinite" jobs.
-    """
+    """Returns a generator of jobs. Allows of "infinite" jobs."""
     vasp_command = args.command.split()
     # save initial INCAR for rampU runs
     n_ramp_u = args.jobs.count("rampU")
@@ -49,10 +45,7 @@ def get_jobs(args):
     post_settings = []  # append to this list to have settings applied on next job
     for i, job in enumerate(args.jobs):
         final = i == njobs - 1
-        if any(c.isdigit() for c in job):
-            suffix = "." + job
-        else:
-            suffix = f".{job}{i + 1}"
+        suffix = "." + job if any(c.isdigit() for c in job) else f".{job}{i + 1}"
         settings = post_settings
         post_settings = []
         backup = i == 0
@@ -83,10 +76,7 @@ def get_jobs(args):
             )
 
         if job_type.startswith("static_dielectric_derived"):
-            from pymatgen.io.vasp.sets import (
-                MPStaticDielectricDFPTVaspInputSet,
-                MPStaticSet,
-            )
+            from pymatgen.io.vasp.sets import MPStaticDielectricDFPTVaspInputSet, MPStaticSet
 
             # vis = MPStaticSet.from_prev_calc(
             #     ".", user_incar_settings={"EDIFF": 1e-6, "IBRION": 8,
@@ -169,7 +159,7 @@ def get_jobs(args):
             )
             copy_magmom = True
             ramps += 1
-        elif job_type.startswith("quick_relax") or job_type.startswith("quickrelax"):
+        elif job_type.startswith(("quick_relax", "quickrelax")):
             kpoints = vinput["KPOINTS"]
             incar = vinput["INCAR"]
             structure = vinput["POSCAR"].structure
@@ -214,9 +204,7 @@ def get_jobs(args):
 
 
 def do_run(args):
-    """
-    Do the run.
-    """
+    """Do the run."""
     FORMAT = "%(asctime)s %(message)s"
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
     logging.info(f"Handlers used are {args.handlers}")
@@ -236,9 +224,7 @@ def do_run(args):
 
 
 def main():
-    """
-    Main method
-    """
+    """Main method."""
     import argparse
 
     parser = argparse.ArgumentParser(

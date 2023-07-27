@@ -2,9 +2,7 @@
 # Copyright (c) Materials Virtual Lab.
 # Distributed under the terms of the BSD License.
 
-"""
-A yaml based Custodian job runner. Allows for multi-step jobs with modifications along the way.
-"""
+"""A yaml based Custodian job runner. Allows for multi-step jobs with modifications along the way."""
 
 import argparse
 import logging
@@ -77,9 +75,7 @@ custodian_params:
 
 
 def run(args):
-    """
-    Perform a single run.
-    """
+    """Perform a single run."""
     FORMAT = "%(asctime)s %(message)s"
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
     logging.info(f"Spec file is {args.spec_file}")
@@ -89,16 +85,12 @@ def run(args):
 
 
 def print_example(args):
-    """
-    Print the example_yaml.
-    """
+    """Print the example_yaml."""
     print(example_yaml)
 
 
 def main():
-    """
-    Main method
-    """
+    """Main method."""
     parser = argparse.ArgumentParser(
         description="""
     cstdn is a convenient script to run custodian style jobs using a
@@ -121,7 +113,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        getattr(args, "func")
+        args.func
     except AttributeError:
         parser.print_help()
         sys.exit(0)

@@ -69,7 +69,7 @@ class HandlerTests(unittest.TestCase):
             stderr_file="std_err.tmp",
             backup=False,
         )
-        self.assertTrue(len(jobs) == 2)
+        assert len(jobs) == 2
 
 
 if __name__ == "__main__":

@@ -1,6 +1,4 @@
-"""
-This package implements various Nwchem Jobs and Error Handlers.
-"""
+"""This package implements various Nwchem Jobs and Error Handlers."""
 
 __author__ = "Shyue Ping Ong"
 __copyright__ = "Copyright 2012, The Materials Project"

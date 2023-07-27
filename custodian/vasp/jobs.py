@@ -1,6 +1,4 @@
-"""
-This module implements basic kinds of jobs for VASP runs.
-"""
+"""This module implements basic kinds of jobs for VASP runs."""
 
 import logging
 import math
@@ -244,12 +242,11 @@ class VaspJob(Job):
         if self.auto_gamma:
             vi = VaspInput.from_directory(".")
             kpts = vi["KPOINTS"]
-            if kpts is not None:
-                if kpts.style == Kpoints.supported_modes.Gamma and tuple(kpts.kpts[0]) == (1, 1, 1):
-                    if self.gamma_vasp_cmd is not None and which(self.gamma_vasp_cmd[-1]):  # pylint: disable=E1136
-                        cmd = self.gamma_vasp_cmd
-                    elif which(cmd[-1] + ".gamma"):
-                        cmd[-1] += ".gamma"
+            if kpts is not None and kpts.style == Kpoints.supported_modes.Gamma and tuple(kpts.kpts[0]) == (1, 1, 1):
+                if self.gamma_vasp_cmd is not None and which(self.gamma_vasp_cmd[-1]):  # pylint: disable=E1136
+                    cmd = self.gamma_vasp_cmd
+                elif which(cmd[-1] + ".gamma"):
+                    cmd[-1] += ".gamma"
         logger.info(f"Running {' '.join(cmd)}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr
@@ -258,9 +255,9 @@ class VaspJob(Job):
     def postprocess(self):
         """
         Postprocessing includes renaming and gzipping where necessary.
-        Also copies the magmom to the incar if necessary
+        Also copies the magmom to the incar if necessary.
         """
-        for f in VASP_OUTPUT_FILES + [self.output_file]:
+        for f in [*VASP_OUTPUT_FILES, self.output_file]:
             if os.path.exists(f):
                 if self.final and self.suffix != "":
                     shutil.move(f, f"{f}{self.suffix}")
@@ -368,9 +365,8 @@ class VaspJob(Job):
         metaGGA functional. There is an initial calculation of the
         GGA wavefunction which is fed into the initial metaGGA optimization
         to precondition the electronic structure optimizer. The metaGGA
-        optimization is performed using the double relaxation scheme
+        optimization is performed using the double relaxation scheme.
         """
-
         incar = Incar.from_file("INCAR")
         # Defaults to using the SCAN metaGGA
         metaGGA = incar.get("METAGGA", "SCAN")
@@ -547,10 +543,7 @@ class VaspJob(Job):
 
         # Set the energy convergence criteria as the EDIFFG (if present) or
         # 10 x EDIFF (which itself defaults to 1e-4 if not present).
-        if incar.get("EDIFFG") and incar.get("EDIFFG") > 0:
-            etol = incar["EDIFFG"]
-        else:
-            etol = incar.get("EDIFF", 1e-4) * 10
+        etol = incar["EDIFFG"] if incar.get("EDIFFG") and incar.get("EDIFFG") > 0 else incar.get("EDIFF", 0.0001) * 10
 
         if lattice_direction == "a":
             lattice_index = 0
@@ -773,7 +766,6 @@ class VaspNEBJob(VaspJob):
                      {"file": "CONTCAR",
                       "action": {"_file_copy": {"dest": "POSCAR"}}}]
         """
-
         self.vasp_cmd = tuple(vasp_cmd)
         self.output_file = output_file
         self.stderr_file = stderr_file
@@ -878,9 +870,7 @@ class VaspNEBJob(VaspJob):
             return subprocess.Popen(cmd, stdout=f_std, stderr=f_err, start_new_session=True)  # pylint: disable=R1732
 
     def postprocess(self):
-        """
-        Postprocessing includes renaming and gzipping where necessary.
-        """
+        """Postprocessing includes renaming and gzipping where necessary."""
         # Add suffix to all sub_dir/{items}
         for path in self.neb_dirs:
             for f in VASP_NEB_OUTPUT_SUB_FILES:
@@ -892,7 +882,7 @@ class VaspNEBJob(VaspJob):
                         shutil.copy(f, f"{f}{self.suffix}")
 
         # Add suffix to all output files
-        for f in VASP_NEB_OUTPUT_FILES + [self.output_file]:
+        for f in [*VASP_NEB_OUTPUT_FILES, self.output_file]:
             if os.path.exists(f):
                 if self.final and self.suffix != "":
                     shutil.move(f, f"{f}{self.suffix}")
@@ -919,14 +909,10 @@ class GenerateVaspInputJob(Job):
         self.kwargs = kwargs
 
     def setup(self):
-        """
-        Dummy setup
-        """
+        """Dummy setup."""
 
     def run(self):
-        """
-        Run the calculation.
-        """
+        """Run the calculation."""
         if os.path.exists("CONTCAR"):
             structure = Structure.from_file("CONTCAR")
         elif (not self.contcar_only) and os.path.exists("POSCAR"):
@@ -939,6 +925,4 @@ class GenerateVaspInputJob(Job):
         vis.write_input(".")
 
     def postprocess(self):
-        """
-        Dummy postprocess.
-        """
+        """Dummy postprocess."""

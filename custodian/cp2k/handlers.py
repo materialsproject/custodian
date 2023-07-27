@@ -72,9 +72,7 @@ class StdErrHandler(ErrorHandler):
         self.errors = set()
 
     def check(self):
-        """
-        Check for error in std_err file.
-        """
+        """Check for error in std_err file."""
         self.errors = set()
         with open(self.std_err) as f:
             for line in f:
@@ -86,9 +84,7 @@ class StdErrHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
-        """
-        Log error, perform no corrections.
-        """
+        """Log error, perform no corrections."""
         return {"errors": [f"System error(s): {self.errors}"], "actions": []}
 
 
@@ -154,9 +150,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         self.restart = None
 
     def check(self):
-        """
-        Check output file for failed SCF convergence
-        """
+        """Check output file for failed SCF convergence."""
         # Checks output file for errors.
         out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
         out.convergence()
@@ -173,25 +167,17 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
-        """
-        Apply corrections to aid convergence, if possible.
-        """
+        """Apply corrections to aid convergence, if possible."""
         ci = Cp2kInput.from_file(self.input_file)
 
-        if self.is_ot:
-            actions = self.__correct_ot(ci=ci)
-        else:
-            actions = self.__correct_diag(ci=ci)
+        actions = self.__correct_ot(ci=ci) if self.is_ot else self.__correct_diag(ci=ci)
 
         restart(actions, self.output_file, self.input_file)
         Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
         return {"errors": ["Non-converging Job"], "actions": actions}
 
     def __correct_ot(self, ci):
-        """
-        Apply corrections to OT calculation, if possible.
-        """
-
+        """Apply corrections to OT calculation, if possible."""
         actions = []
         minimizer = (
             ci["FORCE_EVAL"]["DFT"]["SCF"]["OT"].get("MINIMIZER", Keyword("MINIMIZER", "DIIS")).values[0].upper()
@@ -299,10 +285,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         return actions
 
     def __correct_diag(self, ci):
-        """
-        Apply corrections to diagonalization calculation, if possible
-        """
-
+        """Apply corrections to diagonalization calculation, if possible."""
         actions = []
 
         if not ci.check("FORCE_EVAL/DFT/SCF/MIXING"):
@@ -431,9 +414,7 @@ class DivergingScfErrorHandler(ErrorHandler):
         self.input_file = input_file
 
     def check(self):
-        """
-        Check for diverging SCF.
-        """
+        """Check for diverging SCF."""
         conv = get_conv(self.output_file)
         tmp = np.diff(conv[-10:])
         if len(conv) > 10 and all(_ > 0 for _ in tmp) and any(_ > 1 for _ in conv):
@@ -441,9 +422,7 @@ class DivergingScfErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
-        """
-        Correct issue if possible.
-        """
+        """Correct issue if possible."""
         ci = Cp2kInput.from_file(self.input_file)
         actions = []
 
@@ -508,9 +487,7 @@ class FrozenJobErrorHandler(ErrorHandler):
         self.restart = None
 
     def check(self):
-        """
-        Check for frozen jobs.
-        """
+        """Check for frozen jobs."""
         st = os.stat(self.output_file)
         out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
         try:
@@ -531,9 +508,7 @@ class FrozenJobErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
-        """
-        Correct issue if possible.
-        """
+        """Correct issue if possible."""
         ci = Cp2kInput.from_file(self.input_file)
         actions = []
         errors = []
@@ -642,7 +617,6 @@ class AbortHandler(ErrorHandler):
             input_file: (str) name of the input file
             output_file: (str) nam eof the output file
         """
-
         self.input_file = input_file
         self.output_file = output_file
         self.messages = {
@@ -652,9 +626,7 @@ class AbortHandler(ErrorHandler):
         self.responses = []
 
     def check(self):
-        """
-        Check for abort messages
-        """
+        """Check for abort messages."""
         matches = regrep(
             self.output_file, patterns=self.messages, reverse=True, terminate_on_match=True, postprocess=str
         )
@@ -664,9 +636,7 @@ class AbortHandler(ErrorHandler):
         return False
 
     def correct(self):
-        """
-        Correct issue if possible.
-        """
+        """Correct issue if possible."""
         ci = Cp2kInput.from_file(self.input_file)
         actions = []
 
@@ -776,7 +746,6 @@ class AbortHandler(ErrorHandler):
 
 
 class NumericalPrecisionHandler(ErrorHandler):
-
     """
     CP2K offers lots of functionality for decreasing numerical
     precision in order to speed-up calculations. This can, unfortunately,
@@ -852,9 +821,7 @@ class NumericalPrecisionHandler(ErrorHandler):
         self.eps_gvg_strict = eps_gvg_strict
 
     def check(self):
-        """
-        Check for stuck SCF convergence.
-        """
+        """Check for stuck SCF convergence."""
         conv = get_conv(self.output_file)
         counts = [sum(1 for i in g) for k, g in itertools.groupby(conv)]
         if any(c > self.max_same for c in counts):
@@ -862,9 +829,7 @@ class NumericalPrecisionHandler(ErrorHandler):
         return False
 
     def correct(self):
-        """
-        Correct issue if possible
-        """
+        """Correct issue if possible."""
         ci = Cp2kInput.from_file(self.input_file)
         actions = []
 
@@ -954,9 +919,7 @@ class NumericalPrecisionHandler(ErrorHandler):
         return {"errors": ["Unsufficient precision"], "actions": actions}
 
     def __set_pgf_orb(self):
-        """
-        Helper function to set the PGF_ORB keyword
-        """
+        """Helper function to set the PGF_ORB keyword."""
         return {
             "dict": self.input_file,
             "action": {"_set": {"FORCE_EVAL": {"DFT": {"QS": {"EPS_PGF_ORB": self.pgf_orb_strict}}}}},
@@ -964,7 +927,6 @@ class NumericalPrecisionHandler(ErrorHandler):
 
 
 class UnconvergedRelaxationErrorHandler(ErrorHandler):
-
     """
     This handler checks to see if geometry optimization has failed to converge,
     as signified by a line in the output file that says the maximum number of optimization
@@ -1000,7 +962,6 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
                 e.g. Try BFGS then CG then BFGS again for 20 iterations each until the max total
                 iterations is reached.
         """
-
         self.input_file = input_file
         self.output_file = output_file
         self.max_iter = max_iter
@@ -1009,9 +970,7 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
         self.optimizer_id = 0
 
     def check(self):
-        """
-        Check for unconverged geometry optimization
-        """
+        """Check for unconverged geometry optimization."""
         o = Cp2kOutput(self.output_file)
         o.convergence()
         if o.data.get("geo_opt_not_converged"):
@@ -1019,9 +978,7 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
         return False
 
     def correct(self):
-        """
-        Correct issue if possible.
-        """
+        """Correct issue if possible."""
         ci = Cp2kInput.from_file(self.input_file)
         actions = []
 
@@ -1063,14 +1020,13 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
 
 
 class WalltimeHandler(ErrorHandler):
-
     """
     This walltime error handler, when enabled, will detect whether
     the CP2K internal walltime handler has been tripped. If walltime
     has been reached (plus some buffer), then the walltime handler will create a
     "checkpoint.json" file that enables the job to continue. This is
     different than saving successful runs as custodian.chk.#.tar.gz
-    (see Custodian), and simply creates checkpoint.json
+    (see Custodian), and simply creates checkpoint.json.
     """
 
     is_monitor = False
@@ -1082,15 +1038,13 @@ class WalltimeHandler(ErrorHandler):
         Args:
             output_file (str): name of the cp2k output file
             enable_checkpointing (bool): whether or not to enable checkpointing when
-                the walltime is reached by dumping checkpoint.json
+                the walltime is reached by dumping checkpoint.json.
         """
         self.output_file = output_file
         self.enable_checkpointing = enable_checkpointing
 
     def check(self):
-        """
-        Check if internal CP2K walltime handler was tripped.
-        """
+        """Check if internal CP2K walltime handler was tripped."""
         if regrep(
             filename=self.output_file,
             patterns={"walltime": r"(exceeded requested execution time)"},
@@ -1102,9 +1056,7 @@ class WalltimeHandler(ErrorHandler):
         return False
 
     def correct(self):
-        """
-        Dump checkpoint info if requested
-        """
+        """Dump checkpoint info if requested."""
         if self.enable_checkpointing:
             dumpfn({"_path": os.getcwd()}, fn="checkpoint.json")
         return {"errors": ["Walltime error"], "actions": []}

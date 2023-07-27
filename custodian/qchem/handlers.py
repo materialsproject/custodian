@@ -1,6 +1,4 @@
-"""
-This module implements new error handlers for QChem runs.
-"""
+"""This module implements new error handlers for QChem runs."""
 
 import os
 
@@ -59,9 +57,7 @@ class QChemErrorHandler(ErrorHandler):
         self.opt_error_history = []
 
     def check(self):
-        """
-        Checks output file for errors
-        """
+        """Checks output file for errors."""
         self.outdata = QCOutput(self.output_file).data
         self.errors = self.outdata.get("errors")
         self.warnings = self.outdata.get("warnings")
@@ -74,9 +70,7 @@ class QChemErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
-        """
-        Perform corrections
-        """
+        """Perform corrections."""
         backup({self.input_file, self.output_file})
         actions = []
         self.qcinp = QCInput.from_file(self.input_file)
@@ -144,16 +138,15 @@ class QChemErrorHandler(ErrorHandler):
             # But we'll also save any structural changes that happened along the way.
             else:
                 self.opt_error_history += [self.outdata["structure_change"]]
-                if len(self.opt_error_history) > 1:
-                    if self.opt_error_history[-1] == "no_change":
-                        # If no structural changes occurred in two consecutive optimizations,
-                        # and we still haven't converged, then just exit. This is most common
-                        # if two species are flying away from eachother.
-                        return {
-                            "errors": self.errors,
-                            "actions": None,
-                            "opt_error_history": self.opt_error_history,
-                        }
+                if len(self.opt_error_history) > 1 and self.opt_error_history[-1] == "no_change":
+                    # If no structural changes occurred in two consecutive optimizations,
+                    # and we still haven't converged, then just exit. This is most common
+                    # if two species are flying away from eachother.
+                    return {
+                        "errors": self.errors,
+                        "actions": None,
+                        "opt_error_history": self.opt_error_history,
+                    }
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
                 # Using GDM for SCF convergence also often helps.

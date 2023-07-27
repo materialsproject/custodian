@@ -9,9 +9,7 @@ import shutil
 
 
 def get_nested_dict(input_dict, key):
-    """
-    Helper function to interpret a nested dict input.
-    """
+    """Helper function to interpret a nested dict input."""
     current = input_dict
     toks = key.split("->")
     n = len(toks)
@@ -69,7 +67,7 @@ class DictActions:
             input_dict (dict): The input dictionary to be modified.
             settings (dict): The specification of the modification to be made.
         """
-        for k in settings.keys():
+        for k in settings:
             (d, key) = get_nested_dict(input_dict, k)
             del d[key]
 
@@ -220,7 +218,7 @@ class FileActions:
             settings (dict): Must be {"content": actual_content}
         """
         if len(settings) != 1:
-            raise ValueError("Settings must only contain one item with key " "'content'.")
+            raise ValueError("Settings must only contain one item with key 'content'.")
         for k, v in settings.items():
             if k == "content":
                 with open(filename, "w") as f:
@@ -229,14 +227,14 @@ class FileActions:
     @staticmethod
     def file_move(filename, settings):
         """
-        Moves a file. {'_file_move': {'dest': 'new_file_name'}}
+        Moves a file. {'_file_move': {'dest': 'new_file_name'}}.
 
         Args:
             filename (str): Filename.
             settings (dict): Must be {"dest": path of new file}
         """
         if len(settings) != 1:
-            raise ValueError("Settings must only contain one item with key " "'dest'.")
+            raise ValueError("Settings must only contain one item with key 'dest'.")
         for k, v in settings.items():
             if k == "dest":
                 shutil.move(filename, v)
@@ -244,7 +242,7 @@ class FileActions:
     @staticmethod
     def file_delete(filename, settings):
         """
-        Deletes a file. {'_file_delete': {'mode': "actual"}}
+        Deletes a file. {'_file_delete': {'mode': "actual"}}.
 
         Args:
             filename (str): Filename.
@@ -252,7 +250,7 @@ class FileActions:
                 mode only prints the action without performing it.
         """
         if len(settings) != 1:
-            raise ValueError("Settings must only contain one item with key " "'mode'.")
+            raise ValueError("Settings must only contain one item with key 'mode'.")
         for k, v in settings.items():
             if k == "mode" and v == "actual":
                 try:
@@ -266,7 +264,7 @@ class FileActions:
     @staticmethod
     def file_copy(filename, settings):
         """
-        Copies a file. {'_file_copy': {'dest': 'new_file_name'}}
+        Copies a file. {'_file_copy': {'dest': 'new_file_name'}}.
 
         Args:
             filename (str): Filename.
@@ -279,7 +277,7 @@ class FileActions:
     @staticmethod
     def file_modify(filename, settings):
         """
-        Modifies file access
+        Modifies file access.
 
         Args:
             filename (str): Filename.

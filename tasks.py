@@ -132,7 +132,7 @@ def update_changelog(ctx, version=datetime.datetime.now().strftime("%Y.%-m.%-d")
                     ll = ll.strip()
                     if ll in ["", "## Summary"]:
                         continue
-                    elif ll.startswith("## Checklist") or ll.startswith("## TODO"):
+                    elif ll.startswith(("## Checklist", "## TODO")):
                         break
                     lines.append(f"    {ll}")
         misc.append(l)
