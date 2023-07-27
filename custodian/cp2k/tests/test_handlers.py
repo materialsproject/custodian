@@ -24,10 +24,10 @@ from custodian.cp2k.interpreter import Cp2kModder
 
 
 def clean_dir(d):
-    for f in glob.glob(os.path.join(d, "error.*.tar.gz")):
-        os.remove(f)
-    for f in glob.glob(os.path.join(d, "custodian.chk.*.tar.gz")):
-        os.remove(f)
+    for file in glob.glob(os.path.join(d, "error.*.tar.gz")):
+        os.remove(file)
+    for file in glob.glob(os.path.join(d, "custodian.chk.*.tar.gz")):
+        os.remove(file)
 
 
 class HandlerTests(unittest.TestCase):
@@ -45,7 +45,7 @@ class HandlerTests(unittest.TestCase):
         self.input_file = os.path.join(self.TEST_FILES_DIR, "cp2k.inp")
 
         self.output_file_preconditioner = os.path.join(self.TEST_FILES_DIR, "cp2k.out.precondstuck")
-        self.output_file_choleesky = os.path.join(self.TEST_FILES_DIR, "cp2k.out.cholesky")
+        self.output_file_cholesky = os.path.join(self.TEST_FILES_DIR, "cp2k.out.cholesky")
         self.output_file_imprecise = os.path.join(self.TEST_FILES_DIR, "cp2k.out.imprecise")
         self.output_file_unconverged = os.path.join(self.TEST_FILES_DIR, "cp2k.out.unconverged")
         self.output_file_stderr = os.path.join(self.TEST_FILES_DIR, "std_err.txt")
@@ -56,12 +56,10 @@ class HandlerTests(unittest.TestCase):
 
     def test(self):
         """Ensure modder works"""
-        kwdlst = KeywordList(
-            keywords=[Keyword("BASIS_SET_FILE_NAME", "FILE1"), Keyword("BASIS_SET_FILE_NAME", "FILE2")]
-        )
+        kwds = KeywordList(keywords=[Keyword("BASIS_SET_FILE_NAME", "FILE1"), Keyword("BASIS_SET_FILE_NAME", "FILE2")])
         actions = [
             {"dict": self.input_file, "action": {"_set": {"FORCE_EVAL": {"METHOD": "NOT QA"}}}},
-            {"dict": self.input_file, "action": {"_set": {"FORCE_EVAL": {"DFT": {"BASIS_SET_FILE_NAME": kwdlst}}}}},
+            {"dict": self.input_file, "action": {"_set": {"FORCE_EVAL": {"DFT": {"BASIS_SET_FILE_NAME": kwds}}}}},
             {
                 "dict": self.input_file,
                 "action": {"_set": {"FORCE_EVAL": {"DFT": {"SCF": {"MAX_SCF": 50}, "OUTER_SCF": {"MAX_SCF": 8}}}}},
@@ -98,7 +96,7 @@ class HandlerTests(unittest.TestCase):
         h = FrozenJobErrorHandler(input_file=self.input_file, output_file=self.output_file_imprecise, timeout=1)
         h.check()
 
-    def test_uncoverge_handler(self):
+    def test_unconverged_handler(self):
         """Handler for SCF handling not working"""
         ci = StaticSet.from_file(self.input_file)
         h = UnconvergedScfErrorHandler(input_file=self.input_file, output_file=self.output_file_unconverged)
@@ -119,7 +117,7 @@ class HandlerTests(unittest.TestCase):
 
     def test_abort_handler(self):
         """Checks if cp2k called abort"""
-        h = AbortHandler(input_file=self.input_file, output_file=self.output_file_choleesky)
+        h = AbortHandler(input_file=self.input_file, output_file=self.output_file_cholesky)
         assert h.check()
 
     def test_imprecision_handler(self):

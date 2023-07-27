@@ -25,12 +25,12 @@ def make_doc(ctx):
     with cd("docs_rst"):
         ctx.run("sphinx-apidoc -d 6 -o . -f ../custodian")
         ctx.run("rm custodian*.tests.rst")
-        for f in glob.glob("*.rst"):
-            if f.startswith("custodian") and f.endswith("rst"):
+        for file in glob.glob("*.rst"):
+            if file.startswith("custodian") and file.endswith("rst"):
                 newoutput = []
                 suboutput = []
                 subpackage = False
-                with open(f) as fid:
+                with open(file) as fid:
                     for line in fid:
                         clean = line.strip()
                         if clean == "Subpackages":
@@ -45,7 +45,7 @@ def make_doc(ctx):
                                 subpackage = False
                                 suboutput = []
 
-                with open(f, "w") as fid:
+                with open(file, "w") as fid:
                     fid.write("".join(newoutput))
         ctx.run("make html")
         # ctx.run("cp _static/* _build/html/_static")
