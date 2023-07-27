@@ -54,7 +54,12 @@ class QChemErrorHandlerTest(TestCase):
         h.check()
         d = h.correct()
         assert d["errors"] == ["unable_to_determine_lamda"]
-        assert d["actions"] == [{"s2thresh": "16"}, {"molecule": "molecule_from_last_geometry"}, {"scf_algorithm": "gdm"}, {"max_scf_cycles": "500"}]
+        assert d["actions"] == [
+            {"s2thresh": "16"},
+            {"molecule": "molecule_from_last_geometry"},
+            {"scf_algorithm": "gdm"},
+            {"max_scf_cycles": "500"},
+        ]
         self._check_equivalent_inputs("unable_to_determine_lamda.qin.0", "unable_to_determine_lamda.qin.1")
 
     def test_linear_dependent_basis_and_FileMan(self):
@@ -382,7 +387,11 @@ class QChemErrorHandlerTest(TestCase):
         h.check()
         d = h.correct()
         assert d["errors"] == ["out_of_opt_cycles"]
-        assert d["actions"] == [{"s2thresh": "16"}, {"molecule": "molecule_from_last_geometry"}, {"geom_opt_hessian": "deleted"}]
+        assert d["actions"] == [
+            {"s2thresh": "16"},
+            {"molecule": "molecule_from_last_geometry"},
+            {"geom_opt_hessian": "deleted"},
+        ]
         self._check_equivalent_inputs(os.path.join(test_dir, "OOS_read_hess_next.qin"), "mol.qin")
 
     def tearDown(self):

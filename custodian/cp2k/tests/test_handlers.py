@@ -81,7 +81,9 @@ class HandlerTests(unittest.TestCase):
         h = FrozenJobErrorHandler(input_file=self.input_file, output_file=self.output_file_preconditioner, timeout=1)
         assert h.check()
         ci = StaticSet.from_file(self.input_file)
-        assert ci["FORCE_EVAL"]["DFT"]["SCF"]["OT"]["PRECONDITIONER"] == Keyword("PRECONDITIONER", "FULL_SINGLE_INVERSE")
+        assert ci["FORCE_EVAL"]["DFT"]["SCF"]["OT"]["PRECONDITIONER"] == Keyword(
+            "PRECONDITIONER", "FULL_SINGLE_INVERSE"
+        )
         h.correct()
 
         ci = StaticSet.from_file(self.input_file)

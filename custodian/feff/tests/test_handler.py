@@ -37,7 +37,10 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         assert h.check()
         d = h.correct()
         assert d["errors"] == ["Non-converging job"]
-        assert d["actions"] == [{"dict": "PARAMETERS", "action": {"_set": {"RESTART": []}}}, {"action": {"_set": {"SCF": [7, 0, 100, 0.2, 3]}}, "dict": "PARAMETERS"}]
+        assert d["actions"] == [
+            {"dict": "PARAMETERS", "action": {"_set": {"RESTART": []}}},
+            {"action": {"_set": {"SCF": [7, 0, 100, 0.2, 3]}}, "dict": "PARAMETERS"},
+        ]
         shutil.move("ATOMS.orig", "ATOMS")
         shutil.move("PARAMETERS.orig", "PARAMETERS")
         shutil.move("HEADER.orig", "HEADER")

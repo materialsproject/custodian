@@ -614,9 +614,11 @@ class VaspErrorHandler(ErrorHandler):
             # suggests: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
             # 2) Use ALGO = Damped but only *after* an ISMEAR = 0 run where the wavefunction
             # has been stored and read in for the subsequent run.
-            if (algo in ["all", "damped"] or (50 <= vi["INCAR"].get("IALGO", 38) <= 59)) and vi["INCAR"].get(
-                "ISMEAR", 1
-            ) < 0 and self.error_count["algo_tet"] == 0:
+            if (
+                (algo in ["all", "damped"] or (50 <= vi["INCAR"].get("IALGO", 38) <= 59))
+                and vi["INCAR"].get("ISMEAR", 1) < 0
+                and self.error_count["algo_tet"] == 0
+            ):
                 # first recovery attempt is to set ALGO to fast. Could fail again in which
                 # case we end up here again if some other handler switches algo back to all/damped.
                 # This time try the recovery below.

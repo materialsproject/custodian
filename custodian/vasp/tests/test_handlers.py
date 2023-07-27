@@ -561,7 +561,11 @@ class AliasingErrorHandlerTest(unittest.TestCase):
         os.chdir(test_dir)
 
         assert d["errors"] == ["aliasing"]
-        assert d["actions"] == [{"action": {"_set": {"NGX": 34}}, "dict": "INCAR"}, {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}}, {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}}]
+        assert d["actions"] == [
+            {"action": {"_set": {"NGX": 34}}, "dict": "INCAR"},
+            {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}},
+            {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}},
+        ]
 
     def test_aliasing_incar(self):
         os.chdir(os.path.join(test_dir, "aliasing"))
@@ -571,7 +575,11 @@ class AliasingErrorHandlerTest(unittest.TestCase):
         d = h.correct()
 
         assert d["errors"] == ["aliasing_incar"]
-        assert d["actions"] == [{"action": {"_unset": {"NGY": 1, "NGZ": 1}}, "dict": "INCAR"}, {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}}, {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}}]
+        assert d["actions"] == [
+            {"action": {"_unset": {"NGY": 1, "NGZ": 1}}, "dict": "INCAR"},
+            {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}},
+            {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}},
+        ]
 
         incar = Incar.from_file("INCAR.orig")
         incar["ICHARG"] = 10
@@ -892,7 +900,10 @@ class ZpotrfErrorHandlerSmallTest(unittest.TestCase):
         assert h.check()
         d = h.correct()
         assert d["errors"] == ["zpotrf"]
-        assert d["actions"] == [{"dict": "INCAR", "action": {"_set": {"NCORE": 1}}}, {"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}}]
+        assert d["actions"] == [
+            {"dict": "INCAR", "action": {"_set": {"NCORE": 1}}},
+            {"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}},
+        ]
 
     def tearDown(self):
         os.chdir(test_dir)
