@@ -1076,7 +1076,7 @@ class UnconvergedErrorHandler(ErrorHandler):
             if np.max(v.final_structure.lattice.abc) > 50.0 and v.incar.get("AMIN", 0.1) > 0.01:
                 actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}})
 
-            if v.incar.get("ISMEAR", -1) >= 0 or not (50 <= v.incar.get("IALGO", 38) <= 59):
+            if v.incar.get("ISMEAR", -1) >= 0 or not 50 <= v.incar.get("IALGO", 38) <= 59:
                 if v.incar.get("METAGGA", "--") != "--" and algo != "all":
                     # If meta-GGA, go straight to Algo = All only if ISMEAR is greater or equal 0.
                     # Algo = All is recommended in the VASP manual and some meta-GGAs explicitly
@@ -1087,7 +1087,7 @@ class UnconvergedErrorHandler(ErrorHandler):
             # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
             # support these algorithms, but no warning is printed.
             if v.incar.get("LHFCALC", False):
-                if v.incar.get("ISMEAR", -1) >= 0 or not (50 <= v.incar.get("IALGO", 38) <= 59):
+                if v.incar.get("ISMEAR", -1) >= 0 or not 50 <= v.incar.get("IALGO", 38) <= 59:
                     if algo != "all":
                         actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
                     # See the VASP manual section on LHFCALC for more information.
