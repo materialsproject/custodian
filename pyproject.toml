@@ -72,3 +72,22 @@ no_implicit_optional = false
 
 [tool.codespell]
 ignore-words-list = "ot"
+
+
+[tool.coverage.run]
+relative_files = true
+
+[tool.coverage.report]
+exclude_lines = [
+  "@deprecated",
+  "def __repr__",
+  "if 0:",
+  "if __name__ == .__main__.:",
+  "if self.debug:",
+  "if settings.DEBUG",
+  "pragma: no cover",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "input",
+  "if TYPE_CHECKING:"
+]
