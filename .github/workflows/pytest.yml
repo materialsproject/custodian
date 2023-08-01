@@ -36,6 +36,7 @@ jobs:
           MPLBACKEND: "Agg"
         run: pytest --cov=custodian custodian --color=yes
       - name: Upload coverage reports to Codecov
+        shell: bash -l {0}
         uses: codecov/codecov-action@v3
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

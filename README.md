@@ -1,4 +1,10 @@
 ![Custodian logo](custodian_logo.png)
+[![GitHub license](https://img.shields.io/github/license/materialsproject/custodian)](https://github.com/materialsproject/custodian/blob/main/LICENSE)
+[![Linting](https://github.com/materialsproject/custodian/workflows/Linting/badge.svg)](https://github.com/materialsproject/custodian/workflows/Linting/badge.svg)
+[![Testing](https://github.com/materialsproject/custodian/actions/workflows/pytest.yml/badge.svg)](https://github.com/materialsproject/custodian/actions/workflows/pytest.yml)
+[![Downloads](https://pepy.tech/badge/custodian)](https://pepy.tech/project/custodian)
+[![codecov](https://codecov.io/gh/materialsproject/custodian/branch/main/graph/badge.svg?token=3V3O79GODQ)](https://codecov.io/gh/materialsproject/custodian)
+
 
 Custodian is a simple, robust and flexible just-in-time (JIT) job management
 framework written in Python. Using custodian, you can create wrappers that
