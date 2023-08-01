@@ -1,4 +1,4 @@
-"""This module implements jobs for Lobster runs. """
+"""This module implements jobs for Lobster runs."""
 
 import logging
 import os
@@ -42,9 +42,7 @@ logger = logging.getLogger(__name__)
 
 
 class LobsterJob(Job):
-    """
-    Runs the Lobster Job
-    """
+    """Runs the Lobster Job."""
 
     def __init__(
         self,
@@ -52,7 +50,7 @@ class LobsterJob(Job):
         output_file: str = "lobsterout",
         stderr_file: str = "std_err_lobster.txt",
         gzipped: bool = True,
-        add_files_to_gzip=[],
+        add_files_to_gzip=(),
         backup: bool = True,
     ):
         """
@@ -63,7 +61,7 @@ class LobsterJob(Job):
             stderr_file: standard output
             gzipped: if True, Lobster files and add_files_to_gzip will be gzipped
             add_files_to_gzip: list of files that should be gzipped
-            backup: if True, lobsterin will be copied to lobsterin.orig
+            backup: if True, lobsterin will be copied to lobsterin.orig.
         """
         self.lobster_cmd = lobster_cmd
         self.output_file = output_file
@@ -73,17 +71,13 @@ class LobsterJob(Job):
         self.backup = backup
 
     def setup(self):
-        """
-        will backup lobster input files
-        """
+        """Will backup lobster input files."""
         if self.backup:
             for f in LOBSTERINPUT_FILES:
                 shutil.copy(f, f"{f}.orig")
 
     def run(self):
-        """
-        runs the job
-        """
+        """Runs the job."""
         cmd = self.lobster_cmd
 
         logger.info(f"Running {' '.join(cmd)}")
@@ -93,9 +87,7 @@ class LobsterJob(Job):
             return subprocess.Popen(cmd, stdout=f_std, stderr=f_err)  # pylint: disable=R1732
 
     def postprocess(self):
-        """
-        will gzip relevant files (won't gzip custodian.json and other output files from the cluster)
-        """
+        """Will gzip relevant files (won't gzip custodian.json and other output files from the cluster)."""
         if self.gzipped:
             for file in LOBSTEROUTPUT_FILES:
                 if os.path.exists(file):
@@ -103,9 +95,8 @@ class LobsterJob(Job):
             for file in LOBSTERINPUT_FILES:
                 if os.path.exists(file):
                     compress_file(file, compression="gz")
-            if self.backup:
-                if os.path.exists("lobsterin.orig"):
-                    compress_file("lobsterin.orig", compression="gz")
+            if self.backup and os.path.exists("lobsterin.orig"):
+                compress_file("lobsterin.orig", compression="gz")
             for file in FW_FILES:
                 if os.path.exists(file):
                     compress_file(file, compression="gz")

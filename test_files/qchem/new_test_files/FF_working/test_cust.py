@@ -1,6 +1,11 @@
+import pytest
+
 from custodian import Custodian
-from custodian.qchem.new_handlers import QChemErrorHandler
-from custodian.qchem.new_jobs import QCJob
+
+pytest.importorskip("openbabel")
+
+from custodian.qchem.handlers import QChemErrorHandler  # noqa: E402
+from custodian.qchem.jobs import QCJob  # noqa: E402
 
 my_input = "test.qin"
 my_output = "test.qout"

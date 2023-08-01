@@ -1,6 +1,4 @@
-"""
-This package implements Lobster Jobs and Error Handlers.
-"""
+"""This package implements Lobster Jobs and Error Handlers."""
 
 __author__ = "Janine George, Guido Petretto"
 __version__ = "0.1"

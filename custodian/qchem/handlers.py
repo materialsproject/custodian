@@ -1,6 +1,4 @@
-"""
-This module implements new error handlers for QChem runs.
-"""
+"""This module implements new error handlers for QChem runs."""
 
 import os
 
@@ -59,9 +57,7 @@ class QChemErrorHandler(ErrorHandler):
         self.opt_error_history = []
 
     def check(self):
-        """
-        Checks output file for errors
-        """
+        """Checks output file for errors."""
         self.outdata = QCOutput(self.output_file).data
         self.errors = self.outdata.get("errors")
         self.warnings = self.outdata.get("warnings")
@@ -74,9 +70,7 @@ class QChemErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self):
-        """
-        Perform corrections
-        """
+        """Perform corrections."""
         backup({self.input_file, self.output_file})
         actions = []
         self.qcinp = QCInput.from_file(self.input_file)
@@ -144,16 +138,15 @@ class QChemErrorHandler(ErrorHandler):
             # But we'll also save any structural changes that happened along the way.
             else:
                 self.opt_error_history += [self.outdata["structure_change"]]
-                if len(self.opt_error_history) > 1:
-                    if self.opt_error_history[-1] == "no_change":
-                        # If no structural changes occurred in two consecutive optimizations,
-                        # and we still haven't converged, then just exit. This is most common
-                        # if two species are flying away from eachother.
-                        return {
-                            "errors": self.errors,
-                            "actions": None,
-                            "opt_error_history": self.opt_error_history,
-                        }
+                if len(self.opt_error_history) > 1 and self.opt_error_history[-1] == "no_change":
+                    # If no structural changes occurred in two consecutive optimizations,
+                    # and we still haven't converged, then just exit. This is most common
+                    # if two species are flying away from each other.
+                    return {
+                        "errors": self.errors,
+                        "actions": None,
+                        "opt_error_history": self.opt_error_history,
+                    }
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
                 # Using GDM for SCF convergence also often helps.
@@ -345,19 +338,10 @@ class QChemErrorHandler(ErrorHandler):
             print("Something is wrong with the input file. Examine error message by hand.")
             return {"errors": self.errors, "actions": None}
 
-        elif "failed_to_read_input" in self.errors:
-            # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
-            actions.append({"rerun_job_no_changes": True})
-
-        elif "read_molecule_error" in self.errors:
-            # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
-            actions.append({"rerun_job_no_changes": True})
-
-        elif "never_called_qchem" in self.errors:
-            # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
-            actions.append({"rerun_job_no_changes": True})
-
-        elif "licensing_error" in self.errors:
+        elif any(
+            err in self.errors
+            for err in ["failed_to_read_input", "read_molecule_error", "never_called_qchem", "licensing_error"]
+        ):
             # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
             actions.append({"rerun_job_no_changes": True})
 
@@ -384,11 +368,13 @@ class QChemErrorHandler(ErrorHandler):
         ).lower() == "read":
             del self.qcinp.rem["geom_opt_hessian"]
             actions.append({"geom_opt_hessian": "deleted"})
-        if {"molecule": "molecule_from_last_geometry"} in actions and self.outdata["version"] == "6":
-            if "initial_hessian" in self.qcinp.geom_opt:
-                if str(self.qcinp.geom_opt["initial_hessian"]).lower() == "read":
-                    del self.qcinp.geom_opt["initial_hessian"]
-                    actions.append({"geom_opt.initial_hessian-read": "deleted"})
+        if (
+            {"molecule": "molecule_from_last_geometry"} in actions
+            and self.outdata["version"] == "6"
+            and "initial_hessian" in self.qcinp.geom_opt
+        ) and str(self.qcinp.geom_opt["initial_hessian"]).lower() == "read":
+            del self.qcinp.geom_opt["initial_hessian"]
+            actions.append({"geom_opt.initial_hessian-read": "deleted"})
         os.rename(self.input_file, self.input_file + ".last")
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "warnings": self.warnings, "actions": actions}

@@ -42,11 +42,12 @@ logger = logging.getLogger(__name__)
 SENTRY_DSN = None
 if "SENTRY_DSN" in os.environ:
     SENTRY_DSN = os.environ["SENTRY_DSN"]
-elif "CUSTODIAN_REPORTING_OPT_IN" in os.environ:
+elif "CUSTODIAN_REPORTING_OPT_IN" in os.environ and literal_eval(
+    os.environ.get("CUSTODIAN_REPORTING_OPT_IN", "False").title()
+):
     # check for environment variable to automatically set SENTRY_DSN
     # will set for True, true, TRUE, etc.
-    if literal_eval(os.environ.get("CUSTODIAN_REPORTING_OPT_IN", "False").title()):
-        SENTRY_DSN = "https://0f7291738eb042a3af671df9fc68ae2a@sentry.io/1470881"
+    SENTRY_DSN = "https://0f7291738eb042a3af671df9fc68ae2a@sentry.io/1470881"
 
 if SENTRY_DSN:
     import sentry_sdk
@@ -299,7 +300,6 @@ class Custodian:
         Returns:
             Custodian instance.
         """
-
         dec = MontyDecoder()
 
         def load_class(dotpath):
@@ -492,7 +492,7 @@ class Custodian:
 
                 zero_return_code = p.returncode == 0
 
-            logger.info(f"{job.name}.run has completed. " "Checking remaining handlers")
+            logger.info(f"{job.name}.run has completed. Checking remaining handlers")
             # Check for errors again, since in some cases non-monitor
             # handlers fix the problems detected by monitors
             # if an error has been found, not all handlers need to run
@@ -515,7 +515,7 @@ class Custodian:
                         s = f"Job return code is {p.returncode}. Terminating..."
                         logger.info(s)
                         raise ReturnCodeError(s, True)
-                    warnings.warn("subprocess returned a non-zero return " "code. Check outputs carefully...")
+                    warnings.warn("subprocess returned a non-zero return code. Check outputs carefully...")
                 job.postprocess()
                 return
 
@@ -545,7 +545,7 @@ class Custodian:
     def run_interrupted(self):
         """
         Runs custodian in a interuppted mode, which sets up and
-        validates jobs but doesn't run the executable
+        validates jobs but doesn't run the executable.
 
         Returns:
             number of remaining jobs
@@ -645,9 +645,7 @@ class Custodian:
         return None
 
     def _do_check(self, handlers, terminate_func=None):
-        """
-        checks the specified handlers. Returns True iff errors caught
-        """
+        """Checks the specified handlers. Returns True iff errors caught."""
         corrections = []
         for h in handlers:
             try:
@@ -687,9 +685,7 @@ class Custodian:
 
 
 class Job(MSONable):
-    """
-    Abstract base class defining the interface for a Job.
-    """
+    """Abstract base class defining the interface for a Job."""
 
     @abstractmethod
     def setup(self):
@@ -714,23 +710,17 @@ class Job(MSONable):
         """
 
     def terminate(self):
-        """
-        Implement termination function.
-        """
-        return None
+        """Implement termination function."""
+        return
 
     @property
     def name(self):
-        """
-        A nice string name for the job.
-        """
+        """A nice string name for the job."""
         return self.__class__.__name__
 
 
 class ErrorHandler(MSONable):
-    """
-    Abstract base class defining the interface for an ErrorHandler.
-    """
+    """Abstract base class defining the interface for an ErrorHandler."""
 
     is_monitor = False
     """
@@ -844,9 +834,7 @@ class Validator(MSONable):
 
 
 class CustodianError(RuntimeError):
-    """
-    Exception class for Custodian errors.
-    """
+    """Exception class for Custodian errors."""
 
     def __init__(self, message, raises=False):
         """
@@ -862,9 +850,7 @@ class CustodianError(RuntimeError):
 
 
 class ValidationError(CustodianError):
-    """
-    Error raised when a validator does not pass the check
-    """
+    """Error raised when a validator does not pass the check."""
 
     def __init__(self, message, raises, validator):
         """
@@ -878,9 +864,7 @@ class ValidationError(CustodianError):
 
 
 class NonRecoverableError(CustodianError):
-    """
-    Error raised when a handler found an error but could not fix it
-    """
+    """Error raised when a handler found an error but could not fix it."""
 
     def __init__(self, message, raises, handler):
         """
@@ -894,31 +878,25 @@ class NonRecoverableError(CustodianError):
 
 
 class ReturnCodeError(CustodianError):
-    """
-    Error raised when the process gave non zero return code
-    """
+    """Error raised when the process gave non zero return code."""
 
 
 class MaxCorrectionsError(CustodianError):
-    """
-    Error raised when the maximum allowed number of errors is reached
-    """
+    """Error raised when the maximum allowed number of errors is reached."""
 
     def __init__(self, message, raises, max_errors):
         """
         Args:
             message (str): Message passed to Exception
             raises (bool): Whether this should be raised outside custodian
-            max_errors (int): the number of errors reached
+            max_errors (int): the number of errors reached.
         """
         super().__init__(message, raises)
         self.max_errors = max_errors
 
 
 class MaxCorrectionsPerJobError(CustodianError):
-    """
-    Error raised when the maximum allowed number of errors per job is reached
-    """
+    """Error raised when the maximum allowed number of errors per job is reached."""
 
     def __init__(self, message, raises, max_errors_per_job, job):
         """
@@ -926,7 +904,7 @@ class MaxCorrectionsPerJobError(CustodianError):
             message (str): Message passed to Exception
             raises (bool): Whether this should be raised outside custodian
             max_errors_per_job (int): the number of errors per job reached
-            job (Job): the job that was stopped
+            job (Job): the job that was stopped.
         """
         super().__init__(message, raises)
         self.max_errors_per_job = max_errors_per_job
@@ -934,9 +912,7 @@ class MaxCorrectionsPerJobError(CustodianError):
 
 
 class MaxCorrectionsPerHandlerError(CustodianError):
-    """
-    Error raised when the maximum allowed number of errors per handler is reached
-    """
+    """Error raised when the maximum allowed number of errors per handler is reached."""
 
     def __init__(self, message, raises, max_errors_per_handler, handler):
         """
@@ -944,7 +920,7 @@ class MaxCorrectionsPerHandlerError(CustodianError):
             message (str): Message passed to Exception
             raises (bool): Whether this should be raised outside custodian
             max_errors_per_handler (int): the number of errors per job reached
-            handler (Handler): the handler that caused the exception
+            handler (Handler): the handler that caused the exception.
         """
         super().__init__(message, raises)
         self.max_errors_per_handler = max_errors_per_handler

@@ -1,6 +1,4 @@
-"""
-This module implements basic kinds of jobs for Cp2k runs.
-"""
+"""This module implements basic kinds of jobs for Cp2k runs."""
 
 import logging
 import os
@@ -129,21 +127,18 @@ class Cp2kJob(Job):
     # TODO double jobs, file manipulations, etc. should be done in atomate in the future
     # and custodian should only run the job itself
     def postprocess(self):
-        """
-        Postprocessing includes renaming and gzipping where necessary.
-        """
+        """Postprocessing includes renaming and gzipping where necessary."""
         fs = os.listdir(".")
-        if os.path.exists(self.output_file):
-            if self.suffix != "":
-                os.mkdir(f"run{self.suffix}")
-                for f in fs:
-                    if "json" in f:
-                        continue
-                    if not os.path.isdir(f):
-                        if self.final:
-                            shutil.move(f, f"run{self.suffix}/{f}")
-                        else:
-                            shutil.copy(f, f"run{self.suffix}/{f}")
+        if os.path.exists(self.output_file) and self.suffix != "":
+            os.mkdir(f"run{self.suffix}")
+            for f in fs:
+                if "json" in f:
+                    continue
+                if not os.path.isdir(f):
+                    if self.final:
+                        shutil.move(f, f"run{self.suffix}/{f}")
+                    else:
+                        shutil.copy(f, f"run{self.suffix}/{f}")
 
         # Remove continuation so if a subsequent job is run in
         # the same directory, will not restart this job.
@@ -151,9 +146,7 @@ class Cp2kJob(Job):
             os.remove("continue.json")
 
     def terminate(self):
-        """
-        Terminate cp2k
-        """
+        """Terminate cp2k."""
         for k in self.cp2k_cmd:
             if "cp2k" in k:
                 try:
@@ -173,11 +166,10 @@ class Cp2kJob(Job):
         settings_override_hybrid=None,
     ):
         """
-        A bare gga to hybrid calculation. Removes all unecessary features
+        A bare gga to hybrid calculation. Removes all unnecessary features
         from the gga run, and making it only a ENERGY/ENERGY_FORCE
         depending on the hybrid run.
         """
-
         job1_settings_override = [
             {
                 "dict": input_file,
@@ -255,7 +247,6 @@ class Cp2kJob(Job):
         job can/would benefit from switching to OT scheme. If not, then the second job remains a
         diagonalization job, and there is minimal overhead from restarting.
         """
-
         job1 = Cp2kJob(
             cp2k_cmd,
             input_file=input_file,
@@ -295,7 +286,6 @@ class Cp2kJob(Job):
         Build a job where the first job is an unscreened hybrid static calculation, then the second one
         uses the wfn from the first job as a restart to do a screened calculation.
         """
-
         job1_settings_override = [
             {
                 "dict": input_file,
