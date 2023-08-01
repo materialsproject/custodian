@@ -100,6 +100,7 @@ class QCJobTest(TestCase):
             assert os.environ["QCLOCALSCR"] == "/tmp/scratch"
 
 
+@unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFTest_complex_unlinked(TestCase):
     def setUp(self):
         self.maxDiff = None
@@ -176,6 +177,7 @@ class OptFFTest_complex_unlinked(TestCase):
         )
 
 
+@unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFTest_complex_linked_change_nseg(TestCase):
     def setUp(self):
         self.maxDiff = None
@@ -289,6 +291,7 @@ class OptFFTest_complex_linked_change_nseg(TestCase):
         )
 
 
+@unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFTest(TestCase):
     def setUp(self):
         self.maxDiff = None
@@ -391,6 +394,7 @@ class OptFFTest(TestCase):
         self.assertRaises(StopIteration, myjob.__next__)
 
 
+@unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFTest1(TestCase):
     def setUp(self):
         os.makedirs(scr_dir)
@@ -429,6 +433,7 @@ class OptFFTest1(TestCase):
         self.assertRaises(StopIteration, myjob.__next__)
 
 
+@unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFTest2(TestCase):
     def setUp(self):
         os.makedirs(scr_dir)
@@ -489,6 +494,7 @@ class OptFFTest2(TestCase):
         self.assertRaises(StopIteration, myjob.__next__)
 
 
+@unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFTestSwitching(TestCase):
     def setUp(self):
         self.maxDiff = None
@@ -630,6 +636,7 @@ class OptFFTestSwitching(TestCase):
         self.assertRaises(StopIteration, myjob.__next__)
 
 
+@unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFTest6004(TestCase):
     def setUp(self):
         self.maxDiff = None
@@ -770,6 +777,7 @@ class OptFFTest6004(TestCase):
         )
 
 
+@unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFTest5952(TestCase):
     def setUp(self):
         self.maxDiff = None
@@ -827,6 +835,7 @@ class OptFFTest5952(TestCase):
         self.assertRaises(Exception, myjob.__next__)
 
 
+@unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFTest5690(TestCase):
     def setUp(self):
         self.maxDiff = None
@@ -968,6 +977,7 @@ class OptFFTest5690(TestCase):
         self.assertRaises(Exception, myjob.__next__)
 
 
+@unittest.skipIf(ob is None, "openbabel not installed")
 class OptFF_small_neg_freq(TestCase):
     def setUp(self):
         self.maxDiff = None
@@ -1128,6 +1138,7 @@ class OptFF_small_neg_freq(TestCase):
         self.assertRaises(StopIteration, myjob.__next__)
 
 
+@unittest.skipIf(ob is None, "openbabel not installed")
 class OptFF_single_freq_frags(TestCase):
     def setUp(self):
         self.maxDiff = None
@@ -1202,6 +1213,7 @@ class OptFF_single_freq_frags(TestCase):
         self.assertRaises(StopIteration, myjob.__next__)
 
 
+@unittest.skipIf(ob is None, "openbabel not installed")
 class TSFFTest(TestCase):
     def setUp(self):
         self.maxDiff = None
@@ -1265,6 +1277,7 @@ class TSFFTest(TestCase):
         self.assertRaises(StopIteration, myjob.__next__)
 
 
+@unittest.skipIf(ob is None, "openbabel not installed")
 class TSFF_freqfirst(TestCase):
     def setUp(self):
         self.maxDiff = None
@@ -1358,6 +1371,7 @@ class TSFF_freqfirst(TestCase):
         self.assertRaises(StopIteration, myjob.__next__)
 
 
+@unittest.skipIf(ob is None, "openbabel not installed")
 class TSFF_freqfirst_multiple_cycles(TestCase):
     def setUp(self):
         self.maxDiff = None
