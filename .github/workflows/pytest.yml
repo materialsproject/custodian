@@ -27,9 +27,8 @@ jobs:
         shell: bash -l {0}
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-ci.txt
-          pip install -e .
+          python -m pip install --upgrade pymatgen
+          python -m pip install -e '.[dev]'
       - name: pytest
         shell: bash -l {0}
         env:
