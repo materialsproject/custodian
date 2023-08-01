@@ -3,7 +3,7 @@
 
 from setuptools import find_packages, setup
 
-with open("README.rst") as f:
+with open("README.md") as f:
     long_desc = f.read()
     ind = long_desc.find("\n")
     long_desc = long_desc[ind + 1 :]

@@ -1,6 +1,4 @@
-.. image:: custodian_logo.png
-   :width: 400px
-   :alt: Custodian
+![Custodian logo](custodian_logo.png)
 
 Custodian is a simple, robust and flexible just-in-time (JIT) job management
 framework written in Python. Using custodian, you can create wrappers that
@@ -23,11 +21,9 @@ The current version of Custodian also comes with several sub-packages for error
 handling for Vienna Ab Initio Simulation Package (VASP), NwChem, QChem, FEFF, Lobster and CP2K
 calculations.
 
-Getting custodian
-=================
+# Getting custodian
 
-Stable version
---------------
+## Stable version
 
 The version at the Python Package Index (PyPI) is always the latest stable
 release that will be hopefully, be relatively bug-free. Install as follows::
@@ -37,37 +33,37 @@ release that will be hopefully, be relatively bug-free. Install as follows::
 Some plugins (e.g., vasp management) require additional setup (please see
 `pymatgen's documentation <http://pymatgen.org/>`_).
 
-Developmental version
----------------------
+## Developmental version
 
 The bleeding edge developmental version is at the custodian's `Github repo
 <https://github.com/materialsproject/custodian>`_. The developmental
 version is likely to be more buggy, but may contain new features. The
 Github version include test files as well for complete unit testing. After
-cloning the source, you can type::
+cloning the source, you can type
 
-    python setup.py install
+```bash
+python setup.py install
+```
 
 or to install the package in developmental mode::
 
-    python setup.py develop
+```bash
+python setup.py develop
+```
 
-Requirements
-============
+# Requirements
 
 Custodian supports Python 3.8+. There are no other required dependencies.
 However, if you wish to use many of the built-in error handlers and Jobs for
 VASP, NWChem, QChem, etc., you will likely need pymatgen to be install as well.
 
-Usage
-=====
+# Usage
 
 Please refer to the `official custodian docs
 <http://pythonhosted.org//custodian>`_ for details on how to use
 custodian.
 
-How to cite custodian
-=====================
+# How to cite custodian
 
 If you use custodian in your research, especially the VASP component, please
 consider citing the following work:
@@ -79,29 +75,30 @@ consider citing the following work:
     Materials Science, 2013, 68, 314-319. `doi:10.1016/j.commatsci.2012.10.028
     <http://dx.doi.org/10.1016/j.commatsci.2012.10.028>`_
 
-License
-=======
+# License
 
 Custodian is released under the MIT License. The terms of the license are as
-follows::
+follows:
 
-    The MIT License (MIT)
-    Copyright (c) 2011-2012 MIT & LBNL
+```txt
+The MIT License (MIT)
+Copyright (c) 2011-2012 MIT & LBNL
 
-    Permission is hereby granted, free of charge, to any person obtaining a
-    copy of this software and associated documentation files (the "Software"),
-    to deal in the Software without restriction, including without limitation
-    the rights to use, copy, modify, merge, publish, distribute, sublicense,
-    and/or sell copies of the Software, and to permit persons to whom the
-    Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
 
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-    DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+```
