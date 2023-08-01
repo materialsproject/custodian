@@ -1,5 +1,6 @@
 import os
 import shutil
+import unittest
 from unittest import TestCase
 
 from pymatgen.io.qchem.inputs import QCInput
@@ -20,7 +21,13 @@ test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files
 scr_dir = os.path.join(test_dir, "scr")
 cwd = os.getcwd()
 
+try:
+    from openbabel import openbabel as ob
+except ImportError:
+    ob = None
 
+
+@unittest.skipIf(ob is None, "openbabel not installed")
 class QChemErrorHandlerTest(TestCase):
     def setUp(self):
         os.makedirs(scr_dir)

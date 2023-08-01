@@ -1,5 +1,6 @@
 import os
 import shutil
+import unittest
 from unittest import TestCase
 
 try:
@@ -28,6 +29,13 @@ scr_dir = os.path.join(test_dir, "scr")
 cwd = os.getcwd()
 
 
+try:
+    from openbabel import openbabel as ob
+except ImportError:
+    ob = None
+
+
+@unittest.skipIf(ob is None, "openbabel not installed")
 class QCJobTest(TestCase):
     def setUp(self):
         os.makedirs(scr_dir)

@@ -18,9 +18,9 @@ __date__ = "3/26/18"
 __credits__ = "Xiaohui Qu"
 
 try:
-    from openbabel import openbabel as ob  # noqa: F401
+    from openbabel import openbabel as ob
 except ImportError:
-    raise RuntimeError("ERROR: Openbabel must be installed in order to use Q-Chem Custodian!")
+    ob = None
 
 
 class QChemErrorHandler(ErrorHandler):

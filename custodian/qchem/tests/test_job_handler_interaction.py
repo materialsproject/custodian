@@ -1,5 +1,6 @@
 import os
 import shutil
+import unittest
 from unittest import TestCase
 
 from pymatgen.io.qchem.inputs import QCInput
@@ -22,7 +23,13 @@ test_dir = os.path.join(
 scr_dir = os.path.join(test_dir, "scr")
 cwd = os.getcwd()
 
+try:
+    from openbabel import openbabel as ob
+except ImportError:
+    ob = None
 
+
+@unittest.skipIf(ob is None, "openbabel not installed")
 class FFopt_job_handler_interaction(TestCase):
     def _check_equivalent_inputs(self, input1, input2):
         QCinput1 = QCInput.from_file(input1)

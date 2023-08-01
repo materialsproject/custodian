@@ -25,9 +25,9 @@ __date__ = "3/20/18"
 __credits__ = "Xiaohui Qu"
 
 try:
-    from openbabel import openbabel as ob  # noqa: F401
+    from openbabel import openbabel as ob
 except ImportError:
-    raise RuntimeError("ERROR: Openbabel must be installed in order to use Q-Chem Custodian!")
+    ob = None
 
 
 class QCJob(Job):
@@ -65,6 +65,8 @@ class QCJob(Job):
             backup (bool): Whether to backup the initial input file. If True, the
                 input will be copied with a ".orig" appended. Defaults to True.
         """
+        if ob is None:
+            raise RuntimeError("ERROR: Openbabel must be installed in order to use Q-Chem Custodian!")
         try:
             self.qchem_command = qchem_command.split(" ")
         except AttributeError:
