@@ -3,8 +3,7 @@
 [![Linting](https://github.com/materialsproject/custodian/workflows/Linting/badge.svg)](https://github.com/materialsproject/custodian/workflows/Linting/badge.svg)
 [![Testing](https://github.com/materialsproject/custodian/actions/workflows/pytest.yml/badge.svg)](https://github.com/materialsproject/custodian/actions/workflows/pytest.yml)
 [![Downloads](https://pepy.tech/badge/custodian)](https://pepy.tech/project/custodian)
-[![codecov](https://codecov.io/gh/materialsproject/custodian/branch/main/graph/badge.svg?token=3V3O79GODQ)](https://codecov.io/gh/materialsproject/custodian)
-
+[![codecov](https://codecov.io/gh/materialsproject/custodian/branch/master/graph/badge.svg?token=OwDQVJnghu)](https://codecov.io/gh/materialsproject/custodian)
 
 Custodian is a simple, robust and flexible just-in-time (JIT) job management
 framework written in Python. Using custodian, you can create wrappers that
@@ -31,21 +30,20 @@ calculations.
 
 ## Stable version
 
-The version at the Python Package Index (PyPI) is always the latest stable
-release that will be hopefully, be relatively bug-free. Install as follows::
+The version at the Python Package Index (PyPI) is always the latest stable release that will be hopefully, be
+relatively bug-free. Install as follows:
 
-    pip install custodian
+```shell
+pip install custodian
+```
 
-Some plugins (e.g., vasp management) require additional setup (please see
-`pymatgen's documentation <http://pymatgen.org/>`_).
+Some plugins (e.g., vasp management) require additional setup (please see [pymatgen docs]).
 
 ## Developmental version
 
-The bleeding edge developmental version is at the custodian's `Github repo
-<https://github.com/materialsproject/custodian>`_. The developmental
-version is likely to be more buggy, but may contain new features. The
-Github version include test files as well for complete unit testing. After
-cloning the source, you can type
+The bleeding edge developmental version is at the custodian's [Github repo](https://github.com/materialsproject/custodian). The developmental
+version is likely to be more buggy, but may contain new features. The Github version include test files as well for
+complete unit testing. After cloning the source, you can type
 
 ```bash
 python setup.py install
@@ -59,14 +57,12 @@ python setup.py develop
 
 # Requirements
 
-Custodian supports Python 3.8+. There are no other required dependencies.
-However, if you wish to use many of the built-in error handlers and Jobs for
-VASP, NWChem, QChem, etc., you will likely need pymatgen to be install as well.
+Custodian supports Python 3.8+. There are no other required dependencies. However, if you wish to use many of the
+built-in error handlers and Jobs for VASP, NWChem, QChem, etc., you will likely need pymatgen to be installed as well.
 
 # Usage
 
-Please refer to the `official custodian docs
-<http://pythonhosted.org/custodian>`_ for details on how to use
+Please refer to the official [custodian docs] for details on how to use
 custodian.
 
 # How to cite custodian
@@ -74,12 +70,13 @@ custodian.
 If you use custodian in your research, especially the VASP component, please
 consider citing the following work:
 
-    Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Geoffroy Hautier,
-    Michael Kocher, Shreyas Cholia, Dan Gunter, Vincent Chevrier, Kristin A.
-    Persson, Gerbrand Ceder. *Python Materials Genomics (pymatgen) : A Robust,
-    Open-Source Python Library for Materials Analysis.* Computational
-    Materials Science, 2013, 68, 314-319. `doi:10.1016/j.commatsci.2012.10.028
-    <http://dx.doi.org/10.1016/j.commatsci.2012.10.028>`_
+```
+Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Geoffroy Hautier,
+Michael Kocher, Shreyas Cholia, Dan Gunter, Vincent Chevrier, Kristin A.
+Persson, Gerbrand Ceder. *Python Materials Genomics (pymatgen) : A Robust,
+Open-Source Python Library for Materials Analysis.* Computational
+Materials Science, 2013, 68, 314-319. doi:10.1016/j.commatsci.2012.10.028
+```
 
 # License
 
@@ -108,3 +105,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 ```
+
+[pymatgen docs]: http://pymatgen.org/
+[custodian docs]: https://materialsproject.github.io/custodian/
