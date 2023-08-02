@@ -1,11 +1,8 @@
 title: custodian
 email: ongsp@ucsd.edu
 description: >- # this means to ignore newlines until "baseurl:"
-  Python Materials Genomics (custodian) is a robust materials analysis code that
-  defines classes for structures and molecules with support for many electronic
-  structure codes. It powers the Materials Project.
-baseurl: ""
-url: https://custodian.org
+  Custodian is a simple, robust and flexible just-in-time (JIT) job management
+  framework written in Python.
 # twitter_username: custodian
 github_username: materialsproject
 
