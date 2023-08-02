@@ -22,42 +22,24 @@ NEW_VER = datetime.datetime.today().strftime("%Y.%-m.%-d")
 
 @task
 def make_doc(ctx):
-    with cd("docs_rst"):
-        ctx.run("sphinx-apidoc -d 6 -o . -f ../custodian")
-        ctx.run("rm custodian*.tests.rst")
-        for file in glob.glob("*.rst"):
-            if file.startswith("custodian") and file.endswith("rst"):
-                newoutput = []
-                suboutput = []
-                subpackage = False
-                with open(file) as fid:
-                    for line in fid:
-                        clean = line.strip()
-                        if clean == "Subpackages":
-                            subpackage = True
-                        if not subpackage and not clean.endswith("tests"):
-                            newoutput.append(line)
-                        else:
-                            if not clean.endswith("tests"):
-                                suboutput.append(line)
-                            if clean.startswith("custodian") and not clean.endswith("tests"):
-                                newoutput.extend(suboutput)
-                                subpackage = False
-                                suboutput = []
-
-                with open(file, "w") as fid:
-                    fid.write("".join(newoutput))
-        ctx.run("make html")
-        # ctx.run("cp _static/* _build/html/_static")
-
     with cd("docs"):
-        ctx.run("cp -r html/* .")
-        ctx.run("rm -r html")
-        ctx.run("rm -r doctrees")
-        ctx.run("rm -r _sources")
-
-        # Avoid the use of jekyll so that _dir works as intended.
-        ctx.run("touch .nojekyll")
+        ctx.run("touch index.rst")
+        ctx.run("rm custodian.*.rst", warn=True)
+        ctx.run("sphinx-apidoc --separate -P -M -d 7 -o . -f ../custodian")
+        ctx.run("sphinx-build -M markdown . .")
+        ctx.run("rm *.rst", warn=True)
+        ctx.run("cp markdown/custodian*.md .")
+        ctx.run("rm custodian*tests*.md")
+        for fn in glob.glob("custodian*.md"):
+            with open(fn) as f:
+                lines = [line.rstrip() for line in f if "Submodules" not in line]
+            if fn == "custodian.md":
+                preamble = ["---", "layout: default", "title: API Documentation", "nav_order: 6", "---", ""]
+            else:
+                preamble = ["---", "layout: default", "title: " + fn, "nav_exclude: true", "---", ""]
+            with open(fn, "w") as f:
+                f.write("\n".join(preamble + lines))
+        ctx.run("rm -r markdown", warn=True)
 
 
 @task
@@ -138,16 +120,16 @@ def update_changelog(ctx, version=None, sim=False):
                         break
                     lines.append(f"    {ll}")
         misc.append(line)
-    with open("docs_rst/changelog.rst") as f:
+    with open("docs_rst/changelog.md") as f:
         contents = f.read()
     line = "=========="
     toks = contents.split(line)
     head = f"\n\nv{version}\n" + "-" * (len(version) + 1) + "\n"
     toks.insert(-1, head + "\n".join(lines))
     if not sim:
-        with open("docs_rst/changelog.rst", "w") as f:
+        with open("docs_rst/changelog.md", "w") as f:
             f.write(toks[0] + line + "".join(toks[1:]))
-        ctx.run("open docs_rst/changelog.rst")
+        ctx.run("open docs_rst/changelog.md")
     else:
         print(toks[0] + line + "".join(toks[1:]))
     print("The following commit messages were not included...")
