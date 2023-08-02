@@ -66,7 +66,7 @@ VASP, NWChem, QChem, etc., you will likely need pymatgen to be install as well.
 # Usage
 
 Please refer to the `official custodian docs
-<http://pythonhosted.org//custodian>`_ for details on how to use
+<http://pythonhosted.org/custodian>`_ for details on how to use
 custodian.
 
 # How to cite custodian
