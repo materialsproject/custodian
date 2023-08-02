@@ -25,11 +25,11 @@ def make_doc(ctx):
     with cd("docs"):
         ctx.run("touch index.rst")
         ctx.run("rm custodian.*.rst", warn=True)
-        ctx.run("sphinx-apidoc --separate -P -M -d 7 -o . -f ../custodian")
+        ctx.run("sphinx-apidoc --separate -P -M -d 7 -o . -f ../custodian  ../**/tests/*")
         ctx.run("sphinx-build -M markdown . .")
         ctx.run("rm *.rst", warn=True)
         ctx.run("cp markdown/custodian*.md .")
-        ctx.run("rm custodian*tests*.md")
+        ctx.run("rm custodian*tests*.md", warn=True)
         for fn in glob.glob("custodian*.md"):
             with open(fn) as f:
                 lines = [line.rstrip() for line in f if "Submodules" not in line]
@@ -39,7 +39,7 @@ def make_doc(ctx):
                 preamble = ["---", "layout: default", "title: " + fn, "nav_exclude: true", "---", ""]
             with open(fn, "w") as f:
                 f.write("\n".join(preamble + lines))
-        ctx.run("rm -r markdown", warn=True)
+        ctx.run("rm -r markdown doctrees", warn=True)
 
 
 @task
