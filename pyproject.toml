@@ -46,7 +46,6 @@ ignore = [
   "PD011",   # pandas-use-of-dot-values
   "PD901",   # pandas-df-variable-name
   "PERF203", # try-except-in-loop
-  "PERF401", # manual-list-comprehension (TODO fix these or wait for autofix)
   "PLR",     # pylint refactor
   "PLW2901", # Outer for loop variable overwritten by inner assignment target
   "PT013",   # pytest-incorrect-pytest-import
@@ -82,12 +81,12 @@ exclude_lines = [
   "@deprecated",
   "def __repr__",
   "if 0:",
+  "if TYPE_CHECKING:",
   "if __name__ == .__main__.:",
   "if self.debug:",
   "if settings.DEBUG",
+  "input",
   "pragma: no cover",
   "raise AssertionError",
   "raise NotImplementedError",
-  "input",
-  "if TYPE_CHECKING:"
 ]
