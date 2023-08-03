@@ -778,14 +778,11 @@ class VaspNEBJob(VaspJob):
         self.gamma_vasp_cmd = tuple(gamma_vasp_cmd) if gamma_vasp_cmd else None
         self.auto_continue = auto_continue
         self.settings_override = settings_override
-        self.neb_dirs = []  # 00, 01, etc.
-        self.neb_sub = []  # 01, 02, etc.
 
-        for path in os.listdir("."):
-            if os.path.isdir(path) and path.isdigit():
-                self.neb_dirs.append(path)
-        self.neb_dirs = sorted(self.neb_dirs)
-        self.neb_sub = self.neb_dirs[1:-1]
+        self.neb_dirs = sorted(  # 00, 01, etc.
+            path for path in os.listdir(".") if os.path.isdir(path) and path.isdigit()
+        )
+        self.neb_sub = self.neb_dirs[1:-1]  # 01, 02, etc.
 
     def setup(self):
         """

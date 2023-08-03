@@ -75,20 +75,15 @@ def test(ctx):
 
 @task
 def set_ver(ctx):
-    lines = []
     with open("custodian/__init__.py") as file:
-        for line in file:
-            if "__version__" in line:
-                lines.append(f'__version__ = "{NEW_VER}"')
-            else:
-                lines.append(line.rstrip())
+        lines = [f'__version__ = "{NEW_VER}"' if "__version__" in line else line.rstrip() for line in file]
+
     with open("custodian/__init__.py", "w") as file:
         file.write("\n".join(lines) + "\n")
 
-    lines = []
     with open("setup.py") as file:
-        for line in file:
-            lines.append(re.sub(r"version=([^,]+),", f'version="{NEW_VER}",', line.rstrip()))
+        lines = [re.sub(r"version=([^,]+),", f'version="{NEW_VER}",', line.rstrip()) for line in file]
+
     with open("setup.py", "w") as file:
         file.write("\n".join(lines) + "\n")
 
