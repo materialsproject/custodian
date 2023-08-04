@@ -227,12 +227,12 @@ class VaspErrorHandler(ErrorHandler):
                     actions.append({"dict": "INCAR", "action": {"_unset": {"IMIX": 1}}})
                 self.error_count["brmix"] += 1
 
-            elif self.error_count["brmix"] in [2, 3]:
-                if vi["KPOINTS"] is not None and vi["KPOINTS"].style == Kpoints.supported_modes.Gamma:
-                    actions.append({"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma"}}})
-                elif vi["INCAR"].get("KSPACING"):
-                    actions.append({"dict": "INCAR", "action": {"_set": {"KGAMMA": True}}})
-
+            elif (
+                self.error_count["brmix"] in [2, 3]
+                and vi["KPOINTS"] is not None
+                and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst
+            ):
+                actions.append({"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma"}}})
                 if "IMIX" in vi["INCAR"]:
                     actions.append({"dict": "INCAR", "action": {"_unset": {"IMIX": 1}}})
                 self.error_count["brmix"] += 1
@@ -249,6 +249,9 @@ class VaspErrorHandler(ErrorHandler):
                             "action": {"_set": {"kpoints": new_kpts}},
                         }
                     )
+
+            elif self.error_count["brmix"] in [2, 3] and vi["INCAR"].get("KSPACING"):
+                actions.append({"dict": "INCAR", "action": {"_set": {"KGAMMA": True}}})
 
             else:
                 if vi["INCAR"].get("ISYM", 2) > 0:
