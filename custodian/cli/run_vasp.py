@@ -99,7 +99,7 @@ def get_jobs(args):
                 ]
             )
             auto_npar = False
-        elif job_type.startswith("static") and vinput["KPOINTS"] is not None:
+        elif job_type.startswith("static") and vinput["KPOINTS"]:
             m = [i * args.static_kpoint for i in vinput["KPOINTS"].kpts[0]]
             settings.extend(
                 [

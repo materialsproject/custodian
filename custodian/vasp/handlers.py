@@ -214,7 +214,7 @@ class VaspErrorHandler(ErrorHandler):
 
             elif (
                 self.error_count["brmix"] == 2
-                and vi["KPOINTS"] is not None
+                and vi["KPOINTS"]
                 and vi["KPOINTS"].style == Kpoints.supported_modes.Gamma
             ):
                 actions.append(
@@ -229,7 +229,7 @@ class VaspErrorHandler(ErrorHandler):
 
             elif (
                 self.error_count["brmix"] in [2, 3]
-                and vi["KPOINTS"] is not None
+                and vi["KPOINTS"]
                 and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst
             ):
                 actions.append({"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma"}}})
@@ -237,11 +237,7 @@ class VaspErrorHandler(ErrorHandler):
                     actions.append({"dict": "INCAR", "action": {"_unset": {"IMIX": 1}}})
                 self.error_count["brmix"] += 1
 
-                if (
-                    vi["KPOINTS"] is not None
-                    and vi["KPOINTS"].num_kpts < 1
-                    and all(n % 2 == 0 for n in vi["KPOINTS"].kpts[0])
-                ):
+                if vi["KPOINTS"] and vi["KPOINTS"].num_kpts < 1 and all(n % 2 == 0 for n in vi["KPOINTS"].kpts[0]):
                     new_kpts = (tuple(n + 1 for n in vi["KPOINTS"].kpts[0]),)
                     actions.append(
                         {
@@ -256,14 +252,14 @@ class VaspErrorHandler(ErrorHandler):
             else:
                 if vi["INCAR"].get("ISYM", 2) > 0:
                     actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
-                if vi["KPOINTS"] is not None and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                if vi["KPOINTS"] and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
                     actions.append(
                         {
                             "dict": "KPOINTS",
                             "action": {"_set": {"generation_style": "Gamma"}},
                         }
                     )
-                if vi["KPOINTS"] is not None and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                if vi["KPOINTS"] and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
                     actions.append(
                         {
                             "dict": "KPOINTS",
@@ -334,7 +330,7 @@ class VaspErrorHandler(ErrorHandler):
 
         if (
             self.errors.intersection(["tetirr", "incorrect_shift"])
-            and vi["KPOINTS"] is not None
+            and vi["KPOINTS"]
             and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst
         ):
             actions.append(
@@ -345,7 +341,7 @@ class VaspErrorHandler(ErrorHandler):
             )
 
         if "rot_matrix" in self.errors:
-            if vi["KPOINTS"] is not None and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+            if vi["KPOINTS"] and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
                 actions.append(
                     {
                         "dict": "KPOINTS",
@@ -754,7 +750,7 @@ class StdErrHandler(ErrorHandler):
         if "kpoints_trans" in self.errors and self.error_count["kpoints_trans"] == 0:
             m = reduce(operator.mul, vi["KPOINTS"].kpts[0])
             m = max(int(round(m ** (1 / 3))), 1)
-            if vi["KPOINTS"] is not None and vi["KPOINTS"].style.name.lower().startswith("m"):
+            if vi["KPOINTS"] and vi["KPOINTS"].style.name.lower().startswith("m"):
                 m += m % 2
             actions.append({"dict": "KPOINTS", "action": {"_set": {"kpoints": [[m] * 3]}}})
             self.error_count["kpoints_trans"] += 1
@@ -985,7 +981,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         # if symmetry is off
         # Also disregard if automatic KPOINT generation is used
         if (not vi["INCAR"].get("ISYM", True)) or (
-            vi["KPOINTS"] is not None and vi["KPOINTS"].style == Kpoints.supported_modes.Automatic
+            vi["KPOINTS"] and vi["KPOINTS"].style == Kpoints.supported_modes.Automatic
         ):
             return False
 
@@ -1008,7 +1004,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
         m = reduce(operator.mul, vi["KPOINTS"].kpts[0])
         m = max(int(round(m ** (1 / 3))), 1)
-        if vi["KPOINTS"] is not None and vi["KPOINTS"].style.name.lower().startswith("m"):
+        if vi["KPOINTS"] and vi["KPOINTS"].style.name.lower().startswith("m"):
             m += m % 2
         actions = [{"dict": "KPOINTS", "action": {"_set": {"kpoints": [[m] * 3]}}}]
         VaspModder(vi=vi).apply_actions(actions)
