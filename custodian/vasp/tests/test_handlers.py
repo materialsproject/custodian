@@ -411,7 +411,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         assert h.check() is True
         assert h.correct()["errors"] == ["bravais"]
         i = Incar.from_file("INCAR")
-        assert i["SYMPREC"] == 1e-05
+        assert i["SYMPREC"] == 1e-6
 
     def test_posmap(self):
         h = VaspErrorHandler("vasp.posmap")
@@ -702,6 +702,15 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         h2 = UnconvergedErrorHandler.from_dict(h.as_dict())
         assert type(h2) == UnconvergedErrorHandler
         assert h2.output_filename == "random_name.xml"
+
+    def test_correct_normal_with_condition(self):
+        shutil.copy("vasprun.xml.electronic_normal", "vasprun.xml")  # Reuse an existing file
+        h = UnconvergedErrorHandler()
+        assert h.check()
+        d = h.correct()
+        assert d["errors"] == ["Unconverged"]
+        assert d == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
+        os.remove("vasprun.xml")
 
     @classmethod
     def tearDown(cls):
