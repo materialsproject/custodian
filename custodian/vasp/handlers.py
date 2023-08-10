@@ -578,13 +578,19 @@ class VaspErrorHandler(ErrorHandler):
 
         if "bravais" in self.errors:
             # VASP recommends refining the lattice parameters or changing SYMPREC.
-            # Appears to occurs when SYMPREC is very low, so we will change it to
-            # the default if it's not already. If it's the default, we will x 10.
-            symprec = vi["INCAR"].get("SYMPREC", 1e-5)
-            if symprec < 1e-5:
-                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-5}}})
-            else:
+            # Appears to occur when SYMPREC is very low, so we change it to
+            # the default if it's not already. If it's the default, we x10.
+            vasp_recommended_symprec = 1e-6  # https://www.vasp.at/forum/viewtopic.php?f=3&t=19109
+            symprec = vi["INCAR"].get("SYMPREC", vasp_recommended_symprec)
+            if symprec < vasp_recommended_symprec:
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": vasp_recommended_symprec}}})
+            elif symprec < 1e-4:
+                # try 10xing symprec twice, then set ISYM=0 to not impose potentially artificial symmetry from
+                # too loose symprec on charge density
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": symprec * 10}}})
+            else:
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+            self.error_count["bravais"] += 1
 
         if "nbands_not_sufficient" in self.errors:
             # There is something very wrong about the value of NBANDS. We don't make
