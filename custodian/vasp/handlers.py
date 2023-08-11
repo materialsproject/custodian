@@ -7,14 +7,13 @@ by modifying the input files.
 import datetime
 import logging
 import multiprocessing
-import operator
 import os
 import re
 import shutil
 import time
 import warnings
 from collections import Counter
-from functools import reduce
+from math import prod
 
 import numpy as np
 from monty.os.path import zpath
@@ -178,16 +177,27 @@ class VaspErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
 
         if self.errors.intersection(["tet", "dentet"]):
-            if vi["INCAR"].get("KSPACING"):
-                # decrease KSPACING by 20% in each direction (approximately double no. of kpoints)
-                actions.append(
-                    {
-                        "dict": "INCAR",
-                        "action": {"_set": {"KSPACING": vi["INCAR"].get("KSPACING") * 0.8}},
-                    }
-                )
+            # follow advice in this thread
+            # https://vasp.at/forum/viewtopic.php?f=3&t=416&p=4047&hilit=dentet#p4047
+            err_type = "tet" if "tet" in self.errors else "dentet"
+            if self.error_count[err_type] == 0:
+                if vi["INCAR"].get("KSPACING"):
+                    # decrease KSPACING by 20% in each direction (approximately double no. of kpoints)
+                    action = {"_set": {"KSPACING": vi["INCAR"].get("KSPACING") * 0.8}}
+                    actions.append({"dict": "INCAR", "action": action})
+                elif vi["KPOINTS"] and vi["KPOINTS"].num_kpts < 1:
+                    # increase KPOINTS by 20% in each direction (approximately double no. of kpoints)
+                    new_kpts = tuple(int(round(num * 1.2, 0)) for num in vi["KPOINTS"].kpts[0])
+                    actions.append({"dict": "KPOINTS", "action": {"_set": {"kpoints": (new_kpts,)}}})
+                elif vi["KPOINTS"] and vi["KPOINTS"].num_kpts >= 1:
+                    n_kpts = vi["KPOINTS"].num_kpts * 1.2
+                    new_kpts = tuple([int(round(n_kpts**1 / 3, 0))] * 3)
+                    actions.append(
+                        {"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma", "kpoints": (new_kpts,)}}}
+                    )
             else:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+            self.error_count[err_type] += 1
 
         if "inv_rot_mat" in self.errors and vi["INCAR"].get("SYMPREC", 1e-5) > 1e-8:
             actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8}}})
@@ -342,12 +352,8 @@ class VaspErrorHandler(ErrorHandler):
 
         if "rot_matrix" in self.errors:
             if vi["KPOINTS"] and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
-                actions.append(
-                    {
-                        "dict": "KPOINTS",
-                        "action": {"_set": {"generation_style": "Gamma"}},
-                    }
-                )
+                action = {"_set": {"generation_style": "Gamma"}}
+                actions.append({"dict": "KPOINTS", "action": action})
             elif vi["INCAR"].get("ISYM", 2) > 0:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
@@ -478,6 +484,7 @@ class VaspErrorHandler(ErrorHandler):
             if vi["INCAR"].get("ICHARG", 0) < 10:
                 actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
                 actions.append({"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}})
+            self.error_count["eddrmm"] += 1
 
         if "edddav" in self.errors:
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
@@ -578,13 +585,19 @@ class VaspErrorHandler(ErrorHandler):
 
         if "bravais" in self.errors:
             # VASP recommends refining the lattice parameters or changing SYMPREC.
-            # Appears to occurs when SYMPREC is very low, so we will change it to
-            # the default if it's not already. If it's the default, we will x 10.
-            symprec = vi["INCAR"].get("SYMPREC", 1e-5)
-            if symprec < 1e-5:
-                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-5}}})
-            else:
+            # Appears to occur when SYMPREC is very low, so we change it to
+            # the default if it's not already. If it's the default, we x10.
+            vasp_recommended_symprec = 1e-6  # https://www.vasp.at/forum/viewtopic.php?f=3&t=19109
+            symprec = vi["INCAR"].get("SYMPREC", vasp_recommended_symprec)
+            if symprec < vasp_recommended_symprec:
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": vasp_recommended_symprec}}})
+            elif symprec < 1e-4:
+                # try 10xing symprec twice, then set ISYM=0 to not impose potentially artificial symmetry from
+                # too loose symprec on charge density
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": symprec * 10}}})
+            else:
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+            self.error_count["bravais"] += 1
 
         if "nbands_not_sufficient" in self.errors:
             # There is something very wrong about the value of NBANDS. We don't make
@@ -748,7 +761,7 @@ class StdErrHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
 
         if "kpoints_trans" in self.errors and self.error_count["kpoints_trans"] == 0:
-            m = reduce(operator.mul, vi["KPOINTS"].kpts[0])
+            m = prod(vi["KPOINTS"].kpts[0])
             m = max(int(round(m ** (1 / 3))), 1)
             if vi["KPOINTS"] and vi["KPOINTS"].style.name.lower().startswith("m"):
                 m += m % 2
@@ -1002,7 +1015,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         """Perform corrections."""
         backup(VASP_BACKUP_FILES | {self.output_filename})
         vi = VaspInput.from_directory(".")
-        m = reduce(operator.mul, vi["KPOINTS"].kpts[0])
+        m = prod(vi["KPOINTS"].kpts[0])
         m = max(int(round(m ** (1 / 3))), 1)
         if vi["KPOINTS"] and vi["KPOINTS"].style.name.lower().startswith("m"):
             m += m % 2
@@ -1080,7 +1093,7 @@ class UnconvergedErrorHandler(ErrorHandler):
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
                 elif algo == "fast":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
-                elif algo == "normal":
+                elif algo == "normal" and (v.incar.get("ISMEAR", -1) >= 0 or not 50 <= v.incar.get("IALGO", 38) <= 59):
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
                 else:
                     # Try mixing as last resort

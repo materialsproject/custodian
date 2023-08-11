@@ -96,6 +96,11 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h.check()
         d = h.correct()
         assert d["errors"] == ["tet"]
+        assert d["actions"] == [{"action": {"_set": {"kpoints": ((10, 2, 2),)}}, "dict": "KPOINTS"}]
+
+        h.check()
+        d = h.correct()
+        assert d["errors"] == ["tet"]
         assert d["actions"] == [{"action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}, "dict": "INCAR"}]
 
         h = VaspErrorHandler("vasp.teterror", errors_subset_to_catch=["eddrmm"])
@@ -139,6 +144,11 @@ class VaspErrorHandlerTest(unittest.TestCase):
 
     def test_dentet(self):
         h = VaspErrorHandler("vasp.dentet")
+        h.check()
+        d = h.correct()
+        assert d["errors"] == ["dentet"]
+        assert d["actions"] == [{"action": {"_set": {"kpoints": ((10, 2, 2),)}}, "dict": "KPOINTS"}]
+
         h.check()
         d = h.correct()
         assert d["errors"] == ["dentet"]
@@ -411,7 +421,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         assert h.check() is True
         assert h.correct()["errors"] == ["bravais"]
         i = Incar.from_file("INCAR")
-        assert i["SYMPREC"] == 1e-05
+        assert i["SYMPREC"] == 1e-6
 
     def test_posmap(self):
         h = VaspErrorHandler("vasp.posmap")
@@ -487,10 +497,18 @@ class VaspErrorHandlerTest(unittest.TestCase):
         # the BZINT error message is formatted differently in VASP6 compared to VASP5
         h = VaspErrorHandler("vasp6.bzint")
         assert h.check() is True
+        d = h.correct()
+        assert d["errors"] == ["tet"]
+        incar = Incar.from_file("INCAR")
+        assert incar["ISMEAR"] == -5
+        assert incar["SIGMA"] == 0.05
+        assert d["actions"] == [{"action": {"_set": {"kpoints": ((10, 2, 2),)}}, "dict": "KPOINTS"}]
+
+        assert h.check() is True
         assert h.correct()["errors"] == ["tet"]
-        i = Incar.from_file("INCAR")
-        assert i["ISMEAR"] == 0
-        assert i["SIGMA"] == 0.05
+        incar = Incar.from_file("INCAR")
+        assert incar["ISMEAR"] == 0
+        assert incar["SIGMA"] == 0.05
 
     def test_too_large_kspacing(self):
         shutil.copy("INCAR.kspacing", "INCAR")
@@ -702,6 +720,15 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         h2 = UnconvergedErrorHandler.from_dict(h.as_dict())
         assert type(h2) == UnconvergedErrorHandler
         assert h2.output_filename == "random_name.xml"
+
+    def test_correct_normal_with_condition(self):
+        shutil.copy("vasprun.xml.electronic_normal", "vasprun.xml")  # Reuse an existing file
+        h = UnconvergedErrorHandler()
+        assert h.check()
+        d = h.correct()
+        assert d["errors"] == ["Unconverged"]
+        assert d == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
+        os.remove("vasprun.xml")
 
     @classmethod
     def tearDown(cls):

@@ -33,11 +33,11 @@ calculations.
 The version at the Python Package Index (PyPI) is always the latest stable release that will be hopefully, be
 relatively bug-free. Install as follows:
 
-```shell
+```sh
 pip install custodian
 ```
 
-Some plugins (e.g., vasp management) require additional setup (please see [pymatgen docs]).
+Some plugins (e.g., VASP management) require additional setup (please see [pymatgen docs]).
 
 ## Developmental version
 
@@ -45,13 +45,13 @@ The bleeding edge developmental version is at the custodian's [Github repo](http
 version is likely to be more buggy, but may contain new features. The Github version include test files as well for
 complete unit testing. After cloning the source, you can type
 
-```bash
+```sh
 python setup.py install
 ```
 
 or to install the package in developmental mode::
 
-```bash
+```sh
 python setup.py develop
 ```
 
