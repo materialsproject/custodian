@@ -96,6 +96,11 @@ class VaspErrorHandlerTest(unittest.TestCase):
         h.check()
         d = h.correct()
         assert d["errors"] == ["tet"]
+        assert d["actions"] == [{"action": {"_set": {"kpoints": ((10, 2, 2),)}}, "dict": "KPOINTS"}]
+
+        h.check()
+        d = h.correct()
+        assert d["errors"] == ["tet"]
         assert d["actions"] == [{"action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}, "dict": "INCAR"}]
 
         h = VaspErrorHandler("vasp.teterror", errors_subset_to_catch=["eddrmm"])
@@ -139,6 +144,11 @@ class VaspErrorHandlerTest(unittest.TestCase):
 
     def test_dentet(self):
         h = VaspErrorHandler("vasp.dentet")
+        h.check()
+        d = h.correct()
+        assert d["errors"] == ["dentet"]
+        assert d["actions"] == [{"action": {"_set": {"kpoints": ((10, 2, 2),)}}, "dict": "KPOINTS"}]
+
         h.check()
         d = h.correct()
         assert d["errors"] == ["dentet"]
@@ -487,10 +497,18 @@ class VaspErrorHandlerTest(unittest.TestCase):
         # the BZINT error message is formatted differently in VASP6 compared to VASP5
         h = VaspErrorHandler("vasp6.bzint")
         assert h.check() is True
+        d = h.correct()
+        assert d["errors"] == ["tet"]
+        incar = Incar.from_file("INCAR")
+        assert incar["ISMEAR"] == -5
+        assert incar["SIGMA"] == 0.05
+        assert d["actions"] == [{"action": {"_set": {"kpoints": ((10, 2, 2),)}}, "dict": "KPOINTS"}]
+
+        assert h.check() is True
         assert h.correct()["errors"] == ["tet"]
-        i = Incar.from_file("INCAR")
-        assert i["ISMEAR"] == 0
-        assert i["SIGMA"] == 0.05
+        incar = Incar.from_file("INCAR")
+        assert incar["ISMEAR"] == 0
+        assert incar["SIGMA"] == 0.05
 
     def test_too_large_kspacing(self):
         shutil.copy("INCAR.kspacing", "INCAR")
