@@ -991,9 +991,9 @@ class MeshSymmetryErrorHandler(ErrorHandler):
             return False
 
         # According to VASP admins, you can disregard this error
-        # if symmetry is off
+        # if symmetry is off (i.e. ISYM = -1 or 0)
         # Also disregard if automatic KPOINT generation is used
-        if (not vi["INCAR"].get("ISYM", True)) or (
+        if vi["INCAR"].get("ISYM", 2) <= 0 or (
             vi["KPOINTS"] and vi["KPOINTS"].style == Kpoints.supported_modes.Automatic
         ):
             return False
