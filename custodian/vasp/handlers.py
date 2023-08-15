@@ -841,18 +841,9 @@ class AliasingErrorHandler(ErrorHandler):
                     if grid_adjusted and "NGZ" in line:
                         actions.append({"dict": "INCAR", "action": {"_set": changes_dict}})
                         if vi["INCAR"].get("ICHARG", 0) < 10:
-                            actions.extend(
-                                [
-                                    {
-                                        "file": "CHGCAR",
-                                        "action": {"_file_delete": {"mode": "actual"}},
-                                    },
-                                    {
-                                        "file": "WAVECAR",
-                                        "action": {"_file_delete": {"mode": "actual"}},
-                                    },
-                                ]
-                            )
+                            delete_chgcar = {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}}
+                            delete_wavecar = {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}}
+                            actions.extend([delete_chgcar, delete_wavecar])
                         break
 
         if "aliasing_incar" in self.errors:
@@ -991,9 +982,9 @@ class MeshSymmetryErrorHandler(ErrorHandler):
             return False
 
         # According to VASP admins, you can disregard this error
-        # if symmetry is off
+        # if symmetry is off (i.e. ISYM = -1 or 0)
         # Also disregard if automatic KPOINT generation is used
-        if (not vi["INCAR"].get("ISYM", True)) or (
+        if vi["INCAR"].get("ISYM", 2) <= 0 or (
             vi["KPOINTS"] and vi["KPOINTS"].style == Kpoints.supported_modes.Automatic
         ):
             return False
@@ -1772,7 +1763,8 @@ class PositiveEnergyErrorHandler(ErrorHandler):
             actions = [{"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}}]
             VaspModder(vi=vi).apply_actions(actions)
             return {"errors": ["Positive energy"], "actions": actions}
-        if algo == "normal":
+        # decrease POTIM if ALGO is 'normal' and IBRION != -1 (i.e. it's not a static calculation)
+        if algo == "normal" and vi["INCAR"].get("IBRION", 1) > -1:
             potim = round(vi["INCAR"].get("POTIM", 0.5) / 2.0, 2)
             actions = [{"dict": "INCAR", "action": {"_set": {"POTIM": potim}}}]
             VaspModder(vi=vi).apply_actions(actions)
