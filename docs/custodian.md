@@ -23,7 +23,7 @@ framework written in Python.
 
 
 
-                * [custodian.ansible.tests.test_interpreter module](custodian.ansible.tests.test_interpreter.md)
+            * [custodian.ansible.tests.test_interpreter module](custodian.ansible.tests.test_interpreter.md)
 
 
 
@@ -102,61 +102,61 @@ framework written in Python.
 
 
 
-        * [custodian.cli.converge_geometry module](custodian.cli.converge_geometry.md)
+    * [custodian.cli.converge_geometry module](custodian.cli.converge_geometry.md)
 
 
-            * [`do_run()`](custodian.cli.converge_geometry.md#custodian.cli.converge_geometry.do_run)
+        * [`do_run()`](custodian.cli.converge_geometry.md#custodian.cli.converge_geometry.do_run)
 
 
-            * [`get_runs()`](custodian.cli.converge_geometry.md#custodian.cli.converge_geometry.get_runs)
+        * [`get_runs()`](custodian.cli.converge_geometry.md#custodian.cli.converge_geometry.get_runs)
 
 
-        * [custodian.cli.converge_kpoints module](custodian.cli.converge_kpoints.md)
+    * [custodian.cli.converge_kpoints module](custodian.cli.converge_kpoints.md)
 
 
-            * [`do_run()`](custodian.cli.converge_kpoints.md#custodian.cli.converge_kpoints.do_run)
+        * [`do_run()`](custodian.cli.converge_kpoints.md#custodian.cli.converge_kpoints.do_run)
 
 
-            * [`get_runs()`](custodian.cli.converge_kpoints.md#custodian.cli.converge_kpoints.get_runs)
+        * [`get_runs()`](custodian.cli.converge_kpoints.md#custodian.cli.converge_kpoints.get_runs)
 
 
-            * [`main()`](custodian.cli.converge_kpoints.md#custodian.cli.converge_kpoints.main)
+        * [`main()`](custodian.cli.converge_kpoints.md#custodian.cli.converge_kpoints.main)
 
 
-        * [custodian.cli.cstdn module](custodian.cli.cstdn.md)
+    * [custodian.cli.cstdn module](custodian.cli.cstdn.md)
 
 
-            * [`main()`](custodian.cli.cstdn.md#custodian.cli.cstdn.main)
+        * [`main()`](custodian.cli.cstdn.md#custodian.cli.cstdn.main)
 
 
-            * [`print_example()`](custodian.cli.cstdn.md#custodian.cli.cstdn.print_example)
+        * [`print_example()`](custodian.cli.cstdn.md#custodian.cli.cstdn.print_example)
 
 
-            * [`run()`](custodian.cli.cstdn.md#custodian.cli.cstdn.run)
+        * [`run()`](custodian.cli.cstdn.md#custodian.cli.cstdn.run)
 
 
-        * [custodian.cli.run_nwchem module](custodian.cli.run_nwchem.md)
+    * [custodian.cli.run_nwchem module](custodian.cli.run_nwchem.md)
 
 
-            * [`do_run()`](custodian.cli.run_nwchem.md#custodian.cli.run_nwchem.do_run)
+        * [`do_run()`](custodian.cli.run_nwchem.md#custodian.cli.run_nwchem.do_run)
 
 
-            * [`main()`](custodian.cli.run_nwchem.md#custodian.cli.run_nwchem.main)
+        * [`main()`](custodian.cli.run_nwchem.md#custodian.cli.run_nwchem.main)
 
 
-        * [custodian.cli.run_vasp module](custodian.cli.run_vasp.md)
+    * [custodian.cli.run_vasp module](custodian.cli.run_vasp.md)
 
 
-            * [`do_run()`](custodian.cli.run_vasp.md#custodian.cli.run_vasp.do_run)
+        * [`do_run()`](custodian.cli.run_vasp.md#custodian.cli.run_vasp.do_run)
 
 
-            * [`get_jobs()`](custodian.cli.run_vasp.md#custodian.cli.run_vasp.get_jobs)
+        * [`get_jobs()`](custodian.cli.run_vasp.md#custodian.cli.run_vasp.get_jobs)
 
 
-            * [`load_class()`](custodian.cli.run_vasp.md#custodian.cli.run_vasp.load_class)
+        * [`load_class()`](custodian.cli.run_vasp.md#custodian.cli.run_vasp.load_class)
 
 
-            * [`main()`](custodian.cli.run_vasp.md#custodian.cli.run_vasp.main)
+        * [`main()`](custodian.cli.run_vasp.md#custodian.cli.run_vasp.main)
 
 
 * [custodian.cp2k package](custodian.cp2k.md)
@@ -170,10 +170,10 @@ framework written in Python.
 
 
 
-                * [custodian.cp2k.tests.test_handlers module](custodian.cp2k.tests.test_handlers.md)
+            * [custodian.cp2k.tests.test_handlers module](custodian.cp2k.tests.test_handlers.md)
 
 
-                * [custodian.cp2k.tests.test_jobs module](custodian.cp2k.tests.test_jobs.md)
+            * [custodian.cp2k.tests.test_jobs module](custodian.cp2k.tests.test_jobs.md)
 
 
 
@@ -285,10 +285,10 @@ framework written in Python.
 
 
 
-                * [custodian.feff.tests.test_handler module](custodian.feff.tests.test_handler.md)
+            * [custodian.feff.tests.test_handler module](custodian.feff.tests.test_handler.md)
 
 
-                * [custodian.feff.tests.test_jobs module](custodian.feff.tests.test_jobs.md)
+            * [custodian.feff.tests.test_jobs module](custodian.feff.tests.test_jobs.md)
 
 
 
@@ -343,10 +343,10 @@ framework written in Python.
 
 
 
-                * [custodian.lobster.tests.test_handlers module](custodian.lobster.tests.test_handlers.md)
+            * [custodian.lobster.tests.test_handlers module](custodian.lobster.tests.test_handlers.md)
 
 
-                * [custodian.lobster.tests.test_jobs module](custodian.lobster.tests.test_jobs.md)
+            * [custodian.lobster.tests.test_jobs module](custodian.lobster.tests.test_jobs.md)
 
 
 
@@ -398,7 +398,7 @@ framework written in Python.
 
 
 
-                * [custodian.nwchem.tests.test_handlers module](custodian.nwchem.tests.test_handlers.md)
+            * [custodian.nwchem.tests.test_handlers module](custodian.nwchem.tests.test_handlers.md)
 
 
 
@@ -441,13 +441,13 @@ framework written in Python.
 
 
 
-                * [custodian.qchem.tests.test_handlers module](custodian.qchem.tests.test_handlers.md)
+            * [custodian.qchem.tests.test_handlers module](custodian.qchem.tests.test_handlers.md)
 
 
-                * [custodian.qchem.tests.test_job_handler_interaction module](custodian.qchem.tests.test_job_handler_interaction.md)
+            * [custodian.qchem.tests.test_job_handler_interaction module](custodian.qchem.tests.test_job_handler_interaction.md)
 
 
-                * [custodian.qchem.tests.test_jobs module](custodian.qchem.tests.test_jobs.md)
+            * [custodian.qchem.tests.test_jobs module](custodian.qchem.tests.test_jobs.md)
 
 
 
@@ -478,16 +478,16 @@ framework written in Python.
 
 
 
-                * [custodian.vasp.tests.conftest module](custodian.vasp.tests.conftest.md)
+            * [custodian.vasp.tests.conftest module](custodian.vasp.tests.conftest.md)
 
 
-                * [custodian.vasp.tests.test_handlers module](custodian.vasp.tests.test_handlers.md)
+            * [custodian.vasp.tests.test_handlers module](custodian.vasp.tests.test_handlers.md)
 
 
-                * [custodian.vasp.tests.test_jobs module](custodian.vasp.tests.test_jobs.md)
+            * [custodian.vasp.tests.test_jobs module](custodian.vasp.tests.test_jobs.md)
 
 
-                * [custodian.vasp.tests.test_validators module](custodian.vasp.tests.test_validators.md)
+            * [custodian.vasp.tests.test_validators module](custodian.vasp.tests.test_validators.md)
 
 
 
