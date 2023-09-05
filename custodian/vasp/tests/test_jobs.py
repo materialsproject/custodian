@@ -38,7 +38,7 @@ class VaspJobTest(unittest.TestCase):
         with cd(os.path.join(test_dir, "kspacing")), ScratchDir(".", copy_from_current_on_enter=True):
             v = VaspJob(["hello"], auto_npar=True)
             v.setup()
-            with self.assertRaises(FileNotFoundError):
+            with pytest.raises(FileNotFoundError):
                 # a FileNotFoundError indicates that v.run() tried to run
                 # subprocess.Popen(cmd, stdout=f_std, stderr=f_err) with
                 # cmd == "hello", so it successfully parsed the input file
