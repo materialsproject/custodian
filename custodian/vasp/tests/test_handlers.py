@@ -576,7 +576,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         d = h.correct()
         assert d["errors"] == ["eddiag"]
         # first check that no CONTCAR exists, only action should be updating INCAR
-        assert d["actions"] == [{"action": {"_set": {"ALGO": "Exact"}}, "dict": "INCAR"}]
+        assert d["actions"] == [{"action": {"_set": {"ALGO": "Normal"}}, "dict": "INCAR"}]
         
         # now copy CONTCAR and check that both CONTCAR->POSCAR and INCAR updates are included
         shutil.copy("CONTCAR.eddiag", "CONTCAR")
@@ -587,7 +587,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         print(d['actions'])
         assert d["actions"] == [
             {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}},
-            {"action": {"_set": {"ALGO": "Exact"}}, "dict": "INCAR"}
+            {"action": {"_set": {"ALGO": "Normal"}}, "dict": "INCAR"}
         ]
 
 class AliasingErrorHandlerTest(unittest.TestCase):

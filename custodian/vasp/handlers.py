@@ -547,8 +547,11 @@ class VaspErrorHandler(ErrorHandler):
                 is_contcar = False
             if is_contcar:
                 actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
-            if vi["INCAR"].get("ALGO", "Normal").lower() != "exact":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Exact"}}})
+            if vi["INCAR"].get("ALGO", "Normal").lower() == "fast":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
+            elif vi["INCAR"].get("ALGO", "Normal").lower() == "normal":
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "exact"}}})
+
 
         if "elf_kpar" in self.errors and vi["INCAR"].get("KPAR", 1) != 1:
             actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": 1}}})
