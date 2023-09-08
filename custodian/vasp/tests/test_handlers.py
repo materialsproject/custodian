@@ -559,6 +559,14 @@ class VaspErrorHandlerTest(unittest.TestCase):
         clean_dir()
         os.chdir(cwd)
 
+    def test_AMIN(self):
+        # Cell with at least one dimension >= 50 A, but AMIN > 0.01, and calculation not yet complete
+        h = VaspErrorHandler("vasp.amin")
+        h.check()
+        d = h.correct()
+        assert d["errors"] == ["amin"]
+        assert d["actions"] == [{"action": {"_set": {"AMIN": 0.01}}, "dict": "INCAR"}]
+
 
 class AliasingErrorHandlerTest(unittest.TestCase):
     def setUp(self):

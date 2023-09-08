@@ -199,6 +199,10 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
             self.error_count[err_type] += 1
 
+        # Missing AMIN error handler - previously, custodian would kill the job without letting it run if AMIN was flagged
+        if "amin" in self.errors and vi["INCAR"].get("AMIN", 0.1) > 0.01:
+            actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}})
+
         if "inv_rot_mat" in self.errors and vi["INCAR"].get("SYMPREC", 1e-5) > 1e-8:
             actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8}}})
 
@@ -643,7 +647,7 @@ class VaspErrorHandler(ErrorHandler):
                 # This time try the recovery below.
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
             #
-            # We will only hit the 2nd algo_teet error if the ALGO was changed back from Fast to All/Damped
+            # We will only hit the 2nd algo_tet error if the ALGO was changed back from Fast to All/Damped
             # by e.g. NonConvergingErrorHandler
             # NOTE this relies on self.errors being reset on empty set on every .check call
             if self.error_count["algo_tet"] > 0:
@@ -1053,9 +1057,8 @@ class UnconvergedErrorHandler(ErrorHandler):
 
             if (
                 v.incar.get("ISMEAR", -1) >= 0
-                or not 50 <= v.incar.get("IALGO", 38) <= 59
                 and v.incar.get("METAGGA", "--") != "--"
-                and algo != "all"
+                and (algo != "all" or (not 50 <= v.incar.get("IALGO", 38) <= 59))
             ):
                 # If meta-GGA, go straight to Algo = All only if ISMEAR is greater or equal 0.
                 # Algo = All is recommended in the VASP manual and some meta-GGAs explicitly
@@ -1084,7 +1087,7 @@ class UnconvergedErrorHandler(ErrorHandler):
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
                 elif algo == "fast":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
-                elif algo == "normal" and (v.incar.get("ISMEAR", -1) >= 0 or not 50 <= v.incar.get("IALGO", 38) <= 59):
+                elif (algo == "normal" or not 50 <= v.incar.get("IALGO", 38) <= 59) and v.incar.get("ISMEAR", -1) >= 0:
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
                 else:
                     # Try mixing as last resort
