@@ -91,6 +91,7 @@ class VaspErrorHandler(ErrorHandler):
         "grad_not_orth": ["EDWAV: internal error, the gradient is not orthogonal"],
         "nicht_konv": ["ERROR: SBESSELITER : nicht konvergent"],
         "zheev": ["ERROR EDDIAG: Call to routine ZHEEV failed!"],
+        "eddiag": ["ERROR in EDDIAG: call to ZHEEV/ZHEEVX/DSYEV/DSYEVX failed"],
         "elf_kpar": ["ELF: KPAR>1 not implemented"],
         "elf_ncl": ["WARNING: ELF not implemented for non collinear case"],
         "rhosyg": ["RHOSYG"],
@@ -538,7 +539,7 @@ class VaspErrorHandler(ErrorHandler):
                     UserWarning,
                 )
 
-        if "zheev" in self.errors:
+        if self.errors.intersection({'zheev','eddiag'}):
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
             try:
                 is_contcar = Poscar.from_file("CONTCAR")

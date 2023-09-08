@@ -559,14 +559,36 @@ class VaspErrorHandlerTest(unittest.TestCase):
         clean_dir()
         os.chdir(cwd)
 
-    def test_AMIN(self):
+    def test_amin(self):
         # Cell with at least one dimension >= 50 A, but AMIN > 0.01, and calculation not yet complete
+        shutil.copy("INCAR.amin", "INCAR")
         h = VaspErrorHandler("vasp.amin")
         h.check()
         d = h.correct()
         assert d["errors"] == ["amin"]
         assert d["actions"] == [{"action": {"_set": {"AMIN": 0.01}}, "dict": "INCAR"}]
 
+    def test_eddiag(self):
+        # subspace rotation error
+        os.remove("CONTCAR")
+        h = VaspErrorHandler("vasp.eddiag")
+        h.check()
+        d = h.correct()
+        assert d["errors"] == ["eddiag"]
+        # first check that no CONTCAR exists, only action should be updating INCAR
+        assert d["actions"] == [{"action": {"_set": {"ALGO": "Exact"}}, "dict": "INCAR"}]
+        
+        # now copy CONTCAR and check that both CONTCAR->POSCAR and INCAR updates are included
+        shutil.copy("CONTCAR.eddiag", "CONTCAR")
+        shutil.copy("INCAR.orig","INCAR")
+        h = VaspErrorHandler("vasp.eddiag")
+        h.check()
+        d = h.correct()
+        print(d['actions'])
+        assert d["actions"] == [
+            {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}},
+            {"action": {"_set": {"ALGO": "Exact"}}, "dict": "INCAR"}
+        ]
 
 class AliasingErrorHandlerTest(unittest.TestCase):
     def setUp(self):
