@@ -102,7 +102,7 @@ class FFopt_job_handler_interaction(TestCase):
         shutil.rmtree(scr_dir)
 
     def test_OptFF(self):
-        myjob = QCJob.opt_with_frequency_flattener(
+        job = QCJob.opt_with_frequency_flattener(
             qchem_command="qchem",
             max_cores=40,
             input_file="mol.qin",
@@ -119,7 +119,7 @@ class FFopt_job_handler_interaction(TestCase):
             save_scratch=True,
             backup=True,
         ).as_dict()
-        assert next(myjob).as_dict() == expected_next
+        assert next(job).as_dict() == expected_next
 
         h = QChemErrorHandler(
             input_file="mol.qin",
@@ -168,7 +168,7 @@ class FFopt_job_handler_interaction(TestCase):
             save_scratch=True,
             backup=False,
         ).as_dict()
-        assert next(myjob).as_dict() == expected_next
+        assert next(job).as_dict() == expected_next
         self._check_equivalent_inputs("mol.qin", "mol.qin.error5")
 
         h = QChemErrorHandler(
@@ -198,6 +198,6 @@ class FFopt_job_handler_interaction(TestCase):
             save_scratch=True,
             backup=False,
         ).as_dict()
-        assert next(myjob).as_dict() == expected_next
+        assert next(job).as_dict() == expected_next
 
         self._check_equivalent_inputs("mol.qin", "mol.qin.opt_1")
