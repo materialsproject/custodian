@@ -8,6 +8,11 @@ from pymatgen.io.qchem.inputs import QCInput
 from custodian.qchem.handlers import QChemErrorHandler
 from custodian.qchem.jobs import QCJob
 
+try:
+    from openbabel import openbabel as ob
+except ImportError:
+    ob = None
+
 __author__ = "Samuel Blau"
 __copyright__ = "Copyright 2022, The Materials Project"
 __version__ = "0.1"
@@ -22,11 +27,6 @@ test_dir = os.path.join(
 
 scr_dir = os.path.join(test_dir, "scr")
 cwd = os.getcwd()
-
-try:
-    from openbabel import openbabel as ob
-except ImportError:
-    ob = None
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
