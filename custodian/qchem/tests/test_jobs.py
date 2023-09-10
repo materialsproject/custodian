@@ -2,15 +2,17 @@ import os
 import shutil
 import unittest
 from unittest import TestCase
+from unittest.mock import patch
 
-try:
-    from unittest.mock import patch  # type: ignore
-except ImportError:
-    from unittest.mock import patch  # type: ignore
-
+import pytest
 from pymatgen.io.qchem.inputs import QCInput
 
 from custodian.qchem.jobs import QCJob
+
+try:
+    from openbabel import openbabel as ob
+except ImportError:
+    ob = None
 
 __author__ = "Samuel Blau"
 __copyright__ = "Copyright 2018, The Materials Project"
@@ -27,12 +29,6 @@ test_dir = os.path.join(
 
 scr_dir = os.path.join(test_dir, "scr")
 cwd = os.getcwd()
-
-
-try:
-    from openbabel import openbabel as ob
-except ImportError:
-    ob = None
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
@@ -391,7 +387,8 @@ class OptFFTest(TestCase):
             QCInput.from_file(os.path.join(test_dir, "FF_working/test.qin.freq_1")).as_dict()
             == QCInput.from_file(os.path.join(scr_dir, "test.qin")).as_dict()
         )
-        self.assertRaises(StopIteration, myjob.__next__)
+        with pytest.raises(StopIteration):
+            myjob.__next__()
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
@@ -430,7 +427,8 @@ class OptFFTest1(TestCase):
             backup=True,
         ).as_dict()
         assert next(myjob).as_dict() == expected_next
-        self.assertRaises(StopIteration, myjob.__next__)
+        with pytest.raises(StopIteration):
+            myjob.__next__()
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
@@ -491,7 +489,8 @@ class OptFFTest2(TestCase):
             QCInput.from_file(os.path.join(test_dir, "disconnected_but_converged/mol.qin.freq_0")).as_dict()
             == QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict()
         )
-        self.assertRaises(StopIteration, myjob.__next__)
+        with pytest.raises(StopIteration):
+            myjob.__next__()
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
@@ -633,7 +632,8 @@ class OptFFTestSwitching(TestCase):
             QCInput.from_file(os.path.join(test_dir, "FF_switching/mol.qin.freq_2")).as_dict()
             == QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict()
         )
-        self.assertRaises(StopIteration, myjob.__next__)
+        with pytest.raises(StopIteration):
+            myjob.__next__()
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
@@ -832,7 +832,8 @@ class OptFFTest5952(TestCase):
             QCInput.from_file(os.path.join(test_dir, "5952_frag16/mol.qin.freq_0")).as_dict()
             == QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict()
         )
-        self.assertRaises(Exception, myjob.__next__)
+        with pytest.raises(Exception):
+            myjob.__next__()
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
@@ -974,7 +975,8 @@ class OptFFTest5690(TestCase):
             QCInput.from_file(os.path.join(test_dir, "5690_frag18/mol.qin.freq_2")).as_dict()
             == QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict()
         )
-        self.assertRaises(Exception, myjob.__next__)
+        with pytest.raises(Exception):
+            myjob.__next__()
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
@@ -1135,7 +1137,8 @@ class OptFF_small_neg_freq(TestCase):
             os.path.join(scr_dir, "mol.qin"),
             os.path.join(scr_dir, "mol.qin.freq_2"),
         )
-        self.assertRaises(StopIteration, myjob.__next__)
+        with pytest.raises(StopIteration):
+            myjob.__next__()
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
@@ -1210,7 +1213,8 @@ class OptFF_single_freq_frags(TestCase):
             os.path.join(scr_dir, "mol.qin.freq_0"),
         )
 
-        self.assertRaises(StopIteration, myjob.__next__)
+        with pytest.raises(StopIteration):
+            myjob.__next__()
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
@@ -1274,7 +1278,8 @@ class TSFFTest(TestCase):
             QCInput.from_file(os.path.join(test_dir, "fftsopt_no_freqfirst/mol.qin.freq_0")).as_dict()
             == QCInput.from_file(os.path.join(scr_dir, "test.qin")).as_dict()
         )
-        self.assertRaises(StopIteration, myjob.__next__)
+        with pytest.raises(StopIteration):
+            myjob.__next__()
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
@@ -1368,7 +1373,8 @@ class TSFF_freqfirst(TestCase):
             os.path.join(scr_dir, "mol.qin"),
             os.path.join(scr_dir, "mol.qin.freq_0"),
         )
-        self.assertRaises(StopIteration, myjob.__next__)
+        with pytest.raises(StopIteration):
+            myjob.__next__()
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
@@ -1509,4 +1515,5 @@ class TSFF_freqfirst_multiple_cycles(TestCase):
             os.path.join(scr_dir, "mol.qin.freq_1"),
         )
 
-        self.assertRaises(StopIteration, myjob.__next__)
+        with pytest.raises(StopIteration):
+            myjob.__next__()

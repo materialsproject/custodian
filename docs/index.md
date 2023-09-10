@@ -49,7 +49,7 @@ Some plugins (e.g., vasp management) require additional setup (please see
 
 ### Developmental version
 
-The bleeding edge developmental version is at the custodian's [Github repo](https://github.com/materialsproject/custodian). 
+The bleeding edge developmental version is at the custodian's [Github repo](https://github.com/materialsproject/custodian).
 The developmental version is likely to be more buggy, but may contain new features. The
 Github version include test files as well for complete unit testing. After
 cloning the source, you can type::
@@ -149,7 +149,7 @@ class ExampleHandler(ErrorHandler):
     def correct(self):
         self.params["initial"] += 1
         return {"errors": "total < 50", "actions": "increment by 1"}
-```    
+```
 
 As you can see above, the ExampleHandler subclasses the ErrorHandler abstract
 base class, and implements the necessary API comprising just two key
@@ -166,11 +166,11 @@ To run the job, one simply needs to supply a list of ExampleJobs and
 ErrorHandlers to a Custodian.
 
 ```python
-njobs = 100
+n_jobs = 100
 params = {"initial": 0, "total": 0}
 c = Custodian([ExampleHandler(params)],
-              [ExampleJob(i, params) for i in xrange(njobs)],
-              max_errors=njobs)
+              [ExampleJob(i, params) for i in xrange(n_jobs)],
+              max_errors=n_jobs)
 c.run()
 ```
 
@@ -221,7 +221,7 @@ converge_kpoints script in the scripts for an example.
 
 Custodian now comes with a cstdn script, which allows you to do fine-grained control of a job using a yaml spec file.
 Below is an annotated example of how you can specify a double VASP relaxation followed by a static calculation.
-Minor modifications would allow very customizable calculations, though this is obviously not meant for highly 
+Minor modifications would allow very customizable calculations, though this is obviously not meant for highly
 complex workflows. For those, usage of [FireWorks](https://materialsproject.github.io/fireworks) is highly recommended.
 
 Sample yaml spec::
