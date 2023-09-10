@@ -690,7 +690,7 @@ class VaspJob(Job):
             cmds += self.gamma_vasp_cmd
         for k in cmds:
             if "vasp" in k:
-                subprocess.run(["killall", f"{k}"])
+                subprocess.run(["killall", f"{k}"], check=False)
 
 
 class VaspNEBJob(VaspJob):

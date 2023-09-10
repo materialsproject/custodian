@@ -15,6 +15,11 @@ from pymatgen.io.qchem.sets import OptSet
 from custodian.custodian import Job
 from custodian.qchem.utils import perturb_coordinates, vector_list_diff
 
+try:
+    from openbabel import openbabel as ob
+except ImportError:
+    ob = None
+
 __author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath, Evan Spotte-Smith"
 __copyright__ = "Copyright 2018, The Materials Project"
 __version__ = "0.1"
@@ -23,11 +28,6 @@ __email__ = "samblau1@gmail.com"
 __status__ = "Alpha"
 __date__ = "3/20/18"
 __credits__ = "Xiaohui Qu"
-
-try:
-    from openbabel import openbabel as ob
-except ImportError:
-    ob = None
 
 
 class QCJob(Job):

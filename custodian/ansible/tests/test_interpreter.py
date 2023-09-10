@@ -12,6 +12,8 @@ __date__ = "Jun 1, 2012"
 
 import unittest
 
+import pytest
+
 from custodian.ansible.actions import FileActions
 from custodian.ansible.interpreter import Modder
 
@@ -48,7 +50,8 @@ class ModderTest(unittest.TestCase):
         modder.modify(mod, d)
         assert d == {"Bye": "World", "List": [1, 2, 3], "number": 10}
         mod = {"_add_to_set": {"number": 3}}
-        self.assertRaises(ValueError, modder.modify, mod, d)
+        with pytest.raises(ValueError, match="Keyword number does not refer to an array"):
+            modder.modify(mod, d)
         mod = {"_pull": {"List": 1}}
         modder.modify(mod, d)
         assert d == {"Bye": "World", "List": [2, 3], "number": 10}
@@ -121,7 +124,8 @@ class ModderTest(unittest.TestCase):
         modder = Modder(actions=[FileActions])
         d = {"Hello": "World"}
         mod = {"_set": {"Hello": "Universe", "Bye": "World"}}
-        self.assertRaises(ValueError, modder.modify, mod, d)
+        with pytest.raises(ValueError, match="_set is not a supported action"):
+            modder.modify(mod, d)
 
         # In non-strict mode, unknown actions are ignored.
         d = {"Hello": "World"}
@@ -131,12 +135,11 @@ class ModderTest(unittest.TestCase):
 
         # File actions not supported
         modder = Modder()
-        self.assertRaises(
-            ValueError,
-            modder.modify,
-            {"_file_create": {"content": "Test data"}},
-            "test_file",
-        )
+        with pytest.raises(ValueError, match="_file_create is not a supported action"):
+            modder.modify(
+                {"_file_create": {"content": "Test data"}},
+                "test_file",
+            )
 
     def test_modify_object(self):
         modder = Modder()

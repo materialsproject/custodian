@@ -8,6 +8,11 @@ from pymatgen.io.qchem.inputs import QCInput
 from custodian.qchem.handlers import QChemErrorHandler
 from custodian.qchem.jobs import QCJob
 
+try:
+    from openbabel import openbabel as ob
+except ImportError:
+    ob = None
+
 __author__ = "Samuel Blau"
 __copyright__ = "Copyright 2022, The Materials Project"
 __version__ = "0.1"
@@ -22,11 +27,6 @@ test_dir = os.path.join(
 
 scr_dir = os.path.join(test_dir, "scr")
 cwd = os.getcwd()
-
-try:
-    from openbabel import openbabel as ob
-except ImportError:
-    ob = None
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
@@ -102,7 +102,7 @@ class FFopt_job_handler_interaction(TestCase):
         shutil.rmtree(scr_dir)
 
     def test_OptFF(self):
-        myjob = QCJob.opt_with_frequency_flattener(
+        job = QCJob.opt_with_frequency_flattener(
             qchem_command="qchem",
             max_cores=40,
             input_file="mol.qin",
@@ -119,7 +119,7 @@ class FFopt_job_handler_interaction(TestCase):
             save_scratch=True,
             backup=True,
         ).as_dict()
-        assert next(myjob).as_dict() == expected_next
+        assert next(job).as_dict() == expected_next
 
         h = QChemErrorHandler(
             input_file="mol.qin",
@@ -168,7 +168,7 @@ class FFopt_job_handler_interaction(TestCase):
             save_scratch=True,
             backup=False,
         ).as_dict()
-        assert next(myjob).as_dict() == expected_next
+        assert next(job).as_dict() == expected_next
         self._check_equivalent_inputs("mol.qin", "mol.qin.error5")
 
         h = QChemErrorHandler(
@@ -198,6 +198,6 @@ class FFopt_job_handler_interaction(TestCase):
             save_scratch=True,
             backup=False,
         ).as_dict()
-        assert next(myjob).as_dict() == expected_next
+        assert next(job).as_dict() == expected_next
 
         self._check_equivalent_inputs("mol.qin", "mol.qin.opt_1")

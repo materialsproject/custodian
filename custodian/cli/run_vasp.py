@@ -41,10 +41,10 @@ def get_jobs(args):
         ldauu = incar["LDAUU"]
         ldauj = incar["LDAUJ"]
 
-    njobs = len(args.jobs)
+    n_jobs = len(args.jobs)
     post_settings = []  # append to this list to have settings applied on next job
     for i, job in enumerate(args.jobs):
-        final = i == njobs - 1
+        final = i == n_jobs - 1
         suffix = "." + job if any(c.isdigit() for c in job) else f".{job}{i + 1}"
         settings = post_settings
         post_settings = []
