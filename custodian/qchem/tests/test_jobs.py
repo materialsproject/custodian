@@ -832,7 +832,7 @@ class OptFFTest5952(TestCase):
             QCInput.from_file(os.path.join(test_dir, "5952_frag16/mol.qin.freq_0")).as_dict()
             == QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict()
         )
-        with pytest.raises(Exception):
+        with pytest.raises(StopIteration):
             job.__next__()
 
 
@@ -975,7 +975,7 @@ class OptFFTest5690(TestCase):
             QCInput.from_file(os.path.join(test_dir, "5690_frag18/mol.qin.freq_2")).as_dict()
             == QCInput.from_file(os.path.join(scr_dir, "mol.qin")).as_dict()
         )
-        with pytest.raises(Exception):
+        with pytest.raises(StopIteration):
             job.__next__()
 
 
