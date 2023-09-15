@@ -1,6 +1,4 @@
-"""
-Implements various interpreters and modders for VASP.
-"""
+"""Implements various interpreters and modders for VASP."""
 
 from pymatgen.io.vasp.inputs import VaspInput
 
@@ -9,13 +7,11 @@ from custodian.ansible.interpreter import Modder
 
 
 class VaspModder(Modder):
-    """
-    A Modder for VaspInputSets.
-    """
+    """A Modder for VaspInputSets."""
 
     def __init__(self, actions=None, strict=True, vi=None):
         """
-        Initializes a Modder for VaspInput sets
+        Initializes a Modder for VaspInput sets.
 
         Args:
             actions ([Action]): A sequence of supported actions. See
@@ -37,10 +33,11 @@ class VaspModder(Modder):
         """
         Applies a list of actions to the Vasp Input Set and rewrites modified
         files.
+
         Args:
             actions [dict]: A list of actions of the form {'file': filename,
                 'action': moddermodification} or {'dict': vaspinput_key,
-                'action': moddermodification}
+                'action': moddermodification}.
         """
         modified = []
         for a in actions:

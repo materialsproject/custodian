@@ -1,3 +1,1 @@
-"""
-This package implements various VASP Jobs and Error Handlers.
-"""
+"""This package implements various VASP Jobs and Error Handlers."""

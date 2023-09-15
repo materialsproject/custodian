@@ -1,6 +1,4 @@
-"""
-This package implements various QChem Jobs and Error Handlers.
-"""
+"""This package implements various QChem Jobs and Error Handlers."""
 
 
 __author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath"

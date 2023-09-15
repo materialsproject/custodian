@@ -1,6 +1,4 @@
-"""
-CP2K adapted interpreter and modder for custodian.
-"""
+"""CP2K adapted interpreter and modder for custodian."""
 
 from pymatgen.io.cp2k.inputs import Cp2kInput
 
@@ -22,7 +20,7 @@ class Cp2kModder(Modder):
 
     def __init__(self, filename="cp2k.inp", actions=None, strict=True, ci=None):
         """
-        Initializes a Modder for Cp2kInput sets
+        Initializes a Modder for Cp2kInput sets.
 
         Args:
             filename (str): name of cp2k input file to modify. This file will be overwritten
@@ -47,10 +45,11 @@ class Cp2kModder(Modder):
         """
         Applies a list of actions to the CP2K Input Set and rewrites modified
         files.
+
         Args:
             actions [dict]: A list of actions of the form {'file': filename,
                 'action': moddermodification} or {'dict': cp2k_key,
-                'action': moddermodification}
+                'action': moddermodification}.
         """
         modified = []
         for a in actions:

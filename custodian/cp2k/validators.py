@@ -1,6 +1,4 @@
-"""
-Validators for CP2K calculations.
-"""
+"""Validators for CP2K calculations."""
 
 from abc import abstractmethod, abstractproperty
 
@@ -15,9 +13,7 @@ __date__ = "March 2022"
 
 
 class Cp2kValidator(Validator):
-    """
-    Base validator.
-    """
+    """Base validator."""
 
     @abstractmethod
     def check(self):
@@ -28,32 +24,24 @@ class Cp2kValidator(Validator):
 
     @abstractproperty
     def kill(self):
-        """
-        Kill the job with raise error.
-        """
+        """Kill the job with raise error."""
 
     @abstractproperty
     def exit(self):
-        """
-        Don't raise error, but exit the job
-        """
+        """Don't raise error, but exit the job."""
 
     @abstractproperty
     def no_children(self):
-        """
-        Job should not have children
-        """
+        """Job should not have children."""
 
 
 class Cp2kOutputValidator(Cp2kValidator):
-    """
-    Checks that a valid cp2k output file was generated
-    """
+    """Checks that a valid cp2k output file was generated."""
 
     def __init__(self, output_file="cp2k.out"):
         """
         Args:
-            output_file (str): cp2k output file to analyze
+            output_file (str): cp2k output file to analyze.
         """
         self.output_file = output_file
         self._check = False
@@ -68,9 +56,9 @@ class Cp2kOutputValidator(Cp2kValidator):
             o = Cp2kOutput(self.output_file)
             o.ran_successfully()
             o.convergence()
-            if not o.data.get("geo_opt_converged") and not o.data.get("geo_opt_not_converged"):
-                geom = True
-            elif o.data.get("geo_opt_converged")[-1]:
+            if (not o.data.get("geo_opt_converged") and not o.data.get("geo_opt_not_converged")) or o.data.get(
+                "geo_opt_converged"
+            )[-1]:
                 geom = True
             else:
                 geom = False
@@ -84,21 +72,15 @@ class Cp2kOutputValidator(Cp2kValidator):
 
     @property
     def kill(self):
-        """
-        Kill the job with raise error.
-        """
+        """Kill the job with raise error."""
         return True
 
     @property
     def exit(self):
-        """
-        Don't raise error, but exit the job
-        """
+        """Don't raise error, but exit the job."""
         return True
 
     @property
     def no_children(self):
-        """
-        Job should not have children
-        """
+        """Job should not have children."""
         return True

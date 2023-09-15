@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Deployment file to facilitate releases of custodian.
 """
@@ -21,42 +22,24 @@ NEW_VER = datetime.datetime.today().strftime("%Y.%-m.%-d")
 
 @task
 def make_doc(ctx):
-    with cd("docs_rst"):
-        ctx.run("sphinx-apidoc -d 6 -o . -f ../custodian")
-        ctx.run("rm custodian*.tests.rst")
-        for f in glob.glob("*.rst"):
-            if f.startswith("custodian") and f.endswith("rst"):
-                newoutput = []
-                suboutput = []
-                subpackage = False
-                with open(f) as fid:
-                    for line in fid:
-                        clean = line.strip()
-                        if clean == "Subpackages":
-                            subpackage = True
-                        if not subpackage and not clean.endswith("tests"):
-                            newoutput.append(line)
-                        else:
-                            if not clean.endswith("tests"):
-                                suboutput.append(line)
-                            if clean.startswith("custodian") and not clean.endswith("tests"):
-                                newoutput.extend(suboutput)
-                                subpackage = False
-                                suboutput = []
-
-                with open(f, "w") as fid:
-                    fid.write("".join(newoutput))
-        ctx.run("make html")
-        # ctx.run("cp _static/* _build/html/_static")
-
     with cd("docs"):
-        ctx.run("cp -r html/* .")
-        ctx.run("rm -r html")
-        ctx.run("rm -r doctrees")
-        ctx.run("rm -r _sources")
-
-        # Avoid the use of jekyll so that _dir works as intended.
-        ctx.run("touch .nojekyll")
+        ctx.run("touch index.rst")
+        ctx.run("rm custodian.*.rst", warn=True)
+        ctx.run("sphinx-apidoc --separate -P -M -d 7 -o . -f ../custodian  ../**/tests/*")
+        ctx.run("sphinx-build -M markdown . .")
+        ctx.run("rm *.rst", warn=True)
+        ctx.run("cp markdown/custodian*.md .")
+        ctx.run("rm custodian*tests*.md", warn=True)
+        for fn in glob.glob("custodian*.md"):
+            with open(fn) as f:
+                lines = [line.rstrip() for line in f if "Submodules" not in line]
+            if fn == "custodian.md":
+                preamble = ["---", "layout: default", "title: API Documentation", "nav_order: 6", "---", ""]
+            else:
+                preamble = ["---", "layout: default", "title: " + fn, "nav_exclude: true", "---", ""]
+            with open(fn, "w") as f:
+                f.write("\n".join(preamble + lines))
+        ctx.run("rm -r markdown doctrees", warn=True)
 
 
 @task
@@ -92,36 +75,32 @@ def test(ctx):
 
 @task
 def set_ver(ctx):
-    lines = []
-    with open("custodian/__init__.py") as f:
-        for l in f:
-            if "__version__" in l:
-                lines.append(f'__version__ = "{NEW_VER}"')
-            else:
-                lines.append(l.rstrip())
-    with open("custodian/__init__.py", "w") as f:
-        f.write("\n".join(lines) + "\n")
+    with open("custodian/__init__.py") as file:
+        lines = [f'__version__ = "{NEW_VER}"' if "__version__" in line else line.rstrip() for line in file]
 
-    lines = []
-    with open("setup.py") as f:
-        for l in f:
-            lines.append(re.sub(r"version=([^,]+),", f'version="{NEW_VER}",', l.rstrip()))
-    with open("setup.py", "w") as f:
-        f.write("\n".join(lines) + "\n")
+    with open("custodian/__init__.py", "w") as file:
+        file.write("\n".join(lines) + "\n")
+
+    with open("setup.py") as file:
+        lines = [re.sub(r"version=([^,]+),", f'version="{NEW_VER}",', line.rstrip()) for line in file]
+
+    with open("setup.py", "w") as file:
+        file.write("\n".join(lines) + "\n")
 
 
 @task
-def update_changelog(ctx, version=datetime.datetime.now().strftime("%Y.%-m.%-d"), sim=False):
+def update_changelog(ctx, version=None, sim=False):
     """
     Create a preliminary change log using the git logs.
 
     :param ctx:
     """
+    version = version or datetime.datetime.now().strftime("%Y.%-m.%-d")
     output = subprocess.check_output(["git", "log", "--pretty=format:%s", f"v{CURRENT_VER}..HEAD"])
     lines = []
     misc = []
-    for l in output.decode("utf-8").strip().split("\n"):
-        m = re.match(r"Merge pull request \#(\d+) from (.*)", l)
+    for line in output.decode("utf-8").strip().split("\n"):
+        m = re.match(r"Merge pull request \#(\d+) from (.*)", line)
         if m:
             pr_number = m.group(1)
             contrib, pr_name = m.group(2).split("/", 1)
@@ -132,22 +111,22 @@ def update_changelog(ctx, version=datetime.datetime.now().strftime("%Y.%-m.%-d")
                     ll = ll.strip()
                     if ll in ["", "## Summary"]:
                         continue
-                    elif ll.startswith("## Checklist") or ll.startswith("## TODO"):
+                    if ll.startswith(("## Checklist", "## TODO")):
                         break
                     lines.append(f"    {ll}")
-        misc.append(l)
-    with open("changelog.rst") as f:
+        misc.append(line)
+    with open("docs_rst/changelog.md") as f:
         contents = f.read()
-    l = "=========="
-    toks = contents.split(l)
+    line = "=========="
+    toks = contents.split(line)
     head = f"\n\nv{version}\n" + "-" * (len(version) + 1) + "\n"
     toks.insert(-1, head + "\n".join(lines))
     if not sim:
-        with open("docs_rst/changelog.rst", "w") as f:
-            f.write(toks[0] + l + "".join(toks[1:]))
-        ctx.run("open docs_rst/changelog.rst")
+        with open("docs_rst/changelog.md", "w") as f:
+            f.write(toks[0] + line + "".join(toks[1:]))
+        ctx.run("open docs_rst/changelog.md")
     else:
-        print(toks[0] + l + "".join(toks[1:]))
+        print(toks[0] + line + "".join(toks[1:]))
     print("The following commit messages were not included...")
     print("\n".join(misc))
 

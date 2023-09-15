@@ -1,6 +1,4 @@
-"""
-This module implements basic kinds of jobs for VASP runs.
-"""
+"""This module implements basic kinds of jobs for VASP runs."""
 
 import logging
 import math
@@ -139,7 +137,7 @@ class VaspJob(Job):
                 wall-time handler which will write a read-only STOPCAR to
                 prevent VASP from deleting it once it finishes
         """
-        self.vasp_cmd = vasp_cmd
+        self.vasp_cmd = tuple(vasp_cmd)
         self.output_file = output_file
         self.stderr_file = stderr_file
         self.final = final
@@ -148,7 +146,7 @@ class VaspJob(Job):
         self.settings_override = settings_override
         self.auto_npar = auto_npar
         self.auto_gamma = auto_gamma
-        self.gamma_vasp_cmd = gamma_vasp_cmd
+        self.gamma_vasp_cmd = tuple(gamma_vasp_cmd) if gamma_vasp_cmd else None
         self.copy_magmom = copy_magmom
         self.auto_continue = auto_continue
 
@@ -244,12 +242,11 @@ class VaspJob(Job):
         if self.auto_gamma:
             vi = VaspInput.from_directory(".")
             kpts = vi["KPOINTS"]
-            if kpts is not None:
-                if kpts.style == Kpoints.supported_modes.Gamma and tuple(kpts.kpts[0]) == (1, 1, 1):
-                    if self.gamma_vasp_cmd is not None and which(self.gamma_vasp_cmd[-1]):
-                        cmd = self.gamma_vasp_cmd
-                    elif which(cmd[-1] + ".gamma"):
-                        cmd[-1] += ".gamma"
+            if kpts is not None and kpts.style == Kpoints.supported_modes.Gamma and tuple(kpts.kpts[0]) == (1, 1, 1):
+                if self.gamma_vasp_cmd is not None and which(self.gamma_vasp_cmd[-1]):  # pylint: disable=E1136
+                    cmd = self.gamma_vasp_cmd
+                elif which(cmd[-1] + ".gamma"):
+                    cmd[-1] += ".gamma"
         logger.info(f"Running {' '.join(cmd)}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr
@@ -258,9 +255,9 @@ class VaspJob(Job):
     def postprocess(self):
         """
         Postprocessing includes renaming and gzipping where necessary.
-        Also copies the magmom to the incar if necessary
+        Also copies the magmom to the incar if necessary.
         """
-        for f in VASP_OUTPUT_FILES + [self.output_file]:
+        for f in [*VASP_OUTPUT_FILES, self.output_file]:
             if os.path.exists(f):
                 if self.final and self.suffix != "":
                     shutil.move(f, f"{f}{self.suffix}")
@@ -368,9 +365,8 @@ class VaspJob(Job):
         metaGGA functional. There is an initial calculation of the
         GGA wavefunction which is fed into the initial metaGGA optimization
         to precondition the electronic structure optimizer. The metaGGA
-        optimization is performed using the double relaxation scheme
+        optimization is performed using the double relaxation scheme.
         """
-
         incar = Incar.from_file("INCAR")
         # Defaults to using the SCAN metaGGA
         metaGGA = incar.get("METAGGA", "SCAN")
@@ -547,10 +543,7 @@ class VaspJob(Job):
 
         # Set the energy convergence criteria as the EDIFFG (if present) or
         # 10 x EDIFF (which itself defaults to 1e-4 if not present).
-        if incar.get("EDIFFG") and incar.get("EDIFFG") > 0:
-            etol = incar["EDIFFG"]
-        else:
-            etol = incar.get("EDIFF", 1e-4) * 10
+        etol = incar["EDIFFG"] if incar.get("EDIFFG") and incar.get("EDIFFG") > 0 else incar.get("EDIFF", 0.0001) * 10
 
         if lattice_direction == "a":
             lattice_index = 0
@@ -665,35 +658,39 @@ class VaspJob(Job):
 
     def terminate(self):
         """
-        Kill all vasp processes associated with the current job.
+        Kill all VASP processes associated with the current job.
         This is done by looping over all processes and selecting the ones
-        that contain "vasp" as well as access files (CHGCAR in particular)
+        that contain "vasp" as well as access files (vasprun.xml in particular)
         in the custodian working directory.
-        There is also a safety that kills all vasp processes if non of the
-        processes can be killed (This is bad if more than one vasp runs are
+        There is also a safety that kills all VASP processes if none of the
+        processes can be killed (This is bad if more than one VASP runs are
         simultaneously executed on the same node). However, this should never
         happen.
         """
         workdir = os.getcwd()
-        logger.info(f"kill vasp processes in work dir {workdir}")
-        is_killed = False
+        logger.info(f"Killing VASP processes in workdir {workdir}.")
         for proc in psutil.process_iter():
             try:
                 if "vasp" in proc.name().lower():
-                    for file in proc.open_files():
-                        if workdir + "/CHGCAR" == file.path and psutil.pid_exists(proc.pid):
-                            proc.kill()
-                            is_killed = True
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    open_paths = [file.path for file in proc.open_files()]
+                    vasprun_path = os.path.join(workdir, "vasprun.xml")
+                    if (vasprun_path in open_paths) and psutil.pid_exists(proc.pid):
+                        proc.kill()
+                        return
+            except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+                logger.warning(f"Exception {e} encountered while killing VASP.")
                 continue
-        if not is_killed:
-            logger.warning(f"killing vasp processes in work dir {workdir} failed. Resorting to 'killall'.")
-            cmds = self.vasp_cmd
-            if self.gamma_vasp_cmd:
-                cmds += self.gamma_vasp_cmd
-                for k in cmds:
-                    if "vasp" in k:
-                        subprocess.run(["killall", f"{k}"])
+
+        logger.warning(
+            f"Killing VASP processes in workdir {workdir} failed with subprocess.Popen.terminate(). "
+            "Resorting to 'killall'."
+        )
+        cmds = self.vasp_cmd
+        if self.gamma_vasp_cmd:
+            cmds += self.gamma_vasp_cmd
+        for k in cmds:
+            if "vasp" in k:
+                subprocess.run(["killall", f"{k}"], check=False)
 
 
 class VaspNEBJob(VaspJob):
@@ -769,8 +766,7 @@ class VaspNEBJob(VaspJob):
                      {"file": "CONTCAR",
                       "action": {"_file_copy": {"dest": "POSCAR"}}}]
         """
-
-        self.vasp_cmd = vasp_cmd
+        self.vasp_cmd = tuple(vasp_cmd)
         self.output_file = output_file
         self.stderr_file = stderr_file
         self.final = final
@@ -779,17 +775,14 @@ class VaspNEBJob(VaspJob):
         self.auto_npar = auto_npar
         self.half_kpts = half_kpts
         self.auto_gamma = auto_gamma
-        self.gamma_vasp_cmd = gamma_vasp_cmd
+        self.gamma_vasp_cmd = tuple(gamma_vasp_cmd) if gamma_vasp_cmd else None
         self.auto_continue = auto_continue
         self.settings_override = settings_override
-        self.neb_dirs = []  # 00, 01, etc.
-        self.neb_sub = []  # 01, 02, etc.
 
-        for path in os.listdir("."):
-            if os.path.isdir(path) and path.isdigit():
-                self.neb_dirs.append(path)
-        self.neb_dirs = sorted(self.neb_dirs)
-        self.neb_sub = self.neb_dirs[1:-1]
+        self.neb_dirs = sorted(  # 00, 01, etc.
+            path for path in os.listdir(".") if os.path.isdir(path) and path.isdigit()
+        )
+        self.neb_sub = self.neb_dirs[1:-1]  # 01, 02, etc.
 
     def setup(self):
         """
@@ -864,7 +857,7 @@ class VaspNEBJob(VaspJob):
                 1,
                 1,
             ):
-                if self.gamma_vasp_cmd is not None and which(self.gamma_vasp_cmd[-1]):
+                if self.gamma_vasp_cmd is not None and which(self.gamma_vasp_cmd[-1]):  # pylint: disable=E1136
                     cmd = self.gamma_vasp_cmd
                 elif which(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
@@ -874,9 +867,7 @@ class VaspNEBJob(VaspJob):
             return subprocess.Popen(cmd, stdout=f_std, stderr=f_err, start_new_session=True)  # pylint: disable=R1732
 
     def postprocess(self):
-        """
-        Postprocessing includes renaming and gzipping where necessary.
-        """
+        """Postprocessing includes renaming and gzipping where necessary."""
         # Add suffix to all sub_dir/{items}
         for path in self.neb_dirs:
             for f in VASP_NEB_OUTPUT_SUB_FILES:
@@ -888,7 +879,7 @@ class VaspNEBJob(VaspJob):
                         shutil.copy(f, f"{f}{self.suffix}")
 
         # Add suffix to all output files
-        for f in VASP_NEB_OUTPUT_FILES + [self.output_file]:
+        for f in [*VASP_NEB_OUTPUT_FILES, self.output_file]:
             if os.path.exists(f):
                 if self.final and self.suffix != "":
                     shutil.move(f, f"{f}{self.suffix}")
@@ -915,14 +906,10 @@ class GenerateVaspInputJob(Job):
         self.kwargs = kwargs
 
     def setup(self):
-        """
-        Dummy setup
-        """
+        """Dummy setup."""
 
     def run(self):
-        """
-        Run the calculation.
-        """
+        """Run the calculation."""
         if os.path.exists("CONTCAR"):
             structure = Structure.from_file("CONTCAR")
         elif (not self.contcar_only) and os.path.exists("POSCAR"):
@@ -935,6 +922,4 @@ class GenerateVaspInputJob(Job):
         vis.write_input(".")
 
     def postprocess(self):
-        """
-        Dummy postprocess.
-        """
+        """Dummy postprocess."""

@@ -64,8 +64,8 @@ class LobsterJobTest(unittest.TestCase):
     def test_to_from_dict(self):
         v = LobsterJob(lobster_cmd="hello")
         v2 = LobsterJob.from_dict(v.as_dict())
-        self.assertEqual(type(v2), type(v))
-        self.assertEqual(v2.lobster_cmd, "hello")
+        assert type(v2) == type(v)
+        assert v2.lobster_cmd == "hello"
 
     def test_setup(self):
         with cd(test_files_lobster2):
@@ -73,12 +73,12 @@ class LobsterJobTest(unittest.TestCase):
                 # check if backup is done correctly
                 v = LobsterJob("hello", backup=True)
                 v.setup()
-                self.assertTrue(os.path.exists("lobsterin.orig"))
+                assert os.path.exists("lobsterin.orig")
                 # check if backup id done correctly
             with ScratchDir(".", copy_from_current_on_enter=True):
                 v = LobsterJob("hello", backup=False)
                 v.setup()
-                self.assertFalse(os.path.exists("lobsterin.orig"))
+                assert not os.path.exists("lobsterin.orig")
 
     def test_postprocess(self):
         # test gzipped and zipping of additional files
@@ -89,15 +89,11 @@ class LobsterJobTest(unittest.TestCase):
                 v.postprocess()
                 for file in VASP_OUTPUT_FILES + LOBSTER_FILES + FW_FILES:
                     filegz = file + ".gz"
-                    self.assertTrue(os.path.exists(filegz))
+                    assert os.path.exists(filegz)
 
             with ScratchDir(".", copy_from_current_on_enter=True):
                 shutil.copy("lobsterin", "lobsterin.orig")
                 v = LobsterJob("hello", gzipped=False, add_files_to_gzip=VASP_OUTPUT_FILES)
                 v.postprocess()
                 for file in VASP_OUTPUT_FILES + LOBSTER_FILES + FW_FILES:
-                    self.assertTrue(os.path.exists(file))
-
-
-if __name__ == "__main__":
-    unittest.main()
+                    assert os.path.exists(file)

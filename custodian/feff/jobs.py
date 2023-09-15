@@ -1,4 +1,4 @@
-""" This module implements basic kinds of jobs for FEFF runs."""
+"""This module implements basic kinds of jobs for FEFF runs."""
 
 import logging
 import os
@@ -24,9 +24,7 @@ FEFF_BACKUP_FILES = {"ATOMS", "HEADER", "PARAMETERS", "POTENTIALS"}
 
 
 class FeffJob(Job):
-    """
-    A basic FEFF job, run whatever is in the directory.
-    """
+    """A basic FEFF job, run whatever is in the directory."""
 
     def __init__(
         self,
@@ -38,7 +36,7 @@ class FeffJob(Job):
         gzipped_prefix="feff_out",
     ):
         """
-        This constructor is used for a standard FEFF initialization
+        This constructor is used for a standard FEFF initialization.
 
         Args:
             feff_cmd (str): the name of the full executable for running FEFF
@@ -64,6 +62,7 @@ class FeffJob(Job):
     def setup(self):
         """
         Performs initial setup for FeffJob, do backing up.
+
         Returns:
 
         """
@@ -89,8 +88,6 @@ class FeffJob(Job):
             return subprocess.Popen(self.feff_cmd, stdout=f_std, stderr=f_err, shell=True)  # pylint: disable=R1732
 
     def postprocess(self):
-        """
-        Renaming or gzipping all the output as needed
-        """
+        """Renaming or gzipping all the output as needed."""
         if self.gzipped:
             backup("*", prefix=self.gzipped_prefix)

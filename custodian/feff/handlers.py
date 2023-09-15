@@ -1,6 +1,4 @@
-"""
-This module implements specific error handler for FEFF runs.
-"""
+"""This module implements specific error handler for FEFF runs."""
 
 
 import logging
@@ -33,15 +31,13 @@ logger = logging.getLogger(__name__)
 
 
 class UnconvergedErrorHandler(ErrorHandler):
-    """
-    Correct the unconverged error of FEFF's SCF calculation.
-    """
+    """Correct the unconverged error of FEFF's SCF calculation."""
 
     is_monitor = False
 
     def __init__(self, output_filename="log1.dat"):
         """
-        Initializes the handler with the output file to check
+        Initializes the handler with the output file to check.
 
         Args:
             output_filename (str): Filename for the log1.dat file. log1.dat file
@@ -53,7 +49,7 @@ class UnconvergedErrorHandler(ErrorHandler):
     def check(self):
         """
         If the FEFF run does not converge, the check will return
-        "TRUE"
+        "TRUE".
         """
         return self._notconverge_check()
 
@@ -71,9 +67,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         return None
 
     def correct(self):
-        """
-        Perform the corrections.
-        """
+        """Perform the corrections."""
         backup(FEFF_BACKUP_FILES)
         feff_input = FEFFDictSet.from_directory(".")
         scf_values = feff_input.tags.get("SCF")
