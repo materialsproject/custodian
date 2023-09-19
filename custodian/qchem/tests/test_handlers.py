@@ -412,8 +412,8 @@ class QChemErrorHandlerTest(TestCase):
         h = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ["gdm_neg_precon_error"])
-        self.assertEqual(d["actions"], [{"molecule": "molecule_from_last_geometry"}])
+        assert d["errors"] == ["gdm_neg_precon_error"]
+        assert d["actions"] == [{"molecule": "molecule_from_last_geometry"}]
 
     def test_fileman_cpscf_nseg_error(self):
         shutil.copyfile(
@@ -427,9 +427,8 @@ class QChemErrorHandlerTest(TestCase):
         h = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         h.check()
         d = h.correct()
-        self.assertEqual(d["errors"], ["premature_end_FileMan_error"])
-        self.assertEqual(d["actions"], [{"cpscf_nseg": "3"}])
-
+        assert d["errors"] == ["premature_end_FileMan_error"]
+        assert d["actions"] == [{"cpscf_nseg": "3"}]
 
     def tearDown(self):
         os.chdir(cwd)
