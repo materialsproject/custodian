@@ -106,7 +106,7 @@ class QChemErrorHandler(ErrorHandler):
             # Try forcing a new initial guess at each iteration
             elif (
                 self.qcinp.rem.get("scf_guess_always", "none").lower() != "true"
-                and len(self.outdata.get("energy_trajectory", [])) > 0
+                and "molecule_from_last_geometry" in self.outdata
             ):
                 self.qcinp.rem["scf_guess_always"] = "true"
                 actions.append({"scf_guess_always": "true"})
@@ -130,7 +130,7 @@ class QChemErrorHandler(ErrorHandler):
                         "maxiter"
                     ] = self.geom_max_cycles
                 actions.append({"geom_max_cycles:": self.geom_max_cycles})
-                if len(self.outdata.get("energy_trajectory")) > 1:
+                if "molecule_from_last_geometry" in self.outdata:
                     self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                     actions.append({"molecule": "molecule_from_last_geometry"})
 
@@ -164,7 +164,7 @@ class QChemErrorHandler(ErrorHandler):
             if self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
-            elif len(self.outdata.get("energy_trajectory")) > 1:
+            elif "molecule_from_last_geometry" in self.outdata:
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
                 if self.qcinp.rem.get("scf_algorithm", "diis").lower() == "diis":
@@ -183,7 +183,7 @@ class QChemErrorHandler(ErrorHandler):
             if self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
-            elif len(self.outdata.get("energy_trajectory")) > 1:
+            elif "molecule_from_last_geometry" in self.outdata:
                 self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
                 actions.append({"molecule": "molecule_from_last_geometry"})
 
@@ -198,9 +198,15 @@ class QChemErrorHandler(ErrorHandler):
                         "coordinates"
                     ] = "delocalized"
                     actions.append({"coordinates": "delocalized"})
+                    if self.qcinp.geom_opt.get("initial_hessian", "none") != "read":
+                        self.qcinp.geom_opt["initial_hessian"] = "model"
+                        actions.append({"initial_hessian": "model"})
                 elif self.qcinp.geom_opt["coordinates"] == "delocalized":
                     self.qcinp.geom_opt["coordinates"] = "cartesian"  # pylint: disable=unsupported-assignment-operation
                     actions.append({"coordinates": "cartesian"})
+                    if self.qcinp.geom_opt.get("initial_hessian", "none") == "model":
+                        del self.qcinp.geom_opt["initial_hessian"]
+                        actions.append({"initial_hessian": "deleted"})
 
         elif "premature_end_FileMan_error" in self.errors:
             # Given defaults, the first two handlers will typically be skipped.
@@ -210,13 +216,13 @@ class QChemErrorHandler(ErrorHandler):
             if self.qcinp.rem.get("thresh", "10") != "14":
                 self.qcinp.rem["thresh"] = "14"
                 actions.append({"thresh": "14"})
-            elif self.qcinp.rem.get("job_type") == "opt" or "optimization":
+            elif self.qcinp.rem.get("job_type") == "opt" or self.qcinp.rem.get("job_type") == "optimization":
                 if self.qcinp.rem.get("scf_guess_always", "none").lower() != "true":
                     self.qcinp.rem["scf_guess_always"] = "true"
                     actions.append({"scf_guess_always": "true"})
                 else:
                     print("Don't know how to fix a FileMan error for an opt while always generating a new SCF guess!")
-            elif self.qcinp.rem.get("job_type") == "freq" or "frequency":
+            elif self.qcinp.rem.get("job_type") == "freq" or self.qcinp.rem.get("job_type") == "frequency":
                 self.qcinp.rem["cpscf_nseg"] = str(self.outdata["cpscf_nseg"] + 1)
                 actions.append({"cpscf_nseg": str(self.outdata["cpscf_nseg"] + 1)})
 
@@ -321,6 +327,13 @@ class QChemErrorHandler(ErrorHandler):
                 self.qcinp.rem["cpscf_nseg"] = str(self.outdata["cpscf_nseg"] + 1)
                 actions.append({"cpscf_nseg": str(self.outdata["cpscf_nseg"] + 1)})
 
+        elif "gdm_neg_precon_error" in self.errors:
+            if "molecule_from_last_geometry" in self.outdata:
+                self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
+                actions.append({"molecule": "molecule_from_last_geometry"})
+            else:
+                print("Not sure how to fix gdm_neg_precon_error on the first SCF!")
+
         elif "mem_static_too_small" in self.errors:
             # mem_static should never exceed 2000 MB according to the Q-Chem manual
             self.qcinp.rem["mem_static"] = "2000"
@@ -374,7 +387,7 @@ class QChemErrorHandler(ErrorHandler):
             and "initial_hessian" in self.qcinp.geom_opt
         ) and str(self.qcinp.geom_opt["initial_hessian"]).lower() == "read":
             del self.qcinp.geom_opt["initial_hessian"]
-            actions.append({"geom_opt.initial_hessian-read": "deleted"})
+            actions.append({"initial_hessian": "deleted"})
         os.rename(self.input_file, self.input_file + ".last")
         self.qcinp.write_file(self.input_file)
         return {"errors": self.errors, "warnings": self.warnings, "actions": actions}

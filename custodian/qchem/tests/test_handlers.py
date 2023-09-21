@@ -400,6 +400,36 @@ class QChemErrorHandlerTest(TestCase):
         ]
         self._check_equivalent_inputs(os.path.join(test_dir, "OOS_read_hess_next.qin"), "mol.qin")
 
+    def test_gdm_neg_precon_error(self):
+        shutil.copyfile(
+            os.path.join(test_dir, "gdm_neg_precon_error.qin.gz"),
+            os.path.join(scr_dir, "mol.qin.gz"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "gdm_neg_precon_error.qout.gz"),
+            os.path.join(scr_dir, "mol.qout.gz"),
+        )
+        h = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
+        h.check()
+        d = h.correct()
+        assert d["errors"] == ["gdm_neg_precon_error"]
+        assert d["actions"] == [{"molecule": "molecule_from_last_geometry"}]
+
+    def test_fileman_cpscf_nseg_error(self):
+        shutil.copyfile(
+            os.path.join(test_dir, "fileman_cpscf.qin.gz"),
+            os.path.join(scr_dir, "mol.qin.gz"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "fileman_cpscf.qout.gz"),
+            os.path.join(scr_dir, "mol.qout.gz"),
+        )
+        h = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
+        h.check()
+        d = h.correct()
+        assert d["errors"] == ["premature_end_FileMan_error"]
+        assert d["actions"] == [{"cpscf_nseg": "3"}]
+
     def tearDown(self):
         os.chdir(cwd)
         shutil.rmtree(scr_dir)
