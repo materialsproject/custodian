@@ -402,12 +402,12 @@ class QChemErrorHandlerTest(TestCase):
 
     def test_gdm_neg_precon_error(self):
         shutil.copyfile(
-            os.path.join(test_dir, "gdm_neg_precon_error.qin"),
-            os.path.join(scr_dir, "mol.qin"),
+            os.path.join(test_dir, "gdm_neg_precon_error.qin.gz"),
+            os.path.join(scr_dir, "mol.qin.gz"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "gdm_neg_precon_error.qout"),
-            os.path.join(scr_dir, "mol.qout"),
+            os.path.join(test_dir, "gdm_neg_precon_error.qout.gz"),
+            os.path.join(scr_dir, "mol.qout.gz"),
         )
         h = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         h.check()
