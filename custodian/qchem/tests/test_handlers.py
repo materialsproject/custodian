@@ -417,12 +417,12 @@ class QChemErrorHandlerTest(TestCase):
 
     def test_fileman_cpscf_nseg_error(self):
         shutil.copyfile(
-            os.path.join(test_dir, "fileman_cpscf.qin"),
-            os.path.join(scr_dir, "mol.qin"),
+            os.path.join(test_dir, "fileman_cpscf.qin.gz"),
+            os.path.join(scr_dir, "mol.qin.gz"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "fileman_cpscf.qout"),
-            os.path.join(scr_dir, "mol.qout"),
+            os.path.join(test_dir, "fileman_cpscf.qout.gz"),
+            os.path.join(scr_dir, "mol.qout.gz"),
         )
         h = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         h.check()

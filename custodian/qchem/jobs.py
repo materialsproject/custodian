@@ -162,8 +162,7 @@ class QCJob(Job):
             os.mkdir(local_scratch)
             shutil.move(os.path.join(os.environ["QCSCRATCH"], "132.0"), local_scratch)
         if os.path.exists(os.path.join(os.environ["QCSCRATCH"], "53.0")):
-            if not os.path.exists(local_scratch):
-                os.mkdir(local_scratch)
+            os.mkdir(local_scratch, exist_ok=True)
             shutil.move(os.path.join(os.environ["QCSCRATCH"], "53.0"), local_scratch)
         with open(self.qclog_file, "w") as qclog:
             return subprocess.Popen(self.current_command, stdout=qclog, shell=True)  # pylint: disable=R1732
