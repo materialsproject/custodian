@@ -1101,7 +1101,7 @@ class UnconvergedErrorHandler(ErrorHandler):
                         actions.append({"dict": "INCAR", "action": {"_set": new_settings}})
 
         elif not v.converged_ionic:
-            # Just continue optimizing and let other handles fix ionic
+            # Just continue optimizing and let other handlers fix ionic
             # optimizer parameters
             actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 1}}})
             actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})

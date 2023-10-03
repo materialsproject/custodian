@@ -70,7 +70,7 @@ explicit_package_bases = true
 no_implicit_optional = false
 
 [tool.codespell]
-ignore-words-list = "ot"
+ignore-words-list = "ot,atomate"
 
 
 [tool.coverage.run]
