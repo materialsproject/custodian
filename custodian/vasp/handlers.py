@@ -30,7 +30,10 @@ from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from custodian.vasp.interpreter import VaspModder
 
-__author__ = "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen, Stephen Dacek, Andrew Rosen"
+__author__ = (
+    "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen, "
+    "Stephen Dacek, Andrew Rosen, Janosh Riebesell"
+)
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
 __email__ = "ongsp@ucsd.edu"
@@ -281,18 +284,10 @@ class VaspErrorHandler(ErrorHandler):
                 # CHGCAR and WAVECAR when dealing with this error.
                 # A.S.R.: Then why only delete them now?
                 if vi["INCAR"].get("ICHARG", 0) < 10:
-                    actions.append(
-                        {
-                            "file": "CHGCAR",
-                            "action": {"_file_delete": {"mode": "actual"}},
-                        }
-                    )
-                    actions.append(
-                        {
-                            "file": "WAVECAR",
-                            "action": {"_file_delete": {"mode": "actual"}},
-                        }
-                    )
+                    actions += [
+                        {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}},
+                        {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}},
+                    ]
                 self.error_count["brmix"] += 1
 
         if "zpotrf" in self.errors:
@@ -482,8 +477,10 @@ class VaspErrorHandler(ErrorHandler):
                 potim = round(vi["INCAR"].get("POTIM", 0.5) / 2.0, 2)
                 actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
             if vi["INCAR"].get("ICHARG", 0) < 10:
-                actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
-                actions.append({"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}})
+                actions += [
+                    {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}},
+                    {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}},
+                ]
             self.error_count["eddrmm"] += 1
 
         if "edddav" in self.errors:
@@ -923,13 +920,10 @@ class DriftErrorHandler(ErrorHandler):
 
         # Set PREC to High so ENAUG can be used to control Augmentation Grid Size
         if incar.get("PREC", "Accurate").lower() != "high":
-            actions.append({"dict": "INCAR", "action": {"_set": {"PREC": "High"}}})
-            actions.append(
-                {
-                    "dict": "INCAR",
-                    "action": {"_set": {"ENAUG": incar.get("ENCUT", 520) * 2}},
-                }
-            )
+            actions += [
+                {"dict": "INCAR", "action": {"_set": {"PREC": "High"}}},
+                {"dict": "INCAR", "action": {"_set": {"ENAUG": incar.get("ENCUT", 520) * 2}}},
+            ]
         # PREC is already high and ENAUG set so just increase it
         else:
             actions.append(
@@ -1103,8 +1097,10 @@ class UnconvergedErrorHandler(ErrorHandler):
         elif not v.converged_ionic:
             # Just continue optimizing and let other handlers fix ionic
             # optimizer parameters
-            actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 1}}})
-            actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+            actions += [
+                {"dict": "INCAR", "action": {"_set": {"IBRION": 1}}},
+                {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}},
+            ]
 
         if actions:
             vi = VaspInput.from_directory(".")
@@ -1153,9 +1149,10 @@ class IncorrectSmearingHandler(ErrorHandler):
         backup(VASP_BACKUP_FILES | {self.output_filename})
         vi = VaspInput.from_directory(".")
 
-        actions = []
-        actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 2}}})
-        actions.append({"dict": "INCAR", "action": {"_set": {"SIGMA": 0.2}}})
+        actions = [
+            {"dict": "INCAR", "action": {"_set": {"ISMEAR": 2}}},
+            {"dict": "INCAR", "action": {"_set": {"SIGMA": 0.2}}},
+        ]
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": ["IncorrectSmearing"], "actions": actions}

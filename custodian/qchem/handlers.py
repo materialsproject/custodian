@@ -280,8 +280,7 @@ class QChemErrorHandler(ErrorHandler):
             if not self.qcinp.rem.get("sym_ignore") or self.qcinp.rem.get("symmetry"):
                 self.qcinp.rem["sym_ignore"] = "true"
                 self.qcinp.rem["symmetry"] = "false"
-                actions.append({"sym_ignore": "true"})
-                actions.append({"symmetry": "false"})
+                actions.extend(({"sym_ignore": "true"}, {"symmetry": "false"}))
             else:
                 print("Not sure how else to fix a failed coordinate transformation")
 
@@ -295,15 +294,13 @@ class QChemErrorHandler(ErrorHandler):
             # "run_nbo6" has to change to "nbo_external" in QChem 5.4.2 and later
             del self.qcinp.rem["run_nbo6"]
             self.qcinp.rem["nbo_external"] = "true"
-            actions.append({"run_nbo6": "deleted"})
-            actions.append({"nbo_external": "true"})
+            actions.extend(({"run_nbo6": "deleted"}, {"nbo_external": "true"}))
 
         elif "bad_new_nbo_external_rem" in self.errors:
             # Have to use "run_nbo6" instead of "nbo_external" for QChem 5.4.1 or earlier
             del self.qcinp.rem["nbo_external"]
             self.qcinp.rem["run_nbo6"] = "true"
-            actions.append({"nbo_external": "deleted"})
-            actions.append({"run_nbo6": "true"})
+            actions.extend(({"nbo_external": "deleted"}, {"run_nbo6": "true"}))
 
         elif "esp_chg_fit_error" in self.errors:
             # this error should only be possible if resp_charges or esp_charges is set
