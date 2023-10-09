@@ -8,10 +8,10 @@ nav_exclude: true
 
 This is a script to converge the geometry of a system
 
+## custodian.cli.converge_geometry.do_run(args)
 
-### custodian.cli.converge_geometry.do_run(args)
 Perform the run.
 
+## custodian.cli.converge_geometry.get_runs(args)
 
-### custodian.cli.converge_geometry.get_runs(args)
 Get the runs.
