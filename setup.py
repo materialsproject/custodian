@@ -33,6 +33,7 @@ setup(
     license="MIT",
     description="A simple JIT job management framework in Python.",
     long_description=long_desc,
+    long_description_content_type="text/markdown",
     keywords=["jit", "just-in-time", "job", "management", "vasp"],
     classifiers=[
         "Programming Language :: Python :: 3",
