@@ -6,6 +6,28 @@ nav_order: 2
 
 # Change Log
 
+## 2023.10.9
+* PR #293 from @samblau (#293)
+    A bug was introduced during the recent Minor Q-Chem updates PR:
+    ```diff
+    - os.mkdir(local_scratch, exist_ok=True)
+    + os.makedirs(local_scratch, exist_ok=True)
+    ```
+    I would appreciate it if a new version could please be released after this PR is merged. Thanks!
+* PR #292 from @samblau (#292)
+    This PR fixes a few bugs in the Q-Chem error handlers, adds one new handler, adds some additional tests, and slightly extends post processing scratch file handling.
+* PR #285 from @janosh (#285)
+    7b0c061a fix `MeshSymmetryErrorHandler` treating `ISYM=-1` as symmetry ON
+    72ac1213 `PositiveEnergyErrorHandler` don't decrease `POTIM` for static calcs
+* PR #284 from @janosh (#284)
+    225a1e8d UnconvergedErrorHandler only set algo to normal if ISMEAR>=0
+    608530b2 mv custodian/feff/tests/test_handler{,s}.py
+    c11ab49e tweak bravais error handling in VaspErrorHandler
+    283fe9d2 improve den-/tet error handling in case of not using kspacing
+    bc022852 fix VaspErrorHandlerTest.test_bravais
+* PR #283 from @janosh (#283)
+    When running VASP with `INCAR` tag `kspacing` instead of a `KPOINTS` file and encountering `brmix` 2 or 3 times. Reported by @esoteric-ephemera in atomate2 r2SCAN workflow.
+
 ## v2023.7.22
 
 - Fix for LargeSigmaHandler. Now defaults to ISMEAR=1 and fallback to ISMEAR=0 if SIGMA has been modified

@@ -100,33 +100,40 @@ def update_changelog(ctx, version=None, sim=False):
     lines = []
     misc = []
     for line in output.decode("utf-8").strip().split("\n"):
-        m = re.match(r"Merge pull request \#(\d+) from (.*)", line)
+        m = re.search(r"\(\#(\d+)\)", line)
         if m:
             pr_number = m.group(1)
-            contrib, pr_name = m.group(2).split("/", 1)
+            pr_name = m.group().rsplit(r"\(", 1)[0]
             response = requests.get(f"https://api.github.com/repos/materialsproject/custodian/pulls/{pr_number}")
-            lines.append(f"* PR #{pr_number} from @{contrib} {pr_name}")
-            if "body" in response.json():
-                for ll in response.json()["body"].split("\n"):
-                    ll = ll.strip()
-                    if ll in ["", "## Summary"]:
-                        continue
-                    if ll.startswith(("## Checklist", "## TODO")):
-                        break
-                    lines.append(f"    {ll}")
-        misc.append(line)
-    with open("docs_rst/changelog.md") as f:
+            try:
+                d = response.json()
+                contrib = d["user"]["login"]
+                lines.append(f"* PR #{pr_number} from @{contrib} {pr_name}")
+                if "body" in response.json():
+                    for ll in response.json()["body"].split("\n"):
+                        ll = ll.strip()
+                        if ll in ["", "## Summary"]:
+                            continue
+                        if ll.startswith(("## Checklist", "## TODO")):
+                            break
+                        lines.append(f"    {ll}")
+            except:
+                pass
+        else:
+            misc.append("- " + line)
+    with open("docs/changelog.md") as f:
         contents = f.read()
-    line = "=========="
-    toks = contents.split(line)
-    head = f"\n\nv{version}\n" + "-" * (len(version) + 1) + "\n"
-    toks.insert(-1, head + "\n".join(lines))
+    head = "# Change Log"
+    i = contents.find(head)
+    i += len(head)
+
+    contents = contents[0:i] + f"\n\n## {NEW_VER}\n" + "\n".join(lines) + contents[i:]
     if not sim:
-        with open("docs_rst/changelog.md", "w") as f:
-            f.write(toks[0] + line + "".join(toks[1:]))
-        ctx.run("open docs_rst/changelog.md")
+        with open("docs/changelog.md", "w") as f:
+            f.write(contents)
+        ctx.run("open docs/changelog.md")
     else:
-        print(toks[0] + line + "".join(toks[1:]))
+        print(contents)
     print("The following commit messages were not included...")
     print("\n".join(misc))
 
