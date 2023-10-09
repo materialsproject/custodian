@@ -58,7 +58,7 @@ isort.split-on-trailing-comma = false
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401"]
 "*/tests/*" = ["D"]
-"tasks.py" = ["D"]
+"tasks.py" = ["D", "E"]
 
 [tool.pytest.ini_options]
 addopts = "--color=yes -p no:warnings --import-mode=importlib"
