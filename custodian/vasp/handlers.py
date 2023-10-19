@@ -1444,7 +1444,7 @@ class NonConvergingErrorHandler(ErrorHandler):
 
         # NOTE: This is the amin error handler
         # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
-        if np.max(Structure.from_file("CONTCAR").structure.lattice.abc) > 50.0 and amin > 0.01:
+        if np.max(Structure.from_file("CONTCAR").lattice.abc) > 50.0 and amin > 0.01:
             actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}})
 
         # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
