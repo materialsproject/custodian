@@ -11,7 +11,7 @@ with open("README.md") as f:
 setup(
     name="custodian",
     packages=find_packages(),
-    version="2023.7.22",
+    version="2023.10.9",
     install_requires=["monty>=2.0.6", "ruamel.yaml>=0.15.6", "sentry-sdk>=0.8.0", "psutil"],
     extras_require={
         "vasp, nwchem, qchem": ["pymatgen>=2019.8.23"],
@@ -33,6 +33,7 @@ setup(
     license="MIT",
     description="A simple JIT job management framework in Python.",
     long_description=long_desc,
+    long_description_content_type="text/markdown",
     keywords=["jit", "just-in-time", "job", "management", "vasp"],
     classifiers=[
         "Programming Language :: Python :: 3",

@@ -13,7 +13,7 @@ from pymatgen.io.vasp import Incar, Kpoints, Poscar
 from custodian.vasp.jobs import GenerateVaspInputJob, VaspJob, VaspNEBJob
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")
-pymatgen.core.SETTINGS["PMG_VASP_PSP_DIR"] = os.path.abspath(test_dir)  # type: ignore
+pymatgen.core.SETTINGS["PMG_VASP_PSP_DIR"] = os.path.abspath(test_dir)
 
 
 class VaspJobTest(unittest.TestCase):

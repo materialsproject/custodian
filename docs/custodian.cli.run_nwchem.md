@@ -8,10 +8,10 @@ nav_exclude: true
 
 Basic script to run nwchem job.
 
+## custodian.cli.run_nwchem.do_run(args)
 
-### custodian.cli.run_nwchem.do_run(args)
 Do the run.
 
+## custodian.cli.run_nwchem.main()
 
-### custodian.cli.run_nwchem.main()
 Main method

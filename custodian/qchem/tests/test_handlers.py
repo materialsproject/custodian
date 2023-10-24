@@ -7,6 +7,11 @@ from pymatgen.io.qchem.inputs import QCInput
 
 from custodian.qchem.handlers import QChemErrorHandler
 
+try:
+    from openbabel import openbabel as ob
+except ImportError:
+    ob = None
+
 __author__ = "Samuel Blau, Brandon Woods, Shyam Dwaraknath, Ryan Kingsbury"
 __copyright__ = "Copyright 2018, The Materials Project"
 __version__ = "0.1"
@@ -20,11 +25,6 @@ test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files
 
 scr_dir = os.path.join(test_dir, "scr")
 cwd = os.getcwd()
-
-try:
-    from openbabel import openbabel as ob
-except ImportError:
-    ob = None
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
@@ -399,6 +399,36 @@ class QChemErrorHandlerTest(TestCase):
             {"geom_opt_hessian": "deleted"},
         ]
         self._check_equivalent_inputs(os.path.join(test_dir, "OOS_read_hess_next.qin"), "mol.qin")
+
+    def test_gdm_neg_precon_error(self):
+        shutil.copyfile(
+            os.path.join(test_dir, "gdm_neg_precon_error.qin.gz"),
+            os.path.join(scr_dir, "mol.qin.gz"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "gdm_neg_precon_error.qout.gz"),
+            os.path.join(scr_dir, "mol.qout.gz"),
+        )
+        h = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
+        h.check()
+        d = h.correct()
+        assert d["errors"] == ["gdm_neg_precon_error"]
+        assert d["actions"] == [{"molecule": "molecule_from_last_geometry"}]
+
+    def test_fileman_cpscf_nseg_error(self):
+        shutil.copyfile(
+            os.path.join(test_dir, "fileman_cpscf.qin.gz"),
+            os.path.join(scr_dir, "mol.qin.gz"),
+        )
+        shutil.copyfile(
+            os.path.join(test_dir, "fileman_cpscf.qout.gz"),
+            os.path.join(scr_dir, "mol.qout.gz"),
+        )
+        h = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
+        h.check()
+        d = h.correct()
+        assert d["errors"] == ["premature_end_FileMan_error"]
+        assert d["actions"] == [{"cpscf_nseg": "3"}]
 
     def tearDown(self):
         os.chdir(cwd)

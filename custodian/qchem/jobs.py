@@ -15,6 +15,11 @@ from pymatgen.io.qchem.sets import OptSet
 from custodian.custodian import Job
 from custodian.qchem.utils import perturb_coordinates, vector_list_diff
 
+try:
+    from openbabel import openbabel as ob
+except ImportError:
+    ob = None
+
 __author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath, Evan Spotte-Smith"
 __copyright__ = "Copyright 2018, The Materials Project"
 __version__ = "0.1"
@@ -23,11 +28,6 @@ __email__ = "samblau1@gmail.com"
 __status__ = "Alpha"
 __date__ = "3/20/18"
 __credits__ = "Xiaohui Qu"
-
-try:
-    from openbabel import openbabel as ob
-except ImportError:
-    ob = None
 
 
 class QCJob(Job):
@@ -131,7 +131,7 @@ class QCJob(Job):
     def postprocess(self):
         """Renames and removes scratch files after running QChem."""
         scratch_dir = os.path.join(os.environ["QCSCRATCH"], "scratch")
-        for file in ["HESS", "GRAD", "plots/dens.0.cube"]:
+        for file in ["HESS", "GRAD", "plots/dens.0.cube", "131.0", "53.0", "132.0"]:
             file_path = os.path.join(scratch_dir, file)
             if os.path.exists(file_path):
                 shutil.copy(file_path, os.getcwd())
@@ -161,6 +161,9 @@ class QCJob(Job):
         if os.path.exists(os.path.join(os.environ["QCSCRATCH"], "132.0")):
             os.mkdir(local_scratch)
             shutil.move(os.path.join(os.environ["QCSCRATCH"], "132.0"), local_scratch)
+        if os.path.exists(os.path.join(os.environ["QCSCRATCH"], "53.0")):
+            os.makedirs(local_scratch, exist_ok=True)
+            shutil.move(os.path.join(os.environ["QCSCRATCH"], "53.0"), local_scratch)
         with open(self.qclog_file, "w") as qclog:
             return subprocess.Popen(self.current_command, stdout=qclog, shell=True)  # pylint: disable=R1732
 
