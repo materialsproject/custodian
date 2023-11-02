@@ -16,7 +16,6 @@ setup(
     extras_require={
         "vasp, nwchem, qchem": ["pymatgen>=2019.8.23"],
         "dev": [
-            "black",
             "mypy",
             "pre-commit",
             "pytest-cov",
