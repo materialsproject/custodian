@@ -5,7 +5,7 @@ import subprocess
 import unittest
 
 import pytest
-from ruamel import yaml
+from ruamel.yaml import YAML
 
 from custodian.custodian import (
     Custodian,
@@ -301,7 +301,7 @@ custodian_params:
 
         os.environ["TMPDIR"] = "/tmp/random"
         os.environ["PBS_NODEFILE"] = "whatever"
-        d = yaml.load(spec)
+        d = YAML(typ="rt").load(spec)
         c = Custodian.from_spec(d)
         assert c.jobs[0].vasp_cmd[2] == "whatever"
         assert c.scratch_dir == "/tmp/random"
