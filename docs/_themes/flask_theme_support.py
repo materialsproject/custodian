@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # flasky extensions. flasky pygments style based on tango style
 from pygments.style import Style
 from pygments.token import (

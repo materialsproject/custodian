@@ -301,7 +301,7 @@ custodian_params:
 
         os.environ["TMPDIR"] = "/tmp/random"
         os.environ["PBS_NODEFILE"] = "whatever"
-        d = yaml.safe_load(spec)
+        d = yaml.load(spec)
         c = Custodian.from_spec(d)
         assert c.jobs[0].vasp_cmd[2] == "whatever"
         assert c.scratch_dir == "/tmp/random"

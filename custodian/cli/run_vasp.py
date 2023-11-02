@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """
 This is a master vasp running script to perform various combinations of VASP
 runs.
@@ -22,7 +20,7 @@ def load_class(mod, name):
     if len(toks) == 2:
         for p in toks[-1].split(","):
             ptoks = p.split("=")
-            params[ptoks[0]] = yaml.safe_load(ptoks[1])
+            params[ptoks[0]] = yaml.load(ptoks[1])
     elif len(toks) > 2:
         print("Bad handler specification")
         sys.exit(-1)

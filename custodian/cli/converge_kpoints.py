@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """This is a master vasp running script to converging kpoints for a calculation."""
 
 import logging
