@@ -78,7 +78,9 @@ class VaspErrorHandler(ErrorHandler):
         "incorrect_shift": ["Could not get correct shifts"],
         "real_optlay": ["REAL_OPTLAY: internal error", "REAL_OPT: internal ERROR"],
         "rspher": ["ERROR RSPHER"],
-        "dentet": ["DENTET"],
+        "dentet": ["DENTET"],  # reason for this warning is that the Fermi level cannot be determined accurately
+        # enough by the tetrahedron method
+        # https://vasp.at/forum/viewtopic.php?f=3&t=416&p=4047&hilit=dentet#p4047
         "too_few_bands": ["TOO FEW BANDS"],
         "triple_product": ["ERROR: the triple product of the basis vectors"],
         "rot_matrix": ["Found some non-integer element in rotation matrix", "SGRCON"],
@@ -133,7 +135,7 @@ class VaspErrorHandler(ErrorHandler):
                 lines:
 
                 ```
-                subset = list(VaspErrorHandler().error_msgs.keys())
+                subset = list(VaspErrorHandler().error_msgs)
                 subset.remove("eddrmm")
 
                 handler = VaspErrorHandler(errors_subset_to_catch=subset)
@@ -145,7 +147,7 @@ class VaspErrorHandler(ErrorHandler):
         self.output_filename = output_filename
         self.errors = set()
         self.error_count = Counter()
-        self.errors_subset_to_catch = errors_subset_to_catch or list(VaspErrorHandler.error_msgs.keys())
+        self.errors_subset_to_catch = errors_subset_to_catch or list(VaspErrorHandler.error_msgs)
         self.vtst_fixes = vtst_fixes
         self.logger = logging.getLogger(self.__class__.__name__)
 
