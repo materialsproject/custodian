@@ -78,7 +78,9 @@ class VaspErrorHandler(ErrorHandler):
         "incorrect_shift": ["Could not get correct shifts"],
         "real_optlay": ["REAL_OPTLAY: internal error", "REAL_OPT: internal ERROR"],
         "rspher": ["ERROR RSPHER"],
-        "dentet": ["DENTET"],
+        "dentet": ["DENTET"],  # reason for this warning is that the Fermi level cannot be determined accurately
+        # enough by the tetrahedron method
+        # https://vasp.at/forum/viewtopic.php?f=3&t=416&p=4047&hilit=dentet#p4047
         "too_few_bands": ["TOO FEW BANDS"],
         "triple_product": ["ERROR: the triple product of the basis vectors"],
         "rot_matrix": ["Found some non-integer element in rotation matrix", "SGRCON"],
@@ -133,7 +135,7 @@ class VaspErrorHandler(ErrorHandler):
                 lines:
 
                 ```
-                subset = list(VaspErrorHandler().error_msgs.keys())
+                subset = list(VaspErrorHandler().error_msgs)
                 subset.remove("eddrmm")
 
                 handler = VaspErrorHandler(errors_subset_to_catch=subset)
@@ -145,7 +147,7 @@ class VaspErrorHandler(ErrorHandler):
         self.output_filename = output_filename
         self.errors = set()
         self.error_count = Counter()
-        self.errors_subset_to_catch = errors_subset_to_catch or list(VaspErrorHandler.error_msgs.keys())
+        self.errors_subset_to_catch = errors_subset_to_catch or list(VaspErrorHandler.error_msgs)
         self.vtst_fixes = vtst_fixes
         self.logger = logging.getLogger(self.__class__.__name__)
 
@@ -1158,12 +1160,13 @@ class IncorrectSmearingHandler(ErrorHandler):
         return {"errors": ["IncorrectSmearing"], "actions": actions}
 
 
-class ScanMetalHandler(ErrorHandler):
+class KspacingMetalHandler(ErrorHandler):
     """
     Check if a SCAN calculation is a metal (zero bandgap) but has been run with
     a KSPACING value appropriate for semiconductors. If this occurs, this handler
     will rerun the calculation using the KSPACING setting appropriate for metals
-    (KSPACING=0.22). Note that this handler depends on values set in MPScanRelaxSet.
+    (KSPACING=0.22). Note that this handler depends on values set by set_kspacing
+    logic in MPScanRelaxSet.
     """
 
     is_monitor = False
@@ -1182,8 +1185,9 @@ class ScanMetalHandler(ErrorHandler):
         """Check for error."""
         try:
             v = Vasprun(self.output_filename)
-            # check whether bandgap is zero and tetrahedron smearing was used
-            if v.eigenvalue_band_properties[0] == 0 and v.incar.get("KSPACING", 1) > 0.22:
+            # check whether bandgap is zero and KSPACING is too large
+            # using 0 as fallback value for KSPACING so that this handler does not trigger if KSPACING is not set
+            if v.eigenvalue_band_properties[0] == 0 and v.incar.get("KSPACING", 0) > 0.22:
                 return True
         except Exception:
             pass
@@ -1206,6 +1210,20 @@ class ScanMetalHandler(ErrorHandler):
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": ["ScanMetal"], "actions": actions}
+
+
+class ScanMetalHandler(KspacingMetalHandler):
+    """ScanMetalHandler was renamed because MP GGA workflow might also adopt kspacing
+    in the future. Keeping this alias during a deprecation period for backwards compatibility.
+    """
+
+    def __init__(self, *args, **kwargs) -> None:
+        warnings.warn(
+            "ScanMetalHandler is deprecated and will be removed in a future release. "
+            "Use KspacingMetalHandler instead.",
+            DeprecationWarning,
+        )
+        super().__init__(*args, **kwargs)
 
 
 class LargeSigmaHandler(ErrorHandler):
