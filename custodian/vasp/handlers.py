@@ -1183,8 +1183,9 @@ class KspacingMetalHandler(ErrorHandler):
         """Check for error."""
         try:
             v = Vasprun(self.output_filename)
-            # check whether bandgap is zero and tetrahedron smearing was used
-            if v.eigenvalue_band_properties[0] == 0 and v.incar.get("KSPACING", 1) > 0.22:
+            # check whether bandgap is zero and KSPACING is too large
+            # using 0 as fallback value for KSPACING so that this handler does not trigger if KSPACING is not set
+            if v.eigenvalue_band_properties[0] == 0 and v.incar.get("KSPACING", 0) > 0.22:
                 return True
         except Exception:
             pass
