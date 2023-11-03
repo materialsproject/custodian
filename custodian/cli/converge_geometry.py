@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """This is a script to converge the geometry of a system."""
 
 import logging

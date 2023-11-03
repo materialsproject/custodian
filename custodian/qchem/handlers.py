@@ -126,9 +126,7 @@ class QChemErrorHandler(ErrorHandler):
             elif int(self.qcinp.rem.get("geom_opt_max_cycles", 50)) < self.geom_max_cycles:
                 self.qcinp.rem["geom_opt_max_cycles"] = self.geom_max_cycles
                 if str(self.qcinp.rem.get("geom_opt2", "none")) == "3" or self.outdata["version"] == "6":
-                    self.qcinp.geom_opt[  # pylint: disable=unsupported-assignment-operation
-                        "maxiter"
-                    ] = self.geom_max_cycles
+                    self.qcinp.geom_opt["maxiter"] = self.geom_max_cycles  # pylint: disable=unsupported-assignment-operation
                 actions.append({"geom_max_cycles:": self.geom_max_cycles})
                 if "molecule_from_last_geometry" in self.outdata:
                     self.qcinp.molecule = self.outdata.get("molecule_from_last_geometry")
@@ -194,9 +192,7 @@ class QChemErrorHandler(ErrorHandler):
 
             elif self.outdata["version"] == "6" and self.qcinp.rem.get("geom_opt_driver", "libopt3") != "optimize":
                 if self.qcinp.geom_opt["coordinates"] == "redundant":
-                    self.qcinp.geom_opt[  # pylint: disable=unsupported-assignment-operation
-                        "coordinates"
-                    ] = "delocalized"
+                    self.qcinp.geom_opt["coordinates"] = "delocalized"  # pylint: disable=unsupported-assignment-operation
                     actions.append({"coordinates": "delocalized"})
                     if self.qcinp.geom_opt.get("initial_hessian", "none") != "read":
                         self.qcinp.geom_opt["initial_hessian"] = "model"

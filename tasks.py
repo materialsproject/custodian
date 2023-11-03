@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Deployment file to facilitate releases of custodian.
 """

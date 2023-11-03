@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """Basic script to run nwchem job."""
 
 import logging
