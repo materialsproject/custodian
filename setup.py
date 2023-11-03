@@ -14,7 +14,9 @@ setup(
     version="2023.10.9",
     install_requires=["monty>=2.0.6", "ruamel.yaml>=0.15.6", "sentry-sdk>=0.8.0", "psutil"],
     extras_require={
-        "vasp, nwchem, qchem": ["pymatgen>=2019.8.23"],
+        "vasp": ["pymatgen"],
+        "nwchem": ["pymatgen"],
+        "qchem": ["pymatgen"],
         "dev": ["mypy", "pre-commit", "pytest-cov", "pytest", "ruff"],
     },
     package_data={},
