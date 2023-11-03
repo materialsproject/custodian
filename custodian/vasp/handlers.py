@@ -1158,12 +1158,13 @@ class IncorrectSmearingHandler(ErrorHandler):
         return {"errors": ["IncorrectSmearing"], "actions": actions}
 
 
-class ScanMetalHandler(ErrorHandler):
+class KspacingMetalHandler(ErrorHandler):
     """
     Check if a SCAN calculation is a metal (zero bandgap) but has been run with
     a KSPACING value appropriate for semiconductors. If this occurs, this handler
     will rerun the calculation using the KSPACING setting appropriate for metals
-    (KSPACING=0.22). Note that this handler depends on values set in MPScanRelaxSet.
+    (KSPACING=0.22). Note that this handler depends on values set by set_kspacing
+    logic in MPScanRelaxSet.
     """
 
     is_monitor = False
@@ -1206,6 +1207,20 @@ class ScanMetalHandler(ErrorHandler):
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": ["ScanMetal"], "actions": actions}
+
+
+class ScanMetalHandler(KspacingMetalHandler):
+    """ScanMetalHandler was renamed because MP GGA workflow might also adopt kspacing
+    in the future. Keeping this alias during a deprecation period for backwards compatibility.
+    """
+
+    def __init__(self, *args, **kwargs) -> None:
+        warnings.warn(
+            "ScanMetalHandler is deprecated and will be removed in a future release. "
+            "Use KspacingMetalHandler instead.",
+            DeprecationWarning,
+        )
+        super().__init__(*args, **kwargs)
 
 
 class LargeSigmaHandler(ErrorHandler):
