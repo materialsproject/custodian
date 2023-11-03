@@ -17,12 +17,14 @@ import unittest
 
 import pytest
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
+from pymatgen.util.testing import PymatgenTest
 
 from custodian.vasp.handlers import (
     AliasingErrorHandler,
     DriftErrorHandler,
     FrozenJobErrorHandler,
     IncorrectSmearingHandler,
+    KspacingMetalHandler,
     LargeSigmaHandler,
     LrfCommutatorHandler,
     MeshSymmetryErrorHandler,
@@ -809,7 +811,7 @@ class IncorrectSmearingHandlerFermiTest(unittest.TestCase):
         os.chdir(cwd)
 
 
-class ScanMetalHandlerTest(unittest.TestCase):
+class KspacingMetalHandlerTest(PymatgenTest):
     def setUp(self):
         os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
         os.chdir(test_dir)
@@ -820,12 +822,23 @@ class ScanMetalHandlerTest(unittest.TestCase):
         shutil.copy("vasprun.xml", "vasprun.xml.orig")
 
     def test_check_correct_scan_metal(self):
-        h = ScanMetalHandler()
+        h = KspacingMetalHandler()
         assert h.check()
         d = h.correct()
         assert d["errors"] == ["ScanMetal"]
         assert Incar.from_file("INCAR")["KSPACING"] == 0.22
         os.remove("vasprun.xml")
+
+    def test_check_with_non_kspacing_wf(self):
+        os.chdir(test_dir)
+        shutil.copy("INCAR", f"{self.tmp_path}/INCAR")
+        shutil.copy("vasprun.xml", f"{self.tmp_path}/vasprun.xml")
+        h = KspacingMetalHandler(output_filename=f"{self.tmp_path}/vasprun.xml")
+        assert h.check() is False
+        os.chdir(os.path.join(test_dir, "scan_metal"))
+
+        # TODO (@janosh 2023-11-03) remove when ending ScanMetalHandler deprecation period
+        assert issubclass(ScanMetalHandler, KspacingMetalHandler)
 
     def tearDown(self):
         shutil.move("INCAR.orig", "INCAR")
