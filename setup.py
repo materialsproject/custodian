@@ -15,14 +15,7 @@ setup(
     install_requires=["monty>=2.0.6", "ruamel.yaml>=0.15.6", "sentry-sdk>=0.8.0", "psutil"],
     extras_require={
         "vasp, nwchem, qchem": ["pymatgen>=2019.8.23"],
-        "dev": [
-            "mypy",
-            "pre-commit",
-            "pytest-cov",
-            "pytest-split",
-            "pytest",
-            "ruff",
-        ],
+        "dev": ["mypy", "pre-commit", "pytest-cov", "pytest", "ruff"],
     },
     package_data={},
     author="Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu, Matthew Horton, Samuel M. Blau",
