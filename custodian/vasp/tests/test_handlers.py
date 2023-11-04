@@ -1,19 +1,9 @@
-"""
-Created on Jun 1, 2012
-"""
-
-__author__ = "Shyue Ping Ong, Stephen Dacek"
-__copyright__ = "Copyright 2012, The Materials Project"
-__version__ = "0.1"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "shyue@mit.edu"
-__date__ = "Jun 1, 2012"
-
+"""Created on Jun 1, 2012"""
 import datetime
-import glob
 import os
 import shutil
 import unittest
+from glob import glob
 
 import pytest
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
@@ -37,22 +27,28 @@ from custodian.vasp.handlers import (
     WalltimeHandler,
 )
 
-test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")
+__author__ = "Shyue Ping Ong, Stephen Dacek"
+__copyright__ = "Copyright 2012, The Materials Project"
+__version__ = "0.1"
+__maintainer__ = "Shyue Ping Ong"
+__email__ = "shyue@mit.edu"
+__date__ = "Jun 1, 2012"
 
-cwd = os.getcwd()
+TEST_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")
+CWD = os.getcwd()
 
 
 def clean_dir():
-    for f in glob.glob("error.*.tar.gz"):
+    for f in glob("error.*.tar.gz"):
         os.remove(f)
-    for f in glob.glob("custodian.chk.*.tar.gz"):
+    for f in glob("custodian.chk.*.tar.gz"):
         os.remove(f)
 
 
 class VaspErrorHandlerTest(unittest.TestCase):
     def setUp(self):
-        os.environ["PMG_VASP_PSP_DIR"] = test_dir
-        os.chdir(test_dir)
+        os.environ["PMG_VASP_PSP_DIR"] = TEST_DIR
+        os.chdir(TEST_DIR)
         shutil.copy("INCAR", "INCAR.orig")
         shutil.copy("KPOINTS", "KPOINTS.orig")
         shutil.copy("POSCAR", "POSCAR.orig")
@@ -248,7 +244,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         assert d["errors"] == []
 
     def test_too_few_bands(self):
-        os.chdir(os.path.join(test_dir, "too_few_bands"))
+        os.chdir(os.path.join(TEST_DIR, "too_few_bands"))
         shutil.copy("INCAR", "INCAR.orig")
         h = VaspErrorHandler("vasp.too_few_bands")
         h.check()
@@ -257,11 +253,11 @@ class VaspErrorHandlerTest(unittest.TestCase):
         assert d["actions"] == [{"action": {"_set": {"NBANDS": 501}}, "dict": "INCAR"}]
         clean_dir()
         shutil.move("INCAR.orig", "INCAR")
-        os.chdir(test_dir)
+        os.chdir(TEST_DIR)
 
     def test_rot_matrix(self):
-        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
-        subdir = os.path.join(test_dir, "poscar_error")
+        os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_DIR)
+        subdir = os.path.join(TEST_DIR, "poscar_error")
         os.chdir(subdir)
         shutil.copy("KPOINTS", "KPOINTS.orig")
         h = VaspErrorHandler()
@@ -553,33 +549,33 @@ class VaspErrorHandlerTest(unittest.TestCase):
         assert d["actions"] is None
 
     def tearDown(self):
-        os.chdir(test_dir)
+        os.chdir(TEST_DIR)
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("KPOINTS.orig", "KPOINTS")
         shutil.move("POSCAR.orig", "POSCAR")
         shutil.move("CHGCAR.orig", "CHGCAR")
         clean_dir()
-        os.chdir(cwd)
+        os.chdir(CWD)
 
 
 class AliasingErrorHandlerTest(unittest.TestCase):
     def setUp(self):
-        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
-        os.chdir(test_dir)
+        os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_DIR)
+        os.chdir(TEST_DIR)
         shutil.copy("INCAR", "INCAR.orig")
         shutil.copy("KPOINTS", "KPOINTS.orig")
         shutil.copy("POSCAR", "POSCAR.orig")
         shutil.copy("CHGCAR", "CHGCAR.orig")
 
     def test_aliasing(self):
-        os.chdir(os.path.join(test_dir, "aliasing"))
+        os.chdir(os.path.join(TEST_DIR, "aliasing"))
         shutil.copy("INCAR", "INCAR.orig")
         h = AliasingErrorHandler("vasp.aliasing")
         h.check()
         d = h.correct()
         shutil.move("INCAR.orig", "INCAR")
         clean_dir()
-        os.chdir(test_dir)
+        os.chdir(TEST_DIR)
 
         assert d["errors"] == ["aliasing"]
         assert d["actions"] == [
@@ -589,7 +585,7 @@ class AliasingErrorHandlerTest(unittest.TestCase):
         ]
 
     def test_aliasing_incar(self):
-        os.chdir(os.path.join(test_dir, "aliasing"))
+        os.chdir(os.path.join(TEST_DIR, "aliasing"))
         shutil.copy("INCAR", "INCAR.orig")
         h = AliasingErrorHandler("vasp.aliasing_incar")
         h.check()
@@ -611,23 +607,23 @@ class AliasingErrorHandlerTest(unittest.TestCase):
 
         shutil.move("INCAR.orig", "INCAR")
         clean_dir()
-        os.chdir(test_dir)
+        os.chdir(TEST_DIR)
 
     def tearDown(self):
-        os.chdir(test_dir)
+        os.chdir(TEST_DIR)
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("KPOINTS.orig", "KPOINTS")
         shutil.move("POSCAR.orig", "POSCAR")
         shutil.move("CHGCAR.orig", "CHGCAR")
         clean_dir()
-        os.chdir(cwd)
+        os.chdir(CWD)
 
 
 class UnconvergedErrorHandlerTest(unittest.TestCase):
     def setUp(self):
-        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
-        os.chdir(test_dir)
-        subdir = os.path.join(test_dir, "unconverged")
+        os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_DIR)
+        os.chdir(TEST_DIR)
+        subdir = os.path.join(TEST_DIR, "unconverged")
         os.chdir(subdir)
 
         shutil.copy("INCAR", "INCAR.orig")
@@ -739,14 +735,14 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         shutil.move("POSCAR.orig", "POSCAR")
         shutil.move("CONTCAR.orig", "CONTCAR")
         clean_dir()
-        os.chdir(cwd)
+        os.chdir(CWD)
 
 
 class IncorrectSmearingHandlerTest(unittest.TestCase):
     def setUp(self):
-        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
-        os.chdir(test_dir)
-        subdir = os.path.join(test_dir, "scan_metal")
+        os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_DIR)
+        os.chdir(TEST_DIR)
+        subdir = os.path.join(TEST_DIR, "scan_metal")
         os.chdir(subdir)
 
         shutil.copy("INCAR", "INCAR.orig")
@@ -766,14 +762,14 @@ class IncorrectSmearingHandlerTest(unittest.TestCase):
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("vasprun.xml.orig", "vasprun.xml")
         clean_dir()
-        os.chdir(cwd)
+        os.chdir(CWD)
 
 
 class IncorrectSmearingHandlerStaticTest(unittest.TestCase):
     def setUp(self):
-        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
-        os.chdir(test_dir)
-        subdir = os.path.join(test_dir, "static_smearing")
+        os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_DIR)
+        os.chdir(TEST_DIR)
+        subdir = os.path.join(TEST_DIR, "static_smearing")
         os.chdir(subdir)
 
         shutil.copy("INCAR", "INCAR.orig")
@@ -787,14 +783,14 @@ class IncorrectSmearingHandlerStaticTest(unittest.TestCase):
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("vasprun.xml.orig", "vasprun.xml")
         clean_dir()
-        os.chdir(cwd)
+        os.chdir(CWD)
 
 
 class IncorrectSmearingHandlerFermiTest(unittest.TestCase):
     def setUp(self):
-        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
-        os.chdir(test_dir)
-        subdir = os.path.join(test_dir, "fermi_smearing")
+        os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_DIR)
+        os.chdir(TEST_DIR)
+        subdir = os.path.join(TEST_DIR, "fermi_smearing")
         os.chdir(subdir)
 
         shutil.copy("INCAR", "INCAR.orig")
@@ -808,14 +804,14 @@ class IncorrectSmearingHandlerFermiTest(unittest.TestCase):
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("vasprun.xml.orig", "vasprun.xml")
         clean_dir()
-        os.chdir(cwd)
+        os.chdir(CWD)
 
 
 class KspacingMetalHandlerTest(PymatgenTest):
     def setUp(self):
-        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
-        os.chdir(test_dir)
-        subdir = os.path.join(test_dir, "scan_metal")
+        os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_DIR)
+        os.chdir(TEST_DIR)
+        subdir = os.path.join(TEST_DIR, "scan_metal")
         os.chdir(subdir)
 
         shutil.copy("INCAR", "INCAR.orig")
@@ -830,12 +826,12 @@ class KspacingMetalHandlerTest(PymatgenTest):
         os.remove("vasprun.xml")
 
     def test_check_with_non_kspacing_wf(self):
-        os.chdir(test_dir)
+        os.chdir(TEST_DIR)
         shutil.copy("INCAR", f"{self.tmp_path}/INCAR")
         shutil.copy("vasprun.xml", f"{self.tmp_path}/vasprun.xml")
         h = KspacingMetalHandler(output_filename=f"{self.tmp_path}/vasprun.xml")
         assert h.check() is False
-        os.chdir(os.path.join(test_dir, "scan_metal"))
+        os.chdir(os.path.join(TEST_DIR, "scan_metal"))
 
         # TODO (@janosh 2023-11-03) remove when ending ScanMetalHandler deprecation period
         assert issubclass(ScanMetalHandler, KspacingMetalHandler)
@@ -844,14 +840,14 @@ class KspacingMetalHandlerTest(PymatgenTest):
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("vasprun.xml.orig", "vasprun.xml")
         clean_dir()
-        os.chdir(cwd)
+        os.chdir(CWD)
 
 
 class LargeSigmaHandlerTest(unittest.TestCase):
     def setUp(self):
-        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
-        os.chdir(test_dir)
-        subdir = os.path.join(test_dir, "large_sigma")
+        os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_DIR)
+        os.chdir(TEST_DIR)
+        subdir = os.path.join(TEST_DIR, "large_sigma")
         os.chdir(subdir)
 
         shutil.copy("INCAR", "INCAR.orig")
@@ -869,13 +865,13 @@ class LargeSigmaHandlerTest(unittest.TestCase):
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("vasprun.xml.orig", "vasprun.xml")
         clean_dir()
-        os.chdir(cwd)
+        os.chdir(CWD)
 
 
 class ZpotrfErrorHandlerTest(unittest.TestCase):
     def setUp(self):
-        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
-        os.chdir(test_dir)
+        os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_DIR)
+        os.chdir(TEST_DIR)
         os.chdir("zpotrf")
         shutil.copy("POSCAR", "POSCAR.orig")
         shutil.copy("INCAR", "INCAR.orig")
@@ -924,19 +920,19 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         assert Incar.from_file("INCAR")["ISYM"] == 0
 
     def tearDown(self):
-        os.chdir(test_dir)
+        os.chdir(TEST_DIR)
         os.chdir("zpotrf")
         shutil.move("POSCAR.orig", "POSCAR")
         shutil.move("INCAR.orig", "INCAR")
         os.remove("OSZICAR")
         clean_dir()
-        os.chdir(cwd)
+        os.chdir(CWD)
 
 
 class ZpotrfErrorHandlerSmallTest(unittest.TestCase):
     def setUp(self):
-        os.environ.setdefault("PMG_VASP_PSP_DIR", test_dir)
-        os.chdir(test_dir)
+        os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_DIR)
+        os.chdir(TEST_DIR)
         os.chdir("zpotrf_small")
         shutil.copy("POSCAR", "POSCAR.orig")
         shutil.copy("INCAR", "INCAR.orig")
@@ -953,18 +949,18 @@ class ZpotrfErrorHandlerSmallTest(unittest.TestCase):
         ]
 
     def tearDown(self):
-        os.chdir(test_dir)
+        os.chdir(TEST_DIR)
         os.chdir("zpotrf_small")
         shutil.move("POSCAR.orig", "POSCAR")
         shutil.move("INCAR.orig", "INCAR")
         os.remove("OSZICAR")
         clean_dir()
-        os.chdir(cwd)
+        os.chdir(CWD)
 
 
 class WalltimeHandlerTest(unittest.TestCase):
     def setUp(self):
-        os.chdir(os.path.join(test_dir, "postprocess"))
+        os.chdir(os.path.join(TEST_DIR, "postprocess"))
         if "CUSTODIAN_WALLTIME_START" in os.environ:
             os.environ.pop("CUSTODIAN_WALLTIME_START")
 
@@ -1017,13 +1013,13 @@ class WalltimeHandlerTest(unittest.TestCase):
     def tearDown(cls):
         if "CUSTODIAN_WALLTIME_START" in os.environ:
             os.environ.pop("CUSTODIAN_WALLTIME_START")
-        os.chdir(cwd)
+        os.chdir(CWD)
 
 
 class PositiveEnergyHandlerTest(unittest.TestCase):
     def setUp(self):
-        os.chdir(test_dir)
-        self.subdir = os.path.join(test_dir, "positive_energy")
+        os.chdir(TEST_DIR)
+        self.subdir = os.path.join(TEST_DIR, "positive_energy")
         os.chdir(self.subdir)
         shutil.copy("INCAR", "INCAR.orig")
         shutil.copy("POSCAR", "POSCAR.orig")
@@ -1044,13 +1040,13 @@ class PositiveEnergyHandlerTest(unittest.TestCase):
     def tearDownClass(cls):
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("POSCAR.orig", "POSCAR")
-        os.chdir(cwd)
+        os.chdir(CWD)
 
 
 class PotimHandlerTest(unittest.TestCase):
     def setUp(self):
-        os.chdir(test_dir)
-        self.subdir = os.path.join(test_dir, "potim")
+        os.chdir(TEST_DIR)
+        self.subdir = os.path.join(TEST_DIR, "potim")
         os.chdir(self.subdir)
         shutil.copy("INCAR", "INCAR.orig")
         shutil.copy("POSCAR", "POSCAR.orig")
@@ -1076,12 +1072,12 @@ class PotimHandlerTest(unittest.TestCase):
     def tearDownClass(cls):
         shutil.move("INCAR.orig", "INCAR")
         shutil.move("POSCAR.orig", "POSCAR")
-        os.chdir(cwd)
+        os.chdir(CWD)
 
 
 class LrfCommHandlerTest(unittest.TestCase):
     def setUp(self):
-        os.chdir(test_dir)
+        os.chdir(TEST_DIR)
         os.chdir("lrf_comm")
         for f in ["INCAR", "OUTCAR", "std_err.txt"]:
             shutil.copy(f, f + ".orig")
@@ -1095,17 +1091,17 @@ class LrfCommHandlerTest(unittest.TestCase):
         assert vi["INCAR"]["LPEAD"] is True
 
     def tearDown(self):
-        os.chdir(test_dir)
+        os.chdir(TEST_DIR)
         os.chdir("lrf_comm")
         for f in ["INCAR", "OUTCAR", "std_err.txt"]:
             shutil.move(f + ".orig", f)
         clean_dir()
-        os.chdir(cwd)
+        os.chdir(CWD)
 
 
 class KpointsTransHandlerTest(unittest.TestCase):
     def setUp(self):
-        os.chdir(test_dir)
+        os.chdir(TEST_DIR)
         shutil.copy("KPOINTS", "KPOINTS.orig")
 
     def test_kpoints_trans(self):
@@ -1123,12 +1119,12 @@ class KpointsTransHandlerTest(unittest.TestCase):
     def tearDown(self):
         shutil.move("KPOINTS.orig", "KPOINTS")
         clean_dir()
-        os.chdir(cwd)
+        os.chdir(CWD)
 
 
 class OutOfMemoryHandlerTest(unittest.TestCase):
     def setUp(self):
-        os.chdir(test_dir)
+        os.chdir(TEST_DIR)
         shutil.copy("INCAR", "INCAR.orig")
 
     def test_oom(self):
@@ -1145,12 +1141,12 @@ class OutOfMemoryHandlerTest(unittest.TestCase):
     def tearDown(self):
         shutil.move("INCAR.orig", "INCAR")
         clean_dir()
-        os.chdir(cwd)
+        os.chdir(CWD)
 
 
 class DriftErrorHandlerTest(unittest.TestCase):
     def setUp(self):
-        os.chdir(os.path.abspath(test_dir))
+        os.chdir(os.path.abspath(TEST_DIR))
         os.chdir("drift")
         shutil.copy("INCAR", "INCAR.orig")
 
@@ -1190,4 +1186,4 @@ class DriftErrorHandlerTest(unittest.TestCase):
     def tearDown(self):
         shutil.move("INCAR.orig", "INCAR")
         clean_dir()
-        os.chdir(cwd)
+        os.chdir(CWD)
