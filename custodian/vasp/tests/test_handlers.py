@@ -874,16 +874,20 @@ class LargeSigmaHandlerTest(unittest.TestCase):
         os.chdir(CWD)
 
 
-class ZpotrfErrorHandlerTest(unittest.TestCase):
+class ZpotrfErrorHandlerTest(PymatgenTest):
     def setUp(self):
-        os.chdir(TEST_DIR)
-        os.chdir("zpotrf")
-        shutil.copy("POSCAR", "POSCAR.orig")
-        shutil.copy("INCAR", "INCAR.orig")
+        copy_tmp_files(
+            self.tmp_path,
+            "zpotrf/INCAR",
+            "zpotrf/POSCAR",
+            "zpotrf/OSZICAR.empty",
+            "zpotrf/vasp.out",
+            "zpotrf/OSZICAR.one_step",
+        )
 
     def test_first_step(self):
         shutil.copy("OSZICAR.empty", "OSZICAR")
-        s1 = Structure.from_file("POSCAR.orig")
+        s1 = Structure.from_file("POSCAR")
         handler = VaspErrorHandler("vasp.out")
         assert handler.check() is True
         dct = handler.correct()
@@ -897,7 +901,7 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
 
     def test_potim_correction(self):
         shutil.copy("OSZICAR.one_step", "OSZICAR")
-        s1 = Structure.from_file("POSCAR.orig")
+        s1 = Structure.from_file("POSCAR")
         handler = VaspErrorHandler("vasp.out")
         assert handler.check() is True
         dct = handler.correct()
@@ -909,7 +913,7 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
 
     def test_static_run_correction(self):
         shutil.copy("OSZICAR.empty", "OSZICAR")
-        s1 = Structure.from_file("POSCAR.orig")
+        s1 = Structure.from_file("POSCAR")
         incar = Incar.from_file("INCAR")
 
         # Test for NSW 0
@@ -924,22 +928,16 @@ class ZpotrfErrorHandlerTest(unittest.TestCase):
         assert s2.volume == pytest.approx(64.346221)
         assert Incar.from_file("INCAR")["ISYM"] == 0
 
-    def tearDown(self):
-        os.chdir(TEST_DIR)
-        os.chdir("zpotrf")
-        shutil.move("POSCAR.orig", "POSCAR")
-        shutil.move("INCAR.orig", "INCAR")
-        os.remove("OSZICAR")
-        clean_dir()
-        os.chdir(CWD)
 
-
-class ZpotrfErrorHandlerSmallTest(unittest.TestCase):
+class ZpotrfErrorHandlerSmallTest(PymatgenTest):
     def setUp(self):
-        os.chdir(TEST_DIR)
-        os.chdir("zpotrf_small")
-        shutil.copy("POSCAR", "POSCAR.orig")
-        shutil.copy("INCAR", "INCAR.orig")
+        copy_tmp_files(
+            self.tmp_path,
+            "zpotrf_small/INCAR",
+            "zpotrf_small/POSCAR",
+            "zpotrf_small/OSZICAR.empty",
+            "zpotrf_small/vasp.out",
+        )
 
     def test_small(self):
         handler = VaspErrorHandler("vasp.out")
@@ -952,30 +950,20 @@ class ZpotrfErrorHandlerSmallTest(unittest.TestCase):
             {"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}},
         ]
 
-    def tearDown(self):
-        os.chdir(TEST_DIR)
-        os.chdir("zpotrf_small")
-        shutil.move("POSCAR.orig", "POSCAR")
-        shutil.move("INCAR.orig", "INCAR")
-        os.remove("OSZICAR")
-        clean_dir()
-        os.chdir(CWD)
 
-
-class WalltimeHandlerTest(unittest.TestCase):
+class WalltimeHandlerTest(PymatgenTest):
     def setUp(self):
-        os.chdir(os.path.join(TEST_DIR, "postprocess"))
-        if "CUSTODIAN_WALLTIME_START" in os.environ:
-            os.environ.pop("CUSTODIAN_WALLTIME_START")
+        os.chdir(f"{TEST_DIR}/postprocess")
+        os.environ.pop("CUSTODIAN_WALLTIME_START", None)
 
     def test_walltime_start(self):
         # checks the walltime handlers starttime initialization
         handler = WalltimeHandler(wall_time=3600)
         new_starttime = handler.start_time
-        assert os.environ.get("CUSTODIAN_WALLTIME_START") == new_starttime.strftime("%a %b %dct %H:%M:%S UTC %Y")
+        assert os.environ.get("CUSTODIAN_WALLTIME_START") == new_starttime.strftime("%a %b %d %H:%M:%S UTC %Y")
         # Test that walltime persists if new handler is created
         handler = WalltimeHandler(wall_time=3600)
-        assert os.environ.get("CUSTODIAN_WALLTIME_START") == new_starttime.strftime("%a %b %dct %H:%M:%S UTC %Y")
+        assert os.environ.get("CUSTODIAN_WALLTIME_START") == new_starttime.strftime("%a %b %d %H:%M:%S UTC %Y")
 
     def test_check_and_correct(self):
         # Try a 1 hr wall time with a 2 min buffer
@@ -1015,18 +1003,13 @@ class WalltimeHandlerTest(unittest.TestCase):
 
     @classmethod
     def tearDown(cls):
-        if "CUSTODIAN_WALLTIME_START" in os.environ:
-            os.environ.pop("CUSTODIAN_WALLTIME_START")
+        os.environ.pop("CUSTODIAN_WALLTIME_START", None)
         os.chdir(CWD)
 
 
-class PositiveEnergyHandlerTest(unittest.TestCase):
+class PositiveEnergyHandlerTest(PymatgenTest):
     def setUp(self):
-        os.chdir(TEST_DIR)
-        self.subdir = os.path.join(TEST_DIR, "positive_energy")
-        os.chdir(self.subdir)
-        shutil.copy("INCAR", "INCAR.orig")
-        shutil.copy("POSCAR", "POSCAR.orig")
+        copy_tmp_files(self.tmp_path, "positive_energy/INCAR", "positive_energy/POSCAR", "positive_energy/OSZICAR")
 
     def test_check_correct(self):
         handler = PositiveEnergyErrorHandler()
@@ -1034,17 +1017,11 @@ class PositiveEnergyHandlerTest(unittest.TestCase):
         dct = handler.correct()
         assert dct["errors"] == ["Positive energy"]
 
-        os.remove(os.path.join(self.subdir, "error.1.tar.gz"))
+        assert os.path.isfile("error.1.tar.gz")
 
         incar = Incar.from_file("INCAR")
 
         assert incar["ALGO"] == "Normal"
-
-    @classmethod
-    def tearDownClass(cls):
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("POSCAR.orig", "POSCAR")
-        os.chdir(CWD)
 
 
 class PotimHandlerTest(PymatgenTest):
