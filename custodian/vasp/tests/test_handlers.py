@@ -43,7 +43,10 @@ def copy_tmp_files(tmp_path: str, *file_paths: str) -> None:
     for file_path in file_paths:
         src_path = f"{TEST_DIR}/{file_path}"
         dst_path = f"{tmp_path}/{os.path.basename(file_path)}"
-        shutil.copy(src_path, dst_path)
+        if os.path.isdir(src_path):
+            shutil.copytree(src_path, dst_path)
+        else:
+            shutil.copy(src_path, dst_path)
     os.chdir(tmp_path)
 
 
@@ -749,14 +752,9 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         os.chdir(CWD)
 
 
-class IncorrectSmearingHandlerTest(unittest.TestCase):
+class IncorrectSmearingHandlerTest(PymatgenTest):
     def setUp(self):
-        os.chdir(TEST_DIR)
-        subdir = os.path.join(TEST_DIR, "scan_metal")
-        os.chdir(subdir)
-
-        shutil.copy("INCAR", "INCAR.orig")
-        shutil.copy("vasprun.xml", "vasprun.xml.orig")
+        copy_tmp_files(self.tmp_path, "scan_metal/INCAR", "scan_metal/vasprun.xml")
 
     def test_check_correct_scan_metal(self):
         handler = IncorrectSmearingHandler()
@@ -767,62 +765,28 @@ class IncorrectSmearingHandlerTest(unittest.TestCase):
         assert Incar.from_file("INCAR")["SIGMA"] == 0.2
         os.remove("vasprun.xml")
 
-    @classmethod
-    def tearDown(cls):
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("vasprun.xml.orig", "vasprun.xml")
-        clean_dir()
-        os.chdir(CWD)
 
-
-class IncorrectSmearingHandlerStaticTest(unittest.TestCase):
+class IncorrectSmearingHandlerStaticTest(PymatgenTest):
     def setUp(self):
-        os.chdir(TEST_DIR)
-        subdir = os.path.join(TEST_DIR, "static_smearing")
-        os.chdir(subdir)
-
-        shutil.copy("INCAR", "INCAR.orig")
-        shutil.copy("vasprun.xml", "vasprun.xml.orig")
+        copy_tmp_files(self.tmp_path, "static_smearing/INCAR", "static_smearing/vasprun.xml")
 
     def test_check_correct_scan_metal(self):
         handler = IncorrectSmearingHandler()
         assert not handler.check()
 
-    def tearDown(self):
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("vasprun.xml.orig", "vasprun.xml")
-        clean_dir()
-        os.chdir(CWD)
 
-
-class IncorrectSmearingHandlerFermiTest(unittest.TestCase):
+class IncorrectSmearingHandlerFermiTest(PymatgenTest):
     def setUp(self):
-        os.chdir(TEST_DIR)
-        subdir = os.path.join(TEST_DIR, "fermi_smearing")
-        os.chdir(subdir)
-
-        shutil.copy("INCAR", "INCAR.orig")
-        shutil.copy("vasprun.xml", "vasprun.xml.orig")
+        copy_tmp_files(self.tmp_path, "fermi_smearing/INCAR", "fermi_smearing/vasprun.xml")
 
     def test_check_correct_scan_metal(self):
         handler = IncorrectSmearingHandler()
         assert not handler.check()
-
-    def tearDown(self):
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("vasprun.xml.orig", "vasprun.xml")
-        clean_dir()
-        os.chdir(CWD)
 
 
 class KspacingMetalHandlerTest(PymatgenTest):
     def setUp(self):
-        os.chdir(TEST_DIR)
-        subdir = os.path.join(TEST_DIR, "scan_metal")
-        os.chdir(subdir)
-
-        shutil.copy("INCAR", "INCAR.orig")
-        shutil.copy("vasprun.xml", "vasprun.xml.orig")
+        copy_tmp_files(self.tmp_path, "scan_metal/INCAR", "scan_metal/vasprun.xml")
 
     def test_check_correct_scan_metal(self):
         handler = KspacingMetalHandler()
@@ -843,21 +807,12 @@ class KspacingMetalHandlerTest(PymatgenTest):
         # TODO (@janosh 2023-11-03) remove when ending ScanMetalHandler deprecation period
         assert issubclass(ScanMetalHandler, KspacingMetalHandler)
 
-    def tearDown(self):
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("vasprun.xml.orig", "vasprun.xml")
-        clean_dir()
-        os.chdir(CWD)
 
-
-class LargeSigmaHandlerTest(unittest.TestCase):
+class LargeSigmaHandlerTest(PymatgenTest):
     def setUp(self):
-        os.chdir(TEST_DIR)
-        subdir = os.path.join(TEST_DIR, "large_sigma")
-        os.chdir(subdir)
-
-        shutil.copy("INCAR", "INCAR.orig")
-        shutil.copy("vasprun.xml", "vasprun.xml.orig")
+        copy_tmp_files(
+            self.tmp_path, "large_sigma/INCAR", "large_sigma/vasprun.xml", "large_sigma/OUTCAR", "large_sigma/POSCAR"
+        )
 
     def test_check_correct_large_sigma(self):
         handler = LargeSigmaHandler()
@@ -865,13 +820,7 @@ class LargeSigmaHandlerTest(unittest.TestCase):
         dct = handler.correct()
         assert dct["errors"] == ["LargeSigma"]
         assert Incar.from_file("INCAR")["SIGMA"] == 1.44
-        os.remove("vasprun.xml")
-
-    def tearDown(self):
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("vasprun.xml.orig", "vasprun.xml")
-        clean_dir()
-        os.chdir(CWD)
+        assert os.path.isfile("vasprun.xml")
 
 
 class ZpotrfErrorHandlerTest(PymatgenTest):
