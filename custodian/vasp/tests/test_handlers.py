@@ -59,7 +59,6 @@ def clean_dir():
 
 class VaspErrorHandlerTest(unittest.TestCase):
     def setUp(self):
-        os.environ["PMG_VASP_PSP_DIR"] = TEST_DIR
         os.chdir(TEST_DIR)
         shutil.copy("INCAR", "INCAR.orig")
         shutil.copy("KPOINTS", "KPOINTS.orig")
@@ -571,13 +570,9 @@ class VaspErrorHandlerTest(unittest.TestCase):
         os.chdir(CWD)
 
 
-class AliasingErrorHandlerTest(unittest.TestCase):
+class AliasingErrorHandlerTest(PymatgenTest):
     def setUp(self):
-        os.chdir(TEST_DIR)
-        shutil.copy("INCAR", "INCAR.orig")
-        shutil.copy("KPOINTS", "KPOINTS.orig")
-        shutil.copy("POSCAR", "POSCAR.orig")
-        shutil.copy("CHGCAR", "CHGCAR.orig")
+        copy_tmp_files(self.tmp_path, "INCAR", "KPOINTS", "POSCAR", "CHGCAR")
 
     def test_aliasing(self):
         os.chdir(os.path.join(TEST_DIR, "aliasing"))
@@ -620,15 +615,6 @@ class AliasingErrorHandlerTest(unittest.TestCase):
         shutil.move("INCAR.orig", "INCAR")
         clean_dir()
         os.chdir(TEST_DIR)
-
-    def tearDown(self):
-        os.chdir(TEST_DIR)
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("KPOINTS.orig", "KPOINTS")
-        shutil.move("POSCAR.orig", "POSCAR")
-        shutil.move("CHGCAR.orig", "CHGCAR")
-        clean_dir()
-        os.chdir(CWD)
 
 
 class UnconvergedErrorHandlerTest(unittest.TestCase):
