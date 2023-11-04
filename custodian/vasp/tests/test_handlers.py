@@ -27,7 +27,7 @@ from custodian.vasp.handlers import (
     WalltimeHandler,
 )
 
-__author__ = "Shyue Ping Ong, Stephen Dacek"
+__author__ = "Shyue Ping Ong, Stephen Dacek, Janosh Riebesell"
 __copyright__ = "Copyright 2012, The Materials Project"
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
@@ -37,6 +37,14 @@ __date__ = "Jun 1, 2012"
 TEST_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")
 CWD = os.getcwd()
 os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_DIR)
+
+
+def copy_tmp_files(tmp_path: str, *file_paths: str) -> None:
+    for file_path in file_paths:
+        src_path = f"{TEST_DIR}/{file_path}"
+        dst_path = f"{tmp_path}/{os.path.basename(file_path)}"
+        shutil.copy(src_path, dst_path)
+    os.chdir(tmp_path)
 
 
 def clean_dir():
@@ -1039,13 +1047,9 @@ class PositiveEnergyHandlerTest(unittest.TestCase):
         os.chdir(CWD)
 
 
-class PotimHandlerTest(unittest.TestCase):
+class PotimHandlerTest(PymatgenTest):
     def setUp(self):
-        os.chdir(TEST_DIR)
-        self.subdir = os.path.join(TEST_DIR, "potim")
-        os.chdir(self.subdir)
-        shutil.copy("INCAR", "INCAR.orig")
-        shutil.copy("POSCAR", "POSCAR.orig")
+        copy_tmp_files(self.tmp_path, "potim/INCAR", "potim/POSCAR", "potim/OSZICAR")
 
     def test_check_correct(self):
         incar = Incar.from_file("INCAR")
@@ -1056,7 +1060,7 @@ class PotimHandlerTest(unittest.TestCase):
         dct = handler.correct()
         assert dct["errors"] == ["POTIM"]
 
-        os.remove(os.path.join(self.subdir, "error.1.tar.gz"))
+        assert os.path.isfile("error.1.tar.gz")
 
         incar = Incar.from_file("INCAR")
         new_potim = incar["POTIM"]
@@ -1064,19 +1068,10 @@ class PotimHandlerTest(unittest.TestCase):
         assert original_potim == new_potim
         assert incar["IBRION"] == 3
 
-    @classmethod
-    def tearDownClass(cls):
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("POSCAR.orig", "POSCAR")
-        os.chdir(CWD)
 
-
-class LrfCommHandlerTest(unittest.TestCase):
+class LrfCommHandlerTest(PymatgenTest):
     def setUp(self):
-        os.chdir(TEST_DIR)
-        os.chdir("lrf_comm")
-        for f in ["INCAR", "OUTCAR", "std_err.txt"]:
-            shutil.copy(f, f + ".orig")
+        copy_tmp_files(self.tmp_path, "lrf_comm/INCAR", "lrf_comm/OUTCAR", "lrf_comm/std_err.txt")
 
     def test_lrf_comm(self):
         handler = LrfCommutatorHandler("std_err.txt")
@@ -1086,19 +1081,10 @@ class LrfCommHandlerTest(unittest.TestCase):
         vi = VaspInput.from_directory(".")
         assert vi["INCAR"]["LPEAD"] is True
 
-    def tearDown(self):
-        os.chdir(TEST_DIR)
-        os.chdir("lrf_comm")
-        for f in ["INCAR", "OUTCAR", "std_err.txt"]:
-            shutil.move(f + ".orig", f)
-        clean_dir()
-        os.chdir(CWD)
 
-
-class KpointsTransHandlerTest(unittest.TestCase):
+class KpointsTransHandlerTest(PymatgenTest):
     def setUp(self):
-        os.chdir(TEST_DIR)
-        shutil.copy("KPOINTS", "KPOINTS.orig")
+        copy_tmp_files(self.tmp_path, "KPOINTS", "std_err.txt.kpoints_trans")
 
     def test_kpoints_trans(self):
         handler = StdErrHandler("std_err.txt.kpoints_trans")
@@ -1112,16 +1098,10 @@ class KpointsTransHandlerTest(unittest.TestCase):
         assert dct["errors"] == ["kpoints_trans"]
         assert dct["actions"] == []  # don't correct twice
 
-    def tearDown(self):
-        shutil.move("KPOINTS.orig", "KPOINTS")
-        clean_dir()
-        os.chdir(CWD)
 
-
-class OutOfMemoryHandlerTest(unittest.TestCase):
+class OutOfMemoryHandlerTest(PymatgenTest):
     def setUp(self):
-        os.chdir(TEST_DIR)
-        shutil.copy("INCAR", "INCAR.orig")
+        copy_tmp_files(self.tmp_path, "INCAR", "std_err.txt.oom")
 
     def test_oom(self):
         vi = VaspInput.from_directory(".")
@@ -1134,17 +1114,10 @@ class OutOfMemoryHandlerTest(unittest.TestCase):
         assert dct["errors"] == ["out_of_memory"]
         assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"KPAR": 2}}}]
 
-    def tearDown(self):
-        shutil.move("INCAR.orig", "INCAR")
-        clean_dir()
-        os.chdir(CWD)
 
-
-class DriftErrorHandlerTest(unittest.TestCase):
+class DriftErrorHandlerTest(PymatgenTest):
     def setUp(self):
-        os.chdir(os.path.abspath(TEST_DIR))
-        os.chdir("drift")
-        shutil.copy("INCAR", "INCAR.orig")
+        copy_tmp_files(self.tmp_path, "INCAR", "drift/OUTCAR", "drift/CONTCAR")
 
     def test_check(self):
         handler = DriftErrorHandler(max_drift=0.05, to_average=11)
@@ -1167,8 +1140,6 @@ class DriftErrorHandlerTest(unittest.TestCase):
         handler.check()
         assert handler.max_drift == 0.01
 
-        clean_dir()
-
     def test_correct(self):
         handler = DriftErrorHandler(max_drift=0.0001, enaug_multiply=2)
         handler.check()
@@ -1176,10 +1147,3 @@ class DriftErrorHandlerTest(unittest.TestCase):
         incar = Incar.from_file("INCAR")
         assert incar.get("PREC") == "High"
         assert incar.get("ENAUG", 0) == incar.get("ENCUT", 2) * 2
-
-        clean_dir()
-
-    def tearDown(self):
-        shutil.move("INCAR.orig", "INCAR")
-        clean_dir()
-        os.chdir(CWD)
