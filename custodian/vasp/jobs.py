@@ -163,7 +163,7 @@ class VaspJob(Job):
                     scope.set_tag("vasp_path", vasp_path)
                     scope.set_tag("vasp_cmd", vasp_cmd)
                 except Exception:
-                    logger.error(f"Failed to detect VASP path: {vasp_cmd}", exc_info=True)
+                    logger.exception(f"Failed to detect VASP path: {vasp_cmd}")
                     scope.set_tag("vasp_cmd", vasp_cmd)
 
     def setup(self):

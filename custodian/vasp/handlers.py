@@ -4,6 +4,8 @@ try to detect common errors in vasp runs and attempt to fix them on the fly
 by modifying the input files.
 """
 
+from __future__ import annotations
+
 import datetime
 import logging
 import multiprocessing
@@ -670,7 +672,7 @@ class LrfCommutatorHandler(ErrorHandler):
 
     error_msgs = {"lrf_comm": ["LRF_COMMUTATOR internal error"]}
 
-    def __init__(self, output_filename="std_err.txt"):
+    def __init__(self, output_filename: str = "std_err.txt"):
         """
         Initializes the handler with the output file to check.
 
@@ -681,8 +683,8 @@ class LrfCommutatorHandler(ErrorHandler):
                 default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
         """
         self.output_filename = output_filename
-        self.errors = set()
-        self.error_count = Counter()
+        self.errors: set[str] = set()
+        self.error_count: Counter = Counter()
 
     def check(self):
         """Check for error."""
@@ -727,7 +729,7 @@ class StdErrHandler(ErrorHandler):
         "out_of_memory": ["Allocation would exceed memory limit"],
     }
 
-    def __init__(self, output_filename="std_err.txt"):
+    def __init__(self, output_filename: str = "std_err.txt"):
         """
         Initializes the handler with the output file to check.
 
@@ -738,8 +740,8 @@ class StdErrHandler(ErrorHandler):
                 default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
         """
         self.output_filename = output_filename
-        self.errors = set()
-        self.error_count = Counter()
+        self.errors: set[str] = set()
+        self.error_count: Counter = Counter()
 
     def check(self):
         """Check for error."""
@@ -788,7 +790,7 @@ class AliasingErrorHandler(ErrorHandler):
         "aliasing_incar": ["Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate"],
     }
 
-    def __init__(self, output_filename="vasp.out"):
+    def __init__(self, output_filename: str = "vasp.out"):
         """
         Initializes the handler with the output file to check.
 
@@ -799,7 +801,7 @@ class AliasingErrorHandler(ErrorHandler):
                 default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
         """
         self.output_filename = output_filename
-        self.errors = set()
+        self.errors: set[str] = set()
 
     def check(self):
         """Check for error."""
@@ -953,7 +955,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
 
     is_monitor = False
 
-    def __init__(self, output_filename="vasp.out", output_vasprun="vasprun.xml"):
+    def __init__(self, output_filename: str = "vasp.out", output_vasprun="vasprun.xml"):
         """
         Initializes the handler with the output files to check.
 
@@ -1016,7 +1018,7 @@ class UnconvergedErrorHandler(ErrorHandler):
 
     is_monitor = False
 
-    def __init__(self, output_filename="vasprun.xml"):
+    def __init__(self, output_filename: str = "vasprun.xml"):
         """
         Initializes the handler with the output file to check.
 
@@ -1044,7 +1046,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         if not v.converged_electronic:
             # NOTE: This is the amin error handler
             # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
-            if np.max(v.final_structure.lattice.abc) > 50.0 and v.incar.get("AMIN", 0.1) > 0.01:
+            if max(v.final_structure.lattice.abc) > 50.0 and v.incar.get("AMIN", 0.1) > 0.01:
                 actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}})
 
             if (
@@ -1124,7 +1126,7 @@ class IncorrectSmearingHandler(ErrorHandler):
 
     is_monitor = False
 
-    def __init__(self, output_filename="vasprun.xml"):
+    def __init__(self, output_filename: str = "vasprun.xml"):
         """
         Initializes the handler with the output file to check.
 
@@ -1171,7 +1173,7 @@ class KspacingMetalHandler(ErrorHandler):
 
     is_monitor = False
 
-    def __init__(self, output_filename="vasprun.xml"):
+    def __init__(self, output_filename: str = "vasprun.xml"):
         """
         Initializes the handler with the output file to check.
 
@@ -1356,7 +1358,7 @@ class FrozenJobErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, output_filename="vasp.out", timeout=21600):
+    def __init__(self, output_filename: str = "vasp.out", timeout=21_600) -> None:
         """
         Initializes the handler with the output file to check.
 
@@ -1404,7 +1406,7 @@ class NonConvergingErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, output_filename="OSZICAR", nionic_steps=10):
+    def __init__(self, output_filename: str = "OSZICAR", nionic_steps=10):
         """
         Initializes the handler with the output file to check.
 
@@ -1421,29 +1423,29 @@ class NonConvergingErrorHandler(ErrorHandler):
     def check(self):
         """Check for error."""
         vi = VaspInput.from_directory(".")
-        nelm = vi["INCAR"].get("NELM", 60)
+        n_elm = vi["INCAR"].get("NELM", 60)  # number of electronic steps
         try:
             oszicar = Oszicar(self.output_filename)
-            esteps = oszicar.electronic_steps
-            if len(esteps) > self.nionic_steps:
-                return all(len(e) == nelm for e in esteps[-(self.nionic_steps + 1) : -1])
+            elec_steps = oszicar.electronic_steps
+            if len(elec_steps) > self.nionic_steps:
+                return all(len(e) == n_elm for e in elec_steps[-(self.nionic_steps + 1) : -1])
         except Exception:
             pass
         return False
 
     def correct(self):
         """Perform corrections."""
-        vi = VaspInput.from_directory(".")
-        algo = vi["INCAR"].get("ALGO", "Normal").lower()
-        amix = vi["INCAR"].get("AMIX", 0.4)
-        bmix = vi["INCAR"].get("BMIX", 1.0)
-        amin = vi["INCAR"].get("AMIN", 0.1)
+        incar = (vi := VaspInput.from_directory("."))["INCAR"]
+        algo = incar.get("ALGO", "Normal").lower()
+        amix = incar.get("AMIX", 0.4)
+        bmix = incar.get("BMIX", 1.0)
+        amin = incar.get("AMIN", 0.1)
         actions = []
 
         # NOTE: This is the algo_tet handler response.
         if (
-            vi["INCAR"].get("ALGO", "Normal").lower() in ["all", "damped"] or (50 <= vi["INCAR"].get("IALGO", 38) <= 59)
-        ) and vi["INCAR"].get("ISMEAR", 1) < 0:
+            incar.get("ALGO", "Normal").lower() in ["all", "damped"] or (50 <= incar.get("IALGO", 38) <= 59)
+        ) and incar.get("ISMEAR", 1) < 0:
             # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP
             # suggests: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
             # 2) Use ALGO = Damped but only *after* an ISMEAR = 0 run where the wavefunction
@@ -1453,7 +1455,7 @@ class NonConvergingErrorHandler(ErrorHandler):
             # DOS then they should consider running a subsequent job with ISMEAR = -5 and
             # ALGO = Damped, provided the wavefunction has been stored.
             actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
-            if vi["INCAR"].get("NEDOS") or vi["INCAR"].get("EMIN") or vi["INCAR"].get("EMAX"):
+            if incar.get("NEDOS") or incar.get("EMIN") or incar.get("EMAX"):
                 warnings.warn(
                     "This looks like a DOS run. You may want to follow-up this job with ALGO = Damped"
                     " and ISMEAR = -5, using the wavefunction from the current job.",
@@ -1462,7 +1464,7 @@ class NonConvergingErrorHandler(ErrorHandler):
 
         # NOTE: This is the amin error handler
         # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
-        if np.max(Structure.from_file("CONTCAR").lattice.abc) > 50.0 and amin > 0.01:
+        if max(Structure.from_file("CONTCAR").lattice.abc) > 50 and amin > 0.01:
             actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}})
 
         # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
@@ -1470,9 +1472,7 @@ class NonConvergingErrorHandler(ErrorHandler):
         # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
         # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
         # I am using "none" here because METAGGA is a string variable and this is the default
-        if (
-            vi["INCAR"].get("LHFCALC", False) or vi["INCAR"].get("METAGGA", "none").lower() != "none"
-        ) and algo != "all":
+        if (incar.get("LHFCALC", False) or incar.get("METAGGA", "none").lower() != "none") and algo != "all":
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
 
         # Ladder from VeryFast to Fast to Normal to All
@@ -1512,16 +1512,15 @@ class NonConvergingErrorHandler(ErrorHandler):
         return {"errors": ["Non-converging job"], "actions": None}
 
     @classmethod
-    def from_dict(cls, d):
+    def from_dict(cls, dct):
         """
         Custom from_dict method to preserve backwards compatibility with
         older versions of Custodian.
         """
-        if "change_algo" in d:
-            del d["change_algo"]
+        dct.pop("change_algo", None)
         return cls(
-            output_filename=d.get("output_filename", "OSZICAR"),
-            nionic_steps=d.get("nionic_steps", 10),
+            output_filename=dct.get("output_filename", "OSZICAR"),
+            nionic_steps=dct.get("nionic_steps", 10),
         )
 
 
@@ -1748,7 +1747,7 @@ class PositiveEnergyErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, output_filename="OSZICAR"):
+    def __init__(self, output_filename: str = "OSZICAR"):
         """
         Initializes the handler with the output file to check.
 

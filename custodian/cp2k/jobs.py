@@ -19,7 +19,6 @@ __author__ = "Nicholas Winner"
 __version__ = "1.0"
 
 CP2K_INPUT_FILES = ["cp2k.inp"]
-
 CP2K_OUTPUT_FILES = ["cp2k.out"]
 
 
@@ -118,8 +117,8 @@ class Cp2kJob(Job):
         # TODO: cp2k has bizarre in/out streams. Some errors that should go to std_err are not sent anywhere...
         cmd = list(self.cp2k_cmd)
         cmd.extend(["-i", self.input_file])
-        cmdstring = " ".join(cmd)
-        logger.info(f"Running {cmdstring}")
+        cmd_str = " ".join(cmd)
+        logger.info(f"Running {cmd_str}")
         with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
             # use line buffering for stderr
             return subprocess.Popen(cmd, stdout=f_std, stderr=f_err, shell=False)
@@ -147,10 +146,10 @@ class Cp2kJob(Job):
 
     def terminate(self):
         """Terminate cp2k."""
-        for k in self.cp2k_cmd:
-            if "cp2k" in k:
+        for cmd in self.cp2k_cmd:
+            if "cp2k" in cmd:
                 try:
-                    os.system(f"killall {k}")
+                    os.system(f"killall {cmd}")
                 except Exception:
                     pass
 
@@ -166,8 +165,8 @@ class Cp2kJob(Job):
         settings_override_hybrid=None,
     ):
         """
-        A bare gga to hybrid calculation. Removes all unnecessary features
-        from the gga run, and making it only a ENERGY/ENERGY_FORCE
+        A bare GGA to hybrid calculation. Removes all unnecessary features
+        from the GGA run, and making it only a ENERGY/ENERGY_FORCE
         depending on the hybrid run.
         """
         job1_settings_override = [

@@ -550,16 +550,12 @@ class VaspErrorHandlerTest(PymatgenTest):
 
 class AliasingErrorHandlerTest(PymatgenTest):
     def setUp(self):
-        copy_tmp_files(self.tmp_path, "INCAR", "KPOINTS", "POSCAR", "CHGCAR")
+        copy_tmp_files(self.tmp_path, *glob("aliasing/*", root_dir=TEST_DIR))
 
     def test_aliasing(self):
-        os.chdir(os.path.join(TEST_DIR, "aliasing"))
-        shutil.copy("INCAR", "INCAR.orig")
         handler = AliasingErrorHandler("vasp.aliasing")
         handler.check()
         dct = handler.correct()
-        shutil.move("INCAR.orig", "INCAR")
-        os.chdir(TEST_DIR)
 
         assert dct["errors"] == ["aliasing"]
         assert dct["actions"] == [
@@ -569,7 +565,6 @@ class AliasingErrorHandlerTest(PymatgenTest):
         ]
 
     def test_aliasing_incar(self):
-        os.chdir(os.path.join(TEST_DIR, "aliasing"))
         shutil.copy("INCAR", "INCAR.orig")
         handler = AliasingErrorHandler("vasp.aliasing_incar")
         handler.check()
@@ -588,9 +583,6 @@ class AliasingErrorHandlerTest(PymatgenTest):
         dct = handler.correct()
         assert dct["errors"] == ["aliasing_incar"]
         assert dct["actions"] == [{"action": {"_unset": {"NGY": 1, "NGZ": 1}}, "dict": "INCAR"}]
-
-        shutil.move("INCAR.orig", "INCAR")
-        os.chdir(TEST_DIR)
 
 
 class UnconvergedErrorHandlerTest(PymatgenTest):
