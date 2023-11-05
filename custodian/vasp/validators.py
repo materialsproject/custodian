@@ -1,4 +1,4 @@
-"""Implements various validatiors, e.g., check if vasprun.xml is valid, for VASP."""
+"""Implements various validators, e.g., check if vasprun.xml is valid, for VASP."""
 
 import logging
 import os
@@ -52,7 +52,7 @@ class VasprunXMLValidator(Validator):
                     vasprun_tail = deque(vasprun, maxlen=10)
                 exception_context["vasprun_tail"] = "".join(vasprun_tail)
 
-            self.logger.error("Failed to load vasprun.xml", exc_info=True, extra=exception_context)
+            self.logger.exception("Failed to load vasprun.xml", extra=exception_context)
 
             return True
         return False
