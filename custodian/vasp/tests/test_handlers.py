@@ -2,7 +2,6 @@
 import datetime
 import os
 import shutil
-import unittest
 from glob import glob
 
 import pytest
@@ -50,20 +49,9 @@ def copy_tmp_files(tmp_path: str, *file_paths: str) -> None:
     os.chdir(tmp_path)
 
 
-def clean_dir():
-    for file in glob("error.*.tar.gz"):
-        os.remove(file)
-    for file in glob("custodian.chk.*.tar.gz"):
-        os.remove(file)
-
-
-class VaspErrorHandlerTest(unittest.TestCase):
+class VaspErrorHandlerTest(PymatgenTest):
     def setUp(self):
-        os.chdir(TEST_DIR)
-        shutil.copy("INCAR", "INCAR.orig")
-        shutil.copy("KPOINTS", "KPOINTS.orig")
-        shutil.copy("POSCAR", "POSCAR.orig")
-        shutil.copy("CHGCAR", "CHGCAR.orig")
+        copy_tmp_files(self.tmp_path, *glob("*", root_dir=TEST_DIR))
 
     def test_frozen_job(self):
         handler = FrozenJobErrorHandler()
@@ -181,7 +169,7 @@ class VaspErrorHandlerTest(unittest.TestCase):
         assert incar["EDIFF"] == 1e-07
         assert incar["NELMIN"] == 8
 
-        shutil.copy("INCAR.orig", "INCAR")
+        shutil.copy(f"{TEST_DIR}/INCAR", f"{self.tmp_path}/INCAR")
         handler = VaspErrorHandler("vasp.zbrent")
         handler.vtst_fixes = True
         handler.check()
@@ -262,7 +250,6 @@ class VaspErrorHandlerTest(unittest.TestCase):
         dct = handler.correct()
         assert dct["errors"] == ["too_few_bands"]
         assert dct["actions"] == [{"action": {"_set": {"NBANDS": 501}}, "dict": "INCAR"}]
-        clean_dir()
         shutil.move("INCAR.orig", "INCAR")
         os.chdir(TEST_DIR)
 
@@ -560,15 +547,6 @@ class VaspErrorHandlerTest(unittest.TestCase):
         assert dct["errors"] == ["read_error"]
         assert dct["actions"] is None
 
-    def tearDown(self):
-        os.chdir(TEST_DIR)
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("KPOINTS.orig", "KPOINTS")
-        shutil.move("POSCAR.orig", "POSCAR")
-        shutil.move("CHGCAR.orig", "CHGCAR")
-        clean_dir()
-        os.chdir(CWD)
-
 
 class AliasingErrorHandlerTest(PymatgenTest):
     def setUp(self):
@@ -581,7 +559,6 @@ class AliasingErrorHandlerTest(PymatgenTest):
         handler.check()
         dct = handler.correct()
         shutil.move("INCAR.orig", "INCAR")
-        clean_dir()
         os.chdir(TEST_DIR)
 
         assert dct["errors"] == ["aliasing"]
@@ -613,20 +590,12 @@ class AliasingErrorHandlerTest(PymatgenTest):
         assert dct["actions"] == [{"action": {"_unset": {"NGY": 1, "NGZ": 1}}, "dict": "INCAR"}]
 
         shutil.move("INCAR.orig", "INCAR")
-        clean_dir()
         os.chdir(TEST_DIR)
 
 
-class UnconvergedErrorHandlerTest(unittest.TestCase):
+class UnconvergedErrorHandlerTest(PymatgenTest):
     def setUp(self):
-        os.chdir(TEST_DIR)
-        subdir = os.path.join(TEST_DIR, "unconverged")
-        os.chdir(subdir)
-
-        shutil.copy("INCAR", "INCAR.orig")
-        shutil.copy("KPOINTS", "KPOINTS.orig")
-        shutil.copy("POSCAR", "POSCAR.orig")
-        shutil.copy("CONTCAR", "CONTCAR.orig")
+        copy_tmp_files(self.tmp_path, *glob("unconverged/*", root_dir=TEST_DIR))
 
     def test_check_correct_electronic(self):
         shutil.copy("vasprun.xml.electronic", "vasprun.xml")
@@ -638,7 +607,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
             "actions": [{"action": {"_set": {"ALGO": "Normal"}}, "dict": "INCAR"}],
             "errors": ["Unconverged"],
         }
-        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_veryfast", "vasprun.xml")
         handler = UnconvergedErrorHandler()
@@ -646,7 +614,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
         assert dct == {"actions": [{"action": {"_set": {"ALGO": "Fast"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
-        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_normal", "vasprun.xml")
         handler = UnconvergedErrorHandler()
@@ -654,7 +621,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
         assert dct == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
-        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_metagga_fast", "vasprun.xml")
         handler = UnconvergedErrorHandler()
@@ -662,7 +628,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
         assert dct == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
-        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_hybrid_fast", "vasprun.xml")
         handler = UnconvergedErrorHandler()
@@ -670,7 +635,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
         assert dct == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
-        os.remove("vasprun.xml")
 
         shutil.copy("vasprun.xml.electronic_hybrid_all", "vasprun.xml")
         handler = UnconvergedErrorHandler()
@@ -678,7 +642,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
         assert [{"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}}] == dct["actions"]
-        os.remove("vasprun.xml")
 
     def test_check_correct_electronic_repeat(self):
         shutil.copy("vasprun.xml.electronic2", "vasprun.xml")
@@ -686,7 +649,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         assert handler.check()
         dct = handler.correct()
         assert dct == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
-        os.remove("vasprun.xml")
 
     def test_check_correct_ionic(self):
         shutil.copy("vasprun.xml.ionic", "vasprun.xml")
@@ -694,7 +656,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         assert handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
-        os.remove("vasprun.xml")
 
     def test_check_correct_scan(self):
         shutil.copy("vasprun.xml.scan", "vasprun.xml")
@@ -703,7 +664,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
         assert {"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}} in dct["actions"]
-        os.remove("vasprun.xml")
 
     def test_amin(self):
         shutil.copy("vasprun.xml.electronic_amin", "vasprun.xml")
@@ -711,7 +671,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         assert handler.check()
         dct = handler.correct()
         assert [{"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}}] == dct["actions"]
-        os.remove("vasprun.xml")
 
     def test_to_from_dict(self):
         handler = UnconvergedErrorHandler("random_name.xml")
@@ -726,16 +685,6 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
         assert dct == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
-        os.remove("vasprun.xml")
-
-    @classmethod
-    def tearDown(cls):
-        shutil.move("INCAR.orig", "INCAR")
-        shutil.move("KPOINTS.orig", "KPOINTS")
-        shutil.move("POSCAR.orig", "POSCAR")
-        shutil.move("CONTCAR.orig", "CONTCAR")
-        clean_dir()
-        os.chdir(CWD)
 
 
 class IncorrectSmearingHandlerTest(PymatgenTest):
@@ -747,9 +696,9 @@ class IncorrectSmearingHandlerTest(PymatgenTest):
         assert handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["IncorrectSmearing"]
-        assert Incar.from_file("INCAR")["ISMEAR"] == 2
-        assert Incar.from_file("INCAR")["SIGMA"] == 0.2
-        os.remove("vasprun.xml")
+        incar = Incar.from_file("INCAR")
+        assert incar["ISMEAR"] == 2
+        assert incar["SIGMA"] == 0.2
 
 
 class IncorrectSmearingHandlerStaticTest(PymatgenTest):
