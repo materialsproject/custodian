@@ -1044,7 +1044,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         if not v.converged_electronic:
             # NOTE: This is the amin error handler
             # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
-            if np.max(v.final_structure.lattice.abc) > 50.0 and v.incar.get("AMIN", 0.1) > 0.01:
+            if max(v.final_structure.lattice.abc) > 50.0 and v.incar.get("AMIN", 0.1) > 0.01:
                 actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}})
 
             if (
@@ -1421,12 +1421,12 @@ class NonConvergingErrorHandler(ErrorHandler):
     def check(self):
         """Check for error."""
         vi = VaspInput.from_directory(".")
-        nelm = vi["INCAR"].get("NELM", 60)
+        n_elm = vi["INCAR"].get("NELM", 60)  # number of electronic steps
         try:
             oszicar = Oszicar(self.output_filename)
-            esteps = oszicar.electronic_steps
-            if len(esteps) > self.nionic_steps:
-                return all(len(e) == nelm for e in esteps[-(self.nionic_steps + 1) : -1])
+            elec_steps = oszicar.electronic_steps
+            if len(elec_steps) > self.nionic_steps:
+                return all(len(e) == n_elm for e in elec_steps[-(self.nionic_steps + 1) : -1])
         except Exception:
             pass
         return False
@@ -1462,7 +1462,7 @@ class NonConvergingErrorHandler(ErrorHandler):
 
         # NOTE: This is the amin error handler
         # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
-        if np.max(Structure.from_file("CONTCAR").lattice.abc) > 50.0 and amin > 0.01:
+        if max(Structure.from_file("CONTCAR").lattice.abc) > 50 and amin > 0.01:
             actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}})
 
         # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
@@ -1606,11 +1606,11 @@ class WalltimeHandler(ErrorHandler):
             if not self.electronic_step_stop:
                 # Determine max time per ionic step.
                 outcar.read_pattern({"timings": r"LOOP\+.+real time(.+)"}, postprocess=float)
-                time_per_step = np.max(outcar.data.get("timings")) if outcar.data.get("timings", []) else 0
+                time_per_step = max(outcar.data.get("timings")) if outcar.data.get("timings", []) else 0
             else:
                 # Determine max time per electronic step.
                 outcar.read_pattern({"timings": "LOOP:.+real time(.+)"}, postprocess=float)
-                time_per_step = np.max(outcar.data.get("timings")) if outcar.data.get("timings", []) else 0
+                time_per_step = max(outcar.data.get("timings")) if outcar.data.get("timings", []) else 0
 
             # If the remaining time is less than average time for 3
             # steps or buffer_time.
