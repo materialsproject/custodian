@@ -4,6 +4,8 @@ try to detect common errors in vasp runs and attempt to fix them on the fly
 by modifying the input files.
 """
 
+from __future__ import annotations
+
 import datetime
 import logging
 import multiprocessing
@@ -670,7 +672,7 @@ class LrfCommutatorHandler(ErrorHandler):
 
     error_msgs = {"lrf_comm": ["LRF_COMMUTATOR internal error"]}
 
-    def __init__(self, output_filename="std_err.txt"):
+    def __init__(self, output_filename: str = "std_err.txt"):
         """
         Initializes the handler with the output file to check.
 
@@ -681,8 +683,8 @@ class LrfCommutatorHandler(ErrorHandler):
                 default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
         """
         self.output_filename = output_filename
-        self.errors = set()
-        self.error_count = Counter()
+        self.errors: set[str] = set()
+        self.error_count: Counter = Counter()
 
     def check(self):
         """Check for error."""
@@ -727,7 +729,7 @@ class StdErrHandler(ErrorHandler):
         "out_of_memory": ["Allocation would exceed memory limit"],
     }
 
-    def __init__(self, output_filename="std_err.txt"):
+    def __init__(self, output_filename: str = "std_err.txt"):
         """
         Initializes the handler with the output file to check.
 
@@ -738,8 +740,8 @@ class StdErrHandler(ErrorHandler):
                 default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
         """
         self.output_filename = output_filename
-        self.errors = set()
-        self.error_count = Counter()
+        self.errors: set[str] = set()
+        self.error_count: Counter = Counter()
 
     def check(self):
         """Check for error."""
@@ -788,7 +790,7 @@ class AliasingErrorHandler(ErrorHandler):
         "aliasing_incar": ["Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate"],
     }
 
-    def __init__(self, output_filename="vasp.out"):
+    def __init__(self, output_filename: str = "vasp.out"):
         """
         Initializes the handler with the output file to check.
 
@@ -799,7 +801,7 @@ class AliasingErrorHandler(ErrorHandler):
                 default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
         """
         self.output_filename = output_filename
-        self.errors = set()
+        self.errors: set[str] = set()
 
     def check(self):
         """Check for error."""
@@ -953,7 +955,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
 
     is_monitor = False
 
-    def __init__(self, output_filename="vasp.out", output_vasprun="vasprun.xml"):
+    def __init__(self, output_filename: str = "vasp.out", output_vasprun="vasprun.xml"):
         """
         Initializes the handler with the output files to check.
 
@@ -1016,7 +1018,7 @@ class UnconvergedErrorHandler(ErrorHandler):
 
     is_monitor = False
 
-    def __init__(self, output_filename="vasprun.xml"):
+    def __init__(self, output_filename: str = "vasprun.xml"):
         """
         Initializes the handler with the output file to check.
 
@@ -1124,7 +1126,7 @@ class IncorrectSmearingHandler(ErrorHandler):
 
     is_monitor = False
 
-    def __init__(self, output_filename="vasprun.xml"):
+    def __init__(self, output_filename: str = "vasprun.xml"):
         """
         Initializes the handler with the output file to check.
 
@@ -1171,7 +1173,7 @@ class KspacingMetalHandler(ErrorHandler):
 
     is_monitor = False
 
-    def __init__(self, output_filename="vasprun.xml"):
+    def __init__(self, output_filename: str = "vasprun.xml"):
         """
         Initializes the handler with the output file to check.
 
@@ -1356,7 +1358,7 @@ class FrozenJobErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, output_filename="vasp.out", timeout=21600):
+    def __init__(self, output_filename: str = "vasp.out", timeout=21_600) -> None:
         """
         Initializes the handler with the output file to check.
 
@@ -1404,7 +1406,7 @@ class NonConvergingErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, output_filename="OSZICAR", nionic_steps=10):
+    def __init__(self, output_filename: str = "OSZICAR", nionic_steps=10):
         """
         Initializes the handler with the output file to check.
 
@@ -1510,16 +1512,15 @@ class NonConvergingErrorHandler(ErrorHandler):
         return {"errors": ["Non-converging job"], "actions": None}
 
     @classmethod
-    def from_dict(cls, d):
+    def from_dict(cls, dct):
         """
         Custom from_dict method to preserve backwards compatibility with
         older versions of Custodian.
         """
-        if "change_algo" in d:
-            del d["change_algo"]
+        dct.pop("change_algo", None)
         return cls(
-            output_filename=d.get("output_filename", "OSZICAR"),
-            nionic_steps=d.get("nionic_steps", 10),
+            output_filename=dct.get("output_filename", "OSZICAR"),
+            nionic_steps=dct.get("nionic_steps", 10),
         )
 
 
@@ -1746,7 +1747,7 @@ class PositiveEnergyErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, output_filename="OSZICAR"):
+    def __init__(self, output_filename: str = "OSZICAR"):
         """
         Initializes the handler with the output file to check.
 
