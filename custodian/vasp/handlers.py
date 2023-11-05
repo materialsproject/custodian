@@ -1433,17 +1433,17 @@ class NonConvergingErrorHandler(ErrorHandler):
 
     def correct(self):
         """Perform corrections."""
-        vi = VaspInput.from_directory(".")
-        algo = vi["INCAR"].get("ALGO", "Normal").lower()
-        amix = vi["INCAR"].get("AMIX", 0.4)
-        bmix = vi["INCAR"].get("BMIX", 1.0)
-        amin = vi["INCAR"].get("AMIN", 0.1)
+        incar = (vi := VaspInput.from_directory("."))["INCAR"]
+        algo = incar.get("ALGO", "Normal").lower()
+        amix = incar.get("AMIX", 0.4)
+        bmix = incar.get("BMIX", 1.0)
+        amin = incar.get("AMIN", 0.1)
         actions = []
 
         # NOTE: This is the algo_tet handler response.
         if (
-            vi["INCAR"].get("ALGO", "Normal").lower() in ["all", "damped"] or (50 <= vi["INCAR"].get("IALGO", 38) <= 59)
-        ) and vi["INCAR"].get("ISMEAR", 1) < 0:
+            incar.get("ALGO", "Normal").lower() in ["all", "damped"] or (50 <= incar.get("IALGO", 38) <= 59)
+        ) and incar.get("ISMEAR", 1) < 0:
             # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP
             # suggests: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
             # 2) Use ALGO = Damped but only *after* an ISMEAR = 0 run where the wavefunction
@@ -1453,7 +1453,7 @@ class NonConvergingErrorHandler(ErrorHandler):
             # DOS then they should consider running a subsequent job with ISMEAR = -5 and
             # ALGO = Damped, provided the wavefunction has been stored.
             actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
-            if vi["INCAR"].get("NEDOS") or vi["INCAR"].get("EMIN") or vi["INCAR"].get("EMAX"):
+            if incar.get("NEDOS") or incar.get("EMIN") or incar.get("EMAX"):
                 warnings.warn(
                     "This looks like a DOS run. You may want to follow-up this job with ALGO = Damped"
                     " and ISMEAR = -5, using the wavefunction from the current job.",
@@ -1470,9 +1470,7 @@ class NonConvergingErrorHandler(ErrorHandler):
         # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
         # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
         # I am using "none" here because METAGGA is a string variable and this is the default
-        if (
-            vi["INCAR"].get("LHFCALC", False) or vi["INCAR"].get("METAGGA", "none").lower() != "none"
-        ) and algo != "all":
+        if (incar.get("LHFCALC", False) or incar.get("METAGGA", "none").lower() != "none") and algo != "all":
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
 
         # Ladder from VeryFast to Fast to Normal to All
@@ -1606,11 +1604,11 @@ class WalltimeHandler(ErrorHandler):
             if not self.electronic_step_stop:
                 # Determine max time per ionic step.
                 outcar.read_pattern({"timings": r"LOOP\+.+real time(.+)"}, postprocess=float)
-                time_per_step = max(outcar.data.get("timings")) if outcar.data.get("timings", []) else 0
+                time_per_step = np.max(outcar.data.get("timings")) if outcar.data.get("timings", []) else 0
             else:
                 # Determine max time per electronic step.
                 outcar.read_pattern({"timings": "LOOP:.+real time(.+)"}, postprocess=float)
-                time_per_step = max(outcar.data.get("timings")) if outcar.data.get("timings", []) else 0
+                time_per_step = np.max(outcar.data.get("timings")) if outcar.data.get("timings", []) else 0
 
             # If the remaining time is less than average time for 3
             # steps or buffer_time.
