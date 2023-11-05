@@ -68,8 +68,8 @@ class DictActions:
             settings (dict): The specification of the modification to be made.
         """
         for key in settings:
-            d, key = get_nested_dict(input_dict, key)
-            del d[key]
+            d, inner_key = get_nested_dict(input_dict, key)
+            del d[inner_key]
 
     @staticmethod
     def push(input_dict, settings):
