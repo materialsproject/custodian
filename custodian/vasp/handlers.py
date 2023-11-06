@@ -541,7 +541,7 @@ class VaspErrorHandler(ErrorHandler):
                     UserWarning,
                 )
 
-        if self.errors.intersection({'zheev','eddiag'}):
+        if self.errors.intersection({"zheev", "eddiag"}):
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
             try:
                 is_contcar = Poscar.from_file("CONTCAR")
@@ -553,7 +553,6 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
             elif vi["INCAR"].get("ALGO", "Normal").lower() == "normal":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "exact"}}})
-
 
         if "elf_kpar" in self.errors and vi["INCAR"].get("KPAR", 1) != 1:
             actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": 1}}})
