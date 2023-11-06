@@ -6,25 +6,16 @@ import multiprocessing
 import pytest
 
 
-def mock_cpu_count(*args, **kwargs):
+@pytest.fixture(autouse=True)
+def _patch_get_potential_energy(monkeypatch):
     """
-    Instead of running multiprocessing.cpu_count(), we return a fixed
-    value during tests
+    Monkeypatch the multiprocessing.cpu_count() function to always return 64
     """
-
-    return 64
+    monkeypatch.setattr(multiprocessing, "cpu_count", lambda *args, **kwargs: 64)
 
 
 @pytest.fixture(autouse=True)
-def patch_get_potential_energy(monkeypatch):
-    """
-    Monkeypatch the multiprocessing.cpu_count() function
-    """
-    monkeypatch.setattr(multiprocessing, "cpu_count", mock_cpu_count)
-
-
-@pytest.fixture(autouse=True)
-def clear_tracked_cache():
+def _clear_tracked_cache():
     """
     Clear the cache of the stored functions between the tests.
     """

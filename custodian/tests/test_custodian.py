@@ -4,7 +4,8 @@ import random
 import subprocess
 import unittest
 
-from ruamel import yaml
+import pytest
+from ruamel.yaml import YAML
 
 from custodian.custodian import (
     Custodian,
@@ -141,132 +142,140 @@ class CustodianTest(unittest.TestCase):
         c = Custodian([], [ExitCodeJob(0)])
         c.run()
         c = Custodian([], [ExitCodeJob(1)])
-        self.assertRaises(ReturnCodeError, c.run)
-        self.assertTrue(c.run_log[-1]["nonzero_return_code"])
+        with pytest.raises(
+            ReturnCodeError,
+        ):
+            c.run()
+        assert c.run_log[-1]["nonzero_return_code"]
         c = Custodian([], [ExitCodeJob(1)], terminate_on_nonzero_returncode=False)
         c.run()
 
     def test_run(self):
-        njobs = 100
+        n_jobs = 100
         params = {"initial": 0, "total": 0}
         c = Custodian(
             [ExampleHandler(params)],
-            [ExampleJob(i, params) for i in range(njobs)],
-            max_errors=njobs,
+            [ExampleJob(i, params) for i in range(n_jobs)],
+            max_errors=n_jobs,
         )
         output = c.run()
-        self.assertEqual(len(output), njobs)
+        assert len(output) == n_jobs
         ExampleHandler(params).as_dict()
 
     def test_run_interrupted(self):
-        njobs = 100
+        n_jobs = 100
         params = {"initial": 0, "total": 0}
         c = Custodian(
             [ExampleHandler(params)],
-            [ExampleJob(i, params) for i in range(njobs)],
-            max_errors=njobs,
+            [ExampleJob(i, params) for i in range(n_jobs)],
+            max_errors=n_jobs,
         )
 
-        self.assertEqual(c.run_interrupted(), njobs)
-        self.assertEqual(c.run_interrupted(), njobs)
+        assert c.run_interrupted() == n_jobs
+        assert c.run_interrupted() == n_jobs
 
         total_done = 1
-        while total_done < njobs:
-            c.jobs[njobs - 1].run()
+        while total_done < n_jobs:
+            c.jobs[n_jobs - 1].run()
             if params["total"] > 50:
-                self.assertEqual(c.run_interrupted(), njobs - total_done)
+                assert c.run_interrupted() == n_jobs - total_done
                 total_done += 1
 
     def test_unrecoverable(self):
-        njobs = 100
+        n_jobs = 100
         params = {"initial": 0, "total": 0}
         h = ExampleHandler2(params)
-        c = Custodian([h], [ExampleJob(i, params) for i in range(njobs)], max_errors=njobs)
-        self.assertRaises(NonRecoverableError, c.run)
-        self.assertTrue(h.has_error)
+        c = Custodian([h], [ExampleJob(i, params) for i in range(n_jobs)], max_errors=n_jobs)
+        with pytest.raises(NonRecoverableError):
+            c.run()
+        assert h.has_error
         h = ExampleHandler2b(params)
-        c = Custodian([h], [ExampleJob(i, params) for i in range(njobs)], max_errors=njobs)
+        c = Custodian([h], [ExampleJob(i, params) for i in range(n_jobs)], max_errors=n_jobs)
         c.run()
-        self.assertTrue(h.has_error)
-        self.assertEqual(c.run_log[-1]["handler"], h)
+        assert h.has_error
+        assert c.run_log[-1]["handler"] == h
 
     def test_max_errors(self):
-        njobs = 100
+        n_jobs = 100
         params = {"initial": 0, "total": 0}
         h = ExampleHandler(params)
         c = Custodian(
             [h],
-            [ExampleJob(i, params) for i in range(njobs)],
+            [ExampleJob(i, params) for i in range(n_jobs)],
             max_errors=1,
             max_errors_per_job=10,
         )
-        self.assertRaises(MaxCorrectionsError, c.run)
-        self.assertTrue(c.run_log[-1]["max_errors"])
+        with pytest.raises(MaxCorrectionsError):
+            c.run()
+        assert c.run_log[-1]["max_errors"]
 
     def test_max_errors_per_job(self):
-        njobs = 100
+        n_jobs = 100
         params = {"initial": 0, "total": 0}
         h = ExampleHandler(params)
         c = Custodian(
             [h],
-            [ExampleJob(i, params) for i in range(njobs)],
-            max_errors=njobs,
+            [ExampleJob(i, params) for i in range(n_jobs)],
+            max_errors=n_jobs,
             max_errors_per_job=1,
         )
-        self.assertRaises(MaxCorrectionsPerJobError, c.run)
-        self.assertTrue(c.run_log[-1]["max_errors_per_job"])
+        with pytest.raises(MaxCorrectionsPerJobError):
+            c.run()
+        assert c.run_log[-1]["max_errors_per_job"]
 
     def test_max_errors_per_handler_raise(self):
-        njobs = 100
+        n_jobs = 100
         params = {"initial": 0, "total": 0}
         h = ExampleHandler1b(params)
         c = Custodian(
             [h],
-            [ExampleJob(i, params) for i in range(njobs)],
-            max_errors=njobs * 10,
+            [ExampleJob(i, params) for i in range(n_jobs)],
+            max_errors=n_jobs * 10,
             max_errors_per_job=1000,
         )
-        self.assertRaises(MaxCorrectionsPerHandlerError, c.run)
-        self.assertEqual(h.n_applied_corrections, 2)
-        self.assertEqual(len(c.run_log[-1]["corrections"]), 2)
-        self.assertTrue(c.run_log[-1]["max_errors_per_handler"])
-        self.assertEqual(c.run_log[-1]["handler"], h)
+        with pytest.raises(MaxCorrectionsPerHandlerError):
+            c.run()
+        assert h.n_applied_corrections == 2
+        assert len(c.run_log[-1]["corrections"]) == 2
+        assert c.run_log[-1]["max_errors_per_handler"]
+        assert c.run_log[-1]["handler"] == h
 
     def test_max_errors_per_handler_warning(self):
-        njobs = 100
+        n_jobs = 100
         params = {"initial": 0, "total": 0}
         c = Custodian(
             [ExampleHandler1c(params)],
-            [ExampleJob(i, params) for i in range(njobs)],
-            max_errors=njobs * 10,
+            [ExampleJob(i, params) for i in range(n_jobs)],
+            max_errors=n_jobs * 10,
             max_errors_per_job=1000,
         )
         c.run()
-        self.assertTrue(all(len(r["corrections"]) <= 2 for r in c.run_log))
+        assert all(len(r["corrections"]) <= 2 for r in c.run_log)
 
     def test_validators(self):
-        njobs = 100
+        n_jobs = 100
         params = {"initial": 0, "total": 0}
         c = Custodian(
             [ExampleHandler(params)],
-            [ExampleJob(i, params) for i in range(njobs)],
+            [ExampleJob(i, params) for i in range(n_jobs)],
             [ExampleValidator1()],
-            max_errors=njobs,
+            max_errors=n_jobs,
         )
         output = c.run()
-        self.assertEqual(len(output), njobs)
+        assert len(output) == n_jobs
 
-        njobs = 100
+        n_jobs = 100
         params = {"initial": 0, "total": 0}
         v = ExampleValidator2()
         c = Custodian(
             [ExampleHandler(params)],
-            [ExampleJob(i, params) for i in range(njobs)],
+            [ExampleJob(i, params) for i in range(n_jobs)],
             [v],
-            max_errors=njobs,
+            max_errors=n_jobs,
         )
-        self.assertRaises(ValidationError, c.run)
-        self.assertEqual(c.run_log[-1]["validator"], v)
+        with pytest.raises(ValidationError):
+            c.run()
+        assert c.run_log[-1]["validator"] == v
 
     def test_from_spec(self):
         spec = """jobs:
@@ -292,13 +301,13 @@ custodian_params:
 
         os.environ["TMPDIR"] = "/tmp/random"
         os.environ["PBS_NODEFILE"] = "whatever"
-        d = yaml.safe_load(spec)
+        d = YAML(typ="rt").load(spec)
         c = Custodian.from_spec(d)
-        self.assertEqual(c.jobs[0].vasp_cmd[2], "whatever")
-        self.assertEqual(c.scratch_dir, "/tmp/random")
-        self.assertEqual(len(c.jobs), 2)
-        self.assertEqual(len(c.handlers), 3)
-        self.assertEqual(len(c.validators), 1)
+        assert c.jobs[0].vasp_cmd[2] == "whatever"
+        assert c.scratch_dir == "/tmp/random"
+        assert len(c.jobs) == 2
+        assert len(c.handlers) == 3
+        assert len(c.validators) == 1
 
     def tearDown(self):
         for f in glob.glob("custodian.*.tar.gz"):
@@ -316,11 +325,11 @@ custodian_params:
 #         pth = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "test_files", "checkpointing")
 #         # os.chdir()
 #         shutil.copy(os.path.join(pth, "backup.tar.gz"), "custodian.chk.3.tar.gz")
-#         njobs = 5
+#         n_jobs = 5
 #         params = {"initial": 0, "total": 0}
 #         c = Custodian(
 #             [ExampleHandler(params)],
-#             [ExampleJob(i, params) for i in range(njobs)],
+#             [ExampleJob(i, params) for i in range(n_jobs)],
 #             [ExampleValidator1()],
 #             max_errors=100,
 #             checkpoint=True,
@@ -329,7 +338,3 @@ custodian_params:
 #         self.assertEqual(len(c.run()), 5)
 #         os.remove("custodian.json")
 #         os.chdir(self.cwd)
-
-
-if __name__ == "__main__":
-    unittest.main()

@@ -1,6 +1,4 @@
-"""
-This module implements basic kinds of jobs for Nwchem runs.
-"""
+"""This module implements basic kinds of jobs for Nwchem runs."""
 
 import shutil
 import subprocess
@@ -19,9 +17,7 @@ __date__ = "5/20/13"
 
 
 class NwchemJob(Job):
-    """
-    A basic Nwchem job.
-    """
+    """A basic Nwchem job."""
 
     def __init__(
         self,
@@ -58,22 +54,16 @@ class NwchemJob(Job):
         self.settings_override = settings_override
 
     def setup(self):
-        """
-        Performs backup if necessary.
-        """
+        """Performs backup if necessary."""
         if self.backup:
             shutil.copy(self.input_file, f"{self.input_file}.orig")
 
     def run(self):
-        """
-        Performs actual nwchem run.
-        """
+        """Performs actual nwchem run."""
         with zopen(self.output_file, "w") as fout:
-            return subprocess.Popen(self.nwchem_cmd + [self.input_file], stdout=fout)  # pylint: disable=R1732
+            return subprocess.Popen([*self.nwchem_cmd, self.input_file], stdout=fout)  # pylint: disable=R1732
 
     def postprocess(self):
-        """
-        Renaming or gzipping as needed.
-        """
+        """Renaming or gzipping as needed."""
         if self.gzipped:
             gzip_dir(".")

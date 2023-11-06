@@ -1,6 +1,4 @@
-"""
-This module holds different utility functions. Mainly used by handlers.
-"""
+"""This module holds different utility functions. Mainly used by handlers."""
 
 import itertools
 import os
@@ -28,10 +26,7 @@ def restart(actions, output_file, input_file, no_actions_needed=False):
         ci = Cp2kInput.from_file(input_file)
         restart_file = o.filenames.get("restart")
         restart_file = restart_file[-1] if restart_file else None
-        if ci.check("force_eval/dft"):
-            wfn_restart = ci["force_eval"]["dft"].get("wfn_restart_file_name")
-        else:
-            wfn_restart = None
+        wfn_restart = ci["force_eval"]["dft"].get("wfn_restart_file_name") if ci.check("force_eval/dft") else None
 
         # If convergence is already pretty good, or we have moved to a new ionic step,
         # discard the old WFN
@@ -67,7 +62,7 @@ def cleanup_input(ci):
         return
     if any(k.upper() == "POTENTIAL" for k in ci.subsections):
         ci.subsections.pop("POTENTIAL")
-    for k, v in ci.subsections.items():
+    for v in ci.subsections.values():
         cleanup_input(v)
 
 
@@ -81,7 +76,6 @@ def activate_ot(actions, ci):
     ci (Cp2kInput):
         Cp2kInput object, used to coordinate settings
     """
-
     eps_scf = ci["force_eval"]["dft"]["scf"]["eps_scf"]
 
     ot_actions = [
@@ -125,12 +119,11 @@ def activate_ot(actions, ci):
 
 def activate_diag(actions):
     """
-    Activate diagonalization
+    Activate diagonalization.
 
     actions (list):
         list of actions that are being applied. Will be modified in-place
     """
-
     diag_actions = [
         {"dict": "cp2k.inp", "action": ("_unset", {"FORCE_EVAL": {"DFT": {"SCF": "OT"}}})},
         {"dict": "cp2k.inp", "action": ("_unset", {"FORCE_EVAL": {"DFT": {"SCF": "OUTER_SCF"}}})},
@@ -162,7 +155,7 @@ def can_use_ot(output, ci, minimum_band_gap=0.1):
     """
     Check whether OT can be used:
         OT should not already be activated
-        The output should show that the system has a band gap that is greater than minimum_band_gap
+        The output should show that the system has a band gap that is greater than minimum_band_gap.
 
     Args:
         output (Cp2kOutput): cp2k output object for determining band gap
@@ -181,9 +174,7 @@ def can_use_ot(output, ci, minimum_band_gap=0.1):
 
 
 def tail(filename, n=10):
-    """
-    Returns the last n lines of a file as a list (including empty lines)
-    """
+    """Returns the last n lines of a file as a list (including empty lines)."""
     with open(filename) as f:
         t = deque(f, n)
         if t:
@@ -193,7 +184,7 @@ def tail(filename, n=10):
 
 def get_conv(outfile):
     """
-    Helper function to get the convergence info from SCF loops
+    Helper function to get the convergence info from SCF loops.
 
     Args:
         outfile (str): output file to parse

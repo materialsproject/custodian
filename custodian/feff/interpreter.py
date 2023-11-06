@@ -1,6 +1,4 @@
-"""
-Implements various interpreters and modders for FEFF calculations.
-"""
+"""Implements various interpreters and modders for FEFF calculations."""
 
 import os
 
@@ -11,9 +9,7 @@ from custodian.ansible.interpreter import Modder
 
 
 class FeffModder(Modder):
-    """
-    A Modder for FeffInput sets
-    """
+    """A Modder for FeffInput sets."""
 
     def __init__(self, actions=None, strict=True, feffinp=None):
         """

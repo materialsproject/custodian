@@ -1,6 +1,4 @@
-"""
-This module implements basic kinds of jobs for QChem runs.
-"""
+"""This module implements basic kinds of jobs for QChem runs."""
 
 import copy
 import os
@@ -17,6 +15,11 @@ from pymatgen.io.qchem.sets import OptSet
 from custodian.custodian import Job
 from custodian.qchem.utils import perturb_coordinates, vector_list_diff
 
+try:
+    from openbabel import openbabel as ob
+except ImportError:
+    ob = None
+
 __author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath, Evan Spotte-Smith"
 __copyright__ = "Copyright 2018, The Materials Project"
 __version__ = "0.1"
@@ -26,16 +29,9 @@ __status__ = "Alpha"
 __date__ = "3/20/18"
 __credits__ = "Xiaohui Qu"
 
-try:
-    from openbabel import openbabel as ob  # noqa: F401
-except ImportError:
-    raise RuntimeError("ERROR: Openbabel must be installed in order to use Q-Chem Custodian!")
-
 
 class QCJob(Job):
-    """
-    A basic QChem Job.
-    """
+    """A basic QChem Job."""
 
     def __init__(
         self,
@@ -69,6 +65,8 @@ class QCJob(Job):
             backup (bool): Whether to backup the initial input file. If True, the
                 input will be copied with a ".orig" appended. Defaults to True.
         """
+        if ob is None:
+            raise RuntimeError("ERROR: Openbabel must be installed in order to use Q-Chem Custodian!")
         try:
             self.qchem_command = qchem_command.split(" ")
         except AttributeError:
@@ -102,21 +100,16 @@ class QCJob(Job):
 
     @property
     def current_command(self):
-        """
-        The command to run QChem
-        """
+        """The command to run QChem."""
         multi = {"openmp": "-nt", "mpi": "-np"}
         if self.multimode not in multi:
             raise RuntimeError("ERROR: Multimode should only be set to openmp or mpi")
         command = [multi[self.multimode], str(self.max_cores), self.input_file, self.output_file, "scratch"]
         command = self.qchem_command + command
-        com_str = " ".join(command)
-        return com_str
+        return " ".join(command)
 
     def setup(self):
-        """
-        Sets up environment variables necessary to efficiently run QChem
-        """
+        """Sets up environment variables necessary to efficiently run QChem."""
         if self.backup:
             shutil.copy(self.input_file, f"{self.input_file}.orig")
         if self.multimode == "openmp":
@@ -136,11 +129,9 @@ class QCJob(Job):
             os.environ["NBOEXE"] = self.nboexe
 
     def postprocess(self):
-        """
-        Renames and removes scratch files after running QChem
-        """
+        """Renames and removes scratch files after running QChem."""
         scratch_dir = os.path.join(os.environ["QCSCRATCH"], "scratch")
-        for file in ["HESS", "GRAD", "plots/dens.0.cube"]:
+        for file in ["HESS", "GRAD", "plots/dens.0.cube", "131.0", "53.0", "132.0"]:
             file_path = os.path.join(scratch_dir, file)
             if os.path.exists(file_path):
                 shutil.copy(file_path, os.getcwd())
@@ -170,6 +161,9 @@ class QCJob(Job):
         if os.path.exists(os.path.join(os.environ["QCSCRATCH"], "132.0")):
             os.mkdir(local_scratch)
             shutil.move(os.path.join(os.environ["QCSCRATCH"], "132.0"), local_scratch)
+        if os.path.exists(os.path.join(os.environ["QCSCRATCH"], "53.0")):
+            os.makedirs(local_scratch, exist_ok=True)
+            shutil.move(os.path.join(os.environ["QCSCRATCH"], "53.0"), local_scratch)
         with open(self.qclog_file, "w") as qclog:
             return subprocess.Popen(self.current_command, stdout=qclog, shell=True)  # pylint: disable=R1732
 
@@ -251,7 +245,7 @@ class QCJob(Job):
         opt_rem = copy.deepcopy(orig_input.rem)
         opt_rem["job_type"] = opt_method
         opt_geom_opt = None
-        if "geom_opt2" in orig_input.rem.keys():
+        if "geom_opt2" in orig_input.rem:
             freq_rem.pop("geom_opt2", None)
             if linked:
                 opt_rem.pop("geom_opt2", None)
@@ -327,18 +321,20 @@ class QCJob(Job):
                     opt_geom_opt["initial_hessian"] = "read"
                 for key in opt_indata.rem:
                     if key not in ["job_type", "geom_opt2", "scf_guess_always"]:
-                        if freq_rem.get(key, None) != opt_indata.rem[key]:
-                            if "geom_opt" not in key:
-                                freq_rem[key] = opt_indata.rem[key]
+                        if freq_rem.get(key, None) != opt_indata.rem[key] and "geom_opt" not in key:
+                            freq_rem[key] = opt_indata.rem[key]
                         if opt_rem.get(key, None) != opt_indata.rem[key]:
                             opt_rem[key] = opt_indata.rem[key]
                 first = False
-                if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
-                    if not transition_state:
-                        warnings.warn(
-                            "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
-                        )
-                        break
+                if (
+                    opt_outdata["structure_change"] == "unconnected_fragments"
+                    and not opt_outdata["completion"]
+                    and not transition_state
+                ):
+                    warnings.warn(
+                        "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
+                    )
+                    break
                 energy_history.append(opt_outdata.get("final_energy"))
                 freq_QCInput = QCInput(
                     molecule=opt_outdata.get("molecule_from_optimized_geometry"),
@@ -372,9 +368,8 @@ class QCJob(Job):
                     if key not in ["job_type", "geom_opt2", "scf_guess_always"]:
                         if freq_rem.get(key, None) != freq_indata.rem[key]:
                             freq_rem[key] = freq_indata.rem[key]
-                        if opt_rem.get(key, None) != freq_indata.rem[key]:
-                            if key != "cpscf_nseg":
-                                opt_rem[key] = freq_indata.rem[key]
+                        if opt_rem.get(key, None) != freq_indata.rem[key] and key != "cpscf_nseg":
+                            opt_rem[key] = freq_indata.rem[key]
                 errors = freq_outdata.get("errors")
 
                 if len(errors) != 0:
@@ -398,10 +393,9 @@ class QCJob(Job):
                     if abs(freq_0) < 15.0 and freq_1 > 0.0:
                         warnings.warn("One negative frequency smaller than 15.0 - not worth further flattening!")
                         break
-                    if len(energy_history) > 1:
-                        if abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
-                            warnings.warn("Energy change below cutoff!")
-                            break
+                    if len(energy_history) > 1 and abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
+                        warnings.warn("Energy change below cutoff!")
+                        break
                     tmp_opt_rem = copy.deepcopy(opt_rem)
                     if opt_rem["scf_algorithm"] == "diis":
                         tmp_opt_rem["scf_guess_always"] = "True"
@@ -473,12 +467,15 @@ class QCJob(Job):
                     orig_multiplicity = copy.deepcopy(opt_outdata.get("multiplicity"))
                     orig_energy = copy.deepcopy(opt_outdata.get("final_energy"))
                 first = False
-                if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
-                    if not transition_state:
-                        warnings.warn(
-                            "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
-                        )
-                        break
+                if (
+                    opt_outdata["structure_change"] == "unconnected_fragments"
+                    and not opt_outdata["completion"]
+                    and not transition_state
+                ):
+                    warnings.warn(
+                        "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
+                    )
+                    break
                 freq_QCInput = QCInput(
                     molecule=opt_outdata.get("molecule_from_optimized_geometry"),
                     rem=freq_rem,
@@ -521,10 +518,9 @@ class QCJob(Job):
                     if abs(freq_0) < 15.0 and freq_1 > 0.0:
                         warnings.warn("One negative frequency smaller than 15.0 - not worth further flattening!")
                         break
-                    if len(energy_history) > 1:
-                        if abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
-                            warnings.warn("Energy change below cutoff!")
-                            break
+                    if len(energy_history) > 1 and abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
+                        warnings.warn("Energy change below cutoff!")
+                        break
                 else:
                     freq_0 = outdata.get("frequencies")[0]
                     freq_1 = outdata.get("frequencies")[1]
@@ -594,11 +590,9 @@ class QCJob(Job):
                                     good_child = copy.deepcopy(history[-1])
                                 if good_child["num_neg_freqs"] > 1:
                                     raise Exception(
-                                        "ERROR: Child with lower energy has more negative frequencies! " "Exiting..."
+                                        "ERROR: Child with lower energy has more negative frequencies! Exiting..."
                                     )
-                                if good_child["energy"] < parent_hist["energy"]:
-                                    make_good_child_next_parent = True
-                                elif (
+                                if good_child["energy"] < parent_hist["energy"] or (
                                     vector_list_diff(
                                         good_child["frequency_mode_vectors"][perturb_index],
                                         parent_hist["frequency_mode_vectors"][perturb_index],

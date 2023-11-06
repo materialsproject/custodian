@@ -1,8 +1,4 @@
-#!/usr/bin/env python
-
-"""
-This is a master vasp running script to converging kpoints for a calculation
-"""
+"""This is a master vasp running script to converging kpoints for a calculation."""
 
 import logging
 
@@ -18,17 +14,12 @@ logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
 
 
 def get_runs(vasp_command, target=1e-3, max_steps=10, mode="linear"):
-    """
-    Generate the runs using a generator until convergence is achieved.
-    """
+    """Generate the runs using a generator until convergence is achieved."""
     energy = 0
     vinput = VaspInput.from_directory(".")
     kpoints = vinput["KPOINTS"].kpts[0]
     for i in range(max_steps):
-        if mode == "linear":
-            m = [k * (i + 1) for k in kpoints]
-        else:
-            m = [k + 1 for k in kpoints]
+        m = [(k * (i + 1)) for k in kpoints] if mode == "linear" else [(k + 1) for k in kpoints]
         if i == 0:
             settings = None
             backup = True
@@ -59,9 +50,7 @@ def get_runs(vasp_command, target=1e-3, max_steps=10, mode="linear"):
 
 
 def do_run(args):
-    """
-    Perform the run.
-    """
+    """Perform the run."""
     handlers = [VaspErrorHandler(), UnconvergedErrorHandler()]
     c = Custodian(
         handlers,
@@ -77,9 +66,7 @@ def do_run(args):
 
 
 def main():
-    """
-    Main method
-    """
+    """Main method."""
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -103,7 +90,7 @@ def main():
         nargs="?",
         default="pvasp",
         type=str,
-        help="VASP command. Defaults to pvasp. If you are using mpirun, " 'set this to something like "mpirun pvasp".',
+        help="VASP command. Defaults to pvasp. If you are using mpirun, set this to something like 'mpirun pvasp'.",
     )
 
     parser.add_argument(

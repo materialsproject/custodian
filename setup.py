@@ -3,7 +3,7 @@
 
 from setuptools import find_packages, setup
 
-with open("README.rst") as f:
+with open("README.md") as f:
     long_desc = f.read()
     ind = long_desc.find("\n")
     long_desc = long_desc[ind + 1 :]
@@ -11,9 +11,14 @@ with open("README.rst") as f:
 setup(
     name="custodian",
     packages=find_packages(),
-    version="2023.6.5",
+    version="2023.10.9",
     install_requires=["monty>=2.0.6", "ruamel.yaml>=0.15.6", "sentry-sdk>=0.8.0", "psutil"],
-    extras_require={"vasp, nwchem, qchem": ["pymatgen>=2019.8.23"]},
+    extras_require={
+        "vasp": ["pymatgen"],
+        "nwchem": ["pymatgen"],
+        "qchem": ["pymatgen"],
+        "dev": ["mypy", "pre-commit", "pytest-cov", "pytest", "ruff"],
+    },
     package_data={},
     author="Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu, Matthew Horton, Samuel M. Blau",
     author_email="ongsp@ucsd.edu",
@@ -22,6 +27,7 @@ setup(
     license="MIT",
     description="A simple JIT job management framework in Python.",
     long_description=long_desc,
+    long_description_content_type="text/markdown",
     keywords=["jit", "just-in-time", "job", "management", "vasp"],
     classifiers=[
         "Programming Language :: Python :: 3",

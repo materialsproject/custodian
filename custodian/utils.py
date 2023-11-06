@@ -1,6 +1,5 @@
-"""
-Utility function and classes.
-"""
+"""Utility function and classes."""
+
 import functools
 import logging
 import os
@@ -19,7 +18,7 @@ def backup(filenames, prefix="error"):
         prefix (str): prefix to the files. Defaults to error, which means a
             series of error.1.tar.gz, error.2.tar.gz, ... will be generated.
     """
-    num = max([0] + [int(f.split(".")[1]) for f in glob(f"{prefix}.*.tar.gz")])
+    num = max([0] + [int(file.split(".")[1]) for file in glob(f"{prefix}.*.tar.gz")])
     filename = f"{prefix}.{num + 1}.tar.gz"
     logging.info(f"Backing up run to {filename}.")
     with tarfile.open(filename, "w:gz") as tar:
@@ -31,7 +30,7 @@ def backup(filenames, prefix="error"):
 def get_execution_host_info():
     """
     Tries to return a tuple describing the execution host.
-    Doesn't work for all queueing systems
+    Doesn't work for all queueing systems.
 
     Returns:
         (HOSTNAME, CLUSTER_NAME)
