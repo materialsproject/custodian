@@ -20,8 +20,7 @@ def load_vasprun(filepath, **vasprun_kwargs):
     Returns:
         The Vasprun object
     """
-    vr = Vasprun(filepath, **vasprun_kwargs)
-    return vr
+    return Vasprun(filepath, **vasprun_kwargs)
 
 
 @tracked_lru_cache
@@ -36,5 +35,4 @@ def load_outcar(filepath):
     Returns:
         The Vasprun object
     """
-    o = Outcar(filepath)
-    return o
+    return Outcar(filepath)
