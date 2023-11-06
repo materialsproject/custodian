@@ -1090,7 +1090,9 @@ class UnconvergedErrorHandler(ErrorHandler):
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
                 elif algo == "fast":
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
-                elif (algo == "normal" or not 50 <= v.incar.get("IALGO", 38) <= 59) and v.incar.get("ISMEAR", -1) >= 0:
+                elif algo == "normal" and v.incar.get("ISMEAR", 1) >= 0:
+                    # NB: default for ISMEAR is 1. To avoid algo_tet errors, only set
+                    # ALGO = ALL if ISMEAR >= 0
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
                 else:
                     # Try mixing as last resort
@@ -1492,9 +1494,9 @@ class NonConvergingErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
             elif algo == "fast":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
-            elif algo == "normal":
+            elif algo == "normal" and incar.get("ISMEAR", 1) >= 0:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
-            elif algo == "all":
+            elif algo == "all" or (algo == "normal" and incar.get("ISMEAR", 1) < 0):
                 if amix > 0.1 and bmix > 0.01:
                     # Try linear mixing
                     actions.append(

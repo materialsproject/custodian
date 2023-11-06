@@ -560,23 +560,24 @@ class VaspErrorHandlerTest(PymatgenTest):
     def test_eddiag(self):
         # subspace rotation error
         os.remove("CONTCAR")
+        shutil.copy("INCAR.amin", "INCAR")
         h = VaspErrorHandler("vasp.eddiag")
         h.check()
         d = h.correct()
         assert d["errors"] == ["eddiag"]
         # first check that no CONTCAR exists, only action should be updating INCAR
+        # ALGO = Fast --> ALGO = Normal
         assert d["actions"] == [{"action": {"_set": {"ALGO": "Normal"}}, "dict": "INCAR"}]
 
-        # now copy CONTCAR and check that both CONTCAR->POSCAR and INCAR updates are included
+        # now copy CONTCAR and check that both CONTCAR->POSCAR
+        # and INCAR updates are included: ALGO = Normal --> ALGO = exact
         shutil.copy("CONTCAR.eddiag", "CONTCAR")
-        shutil.copy("INCAR.orig", "INCAR")
         h = VaspErrorHandler("vasp.eddiag")
         h.check()
         d = h.correct()
-        print(d["actions"])
         assert d["actions"] == [
             {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}},
-            {"action": {"_set": {"ALGO": "Normal"}}, "dict": "INCAR"},
+            {"action": {"_set": {"ALGO": "exact"}}, "dict": "INCAR"},
         ]
 
 

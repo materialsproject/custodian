@@ -28,7 +28,7 @@
   <i name="ENCUT">    520.00000000</i>
   <v name="MAGMOM">      0.00000000      0.00000000</v>
   <i type="string" name="LREAL"> Auto</i>
-  <i type="int" name="ISMEAR">    -5</i>
+  <i type="int" name="ISMEAR">    0</i>
   <i name="SIGMA">      0.05000000</i>
   <i type="logical" name="LWAVE"> F  </i>
   <i type="logical" name="LCHARG"> T  </i>
@@ -485,7 +485,7 @@
    <i type="int" name="NMIN">     0</i>
    <i name="EREF">      0.00000000</i>
    <separator name="electronic smearing" >
-    <i type="int" name="ISMEAR">    -5</i>
+    <i type="int" name="ISMEAR">    0</i>
     <i name="SIGMA">      0.05000000</i>
     <i name="KSPACING">      0.50000000</i>
     <i type="logical" name="KGAMMA"> T  </i>
