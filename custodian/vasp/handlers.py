@@ -208,7 +208,8 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
             self.error_count[err_type] += 1
 
-        # Missing AMIN error handler - previously, custodian would kill the job without letting it run if AMIN was flagged
+        # Missing AMIN error handler:
+        # previously, custodian would kill the job without letting it run if AMIN was flagged
         if "amin" in self.errors and vi["INCAR"].get("AMIN", 0.1) > 0.01:
             actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}})
 
