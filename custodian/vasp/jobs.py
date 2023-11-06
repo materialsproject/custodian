@@ -163,7 +163,7 @@ class VaspJob(Job):
                     scope.set_tag("vasp_path", vasp_path)
                     scope.set_tag("vasp_cmd", vasp_cmd)
                 except Exception:
-                    logger.error(f"Failed to detect VASP path: {vasp_cmd}", exc_info=True)
+                    logger.exception(f"Failed to detect VASP path: {vasp_cmd}")
                     scope.set_tag("vasp_cmd", vasp_cmd)
 
     def setup(self):
@@ -575,8 +575,8 @@ class VaspJob(Job):
                     x *= 1 + initial_strain
                 else:
                     # Sort the lattice parameter by energies.
-                    min_x = min(energies.keys(), key=lambda e: energies[e])
-                    sorted_x = sorted(energies.keys())
+                    min_x = min(energies, key=lambda e: energies[e])
+                    sorted_x = sorted(energies)
                     ind = sorted_x.index(min_x)
                     if ind == 0:
                         other = ind + 1
@@ -607,7 +607,7 @@ class VaspJob(Job):
                             try:
                                 # If there are more than 4 data points, we will
                                 # do a quadratic fit to accelerate convergence.
-                                x1 = list(energies.keys())
+                                x1 = list(energies)
                                 y1 = [energies[j] for j in x1]
                                 z1 = np.polyfit(x1, y1, 2)
                                 pp = np.poly1d(z1)
@@ -651,10 +651,10 @@ class VaspJob(Job):
                 **vasp_job_kwargs,
             )
 
-        with open("EOS.txt", "w") as f:
-            f.write(f"# {lattice_direction} energy\n")
-            for k in sorted(energies.keys()):
-                f.write(f"{k} {energies[k]}\n")
+        with open("EOS.txt", "w") as file:
+            file.write(f"# {lattice_direction} energy\n")
+            for key in sorted(energies):
+                file.write(f"{key} {energies[key]}\n")
 
     def terminate(self):
         """

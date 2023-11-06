@@ -1,7 +1,4 @@
-"""
-Deployment file to facilitate releases of custodian.
-"""
-
+"""Deployment file to facilitate releases of custodian."""
 
 import datetime
 import glob

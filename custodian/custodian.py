@@ -22,7 +22,7 @@ from monty.serialization import dumpfn, loadfn
 from monty.shutil import gzip_dir
 from monty.tempfile import ScratchDir
 
-from .utils import get_execution_host_info
+from .utils import get_execution_host_info, tracked_lru_cache
 
 __author__ = "Shyue Ping Ong, William Davidson Richards"
 __copyright__ = "Copyright 2012, The Materials Project"
@@ -508,13 +508,13 @@ class Custodian:
                     if v.check():
                         self.run_log[-1]["validator"] = v
                         s = f"Validation failed: {v.__class__.__name__}"
-                        raise ValidationError(s, True, v)
+                        raise ValidationError(s, raises=True, validator=v)
                 if not zero_return_code:
                     if self.terminate_on_nonzero_returncode:
                         self.run_log[-1]["nonzero_return_code"] = True
                         s = f"Job return code is {p.returncode}. Terminating..."
                         logger.info(s)
-                        raise ReturnCodeError(s, True)
+                        raise ReturnCodeError(s, raises=True)
                     warnings.warn("subprocess returned a non-zero return code. Check outputs carefully...")
                 job.postprocess()
                 return
@@ -524,27 +524,27 @@ class Custodian:
                 if not x["actions"] and x["handler"].raises_runtime_error:
                     self.run_log[-1]["handler"] = x["handler"]
                     s = f"Unrecoverable error for handler: {x['handler']}"
-                    raise NonRecoverableError(s, True, x["handler"])
+                    raise NonRecoverableError(s, raises=True, handler=x["handler"])
             for x in self.run_log[-1]["corrections"]:
                 if not x["actions"]:
                     self.run_log[-1]["handler"] = x["handler"]
                     s = f"Unrecoverable error for handler: {x['handler']}"
-                    raise NonRecoverableError(s, False, x["handler"])
+                    raise NonRecoverableError(s, raises=False, handler=x["handler"])
 
         if self.errors_current_job >= self.max_errors_per_job:
             self.run_log[-1]["max_errors_per_job"] = True
             msg = f"Max errors per job reached: {self.max_errors_per_job}."
             logger.info(msg)
-            raise MaxCorrectionsPerJobError(msg, True, self.max_errors_per_job, job)
+            raise MaxCorrectionsPerJobError(msg, raises=True, max_errors_per_job=self.max_errors_per_job, job=job)
 
         self.run_log[-1]["max_errors"] = True
         msg = f"Max errors reached: {self.max_errors}."
         logger.info(msg)
-        raise MaxCorrectionsError(msg, True, self.max_errors)
+        raise MaxCorrectionsError(msg, raises=True, max_errors=self.max_errors)
 
     def run_interrupted(self):
         """
-        Runs custodian in a interuppted mode, which sets up and
+        Runs custodian in a interrupted mode, which sets up and
         validates jobs but doesn't run the executable.
 
         Returns:
@@ -596,7 +596,7 @@ class Custodian:
                     if not x["actions"] and x["handler"].raises_runtime_error:
                         self.run_log[-1]["handler"] = x["handler"]
                         s = f"Unrecoverable error for handler: {x['handler']}. Raising RuntimeError"
-                        raise NonRecoverableError(s, True, x["handler"])
+                        raise NonRecoverableError(s, raises=True, handler=x["handler"])
                 logger.info("Corrected input based on error handlers")
                 # Return with more jobs to run if recoverable error caught
                 # and corrected for
@@ -609,7 +609,7 @@ class Custodian:
                     self.run_log[-1]["validator"] = v
                     logger.info("Failed validation based on validator")
                     s = f"Validation failed: {v}"
-                    raise ValidationError(s, True, v)
+                    raise ValidationError(s, raises=True, validator=v)
 
             logger.info(f"Postprocessing for {job.name}.run")
             job.postprocess()
@@ -655,7 +655,9 @@ class Custodian:
                         if h.raise_on_max:
                             self.run_log[-1]["handler"] = h
                             self.run_log[-1]["max_errors_per_handler"] = True
-                            raise MaxCorrectionsPerHandlerError(msg, True, h.max_num_corrections, h)
+                            raise MaxCorrectionsPerHandlerError(
+                                msg, raises=True, max_errors_per_handler=h.max_num_corrections, handler=h
+                            )
                         logger.warning(msg + " Correction not applied.")
                         continue
                     if terminate_func is not None and h.is_terminating:
@@ -681,6 +683,8 @@ class Custodian:
         self.run_log[-1]["corrections"].extend(corrections)
         # We do a dump of the run log after each check.
         dumpfn(self.run_log, Custodian.LOG_FILE, cls=MontyEncoder, indent=4)
+        # Clear all the cached values to avoid reusing them in a subsequent check
+        tracked_lru_cache.tracked_cache_clear()
         return len(corrections) > 0
 
 
@@ -914,7 +918,7 @@ class MaxCorrectionsPerJobError(CustodianError):
 class MaxCorrectionsPerHandlerError(CustodianError):
     """Error raised when the maximum allowed number of errors per handler is reached."""
 
-    def __init__(self, message, raises, max_errors_per_handler, handler):
+    def __init__(self, message: str, raises: bool, max_errors_per_handler: int, handler: ErrorHandler) -> None:
         """
         Args:
             message (str): Message passed to Exception

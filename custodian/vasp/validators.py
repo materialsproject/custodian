@@ -1,12 +1,13 @@
-"""Implements various validatiors, e.g., check if vasprun.xml is valid, for VASP."""
+"""Implements various validators, e.g., check if vasprun.xml is valid, for VASP."""
 
 import logging
 import os
 from collections import deque
 
-from pymatgen.io.vasp import Chgcar, Incar, Outcar, Vasprun
+from pymatgen.io.vasp import Chgcar, Incar
 
 from custodian.custodian import Validator
+from custodian.vasp.io import load_outcar, load_vasprun
 
 
 class VasprunXMLValidator(Validator):
@@ -27,7 +28,7 @@ class VasprunXMLValidator(Validator):
     def check(self):
         """Check for error."""
         try:
-            Vasprun("vasprun.xml")
+            load_vasprun(os.path.join(os.getcwd(), "vasprun.xml"))
         except Exception:
             exception_context = {}
 
@@ -52,7 +53,7 @@ class VasprunXMLValidator(Validator):
                     vasprun_tail = deque(vasprun, maxlen=10)
                 exception_context["vasprun_tail"] = "".join(vasprun_tail)
 
-            self.logger.error("Failed to load vasprun.xml", exc_info=True, extra=exception_context)
+            self.logger.exception("Failed to load vasprun.xml", extra=exception_context)
 
             return True
         return False
@@ -88,7 +89,7 @@ class VaspNpTMDValidator(Validator):
         if not is_npt:
             return False
 
-        outcar = Outcar("OUTCAR")
+        outcar = load_outcar(os.path.join(os.getcwd(), "OUTCAR"))
         patterns = {"MDALGO": r"MDALGO\s+=\s+([\d]+)"}
         outcar.read_pattern(patterns=patterns)
         if outcar.data["MDALGO"] == [["3"]]:
