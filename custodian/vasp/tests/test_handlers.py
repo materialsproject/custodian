@@ -8,6 +8,7 @@ import pytest
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
 from pymatgen.util.testing import PymatgenTest
 
+from custodian.utils import tracked_lru_cache
 from custodian.vasp.handlers import (
     AliasingErrorHandler,
     DriftErrorHandler,
@@ -599,6 +600,7 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
             "actions": [{"action": {"_set": {"ALGO": "Normal"}}, "dict": "INCAR"}],
             "errors": ["Unconverged"],
         }
+        tracked_lru_cache.tracked_cache_clear()
 
         shutil.copy("vasprun.xml.electronic_veryfast", "vasprun.xml")
         handler = UnconvergedErrorHandler()
@@ -606,6 +608,7 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
         assert dct == {"actions": [{"action": {"_set": {"ALGO": "Fast"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
+        tracked_lru_cache.tracked_cache_clear()
 
         shutil.copy("vasprun.xml.electronic_normal", "vasprun.xml")
         handler = UnconvergedErrorHandler()
@@ -613,6 +616,7 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
         assert dct == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
+        tracked_lru_cache.tracked_cache_clear()
 
         shutil.copy("vasprun.xml.electronic_metagga_fast", "vasprun.xml")
         handler = UnconvergedErrorHandler()
@@ -620,6 +624,7 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
         assert dct == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
+        tracked_lru_cache.tracked_cache_clear()
 
         shutil.copy("vasprun.xml.electronic_hybrid_fast", "vasprun.xml")
         handler = UnconvergedErrorHandler()
@@ -627,6 +632,7 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
         assert dct == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
+        tracked_lru_cache.tracked_cache_clear()
 
         shutil.copy("vasprun.xml.electronic_hybrid_all", "vasprun.xml")
         handler = UnconvergedErrorHandler()
