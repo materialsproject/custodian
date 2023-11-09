@@ -61,6 +61,10 @@ Docs = "https://materialsproject.github.io/custodian"
 Repo = "https://github.com/materialsproject/custodian"
 Package = "https://pypi.org/project/custodian"
 
+[tool.setuptools.packages.find]
+include = ["custodian*"]
+exclude = ["*.tests", "*.tests.*", "test_files"]
+
 [tool.ruff]
 target-version = "py38"
 line-length = 120
