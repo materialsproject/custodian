@@ -1,3 +1,66 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "custodian"
+version = "2023.10.9"
+description = "A simple JIT job management framework in Python."
+authors = [
+  { name = "Shyue Ping Ong", email = "ongsp@ucsd.edu" },
+
+  { name = "Matthew Horton" },
+  { name = "Samuel M. Blau" },
+  { name = "Stephen Dacek" },
+  { name = "William Davidson Richards" },
+  { name = "Xiaohui Qu" },
+
+  { name = "Janosh Riebesell", email = "janosh@lbl.gov" },
+]
+maintainers = [{ name = "Shyue Ping Ong" }]
+readme = "README.md"
+keywords = ["jit", "job", "just-in-time", "management", "vasp"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Topic :: Scientific/Engineering :: Chemistry",
+  "Topic :: Scientific/Engineering :: Physics",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
+
+dependencies = [
+  "monty>=2.0.6",
+  "psutil",
+  "ruamel.yaml>=0.15.6",
+  "sentry-sdk>=0.8.0",
+]
+
+[project.optional-dependencies]
+vasp = ["pymatgen"]
+nwchem = ["pymatgen"]
+qchem = ["pymatgen"]
+dev = ["mypy", "pre-commit", "pytest", "pytest-cov", "ruff"]
+
+[project.scripts]
+cstdn = "custodian.cli.cstdn:main"
+run_vasp = "custodian.cli.run_vasp:main"
+run_nwchem = "custodian.cli.run_nwchem:main"
+converge_kpoints = "custodian.cli.converge_kpoints:main"
+converge_geometry = "custodian.cli.converge_geometry:main"
+
+[project.urls]
+Docs = "https://materialsproject.github.io/custodian"
+Repo = "https://github.com/materialsproject/custodian"
+Package = "https://pypi.org/project/custodian"
+
 [tool.ruff]
 target-version = "py38"
 line-length = 120
