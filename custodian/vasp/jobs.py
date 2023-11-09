@@ -23,9 +23,9 @@ from custodian.vasp.interpreter import VaspModder
 logger = logging.getLogger(__name__)
 
 
-VASP_INPUT_FILES = {"INCAR", "POSCAR", "POTCAR", "KPOINTS"}
+VASP_INPUT_FILES = ("INCAR", "POSCAR", "POTCAR", "KPOINTS")
 
-VASP_OUTPUT_FILES = [
+VASP_OUTPUT_FILES = (
     "DOSCAR",
     "INCAR",
     "KPOINTS",
@@ -40,13 +40,13 @@ VASP_OUTPUT_FILES = [
     "CONTCAR",
     "IBZKPT",
     "OUTCAR",
-]
+)
 
-VASP_NEB_INPUT_FILES = {"INCAR", "POTCAR", "KPOINTS"}
+VASP_NEB_INPUT_FILES = ("INCAR", "POTCAR", "KPOINTS")
 
-VASP_NEB_OUTPUT_FILES = ["INCAR", "KPOINTS", "POTCAR", "vasprun.xml"]
+VASP_NEB_OUTPUT_FILES = ("INCAR", "KPOINTS", "POTCAR", "vasprun.xml")
 
-VASP_NEB_OUTPUT_SUB_FILES = [
+VASP_NEB_OUTPUT_SUB_FILES = (
     "CHG",
     "CHGCAR",
     "CONTCAR",
@@ -61,7 +61,7 @@ VASP_NEB_OUTPUT_SUB_FILES = [
     "OUTCAR",
     "WAVECAR",
     "XDATCAR",
-]
+)
 
 
 class VaspJob(Job):
