@@ -17,7 +17,7 @@ authors = [
 
   { name = "Janosh Riebesell", email = "janosh@lbl.gov" },
 ]
-maintainers = [{ name = "Shyue Ping Ong" }]
+maintainers = [{ name = "Janosh Riebesell" }, { name = "Shyue Ping Ong" }]
 readme = "README.md"
 keywords = ["jit", "job", "just-in-time", "management", "vasp"]
 classifiers = [
@@ -25,9 +25,10 @@ classifiers = [
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.9",
   "Topic :: Scientific/Engineering :: Chemistry",
   "Topic :: Scientific/Engineering :: Physics",
@@ -66,7 +67,7 @@ include = ["custodian*"]
 exclude = ["*.tests", "*.tests.*", "test_files"]
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 line-length = 120
 select = [
   "B",    # flake8-bugbear
