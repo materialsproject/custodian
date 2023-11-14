@@ -39,12 +39,8 @@ logger = logging.getLogger(__name__)
 # not have CUSTODIAN_REPORTING_OPT_IN set to True, then
 # Sentry will not be enabled.
 
-SENTRY_DSN = None
-if "SENTRY_DSN" in os.environ:
-    SENTRY_DSN = os.environ["SENTRY_DSN"]
-elif "CUSTODIAN_REPORTING_OPT_IN" in os.environ and literal_eval(
-    os.environ.get("CUSTODIAN_REPORTING_OPT_IN", "False").title()
-):
+SENTRY_DSN = os.getenv("SENTRY_DSN")
+if literal_eval(os.getenv("CUSTODIAN_REPORTING_OPT_IN", "False").title()):
     # check for environment variable to automatically set SENTRY_DSN
     # will set for True, true, TRUE, etc.
     SENTRY_DSN = "https://0f7291738eb042a3af671df9fc68ae2a@sentry.io/1470881"
