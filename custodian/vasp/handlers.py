@@ -542,7 +542,7 @@ class VaspErrorHandler(ErrorHandler):
                     UserWarning,
                 )
 
-        if self.errors.intersection({"zheev", "eddiag"}):
+        if self.errors & {"zheev", "eddiag"}:
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
             try:
                 is_contcar = Poscar.from_file("CONTCAR")
