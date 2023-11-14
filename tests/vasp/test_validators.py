@@ -3,7 +3,7 @@ import shutil
 
 from custodian.vasp.validators import VaspAECCARValidator, VaspFilesValidator, VaspNpTMDValidator, VasprunXMLValidator
 
-test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")
+test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "tests/files")
 
 
 class TestVasprunXMLValidator:

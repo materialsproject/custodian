@@ -10,10 +10,11 @@ from monty.os import cd
 from monty.tempfile import ScratchDir
 from pymatgen.io.vasp import Incar, Kpoints, Poscar
 
+from custodian import ROOT
 from custodian.vasp.jobs import GenerateVaspInputJob, VaspJob, VaspNEBJob
 
-test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")
-pymatgen.core.SETTINGS["PMG_VASP_PSP_DIR"] = os.path.abspath(test_dir)
+TEST_DIR = f"{ROOT}/tests/files"
+pymatgen.core.SETTINGS["PMG_VASP_PSP_DIR"] = os.path.abspath(TEST_DIR)
 
 
 class VaspJobTest(unittest.TestCase):
@@ -24,7 +25,7 @@ class VaspJobTest(unittest.TestCase):
         assert v2.vasp_cmd == ("hello",)
 
     def test_setup(self):
-        with cd(test_dir), ScratchDir(".", copy_from_current_on_enter=True):
+        with cd(TEST_DIR), ScratchDir(".", copy_from_current_on_enter=True):
             v = VaspJob(["hello"], auto_npar=True)
             v.setup()
             incar = Incar.from_file("INCAR")
@@ -35,7 +36,7 @@ class VaspJobTest(unittest.TestCase):
 
     def test_setup_run_no_kpts(self):
         # just make sure v.setup() and v.run() exit cleanly when no KPOINTS file is present
-        with cd(os.path.join(test_dir, "kspacing")), ScratchDir(".", copy_from_current_on_enter=True):
+        with cd(os.path.join(TEST_DIR, "kspacing")), ScratchDir(".", copy_from_current_on_enter=True):
             v = VaspJob(["hello"], auto_npar=True)
             v.setup()
             with pytest.raises(FileNotFoundError):
@@ -46,7 +47,7 @@ class VaspJobTest(unittest.TestCase):
                 v.run()
 
     def test_postprocess(self):
-        with cd(os.path.join(test_dir, "postprocess")), ScratchDir(".", copy_from_current_on_enter=True):
+        with cd(os.path.join(TEST_DIR, "postprocess")), ScratchDir(".", copy_from_current_on_enter=True):
             shutil.copy("INCAR", "INCAR.backup")
 
             v = VaspJob(["hello"], final=False, suffix=".test", copy_magmom=True)
@@ -72,7 +73,7 @@ class VaspJobTest(unittest.TestCase):
 
     def test_continue(self):
         # Test the continuation functionality
-        with cd(os.path.join(test_dir, "postprocess")):
+        with cd(os.path.join(TEST_DIR, "postprocess")):
             # Test default functionality
             with ScratchDir(".", copy_from_current_on_enter=True):
                 v = VaspJob("hello", auto_continue=True)
@@ -108,7 +109,7 @@ class VaspNEBJobTest(unittest.TestCase):
         assert v2.vasp_cmd == ("hello",)
 
     def test_setup(self):
-        with cd(os.path.join(test_dir, "setup_neb")), ScratchDir(".", copy_from_current_on_enter=True):
+        with cd(os.path.join(TEST_DIR, "setup_neb")), ScratchDir(".", copy_from_current_on_enter=True):
             v = VaspNEBJob("hello", half_kpts=True)
             v.setup()
 
@@ -141,7 +142,7 @@ class VaspNEBJobTest(unittest.TestCase):
             "XDATCAR",
         ]
 
-        with cd(os.path.join(test_dir, "postprocess_neb")):
+        with cd(os.path.join(TEST_DIR, "postprocess_neb")):
             postprocess_neb = os.path.abspath(".")
 
             v = VaspNEBJob("hello", final=False, suffix=".test")
@@ -164,7 +165,7 @@ class GenerateVaspInputJobTest(unittest.TestCase):
     def test_run(self):
         with ScratchDir("."):
             for f in ["INCAR", "POSCAR", "POTCAR", "KPOINTS"]:
-                shutil.copy(os.path.join("..", test_dir, f), f)
+                shutil.copy(os.path.join("..", TEST_DIR, f), f)
             oldincar = Incar.from_file("INCAR")
             v = GenerateVaspInputJob("pymatgen.io.vasp.sets.MPNonSCFSet", contcar_only=False)
             v.run()

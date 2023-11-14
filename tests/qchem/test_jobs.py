@@ -24,7 +24,7 @@ __date__ = "6/6/18"
 __credits__ = "Shyam Dwaraknath"
 
 test_dir = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "test_files", "qchem", "new_test_files"
+    os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "tests/files", "qchem", "new_test_files"
 )
 
 scr_dir = os.path.join(test_dir, "scr")

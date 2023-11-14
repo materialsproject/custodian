@@ -5,7 +5,7 @@ from custodian.lobster.handlers import ChargeSpillingValidator, EnoughBandsValid
 
 # get location of module
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
-test_files_lobster = os.path.join(TEST_DIR, "../../../test_files/lobster/lobsterouts")
+test_files_lobster = os.path.join(TEST_DIR, "../../../tests/files/lobster/lobsterouts")
 
 
 class TestChargeSpillingValidator(unittest.TestCase):

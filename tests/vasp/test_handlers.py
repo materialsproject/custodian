@@ -34,7 +34,7 @@ __maintainer__ = "Shyue Ping Ong"
 __email__ = "shyue@mit.edu"
 __date__ = "Jun 1, 2012"
 
-TEST_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")
+TEST_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "..", "tests/files")
 CWD = os.getcwd()
 os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_DIR)
 

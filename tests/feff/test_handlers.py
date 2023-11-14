@@ -12,7 +12,7 @@ import unittest
 
 from custodian.feff.handlers import UnconvergedErrorHandler
 
-test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")
+test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "tests/files")
 
 
 def clean_dir():

@@ -8,8 +8,8 @@ from monty.tempfile import ScratchDir
 from custodian.lobster.jobs import LobsterJob
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
-test_files_lobster2 = os.path.join(MODULE_DIR, "../../../test_files/lobster/lobsterins")
-test_files_lobster3 = os.path.join(MODULE_DIR, "../../../test_files/lobster/vasp_lobster_output")
+test_files_lobster2 = os.path.join(MODULE_DIR, "../../../tests/files/lobster/lobsterins")
+test_files_lobster3 = os.path.join(MODULE_DIR, "../../../tests/files/lobster/vasp_lobster_output")
 
 VASP_OUTPUT_FILES = [
     "OUTCAR",

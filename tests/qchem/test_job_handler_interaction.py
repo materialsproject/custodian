@@ -22,7 +22,7 @@ __status__ = "Alpha"
 __date__ = "6/3/22"
 
 test_dir = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "test_files", "qchem", "new_test_files"
+    os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "tests/files", "qchem", "new_test_files"
 )
 
 scr_dir = os.path.join(test_dir, "scr")

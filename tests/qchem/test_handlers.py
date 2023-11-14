@@ -21,7 +21,7 @@ __status__ = "Alpha"
 __date__ = "3/26/18"
 __credits__ = "Xiaohui Qu"
 
-test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files", "qchem", "new_test_files")
+test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "tests/files", "qchem", "new_test_files")
 
 scr_dir = os.path.join(test_dir, "scr")
 cwd = os.getcwd()

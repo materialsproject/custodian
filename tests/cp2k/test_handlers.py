@@ -34,7 +34,7 @@ class HandlerTests(unittest.TestCase):
     def setUp(self):
         warnings.filterwarnings("ignore")
 
-        self.TEST_FILES_DIR = os.path.join(Path(__file__).parent.absolute(), "../../../test_files/cp2k")
+        self.TEST_FILES_DIR = os.path.join(Path(__file__).parent.absolute(), "../../../tests/files/cp2k")
 
         clean_dir(self.TEST_FILES_DIR)
 

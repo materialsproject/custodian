@@ -14,7 +14,7 @@ from pymatgen.io.feff.inputs import Atoms, Tags
 
 from custodian.feff.jobs import FeffJob
 
-test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files", "feff_unconverge")
+test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "tests/files", "feff_unconverge")
 
 
 class FeffJobTest(unittest.TestCase):
