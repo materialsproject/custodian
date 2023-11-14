@@ -186,7 +186,7 @@ class VaspJob(Job):
                 incar = Incar.from_file("INCAR")
                 # Only optimized NPAR for non-HF and non-RPA calculations.
                 if not (incar.get("LHFCALC") or incar.get("LRPA") or incar.get("LEPSILON")):
-                    if incar.get("IBRION") in [5, 6, 7, 8]:
+                    if incar.get("IBRION") in {5, 6, 7, 8}:
                         # NPAR should not be set for Hessian matrix
                         # calculations, whether in DFPT or otherwise.
                         del incar["NPAR"]
@@ -361,7 +361,7 @@ class VaspJob(Job):
         auto_continue=False,
     ):
         """
-        Returns a list of thres jobs to perform an optimization for any
+        Returns a list of three jobs to perform an optimization for any
         metaGGA functional. There is an initial calculation of the
         GGA wavefunction which is fed into the initial metaGGA optimization
         to precondition the electronic structure optimizer. The metaGGA
@@ -372,7 +372,7 @@ class VaspJob(Job):
         metaGGA = incar.get("METAGGA", "SCAN")
 
         # Pre optimize WAVECAR and structure using regular GGA
-        pre_opt_setings = [
+        pre_opt_settings = [
             {
                 "dict": "INCAR",
                 "action": {"_set": {"METAGGA": None, "LWAVE": True, "NSW": 0}},
@@ -384,7 +384,7 @@ class VaspJob(Job):
                 auto_npar=auto_npar,
                 final=False,
                 suffix=".precondition",
-                settings_override=pre_opt_setings,
+                settings_override=pre_opt_settings,
             )
         ]
 

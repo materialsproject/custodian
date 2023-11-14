@@ -195,8 +195,8 @@ class Cp2kJob(Job):
         )
 
         ci = Cp2kInput.from_file(zpath(input_file))
-        r = ci["global"].get("run_type", Keyword("RUN_TYPE", "ENERGY_FORCE")).values[0]
-        if r in ["ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT", "ENERGY_FORCE"]:  # no need for double job
+        run_type = ci["global"].get("run_type", Keyword("RUN_TYPE", "ENERGY_FORCE")).values[0]
+        if run_type in {"ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT", "ENERGY_FORCE"}:  # no need for double job
             return [job1]
 
         job2_settings_override = [
@@ -217,7 +217,7 @@ class Cp2kJob(Job):
                                 "WFN_RESTART_FILE_NAME": "GGA-RESTART.wfn",
                             }
                         },
-                        "GLOBAL": {"RUN_TYPE": r},
+                        "GLOBAL": {"RUN_TYPE": run_type},
                     },
                 },
             }
@@ -257,8 +257,8 @@ class Cp2kJob(Job):
             settings_override={},
         )
         ci = Cp2kInput.from_file(zpath(input_file))
-        r = ci["global"].get("run_type", Keyword("RUN_TYPE", "ENERGY_FORCE")).values[0]
-        if r not in ["ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT"]:
+        run_type = ci["global"].get("run_type", Keyword("RUN_TYPE", "ENERGY_FORCE")).values[0]
+        if run_type not in {"ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT"}:
             job1.settings_override = [
                 {"dict": input_file, "action": {"_set": {"GLOBAL": {"RUN_TYPE": "ENERGY_FORCE"}}}}
             ]
@@ -273,7 +273,7 @@ class Cp2kJob(Job):
             suffix="2",
             restart=True,
         )
-        job2.settings_override = [{"dict": input_file, "action": {"_set": {"GLOBAL": {"RUN_TYPE": r}}}}]
+        job2.settings_override = [{"dict": input_file, "action": {"_set": {"GLOBAL": {"RUN_TYPE": run_type}}}}]
 
         return [job1, job2]
 
@@ -321,7 +321,7 @@ class Cp2kJob(Job):
 
         ci = Cp2kInput.from_file(zpath(input_file))
         r = ci["global"].get("run_type", Keyword("RUN_TYPE", "ENERGY_FORCE")).values[0]
-        if r in ["ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT", "ENERGY_FORCE"]:  # no need for double job
+        if r in {"ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT", "ENERGY_FORCE"}:  # no need for double job
             return [job1]
 
         job2_settings_override = [

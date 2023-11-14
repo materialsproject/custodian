@@ -246,7 +246,7 @@ class VaspErrorHandler(ErrorHandler):
                 self.error_count["brmix"] += 1
 
             elif (
-                self.error_count["brmix"] in [2, 3]
+                self.error_count["brmix"] in {2, 3}
                 and vi["KPOINTS"]
                 and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst
             ):
@@ -264,7 +264,7 @@ class VaspErrorHandler(ErrorHandler):
                         }
                     )
 
-            elif self.error_count["brmix"] in [2, 3] and vi["INCAR"].get("KSPACING"):
+            elif self.error_count["brmix"] in {2, 3} and vi["INCAR"].get("KSPACING"):
                 actions.append({"dict": "INCAR", "action": {"_set": {"KGAMMA": True}}})
 
             else:
@@ -476,7 +476,7 @@ class VaspErrorHandler(ErrorHandler):
                 is_contcar = False
             if is_contcar:
                 actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
-            if vi["INCAR"].get("ALGO", "Normal").lower() in ["fast", "veryfast"]:
+            if vi["INCAR"].get("ALGO", "Normal").lower() in {"fast", "veryfast"}:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
             else:
                 potim = round(vi["INCAR"].get("POTIM", 0.5) / 2.0, 2)
@@ -525,7 +525,7 @@ class VaspErrorHandler(ErrorHandler):
             # are often used with ALGO = All (and hybrids are incompatible with ALGO = VeryFast/Fast and slow with
             # ALGO = Normal), we do not adjust ALGO in these cases.
             if vi["INCAR"].get("METAGGA", "none") == "none" and not vi["INCAR"].get("LHFCALC", False):
-                if vi["INCAR"].get("ALGO", "Normal").lower() in ["all", "damped"]:
+                if vi["INCAR"].get("ALGO", "Normal").lower() in {"all", "damped"}:
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
                 elif 53 <= vi["INCAR"].get("IALGO", 38) <= 58:
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}, "_unset": {"IALGO": 38}}})
@@ -636,7 +636,7 @@ class VaspErrorHandler(ErrorHandler):
             # 2) Use ALGO = Damped but only *after* an ISMEAR = 0 run where the wavefunction
             # has been stored and read in for the subsequent run.
             if (
-                (algo in ["all", "damped"] or (50 <= vi["INCAR"].get("IALGO", 38) <= 59))
+                (algo in {"all", "damped"} or (50 <= vi["INCAR"].get("IALGO", 38) <= 59))
                 and vi["INCAR"].get("ISMEAR", 1) < 0
                 and self.error_count["algo_tet"] == 0
             ):
@@ -1445,7 +1445,7 @@ class NonConvergingErrorHandler(ErrorHandler):
 
         # NOTE: This is the algo_tet handler response.
         if (
-            incar.get("ALGO", "Normal").lower() in ["all", "damped"] or (50 <= incar.get("IALGO", 38) <= 59)
+            incar.get("ALGO", "Normal").lower() in {"all", "damped"} or (50 <= incar.get("IALGO", 38) <= 59)
         ) and incar.get("ISMEAR", 1) < 0:
             # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP
             # suggests: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
@@ -1773,7 +1773,7 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         # change ALGO = Fast to Normal if ALGO is !Normal
         vi = VaspInput.from_directory(".")
         algo = vi["INCAR"].get("ALGO", "Normal").lower()
-        if algo not in ["normal", "n"]:
+        if algo not in {"normal", "n"}:
             backup(VASP_BACKUP_FILES)
             actions = [{"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}}]
             VaspModder(vi=vi).apply_actions(actions)

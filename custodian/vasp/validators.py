@@ -117,7 +117,7 @@ def check_broken_chgcar(chgcar, diff_thresh=None):
     Args:
         chgcar (Chgcar): Chgcar-like object.
         diff_thresh (Float): Threshold for diagonal difference.
-                        None means we won't check for this.
+            None means we won't check for this.
     """
     chgcar_data = chgcar.data["total"]
     if (chgcar_data < 0).sum() > 100:

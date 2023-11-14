@@ -112,8 +112,8 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                 can also use Iterative Refinement of the approximate congruency
                 transformation.
             (iv) Once can enable rotations of the occupied subspace which allows
-                 fractional occupations with  OT. As of October 2021, this option cannot
-                 be used with 3 point CG, FULL_ALL, or FULL_SINGLE_INVERSE.
+                fractional occupations with  OT. As of October 2021, this option cannot
+                be used with 3 point CG, FULL_ALL, or FULL_SINGLE_INVERSE.
 
     (2) Traditional Diagonalization:
 

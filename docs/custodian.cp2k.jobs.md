@@ -51,7 +51,7 @@ diagonalization job, and there is minimal overhead from restarting.
 
 ### *classmethod* gga_static_to_hybrid(cp2k_cmd, input_file=’cp2k.inp’, output_file=’cp2k.out’, stderr_file=’std_err.txt’, backup=True, settings_override_gga=None, settings_override_hybrid=None)
 
-A bare gga to hybrid calculation. Removes all unecessary features
+A bare gga to hybrid calculation. Removes all unnecessary features
 from the gga run, and making it only a ENERGY/ENERGY_FORCE
 depending on the hybrid run.
 

@@ -77,11 +77,18 @@ def get_jobs(args):
             from pymatgen.io.vasp.sets import MPStaticDielectricDFPTVaspInputSet, MPStaticSet
 
             # vis = MPStaticSet.from_prev_calc(
-            #     ".", user_incar_settings={"EDIFF": 1e-6, "IBRION": 8,
-            #                               "LEPSILON": True, 'LREAL':False,
-            #                               "LPEAD": True, "ISMEAR": 0,
-            #                               "SIGMA": 0.01},
-            #     ediff_per_atom=False)
+            #     ".",
+            #     user_incar_settings={
+            #         "EDIFF": 1e-6,
+            #         "IBRION": 8,
+            #         "LEPSILON": True,
+            #         "LREAL": False,
+            #         "LPEAD": True,
+            #         "ISMEAR": 0,
+            #         "SIGMA": 0.01,
+            #     },
+            #     ediff_per_atom=False,
+            # )
             vis = MPStaticDielectricDFPTVaspInputSet()
             incar = vis.get_incar(vinput["POSCAR"].structure)
             unset = {}

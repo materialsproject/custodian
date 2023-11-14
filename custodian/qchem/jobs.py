@@ -320,7 +320,7 @@ class QCJob(Job):
                     opt_geom_opt = copy.deepcopy(opt_indata.geom_opt)
                     opt_geom_opt["initial_hessian"] = "read"
                 for key in opt_indata.rem:
-                    if key not in ["job_type", "geom_opt2", "scf_guess_always"]:
+                    if key not in {"job_type", "geom_opt2", "scf_guess_always"}:
                         if freq_rem.get(key, None) != opt_indata.rem[key] and "geom_opt" not in key:
                             freq_rem[key] = opt_indata.rem[key]
                         if opt_rem.get(key, None) != opt_indata.rem[key]:
@@ -365,7 +365,7 @@ class QCJob(Job):
                 freq_outdata = QCOutput(output_file + ".freq_" + str(ii)).data
                 freq_indata = QCInput.from_file(input_file + ".freq_" + str(ii))
                 for key in freq_indata.rem:
-                    if key not in ["job_type", "geom_opt2", "scf_guess_always"]:
+                    if key not in {"job_type", "geom_opt2", "scf_guess_always"}:
                         if freq_rem.get(key, None) != freq_indata.rem[key]:
                             freq_rem[key] = freq_indata.rem[key]
                         if opt_rem.get(key, None) != freq_indata.rem[key] and key != "cpscf_nseg":

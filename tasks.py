@@ -108,7 +108,7 @@ def update_changelog(ctx, version=None, sim=False):
                 if "body" in response.json():
                     for ll in response.json()["body"].split("\n"):
                         ll = ll.strip()
-                        if ll in ["", "## Summary"]:
+                        if ll in {"", "## Summary"}:
                             continue
                         if ll.startswith(("## Checklist", "## TODO")):
                             break
