@@ -33,14 +33,8 @@ CWD = os.getcwd()
 class QCJobTest(TestCase):
     def setUp(self):
         os.makedirs(SCR_DIR)
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "no_nbo.qin"),
-            os.path.join(SCR_DIR, "mol.qin"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "nbo7.qin"),
-            os.path.join(SCR_DIR, "different.qin"),
-        )
+        shutil.copyfile(f"{TEST_DIR}/no_nbo.qin", f"{SCR_DIR}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/nbo7.qin", f"{SCR_DIR}/different.qin")
         os.chdir(SCR_DIR)
 
     def tearDown(self):
@@ -98,22 +92,10 @@ class QCJobTest(TestCase):
 class OptFFComplexUnlinkedTest(TestCase):
     def setUp(self):
         os.makedirs(SCR_DIR)
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "FF_complex/mol.qin.opt_0"),
-            os.path.join(SCR_DIR, "mol.qin"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "FF_complex/mol.qout.opt_0"),
-            os.path.join(SCR_DIR, "mol.qout.opt_0"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "FF_complex/mol.qout.freq_0"),
-            os.path.join(SCR_DIR, "mol.qout.freq_0"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "FF_complex/mol.qin.freq_0"),
-            os.path.join(SCR_DIR, "mol.qin.freq_0"),
-        )
+        shutil.copyfile(f"{TEST_DIR}/FF_complex/mol.qin.opt_0", f"{SCR_DIR}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/FF_complex/mol.qout.opt_0", f"{SCR_DIR}/mol.qout.opt_0")
+        shutil.copyfile(f"{TEST_DIR}/FF_complex/mol.qout.freq_0", f"{SCR_DIR}/mol.qout.freq_0")
+        shutil.copyfile(f"{TEST_DIR}/FF_complex/mol.qin.freq_0", f"{SCR_DIR}/mol.qin.freq_0")
         os.chdir(SCR_DIR)
 
     def tearDown(self):
@@ -1162,13 +1144,10 @@ class OptFFSingleFreqFragsTest(TestCase):
         ).as_dict()
         assert next(job).as_dict() == expected_next
         assert (
-            QCInput.from_file(os.path.join(TEST_DIR, "single_freq_frag/mol.qin.freq_0")).as_dict()
-            == QCInput.from_file(os.path.join(SCR_DIR, "mol.qin")).as_dict()
+            QCInput.from_file(f"{TEST_DIR}/single_freq_frag/mol.qin.freq_0").as_dict()
+            == QCInput.from_file(f"{SCR_DIR}/mol.qin").as_dict()
         )
-        shutil.copyfile(
-            os.path.join(SCR_DIR, "mol.qin"),
-            os.path.join(SCR_DIR, "mol.qin.freq_0"),
-        )
+        shutil.copyfile(f"{SCR_DIR}/mol.qin", f"{SCR_DIR}/mol.qin.freq_0")
 
         with pytest.raises(StopIteration):
             job.__next__()
@@ -1178,22 +1157,10 @@ class OptFFSingleFreqFragsTest(TestCase):
 class TSFFTest(TestCase):
     def setUp(self):
         os.makedirs(SCR_DIR)
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "fftsopt_no_freqfirst/mol.qin.freq_0"),
-            os.path.join(SCR_DIR, "test.qin"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "fftsopt_no_freqfirst/mol.qout.ts_0"),
-            os.path.join(SCR_DIR, "test.qout.ts_0"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "fftsopt_no_freqfirst/mol.qout.freq_0"),
-            os.path.join(SCR_DIR, "test.qout.freq_0"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "fftsopt_no_freqfirst/mol.qin.freq_0"),
-            os.path.join(SCR_DIR, "test.qin.freq_0"),
-        )
+        shutil.copyfile(f"{TEST_DIR}/fftsopt_no_freqfirst/mol.qin.freq_0", f"{SCR_DIR}/test.qin")
+        shutil.copyfile(f"{TEST_DIR}/fftsopt_no_freqfirst/mol.qout.ts_0", f"{SCR_DIR}/test.qout.ts_0")
+        shutil.copyfile(f"{TEST_DIR}/fftsopt_no_freqfirst/mol.qout.freq_0", f"{SCR_DIR}/test.qout.freq_0")
+        shutil.copyfile(f"{TEST_DIR}/fftsopt_no_freqfirst/mol.qin.freq_0", f"{SCR_DIR}/test.qin.freq_0")
         os.chdir(SCR_DIR)
 
     def tearDown(self):
@@ -1230,8 +1197,8 @@ class TSFFTest(TestCase):
         ).as_dict()
         assert next(job).as_dict() == expected_next
         assert (
-            QCInput.from_file(os.path.join(TEST_DIR, "fftsopt_no_freqfirst/mol.qin.freq_0")).as_dict()
-            == QCInput.from_file(os.path.join(SCR_DIR, "test.qin")).as_dict()
+            QCInput.from_file(f"{TEST_DIR}/fftsopt_no_freqfirst/mol.qin.freq_0").as_dict()
+            == QCInput.from_file(f"{SCR_DIR}/test.qin").as_dict()
         )
         with pytest.raises(StopIteration):
             job.__next__()
@@ -1241,26 +1208,11 @@ class TSFFTest(TestCase):
 class TSFFFreqfirstTest(TestCase):
     def setUp(self):
         os.makedirs(f"{SCR_DIR}/scratch", exist_ok=True)
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "fftsopt_freqfirst/mol.qin.orig"),
-            os.path.join(SCR_DIR, "mol.qin"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "fftsopt_freqfirst/mol.qin.freq_pre"),
-            os.path.join(SCR_DIR, "mol.qin.freq_pre"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "fftsopt_freqfirst/mol.qout.freq_pre"),
-            os.path.join(SCR_DIR, "mol.qout.freq_pre"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "fftsopt_freqfirst/mol.qout.ts_0"),
-            os.path.join(SCR_DIR, "mol.qout.ts_0"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "fftsopt_freqfirst/mol.qout.freq_0"),
-            os.path.join(SCR_DIR, "mol.qout.freq_0"),
-        )
+        shutil.copyfile(f"{TEST_DIR}/fftsopt_freqfirst/mol.qin.orig", f"{SCR_DIR}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/fftsopt_freqfirst/mol.qin.freq_pre", f"{SCR_DIR}/mol.qin.freq_pre")
+        shutil.copyfile(f"{TEST_DIR}/fftsopt_freqfirst/mol.qout.freq_pre", f"{SCR_DIR}/mol.qout.freq_pre")
+        shutil.copyfile(f"{TEST_DIR}/fftsopt_freqfirst/mol.qout.ts_0", f"{SCR_DIR}/mol.qout.ts_0")
+        shutil.copyfile(f"{TEST_DIR}/fftsopt_freqfirst/mol.qout.freq_0", f"{SCR_DIR}/mol.qout.freq_0")
         os.chdir(SCR_DIR)
 
     def tearDown(self):
@@ -1300,13 +1252,10 @@ class TSFFFreqfirstTest(TestCase):
         ).as_dict()
         assert next(job).as_dict() == expected_next
         assert (
-            QCInput.from_file(os.path.join(TEST_DIR, "fftsopt_freqfirst/mol.qin.ts_0")).as_dict()
-            == QCInput.from_file(os.path.join(SCR_DIR, "mol.qin")).as_dict()
+            QCInput.from_file(f"{TEST_DIR}/fftsopt_freqfirst/mol.qin.ts_0").as_dict()
+            == QCInput.from_file(f"{SCR_DIR}/mol.qin").as_dict()
         )
-        shutil.copyfile(
-            os.path.join(SCR_DIR, "mol.qin"),
-            os.path.join(SCR_DIR, "mol.qin.ts_0"),
-        )
+        shutil.copyfile(f"{SCR_DIR}/mol.qin", f"{SCR_DIR}/mol.qin.ts_0")
         expected_next = QCJob(
             qchem_command="qchem -slurm",
             max_cores=32,
@@ -1319,13 +1268,10 @@ class TSFFFreqfirstTest(TestCase):
         ).as_dict()
         assert next(job).as_dict() == expected_next
         assert (
-            QCInput.from_file(os.path.join(TEST_DIR, "fftsopt_freqfirst/mol.qin.freq_0")).as_dict()
-            == QCInput.from_file(os.path.join(SCR_DIR, "mol.qin")).as_dict()
+            QCInput.from_file(f"{TEST_DIR}/fftsopt_freqfirst/mol.qin.freq_0").as_dict()
+            == QCInput.from_file(f"{SCR_DIR}/mol.qin").as_dict()
         )
-        shutil.copyfile(
-            os.path.join(SCR_DIR, "mol.qin"),
-            os.path.join(SCR_DIR, "mol.qin.freq_0"),
-        )
+        shutil.copyfile(f"{SCR_DIR}/mol.qin", f"{SCR_DIR}/mol.qin.freq_0")
         with pytest.raises(StopIteration):
             job.__next__()
 
@@ -1334,34 +1280,13 @@ class TSFFFreqfirstTest(TestCase):
 class TSFFFreqFirstMultipleCyclesTest(TestCase):
     def setUp(self):
         os.makedirs(f"{SCR_DIR}/scratch", exist_ok=True)
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "fftsopt_multiple_cycles/mol.qin.orig"),
-            os.path.join(SCR_DIR, "mol.qin"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "fftsopt_multiple_cycles/mol.qin.freq_pre"),
-            os.path.join(SCR_DIR, "mol.qin.freq_pre"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "fftsopt_multiple_cycles/mol.qout.freq_pre"),
-            os.path.join(SCR_DIR, "mol.qout.freq_pre"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "fftsopt_multiple_cycles/mol.qout.ts_0"),
-            os.path.join(SCR_DIR, "mol.qout.ts_0"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "fftsopt_multiple_cycles/mol.qout.freq_0"),
-            os.path.join(SCR_DIR, "mol.qout.freq_0"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "fftsopt_multiple_cycles/mol.qout.ts_1"),
-            os.path.join(SCR_DIR, "mol.qout.ts_1"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "fftsopt_multiple_cycles/mol.qout.freq_1"),
-            os.path.join(SCR_DIR, "mol.qout.freq_1"),
-        )
+        shutil.copyfile(f"{TEST_DIR}/fftsopt_multiple_cycles/mol.qin.orig", f"{SCR_DIR}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/fftsopt_multiple_cycles/mol.qin.freq_pre", f"{SCR_DIR}/mol.qin.freq_pre")
+        shutil.copyfile(f"{TEST_DIR}/fftsopt_multiple_cycles/mol.qout.freq_pre", f"{SCR_DIR}/mol.qout.freq_pre")
+        shutil.copyfile(f"{TEST_DIR}/fftsopt_multiple_cycles/mol.qout.ts_0", f"{SCR_DIR}/mol.qout.ts_0")
+        shutil.copyfile(f"{TEST_DIR}/fftsopt_multiple_cycles/mol.qout.freq_0", f"{SCR_DIR}/mol.qout.freq_0")
+        shutil.copyfile(f"{TEST_DIR}/fftsopt_multiple_cycles/mol.qout.ts_1", f"{SCR_DIR}/mol.qout.ts_1")
+        shutil.copyfile(f"{TEST_DIR}/fftsopt_multiple_cycles/mol.qout.freq_1", f"{SCR_DIR}/mol.qout.freq_1")
         os.chdir(SCR_DIR)
 
     def tearDown(self):
@@ -1401,13 +1326,10 @@ class TSFFFreqFirstMultipleCyclesTest(TestCase):
         ).as_dict()
         assert next(job).as_dict() == expected_next
         assert (
-            QCInput.from_file(os.path.join(TEST_DIR, "fftsopt_multiple_cycles/mol.qin.ts_0")).as_dict()
-            == QCInput.from_file(os.path.join(SCR_DIR, "mol.qin")).as_dict()
+            QCInput.from_file(f"{TEST_DIR}/fftsopt_multiple_cycles/mol.qin.ts_0").as_dict()
+            == QCInput.from_file(f"{SCR_DIR}/mol.qin").as_dict()
         )
-        shutil.copyfile(
-            os.path.join(SCR_DIR, "mol.qin"),
-            os.path.join(SCR_DIR, "mol.qin.ts_0"),
-        )
+        shutil.copyfile(f"{SCR_DIR}/mol.qin", f"{SCR_DIR}/mol.qin.ts_0")
         expected_next = QCJob(
             qchem_command="qchem -slurm",
             max_cores=32,
@@ -1420,13 +1342,10 @@ class TSFFFreqFirstMultipleCyclesTest(TestCase):
         ).as_dict()
         assert next(job).as_dict() == expected_next
         assert (
-            QCInput.from_file(os.path.join(TEST_DIR, "fftsopt_multiple_cycles/mol.qin.freq_0")).as_dict()
-            == QCInput.from_file(os.path.join(SCR_DIR, "mol.qin")).as_dict()
+            QCInput.from_file(f"{TEST_DIR}/fftsopt_multiple_cycles/mol.qin.freq_0").as_dict()
+            == QCInput.from_file(f"{SCR_DIR}/mol.qin").as_dict()
         )
-        shutil.copyfile(
-            os.path.join(SCR_DIR, "mol.qin"),
-            os.path.join(SCR_DIR, "mol.qin.freq_0"),
-        )
+        shutil.copyfile(f"{SCR_DIR}/mol.qin", f"{SCR_DIR}/mol.qin.freq_0")
         expected_next = QCJob(
             qchem_command="qchem -slurm",
             max_cores=32,
@@ -1439,13 +1358,10 @@ class TSFFFreqFirstMultipleCyclesTest(TestCase):
         ).as_dict()
         assert next(job).as_dict() == expected_next
         assert (
-            QCInput.from_file(os.path.join(TEST_DIR, "fftsopt_multiple_cycles/mol.qin.ts_1")).as_dict()
-            == QCInput.from_file(os.path.join(SCR_DIR, "mol.qin")).as_dict()
+            QCInput.from_file(f"{TEST_DIR}/fftsopt_multiple_cycles/mol.qin.ts_1").as_dict()
+            == QCInput.from_file(f"{SCR_DIR}/mol.qin").as_dict()
         )
-        shutil.copyfile(
-            os.path.join(SCR_DIR, "mol.qin"),
-            os.path.join(SCR_DIR, "mol.qin.ts_1"),
-        )
+        shutil.copyfile(f"{SCR_DIR}/mol.qin", f"{SCR_DIR}/mol.qin.ts_1")
         expected_next = QCJob(
             qchem_command="qchem -slurm",
             max_cores=32,
@@ -1458,13 +1374,10 @@ class TSFFFreqFirstMultipleCyclesTest(TestCase):
         ).as_dict()
         assert next(job).as_dict() == expected_next
         assert (
-            QCInput.from_file(os.path.join(TEST_DIR, "fftsopt_multiple_cycles/mol.qin.freq_1")).as_dict()
-            == QCInput.from_file(os.path.join(SCR_DIR, "mol.qin")).as_dict()
+            QCInput.from_file(f"{TEST_DIR}/fftsopt_multiple_cycles/mol.qin.freq_1").as_dict()
+            == QCInput.from_file(f"{SCR_DIR}/mol.qin").as_dict()
         )
-        shutil.copyfile(
-            os.path.join(SCR_DIR, "mol.qin"),
-            os.path.join(SCR_DIR, "mol.qin.freq_1"),
-        )
+        shutil.copyfile(f"{SCR_DIR}/mol.qin", f"{SCR_DIR}/mol.qin.freq_1")
 
         with pytest.raises(StopIteration):
             job.__next__()
