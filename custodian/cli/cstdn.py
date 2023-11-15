@@ -78,8 +78,8 @@ def run(args):
     FORMAT = "%(asctime)s %(message)s"
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
     logging.info(f"Spec file is {args.spec_file}")
-    d = loadfn(args.spec_file[0])
-    c = Custodian.from_spec(d)
+    dct = loadfn(args.spec_file[0])
+    c = Custodian.from_spec(dct)
     c.run()
 
 

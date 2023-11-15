@@ -23,7 +23,7 @@ __status__ = "Alpha"
 __date__ = "6/3/22"
 
 TEST_DIR = f"{TEST_FILES}/qchem/new_test_files"
-SCR_DIR = os.path.join(TEST_DIR, "scr")
+SCR_DIR = os.path.join(TEST_DIR, "scratch")
 CWD = os.getcwd()
 
 
@@ -119,42 +119,42 @@ class FFOptJobHandlerInteraction(TestCase):
         ).as_dict()
         assert next(job).as_dict() == expected_next
 
-        h = QChemErrorHandler(
+        handler = QChemErrorHandler(
             input_file="mol.qin",
             output_file="mol.qout.error1",
         )
-        h.check()
-        d = h.correct()
-        assert d["errors"] == ["back_transform_error"]
-        assert d["actions"] == [{"molecule": "molecule_from_last_geometry"}]
+        handler.check()
+        dct = handler.correct()
+        assert dct["errors"] == ["back_transform_error"]
+        assert dct["actions"] == [{"molecule": "molecule_from_last_geometry"}]
         self._check_equivalent_inputs("mol.qin", "mol.qin.error2")
 
-        h = QChemErrorHandler(
+        handler = QChemErrorHandler(
             input_file="mol.qin",
             output_file="mol.qout.error2",
         )
-        h.check()
-        d = h.correct()
-        assert d["errors"] == ["SCF_failed_to_converge"]
-        assert d["actions"] == [{"scf_algorithm": "gdm"}, {"max_scf_cycles": "500"}]
+        handler.check()
+        dct = handler.correct()
+        assert dct["errors"] == ["SCF_failed_to_converge"]
+        assert dct["actions"] == [{"scf_algorithm": "gdm"}, {"max_scf_cycles": "500"}]
         self._check_equivalent_inputs("mol.qin", "mol.qin.error3")
 
-        h = QChemErrorHandler(
+        handler = QChemErrorHandler(
             input_file="mol.qin",
             output_file="mol.qout.error3",
         )
-        h.check()
-        d = h.correct()
-        assert d["errors"] == ["back_transform_error"]
-        assert d["actions"] == [{"molecule": "molecule_from_last_geometry"}]
+        handler.check()
+        dct = handler.correct()
+        assert dct["errors"] == ["back_transform_error"]
+        assert dct["actions"] == [{"molecule": "molecule_from_last_geometry"}]
         self._check_equivalent_inputs("mol.qin", "mol.qin.opt_0")
 
-        h = QChemErrorHandler(
+        handler = QChemErrorHandler(
             input_file="mol.qin",
             output_file="mol.qout.opt_0",
         )
-        h.check()
-        assert not h.check()
+        handler.check()
+        assert not handler.check()
 
         expected_next = QCJob(
             qchem_command="qchem",
@@ -169,22 +169,22 @@ class FFOptJobHandlerInteraction(TestCase):
         assert next(job).as_dict() == expected_next
         self._check_equivalent_inputs("mol.qin", "mol.qin.error5")
 
-        h = QChemErrorHandler(
+        handler = QChemErrorHandler(
             input_file="mol.qin",
             output_file="mol.qout.error5",
         )
-        h.check()
-        d = h.correct()
-        assert d["errors"] == ["failed_cpscf"]
-        assert d["actions"] == [{"cpscf_nseg": "3"}]
+        handler.check()
+        dct = handler.correct()
+        assert dct["errors"] == ["failed_cpscf"]
+        assert dct["actions"] == [{"cpscf_nseg": "3"}]
         self._check_equivalent_inputs("mol.qin", "mol.qin.freq_0")
 
-        h = QChemErrorHandler(
+        handler = QChemErrorHandler(
             input_file="mol.qin",
             output_file="mol.qout.freq_0",
         )
-        h.check()
-        assert not h.check()
+        handler.check()
+        assert not handler.check()
 
         expected_next = QCJob(
             qchem_command="qchem",

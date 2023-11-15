@@ -181,7 +181,7 @@ class Custodian:
         self.jobs = jobs
         self.handlers = handlers
         self.validators = validators or []
-        self.monitors = [h for h in handlers if h.is_monitor]
+        self.monitors = [handler for handler in handlers if handler.is_monitor]
         self.polling_time_step = polling_time_step
         self.monitor_freq = monitor_freq
         self.skip_over_errors = skip_over_errors
@@ -303,9 +303,9 @@ class Custodian:
             mod = __import__(modname, globals(), locals(), [classname], 0)
             return getattr(mod, classname)
 
-        def process_params(d):
+        def process_params(dct):
             decoded = {}
-            for k, v in d.items():
+            for k, v in dct.items():
                 if k.startswith("$"):
                     if isinstance(v, list):
                         v = [os.path.expandvars(i) for i in v]
@@ -319,22 +319,22 @@ class Custodian:
         jobs = []
         common_params = process_params(spec.get("jobs_common_params", {}))
 
-        for d in spec["jobs"]:
-            cls_ = load_class(d["jb"])
-            params = process_params(d.get("params", {}))
+        for dct in spec["jobs"]:
+            cls_ = load_class(dct["jb"])
+            params = process_params(dct.get("params", {}))
             params.update(common_params)
             jobs.append(cls_(**params))
 
         handlers = []
-        for d in spec.get("handlers", []):
-            cls_ = load_class(d["hdlr"])
-            params = process_params(d.get("params", {}))
+        for dct in spec.get("handlers", []):
+            cls_ = load_class(dct["hdlr"])
+            params = process_params(dct.get("params", {}))
             handlers.append(cls_(**params))
 
         validators = []
-        for d in spec.get("validators", []):
-            cls_ = load_class(d["vldr"])
-            params = process_params(d.get("params", {}))
+        for dct in spec.get("validators", []):
+            cls_ = load_class(dct["vldr"])
+            params = process_params(dct.get("params", {}))
             validators.append(cls_(**params))
 
         custodian_params = process_params(spec.get("custodian_params", {}))
@@ -436,8 +436,8 @@ class Custodian:
         self.errors_current_job = 0
         # reset the counters of the number of times a correction has been
         # applied for each handler
-        for h in self.handlers:
-            h.n_applied_corrections = 0
+        for handler in self.handlers:
+            handler.n_applied_corrections = 0
 
         job.setup()
 
@@ -493,7 +493,7 @@ class Custodian:
             # handlers fix the problems detected by monitors
             # if an error has been found, not all handlers need to run
             if has_error:
-                self._do_check([h for h in self.handlers if not h.is_monitor])
+                self._do_check([handler for handler in self.handlers if not handler.is_monitor])
             else:
                 has_error = self._do_check(self.handlers)
 
@@ -643,37 +643,42 @@ class Custodian:
     def _do_check(self, handlers, terminate_func=None):
         """Checks the specified handlers. Returns True iff errors caught."""
         corrections = []
-        for h in handlers:
+        for handler in handlers:
             try:
-                if h.check():
-                    if h.max_num_corrections is not None and h.n_applied_corrections >= h.max_num_corrections:
-                        msg = f"Maximum number of corrections {h.max_num_corrections} reached for handler {h}"
-                        if h.raise_on_max:
-                            self.run_log[-1]["handler"] = h
+                if handler.check():
+                    if (
+                        handler.max_num_corrections is not None
+                        and handler.n_applied_corrections >= handler.max_num_corrections
+                    ):
+                        msg = (
+                            f"Maximum number of corrections {handler.max_num_corrections} reached for handler {handler}"
+                        )
+                        if handler.raise_on_max:
+                            self.run_log[-1]["handler"] = handler
                             self.run_log[-1]["max_errors_per_handler"] = True
                             raise MaxCorrectionsPerHandlerError(
-                                msg, raises=True, max_errors_per_handler=h.max_num_corrections, handler=h
+                                msg, raises=True, max_errors_per_handler=handler.max_num_corrections, handler=handler
                             )
                         logger.warning(msg + " Correction not applied.")
                         continue
-                    if terminate_func is not None and h.is_terminating:
+                    if terminate_func is not None and handler.is_terminating:
                         logger.info("Terminating job")
                         terminate_func()
                         # make sure we don't terminate twice
                         terminate_func = None
-                    d = h.correct()
-                    logger.error(h.__class__.__name__, extra=d)
-                    d["handler"] = h
-                    corrections.append(d)
-                    h.n_applied_corrections += 1
+                    dct = handler.correct()
+                    logger.error(handler.__class__.__name__, extra=dct)
+                    dct["handler"] = handler
+                    corrections.append(dct)
+                    handler.n_applied_corrections += 1
             except Exception:
                 if not self.skip_over_errors:
                     raise
                 import traceback
 
-                logger.error(f"Bad handler {h}")
+                logger.error(f"Bad handler {handler}")
                 logger.error(traceback.format_exc())
-                corrections.append({"errors": [f"Bad handler {h}"], "actions": []})
+                corrections.append({"errors": [f"Bad handler {handler}"], "actions": []})
         self.total_errors += len(corrections)
         self.errors_current_job += len(corrections)
         self.run_log[-1]["corrections"].extend(corrections)

@@ -1,11 +1,11 @@
 """Deployment file to facilitate releases of custodian."""
 
 import datetime
-import glob
 import json
 import os
 import re
 import subprocess
+from glob import glob
 
 import requests
 from invoke import task
@@ -26,7 +26,7 @@ def make_doc(ctx):
         ctx.run("rm *.rst", warn=True)
         ctx.run("cp markdown/custodian*.md .")
         ctx.run("rm custodian*tests*.md", warn=True)
-        for fn in glob.glob("custodian*.md"):
+        for fn in glob("custodian*.md"):
             with open(fn) as f:
                 lines = [line.rstrip() for line in f if "Submodules" not in line]
             if fn == "custodian.md":
@@ -102,8 +102,8 @@ def update_changelog(ctx, version=None, sim=False):
             pr_name = m.group().rsplit(r"\(", 1)[0]
             response = requests.get(f"https://api.github.com/repos/materialsproject/custodian/pulls/{pr_number}")
             try:
-                d = response.json()
-                contrib = d["user"]["login"]
+                dct = response.json()
+                contrib = dct["user"]["login"]
                 lines.append(f"* PR #{pr_number} from @{contrib} {pr_name}")
                 if "body" in response.json():
                     for ll in response.json()["body"].split("\n"):

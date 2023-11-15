@@ -859,8 +859,8 @@ class AliasingErrorHandler(ErrorHandler):
         if "aliasing_incar" in self.errors:
             # vasp seems to give different warnings depending on whether the
             # aliasing error was caused by user supplied inputs
-            d = {k: 1 for k in ["NGX", "NGY", "NGZ"] if k in vi["INCAR"]}
-            actions.append({"dict": "INCAR", "action": {"_unset": d}})
+            dct = {k: 1 for k in ["NGX", "NGY", "NGZ"] if k in vi["INCAR"]}
+            actions.append({"dict": "INCAR", "action": {"_unset": dct}})
 
             if vi["INCAR"].get("ICHARG", 0) < 10:
                 actions.extend(
@@ -916,7 +916,7 @@ class DriftErrorHandler(ErrorHandler):
             return False
 
         curr_drift = outcar.data.get("drift", [])[::-1][: self.to_average]
-        curr_drift = np.average([np.linalg.norm(d) for d in curr_drift])
+        curr_drift = np.average([np.linalg.norm(dct) for dct in curr_drift])
         return curr_drift > self.max_drift
 
     def correct(self):
@@ -947,7 +947,7 @@ class DriftErrorHandler(ErrorHandler):
             )
 
         curr_drift = outcar.data.get("drift", [])[::-1][: self.to_average]
-        curr_drift = np.average([np.linalg.norm(d) for d in curr_drift])
+        curr_drift = np.average([np.linalg.norm(dct) for dct in curr_drift])
         VaspModder(vi=vi).apply_actions(actions)
         return {
             "errors": f"Excessive drift {curr_drift} > {self.max_drift}",

@@ -551,31 +551,31 @@ class VaspErrorHandlerTest(PymatgenTest):
     def test_amin(self):
         # Cell with at least one dimension >= 50 A, but AMIN > 0.01, and calculation not yet complete
         shutil.copy("INCAR.amin", "INCAR")
-        h = VaspErrorHandler("vasp.amin")
-        h.check()
-        d = h.correct()
-        assert d["errors"] == ["amin"]
-        assert d["actions"] == [{"action": {"_set": {"AMIN": 0.01}}, "dict": "INCAR"}]
+        handler = VaspErrorHandler("vasp.amin")
+        handler.check()
+        dct = handler.correct()
+        assert dct["errors"] == ["amin"]
+        assert dct["actions"] == [{"action": {"_set": {"AMIN": 0.01}}, "dict": "INCAR"}]
 
     def test_eddiag(self):
         # subspace rotation error
         os.remove("CONTCAR")
         shutil.copy("INCAR.amin", "INCAR")
-        h = VaspErrorHandler("vasp.eddiag")
-        h.check()
-        d = h.correct()
-        assert d["errors"] == ["eddiag"]
+        handler = VaspErrorHandler("vasp.eddiag")
+        handler.check()
+        dct = handler.correct()
+        assert dct["errors"] == ["eddiag"]
         # first check that no CONTCAR exists, only action should be updating INCAR
         # ALGO = Fast --> ALGO = Normal
-        assert d["actions"] == [{"action": {"_set": {"ALGO": "Normal"}}, "dict": "INCAR"}]
+        assert dct["actions"] == [{"action": {"_set": {"ALGO": "Normal"}}, "dict": "INCAR"}]
 
         # now copy CONTCAR and check that both CONTCAR->POSCAR
         # and INCAR updates are included: ALGO = Normal --> ALGO = exact
         shutil.copy("CONTCAR.eddiag", "CONTCAR")
-        h = VaspErrorHandler("vasp.eddiag")
-        h.check()
-        d = h.correct()
-        assert d["actions"] == [
+        handler = VaspErrorHandler("vasp.eddiag")
+        handler.check()
+        dct = handler.correct()
+        assert dct["actions"] == [
             {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}},
             {"action": {"_set": {"ALGO": "exact"}}, "dict": "INCAR"},
         ]

@@ -25,7 +25,7 @@ __date__ = "6/6/18"
 __credits__ = "Shyam Dwaraknath"
 
 TEST_DIR = f"{TEST_FILES}/qchem/new_test_files"
-SCR_DIR = os.path.join(TEST_DIR, "scr")
+SCR_DIR = os.path.join(TEST_DIR, "scratch")
 CWD = os.getcwd()
 
 
@@ -95,7 +95,7 @@ class QCJobTest(TestCase):
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
-class OptFFTest_complex_unlinked(TestCase):
+class OptFFComplexUnlinkedTest(TestCase):
     def setUp(self):
         self.maxDiff = None
 
@@ -172,47 +172,20 @@ class OptFFTest_complex_unlinked(TestCase):
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
-class OptFFTest_complex_linked_change_nseg(TestCase):
+class OptFFTestComplexLinkedChangeNsegTest(TestCase):
     def setUp(self):
         self.maxDiff = None
 
         os.makedirs(SCR_DIR)
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "FF_complex/mol.qin.opt_0"),
-            os.path.join(SCR_DIR, "mol.qin"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "FF_complex/mol.qin.opt_0"),
-            os.path.join(SCR_DIR, "mol.qin.opt_0"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "FF_complex/mol.qin.freq_0"),
-            os.path.join(SCR_DIR, "mol.qin.freq_0"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "FF_complex/mol.qin.opt_1"),
-            os.path.join(SCR_DIR, "mol.qin.opt_1"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "FF_complex/mol.qin.freq_1"),
-            os.path.join(SCR_DIR, "mol.qin.freq_1"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "FF_complex/mol.qout.opt_0"),
-            os.path.join(SCR_DIR, "mol.qout.opt_0"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "FF_complex/mol.qout.freq_0"),
-            os.path.join(SCR_DIR, "mol.qout.freq_0"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "FF_complex/mol.qout.opt_1"),
-            os.path.join(SCR_DIR, "mol.qout.opt_1"),
-        )
-        shutil.copyfile(
-            os.path.join(TEST_DIR, "FF_complex/mol.qout.freq_1"),
-            os.path.join(SCR_DIR, "mol.qout.freq_1"),
-        )
+        shutil.copyfile(f"{TEST_DIR}/FF_complex/mol.qin.opt_0", f"{SCR_DIR}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/FF_complex/mol.qin.opt_0", f"{SCR_DIR}/mol.qin.opt_0")
+        shutil.copyfile(f"{TEST_DIR}/FF_complex/mol.qin.freq_0", f"{SCR_DIR}/mol.qin.freq_0")
+        shutil.copyfile(f"{TEST_DIR}/FF_complex/mol.qin.opt_1", f"{SCR_DIR}/mol.qin.opt_1")
+        shutil.copyfile(f"{TEST_DIR}/FF_complex/mol.qin.freq_1", f"{SCR_DIR}/mol.qin.freq_1")
+        shutil.copyfile(f"{TEST_DIR}/FF_complex/mol.qout.opt_0", f"{SCR_DIR}/mol.qout.opt_0")
+        shutil.copyfile(f"{TEST_DIR}/FF_complex/mol.qout.freq_0", f"{SCR_DIR}/mol.qout.freq_0")
+        shutil.copyfile(f"{TEST_DIR}/FF_complex/mol.qout.opt_1", f"{SCR_DIR}/mol.qout.opt_1")
+        shutil.copyfile(f"{TEST_DIR}/FF_complex/mol.qout.freq_1", f"{SCR_DIR}/mol.qout.freq_1")
         os.chdir(SCR_DIR)
 
     def tearDown(self):
@@ -978,7 +951,7 @@ class OptFFTest5690(TestCase):
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
-class OptFF_small_neg_freq(TestCase):
+class OptFFSmallNegFreqTest(TestCase):
     def setUp(self):
         self.maxDiff = None
         os.makedirs(SCR_DIR)
@@ -1140,7 +1113,7 @@ class OptFF_small_neg_freq(TestCase):
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
-class OptFF_single_freq_frags(TestCase):
+class OptFFSingleFreqFragsTest(TestCase):
     def setUp(self):
         self.maxDiff = None
         os.makedirs(SCR_DIR)
@@ -1281,7 +1254,7 @@ class TSFFTest(TestCase):
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
-class TSFF_freqfirst(TestCase):
+class TSFFFreqfirstTest(TestCase):
     def setUp(self):
         self.maxDiff = None
         os.makedirs(SCR_DIR)
@@ -1376,7 +1349,7 @@ class TSFF_freqfirst(TestCase):
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
-class TSFF_freqfirst_multiple_cycles(TestCase):
+class TSFFFreqFirstMultipleCyclesTest(TestCase):
     def setUp(self):
         self.maxDiff = None
         os.makedirs(SCR_DIR)

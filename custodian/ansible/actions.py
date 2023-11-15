@@ -61,15 +61,15 @@ class DictActions:
     @staticmethod
     def unset(input_dict, settings):
         """
-        Unsets a value using MongoDB syntax.
+        Unset a value using MongoDB syntax.
 
         Args:
             input_dict (dict): The input dictionary to be modified.
             settings (dict): The specification of the modification to be made.
         """
         for key in settings:
-            d, inner_key = get_nested_dict(input_dict, key)
-            del d[inner_key]
+            dct, inner_key = get_nested_dict(input_dict, key)
+            del dct[inner_key]
 
     @staticmethod
     def push(input_dict, settings):

@@ -1,7 +1,7 @@
-import glob
 import os
 import shutil
 import unittest
+from glob import glob
 
 from custodian import TEST_FILES
 from custodian.feff.handlers import UnconvergedErrorHandler
@@ -15,7 +15,7 @@ __date__ = "Oct 18, 2017"
 
 
 def clean_dir():
-    for f in glob.glob("error.*.tar.gz"):
+    for f in glob("error.*.tar.gz"):
         os.remove(f)
 
 
@@ -32,11 +32,11 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         shutil.copy("log1.dat", "log1.dat.orig")
 
     def test_check_unconverged(self):
-        h = UnconvergedErrorHandler()
-        assert h.check()
-        d = h.correct()
-        assert d["errors"] == ["Non-converging job"]
-        assert d["actions"] == [
+        handler = UnconvergedErrorHandler()
+        assert handler.check()
+        dct = handler.correct()
+        assert dct["errors"] == ["Non-converging job"]
+        assert dct["actions"] == [
             {"dict": "PARAMETERS", "action": {"_set": {"RESTART": []}}},
             {"action": {"_set": {"SCF": [7, 0, 100, 0.2, 3]}}, "dict": "PARAMETERS"},
         ]

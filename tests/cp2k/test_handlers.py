@@ -1,12 +1,12 @@
 # Copyright (c) Pymatgen Development Team.
 # Distributed under the terms of the MIT License.
 
-import glob
 import os
 import shutil
 import time
 import unittest
 import warnings
+from glob import glob
 
 from pymatgen.io.cp2k.inputs import Keyword, KeywordList
 from pymatgen.io.cp2k.sets import StaticSet
@@ -25,10 +25,10 @@ from custodian.cp2k.interpreter import Cp2kModder
 TEST_FILES_DIR = f"{TEST_FILES}/cp2k"
 
 
-def clean_dir(d):
-    for file in glob.glob(os.path.join(d, "error.*.tar.gz")):
+def clean_dir(dct):
+    for file in glob(os.path.join(dct, "error.*.tar.gz")):
         os.remove(file)
-    for file in glob.glob(os.path.join(d, "custodian.chk.*.tar.gz")):
+    for file in glob(os.path.join(dct, "custodian.chk.*.tar.gz")):
         os.remove(file)
 
 
@@ -76,62 +76,66 @@ class HandlerTests(unittest.TestCase):
 
     def test_frozenjobhandler(self):
         """Handler for frozen job"""
-        h = FrozenJobErrorHandler(input_file=self.input_file, output_file=self.output_file_preconditioner, timeout=1)
-        assert h.check()
+        handler = FrozenJobErrorHandler(
+            input_file=self.input_file, output_file=self.output_file_preconditioner, timeout=1
+        )
+        assert handler.check()
         ci = StaticSet.from_file(self.input_file)
         assert ci["FORCE_EVAL"]["DFT"]["SCF"]["OT"]["PRECONDITIONER"] == Keyword(
             "PRECONDITIONER", "FULL_SINGLE_INVERSE"
         )
-        h.correct()
+        handler.correct()
 
         ci = StaticSet.from_file(self.input_file)
         assert ci["FORCE_EVAL"]["DFT"]["SCF"]["OT"]["PRECONDITIONER"] == Keyword("PRECONDITIONER", "FULL_ALL")
 
-        h = FrozenJobErrorHandler(input_file=self.input_file, output_file=self.output_file_preconditioner, timeout=1)
-        assert h.check()
-        h.correct()
+        handler = FrozenJobErrorHandler(
+            input_file=self.input_file, output_file=self.output_file_preconditioner, timeout=1
+        )
+        assert handler.check()
+        handler.correct()
         ci = StaticSet.from_file(self.input_file)
         assert ci["FORCE_EVAL"]["DFT"]["SCF"]["OT"]["PRECOND_SOLVER"] == Keyword("PRECOND_SOLVER", "DIRECT")
 
-        h = FrozenJobErrorHandler(input_file=self.input_file, output_file=self.output_file_imprecise, timeout=1)
-        h.check()
+        handler = FrozenJobErrorHandler(input_file=self.input_file, output_file=self.output_file_imprecise, timeout=1)
+        handler.check()
 
     def test_unconverged_handler(self):
         """Handler for SCF handling not working"""
         ci = StaticSet.from_file(self.input_file)
-        h = UnconvergedScfErrorHandler(input_file=self.input_file, output_file=self.output_file_unconverged)
-        h.check()
-        assert h.is_ot
+        handler = UnconvergedScfErrorHandler(input_file=self.input_file, output_file=self.output_file_unconverged)
+        handler.check()
+        assert handler.is_ot
         assert ci["force_eval"]["dft"]["scf"]["ot"]["minimizer"] == Keyword("MINIMIZER", "DIIS")
-        actions = h.correct()
+        actions = handler.correct()
         assert actions["errors"], ["Non-converging Job"]
         ci = StaticSet.from_file(self.input_file)
         assert ci["force_eval"]["dft"]["scf"]["ot"]["minimizer"] == Keyword("MINIMIZER", "CG")
 
         # Fake diag check. Turns on mixing
-        h.is_ot = False
-        actions = h.correct()
+        handler.is_ot = False
+        actions = handler.correct()
         assert actions["errors"], ["Non-converging Job"]
         ci = StaticSet.from_file(self.input_file)
         assert ci["force_eval"]["dft"]["scf"]["MIXING"]["ALPHA"] == Keyword("ALPHA", 0.1)
 
     def test_abort_handler(self):
         """Checks if cp2k called abort"""
-        h = AbortHandler(input_file=self.input_file, output_file=self.output_file_cholesky)
-        assert h.check()
+        handler = AbortHandler(input_file=self.input_file, output_file=self.output_file_cholesky)
+        assert handler.check()
 
     def test_imprecision_handler(self):
         """Check for low precision leading to stagnant SCF"""
-        h = NumericalPrecisionHandler(self.input_file, output_file=self.output_file_imprecise, max_same=3)
-        assert h.check()
-        c = h.correct()
+        handler = NumericalPrecisionHandler(self.input_file, output_file=self.output_file_imprecise, max_same=3)
+        assert handler.check()
+        c = handler.correct()
         assert c["errors"], ["Insufficient precision"]
 
     def test_std_out(self):
         """Errors sent to the std out instead of cp2k out"""
-        h = StdErrHandler(std_err=self.output_file_stderr)
-        assert h.check()
-        h.correct()
+        handler = StdErrHandler(std_err=self.output_file_stderr)
+        assert handler.check()
+        handler.correct()
 
     def test_conv(self):
         """Check that SCF convergence can be read"""

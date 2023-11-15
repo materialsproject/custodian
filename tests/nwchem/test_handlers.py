@@ -1,7 +1,7 @@
-import glob
 import os
 import shutil
 import unittest
+from glob import glob
 
 from custodian import TEST_FILES
 from custodian.nwchem.handlers import NwchemErrorHandler
@@ -18,14 +18,14 @@ class NwchemErrorHandlerTest(unittest.TestCase):
     def test_check_correct(self):
         os.chdir(f"{TEST_FILES}/nwchem")
         shutil.copy("C1N1Cl1_1.nw", "C1N1Cl1_1.nw.orig")
-        h = NwchemErrorHandler(output_filename="C1N1Cl1_1.nwout")
-        h.check()
-        h.correct()
+        handler = NwchemErrorHandler(output_filename="C1N1Cl1_1.nwout")
+        handler.check()
+        handler.correct()
         shutil.move("C1N1Cl1_1.nw.orig", "C1N1Cl1_1.nw")
         shutil.copy("Li1_1.nw", "Li1_1.nw.orig")
-        h = NwchemErrorHandler(output_filename="Li1_1.nwout")
-        h.check()
-        h.correct()
+        handler = NwchemErrorHandler(output_filename="Li1_1.nwout")
+        handler.check()
+        handler.correct()
         shutil.move("Li1_1.nw.orig", "Li1_1.nw")
-        for f in glob.glob("error.*.tar.gz"):
+        for f in glob("error.*.tar.gz"):
             os.remove(f)

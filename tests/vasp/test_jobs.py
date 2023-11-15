@@ -1,7 +1,7 @@
-import glob
 import multiprocessing
 import os
 import shutil
+from glob import glob
 
 import pymatgen
 import pytest
@@ -150,7 +150,7 @@ class TestVaspNEBJob:
                 assert os.path.isfile(f"{f}.test")
                 os.remove(f"{f}.test")
 
-            sub_folders = glob.glob("[0-9][0-9]")
+            sub_folders = glob("[0-9][0-9]")
             for sf in sub_folders:
                 os.chdir(os.path.join(postprocess_neb, sf))
                 for f in neb_sub_outputs:

@@ -1,8 +1,8 @@
-import glob
 import os
 import random
 import subprocess
 import unittest
+from glob import glob
 
 import pytest
 from ruamel.yaml import YAML
@@ -184,23 +184,23 @@ class CustodianTest(unittest.TestCase):
     def test_unrecoverable(self):
         n_jobs = 100
         params = {"initial": 0, "total": 0}
-        h = ExampleHandler2(params)
-        c = Custodian([h], [ExampleJob(i, params) for i in range(n_jobs)], max_errors=n_jobs)
+        handler = ExampleHandler2(params)
+        c = Custodian([handler], [ExampleJob(i, params) for i in range(n_jobs)], max_errors=n_jobs)
         with pytest.raises(NonRecoverableError):
             c.run()
-        assert h.has_error
-        h = ExampleHandler2b(params)
-        c = Custodian([h], [ExampleJob(i, params) for i in range(n_jobs)], max_errors=n_jobs)
+        assert handler.has_error
+        handler = ExampleHandler2b(params)
+        c = Custodian([handler], [ExampleJob(i, params) for i in range(n_jobs)], max_errors=n_jobs)
         c.run()
-        assert h.has_error
-        assert c.run_log[-1]["handler"] == h
+        assert handler.has_error
+        assert c.run_log[-1]["handler"] == handler
 
     def test_max_errors(self):
         n_jobs = 100
         params = {"initial": 0, "total": 0}
-        h = ExampleHandler(params)
+        handler = ExampleHandler(params)
         c = Custodian(
-            [h],
+            [handler],
             [ExampleJob(i, params) for i in range(n_jobs)],
             max_errors=1,
             max_errors_per_job=10,
@@ -212,9 +212,9 @@ class CustodianTest(unittest.TestCase):
     def test_max_errors_per_job(self):
         n_jobs = 100
         params = {"initial": 0, "total": 0}
-        h = ExampleHandler(params)
+        handler = ExampleHandler(params)
         c = Custodian(
-            [h],
+            [handler],
             [ExampleJob(i, params) for i in range(n_jobs)],
             max_errors=n_jobs,
             max_errors_per_job=1,
@@ -226,19 +226,19 @@ class CustodianTest(unittest.TestCase):
     def test_max_errors_per_handler_raise(self):
         n_jobs = 100
         params = {"initial": 0, "total": 0}
-        h = ExampleHandler1b(params)
+        handler = ExampleHandler1b(params)
         c = Custodian(
-            [h],
+            [handler],
             [ExampleJob(i, params) for i in range(n_jobs)],
             max_errors=n_jobs * 10,
             max_errors_per_job=1000,
         )
         with pytest.raises(MaxCorrectionsPerHandlerError):
             c.run()
-        assert h.n_applied_corrections == 2
+        assert handler.n_applied_corrections == 2
         assert len(c.run_log[-1]["corrections"]) == 2
         assert c.run_log[-1]["max_errors_per_handler"]
-        assert c.run_log[-1]["handler"] == h
+        assert c.run_log[-1]["handler"] == handler
 
     def test_max_errors_per_handler_warning(self):
         n_jobs = 100
@@ -301,8 +301,8 @@ custodian_params:
 
         os.environ["TMPDIR"] = "/tmp/random"
         os.environ["PBS_NODEFILE"] = "whatever"
-        d = YAML(typ="rt").load(spec)
-        c = Custodian.from_spec(d)
+        dct = YAML(typ="rt").load(spec)
+        c = Custodian.from_spec(dct)
         assert c.jobs[0].vasp_cmd[2] == "whatever"
         assert c.scratch_dir == "/tmp/random"
         assert len(c.jobs) == 2
@@ -310,7 +310,7 @@ custodian_params:
         assert len(c.validators) == 1
 
     def tearDown(self):
-        for f in glob.glob("custodian.*.tar.gz"):
+        for f in glob("custodian.*.tar.gz"):
             os.remove(f)
         try:
             os.remove("custodian.json")

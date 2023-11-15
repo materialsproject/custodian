@@ -1,10 +1,10 @@
 # Copyright (c) Pymatgen Development Team.
 # Distributed under the terms of the MIT License.
 
-import glob
 import os
 import unittest
 import warnings
+from glob import glob
 from pathlib import Path
 
 from custodian import TEST_FILES, Custodian
@@ -17,9 +17,9 @@ cwd = os.getcwd()
 
 
 def clean_dir(dir):
-    for f in glob.glob(os.path.join(dir, "error.*.tar.gz")):
+    for f in glob(os.path.join(dir, "error.*.tar.gz")):
         os.remove(f)
-    for f in glob.glob(os.path.join(dir, "custodian.chk.*.tar.gz")):
+    for f in glob(os.path.join(dir, "custodian.chk.*.tar.gz")):
         os.remove(f)
 
 

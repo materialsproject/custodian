@@ -21,12 +21,12 @@ class Modder:
 
     Examples:
     >>> modder = Modder()
-    >>> d = {"Hello": "World"}
+    >>> dct = {"Hello": "World"}
     >>> mod = {'_set': {'Hello':'Universe', 'Bye': 'World'}}
-    >>> modder.modify(mod, d)
-    >>> d['Bye']
+    >>> modder.modify(mod, dct)
+    >>> dct['Bye']
     'World'
-    >>> d['Hello']
+    >>> dct['Hello']
     'Universe'
     """
 
@@ -79,9 +79,9 @@ class Modder:
                 settings}. E.g., {'_set': {'Hello':'Universe', 'Bye': 'World'}}
             obj (object): Object to modify
         """
-        d = obj.as_dict()
-        self.modify(modification, d)
-        return obj.from_dict(d)
+        dct = obj.as_dict()
+        self.modify(modification, dct)
+        return obj.from_dict(dct)
 
 
 if __name__ == "__main__":

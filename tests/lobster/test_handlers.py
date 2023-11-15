@@ -26,8 +26,8 @@ class TestChargeSpillingValidator(unittest.TestCase):
 
     def test_as_dict(self):
         v = ChargeSpillingValidator(output_filename=f"{test_files_lobster}/lobsterout.normal")
-        d = v.as_dict()
-        v2 = ChargeSpillingValidator.from_dict(d)
+        dct = v.as_dict()
+        v2 = ChargeSpillingValidator.from_dict(dct)
         assert isinstance(v2, ChargeSpillingValidator)
 
 
@@ -50,8 +50,8 @@ class TestLobsterFilesValidator(unittest.TestCase):
     def test_as_dict(self):
         os.chdir(test_files_lobster)
         v = LobsterFilesValidator()
-        d = v.as_dict()
-        v2 = LobsterFilesValidator.from_dict(d)
+        dct = v.as_dict()
+        v2 = LobsterFilesValidator.from_dict(dct)
         assert isinstance(v2, LobsterFilesValidator)
 
 
@@ -70,6 +70,6 @@ class TestEnoughBandsValidator(unittest.TestCase):
 
     def test_as_dict(self):
         v = EnoughBandsValidator(output_filename=f"{test_files_lobster}/lobsterout.normal")
-        d = v.as_dict()
-        v2 = EnoughBandsValidator.from_dict(d)
+        dct = v.as_dict()
+        v2 = EnoughBandsValidator.from_dict(dct)
         assert isinstance(v2, EnoughBandsValidator)
