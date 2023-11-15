@@ -244,7 +244,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["errors"] == []
 
     def test_too_few_bands(self):
-        os.chdir(os.path.join(TEST_FILES, "too_few_bands"))
+        os.chdir(f"{TEST_FILES}/too_few_bands")
         shutil.copy("INCAR", "INCAR.orig")
         handler = VaspErrorHandler("vasp.too_few_bands")
         handler.check()
@@ -255,7 +255,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         os.chdir(TEST_FILES)
 
     def test_rot_matrix(self):
-        subdir = os.path.join(TEST_FILES, "poscar_error")
+        subdir = f"{TEST_FILES}/poscar_error"
         os.chdir(subdir)
         shutil.copy("KPOINTS", "KPOINTS.orig")
         handler = VaspErrorHandler()
@@ -767,7 +767,7 @@ class KspacingMetalHandlerTest(PymatgenTest):
         shutil.copy("vasprun.xml", f"{self.tmp_path}/vasprun.xml")
         handler = KspacingMetalHandler(output_filename=f"{self.tmp_path}/vasprun.xml")
         assert handler.check() is False
-        os.chdir(os.path.join(TEST_FILES, "scan_metal"))
+        os.chdir(f"{TEST_FILES}/scan_metal")
 
         # TODO (@janosh 2023-11-03) remove when ending ScanMetalHandler deprecation period
         assert issubclass(ScanMetalHandler, KspacingMetalHandler)

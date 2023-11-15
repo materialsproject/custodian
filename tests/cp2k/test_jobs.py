@@ -29,11 +29,11 @@ class HandlerTests(unittest.TestCase):
 
         clean_dir(TEST_FILES_DIR)
 
-        self.input_file = os.path.join(TEST_FILES_DIR, "cp2k.inp")
-        self.input_file_hybrid = os.path.join(TEST_FILES_DIR, "cp2k.inp.hybrid")
-        self.output_file = os.path.join(TEST_FILES_DIR, "cp2k.out.test")
-        self.std_err = os.path.join(TEST_FILES_DIR, "std_err.tmp")
-        self.logfile = os.path.join(TEST_FILES_DIR, "custodian.json")
+        self.input_file = f"{TEST_FILES_DIR}/cp2k.inp"
+        self.input_file_hybrid = f"{TEST_FILES_DIR}/cp2k.inp.hybrid"
+        self.output_file = f"{TEST_FILES_DIR}/cp2k.out.test"
+        self.std_err = f"{TEST_FILES_DIR}/std_err.tmp"
+        self.logfile = f"{TEST_FILES_DIR}/custodian.json"
 
         if os.path.isfile(Custodian.LOG_FILE):
             os.remove("custodian.json")

@@ -7,12 +7,12 @@ from custodian.vasp.validators import VaspAECCARValidator, VaspFilesValidator, V
 
 class TestVasprunXMLValidator:
     def test_check_and_correct(self):
-        os.chdir(os.path.join(TEST_FILES, "bad_vasprun"))
+        os.chdir(f"{TEST_FILES}/bad_vasprun")
         h = VasprunXMLValidator()
         assert h.check()
 
         # Unconverged still has a valid vasprun.
-        os.chdir(os.path.join(TEST_FILES, "unconverged"))
+        os.chdir(f"{TEST_FILES}/unconverged")
         shutil.copy("vasprun.xml.electronic", "vasprun.xml")
         assert not h.check()
         os.remove("vasprun.xml")
@@ -27,11 +27,11 @@ class TestVasprunXMLValidator:
 class TestVaspFilesValidator:
     def test_check_and_correct(self):
         # just an example where CONTCAR is not present
-        os.chdir(os.path.join(TEST_FILES, "positive_energy"))
+        os.chdir(f"{TEST_FILES}/positive_energy")
         h = VaspFilesValidator()
         assert h.check()
 
-        os.chdir(os.path.join(TEST_FILES, "postprocess"))
+        os.chdir(f"{TEST_FILES}/postprocess")
         assert not h.check()
 
     def test_as_dict(self):
@@ -44,16 +44,16 @@ class TestVaspFilesValidator:
 class TestVaspNpTMDValidator:
     def test_check_and_correct(self):
         # NPT-AIMD using correct VASP
-        os.chdir(os.path.join(TEST_FILES, "npt_common"))
+        os.chdir(f"{TEST_FILES}/npt_common")
         h = VaspNpTMDValidator()
         assert not h.check()
 
         # NVT-AIMD using correct VASP
-        os.chdir(os.path.join(TEST_FILES, "npt_nvt"))
+        os.chdir(f"{TEST_FILES}/npt_nvt")
         assert not h.check()
 
         # NPT-AIMD using incorrect VASP
-        os.chdir(os.path.join(TEST_FILES, "npt_bad_vasp"))
+        os.chdir(f"{TEST_FILES}/npt_bad_vasp")
         assert h.check()
 
     def test_as_dict(self):
@@ -66,6 +66,6 @@ class TestVaspNpTMDValidator:
 class TestVaspAECCARValidator:
     def test_check_and_correct(self):
         # NPT-AIMD using correct VASP
-        os.chdir(os.path.join(TEST_FILES, "bad_aeccar"))
+        os.chdir(f"{TEST_FILES}/bad_aeccar")
         h = VaspAECCARValidator()
         assert h.check()

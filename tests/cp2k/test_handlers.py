@@ -40,17 +40,17 @@ class HandlerTests(unittest.TestCase):
 
         time.sleep(1)  # for frozenhandler
 
-        shutil.copy(os.path.join(TEST_FILES_DIR, "cp2k.inp.orig"), os.path.join(TEST_FILES_DIR, "cp2k.inp"))
+        shutil.copy(f"{TEST_FILES_DIR}/cp2k.inp.orig", f"{TEST_FILES_DIR}/cp2k.inp")
 
-        self.input_file = os.path.join(TEST_FILES_DIR, "cp2k.inp")
+        self.input_file = f"{TEST_FILES_DIR}/cp2k.inp"
 
-        self.output_file_preconditioner = os.path.join(TEST_FILES_DIR, "cp2k.out.precondstuck")
-        self.output_file_cholesky = os.path.join(TEST_FILES_DIR, "cp2k.out.cholesky")
-        self.output_file_imprecise = os.path.join(TEST_FILES_DIR, "cp2k.out.imprecise")
-        self.output_file_unconverged = os.path.join(TEST_FILES_DIR, "cp2k.out.unconverged")
-        self.output_file_stderr = os.path.join(TEST_FILES_DIR, "std_err.txt")
-        self.output_file_hybrid = os.path.join(TEST_FILES_DIR, "cp2k.out.hybrid")
-        self.output_file_conv = os.path.join(TEST_FILES_DIR, "cp2k.out.conv")
+        self.output_file_preconditioner = f"{TEST_FILES_DIR}/cp2k.out.precondstuck"
+        self.output_file_cholesky = f"{TEST_FILES_DIR}/cp2k.out.cholesky"
+        self.output_file_imprecise = f"{TEST_FILES_DIR}/cp2k.out.imprecise"
+        self.output_file_unconverged = f"{TEST_FILES_DIR}/cp2k.out.unconverged"
+        self.output_file_stderr = f"{TEST_FILES_DIR}/std_err.txt"
+        self.output_file_hybrid = f"{TEST_FILES_DIR}/cp2k.out.hybrid"
+        self.output_file_conv = f"{TEST_FILES_DIR}/cp2k.out.conv"
 
         self.modder = Cp2kModder(filename=self.input_file)
 
