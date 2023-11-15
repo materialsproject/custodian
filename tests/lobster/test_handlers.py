@@ -1,11 +1,10 @@
 import os
 import unittest
 
+from custodian import TEST_FILES
 from custodian.lobster.handlers import ChargeSpillingValidator, EnoughBandsValidator, LobsterFilesValidator
 
-# get location of module
-TEST_DIR = os.path.dirname(os.path.abspath(__file__))
-test_files_lobster = os.path.join(TEST_DIR, "../../../tests/files/lobster/lobsterouts")
+test_files_lobster = f"{TEST_FILES}/lobster/lobsterouts"
 
 
 class TestChargeSpillingValidator(unittest.TestCase):

@@ -15,12 +15,6 @@ from __future__ import annotations
 
 from pymatgen.core import __author__
 
-# sys.path.insert(0, os.path.abspath("."))
-# sys.path.insert(0, os.path.dirname(".."))
-# sys.path.insert(0, os.path.dirname("../pymatgen"))
-# sys.path.insert(0, os.path.dirname("../.."))
-
-
 project = "pymatgen"
 copyright = "2022, Materials Virtual Lab"
 author = __author__

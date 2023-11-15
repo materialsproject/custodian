@@ -22,7 +22,7 @@ def clean_dir():
 class UnconvergedErrorHandlerTest(unittest.TestCase):
     def setUp(self):
         os.chdir(TEST_FILES)
-        subdir = os.path.join(TEST_FILES, "feff_unconverge")
+        subdir = os.path.join(TEST_FILES, "feff_unconverged")
         os.chdir(subdir)
         shutil.copy("ATOMS", "ATOMS.orig")
         shutil.copy("PARAMETERS", "PARAMETERS.orig")

@@ -166,11 +166,11 @@ class GenerateVaspInputJobTest(unittest.TestCase):
         with ScratchDir("."):
             for f in ["INCAR", "POSCAR", "POTCAR", "KPOINTS"]:
                 shutil.copy(os.path.join("..", TEST_DIR, f), f)
-            oldincar = Incar.from_file("INCAR")
+            old_incar = Incar.from_file("INCAR")
             v = GenerateVaspInputJob("pymatgen.io.vasp.sets.MPNonSCFSet", contcar_only=False)
             v.run()
             incar = Incar.from_file("INCAR")
             assert incar["ICHARG"] == 11
-            assert oldincar["ICHARG"] == 1
+            assert old_incar["ICHARG"] == 1
             kpoints = Kpoints.from_file("KPOINTS")
             assert str(kpoints.style) == "Reciprocal"

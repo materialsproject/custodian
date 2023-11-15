@@ -29,7 +29,7 @@ cwd = os.getcwd()
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
-class FFopt_job_handler_interaction(TestCase):
+class FFOptJobHandlerInteraction(TestCase):
     def _check_equivalent_inputs(self, input1, input2):
         QCinput1 = QCInput.from_file(input1)
         QCinput2 = QCInput.from_file(input2)

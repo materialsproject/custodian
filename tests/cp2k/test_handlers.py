@@ -7,11 +7,11 @@ import shutil
 import time
 import unittest
 import warnings
-from pathlib import Path
 
 from pymatgen.io.cp2k.inputs import Keyword, KeywordList
 from pymatgen.io.cp2k.sets import StaticSet
 
+from custodian import TEST_FILES
 from custodian.cp2k.handlers import (
     AbortHandler,
     FrozenJobErrorHandler,
@@ -21,6 +21,8 @@ from custodian.cp2k.handlers import (
     get_conv,
 )
 from custodian.cp2k.interpreter import Cp2kModder
+
+TEST_FILES_DIR = f"{TEST_FILES}/cp2k"
 
 
 def clean_dir(d):
@@ -34,23 +36,21 @@ class HandlerTests(unittest.TestCase):
     def setUp(self):
         warnings.filterwarnings("ignore")
 
-        self.TEST_FILES_DIR = os.path.join(Path(__file__).parent.absolute(), "../../../tests/files/cp2k")
-
-        clean_dir(self.TEST_FILES_DIR)
+        clean_dir(TEST_FILES_DIR)
 
         time.sleep(1)  # for frozenhandler
 
-        shutil.copy(os.path.join(self.TEST_FILES_DIR, "cp2k.inp.orig"), os.path.join(self.TEST_FILES_DIR, "cp2k.inp"))
+        shutil.copy(os.path.join(TEST_FILES_DIR, "cp2k.inp.orig"), os.path.join(TEST_FILES_DIR, "cp2k.inp"))
 
-        self.input_file = os.path.join(self.TEST_FILES_DIR, "cp2k.inp")
+        self.input_file = os.path.join(TEST_FILES_DIR, "cp2k.inp")
 
-        self.output_file_preconditioner = os.path.join(self.TEST_FILES_DIR, "cp2k.out.precondstuck")
-        self.output_file_cholesky = os.path.join(self.TEST_FILES_DIR, "cp2k.out.cholesky")
-        self.output_file_imprecise = os.path.join(self.TEST_FILES_DIR, "cp2k.out.imprecise")
-        self.output_file_unconverged = os.path.join(self.TEST_FILES_DIR, "cp2k.out.unconverged")
-        self.output_file_stderr = os.path.join(self.TEST_FILES_DIR, "std_err.txt")
-        self.output_file_hybrid = os.path.join(self.TEST_FILES_DIR, "cp2k.out.hybrid")
-        self.output_file_conv = os.path.join(self.TEST_FILES_DIR, "cp2k.out.conv")
+        self.output_file_preconditioner = os.path.join(TEST_FILES_DIR, "cp2k.out.precondstuck")
+        self.output_file_cholesky = os.path.join(TEST_FILES_DIR, "cp2k.out.cholesky")
+        self.output_file_imprecise = os.path.join(TEST_FILES_DIR, "cp2k.out.imprecise")
+        self.output_file_unconverged = os.path.join(TEST_FILES_DIR, "cp2k.out.unconverged")
+        self.output_file_stderr = os.path.join(TEST_FILES_DIR, "std_err.txt")
+        self.output_file_hybrid = os.path.join(TEST_FILES_DIR, "cp2k.out.hybrid")
+        self.output_file_conv = os.path.join(TEST_FILES_DIR, "cp2k.out.conv")
 
         self.modder = Cp2kModder(filename=self.input_file)
 
