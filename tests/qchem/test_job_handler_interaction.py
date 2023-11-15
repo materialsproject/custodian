@@ -39,8 +39,7 @@ class FFOptJobHandlerInteraction(TestCase):
             assert QCinput1.as_dict().get(key) == QCinput2.as_dict().get(key)
 
     def setUp(self):
-        os.makedirs(SCR_DIR)
-        os.makedirs(os.path.join(SCR_DIR, "scratch"))
+        os.makedirs(f"{SCR_DIR}/scratch", exist_ok=True)
         shutil.copyfile(
             os.path.join(TEST_DIR, "job_handler_interaction/mol.qin.orig"),
             os.path.join(SCR_DIR, "mol.qin"),

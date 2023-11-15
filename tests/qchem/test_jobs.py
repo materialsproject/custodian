@@ -97,8 +97,6 @@ class QCJobTest(TestCase):
 @unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFComplexUnlinkedTest(TestCase):
     def setUp(self):
-        self.maxDiff = None
-
         os.makedirs(SCR_DIR)
         shutil.copyfile(
             os.path.join(TEST_DIR, "FF_complex/mol.qin.opt_0"),
@@ -174,8 +172,6 @@ class OptFFComplexUnlinkedTest(TestCase):
 @unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFTestComplexLinkedChangeNsegTest(TestCase):
     def setUp(self):
-        self.maxDiff = None
-
         os.makedirs(SCR_DIR)
         shutil.copyfile(f"{TEST_DIR}/FF_complex/mol.qin.opt_0", f"{SCR_DIR}/mol.qin")
         shutil.copyfile(f"{TEST_DIR}/FF_complex/mol.qin.opt_0", f"{SCR_DIR}/mol.qin.opt_0")
@@ -261,8 +257,6 @@ class OptFFTestComplexLinkedChangeNsegTest(TestCase):
 @unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFTest(TestCase):
     def setUp(self):
-        self.maxDiff = None
-
         os.makedirs(SCR_DIR)
         shutil.copyfile(
             os.path.join(TEST_DIR, "FF_working/test.qin"),
@@ -467,7 +461,6 @@ class OptFFTest2(TestCase):
 @unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFTestSwitching(TestCase):
     def setUp(self):
-        self.maxDiff = None
         os.makedirs(SCR_DIR)
         shutil.copyfile(
             os.path.join(TEST_DIR, "FF_switching/mol.qin.orig"),
@@ -610,7 +603,6 @@ class OptFFTestSwitching(TestCase):
 @unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFTest6004(TestCase):
     def setUp(self):
-        self.maxDiff = None
         os.makedirs(SCR_DIR)
         shutil.copyfile(
             os.path.join(TEST_DIR, "6004_frag12/mol.qin.orig"),
@@ -751,7 +743,6 @@ class OptFFTest6004(TestCase):
 @unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFTest5952(TestCase):
     def setUp(self):
-        self.maxDiff = None
         os.makedirs(SCR_DIR)
         shutil.copyfile(
             os.path.join(TEST_DIR, "5952_frag16/mol.qin.orig"),
@@ -810,7 +801,6 @@ class OptFFTest5952(TestCase):
 @unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFTest5690(TestCase):
     def setUp(self):
-        self.maxDiff = None
         os.makedirs(SCR_DIR)
         shutil.copyfile(
             os.path.join(TEST_DIR, "5690_frag18/mol.qin.orig"),
@@ -953,9 +943,7 @@ class OptFFTest5690(TestCase):
 @unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFSmallNegFreqTest(TestCase):
     def setUp(self):
-        self.maxDiff = None
-        os.makedirs(SCR_DIR)
-        os.makedirs(os.path.join(SCR_DIR, "scratch"))
+        os.makedirs(f"{SCR_DIR}/scratch", exist_ok=True)
         shutil.copyfile(
             os.path.join(TEST_DIR, "small_neg_freq/mol.qin.orig"),
             os.path.join(SCR_DIR, "mol.qin"),
@@ -1115,9 +1103,7 @@ class OptFFSmallNegFreqTest(TestCase):
 @unittest.skipIf(ob is None, "openbabel not installed")
 class OptFFSingleFreqFragsTest(TestCase):
     def setUp(self):
-        self.maxDiff = None
-        os.makedirs(SCR_DIR)
-        os.makedirs(os.path.join(SCR_DIR, "scratch"))
+        os.makedirs(f"{SCR_DIR}/scratch", exist_ok=True)
         shutil.copyfile(
             os.path.join(TEST_DIR, "single_freq_frag/mol.qin.orig"),
             os.path.join(SCR_DIR, "mol.qin"),
@@ -1191,8 +1177,6 @@ class OptFFSingleFreqFragsTest(TestCase):
 @unittest.skipIf(ob is None, "openbabel not installed")
 class TSFFTest(TestCase):
     def setUp(self):
-        self.maxDiff = None
-
         os.makedirs(SCR_DIR)
         shutil.copyfile(
             os.path.join(TEST_DIR, "fftsopt_no_freqfirst/mol.qin.freq_0"),
@@ -1256,9 +1240,7 @@ class TSFFTest(TestCase):
 @unittest.skipIf(ob is None, "openbabel not installed")
 class TSFFFreqfirstTest(TestCase):
     def setUp(self):
-        self.maxDiff = None
-        os.makedirs(SCR_DIR)
-        os.makedirs(os.path.join(SCR_DIR, "scratch"))
+        os.makedirs(f"{SCR_DIR}/scratch", exist_ok=True)
         shutil.copyfile(
             os.path.join(TEST_DIR, "fftsopt_freqfirst/mol.qin.orig"),
             os.path.join(SCR_DIR, "mol.qin"),
@@ -1351,9 +1333,7 @@ class TSFFFreqfirstTest(TestCase):
 @unittest.skipIf(ob is None, "openbabel not installed")
 class TSFFFreqFirstMultipleCyclesTest(TestCase):
     def setUp(self):
-        self.maxDiff = None
-        os.makedirs(SCR_DIR)
-        os.makedirs(os.path.join(SCR_DIR, "scratch"))
+        os.makedirs(f"{SCR_DIR}/scratch", exist_ok=True)
         shutil.copyfile(
             os.path.join(TEST_DIR, "fftsopt_multiple_cycles/mol.qin.orig"),
             os.path.join(SCR_DIR, "mol.qin"),

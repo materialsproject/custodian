@@ -55,8 +55,8 @@ class FeffModder(Modder):
             feff = self.feffinp
             feff_input = "\n\n".join(str(feff[k]) for k in ["HEADER", "PARAMETERS", "POTENTIALS", "ATOMS"] if k in feff)
             for k, v in feff.items():
-                with open(os.path.join(".", k), "w") as f:
-                    f.write(str(v))
+                with open(os.path.join(".", k), "w") as file:
+                    file.write(str(v))
 
-            with open(os.path.join(".", "feff.inp"), "w") as f:
-                f.write(feff_input)
+            with open(os.path.join(".", "feff.inp"), "w") as file:
+                file.write(feff_input)

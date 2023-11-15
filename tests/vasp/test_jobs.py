@@ -34,7 +34,7 @@ class TestVaspJob:
 
     def test_setup_run_no_kpts(self):
         # just make sure v.setup() and v.run() exit cleanly when no KPOINTS file is present
-        with cd(os.path.join(TEST_FILES, "kspacing")), ScratchDir(".", copy_from_current_on_enter=True):
+        with cd(f"{TEST_FILES}/kspacing"), ScratchDir(".", copy_from_current_on_enter=True):
             v = VaspJob(["hello"], auto_npar=True)
             v.setup()
             with pytest.raises(FileNotFoundError):
@@ -45,7 +45,7 @@ class TestVaspJob:
                 v.run()
 
     def test_postprocess(self):
-        with cd(os.path.join(TEST_FILES, "postprocess")), ScratchDir(".", copy_from_current_on_enter=True):
+        with cd(f"{TEST_FILES}/postprocess"), ScratchDir(".", copy_from_current_on_enter=True):
             shutil.copy("INCAR", "INCAR.backup")
 
             v = VaspJob(["hello"], final=False, suffix=".test", copy_magmom=True)
@@ -71,7 +71,7 @@ class TestVaspJob:
 
     def test_continue(self):
         # Test the continuation functionality
-        with cd(os.path.join(TEST_FILES, "postprocess")):
+        with cd(f"{TEST_FILES}/postprocess"):
             # Test default functionality
             with ScratchDir(".", copy_from_current_on_enter=True):
                 v = VaspJob("hello", auto_continue=True)
@@ -107,7 +107,7 @@ class TestVaspNEBJob:
         assert v2.vasp_cmd == ("hello",)
 
     def test_setup(self):
-        with cd(os.path.join(TEST_FILES, "setup_neb")), ScratchDir(".", copy_from_current_on_enter=True):
+        with cd(f"{TEST_FILES}/setup_neb"), ScratchDir(".", copy_from_current_on_enter=True):
             v = VaspNEBJob("hello", half_kpts=True)
             v.setup()
 
@@ -140,7 +140,7 @@ class TestVaspNEBJob:
             "XDATCAR",
         ]
 
-        with cd(os.path.join(TEST_FILES, "postprocess_neb")):
+        with cd(f"{TEST_FILES}/postprocess_neb"):
             postprocess_neb = os.path.abspath(".")
 
             v = VaspNEBJob("hello", final=False, suffix=".test")
@@ -152,7 +152,7 @@ class TestVaspNEBJob:
 
             sub_folders = glob("[0-9][0-9]")
             for sf in sub_folders:
-                os.chdir(os.path.join(postprocess_neb, sf))
+                os.chdir(f"{postprocess_neb}/{sf}")
                 for f in neb_sub_outputs:
                     if os.path.exists(f):
                         assert os.path.isfile(f"{f}.test")
@@ -162,8 +162,8 @@ class TestVaspNEBJob:
 class TestGenerateVaspInputJob:
     def test_run(self):
         with ScratchDir("."):
-            for f in ["INCAR", "POSCAR", "POTCAR", "KPOINTS"]:
-                shutil.copy(os.path.join("..", TEST_FILES, f), f)
+            for file in ("INCAR", "POSCAR", "POTCAR", "KPOINTS"):
+                shutil.copy(f"{TEST_FILES}/{file}", file)
             old_incar = Incar.from_file("INCAR")
             v = GenerateVaspInputJob("pymatgen.io.vasp.sets.MPNonSCFSet", contcar_only=False)
             v.run()
