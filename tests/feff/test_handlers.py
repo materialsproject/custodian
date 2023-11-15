@@ -1,18 +1,17 @@
+import glob
+import os
+import shutil
+import unittest
+
+from custodian import TEST_FILES
+from custodian.feff.handlers import UnconvergedErrorHandler
+
 __author__ = "Chen Zheng"
 __copyright__ = "Copyright 2012, The Materials Project"
 __version__ = "0.1"
 __maintainer__ = "Chen Zheng"
 __email__ = "chz022@ucsd.edu"
 __date__ = "Oct 18, 2017"
-
-import glob
-import os
-import shutil
-import unittest
-
-from custodian.feff.handlers import UnconvergedErrorHandler
-
-test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "tests/files")
 
 
 def clean_dir():
@@ -22,8 +21,8 @@ def clean_dir():
 
 class UnconvergedErrorHandlerTest(unittest.TestCase):
     def setUp(self):
-        os.chdir(test_dir)
-        subdir = os.path.join(test_dir, "feff_unconverge")
+        os.chdir(TEST_FILES)
+        subdir = os.path.join(TEST_FILES, "feff_unconverge")
         os.chdir(subdir)
         shutil.copy("ATOMS", "ATOMS.orig")
         shutil.copy("PARAMETERS", "PARAMETERS.orig")

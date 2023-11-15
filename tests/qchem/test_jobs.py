@@ -7,6 +7,7 @@ from unittest.mock import patch
 import pytest
 from pymatgen.io.qchem.inputs import QCInput
 
+from custodian import TEST_FILES
 from custodian.qchem.jobs import QCJob
 
 try:
@@ -23,9 +24,7 @@ __status__ = "Alpha"
 __date__ = "6/6/18"
 __credits__ = "Shyam Dwaraknath"
 
-test_dir = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "tests/files", "qchem", "new_test_files"
-)
+test_dir = f"{TEST_FILES}/qchem/new_test_files"
 
 scr_dir = os.path.join(test_dir, "scr")
 cwd = os.getcwd()

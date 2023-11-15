@@ -5,6 +5,7 @@ from unittest import TestCase
 
 from pymatgen.io.qchem.inputs import QCInput
 
+from custodian import TEST_FILES
 from custodian.qchem.handlers import QChemErrorHandler
 from custodian.qchem.jobs import QCJob
 
@@ -21,9 +22,7 @@ __email__ = "samblau1@gmail.com"
 __status__ = "Alpha"
 __date__ = "6/3/22"
 
-test_dir = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "tests/files", "qchem", "new_test_files"
-)
+test_dir = f"{TEST_FILES}/qchem/new_test_files"
 
 scr_dir = os.path.join(test_dir, "scr")
 cwd = os.getcwd()

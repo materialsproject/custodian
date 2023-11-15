@@ -12,9 +12,10 @@ from monty.os import cd
 from monty.tempfile import ScratchDir
 from pymatgen.io.feff.inputs import Atoms, Tags
 
+from custodian import TEST_FILES
 from custodian.feff.jobs import FeffJob
 
-test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "tests/files", "feff_unconverge")
+TEST_DIR = f"{TEST_FILES}/feff_unconverged"
 
 
 class FeffJobTest(unittest.TestCase):
@@ -25,7 +26,7 @@ class FeffJobTest(unittest.TestCase):
         assert f2.feff_cmd == "hello"
 
     def test_setup(self):
-        with cd(test_dir), ScratchDir(".", copy_from_current_on_enter=True):
+        with cd(TEST_DIR), ScratchDir(".", copy_from_current_on_enter=True):
             f = FeffJob("hello", backup=True)
             f.setup()
 
@@ -38,7 +39,7 @@ class FeffJobTest(unittest.TestCase):
             assert atom == atom_origin
 
     def test_postprocess(self):
-        with cd(test_dir), ScratchDir(".", copy_from_current_on_enter=True):
+        with cd(TEST_DIR), ScratchDir(".", copy_from_current_on_enter=True):
             f = FeffJob("hello", backup=True, gzipped=True)
             f.postprocess()
             assert os.path.exists("feff_out.1.tar.gz")
