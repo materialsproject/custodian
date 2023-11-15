@@ -22,10 +22,9 @@ __email__ = "samblau1@gmail.com"
 __status__ = "Alpha"
 __date__ = "6/3/22"
 
-test_dir = f"{TEST_FILES}/qchem/new_test_files"
-
-scr_dir = os.path.join(test_dir, "scr")
-cwd = os.getcwd()
+TEST_DIR = f"{TEST_FILES}/qchem/new_test_files"
+SCR_DIR = os.path.join(TEST_DIR, "scr")
+CWD = os.getcwd()
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
@@ -40,65 +39,65 @@ class FFOptJobHandlerInteraction(TestCase):
             assert QCinput1.as_dict().get(key) == QCinput2.as_dict().get(key)
 
     def setUp(self):
-        os.makedirs(scr_dir)
-        os.makedirs(os.path.join(scr_dir, "scratch"))
+        os.makedirs(SCR_DIR)
+        os.makedirs(os.path.join(SCR_DIR, "scratch"))
         shutil.copyfile(
-            os.path.join(test_dir, "job_handler_interaction/mol.qin.orig"),
-            os.path.join(scr_dir, "mol.qin"),
+            os.path.join(TEST_DIR, "job_handler_interaction/mol.qin.orig"),
+            os.path.join(SCR_DIR, "mol.qin"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "job_handler_interaction/error.1/mol.qout"),
-            os.path.join(scr_dir, "mol.qout.error1"),
+            os.path.join(TEST_DIR, "job_handler_interaction/error.1/mol.qout"),
+            os.path.join(SCR_DIR, "mol.qout.error1"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "job_handler_interaction/error.2/mol.qin"),
-            os.path.join(scr_dir, "mol.qin.error2"),
+            os.path.join(TEST_DIR, "job_handler_interaction/error.2/mol.qin"),
+            os.path.join(SCR_DIR, "mol.qin.error2"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "job_handler_interaction/error.2/mol.qout"),
-            os.path.join(scr_dir, "mol.qout.error2"),
+            os.path.join(TEST_DIR, "job_handler_interaction/error.2/mol.qout"),
+            os.path.join(SCR_DIR, "mol.qout.error2"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "job_handler_interaction/error.3/mol.qin"),
-            os.path.join(scr_dir, "mol.qin.error3"),
+            os.path.join(TEST_DIR, "job_handler_interaction/error.3/mol.qin"),
+            os.path.join(SCR_DIR, "mol.qin.error3"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "job_handler_interaction/error.3/mol.qout"),
-            os.path.join(scr_dir, "mol.qout.error3"),
+            os.path.join(TEST_DIR, "job_handler_interaction/error.3/mol.qout"),
+            os.path.join(SCR_DIR, "mol.qout.error3"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "job_handler_interaction/mol.qin.opt_0"),
-            os.path.join(scr_dir, "mol.qin.opt_0"),
+            os.path.join(TEST_DIR, "job_handler_interaction/mol.qin.opt_0"),
+            os.path.join(SCR_DIR, "mol.qin.opt_0"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "job_handler_interaction/mol.qout.opt_0"),
-            os.path.join(scr_dir, "mol.qout.opt_0"),
+            os.path.join(TEST_DIR, "job_handler_interaction/mol.qout.opt_0"),
+            os.path.join(SCR_DIR, "mol.qout.opt_0"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "job_handler_interaction/error.5/mol.qin"),
-            os.path.join(scr_dir, "mol.qin.error5"),
+            os.path.join(TEST_DIR, "job_handler_interaction/error.5/mol.qin"),
+            os.path.join(SCR_DIR, "mol.qin.error5"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "job_handler_interaction/error.5/mol.qout"),
-            os.path.join(scr_dir, "mol.qout.error5"),
+            os.path.join(TEST_DIR, "job_handler_interaction/error.5/mol.qout"),
+            os.path.join(SCR_DIR, "mol.qout.error5"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "job_handler_interaction/mol.qin.freq_0"),
-            os.path.join(scr_dir, "mol.qin.freq_0"),
+            os.path.join(TEST_DIR, "job_handler_interaction/mol.qin.freq_0"),
+            os.path.join(SCR_DIR, "mol.qin.freq_0"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "job_handler_interaction/mol.qout.freq_0"),
-            os.path.join(scr_dir, "mol.qout.freq_0"),
+            os.path.join(TEST_DIR, "job_handler_interaction/mol.qout.freq_0"),
+            os.path.join(SCR_DIR, "mol.qout.freq_0"),
         )
         shutil.copyfile(
-            os.path.join(test_dir, "job_handler_interaction/mol.qin.opt_1"),
-            os.path.join(scr_dir, "mol.qin.opt_1"),
+            os.path.join(TEST_DIR, "job_handler_interaction/mol.qin.opt_1"),
+            os.path.join(SCR_DIR, "mol.qin.opt_1"),
         )
-        os.chdir(scr_dir)
+        os.chdir(SCR_DIR)
 
     def tearDown(self):
-        os.chdir(cwd)
-        shutil.rmtree(scr_dir)
+        os.chdir(CWD)
+        shutil.rmtree(SCR_DIR)
 
     def test_OptFF(self):
         job = QCJob.opt_with_frequency_flattener(
