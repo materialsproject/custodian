@@ -1,7 +1,10 @@
-"""
-TODO: Change the module doc.
-"""
+import glob
+import os
+import shutil
+import unittest
 
+from custodian import TEST_FILES
+from custodian.nwchem.handlers import NwchemErrorHandler
 
 __author__ = "shyuepingong"
 __version__ = "0.1"
@@ -11,19 +14,9 @@ __status__ = "Beta"
 __date__ = "6/18/13"
 
 
-import glob
-import os
-import shutil
-import unittest
-
-from custodian.nwchem.handlers import NwchemErrorHandler
-
-test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files", "nwchem")
-
-
 class NwchemErrorHandlerTest(unittest.TestCase):
     def test_check_correct(self):
-        os.chdir(test_dir)
+        os.chdir(f"{TEST_FILES}/nwchem")
         shutil.copy("C1N1Cl1_1.nw", "C1N1Cl1_1.nw.orig")
         h = NwchemErrorHandler(output_filename="C1N1Cl1_1.nwout")
         h.check()

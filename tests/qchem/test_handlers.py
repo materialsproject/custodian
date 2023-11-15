@@ -5,6 +5,7 @@ from unittest import TestCase
 
 from pymatgen.io.qchem.inputs import QCInput
 
+from custodian import TEST_FILES
 from custodian.qchem.handlers import QChemErrorHandler
 
 try:
@@ -21,8 +22,8 @@ __status__ = "Alpha"
 __date__ = "3/26/18"
 __credits__ = "Xiaohui Qu"
 
-test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files", "qchem", "new_test_files")
 
+test_dir = f"{TEST_FILES}/qchem/new_test_files"
 scr_dir = os.path.join(test_dir, "scr")
 cwd = os.getcwd()
 

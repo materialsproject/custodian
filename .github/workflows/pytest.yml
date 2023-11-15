@@ -21,20 +21,22 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade pymatgen
-          python -m pip install -e '.[dev]'
+          pip install --upgrade pip
+          pip install --upgrade pymatgen
+          pip install -e '.[dev]'
+
       - name: pytest
         env:
           PMG_MAPI_KEY: ${{ secrets.PMG_MAPI_KEY }}
           MPLBACKEND: "Agg"
-        run: pytest --cov=custodian custodian --color=yes
+        run: pytest --cov=. --color=yes
+
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         env:

@@ -8,6 +8,7 @@ import pytest
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
 from pymatgen.util.testing import PymatgenTest
 
+from custodian import TEST_FILES
 from custodian.utils import tracked_lru_cache
 from custodian.vasp.handlers import (
     AliasingErrorHandler,
@@ -34,14 +35,13 @@ __maintainer__ = "Shyue Ping Ong"
 __email__ = "shyue@mit.edu"
 __date__ = "Jun 1, 2012"
 
-TEST_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_files")
 CWD = os.getcwd()
-os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_DIR)
+os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_FILES)
 
 
 def copy_tmp_files(tmp_path: str, *file_paths: str) -> None:
     for file_path in file_paths:
-        src_path = f"{TEST_DIR}/{file_path}"
+        src_path = f"{TEST_FILES}/{file_path}"
         dst_path = f"{tmp_path}/{os.path.basename(file_path)}"
         if os.path.isdir(src_path):
             shutil.copytree(src_path, dst_path)
@@ -52,7 +52,7 @@ def copy_tmp_files(tmp_path: str, *file_paths: str) -> None:
 
 class VaspErrorHandlerTest(PymatgenTest):
     def setUp(self):
-        copy_tmp_files(self.tmp_path, *glob("*", root_dir=TEST_DIR))
+        copy_tmp_files(self.tmp_path, *glob("*", root_dir=TEST_FILES))
 
     def test_frozen_job(self):
         handler = FrozenJobErrorHandler()
@@ -170,7 +170,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert incar["EDIFF"] == 1e-07
         assert incar["NELMIN"] == 8
 
-        shutil.copy(f"{TEST_DIR}/INCAR", f"{self.tmp_path}/INCAR")
+        shutil.copy(f"{TEST_FILES}/INCAR", f"{self.tmp_path}/INCAR")
         handler = VaspErrorHandler("vasp.zbrent")
         handler.vtst_fixes = True
         handler.check()
@@ -244,7 +244,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["errors"] == []
 
     def test_too_few_bands(self):
-        os.chdir(os.path.join(TEST_DIR, "too_few_bands"))
+        os.chdir(f"{TEST_FILES}/too_few_bands")
         shutil.copy("INCAR", "INCAR.orig")
         handler = VaspErrorHandler("vasp.too_few_bands")
         handler.check()
@@ -252,10 +252,10 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["errors"] == ["too_few_bands"]
         assert dct["actions"] == [{"action": {"_set": {"NBANDS": 501}}, "dict": "INCAR"}]
         shutil.move("INCAR.orig", "INCAR")
-        os.chdir(TEST_DIR)
+        os.chdir(TEST_FILES)
 
     def test_rot_matrix(self):
-        subdir = os.path.join(TEST_DIR, "poscar_error")
+        subdir = f"{TEST_FILES}/poscar_error"
         os.chdir(subdir)
         shutil.copy("KPOINTS", "KPOINTS.orig")
         handler = VaspErrorHandler()
@@ -583,7 +583,7 @@ class VaspErrorHandlerTest(PymatgenTest):
 
 class AliasingErrorHandlerTest(PymatgenTest):
     def setUp(self):
-        copy_tmp_files(self.tmp_path, *glob("aliasing/*", root_dir=TEST_DIR))
+        copy_tmp_files(self.tmp_path, *glob("aliasing/*", root_dir=TEST_FILES))
 
     def test_aliasing(self):
         handler = AliasingErrorHandler("vasp.aliasing")
@@ -620,7 +620,7 @@ class AliasingErrorHandlerTest(PymatgenTest):
 
 class UnconvergedErrorHandlerTest(PymatgenTest):
     def setUp(self):
-        copy_tmp_files(self.tmp_path, *glob("unconverged/*", root_dir=TEST_DIR))
+        copy_tmp_files(self.tmp_path, *glob("unconverged/*", root_dir=TEST_FILES))
 
     def test_check_correct_electronic(self):
         shutil.copy("vasprun.xml.electronic", "vasprun.xml")
@@ -762,12 +762,12 @@ class KspacingMetalHandlerTest(PymatgenTest):
         os.remove("vasprun.xml")
 
     def test_check_with_non_kspacing_wf(self):
-        os.chdir(TEST_DIR)
+        os.chdir(TEST_FILES)
         shutil.copy("INCAR", f"{self.tmp_path}/INCAR")
         shutil.copy("vasprun.xml", f"{self.tmp_path}/vasprun.xml")
         handler = KspacingMetalHandler(output_filename=f"{self.tmp_path}/vasprun.xml")
         assert handler.check() is False
-        os.chdir(os.path.join(TEST_DIR, "scan_metal"))
+        os.chdir(f"{TEST_FILES}/scan_metal")
 
         # TODO (@janosh 2023-11-03) remove when ending ScanMetalHandler deprecation period
         assert issubclass(ScanMetalHandler, KspacingMetalHandler)
@@ -867,7 +867,7 @@ class ZpotrfErrorHandlerSmallTest(PymatgenTest):
 
 class WalltimeHandlerTest(PymatgenTest):
     def setUp(self):
-        os.chdir(f"{TEST_DIR}/postprocess")
+        os.chdir(f"{TEST_FILES}/postprocess")
         os.environ.pop("CUSTODIAN_WALLTIME_START", None)
 
     def test_walltime_start(self):

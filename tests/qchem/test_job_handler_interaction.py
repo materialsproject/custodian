@@ -5,6 +5,7 @@ from unittest import TestCase
 
 from pymatgen.io.qchem.inputs import QCInput
 
+from custodian import TEST_FILES
 from custodian.qchem.handlers import QChemErrorHandler
 from custodian.qchem.jobs import QCJob
 
@@ -21,16 +22,14 @@ __email__ = "samblau1@gmail.com"
 __status__ = "Alpha"
 __date__ = "6/3/22"
 
-test_dir = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "test_files", "qchem", "new_test_files"
-)
+test_dir = f"{TEST_FILES}/qchem/new_test_files"
 
 scr_dir = os.path.join(test_dir, "scr")
 cwd = os.getcwd()
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
-class FFopt_job_handler_interaction(TestCase):
+class FFOptJobHandlerInteraction(TestCase):
     def _check_equivalent_inputs(self, input1, input2):
         QCinput1 = QCInput.from_file(input1)
         QCinput2 = QCInput.from_file(input2)

@@ -60,7 +60,7 @@ Package = "https://pypi.org/project/custodian"
 
 [tool.setuptools.packages.find]
 include = ["custodian*"]
-exclude = ["*.tests", "*.tests.*", "test_files"]
+exclude = ["*.tests", "*.tests.*"]
 
 [tool.ruff]
 target-version = "py39"
