@@ -1,6 +1,5 @@
 import os
 import shutil
-import unittest
 
 from monty.os import cd
 from monty.tempfile import ScratchDir
@@ -11,7 +10,7 @@ from custodian.lobster.jobs import LobsterJob
 test_files_lobster2 = f"{TEST_FILES}/lobster/lobsterins"
 test_files_lobster3 = f"{TEST_FILES}/lobster/vasp_lobster_output"
 
-VASP_OUTPUT_FILES = [
+VASP_OUTPUT_FILES = (
     "OUTCAR",
     "vasprun.xml",
     "CHG",
@@ -30,11 +29,11 @@ VASP_OUTPUT_FILES = [
     "REPORT",
     "WAVECAR",
     "XDATCAR",
-]
+)
 
-LOBSTERINPUT_FILES = ["lobsterin"]
+LOBSTERINPUT_FILES = ("lobsterin",)
 
-LOBSTER_FILES = [
+LOBSTER_FILES = (
     "lobsterin",
     "lobsterin.orig",
     "lobsterout",
@@ -53,12 +52,12 @@ LOBSTER_FILES = [
     "ICOBILIST.lobster",
     "COBICAR.lobster",
     "DOSCAR.LSO.lobster",
-]
+)
 
-FW_FILES = ["custodian.json", "FW.json", "FW_submit.script"]
+FW_FILES = ("custodian.json", "FW.json", "FW_submit.script")
 
 
-class LobsterJobTest(unittest.TestCase):
+class TestLobsterJob:
     """Similar to VaspJobTest. Omit test of run."""
 
     def test_to_from_dict(self):
@@ -87,7 +86,7 @@ class LobsterJobTest(unittest.TestCase):
                 shutil.copy("lobsterin", "lobsterin.orig")
                 v = LobsterJob("hello", gzipped=True, add_files_to_gzip=VASP_OUTPUT_FILES)
                 v.postprocess()
-                for file in VASP_OUTPUT_FILES + LOBSTER_FILES + FW_FILES:
+                for file in (*VASP_OUTPUT_FILES, *LOBSTER_FILES, *FW_FILES):
                     filegz = file + ".gz"
                     assert os.path.exists(filegz)
 
@@ -95,5 +94,5 @@ class LobsterJobTest(unittest.TestCase):
                 shutil.copy("lobsterin", "lobsterin.orig")
                 v = LobsterJob("hello", gzipped=False, add_files_to_gzip=VASP_OUTPUT_FILES)
                 v.postprocess()
-                for file in VASP_OUTPUT_FILES + LOBSTER_FILES + FW_FILES:
+                for file in (*VASP_OUTPUT_FILES, *LOBSTER_FILES, *FW_FILES):
                     assert os.path.exists(file)
