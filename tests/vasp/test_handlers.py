@@ -39,6 +39,16 @@ CWD = os.getcwd()
 os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_FILES)
 
 
+@pytest.fixture(autouse=True)
+def _clear_tracked_cache():
+    """
+    Clear the cache of the stored functions between the tests.
+    """
+    from custodian.utils import tracked_lru_cache
+
+    tracked_lru_cache.tracked_cache_clear()
+
+
 def copy_tmp_files(tmp_path: str, *file_paths: str) -> None:
     for file_path in file_paths:
         src_path = f"{TEST_FILES}/{file_path}"
