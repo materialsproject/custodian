@@ -319,7 +319,7 @@ custodian_params:
         os.chdir(self.cwd)
 
 
-# class CustodianCheckpointTest(unittest.TestCase):
+# class TestCustodianCheckpoint:
 #     def test_checkpoint_loading(self):
 #         self.cwd = os.getcwd()
 #         pth = f"{TEST_FILES}/checkpointing"
@@ -334,7 +334,7 @@ custodian_params:
 #             max_errors=100,
 #             checkpoint=True,
 #         )
-#         self.assertEqual(len(c.run_log), 3)
-#         self.assertEqual(len(c.run()), 5)
+#         assert len(c.run_log) == 3
+#         assert len(c.run()) == 5
 #         os.remove("custodian.json")
 #         os.chdir(self.cwd)

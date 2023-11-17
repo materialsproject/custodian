@@ -1,5 +1,4 @@
 import os
-import unittest
 
 from custodian import TEST_FILES
 from custodian.lobster.handlers import ChargeSpillingValidator, EnoughBandsValidator, LobsterFilesValidator
@@ -7,7 +6,7 @@ from custodian.lobster.handlers import ChargeSpillingValidator, EnoughBandsValid
 test_files_lobster = f"{TEST_FILES}/lobster/lobsterouts"
 
 
-class TestChargeSpillingValidator(unittest.TestCase):
+class TestChargeSpillingValidator:
     def test_check_and_correct(self):
         v = ChargeSpillingValidator(output_filename=f"{test_files_lobster}/lobsterout.normal")
         assert not v.check()
@@ -31,7 +30,7 @@ class TestChargeSpillingValidator(unittest.TestCase):
         assert isinstance(v2, ChargeSpillingValidator)
 
 
-class TestLobsterFilesValidator(unittest.TestCase):
+class TestLobsterFilesValidator:
     def test_check_and_correct_1(self):
         os.chdir(test_files_lobster)
         v = LobsterFilesValidator()
@@ -55,7 +54,7 @@ class TestLobsterFilesValidator(unittest.TestCase):
         assert isinstance(v2, LobsterFilesValidator)
 
 
-class TestEnoughBandsValidator(unittest.TestCase):
+class TestEnoughBandsValidator:
     def test_check_and_correct(self):
         v = EnoughBandsValidator(output_filename=f"{test_files_lobster}/lobsterout.normal")
         assert not v.check()

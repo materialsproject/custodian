@@ -1,6 +1,4 @@
-"""
-Created on Jun 1, 2012
-"""
+"""Created on Jun 1, 2012."""
 
 
 __author__ = "Shyue Ping Ong"
@@ -10,7 +8,6 @@ __maintainer__ = "Shyue Ping Ong"
 __email__ = "shyue@mit.edu"
 __date__ = "Jun 1, 2012"
 
-import unittest
 
 import pytest
 
@@ -18,7 +15,7 @@ from custodian.ansible.actions import FileActions
 from custodian.ansible.interpreter import Modder
 
 
-class ModderTest(unittest.TestCase):
+class TestModder:
     def test_dict_modify(self):
         modder = Modder()
         dct = {"Hello": "World"}
@@ -159,8 +156,3 @@ class MyObject:
     @staticmethod
     def from_dict(dct):
         return MyObject(dct["b"]["a"])
-
-
-if __name__ == "__main__":
-    # import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()
