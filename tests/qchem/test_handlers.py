@@ -24,7 +24,7 @@ __credits__ = "Xiaohui Qu"
 
 
 TEST_DIR = f"{TEST_FILES}/qchem/new_test_files"
-SCR_DIR = os.path.join(TEST_DIR, "scratch")
+SCR_DIR = f"{TEST_DIR}/scratch"
 CWD = os.getcwd()
 
 
