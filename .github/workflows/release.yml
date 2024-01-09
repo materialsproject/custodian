@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
@@ -37,7 +37,7 @@ jobs:
           PMG_MAPI_KEY: ${{ secrets.PMG_MAPI_KEY }}
           MPLBACKEND: "Agg"
         run: |
-          pytest custodian --color=yes
+          pytest --color=yes
       - name: release
         shell: bash -l {0}
         env:
