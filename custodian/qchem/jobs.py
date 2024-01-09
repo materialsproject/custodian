@@ -228,7 +228,7 @@ class QCJob(Job):
                 :class:`custodian.qchem.jobs.QCJob`.
         """
         if not os.path.exists(input_file):
-            raise AssertionError("Input file must be present!")
+            raise AssertionError(f"{input_file=} must be present!")
 
         if transition_state:
             opt_method = "ts"
