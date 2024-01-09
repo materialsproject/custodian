@@ -78,7 +78,7 @@ def set_ver(ctx):
         file.write("\n".join(lines) + "\n")
 
     with open("pyproject.toml") as file:
-        lines = [re.sub(r"version = ([^,]+),", f'version = "{NEW_VER}",', line.rstrip()) for line in file]
+        lines = [re.sub(r"version = \"([^,]+)\"", f'version = "{NEW_VER}",', line.rstrip()) for line in file]
 
     with open("pyproject.toml", "w") as file:
         file.write("\n".join(lines) + "\n")
