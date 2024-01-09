@@ -37,7 +37,7 @@ jobs:
           PMG_MAPI_KEY: ${{ secrets.PMG_MAPI_KEY }}
           MPLBACKEND: "Agg"
         run: |
-          pytest --color=yes
+          pytest tests --color=yes
       - name: release
         shell: bash -l {0}
         env:
