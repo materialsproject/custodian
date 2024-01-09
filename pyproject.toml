@@ -8,13 +8,11 @@ version = "2024.1.9"
 description = "A simple JIT job management framework in Python."
 authors = [
   { name = "Shyue Ping Ong", email = "ongsp@ucsd.edu" },
-
   { name = "Matthew Horton" },
   { name = "Samuel M. Blau" },
   { name = "Stephen Dacek" },
   { name = "William Davidson Richards" },
   { name = "Xiaohui Qu" },
-
   { name = "Janosh Riebesell", email = "janosh@lbl.gov" },
 ]
 maintainers = [{ name = "Janosh Riebesell" }, { name = "Shyue Ping Ong" }]
@@ -63,7 +61,7 @@ include = ["custodian*"]
 exclude = ["*.tests", "*.tests.*"]
 
 [tool.ruff]
-target-version = "2024.1.9",,
+target-version = "py39"
 line-length = 120
 select = [
   "B",    # flake8-bugbear
