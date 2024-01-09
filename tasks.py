@@ -77,10 +77,10 @@ def set_ver(ctx):
     with open("custodian/__init__.py", "w") as file:
         file.write("\n".join(lines) + "\n")
 
-    with open("setup.py") as file:
-        lines = [re.sub(r"version=([^,]+),", f'version="{NEW_VER}",', line.rstrip()) for line in file]
+    with open("pyproject.toml") as file:
+        lines = [re.sub(r"version = ([^,]+),", f'version = "{NEW_VER}",', line.rstrip()) for line in file]
 
-    with open("setup.py", "w") as file:
+    with open("pyproject.toml", "w") as file:
         file.write("\n".join(lines) + "\n")
 
 
