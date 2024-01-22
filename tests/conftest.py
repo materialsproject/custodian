@@ -1,8 +1,12 @@
 """This module mocks functions needed for pytest."""
 
 import multiprocessing
+import os
 
 import pytest
+
+TEST_DIR = os.path.dirname(__file__)
+TEST_FILES = f"{TEST_DIR}/files"
 
 
 @pytest.fixture(autouse=True)

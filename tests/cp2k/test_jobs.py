@@ -7,8 +7,9 @@ import warnings
 from glob import glob
 from pathlib import Path
 
-from custodian import TEST_FILES, Custodian
+from custodian import Custodian
 from custodian.cp2k.jobs import Cp2kJob
+from tests.conftest import TEST_FILES
 
 MODULE_DIR = Path(__file__).resolve().parent
 TEST_FILES_DIR = f"{TEST_FILES}/cp2k"
@@ -17,10 +18,10 @@ cwd = os.getcwd()
 
 
 def clean_dir(dir):
-    for f in glob(os.path.join(dir, "error.*.tar.gz")):
-        os.remove(f)
-    for f in glob(os.path.join(dir, "custodian.chk.*.tar.gz")):
-        os.remove(f)
+    for file in glob(os.path.join(dir, "error.*.tar.gz")):
+        os.remove(file)
+    for file in glob(os.path.join(dir, "custodian.chk.*.tar.gz")):
+        os.remove(file)
 
 
 class HandlerTests(unittest.TestCase):

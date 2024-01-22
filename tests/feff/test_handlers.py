@@ -3,8 +3,8 @@ import shutil
 import unittest
 from glob import glob
 
-from custodian import TEST_FILES
 from custodian.feff.handlers import UnconvergedErrorHandler
+from tests.conftest import TEST_FILES
 
 __author__ = "Chen Zheng"
 __copyright__ = "Copyright 2012, The Materials Project"
@@ -15,8 +15,8 @@ __date__ = "Oct 18, 2017"
 
 
 def clean_dir():
-    for f in glob("error.*.tar.gz"):
-        os.remove(f)
+    for file in glob("error.*.tar.gz"):
+        os.remove(file)
 
 
 class UnconvergedErrorHandlerTest(unittest.TestCase):

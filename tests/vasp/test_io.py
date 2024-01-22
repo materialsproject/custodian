@@ -1,8 +1,8 @@
 import pytest
 
-from custodian import TEST_FILES
 from custodian.utils import tracked_lru_cache
 from custodian.vasp.io import load_outcar, load_vasprun
+from tests.conftest import TEST_FILES
 
 
 @pytest.fixture(autouse=True)

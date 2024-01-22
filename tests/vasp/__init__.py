@@ -1,3 +1,1 @@
-"""
-Tests for vasp package.
-"""
+"""Tests for vasp package."""

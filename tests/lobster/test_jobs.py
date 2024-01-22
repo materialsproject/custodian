@@ -4,8 +4,8 @@ import shutil
 from monty.os import cd
 from monty.tempfile import ScratchDir
 
-from custodian import TEST_FILES
 from custodian.lobster.jobs import LobsterJob
+from tests.conftest import TEST_FILES
 
 test_files_lobster2 = f"{TEST_FILES}/lobster/lobsterins"
 test_files_lobster3 = f"{TEST_FILES}/lobster/vasp_lobster_output"

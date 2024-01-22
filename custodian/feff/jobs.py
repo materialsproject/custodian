@@ -59,22 +59,17 @@ class FeffJob(Job):
         self.gzipped = gzipped
         self.gzipped_prefix = gzipped_prefix
 
-    def setup(self):
-        """
-        Performs initial setup for FeffJob, do backing up.
-
-        Returns:
-
-        """
+    def setup(self) -> None:
+        """Performs initial setup for FeffJob, do backing up."""
         decompress_dir(".")
 
         if self.backup:
-            for f in FEFF_INPUT_FILES:
-                shutil.copy(f, f"{f}.orig")
+            for file in FEFF_INPUT_FILES:
+                shutil.copy(file, f"{file}.orig")
 
-            for f in FEFF_BACKUP_FILES:
-                if os.path.isfile(f):
-                    shutil.copy(f, f"{f}.orig")
+            for file in FEFF_BACKUP_FILES:
+                if os.path.isfile(file):
+                    shutil.copy(file, f"{file}.orig")
 
     def run(self):
         """

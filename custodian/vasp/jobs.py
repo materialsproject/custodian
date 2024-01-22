@@ -174,11 +174,11 @@ class VaspJob(Job):
         decompress_dir(".")
 
         if self.backup:
-            for f in VASP_INPUT_FILES:
+            for file in VASP_INPUT_FILES:
                 try:
-                    shutil.copy(f, f"{f}.orig")
+                    shutil.copy(file, f"{file}.orig")
                 except FileNotFoundError:  # handle the situation when there is no KPOINTS file
-                    if f == "KPOINTS":
+                    if file == "KPOINTS":
                         pass
 
         if self.auto_npar:
@@ -257,12 +257,12 @@ class VaspJob(Job):
         Postprocessing includes renaming and gzipping where necessary.
         Also copies the magmom to the incar if necessary.
         """
-        for f in [*VASP_OUTPUT_FILES, self.output_file]:
-            if os.path.exists(f):
+        for file in [*VASP_OUTPUT_FILES, self.output_file]:
+            if os.path.exists(file):
                 if self.final and self.suffix != "":
-                    shutil.move(f, f"{f}{self.suffix}")
+                    shutil.move(file, f"{file}{self.suffix}")
                 elif self.suffix != "":
-                    shutil.copy(f, f"{f}{self.suffix}")
+                    shutil.copy(file, f"{file}{self.suffix}")
 
         if self.copy_magmom and not self.final:
             try:
@@ -793,8 +793,8 @@ class VaspNEBJob(VaspJob):
 
         if self.backup:
             # Back up KPOINTS, INCAR, POTCAR
-            for f in VASP_NEB_INPUT_FILES:
-                shutil.copy(f, f"{f}.orig")
+            for file in VASP_NEB_INPUT_FILES:
+                shutil.copy(file, f"{file}.orig")
             # Back up POSCARs
             for path in neb_dirs:
                 poscar = os.path.join(path, "POSCAR")
@@ -870,21 +870,21 @@ class VaspNEBJob(VaspJob):
         """Postprocessing includes renaming and gzipping where necessary."""
         # Add suffix to all sub_dir/{items}
         for path in self.neb_dirs:
-            for f in VASP_NEB_OUTPUT_SUB_FILES:
-                f = os.path.join(path, f)
-                if os.path.exists(f):
+            for file in VASP_NEB_OUTPUT_SUB_FILES:
+                file = os.path.join(path, file)
+                if os.path.exists(file):
                     if self.final and self.suffix != "":
-                        shutil.move(f, f"{f}{self.suffix}")
+                        shutil.move(file, f"{file}{self.suffix}")
                     elif self.suffix != "":
-                        shutil.copy(f, f"{f}{self.suffix}")
+                        shutil.copy(file, f"{file}{self.suffix}")
 
         # Add suffix to all output files
-        for f in [*VASP_NEB_OUTPUT_FILES, self.output_file]:
-            if os.path.exists(f):
+        for file in [*VASP_NEB_OUTPUT_FILES, self.output_file]:
+            if os.path.exists(file):
                 if self.final and self.suffix != "":
-                    shutil.move(f, f"{f}{self.suffix}")
+                    shutil.move(file, f"{file}{self.suffix}")
                 elif self.suffix != "":
-                    shutil.copy(f, f"{f}{self.suffix}")
+                    shutil.copy(file, f"{file}{self.suffix}")
 
 
 class GenerateVaspInputJob(Job):

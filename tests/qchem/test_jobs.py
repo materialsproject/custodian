@@ -7,8 +7,8 @@ from unittest.mock import patch
 import pytest
 from pymatgen.io.qchem.inputs import QCInput
 
-from custodian import TEST_FILES
 from custodian.qchem.jobs import QCJob
+from tests.conftest import TEST_FILES
 
 try:
     from openbabel import openbabel as ob

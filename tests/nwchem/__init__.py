@@ -1,3 +1,1 @@
-"""
-Tests for nwchem package.
-"""
+"""Tests for nwchem package."""

@@ -127,17 +127,17 @@ class Cp2kJob(Job):
     # and custodian should only run the job itself
     def postprocess(self):
         """Postprocessing includes renaming and gzipping where necessary."""
-        fs = os.listdir(".")
+        files = os.listdir(".")
         if os.path.exists(self.output_file) and self.suffix != "":
             os.mkdir(f"run{self.suffix}")
-            for f in fs:
-                if "json" in f:
+            for file in files:
+                if "json" in file:
                     continue
-                if not os.path.isdir(f):
+                if not os.path.isdir(file):
                     if self.final:
-                        shutil.move(f, f"run{self.suffix}/{f}")
+                        shutil.move(file, f"run{self.suffix}/{file}")
                     else:
-                        shutil.copy(f, f"run{self.suffix}/{f}")
+                        shutil.copy(file, f"run{self.suffix}/{file}")
 
         # Remove continuation so if a subsequent job is run in
         # the same directory, will not restart this job.

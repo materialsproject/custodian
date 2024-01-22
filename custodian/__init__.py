@@ -17,5 +17,3 @@ __version__ = "2024.1.9"
 
 PKG_DIR = os.path.dirname(__file__)
 ROOT = os.path.dirname(PKG_DIR)
-TEST_DIR = f"{ROOT}/tests"
-TEST_FILES = f"{TEST_DIR}/files"

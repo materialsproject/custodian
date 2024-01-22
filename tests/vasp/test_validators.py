@@ -3,8 +3,8 @@ import shutil
 
 import pytest
 
-from custodian import TEST_FILES
 from custodian.vasp.validators import VaspAECCARValidator, VaspFilesValidator, VaspNpTMDValidator, VasprunXMLValidator
+from tests.conftest import TEST_FILES
 
 
 @pytest.fixture(autouse=True)

@@ -5,8 +5,8 @@ from unittest import TestCase
 
 from pymatgen.io.qchem.inputs import QCInput
 
-from custodian import TEST_FILES
 from custodian.qchem.handlers import QChemErrorHandler
+from tests.conftest import TEST_FILES
 
 try:
     from openbabel import openbabel as ob

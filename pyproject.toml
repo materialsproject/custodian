@@ -13,7 +13,7 @@ authors = [
   { name = "Stephen Dacek" },
   { name = "William Davidson Richards" },
   { name = "Xiaohui Qu" },
-  { name = "Janosh Riebesell", email = "janosh@lbl.gov" },
+  { name = "Janosh Riebesell", email = "janosh.riebesell@gmail.com" },
 ]
 maintainers = [{ name = "Janosh Riebesell" }, { name = "Shyue Ping Ong" }]
 readme = "README.md"
