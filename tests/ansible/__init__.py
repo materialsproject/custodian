@@ -1,3 +1,1 @@
-"""
-Tests for ansible package.
-"""
+"""Tests for ansible package."""

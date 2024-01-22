@@ -310,8 +310,8 @@ custodian_params:
         assert len(c.validators) == 1
 
     def tearDown(self):
-        for f in glob("custodian.*.tar.gz"):
-            os.remove(f)
+        for file in glob("custodian.*.tar.gz"):
+            os.remove(file)
         try:
             os.remove("custodian.json")
         except OSError:

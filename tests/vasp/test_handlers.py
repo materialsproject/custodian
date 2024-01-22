@@ -8,7 +8,6 @@ import pytest
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
 from pymatgen.util.testing import PymatgenTest
 
-from custodian import TEST_FILES
 from custodian.utils import tracked_lru_cache
 from custodian.vasp.handlers import (
     AliasingErrorHandler,
@@ -27,6 +26,7 @@ from custodian.vasp.handlers import (
     VaspErrorHandler,
     WalltimeHandler,
 )
+from tests.conftest import TEST_FILES
 
 __author__ = "Shyue Ping Ong, Stephen Dacek, Janosh Riebesell"
 __copyright__ = "Copyright 2012, The Materials Project"

@@ -23,8 +23,8 @@ def backup(filenames, prefix="error"):
     logging.info(f"Backing up run to {filename}.")
     with tarfile.open(filename, "w:gz") as tar:
         for fname in filenames:
-            for f in glob(fname):
-                tar.add(f)
+            for file in glob(fname):
+                tar.add(file)
 
 
 def get_execution_host_info():

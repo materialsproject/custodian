@@ -9,8 +9,8 @@ from monty.os import cd
 from monty.tempfile import ScratchDir
 from pymatgen.io.vasp import Incar, Kpoints, Poscar
 
-from custodian import TEST_FILES
 from custodian.vasp.jobs import GenerateVaspInputJob, VaspJob, VaspNEBJob
+from tests.conftest import TEST_FILES
 
 pymatgen.core.SETTINGS["PMG_VASP_PSP_DIR"] = TEST_FILES
 
@@ -53,7 +53,7 @@ class TestVaspJob:
             incar = Incar.from_file("INCAR")
             incar_prev = Incar.from_file("INCAR.test")
 
-            for f in [
+            for file in (
                 "INCAR",
                 "KPOINTS",
                 "CONTCAR",
@@ -61,9 +61,9 @@ class TestVaspJob:
                 "OUTCAR",
                 "POSCAR",
                 "vasprun.xml",
-            ]:
-                assert os.path.isfile(f"{f}.test")
-                os.remove(f"{f}.test")
+            ):
+                assert os.path.isfile(f"{file}.test")
+                os.remove(f"{file}.test")
             shutil.move("INCAR.backup", "INCAR")
 
             assert incar["MAGMOM"] == pytest.approx([3.007, 1.397, -0.189, -0.189])
@@ -146,17 +146,17 @@ class TestVaspNEBJob:
             v = VaspNEBJob("hello", final=False, suffix=".test")
             v.postprocess()
 
-            for f in neb_outputs:
-                assert os.path.isfile(f"{f}.test")
-                os.remove(f"{f}.test")
+            for file in neb_outputs:
+                assert os.path.isfile(f"{file}.test")
+                os.remove(f"{file}.test")
 
             sub_folders = glob("[0-9][0-9]")
             for sf in sub_folders:
                 os.chdir(f"{postprocess_neb}/{sf}")
-                for f in neb_sub_outputs:
-                    if os.path.exists(f):
-                        assert os.path.isfile(f"{f}.test")
-                        os.remove(f"{f}.test")
+                for file in neb_sub_outputs:
+                    if os.path.exists(file):
+                        assert os.path.isfile(f"{file}.test")
+                        os.remove(f"{file}.test")
 
 
 class TestGenerateVaspInputJob:

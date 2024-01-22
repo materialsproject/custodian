@@ -11,7 +11,6 @@ from glob import glob
 from pymatgen.io.cp2k.inputs import Keyword, KeywordList
 from pymatgen.io.cp2k.sets import StaticSet
 
-from custodian import TEST_FILES
 from custodian.cp2k.handlers import (
     AbortHandler,
     FrozenJobErrorHandler,
@@ -21,6 +20,7 @@ from custodian.cp2k.handlers import (
     get_conv,
 )
 from custodian.cp2k.interpreter import Cp2kModder
+from tests.conftest import TEST_FILES
 
 TEST_FILES_DIR = f"{TEST_FILES}/cp2k"
 

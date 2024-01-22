@@ -73,8 +73,8 @@ class LobsterJob(Job):
     def setup(self):
         """Will backup lobster input files."""
         if self.backup:
-            for f in LOBSTERINPUT_FILES:
-                shutil.copy(f, f"{f}.orig")
+            for file in LOBSTERINPUT_FILES:
+                shutil.copy(file, f"{file}.orig")
 
     def run(self):
         """Runs the job."""

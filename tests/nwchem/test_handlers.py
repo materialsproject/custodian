@@ -2,8 +2,8 @@ import os
 import shutil
 from glob import glob
 
-from custodian import TEST_FILES
 from custodian.nwchem.handlers import NwchemErrorHandler
+from tests.conftest import TEST_FILES
 
 __author__ = "shyuepingong"
 __version__ = "0.1"
@@ -25,5 +25,5 @@ def test_check_correct():
     handler.check()
     handler.correct()
     shutil.move("Li1_1.nw.orig", "Li1_1.nw")
-    for f in glob("error.*.tar.gz"):
-        os.remove(f)
+    for file in glob("error.*.tar.gz"):
+        os.remove(file)

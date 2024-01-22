@@ -235,8 +235,8 @@ class Custodian:
 
     @staticmethod
     def _delete_checkpoints(cwd):
-        for f in glob(os.path.join(cwd, "custodian.chk.*.tar.gz")):
-            os.remove(f)
+        for file in glob(os.path.join(cwd, "custodian.chk.*.tar.gz")):
+            os.remove(file)
 
     @staticmethod
     def _save_checkpoint(cwd, index):

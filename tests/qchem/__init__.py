@@ -1,6 +1,4 @@
-"""
-Tests for QChem Custodian
-"""
+"""Tests for QChem Custodian"""
 
 import os
 import unittest

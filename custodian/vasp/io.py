@@ -1,6 +1,4 @@
-"""
-Helper functions for dealing with vasp files.
-"""
+"""Helper functions for dealing with vasp files."""
 
 from pymatgen.io.vasp.outputs import Outcar, Vasprun
 
