@@ -40,6 +40,12 @@ CWD = os.getcwd()
 os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_FILES)
 
 
+def _copy_all_files_from_source(source_dir: str) -> None:
+    for entity in os.listdir(source_dir):
+        if os.path.isfile(os.path.join(source_dir, entity)):
+            shutil.copyfile(os.path.join(source_dir, entity), entity)
+
+
 @pytest.fixture(autouse=True)
 def _clear_tracked_cache():
     """Clear the cache of the stored functions between the tests."""
@@ -253,27 +259,21 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["errors"] == []
 
     def test_too_few_bands(self):
-        os.chdir(f"{TEST_FILES}/too_few_bands")
+        _copy_all_files_from_source(f"{TEST_FILES}/too_few_bands")
         shutil.copy("INCAR", "INCAR.orig")
         handler = VaspErrorHandler("vasp.too_few_bands")
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["too_few_bands"]
         assert dct["actions"] == [{"action": {"_set": {"NBANDS": 501}}, "dict": "INCAR"}]
-        shutil.move("INCAR.orig", "INCAR")
-        os.chdir(TEST_FILES)
 
     def test_rot_matrix(self):
-        subdir = f"{TEST_FILES}/poscar_error"
-        os.chdir(subdir)
+        _copy_all_files_from_source(f"{TEST_FILES}/poscar_error")
         shutil.copy("KPOINTS", "KPOINTS.orig")
         handler = VaspErrorHandler()
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["rot_matrix"]
-        os.remove(os.path.join(subdir, "error.1.tar.gz"))
-        shutil.copy("KPOINTS.orig", "KPOINTS")
-        os.remove("KPOINTS.orig")
 
     def test_rot_matrix_vasp6(self):
         handler = VaspErrorHandler("vasp6.sgrcon")
