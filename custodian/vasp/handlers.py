@@ -18,6 +18,7 @@ from collections import Counter
 from math import prod
 
 import numpy as np
+from monty.io import zopen
 from monty.os.path import zpath
 from monty.serialization import loadfn
 from pymatgen.core.structure import Structure
@@ -164,7 +165,7 @@ class VaspErrorHandler(ErrorHandler):
         incar = Incar.from_file("INCAR")
         self.errors = set()
         error_msgs = set()
-        with open(self.output_filename) as file:
+        with zopen(self.output_filename, mode="rt") as file:
             text = file.read()
 
             # Check for errors
