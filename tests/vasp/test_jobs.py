@@ -16,7 +16,7 @@ pymatgen.core.SETTINGS["PMG_VASP_PSP_DIR"] = TEST_FILES
 
 
 class TestVaspJob:
-    def test_to_from_dict(self):
+    def test_as_from_dict(self):
         v = VaspJob(["hello"])
         v2 = VaspJob.from_dict(v.as_dict())
         assert type(v2) == type(v)
@@ -100,7 +100,7 @@ class TestVaspJob:
 
 
 class TestVaspNEBJob:
-    def test_to_from_dict(self):
+    def test_as_from_dict(self):
         v = VaspNEBJob(["hello"])
         v2 = VaspNEBJob.from_dict(v.as_dict())
         assert type(v2) == type(v)

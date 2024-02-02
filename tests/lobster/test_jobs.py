@@ -60,7 +60,7 @@ FW_FILES = ("custodian.json", "FW.json", "FW_submit.script")
 class TestLobsterJob:
     """Similar to VaspJobTest. Omit test of run."""
 
-    def test_to_from_dict(self):
+    def test_as_from_dict(self):
         v = LobsterJob(lobster_cmd="hello")
         v2 = LobsterJob.from_dict(v.as_dict())
         assert type(v2) == type(v)

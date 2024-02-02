@@ -1,4 +1,5 @@
-"""Created on Jun 1, 2012"""
+"""Created on Jun 1, 2012."""
+
 import datetime
 import os
 import shutil
@@ -38,12 +39,6 @@ __date__ = "Jun 1, 2012"
 
 CWD = os.getcwd()
 os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_FILES)
-
-
-def _copy_all_files_from_source(source_dir: str) -> None:
-    for entity in os.listdir(source_dir):
-        if os.path.isfile(os.path.join(source_dir, entity)):
-            shutil.copyfile(os.path.join(source_dir, entity), entity)
 
 
 @pytest.fixture(autouse=True)
@@ -259,7 +254,8 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["errors"] == []
 
     def test_too_few_bands(self):
-        _copy_all_files_from_source(f"{TEST_FILES}/too_few_bands")
+        shutil.copytree(f"{TEST_FILES}/too_few_bands", self.tmp_path, dirs_exist_ok=True, symlinks=True)
+        os.chdir(self.tmp_path)
         shutil.copy("INCAR", "INCAR.orig")
         handler = VaspErrorHandler("vasp.too_few_bands")
         handler.check()
@@ -268,7 +264,8 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["actions"] == [{"action": {"_set": {"NBANDS": 501}}, "dict": "INCAR"}]
 
     def test_rot_matrix(self):
-        _copy_all_files_from_source(f"{TEST_FILES}/poscar_error")
+        shutil.copytree(f"{TEST_FILES}/poscar_error", self.tmp_path, dirs_exist_ok=True, symlinks=True)
+        os.chdir(self.tmp_path)
         shutil.copy("KPOINTS", "KPOINTS.orig")
         handler = VaspErrorHandler()
         handler.check()
@@ -291,7 +288,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         dct = handler.correct()
         assert dct["actions"] == [{"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}}]
 
-    def test_to_from_dict(self):
+    def test_as_from_dict(self):
         handler = VaspErrorHandler("random_name")
         h2 = VaspErrorHandler.from_dict(handler.as_dict())
         assert type(h2) == type(handler)
@@ -301,7 +298,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         incar_orig = Incar.from_file("INCAR")
         # Joining tests for these three tags as they have identical handling
         for error_name in ("pssyevx", "pdsyevx"):
-            handler = VaspErrorHandler(f"vasp.{error_name}")
+            handler = VaspErrorHandler(f"vasp.{error_name}.gz")
             assert handler.check() is True
             assert handler.correct()["errors"] == [error_name]
             incar = Incar.from_file("INCAR")
@@ -719,7 +716,7 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         dct = handler.correct()
         assert [{"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}}] == dct["actions"]
 
-    def test_to_from_dict(self):
+    def test_as_from_dict(self):
         handler = UnconvergedErrorHandler("random_name.xml")
         h2 = UnconvergedErrorHandler.from_dict(handler.as_dict())
         assert type(h2) == UnconvergedErrorHandler
@@ -1071,14 +1068,14 @@ class DriftErrorHandlerTest(PymatgenTest):
 
 
 class NonConvergingErrorHandlerTest(PymatgenTest):
-    nionic_steps: int = 3
+    n_ionic_steps: int = 3
 
     def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, *glob("nonconv/*", root_dir=TEST_FILES))
 
     def test_check(self) -> None:
         # calculation has four ionic steps which each hit NELM = 10
-        handler = NonConvergingErrorHandler(nionic_steps=self.nionic_steps)
+        handler = NonConvergingErrorHandler(nionic_steps=self.n_ionic_steps)
         assert handler.check()
 
         # increase NELM to avoid NonConvergingErrorHandler
@@ -1090,7 +1087,7 @@ class NonConvergingErrorHandlerTest(PymatgenTest):
     def test_correct(self) -> None:
         original_incar = Incar.from_file("INCAR")
 
-        handler = NonConvergingErrorHandler(nionic_steps=self.nionic_steps)
+        handler = NonConvergingErrorHandler(nionic_steps=self.n_ionic_steps)
         handler.check()
 
         # INCAR has ALGO = Fast, so first correction --> Normal
@@ -1115,7 +1112,7 @@ class NonConvergingErrorHandlerTest(PymatgenTest):
         incar.update({"ISMEAR": 0, "ALGO": "veryfast"})
         incar.write_file("INCAR")
 
-        algo_ladder = ["fast", "normal", "all"]
+        algo_ladder = ("fast", "normal", "all")
         for algo in algo_ladder:
             handler.correct()
             incar = Incar.from_file("INCAR")
@@ -1131,7 +1128,7 @@ class NonConvergingErrorHandlerTest(PymatgenTest):
             incar = Incar.from_file("INCAR")
             assert incar["ALGO"].lower() == "all"
 
-    def test_to_from_dict(self):
+    def test_as_from_dict(self):
         handler = NonConvergingErrorHandler("OSZICAR_random")
         h2 = NonConvergingErrorHandler.from_dict(handler.as_dict())
         assert type(h2) == type(handler)
