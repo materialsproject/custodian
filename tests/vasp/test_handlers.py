@@ -298,7 +298,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         incar_orig = Incar.from_file("INCAR")
         # Joining tests for these three tags as they have identical handling
         for error_name in ("pssyevx", "pdsyevx"):
-            handler = VaspErrorHandler(f"vasp.{error_name}.gz")
+            handler = VaspErrorHandler(os.path.join(self.tmp_path, f"vasp.{error_name}.gz"))
             assert handler.check() is True
             assert handler.correct()["errors"] == [error_name]
             incar = Incar.from_file("INCAR")
