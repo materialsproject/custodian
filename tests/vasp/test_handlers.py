@@ -1118,7 +1118,7 @@ class NonConvergingErrorHandlerTest(PymatgenTest):
             incar = Incar.from_file("INCAR")
             assert incar["ALGO"].lower() == algo
 
-        # now test meta-GGA and hybrid, should only directly to ALGO = all from fast
+        # now test meta-GGA and hybrid, should go directly from ALGO = fast to all
         for updates in [{"METAGGA": "SCAN"}, {"LHFCALC": True, "GGA": "PE"}]:
             incar = Incar(original_incar)  # incar.copy() returns dict
             incar.update(updates)
