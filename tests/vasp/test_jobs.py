@@ -162,7 +162,7 @@ class TestVaspNEBJob:
 class TestGenerateVaspInputJob:
     def test_run(self):
         with ScratchDir("."):
-            for file in ("INCAR", "POSCAR", "POTCAR.gz", "KPOINTS"):
+            for file in ("INCAR", "POSCAR", "POTCAR", "KPOINTS"):
                 shutil.copy(f"{TEST_FILES}/{file}", file)
             old_incar = Incar.from_file("INCAR")
             v = GenerateVaspInputJob("pymatgen.io.vasp.sets.MPNonSCFSet", contcar_only=False)
