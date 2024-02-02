@@ -18,6 +18,7 @@ from collections import Counter
 from math import prod
 
 import numpy as np
+from monty.io import zopen
 from monty.os.path import zpath
 from monty.serialization import loadfn
 from pymatgen.core.structure import Structure
@@ -92,7 +93,10 @@ class VaspErrorHandler(ErrorHandler):
         "zpotrf": ["LAPACK: Routine ZPOTRF failed", "Routine ZPOTRF ZTRTRI"],
         "amin": ["One of the lattice vectors is very long (>50 A), but AMIN"],
         "zbrent": ["ZBRENT: fatal internal in", "ZBRENT: fatal error in bracketing"],
+        # Note that PSSYEVX and PDSYEVX errors are identical up to LAPACK routine:
+        # P<prec>SYEVX uses <prec> = S(ingle) or D(ouble) precision
         "pssyevx": ["ERROR in subspace rotation PSSYEVX"],
+        "pdsyevx": ["ERROR in subspace rotation PDSYEVX"],
         "eddrmm": ["WARNING in EDDRMM: call to ZHEGV failed"],
         "edddav": ["Error EDDDAV: Call to ZHEGV failed"],
         "algo_tet": ["ALGO=A and IALGO=5X tend to fail"],
@@ -105,6 +109,7 @@ class VaspErrorHandler(ErrorHandler):
         "rhosyg": ["RHOSYG"],
         "posmap": ["POSMAP"],
         "point_group": ["group operation missing"],
+        "pricelv": ["PRICELV: current lattice and primitive lattice are incommensurate"],
         "symprec_noise": ["determination of the symmetry of your systems shows a strong"],
         "dfpt_ncore": ["PEAD routines do not work for NCORE", "remove the tag NPAR from the INCAR file"],
         "bravais": ["Inconsistent Bravais lattice"],
@@ -160,7 +165,7 @@ class VaspErrorHandler(ErrorHandler):
         incar = Incar.from_file("INCAR")
         self.errors = set()
         error_msgs = set()
-        with open(self.output_filename) as file:
+        with zopen(self.output_filename, mode="rt") as file:
             text = file.read()
 
             # Check for errors
@@ -454,8 +459,8 @@ class VaspErrorHandler(ErrorHandler):
             if "NBANDS" in vi["INCAR"]:
                 nbands = vi["INCAR"]["NBANDS"]
             else:
-                with open("OUTCAR") as f:
-                    for line in f:
+                with open("OUTCAR") as file:
+                    for line in file:
                         # Have to take the last NBANDS line since sometimes VASP
                         # updates it automatically even if the user specifies it.
                         # The last one is marked by NBANDS= (no space).
@@ -470,7 +475,7 @@ class VaspErrorHandler(ErrorHandler):
                 new_nbands = max(int(1.1 * nbands), nbands + 1)  # This handles the case when nbands is too low (< 8).
                 actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": new_nbands}}})
 
-        if "pssyevx" in self.errors and vi["INCAR"].get("ALGO", "Normal").lower() != "normal":
+        if self.errors & {"pssyevx", "pdsyevx"} and vi["INCAR"].get("ALGO", "Normal").lower() != "normal":
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
 
         if "eddrmm" in self.errors:
@@ -564,18 +569,24 @@ class VaspErrorHandler(ErrorHandler):
             else:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
-        if "posmap" in self.errors:
+        if symprec_errors := self.errors & {"posmap", "pricelv"}:
             # VASP advises to decrease or increase SYMPREC by an order of magnitude
             # the default SYMPREC value is 1e-5
-            if self.error_count["posmap"] == 0:
+            # For PRICELV, see https://www.vasp.at/forum/viewtopic.php?p=25608
+            if all(self.error_count[key] == 0 for key in symprec_errors):
                 # first, reduce by 10x
                 orig_symprec = vi["INCAR"].get("SYMPREC", 1e-5)
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": orig_symprec / 10}}})
-            elif self.error_count["posmap"] == 1:
+            elif all(self.error_count[key] <= 1 for key in symprec_errors):
                 # next, increase by 100x (10x the original)
                 orig_symprec = vi["INCAR"].get("SYMPREC", 1e-6)
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": orig_symprec * 100}}})
-            self.error_count["posmap"] += 1
+            elif any(self.error_count[key] > 1 for key in symprec_errors) and vi["INCAR"].get("ISYM", 2) > 0:
+                # Failing that, disable symmetry altogether
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+
+            for key in symprec_errors:
+                self.error_count[key] += 1
 
         if "point_group" in self.errors and vi["INCAR"].get("ISYM", 2) > 0:
             actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
@@ -838,11 +849,11 @@ class AliasingErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
 
         if "aliasing" in self.errors:
-            with open("OUTCAR") as f:
+            with open("OUTCAR") as file:
                 grid_adjusted = False
                 changes_dict = {}
                 r = re.compile(r".+aliasing errors.*(NG.)\s*to\s*(\d+)")
-                for line in f:
+                for line in file:
                     m = r.match(line)
                     if m:
                         changes_dict[m.group(1)] = int(m.group(2))
@@ -1118,12 +1129,27 @@ class UnconvergedErrorHandler(ErrorHandler):
 
         if actions:
             vi = VaspInput.from_directory(".")
+
+            # Check for PSMAXN errors - see extensive discussion here
+            # https://github.com/materialsproject/custodian/issues/133
+            # Only correct PSMAXN when run couldn't converge for any reason
+            errors = ["Unconverged"]
+            if os.path.isfile("OUTCAR"):
+                with open("OUTCAR") as file:
+                    outcar_as_str = file.read()
+                if "PSMAXN for non-local potential too small" in outcar_as_str:
+                    if vi["INCAR"].get("LREAL", False) not in [False, "False", "false"]:
+                        actions += [
+                            {"dict": "INCAR", "action": {"_set": {"LREAL": False}}},
+                        ]
+                    errors += ["psmaxn"]
+
             backup(VASP_BACKUP_FILES)
             VaspModder(vi=vi).apply_actions(actions)
-            return {"errors": ["Unconverged"], "actions": actions}
+            return {"errors": errors, "actions": actions}
 
         # Unfixable error. Just return None for actions.
-        return {"errors": ["Unconverged"], "actions": None}
+        return {"errors": errors, "actions": None}
 
 
 class IncorrectSmearingHandler(ErrorHandler):

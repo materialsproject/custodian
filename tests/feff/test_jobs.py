@@ -17,7 +17,7 @@ __date__ = "Oct 18, 2017"
 TEST_DIR = f"{TEST_FILES}/feff_unconverged"
 
 
-def test_to_from_dict():
+def test_as_from_dict():
     f = FeffJob("hello")
     f2 = FeffJob.from_dict(f.as_dict())
     assert type(f) == type(f2)

@@ -1,4 +1,5 @@
-"""Created on Jun 1, 2012"""
+"""Created on Jun 1, 2012."""
+
 import datetime
 import os
 import shutil
@@ -18,6 +19,7 @@ from custodian.vasp.handlers import (
     LargeSigmaHandler,
     LrfCommutatorHandler,
     MeshSymmetryErrorHandler,
+    NonConvergingErrorHandler,
     PositiveEnergyErrorHandler,
     PotimErrorHandler,
     ScanMetalHandler,
@@ -252,27 +254,23 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["errors"] == []
 
     def test_too_few_bands(self):
-        os.chdir(f"{TEST_FILES}/too_few_bands")
+        shutil.copytree(f"{TEST_FILES}/too_few_bands", self.tmp_path, dirs_exist_ok=True, symlinks=True)
+        os.chdir(self.tmp_path)
         shutil.copy("INCAR", "INCAR.orig")
         handler = VaspErrorHandler("vasp.too_few_bands")
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["too_few_bands"]
         assert dct["actions"] == [{"action": {"_set": {"NBANDS": 501}}, "dict": "INCAR"}]
-        shutil.move("INCAR.orig", "INCAR")
-        os.chdir(TEST_FILES)
 
     def test_rot_matrix(self):
-        subdir = f"{TEST_FILES}/poscar_error"
-        os.chdir(subdir)
+        shutil.copytree(f"{TEST_FILES}/poscar_error", self.tmp_path, dirs_exist_ok=True, symlinks=True)
+        os.chdir(self.tmp_path)
         shutil.copy("KPOINTS", "KPOINTS.orig")
         handler = VaspErrorHandler()
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["rot_matrix"]
-        os.remove(os.path.join(subdir, "error.1.tar.gz"))
-        shutil.copy("KPOINTS.orig", "KPOINTS")
-        os.remove("KPOINTS.orig")
 
     def test_rot_matrix_vasp6(self):
         handler = VaspErrorHandler("vasp6.sgrcon")
@@ -290,18 +288,22 @@ class VaspErrorHandlerTest(PymatgenTest):
         dct = handler.correct()
         assert dct["actions"] == [{"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}}]
 
-    def test_to_from_dict(self):
+    def test_as_from_dict(self):
         handler = VaspErrorHandler("random_name")
         h2 = VaspErrorHandler.from_dict(handler.as_dict())
         assert type(h2) == type(handler)
         assert h2.output_filename == "random_name"
 
-    def test_pssyevx(self):
-        handler = VaspErrorHandler("vasp.pssyevx")
-        assert handler.check() is True
-        assert handler.correct()["errors"] == ["pssyevx"]
-        incar = Incar.from_file("INCAR")
-        assert incar["ALGO"] == "Normal"
+    def test_pssyevx_pdsyevx(self):
+        incar_orig = Incar.from_file("INCAR")
+        # Joining tests for these three tags as they have identical handling
+        for error_name in ("pssyevx", "pdsyevx"):
+            handler = VaspErrorHandler(f"vasp.{error_name}")
+            assert handler.check() is True
+            assert handler.correct()["errors"] == [error_name]
+            incar = Incar.from_file("INCAR")
+            assert incar["ALGO"] == "Normal"
+            incar_orig.write_file("INCAR")
 
     def test_eddrmm(self):
         shutil.copy("CONTCAR.eddav_eddrmm", "CONTCAR")
@@ -427,29 +429,33 @@ class VaspErrorHandlerTest(PymatgenTest):
         incar = Incar.from_file("INCAR")
         assert incar["SYMPREC"] == 1e-6
 
-    def test_posmap(self):
-        handler = VaspErrorHandler("vasp.posmap")
-        assert handler.check() is True
-        assert handler.correct()["errors"] == ["posmap"]
-        incar = Incar.from_file("INCAR")
-        assert incar["SYMPREC"] == pytest.approx(1e-6)
+    def test_posmap_and_pricelv(self) -> None:
+        incar_orig = Incar.from_file("INCAR")
+        # Joining tests for these three tags as they have identical handling
+        for error_name in ("posmap", "posmap-6", "pricelv"):
+            if error_name == "posmap-6":
+                vasp_std_out = "vasp6.posmap"
+                error_name = "posmap"
+            else:
+                vasp_std_out = f"vasp.{error_name}"
 
-        assert handler.check() is True
-        assert handler.correct()["errors"] == ["posmap"]
-        incar = Incar.from_file("INCAR")
-        assert incar["SYMPREC"] == pytest.approx(1e-4)
+            handler = VaspErrorHandler(vasp_std_out)
+            assert handler.check() is True
+            assert handler.correct()["errors"] == [error_name]
+            incar = Incar.from_file("INCAR")
+            assert incar["SYMPREC"] == pytest.approx(1e-6)
 
-    def test_posmap_vasp6(self):
-        handler = VaspErrorHandler("vasp6.posmap")
-        assert handler.check() is True
-        assert handler.correct()["errors"] == ["posmap"]
-        incar = Incar.from_file("INCAR")
-        assert incar["SYMPREC"] == pytest.approx(1e-6)
+            assert handler.check() is True
+            assert handler.correct()["errors"] == [error_name]
+            incar = Incar.from_file("INCAR")
+            assert incar["SYMPREC"] == pytest.approx(1e-4)
 
-        assert handler.check() is True
-        assert handler.correct()["errors"] == ["posmap"]
-        incar = Incar.from_file("INCAR")
-        assert incar["SYMPREC"] == pytest.approx(1e-4)
+            assert handler.check() is True
+            assert handler.correct()["errors"] == [error_name]
+            incar = Incar.from_file("INCAR")
+            assert incar["ISYM"] == 0
+
+            incar_orig.write_file("INCAR")
 
     def test_point_group(self):
         handler = VaspErrorHandler("vasp.point_group")
@@ -710,7 +716,7 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         dct = handler.correct()
         assert [{"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}}] == dct["actions"]
 
-    def test_to_from_dict(self):
+    def test_as_from_dict(self):
         handler = UnconvergedErrorHandler("random_name.xml")
         h2 = UnconvergedErrorHandler.from_dict(handler.as_dict())
         assert type(h2) == UnconvergedErrorHandler
@@ -723,6 +729,19 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
         assert dct == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
+
+    def test_psmaxn(self):
+        shutil.copy("vasprun.xml.electronic", "vasprun.xml")
+        shutil.copy(f"{TEST_FILES}/large_cell_real_optlay/OUTCAR", "OUTCAR")
+        handler = UnconvergedErrorHandler()
+        assert handler.check()
+        dct = handler.correct()
+        assert set(dct["errors"]) == {"Unconverged", "psmaxn"}
+        assert dct["actions"] == [
+            {"action": {"_set": {"ALGO": "Normal"}}, "dict": "INCAR"},
+            {"dict": "INCAR", "action": {"_set": {"LREAL": False}}},
+        ]
+        tracked_lru_cache.tracked_cache_clear()
 
 
 class IncorrectSmearingHandlerTest(PymatgenTest):
@@ -1046,3 +1065,71 @@ class DriftErrorHandlerTest(PymatgenTest):
         incar = Incar.from_file("INCAR")
         assert incar.get("PREC") == "High"
         assert incar.get("ENAUG", 0) == incar.get("ENCUT", 2) * 2
+
+
+class NonConvergingErrorHandlerTest(PymatgenTest):
+    n_ionic_steps: int = 3
+
+    def setUp(self) -> None:
+        copy_tmp_files(self.tmp_path, *glob("nonconv/*", root_dir=TEST_FILES))
+
+    def test_check(self) -> None:
+        # calculation has four ionic steps which each hit NELM = 10
+        handler = NonConvergingErrorHandler(nionic_steps=self.n_ionic_steps)
+        assert handler.check()
+
+        # increase NELM to avoid NonConvergingErrorHandler
+        incar = Incar.from_file("INCAR")
+        incar["NELM"] = 15
+        incar.write_file("INCAR")
+        assert not handler.check()
+
+    def test_correct(self) -> None:
+        original_incar = Incar.from_file("INCAR")
+
+        handler = NonConvergingErrorHandler(nionic_steps=self.n_ionic_steps)
+        handler.check()
+
+        # INCAR has ALGO = Fast, so first correction --> Normal
+        handler.correct()
+        incar = Incar.from_file("INCAR")
+        assert incar["ALGO"].lower() == "normal"
+
+        # because ISMEAR = -5, skip ALGO = all and adjust
+        post_all_corrections = {"ALGO": "Normal", "AMIX": 0.1, "BMIX": 0.01, "ICHARG": 2}
+        handler.correct()
+        incar = Incar.from_file("INCAR")
+        assert all(value == incar[key] for key, value in post_all_corrections.items())
+
+        incar.update({"AMIX": 0.02, "BMIX": 2.9})
+        post_all_corrections = {"ALGO": "Normal", "AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}
+        handler.correct()
+        incar = Incar.from_file("INCAR")
+        assert all(value == incar[key] for key, value in post_all_corrections.items())
+
+        # now replace ISMEAR --> 0, ALGO --> VeryFast to get ladder
+        incar = Incar(original_incar)  # incar.copy() returns dict
+        incar.update({"ISMEAR": 0, "ALGO": "veryfast"})
+        incar.write_file("INCAR")
+
+        algo_ladder = ("fast", "normal", "all")
+        for algo in algo_ladder:
+            handler.correct()
+            incar = Incar.from_file("INCAR")
+            assert incar["ALGO"].lower() == algo
+
+        # now test meta-GGA and hybrid, should go directly from ALGO = fast to all
+        for updates in [{"METAGGA": "SCAN"}, {"LHFCALC": True, "GGA": "PE"}]:
+            incar = Incar(original_incar)  # incar.copy() returns dict
+            incar.update(updates)
+            incar.write_file("INCAR")
+            handler.correct()
+
+            incar = Incar.from_file("INCAR")
+            assert incar["ALGO"].lower() == "all"
+
+    def test_as_from_dict(self):
+        handler = NonConvergingErrorHandler("OSZICAR_random")
+        h2 = NonConvergingErrorHandler.from_dict(handler.as_dict())
+        assert type(h2) == type(handler)
+        assert h2.output_filename == "OSZICAR_random"
