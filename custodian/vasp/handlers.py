@@ -459,8 +459,8 @@ class VaspErrorHandler(ErrorHandler):
             if "NBANDS" in vi["INCAR"]:
                 nbands = vi["INCAR"]["NBANDS"]
             else:
-                with open("OUTCAR") as f:
-                    for line in f:
+                with open("OUTCAR") as file:
+                    for line in file:
                         # Have to take the last NBANDS line since sometimes VASP
                         # updates it automatically even if the user specifies it.
                         # The last one is marked by NBANDS= (no space).
@@ -582,7 +582,7 @@ class VaspErrorHandler(ErrorHandler):
                 orig_symprec = vi["INCAR"].get("SYMPREC", 1e-6)
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": orig_symprec * 100}}})
             elif any(self.error_count[key] > 1 for key in symprec_errors) and vi["INCAR"].get("ISYM", 2) > 0:
-                # Failing that, disable symmetry
+                # Failing that, disable symmetry altogether
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
             for key in symprec_errors:
@@ -849,11 +849,11 @@ class AliasingErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
 
         if "aliasing" in self.errors:
-            with open("OUTCAR") as f:
+            with open("OUTCAR") as file:
                 grid_adjusted = False
                 changes_dict = {}
                 r = re.compile(r".+aliasing errors.*(NG.)\s*to\s*(\d+)")
-                for line in f:
+                for line in file:
                     m = r.match(line)
                     if m:
                         changes_dict[m.group(1)] = int(m.group(2))
