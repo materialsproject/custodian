@@ -18,6 +18,7 @@ from collections import Counter
 from math import prod
 
 import numpy as np
+from monty.dev import deprecated
 from monty.io import zopen
 from monty.os.path import zpath
 from monty.serialization import loadfn
@@ -1250,12 +1251,24 @@ class KspacingMetalHandler(ErrorHandler):
         return {"errors": ["ScanMetal"], "actions": actions}
 
 
+@deprecated(
+    KspacingMetalHandler,
+    "ScanMetalHandler was deprecated on 2023-11-03 and will be removed in a future release. "
+    "Use KspacingMetalHandler instead.",
+)
 class ScanMetalHandler(KspacingMetalHandler):
     """ScanMetalHandler was renamed because MP GGA workflow might also adopt kspacing
     in the future. Keeping this alias during a deprecation period for backwards compatibility.
     """
 
     def __init__(self, *args, **kwargs) -> None:
+        """
+        Initializes the handler with the output file to check.
+
+        Args:
+            args: Positional arguments passed to parent class.
+            kwargs: Keyword passed to parent class.
+        """
         warnings.warn(
             "ScanMetalHandler is deprecated and will be removed in a future release. "
             "Use KspacingMetalHandler instead.",
