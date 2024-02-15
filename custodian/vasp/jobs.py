@@ -444,7 +444,7 @@ class VaspJob(Job):
             half_kpts_first_relax (bool): Whether to halve the kpoint grid
                 for the first relaxation. Speeds up difficult convergence
                 considerably. Defaults to False.
-            \*\*vasp_job_kwargs: Passthrough kwargs to VaspJob. See
+            **vasp_job_kwargs: Passthrough kwargs to VaspJob. See
                 :class:`custodian.vasp.jobs.VaspJob`.
 
         Returns:
@@ -530,7 +530,7 @@ class VaspJob(Job):
                 which is more robust but can be a bit slow. The code does fall
                 back on the bisection when bfgs gives a non-sensical result,
                 e.g., negative lattice params.
-            \*\*vasp_job_kwargs: Passthrough kwargs to VaspJob. See
+            **vasp_job_kwargs: Passthrough kwargs to VaspJob. See
                 :class:`custodian.vasp.jobs.VaspJob`.
 
         Returns:
@@ -900,6 +900,7 @@ class GenerateVaspInputJob(Job):
                 "pymatgen.io.vasp.sets.MPNonSCFSet".
             contcar_only (bool): If True (default), only CONTCAR structures
                 are used as input to the input set.
+            **kwargs: Additional kwargs to pass to the input set.
         """
         self.input_set = input_set
         self.contcar_only = contcar_only

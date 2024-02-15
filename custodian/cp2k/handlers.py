@@ -404,11 +404,11 @@ class DivergingScfErrorHandler(ErrorHandler):
     is_monitor = True
 
     def __init__(self, output_file="cp2k.out", input_file="cp2k.inp"):
-        """
-        Initializes the error handler from an output files.
+        """Initializes the error handler from an output files.
 
         Args:
             output_file (str): Name of the CP2K output file.
+            input_file (str): Name of the CP2K input file.
         """
         self.output_file = output_file
         self.input_file = input_file
@@ -592,11 +592,11 @@ class FrozenJobErrorHandler(ErrorHandler):
 
 
 class AbortHandler(ErrorHandler):
-    """
-    These are errors that cp2k recognizes internally, and causes a kill-signal,
-    as opposed to things like slow scf convergence, which is an unwanted feature of
-    optimization rather than an error per se. Currently this error handler recognizes
-    the following:
+    """Handles errors that cp2k recognizes internally.
+
+    These internal errors cause a kill-signal, as opposed to things like slow scf
+    convergence, which is an unwanted feature of optimization rather than an error per se.
+    Currently this error handler recognizes the following:
 
         (1) Cholesky decomposition error in preconditioner. If this is found, the
             handler will try switching between Full_all/Full_single_inverse
@@ -745,14 +745,14 @@ class AbortHandler(ErrorHandler):
 
 
 class NumericalPrecisionHandler(ErrorHandler):
-    """
-    CP2K offers lots of functionality for decreasing numerical
-    precision in order to speed-up calculations. This can, unfortunately,
-    lead to convergence cycles getting 'stuck'. While it can be hard to
-    separate numerical issues from things like optimizer choice, slow-to-converge
-    systems, or divergence issues, this handler specifically detects the problem of
-    convergence getting stuck, where the same convergence value is returned many times
-    in a row. (Numerical precision can also be the cause of oscillating convergence.
+    """This handler detects convergence cycles getting stuck due to numerical imprecision.
+
+    CP2K offers lots of functionality for decreasing numerical precision in order to
+    speed-up calculations. This can unfortunately lead to convergence cycles getting 'stuck'.
+    While it can be hard to separate numerical issues from things like optimizer choice,
+    slow-to-converge systems, or divergence issues, this handler specifically detects the
+    problem of convergence getting stuck, where the same convergence value is returned many
+    times in a row. (Numerical precision can also be the cause of oscillating convergence.
     This is a little harder to assess, as it can also just look like slow-convergence.)
     Currently, we have identified the following causes of this problem:
 
@@ -810,6 +810,9 @@ class NumericalPrecisionHandler(ErrorHandler):
                 This will be caught and corrected, but it won't catch instances where the
                 last n-1 convergence values are the same for each outer scf loop, but it gets
                 reset by the preconditioner.
+            pgf_orb_strict (float): TODO @janosh someone who knows this code, please add a description
+            eps_default_strict (float): TODO @janosh likewise
+            eps_gvg_strict (float): TODO @janosh likewise
         """
         self.input_file = input_file
         self.output_file = output_file

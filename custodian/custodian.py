@@ -64,9 +64,9 @@ if SENTRY_DSN:
 
 
 class Custodian:
-    """
-    The Custodian class is the manager for a list of jobs given a list of
-    error handlers. The way it works is as follows:
+    """Custodian class is the manager for a list of jobs given a list of error handlers.
+
+    The way it works is as follows:
 
     1. Let's say you have defined a list of jobs as [job1, job2, job3, ...] and
        you have defined a list of possible error handlers as [err1, err2, ...]
@@ -175,6 +175,8 @@ class Custodian:
                 running job. If None, the default is to call Popen.terminate.
             terminate_on_nonzero_returncode (bool): If True, a non-zero return
                 code on any Job will result in a termination. Defaults to True.
+            **kwargs: Any other kwargs are ignored. This is to allow for easy
+                 subclassing and instantiation from a dict.
         """
         self.max_errors = max_errors
         self.max_errors_per_job = max_errors_per_job or max_errors

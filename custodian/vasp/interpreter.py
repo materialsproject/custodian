@@ -35,7 +35,7 @@ class VaspModder(Modder):
         files.
 
         Args:
-            actions [dict]: A list of actions of the form {'file': filename,
+            actions (dict): A list of actions of the form {'file': filename,
                 'action': moddermodification} or {'dict': vaspinput_key,
                 'action': moddermodification}.
         """

@@ -23,8 +23,8 @@ def get_nested_dict(input_dict, key):
 
 
 class DictActions:
-    """
-    Class to implement the supported mongo-like modifications on a dict.
+    """Class to implement the supported mongo-like modifications on a dict.
+
     Supported keywords include the following Mongo-based keywords, with the
     usual meanings (refer to Mongo documentation for information):
 

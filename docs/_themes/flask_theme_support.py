@@ -1,4 +1,5 @@
-# flasky extensions. flasky pygments style based on tango style
+"""flasky extensions. flasky pygments style based on tango style."""
+
 from pygments.style import Style
 from pygments.token import (
     Comment,
@@ -17,6 +18,8 @@ from pygments.token import (
 
 
 class FlaskyStyle(Style):
+    """Docs code highlighting style based on tango style."""
+
     background_color = "#f8f8f8"
     default_style = ""
 

@@ -37,7 +37,7 @@ class FeffModder(Modder):
         files.
 
         Args:
-            actions [dict]: A list of actions of the form {'file': filename,
+            actions (dict): A list of actions of the form {'file': filename,
                 'action': moddermodification} or {'dict': feffinput_key,
                 'action': moddermodification}
         """
