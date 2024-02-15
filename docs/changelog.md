@@ -6,6 +6,46 @@ nav_order: 2
 
 # Change Log
 
+## v2024.2.15
+
+### 🐛 Bug Fixes
+
+* Fix `KspacingMetalHandler` triggering on runs that don't use `KSPACING` by @janosh in https://github.com/materialsproject/custodian/pull/298
+* Fixed a small issue with the erroneous attribute call on a Structure object in AMIN handler by @fyalcin in https://github.com/materialsproject/custodian/pull/297
+* Move `TEST_DIR` + `TEST_FILES` from `custodian/__init__.py` to `tests/conftest.py` by @janosh in https://github.com/materialsproject/custodian/pull/312
+
+### 🛠 Enhancements
+
+* Rewrite handler tests by @janosh in https://github.com/materialsproject/custodian/pull/299
+* Fix `AliasingErrorHandlerTest` modifying test files by @janosh in https://github.com/materialsproject/custodian/pull/301
+* Caching parsed output files by @gpetretto in https://github.com/materialsproject/custodian/pull/273
+
+### 🧹 House-Keeping
+
+* Move tests to their own root-level directory by @janosh in https://github.com/materialsproject/custodian/pull/305
+* Refactor test file copying by @janosh in https://github.com/materialsproject/custodian/pull/306
+* Move `_clear_tracked_cache` fixture by @gpetretto in https://github.com/materialsproject/custodian/pull/307
+* Don't needlessly inherit from `unittest.TestCase` by @janosh in https://github.com/materialsproject/custodian/pull/308
+
+### 🧪 Tests
+
+* Add new error handlers, add tests for NonConvergingErrorHandler by @esoteric-ephemera in https://github.com/materialsproject/custodian/pull/313
+
+### 🏥 Package Health
+
+* Merge `setup.py` into `pyproject.toml` by @janosh in https://github.com/materialsproject/custodian/pull/304
+* Fix release CI by @janosh in https://github.com/materialsproject/custodian/pull/314
+
+### 🤷‍♂️ Other Changes
+
+* Add eddiag error handling and fix AMIN error handling in VaspErrorHandler by @esoteric-ephemera in https://github.com/materialsproject/custodian/pull/302
+
+## New Contributors
+
+* @esoteric-ephemera made their first contribution in https://github.com/materialsproject/custodian/pull/302
+
+**Full Changelog**: https://github.com/materialsproject/custodian/compare/v2023.10.9...v2024.2.15
+
 ## 2023.10.9
 
 * PR #293 from @samblau (#293)
