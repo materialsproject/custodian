@@ -309,14 +309,14 @@ class QCJob(Job):
                         input_file=input_file,
                         output_file=output_file,
                         qclog_file=qclog_file,
-                        suffix=f".{opt_method}_" + str(ii),
+                        suffix=f".{opt_method}_{ii}",
                         save_scratch=True,
                         backup=first,
                         **QCJob_kwargs,
                     )
                 )
-                opt_outdata = QCOutput(output_file + f".{opt_method}_" + str(ii)).data
-                opt_indata = QCInput.from_file(input_file + f".{opt_method}_" + str(ii))
+                opt_outdata = QCOutput(f"{output_file}.{opt_method}_{ii}").data
+                opt_indata = QCInput.from_file(f"{input_file}.{opt_method}_{ii}")
                 if opt_outdata["version"] == "6":
                     opt_geom_opt = copy.deepcopy(opt_indata.geom_opt)
                     opt_geom_opt["initial_hessian"] = "read"
@@ -356,15 +356,15 @@ class QCJob(Job):
                         input_file=input_file,
                         output_file=output_file,
                         qclog_file=qclog_file,
-                        suffix=".freq_" + str(ii),
+                        suffix=f".freq_{ii}",
                         save_scratch=True,
                         backup=first,
                         **QCJob_kwargs,
                     )
                 )
 
-                freq_outdata = QCOutput(output_file + ".freq_" + str(ii)).data
-                freq_indata = QCInput.from_file(input_file + ".freq_" + str(ii))
+                freq_outdata = QCOutput(f"{output_file}.freq_{ii}").data
+                freq_indata = QCInput.from_file(f"{input_file}.freq_{ii}")
                 for key in freq_indata.rem:
                     if key not in {"job_type", "geom_opt2", "scf_guess_always"}:
                         if freq_rem.get(key, None) != freq_indata.rem[key]:
@@ -456,12 +456,12 @@ class QCJob(Job):
                         input_file=input_file,
                         output_file=output_file,
                         qclog_file=qclog_file,
-                        suffix=f".{opt_method}_" + str(ii),
+                        suffix=f".{opt_method}_{ii}",
                         backup=first,
                         **QCJob_kwargs,
                     )
                 )
-                opt_outdata = QCOutput(output_file + f".{opt_method}_" + str(ii)).data
+                opt_outdata = QCOutput(f"{output_file}.{opt_method}_{ii}").data
                 if first:
                     orig_species = copy.deepcopy(opt_outdata.get("species"))
                     orig_charge = copy.deepcopy(opt_outdata.get("charge"))
@@ -496,13 +496,13 @@ class QCJob(Job):
                         input_file=input_file,
                         output_file=output_file,
                         qclog_file=qclog_file,
-                        suffix=".freq_" + str(ii),
+                        suffix=f".freq_{ii}",
                         backup=first,
                         **QCJob_kwargs,
                     )
                 )
-                outdata = QCOutput(output_file + ".freq_" + str(ii)).data
-                indata = QCInput.from_file(input_file + ".freq_" + str(ii))
+                outdata = QCOutput(f"{output_file}.freq_{ii}").data
+                indata = QCInput.from_file(f"{input_file}.freq_{ii}")
                 if "cpscf_nseg" in indata.rem:
                     freq_rem["cpscf_nseg"] = indata.rem["cpscf_nseg"]
                 errors = outdata.get("errors")
