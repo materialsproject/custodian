@@ -797,7 +797,7 @@ class KspacingMetalHandlerTest(PymatgenTest):
         os.chdir(f"{TEST_FILES}/scan_metal")
 
         # TODO (@janosh 2023-11-03) remove when ending ScanMetalHandler deprecation period
-        assert issubclass(ScanMetalHandler, KspacingMetalHandler)
+        assert isinstance(ScanMetalHandler(), KspacingMetalHandler)
 
 
 class LargeSigmaHandlerTest(PymatgenTest):
