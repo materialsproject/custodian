@@ -124,8 +124,7 @@ class Custodian:
         terminate_on_nonzero_returncode=True,
         **kwargs,
     ):
-        """
-        Initializes a Custodian from a list of jobs and error handlers.
+        """Initialize a Custodian from a list of jobs and error handlers.
 
         Args:
             handlers ([ErrorHandler]): Error handlers. In order of priority of
@@ -844,8 +843,7 @@ class CustodianError(RuntimeError):
     """Exception class for Custodian errors."""
 
     def __init__(self, message, raises=False):
-        """
-        Initializes the error with a message.
+        """Initialize the error with a message.
 
         Args:
             message (str): Message passed to Exception

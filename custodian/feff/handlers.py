@@ -36,8 +36,7 @@ class UnconvergedErrorHandler(ErrorHandler):
     is_monitor = False
 
     def __init__(self, output_filename="log1.dat"):
-        """
-        Initializes the handler with the output file to check.
+        """Initialize the handler with the output file to check.
 
         Args:
             output_filename (str): Filename for the log1.dat file. log1.dat file

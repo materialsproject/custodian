@@ -19,8 +19,7 @@ class Cp2kModder(Modder):
     """
 
     def __init__(self, filename="cp2k.inp", actions=None, strict=True, ci=None):
-        """
-        Initializes a Modder for Cp2kInput sets.
+        """Initialize a Modder for Cp2kInput sets.
 
         Args:
             filename (str): name of cp2k input file to modify. This file will be overwritten

@@ -59,8 +59,7 @@ class StdErrHandler(ErrorHandler):
     error_msgs = {"seg_fault": ["SIGSEGV"], "out_of_memory": ["insufficient virtual memory"], "abort": ["SIGABRT"]}
 
     def __init__(self, std_err="std_err.txt"):
-        """
-        Initializes the handler with the output file to check.
+        """Initialize the handler with the output file to check.
 
         Args:
             std_err (str): This is the file where the stderr for cp2k
@@ -135,8 +134,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
     is_monitor = True
 
     def __init__(self, input_file="cp2k.inp", output_file="cp2k.out"):
-        """
-        Initializes the error handler from a set of input and output files.
+        """Initialize the error handler from a set of input and output files.
 
         Args:
             input_file (str): Name of the CP2K input file.
@@ -468,8 +466,7 @@ class FrozenJobErrorHandler(ErrorHandler):
     is_monitor = True
 
     def __init__(self, input_file="cp2k.inp", output_file="cp2k.out", timeout=3600):
-        """
-        Initializes the handler with the output file to check.
+        """Initialize the handler with the output file to check.
 
         Args:
             input_file (str): Name of the input file to modify if needed
