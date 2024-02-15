@@ -38,8 +38,7 @@ class QChemErrorHandler(ErrorHandler):
         scf_max_cycles=100,
         geom_max_cycles=200,
     ):
-        """
-        Initializes the error handler from a set of input and output files.
+        """Initialize the error handler from a set of input and output files.
 
         Args:
             input_file (str): Name of the QChem input file.
@@ -333,7 +332,7 @@ class QChemErrorHandler(ErrorHandler):
             actions.append({"mem_static": "2000"})
 
         elif "mem_total_too_small" in self.errors:
-            print("Run on a node with more memory! Current mem_total = " + str(self.outdata["mem_total"]))
+            print(f"Run on a node with more memory! Current mem_total = {self.outdata['mem_total']}")
             return {"errors": self.errors, "actions": None}
 
         elif "basis_not_supported" in self.errors:

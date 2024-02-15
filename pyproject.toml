@@ -41,7 +41,7 @@ dependencies = ["monty>=2.0.6", "psutil", "ruamel.yaml>=0.15.6"]
 vasp = ["pymatgen"]
 nwchem = ["pymatgen"]
 qchem = ["pymatgen"]
-dev = ["mypy", "pre-commit", "pytest", "pytest-cov", "ruff"]
+dev = ["mypy", "pre-commit", "pymatgen", "pytest", "pytest-cov", "ruff"]
 error-statistics = ["sentry-sdk>=0.8.0"]
 
 [project.scripts]

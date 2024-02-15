@@ -28,8 +28,7 @@ class NwchemJob(Job):
         backup=True,
         settings_override=None,
     ):
-        """
-        Initializes a basic NwChem job.
+        """Initialize a basic NwChem job.
 
         Args:
             nwchem_cmd ([str]): Command to run Nwchem as a list of args. For

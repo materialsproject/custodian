@@ -18,6 +18,7 @@ from collections import Counter
 from math import prod
 
 import numpy as np
+from monty.dev import deprecated
 from monty.io import zopen
 from monty.os.path import zpath
 from monty.serialization import loadfn
@@ -127,8 +128,7 @@ class VaspErrorHandler(ErrorHandler):
         vtst_fixes=False,
         **kwargs,
     ):
-        """
-        Initializes the handler with the output file to check.
+        """Initialize the handler with the output file to check.
 
         Args:
             output_filename (str): This is the file where the stdout for vasp
@@ -152,6 +152,7 @@ class VaspErrorHandler(ErrorHandler):
             vtst_fixes (bool): Whether to consider VTST optimizers. Defaults to
                 False for compatibility purposes, but if you have VTST, you
                 would likely benefit from setting this to True.
+            **kwargs: Ignored. Added to increase signature flexibility.
         """
         self.output_filename = output_filename
         self.errors = set()
@@ -693,8 +694,7 @@ class LrfCommutatorHandler(ErrorHandler):
     error_msgs = {"lrf_comm": ["LRF_COMMUTATOR internal error"]}
 
     def __init__(self, output_filename: str = "std_err.txt"):
-        """
-        Initializes the handler with the output file to check.
+        """Initialize the handler with the output file to check.
 
         Args:
             output_filename (str): This is the file where the stderr for vasp
@@ -750,8 +750,7 @@ class StdErrHandler(ErrorHandler):
     }
 
     def __init__(self, output_filename: str = "std_err.txt"):
-        """
-        Initializes the handler with the output file to check.
+        """Initialize the handler with the output file to check.
 
         Args:
             output_filename (str): This is the file where the stderr for vasp
@@ -811,8 +810,7 @@ class AliasingErrorHandler(ErrorHandler):
     }
 
     def __init__(self, output_filename: str = "vasp.out"):
-        """
-        Initializes the handler with the output file to check.
+        """Initialize the handler with the output file to check.
 
         Args:
             output_filename (str): This is the file where the stdout for vasp
@@ -895,8 +893,7 @@ class DriftErrorHandler(ErrorHandler):
     """Corrects for total drift exceeding the force convergence criteria."""
 
     def __init__(self, max_drift=None, to_average=3, enaug_multiply=2):
-        """
-        Initializes the handler with max drift
+        """Initialize the handler with max drift
         Args:
             max_drift (float): This defines the max drift. Leaving this at the default of None gets the max_drift from
                 EDFIFFG.
@@ -976,8 +973,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
     is_monitor = False
 
     def __init__(self, output_filename: str = "vasp.out", output_vasprun="vasprun.xml"):
-        """
-        Initializes the handler with the output files to check.
+        """Initialize the handler with the output files to check.
 
         Args:
             output_filename (str): This is the file where the stdout for vasp
@@ -1039,11 +1035,10 @@ class UnconvergedErrorHandler(ErrorHandler):
     is_monitor = False
 
     def __init__(self, output_filename: str = "vasprun.xml"):
-        """
-        Initializes the handler with the output file to check.
+        """Initialize the handler with the output file to check.
 
         Args:
-            output_vasprun (str): Filename for the vasprun.xml file. Change
+            output_filename (str): Filename for the vasprun.xml file. Change
                 this only if it is different from the default (unlikely).
         """
         self.output_filename = output_filename
@@ -1163,8 +1158,7 @@ class IncorrectSmearingHandler(ErrorHandler):
     is_monitor = False
 
     def __init__(self, output_filename: str = "vasprun.xml"):
-        """
-        Initializes the handler with the output file to check.
+        """Initialize the handler with the output file to check.
 
         Args:
             output_filename (str): Filename for the vasprun.xml file. Change
@@ -1210,8 +1204,7 @@ class KspacingMetalHandler(ErrorHandler):
     is_monitor = False
 
     def __init__(self, output_filename: str = "vasprun.xml"):
-        """
-        Initializes the handler with the output file to check.
+        """Initialize the handler with the output file to check.
 
         Args:
             output_filename (str): Filename for the vasprun.xml file. Change
@@ -1250,12 +1243,23 @@ class KspacingMetalHandler(ErrorHandler):
         return {"errors": ["ScanMetal"], "actions": actions}
 
 
+@deprecated(
+    KspacingMetalHandler,
+    "ScanMetalHandler was deprecated on 2023-11-03 and will be removed in a future release. "
+    "Use KspacingMetalHandler instead.",
+)
 class ScanMetalHandler(KspacingMetalHandler):
     """ScanMetalHandler was renamed because MP GGA workflow might also adopt kspacing
     in the future. Keeping this alias during a deprecation period for backwards compatibility.
     """
 
     def __init__(self, *args, **kwargs) -> None:
+        """Initialize the handler with the output file to check.
+
+        Args:
+            args: Positional arguments passed to parent class.
+            kwargs: Keyword passed to parent class.
+        """
         warnings.warn(
             "ScanMetalHandler is deprecated and will be removed in a future release. "
             "Use KspacingMetalHandler instead.",
@@ -1342,8 +1346,7 @@ class PotimErrorHandler(ErrorHandler):
     is_monitor = True
 
     def __init__(self, input_filename="POSCAR", output_filename="OSZICAR", dE_threshold=1):
-        """
-        Initializes the handler with the input and output files to check.
+        """Initialize the handler with the input and output files to check.
 
         Args:
             input_filename (str): This is the POSCAR file that the run
@@ -1395,8 +1398,7 @@ class FrozenJobErrorHandler(ErrorHandler):
     is_monitor = True
 
     def __init__(self, output_filename: str = "vasp.out", timeout=21_600) -> None:
-        """
-        Initializes the handler with the output file to check.
+        """Initialize the handler with the output file to check.
 
         Args:
             output_filename (str): This is the file where the stdout for vasp
@@ -1443,8 +1445,7 @@ class NonConvergingErrorHandler(ErrorHandler):
     is_monitor = True
 
     def __init__(self, output_filename: str = "OSZICAR", nionic_steps=10):
-        """
-        Initializes the handler with the output file to check.
+        """Initialize the handler with the output file to check.
 
         Args:
             output_filename (str): This is the OSZICAR file. Change
@@ -1580,8 +1581,7 @@ class WalltimeHandler(ErrorHandler):
     raises_runtime_error = False
 
     def __init__(self, wall_time=None, buffer_time=300, electronic_step_stop=False):
-        """
-        Initializes the handler with a buffer time.
+        """Initialize the handler with a buffer time.
 
         Args:
             wall_time (int): Total walltime in seconds. If this is None and
@@ -1686,8 +1686,7 @@ class CheckpointHandler(ErrorHandler):
     is_terminating = False
 
     def __init__(self, interval=3600):
-        """
-        Initializes the handler with an interval.
+        """Initialize the handler with an interval.
 
         Args:
             interval (int): Interval at which to checkpoint in seconds.
@@ -1784,8 +1783,7 @@ class PositiveEnergyErrorHandler(ErrorHandler):
     is_monitor = True
 
     def __init__(self, output_filename: str = "OSZICAR"):
-        """
-        Initializes the handler with the output file to check.
+        """Initialize the handler with the output file to check.
 
         Args:
             output_filename (str): This is the OSZICAR file. Change

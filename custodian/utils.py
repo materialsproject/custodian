@@ -64,7 +64,7 @@ class tracked_lru_cache:
     def __init__(self, func):
         """
         Args:
-            func: function to be decorated
+            func: function to be decorated.
         """
         self.func = functools.lru_cache(func)
         functools.update_wrapper(self, func)
@@ -74,18 +74,14 @@ class tracked_lru_cache:
         self.cache_clear = self.func.cache_clear
 
     def __call__(self, *args, **kwargs):
-        """
-        Call the decorated function
-        """
+        """Call the decorated function."""
         result = self.func(*args, **kwargs)
         self.cached_functions.add(self.func)
         return result
 
     @classmethod
     def tracked_cache_clear(cls):
-        """
-        Clear the cache of all the decorated functions.
-        """
+        """Clear the cache of all the decorated functions."""
         while cls.cached_functions:
             f = cls.cached_functions.pop()
             f.cache_clear()

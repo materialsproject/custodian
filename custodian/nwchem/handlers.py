@@ -17,8 +17,7 @@ class NwchemErrorHandler(ErrorHandler):
     """
 
     def __init__(self, output_filename="mol.nwout"):
-        """
-        Initializes with an output file name.
+        """Initialize with an output file name.
 
         Args:
             output_filename (str): This is the file where the stdout for nwchem

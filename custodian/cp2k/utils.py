@@ -20,11 +20,12 @@ def restart(actions, output_file, input_file, no_actions_needed=False):
             no actions are present, then non are added by this function
         output_file (str): the cp2k output file name.
         input_file (str): the cp2k input file name.
+        no_actions_needed (bool): if no actions are needed, then this should be set to True.
     """
     if actions or no_actions_needed:
-        o = Cp2kOutput(output_file)
+        out = Cp2kOutput(output_file)
         ci = Cp2kInput.from_file(input_file)
-        restart_file = o.filenames.get("restart")
+        restart_file = out.filenames.get("restart")
         restart_file = restart_file[-1] if restart_file else None
         wfn_restart = ci["force_eval"]["dft"].get("wfn_restart_file_name") if ci.check("force_eval/dft") else None
 

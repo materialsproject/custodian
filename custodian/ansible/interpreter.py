@@ -31,8 +31,7 @@ class Modder:
     """
 
     def __init__(self, actions=None, strict=True):
-        """
-        Initializes a Modder from a list of supported actions.
+        """Initialize a Modder from a list of supported actions.
 
         Args:
             actions ([Action]): A sequence of supported actions. See
