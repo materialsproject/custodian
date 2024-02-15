@@ -159,7 +159,7 @@ class VaspErrorHandler(ErrorHandler):
         self.error_count = Counter()
         self.errors_subset_to_catch = errors_subset_to_catch or list(VaspErrorHandler.error_msgs)
         self.vtst_fixes = vtst_fixes
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger = logging.getLogger(type(self).__name__)
 
     def check(self):
         """Check for error."""
@@ -1755,7 +1755,7 @@ class StoppedRunHandler(ErrorHandler):
 
     def check(self):
         """Check for error."""
-        return os.path.exists("chkpt.yaml")
+        return os.path.isfile("chkpt.yaml")
 
     def correct(self):
         """Perform corrections."""

@@ -52,11 +52,11 @@ class LobsterFilesValidator(Validator):
 
     def check(self) -> bool:
         """Check for errors."""
-        for vfile in ["lobsterout"]:
-            if not os.path.exists(vfile):
+        for filename in ["lobsterout"]:
+            if not os.path.isfile(filename):
                 return True
-        with open("lobsterout") as f:
-            data = f.read()
+        with open("lobsterout") as file:
+            data = file.read()
         return "finished" not in data
 
 
@@ -67,7 +67,7 @@ class ChargeSpillingValidator(Validator):
         """
 
         Args:
-            output_filename: filename of the output file of lobter, usually lobsterout
+            output_filename: filename of the output file of lobster, usually lobsterout
             charge_spilling_limit: limit of the charge spilling that will be considered okay.
         """
         self.output_filename = output_filename
@@ -75,7 +75,7 @@ class ChargeSpillingValidator(Validator):
 
     def check(self) -> bool:
         """Open lobsterout and find charge spilling."""
-        if os.path.exists(self.output_filename):
+        if os.path.isfile(self.output_filename):
             lobsterout = Lobsterout(self.output_filename)
             if lobsterout.charge_spilling[0] > self.charge_spilling_limit:
                 return True

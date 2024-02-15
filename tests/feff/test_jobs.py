@@ -42,6 +42,6 @@ def test_postprocess():
     with cd(TEST_DIR), ScratchDir(".", copy_from_current_on_enter=True):
         f = FeffJob("hello", backup=True, gzipped=True)
         f.postprocess()
-        assert os.path.exists("feff_out.1.tar.gz")
+        assert os.path.isfile("feff_out.1.tar.gz")
         f.postprocess()
-        assert os.path.exists("feff_out.2.tar.gz")
+        assert os.path.isfile("feff_out.2.tar.gz")

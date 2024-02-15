@@ -501,17 +501,17 @@ class Custodian:
             # If there are no errors detected, perform
             # postprocessing and exit.
             if not has_error:
-                for v in self.validators:
-                    if v.check():
-                        self.run_log[-1]["validator"] = v
-                        s = f"Validation failed: {v.__class__.__name__}"
-                        raise ValidationError(s, raises=True, validator=v)
+                for validator in self.validators:
+                    if validator.check():
+                        self.run_log[-1]["validator"] = validator
+                        msg = f"Validation failed: {type(validator).__name__}"
+                        raise ValidationError(msg, raises=True, validator=validator)
                 if not zero_return_code:
                     if self.terminate_on_nonzero_returncode:
                         self.run_log[-1]["nonzero_return_code"] = True
-                        s = f"Job return code is {p.returncode}. Terminating..."
-                        logger.info(s)
-                        raise ReturnCodeError(s, raises=True)
+                        msg = f"Job return code is {p.returncode}. Terminating..."
+                        logger.info(msg)
+                        raise ReturnCodeError(msg, raises=True)
                     warnings.warn("subprocess returned a non-zero return code. Check outputs carefully...")
                 job.postprocess()
                 return
@@ -520,13 +520,13 @@ class Custodian:
             for x in self.run_log[-1]["corrections"]:
                 if not x["actions"] and x["handler"].raises_runtime_error:
                     self.run_log[-1]["handler"] = x["handler"]
-                    s = f"Unrecoverable error for handler: {x['handler']}"
-                    raise NonRecoverableError(s, raises=True, handler=x["handler"])
+                    msg = f"Unrecoverable error for handler: {x['handler']}"
+                    raise NonRecoverableError(msg, raises=True, handler=x["handler"])
             for x in self.run_log[-1]["corrections"]:
                 if not x["actions"]:
                     self.run_log[-1]["handler"] = x["handler"]
-                    s = f"Unrecoverable error for handler: {x['handler']}"
-                    raise NonRecoverableError(s, raises=False, handler=x["handler"])
+                    msg = f"Unrecoverable error for handler: {x['handler']}"
+                    raise NonRecoverableError(msg, raises=False, handler=x["handler"])
 
         if self.errors_current_job >= self.max_errors_per_job:
             self.run_log[-1]["max_errors_per_job"] = True
@@ -563,7 +563,7 @@ class Custodian:
             logger.info(f"Custodian running on Python version {v}")
 
             # load run log
-            if os.path.exists(Custodian.LOG_FILE):
+            if os.path.isfile(Custodian.LOG_FILE):
                 self.run_log = loadfn(Custodian.LOG_FILE, cls=MontyDecoder)
 
             if len(self.run_log) == 0:
@@ -668,7 +668,7 @@ class Custodian:
                         # make sure we don't terminate twice
                         terminate_func = None
                     dct = handler.correct()
-                    logger.error(handler.__class__.__name__, extra=dct)
+                    logger.error(type(handler).__name__, extra=dct)
                     dct["handler"] = handler
                     corrections.append(dct)
                     handler.n_applied_corrections += 1
@@ -722,7 +722,7 @@ class Job(MSONable):
     @property
     def name(self):
         """A nice string name for the job."""
-        return self.__class__.__name__
+        return type(self).__name__
 
 
 class ErrorHandler(MSONable):

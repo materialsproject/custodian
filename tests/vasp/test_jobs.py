@@ -76,12 +76,12 @@ class TestVaspJob:
             with ScratchDir(".", copy_from_current_on_enter=True):
                 v = VaspJob("hello", auto_continue=True)
                 v.setup()
-                assert os.path.exists("continue.json"), "continue.json not created"
+                assert os.path.isfile("continue.json"), "continue.json not created"
                 v.setup()
                 assert Poscar.from_file("CONTCAR").structure == Poscar.from_file("POSCAR").structure
                 assert Incar.from_file("INCAR")["ISTART"] == 1
                 v.postprocess()
-                assert not os.path.exists("continue.json"), "continue.json not deleted after postprocessing"
+                assert not os.path.isfile("continue.json"), "continue.json not deleted after postprocessing"
             # Test explicit action functionality
             with ScratchDir(".", copy_from_current_on_enter=True):
                 v = VaspJob(
@@ -154,7 +154,7 @@ class TestVaspNEBJob:
             for sf in sub_folders:
                 os.chdir(f"{postprocess_neb}/{sf}")
                 for file in neb_sub_outputs:
-                    if os.path.exists(file):
+                    if os.path.isfile(file):
                         assert os.path.isfile(f"{file}.test")
                         os.remove(f"{file}.test")
 

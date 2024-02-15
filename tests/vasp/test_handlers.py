@@ -230,13 +230,13 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["errors"] == ["brmix"]
         vi = VaspInput.from_directory(".")
         assert vi["INCAR"]["IMIX"] == 1
-        assert os.path.exists("CHGCAR")
+        assert os.path.isfile("CHGCAR")
 
         # The next correction check Gamma and evenize
         handler.correct()
         vi = VaspInput.from_directory(".")
         assert "IMIX" not in vi["INCAR"]
-        assert os.path.exists("CHGCAR")
+        assert os.path.isfile("CHGCAR")
         if vi["KPOINTS"].style == Kpoints.supported_modes.Gamma and vi["KPOINTS"].num_kpts < 1:
             all_kpts_even = all(n % 2 == 0 for n in vi["KPOINTS"].kpts[0])
             assert not all_kpts_even
@@ -245,7 +245,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         handler.correct()
         vi = VaspInput.from_directory(".")
         assert vi["INCAR"]["ISYM"] == 0
-        assert not os.path.exists("CHGCAR")
+        assert not os.path.isfile("CHGCAR")
 
         shutil.copy("INCAR.nelect", "INCAR")
         handler = VaspErrorHandler("vasp.brmix")
@@ -340,7 +340,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         handler = VaspErrorHandler("vasp.edddav")
         assert handler.check() is True
         assert handler.correct()["errors"] == ["edddav"]
-        assert not os.path.exists("CHGCAR")
+        assert not os.path.isfile("CHGCAR")
         p = Structure.from_file("POSCAR")
         c = Structure.from_file("CONTCAR")
         assert p == c

@@ -13,7 +13,7 @@ from custodian.vasp.io import load_outcar, load_vasprun
 class VasprunXMLValidator(Validator):
     """Checks that a valid vasprun.xml was generated."""
 
-    def __init__(self, output_file="vasp.out", stderr_file="std_err.txt"):
+    def __init__(self, output_file: str = "vasp.out", stderr_file: str = "std_err.txt") -> None:
         """
         Args:
             output_file (str): Name of file VASP standard output is directed to.
@@ -23,7 +23,7 @@ class VasprunXMLValidator(Validator):
         """
         self.output_file = output_file
         self.stderr_file = stderr_file
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger = logging.getLogger(type(self).__name__)
 
     def check(self):
         """Check for error."""
@@ -32,17 +32,17 @@ class VasprunXMLValidator(Validator):
         except Exception:
             exception_context = {}
 
-            if os.path.exists(self.output_file):
+            if os.path.isfile(self.output_file):
                 with open(self.output_file) as output_file:
                     output_file_tail = deque(output_file, maxlen=10)
                 exception_context["output_file_tail"] = "".join(output_file_tail)
 
-            if os.path.exists(self.stderr_file):
+            if os.path.isfile(self.stderr_file):
                 with open(self.stderr_file) as stderr_file:
                     stderr_file_tail = deque(stderr_file, maxlen=10)
                 exception_context["stderr_file_tail"] = "".join(stderr_file_tail)
 
-            if os.path.exists("vasprun.xml"):
+            if os.path.isfile("vasprun.xml"):
                 stat = os.stat("vasprun.xml")
                 exception_context["vasprun_st_size"] = stat.st_size
                 exception_context["vasprun_st_atime"] = stat.st_atime
@@ -70,7 +70,7 @@ class VaspFilesValidator(Validator):
 
     def check(self):
         """Check for error."""
-        return any(not os.path.exists(vfile) for vfile in ["CONTCAR", "OSZICAR", "OUTCAR"])
+        return any(not os.path.isfile(vfile) for vfile in ["CONTCAR", "OSZICAR", "OUTCAR"])
 
 
 class VaspNpTMDValidator(Validator):

@@ -207,7 +207,7 @@ class VaspJob(Job):
                 pass
 
         if self.auto_continue:
-            if os.path.exists("continue.json"):
+            if os.path.isfile("continue.json"):
                 actions = loadfn("continue.json").get("actions")
                 logger.info(f"Continuing previous VaspJob. Actions: {actions}")
                 backup(VASP_BACKUP_FILES, prefix="prev_run")
@@ -258,7 +258,7 @@ class VaspJob(Job):
         Also copies the magmom to the incar if necessary.
         """
         for file in [*VASP_OUTPUT_FILES, self.output_file]:
-            if os.path.exists(file):
+            if os.path.isfile(file):
                 if self.final and self.suffix != "":
                     shutil.move(file, f"{file}{self.suffix}")
                 elif self.suffix != "":
@@ -276,7 +276,7 @@ class VaspJob(Job):
 
         # Remove continuation so if a subsequent job is run in
         # the same directory, will not restart this job.
-        if os.path.exists("continue.json"):
+        if os.path.isfile("continue.json"):
             os.remove("continue.json")
 
     @classmethod
@@ -322,7 +322,7 @@ class VaspJob(Job):
             {"dict": "INCAR", "action": {"_set": incar_update}},
             {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}},
         ]
-        if half_kpts_first_relax and os.path.exists("KPOINTS") and os.path.exists("POSCAR"):
+        if half_kpts_first_relax and os.path.isfile("KPOINTS") and os.path.isfile("POSCAR"):
             kpts = Kpoints.from_file("KPOINTS")
             orig_kpts_dict = kpts.as_dict()
             # lattice vectors with length < 8 will get >1 KPOINT
@@ -454,7 +454,7 @@ class VaspJob(Job):
             if i == 0:
                 settings = None
                 backup = True
-                if half_kpts_first_relax and os.path.exists("KPOINTS") and os.path.exists("POSCAR"):
+                if half_kpts_first_relax and os.path.isfile("KPOINTS") and os.path.isfile("POSCAR"):
                     kpts = Kpoints.from_file("KPOINTS")
                     orig_kpts_dict = kpts.as_dict()
                     kpts.kpts = np.maximum(np.array(kpts.kpts) / 2, 1).tolist()
@@ -800,7 +800,7 @@ class VaspNEBJob(VaspJob):
                 poscar = os.path.join(path, "POSCAR")
                 shutil.copy(poscar, f"{poscar}.orig")
 
-        if self.half_kpts and os.path.exists("KPOINTS"):
+        if self.half_kpts and os.path.isfile("KPOINTS"):
             kpts = Kpoints.from_file("KPOINTS")
             kpts.kpts = np.maximum(np.array(kpts.kpts) / 2, 1)
             kpts.kpts = kpts.kpts.astype(int).tolist()
@@ -828,7 +828,7 @@ class VaspNEBJob(VaspJob):
             except Exception:
                 pass
 
-        if self.auto_continue and os.path.exists("STOPCAR") and not os.access("STOPCAR", os.W_OK):
+        if self.auto_continue and os.path.isfile("STOPCAR") and not os.access("STOPCAR", os.W_OK):
             # Remove STOPCAR
             os.chmod("STOPCAR", 0o644)
             os.remove("STOPCAR")
@@ -872,7 +872,7 @@ class VaspNEBJob(VaspJob):
         for path in self.neb_dirs:
             for file in VASP_NEB_OUTPUT_SUB_FILES:
                 file = os.path.join(path, file)
-                if os.path.exists(file):
+                if os.path.isfile(file):
                     if self.final and self.suffix != "":
                         shutil.move(file, f"{file}{self.suffix}")
                     elif self.suffix != "":
@@ -880,7 +880,7 @@ class VaspNEBJob(VaspJob):
 
         # Add suffix to all output files
         for file in [*VASP_NEB_OUTPUT_FILES, self.output_file]:
-            if os.path.exists(file):
+            if os.path.isfile(file):
                 if self.final and self.suffix != "":
                     shutil.move(file, f"{file}{self.suffix}")
                 elif self.suffix != "":
@@ -911,9 +911,9 @@ class GenerateVaspInputJob(Job):
 
     def run(self):
         """Run the calculation."""
-        if os.path.exists("CONTCAR"):
+        if os.path.isfile("CONTCAR"):
             structure = Structure.from_file("CONTCAR")
-        elif (not self.contcar_only) and os.path.exists("POSCAR"):
+        elif (not self.contcar_only) and os.path.isfile("POSCAR"):
             structure = Structure.from_file("POSCAR")
         else:
             raise RuntimeError("No CONTCAR/POSCAR detected to generate input!")

@@ -128,7 +128,7 @@ class Cp2kJob(Job):
     def postprocess(self):
         """Postprocessing includes renaming and gzipping where necessary."""
         files = os.listdir(".")
-        if os.path.exists(self.output_file) and self.suffix != "":
+        if os.path.isfile(self.output_file) and self.suffix != "":
             os.mkdir(f"run{self.suffix}")
             for file in files:
                 if "json" in file:
@@ -141,7 +141,7 @@ class Cp2kJob(Job):
 
         # Remove continuation so if a subsequent job is run in
         # the same directory, will not restart this job.
-        if os.path.exists("continue.json"):
+        if os.path.isfile("continue.json"):
             os.remove("continue.json")
 
     def terminate(self):

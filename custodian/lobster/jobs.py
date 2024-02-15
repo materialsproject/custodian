@@ -90,15 +90,15 @@ class LobsterJob(Job):
         """Will gzip relevant files (won't gzip custodian.json and other output files from the cluster)."""
         if self.gzipped:
             for file in LOBSTEROUTPUT_FILES:
-                if os.path.exists(file):
+                if os.path.isfile(file):
                     compress_file(file, compression="gz")
             for file in LOBSTERINPUT_FILES:
-                if os.path.exists(file):
+                if os.path.isfile(file):
                     compress_file(file, compression="gz")
-            if self.backup and os.path.exists("lobsterin.orig"):
+            if self.backup and os.path.isfile("lobsterin.orig"):
                 compress_file("lobsterin.orig", compression="gz")
             for file in FW_FILES:
-                if os.path.exists(file):
+                if os.path.isfile(file):
                     compress_file(file, compression="gz")
             for file in self.add_files_to_gzip:
                 compress_file(file, compression="gz")
