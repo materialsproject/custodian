@@ -744,8 +744,8 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         tracked_lru_cache.tracked_cache_clear()
 
     def test_uncorrectable(self):
-        shutil.copy("vasprun-unconverged-unfixable.xml.gz", "vasprun.xml.gz")
-        handler = UnconvergedErrorHandler(output_filename="vasprun.xml.gz")
+        shutil.copy("vasprun.xml.unconverged_unfixable", "vasprun.xml")
+        handler = UnconvergedErrorHandler()
         assert handler.check()
         dct = handler.correct()
         assert set(dct["errors"]) == {"Unconverged"}
