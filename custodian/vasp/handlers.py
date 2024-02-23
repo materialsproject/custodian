@@ -1128,7 +1128,7 @@ class UnconvergedErrorHandler(ErrorHandler):
 
             # Check for PSMAXN errors - see extensive discussion here
             # https://github.com/materialsproject/custodian/issues/133
-            # Only correct PSMAXN when run couldn't converge for any reason
+            # Only correct PSMAXN when run didn't converge for fixable reasons
             if os.path.isfile("OUTCAR"):
                 with open("OUTCAR") as file:
                     outcar_as_str = file.read()
