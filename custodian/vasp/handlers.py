@@ -1058,6 +1058,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         v = load_vasprun(os.path.join(directory, self.output_filename))
         algo = v.incar.get("ALGO", "Normal").lower()
         actions = []
+        errors = ["Unconverged"]
         if not v.converged_electronic:
             # NOTE: This is the amin error handler
             # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
@@ -1127,8 +1128,7 @@ class UnconvergedErrorHandler(ErrorHandler):
 
             # Check for PSMAXN errors - see extensive discussion here
             # https://github.com/materialsproject/custodian/issues/133
-            # Only correct PSMAXN when run couldn't converge for any reason
-            errors = ["Unconverged"]
+            # Only correct PSMAXN when run didn't converge for fixable reasons
             if os.path.isfile(os.path.join(directory, "OUTCAR")):
                 with open(os.path.join(directory, "OUTCAR")) as file:
                     outcar_as_str = file.read()
