@@ -260,6 +260,7 @@ class VaspJob(Job):
         Also copies the magmom to the incar if necessary.
         """
         for file in [*VASP_OUTPUT_FILES, self.output_file]:
+            file = os.path.join(self.directory, file)
             if os.path.isfile(file):
                 if self.final and self.suffix != "":
                     shutil.move(file, f"{file}{self.suffix}")
@@ -325,8 +326,8 @@ class VaspJob(Job):
             {"dict": "INCAR", "action": {"_set": incar_update}},
             {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}},
         ]
-        if half_kpts_first_relax and os.path.isfile(os.path.join(self.directory, "KPOINTS")) and os.path.isfile(os.path.join(self.directory, "POSCAR")):
-            kpts = Kpoints.from_file(os.path.join(self.directory, "KPOINTS"))
+        if half_kpts_first_relax and os.path.isfile(os.path.join(directory, "KPOINTS")) and os.path.isfile(os.path.join(directory, "POSCAR")):
+            kpts = Kpoints.from_file(os.path.join(directory, "KPOINTS"))
             orig_kpts_dict = kpts.as_dict()
             # lattice vectors with length < 8 will get >1 KPOINT
             kpts.kpts = np.round(np.maximum(np.array(kpts.kpts) / 2, 1)).astype(int).tolist()
@@ -548,7 +549,7 @@ class VaspJob(Job):
         """
         nsw = 99 if atom_relax else 0
 
-        incar = Incar.from_file(os.path.join(self.directory, "INCAR"))
+        incar = Incar.from_file(os.path.join(directory, "INCAR"))
 
         # Set the energy convergence criteria as the EDIFFG (if present) or
         # 10 x EDIFF (which itself defaults to 1e-4 if not present).

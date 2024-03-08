@@ -122,7 +122,7 @@ class Custodian:
         checkpoint=False,
         terminate_func=None,
         terminate_on_nonzero_returncode=True,
-        cwd = None,
+        directory = None,
         **kwargs,
     ):
         """Initialize a Custodian from a list of jobs and error handlers.
@@ -190,11 +190,11 @@ class Custodian:
         self.scratch_dir = scratch_dir
         self.gzipped_output = gzipped_output
         self.checkpoint = checkpoint
-        if cwd is None:
-            cwd = os.getcwd()
-        self.cwd = cwd
+        if directory is None:
+            directory = os.getcwd()
+        self.directory = directory
         if self.checkpoint:
-            self.restart, self.run_log = Custodian._load_checkpoint(cwd)
+            self.restart, self.run_log = Custodian._load_checkpoint(directory)
         else:
             self.restart = 0
             self.run_log = []
@@ -205,10 +205,10 @@ class Custodian:
         self.finished = False
 
     @staticmethod
-    def _load_checkpoint(cwd):
+    def _load_checkpoint(directory):
         restart = 0
         run_log = []
-        chkpts = glob(os.path.join(cwd, "custodian.chk.*.tar.gz"))
+        chkpts = glob(os.path.join(directory, "custodian.chk.*.tar.gz"))
         if chkpts:
             chkpt = sorted(chkpts, key=lambda c: int(c.split(".")[-3]))[0]
             restart = int(chkpt.split(".")[-3])
@@ -238,17 +238,17 @@ class Custodian:
         return restart, run_log
 
     @staticmethod
-    def _delete_checkpoints(cwd):
-        for file in glob(os.path.join(cwd, "custodian.chk.*.tar.gz")):
+    def _delete_checkpoints(directory):
+        for file in glob(os.path.join(directory, "custodian.chk.*.tar.gz")):
             os.remove(file)
 
     @staticmethod
-    def _save_checkpoint(cwd, index):
+    def _save_checkpoint(directory, index):
         try:
-            Custodian._delete_checkpoints(cwd)
-            n = os.path.join(cwd, f"custodian.chk.{index}.tar.gz")
+            Custodian._delete_checkpoints(directory)
+            n = os.path.join(directory, f"custodian.chk.{index}.tar.gz")
             with tarfile.open(n, mode="w:gz", compresslevel=3) as f:
-                f.add(cwd, arcname=".")
+                f.add(directory, arcname=".")
             logger.info(f"Checkpoint written to {n}")
         except Exception:
             logger.info("Checkpointing failed")
@@ -361,7 +361,6 @@ class Custodian:
             MaxCorrectionsError: if max_errors is reached
             MaxCorrectionsPerHandlerError: if max_errors_per_handler is reached
         """
-        cwd = self.cwd
 
         with ScratchDir(
             self.scratch_dir,
@@ -382,20 +381,20 @@ class Custodian:
                 for job_n, job in islice(enumerate(self.jobs, 1), self.restart, None):
                     self._run_job(job_n, job)
                     # We do a dump of the run log after each job.
-                    dumpfn(self.run_log, os.path.join(self.cwd, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
+                    dumpfn(self.run_log, os.path.join(self.directory, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
                     # Checkpoint after each job so that we can recover from last
                     # point and remove old checkpoints
                     if self.checkpoint:
                         self.restart = job_n
-                        Custodian._save_checkpoint(cwd, job_n)
+                        Custodian._save_checkpoint(self.directory, job_n)
             except CustodianError as ex:
                 logger.error(ex.message)
                 if ex.raises:
                     raise
             finally:
                 # Log the corrections to a json file.
-                logger.info(f"Logging to {os.path.join(self.cwd, Custodian.LOG_FILE)}...")
-                dumpfn(self.run_log, os.path.join(self.cwd, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
+                logger.info(f"Logging to {os.path.join(self.directory, Custodian.LOG_FILE)}...")
+                dumpfn(self.run_log, os.path.join(self.directory, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
                 end = datetime.datetime.now()
                 logger.info(f"Run ended at {end}.")
                 run_time = end - start
@@ -404,7 +403,7 @@ class Custodian:
                     gzip_dir(".")
 
             # Cleanup checkpoint files (if any) if run is successful.
-            Custodian._delete_checkpoints(cwd)
+            Custodian._delete_checkpoints(self.directory)
 
         return self.run_log
 
@@ -443,7 +442,7 @@ class Custodian:
         for handler in self.handlers:
             handler.n_applied_corrections = 0
 
-        job.setup(self.cwd)
+        job.setup(self.directory)
 
         attempt = 0
         while self.total_errors < self.max_errors and self.errors_current_job < self.max_errors_per_job:
@@ -453,7 +452,7 @@ class Custodian:
                 f"errors in job thus far = {self.total_errors}, {self.errors_current_job}."
             )
 
-            p = job.run(directory = self.cwd)
+            p = job.run(directory = self.directory)
             # Check for errors using the error handlers and perform
             # corrections.
             has_error = False
@@ -505,7 +504,7 @@ class Custodian:
             # postprocessing and exit.
             if not has_error:
                 for validator in self.validators:
-                    if validator.check(self.cwd):
+                    if validator.check(self.directory):
                         self.run_log[-1]["validator"] = validator
                         msg = f"Validation failed: {type(validator).__name__}"
                         raise ValidationError(msg, raises=True, validator=validator)
@@ -516,7 +515,7 @@ class Custodian:
                         logger.info(msg)
                         raise ReturnCodeError(msg, raises=True)
                     warnings.warn("subprocess returned a non-zero return code. Check outputs carefully...")
-                job.postprocess(directory = self.cwd)
+                job.postprocess(directory = self.directory)
                 return
 
             # Check that all errors could be handled
@@ -560,9 +559,8 @@ class Custodian:
         """
         start = datetime.datetime.now()
         try:
-            cwd = self.cwd
             v = sys.version.replace("\n", " ")
-            logger.info(f"Custodian started in singleshot mode at {start} in {cwd}.")
+            logger.info(f"Custodian started in singleshot mode at {start} in {self.directory}.")
             logger.info(f"Custodian running on Python version {v}")
 
             # load run log
@@ -605,14 +603,14 @@ class Custodian:
             # check validators
             logger.info(f"Checking validator for {job.name}.run")
             for v in self.validators:
-                if v.check(directory = self.cwd):
+                if v.check(directory = self.directory):
                     self.run_log[-1]["validator"] = v
                     logger.info("Failed validation based on validator")
                     s = f"Validation failed: {v}"
                     raise ValidationError(s, raises=True, validator=v)
 
             logger.info(f"Postprocessing for {job.name}.run")
-            job.postprocess(directory = self.cwd)
+            job.postprocess(directory = self.directory)
 
             # IF DONE WITH ALL JOBS - DELETE ALL CHECKPOINTS AND RETURN
             # VALIDATED
@@ -624,7 +622,7 @@ class Custodian:
             job_n += 1
             job = self.jobs[job_n]
             self.run_log.append({"job": job.as_dict(), "corrections": [], "job_n": job_n})
-            job.setup(directory = self.cwd)
+            job.setup(directory = self.directory)
             return len(self.jobs) - job_n
 
         except CustodianError as ex:
@@ -635,13 +633,13 @@ class Custodian:
         finally:
             # Log the corrections to a json file.
             logger.info(f"Logging to {Custodian.LOG_FILE}...")
-            dumpfn(self.run_log, os.path.join(self.cwd, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
+            dumpfn(self.run_log, os.path.join(self.directory, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
             end = datetime.datetime.now()
             logger.info(f"Run ended at {end}.")
             run_time = end - start
             logger.info(f"Run completed. Total time taken = {run_time}.")
             if self.finished and self.gzipped_output:
-                gzip_dir(self.cwd)
+                gzip_dir(self.directory)
         return None
 
     def _do_check(self, handlers, terminate_func=None):
@@ -649,7 +647,7 @@ class Custodian:
         corrections = []
         for handler in handlers:
             try:
-                if handler.check(directory = self.cwd):
+                if handler.check(directory = self.directory):
                     if (
                         handler.max_num_corrections is not None
                         and handler.n_applied_corrections >= handler.max_num_corrections
@@ -667,10 +665,10 @@ class Custodian:
                         continue
                     if terminate_func is not None and handler.is_terminating:
                         logger.info("Terminating job")
-                        terminate_func(directory = self.cwd)
+                        terminate_func(directory = self.directory)
                         # make sure we don't terminate twice
                         terminate_func = None
-                    dct = handler.correct(directory = self.cwd)
+                    dct = handler.correct(directory = self.directory)
                     logger.error(type(handler).__name__, extra=dct)
                     dct["handler"] = handler
                     corrections.append(dct)
@@ -687,7 +685,7 @@ class Custodian:
         self.errors_current_job += len(corrections)
         self.run_log[-1]["corrections"].extend(corrections)
         # We do a dump of the run log after each check.
-        dumpfn(self.run_log, os.path.join(self.cwd, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
+        dumpfn(self.run_log, os.path.join(self.directory, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
         # Clear all the cached values to avoid reusing them in a subsequent check
         tracked_lru_cache.tracked_cache_clear()
         return len(corrections) > 0

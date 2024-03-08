@@ -1,5 +1,7 @@
 """Implements various interpreters and modders for VASP."""
 
+import os
+
 from pymatgen.io.vasp.inputs import VaspInput
 
 from custodian.ansible.actions import DictActions, FileActions
@@ -25,10 +27,11 @@ class VaspModder(Modder):
                 avoid having to reparse the directory).
         """
         self.vi = vi or VaspInput.from_directory(directory)
+        self.directory = directory
         actions = actions or [FileActions, DictActions]
         super().__init__(actions, strict)
 
-    def apply_actions(self, actions, directory = "./"):
+    def apply_actions(self, actions):
         """
         Applies a list of actions to the Vasp Input Set and rewrites modified
         files.
@@ -49,4 +52,4 @@ class VaspModder(Modder):
             else:
                 raise ValueError(f"Unrecognized format: {a}")
         for file in modified:
-            self.vi[file].write_file(os.path.join(directory, file))
+            self.vi[file].write_file(os.path.join(self.directory, file))
