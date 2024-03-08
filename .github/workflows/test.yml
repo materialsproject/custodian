@@ -33,11 +33,11 @@ jobs:
           python-version: ${{ matrix.python-version }}
           activate-environment: myenv
 
-      - name: Install OpenBabel
-        run: conda install -c conda-forge openbabel
-
       - name: Install dependencies
         run: pip install -e '.[dev]'
+
+      - name: Install OpenBabel
+        run: conda install -c conda-forge openbabel
 
       - name: pytest
         env:
