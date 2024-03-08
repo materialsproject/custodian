@@ -212,7 +212,7 @@ class VaspJob(Job):
             if os.path.isfile(os.path.join(self.directory, "continue.json")):
                 actions = loadfn(os.path.join(self.directory, "continue.json")).get("actions")
                 logger.info(f"Continuing previous VaspJob. Actions: {actions}")
-                backup([os.path.join(self.directory, file) for file in VASP_BACKUP_FILES], prefix="prev_run")
+                backup(VASP_BACKUP_FILES, prefix="prev_run", directory=self.directory)
                 VaspModder(directory=self.directory).apply_actions(actions)
 
             else:

@@ -208,7 +208,7 @@ class FileActions:
     """
 
     @staticmethod
-    def file_create(filename, settings):
+    def file_create(filename, settings, directory):
         """
         Creates a file.
 
@@ -224,7 +224,7 @@ class FileActions:
                     f.write(v)
 
     @staticmethod
-    def file_move(filename, settings):
+    def file_move(filename, settings, directory):
         """
         Moves a file. {'_file_move': {'dest': 'new_file_name'}}.
 
@@ -236,10 +236,10 @@ class FileActions:
             raise ValueError("Settings must only contain one item with key 'dest'.")
         for k, v in settings.items():
             if k == "dest":
-                shutil.move(filename, v)
+                shutil.move(os.path.join(directory, filename), os.path.join(directory, v))
 
     @staticmethod
-    def file_delete(filename, settings):
+    def file_delete(filename, settings, directory):
         """
         Deletes a file. {'_file_delete': {'mode': "actual"}}.
 
@@ -253,7 +253,7 @@ class FileActions:
         for k, v in settings.items():
             if k == "mode" and v == "actual":
                 try:
-                    os.remove(filename)
+                    os.remove(os.path.join(directory, filename))
                 except OSError:
                     # Skip file not found error.
                     pass
@@ -261,7 +261,7 @@ class FileActions:
                 print(f"Simulated removal of {filename}")
 
     @staticmethod
-    def file_copy(filename, settings):
+    def file_copy(filename, settings, directory):
         """
         Copies a file. {'_file_copy': {'dest': 'new_file_name'}}.
 
@@ -271,10 +271,10 @@ class FileActions:
         """
         for k, v in settings.items():
             if k.startswith("dest"):
-                shutil.copyfile(filename, v)
+                shutil.copyfile(os.path.join(directory, filename), os.path.join(directory, v))
 
     @staticmethod
-    def file_modify(filename, settings):
+    def file_modify(filename, settings, directory):
         """
         Modifies file access.
 
@@ -284,6 +284,6 @@ class FileActions:
         """
         for k, v in settings.items():
             if k == "mode":
-                os.chmod(filename, v)
+                os.chmod(os.path.join(directory, filename), v)
             if k == "owners":
-                os.chown(filename, v)
+                os.chown(os.path.join(directory, filename), v)

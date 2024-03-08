@@ -187,7 +187,7 @@ class VaspErrorHandler(ErrorHandler):
 
     def correct(self, directory="./"):
         """Perform corrections."""
-        backup(VASP_BACKUP_FILES | {self.output_filename})
+        backup(VASP_BACKUP_FILES | {self.output_filename}, directory=directory)
         actions = []
         vi = VaspInput.from_directory(directory)
 
@@ -720,7 +720,7 @@ class LrfCommutatorHandler(ErrorHandler):
 
     def correct(self, directory="./"):
         """Perform corrections."""
-        backup(VASP_BACKUP_FILES | {self.output_filename})
+        backup(VASP_BACKUP_FILES | {self.output_filename}, directory=directory)
         actions = []
         vi = VaspInput.from_directory(directory)
 
@@ -776,7 +776,7 @@ class StdErrHandler(ErrorHandler):
 
     def correct(self, directory="./"):
         """Perform corrections."""
-        backup(VASP_BACKUP_FILES | {self.output_filename})
+        backup(VASP_BACKUP_FILES | {self.output_filename}, directory=directory)
         actions = []
         vi = VaspInput.from_directory(directory)
 
@@ -842,7 +842,7 @@ class AliasingErrorHandler(ErrorHandler):
 
     def correct(self, directory="./"):
         """Perform corrections."""
-        backup(VASP_BACKUP_FILES | {self.output_filename})
+        backup(VASP_BACKUP_FILES | {self.output_filename}, directory=directory)
         actions = []
         vi = VaspInput.from_directory(directory)
 
@@ -929,7 +929,7 @@ class DriftErrorHandler(ErrorHandler):
 
     def correct(self, directory="./"):
         """Perform corrections."""
-        backup(VASP_BACKUP_FILES)
+        backup(VASP_BACKUP_FILES, directory=directory)
         actions = []
         vi = VaspInput.from_directory(directory)
 
@@ -1018,7 +1018,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
 
     def correct(self, directory="./"):
         """Perform corrections."""
-        backup(VASP_BACKUP_FILES | {self.output_filename})
+        backup(VASP_BACKUP_FILES | {self.output_filename}, directory=directory)
         vi = VaspInput.from_directory(directory)
         m = prod(vi["KPOINTS"].kpts[0])
         m = max(int(round(m ** (1 / 3))), 1)
@@ -1129,7 +1129,7 @@ class UnconvergedErrorHandler(ErrorHandler):
             # https://github.com/materialsproject/custodian/issues/133
             # Only correct PSMAXN when run couldn't converge for any reason
             errors = ["Unconverged"]
-            if os.path.isfile("OUTCAR"):
+            if os.path.isfile(os.path.join(directory, "OUTCAR")):
                 with open(os.path.join(directory, "OUTCAR")) as file:
                     outcar_as_str = file.read()
                 if "PSMAXN for non-local potential too small" in outcar_as_str:
@@ -1139,7 +1139,7 @@ class UnconvergedErrorHandler(ErrorHandler):
                         ]
                     errors += ["psmaxn"]
 
-            backup(VASP_BACKUP_FILES)
+            backup(VASP_BACKUP_FILES, directory=directory)
             VaspModder(vi=vi, directory=directory).apply_actions(actions)
             return {"errors": errors, "actions": actions}
 
@@ -1180,7 +1180,7 @@ class IncorrectSmearingHandler(ErrorHandler):
 
     def correct(self, directory="./"):
         """Perform corrections."""
-        backup(VASP_BACKUP_FILES | {self.output_filename})
+        backup(VASP_BACKUP_FILES | {self.output_filename}, directory=directory)
         vi = VaspInput.from_directory(directory)
 
         actions = [
@@ -1226,7 +1226,7 @@ class KspacingMetalHandler(ErrorHandler):
 
     def correct(self, directory="./"):
         """Perform corrections."""
-        backup(VASP_BACKUP_FILES | {self.output_filename})
+        backup(VASP_BACKUP_FILES | {self.output_filename}, directory=directory)
         vi = VaspInput.from_directory(directory)
 
         _dummy_structure = Structure(
@@ -1306,7 +1306,7 @@ class LargeSigmaHandler(ErrorHandler):
 
     def correct(self, directory="./"):
         """Perform corrections."""
-        backup(VASP_BACKUP_FILES)
+        backup(VASP_BACKUP_FILES, directory=directory)
         actions = []
         vi = VaspInput.from_directory(directory)
         sigma = vi["INCAR"].get("SIGMA", 0.2)
@@ -1374,7 +1374,7 @@ class PotimErrorHandler(ErrorHandler):
 
     def correct(self, directory="./"):
         """Perform corrections."""
-        backup(VASP_BACKUP_FILES)
+        backup(VASP_BACKUP_FILES, directory=directory)
         vi = VaspInput.from_directory(directory)
         potim = vi["INCAR"].get("POTIM", 0.5)
         ibrion = vi["INCAR"].get("IBRION", 0)
@@ -1421,7 +1421,7 @@ class FrozenJobErrorHandler(ErrorHandler):
 
     def correct(self, directory="./"):
         """Perform corrections."""
-        backup(VASP_BACKUP_FILES | {self.output_filename})
+        backup(VASP_BACKUP_FILES | {self.output_filename}, directory=directory)
 
         vi = VaspInput.from_directory(directory)
         actions = []
@@ -1542,7 +1542,7 @@ class NonConvergingErrorHandler(ErrorHandler):
                     )
 
         if actions:
-            backup(VASP_BACKUP_FILES)
+            backup(VASP_BACKUP_FILES, directory=directory)
             VaspModder(vi=vi, directory=directory).apply_actions(actions)
             return {"errors": ["Non-converging job"], "actions": actions}
         # Unfixable error. Just return None for actions.
@@ -1661,7 +1661,7 @@ class WalltimeHandler(ErrorHandler):
         # Write STOPCAR
         actions = [{"file": "STOPCAR", "action": {"_file_create": {"content": content}}}]
 
-        m = Modder(actions=[FileActions])
+        m = Modder(actions=[FileActions], directory=directory)
         for a in actions:
             m.modify(a["action"], a["file"])
         return {"errors": ["Walltime reached"], "actions": None}
@@ -1719,7 +1719,7 @@ class CheckpointHandler(ErrorHandler):
             },
         ]
 
-        m = Modder(actions=[FileActions])
+        m = Modder(actions=[FileActions], directory=directory)
         for a in actions:
             m.modify(a["action"], a["file"])
 
@@ -1755,17 +1755,17 @@ class StoppedRunHandler(ErrorHandler):
 
     def check(self, directory="./"):
         """Check for error."""
-        return os.path.isfile("chkpt.yaml")
+        return os.path.isfile(os.path.join(directory, "chkpt.yaml"))
 
     def correct(self, directory="./"):
         """Perform corrections."""
-        d = loadfn("chkpt.yaml")
+        d = loadfn(os.path.join(directory, "chkpt.yaml"))
         i = d["Index"]
         name = shutil.make_archive(os.path.join(directory, f"vasp.chk.{i}"), "gztar")
 
         actions = [{"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}]
 
-        m = Modder(actions=[FileActions])
+        m = Modder(actions=[FileActions], directory=directory)
         for a in actions:
             m.modify(a["action"], a["file"])
 
@@ -1807,7 +1807,7 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(directory)
         algo = vi["INCAR"].get("ALGO", "Normal").lower()
         if algo not in {"normal", "n"}:
-            backup(VASP_BACKUP_FILES)
+            backup(VASP_BACKUP_FILES | {self.output_filename}, directory=directory)
             actions = [{"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}}]
             VaspModder(vi=vi, directory=directory).apply_actions(actions)
             return {"errors": ["Positive energy"], "actions": actions}

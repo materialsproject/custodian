@@ -5,7 +5,7 @@ using support actions.
 
 import re
 
-from custodian.ansible.actions import DictActions
+from custodian.ansible.actions import DictActions, FileActions
 
 
 class Modder:
@@ -30,7 +30,7 @@ class Modder:
     'Universe'
     """
 
-    def __init__(self, actions=None, strict=True):
+    def __init__(self, actions=None, strict=True, directory="./"):
         """Initialize a Modder from a list of supported actions.
 
         Args:
@@ -49,6 +49,7 @@ class Modder:
                 if (not re.match(r"__\w+__", i)) and callable(getattr(action, i)):
                     self.supported_actions["_" + i] = getattr(action, i)
         self.strict = strict
+        self.directory = directory
 
     def modify(self, modification, obj):
         """
@@ -65,7 +66,10 @@ class Modder:
         """
         for action, settings in modification.items():
             if action in self.supported_actions:
-                self.supported_actions[action](obj, settings)
+                if isinstance(action, FileActions):
+                    self.supported_actions[action](obj, settings, directory=self.directory)
+                else:
+                    self.supported_actions[action](obj, settings)
             elif self.strict:
                 raise ValueError(f"{action} is not a supported action!")
 
