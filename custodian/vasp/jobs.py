@@ -250,9 +250,10 @@ class VaspJob(Job):
                 elif which(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
         logger.info(f"Running {' '.join(cmd)}")
-        with open(os.path.join(self.directory, self.output_file), "w") as f_std, open(
-            os.path.join(self.directory, self.stderr_file), "w", buffering=1
-        ) as f_err:
+        with (
+            open(os.path.join(self.directory, self.output_file), "w") as f_std,
+            open(os.path.join(self.directory, self.stderr_file), "w", buffering=1) as f_err,
+        ):
             # use line buffering for stderr
             return subprocess.Popen(cmd, cwd=self.directory, stdout=f_std, stderr=f_err, start_new_session=True)  # pylint: disable=R1732
 
@@ -904,9 +905,10 @@ class VaspNEBJob(VaspJob):
                 elif which(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
         logger.info(f"Running {' '.join(cmd)}")
-        with open(os.path.join(self.directory, self.output_file), "w") as f_std, open(
-            os.path.join(self.directory, self.stderr_file), "w", buffering=1
-        ) as f_err:
+        with (
+            open(os.path.join(self.directory, self.output_file), "w") as f_std,
+            open(os.path.join(self.directory, self.stderr_file), "w", buffering=1) as f_err,
+        ):
             # Use line buffering for stderr
             return subprocess.Popen(
                 cmd,

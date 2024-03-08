@@ -361,7 +361,6 @@ class Custodian:
             MaxCorrectionsError: if max_errors is reached
             MaxCorrectionsPerHandlerError: if max_errors_per_handler is reached
         """
-
         with ScratchDir(
             self.scratch_dir,
             create_symbolic_link=True,
