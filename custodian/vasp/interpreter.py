@@ -9,7 +9,7 @@ from custodian.ansible.interpreter import Modder
 class VaspModder(Modder):
     """A Modder for VaspInputSets."""
 
-    def __init__(self, actions=None, strict=True, vi=None):
+    def __init__(self, actions=None, strict=True, vi=None, directory="./"):
         """Initialize a Modder for VaspInput sets.
 
         Args:
@@ -24,11 +24,11 @@ class VaspModder(Modder):
                 Initialized automatically if not passed (but passing it will
                 avoid having to reparse the directory).
         """
-        self.vi = vi or VaspInput.from_directory(".")
+        self.vi = vi or VaspInput.from_directory(directory)
         actions = actions or [FileActions, DictActions]
         super().__init__(actions, strict)
 
-    def apply_actions(self, actions):
+    def apply_actions(self, actions, directory = "./"):
         """
         Applies a list of actions to the Vasp Input Set and rewrites modified
         files.
@@ -49,4 +49,4 @@ class VaspModder(Modder):
             else:
                 raise ValueError(f"Unrecognized format: {a}")
         for file in modified:
-            self.vi[file].write_file(file)
+            self.vi[file].write_file(os.path.join(directory, file))

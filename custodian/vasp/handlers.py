@@ -16,6 +16,7 @@ import time
 import warnings
 from collections import Counter
 from math import prod
+from pathlib import Path
 
 import numpy as np
 from monty.dev import deprecated
@@ -161,12 +162,12 @@ class VaspErrorHandler(ErrorHandler):
         self.vtst_fixes = vtst_fixes
         self.logger = logging.getLogger(type(self).__name__)
 
-    def check(self):
+    def check(self, directory = './'):
         """Check for error."""
-        incar = Incar.from_file("INCAR")
+        incar = Incar.from_file(os.path.join(directory, "INCAR"))
         self.errors = set()
         error_msgs = set()
-        with zopen(self.output_filename, mode="rt") as file:
+        with zopen(os.path.join(directory, self.output_filename), mode="rt") as file:
             text = file.read()
 
             # Check for errors
@@ -185,11 +186,11 @@ class VaspErrorHandler(ErrorHandler):
             self.logger.error(msg, extra={"incar": incar.as_dict()})
         return len(self.errors) > 0
 
-    def correct(self):
+    def correct(self, directory = './'):
         """Perform corrections."""
         backup(VASP_BACKUP_FILES | {self.output_filename})
         actions = []
-        vi = VaspInput.from_directory(".")
+        vi = VaspInput.from_directory(directory)
 
         if self.errors.intersection(["tet", "dentet"]):
             # follow advice in this thread
@@ -227,7 +228,7 @@ class VaspErrorHandler(ErrorHandler):
             # error count to 1 to skip first fix
             if self.error_count["brmix"] == 0:
                 try:
-                    assert load_outcar(zpath(os.path.join(os.getcwd(), "OUTCAR"))).is_stopped is False
+                    assert load_outcar(zpath(os.path.join(directory, "OUTCAR"))).is_stopped is False
                 except Exception:
                     self.error_count["brmix"] += 1
 
@@ -315,7 +316,7 @@ class VaspErrorHandler(ErrorHandler):
             # is set to a large value for a small structure.
 
             try:
-                oszicar = Oszicar("OSZICAR")
+                oszicar = Oszicar(os.path.join(directory, "OSZICAR"))
                 nsteps = len(oszicar.ionic_steps)
             except Exception:
                 nsteps = 0
@@ -460,7 +461,7 @@ class VaspErrorHandler(ErrorHandler):
             if "NBANDS" in vi["INCAR"]:
                 nbands = vi["INCAR"]["NBANDS"]
             else:
-                with open("OUTCAR") as file:
+                with open(os.path.join(directory,"OUTCAR")) as file:
                     for line in file:
                         # Have to take the last NBANDS line since sometimes VASP
                         # updates it automatically even if the user specifies it.
@@ -483,7 +484,7 @@ class VaspErrorHandler(ErrorHandler):
             # RMM algorithm is not stable for this calculation
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
             try:
-                is_contcar = Poscar.from_file("CONTCAR")
+                is_contcar = Poscar.from_file(os.path.join(directory, "CONTCAR"))
             except Exception:
                 is_contcar = False
             if is_contcar:
@@ -503,7 +504,7 @@ class VaspErrorHandler(ErrorHandler):
         if "edddav" in self.errors:
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
             try:
-                is_contcar = Poscar.from_file("CONTCAR")
+                is_contcar = Poscar.from_file(os.path.join(directory, "CONTCAR"))
             except Exception:
                 is_contcar = False
             if is_contcar:
@@ -523,7 +524,7 @@ class VaspErrorHandler(ErrorHandler):
             # resources, seems to be to just increase NCORE slightly. That's what I do here.
             nprocs = multiprocessing.cpu_count()
             try:
-                nelect = load_outcar(os.path.join(os.getcwd(), "OUTCAR")).nelect
+                nelect = load_outcar(os.path.join(directory, "OUTCAR")).nelect
             except Exception:
                 nelect = 1  # dummy value
             if nelect < nprocs:
@@ -551,7 +552,7 @@ class VaspErrorHandler(ErrorHandler):
         if self.errors & {"zheev", "eddiag"}:
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
             try:
-                is_contcar = Poscar.from_file("CONTCAR")
+                is_contcar = Poscar.from_file(os.path.join(directory, "CONTCAR"))
             except Exception:
                 is_contcar = False
             if is_contcar:
@@ -706,10 +707,10 @@ class LrfCommutatorHandler(ErrorHandler):
         self.errors: set[str] = set()
         self.error_count: Counter = Counter()
 
-    def check(self):
+    def check(self, directory = './'):
         """Check for error."""
         self.errors = set()
-        with open(self.output_filename) as f:
+        with open(os.path.join(directory, self.output_filename)) as f:
             for line in f:
                 line = line.strip()
                 for err, msgs in LrfCommutatorHandler.error_msgs.items():
@@ -718,15 +719,15 @@ class LrfCommutatorHandler(ErrorHandler):
                             self.errors.add(err)
         return len(self.errors) > 0
 
-    def correct(self):
+    def correct(self, directory = './'):
         """Perform corrections."""
         backup(VASP_BACKUP_FILES | {self.output_filename})
         actions = []
-        vi = VaspInput.from_directory(".")
+        vi = VaspInput.from_directory(directory)
 
         if (
             "lrf_comm" in self.errors
-            and load_outcar(zpath(os.path.join(os.getcwd(), "OUTCAR"))).is_stopped is False
+            and load_outcar(zpath(os.path.join(directory, "OUTCAR"))).is_stopped is False
             and not vi["INCAR"].get("LPEAD")
         ):
             actions.append({"dict": "INCAR", "action": {"_set": {"LPEAD": True}}})
@@ -762,10 +763,10 @@ class StdErrHandler(ErrorHandler):
         self.errors: set[str] = set()
         self.error_count: Counter = Counter()
 
-    def check(self):
+    def check(self, directory = './'):
         """Check for error."""
         self.errors = set()
-        with open(self.output_filename) as file:
+        with open(os.path.join(directory, self.output_filename)) as file:
             for line in file:
                 line = line.strip()
                 for err, msgs in StdErrHandler.error_msgs.items():
@@ -774,11 +775,11 @@ class StdErrHandler(ErrorHandler):
                             self.errors.add(err)
         return len(self.errors) > 0
 
-    def correct(self):
+    def correct(self, directory = './'):
         """Perform corrections."""
         backup(VASP_BACKUP_FILES | {self.output_filename})
         actions = []
-        vi = VaspInput.from_directory(".")
+        vi = VaspInput.from_directory(directory)
 
         if "kpoints_trans" in self.errors and self.error_count["kpoints_trans"] == 0:
             m = prod(vi["KPOINTS"].kpts[0])
@@ -821,11 +822,11 @@ class AliasingErrorHandler(ErrorHandler):
         self.output_filename = output_filename
         self.errors: set[str] = set()
 
-    def check(self):
+    def check(self, directory = './'):
         """Check for error."""
-        incar = Incar.from_file("INCAR")
+        incar = Incar.from_file(os.path.join(directory, "INCAR"))
         self.errors = set()
-        with open(self.output_filename) as f:
+        with open(os.path.join(directory, self.output_filename)) as f:
             for line in f:
                 line = line.strip()
                 for err, msgs in AliasingErrorHandler.error_msgs.items():
@@ -840,14 +841,14 @@ class AliasingErrorHandler(ErrorHandler):
                             self.errors.add(err)
         return len(self.errors) > 0
 
-    def correct(self):
+    def correct(self, directory = './'):
         """Perform corrections."""
         backup(VASP_BACKUP_FILES | {self.output_filename})
         actions = []
-        vi = VaspInput.from_directory(".")
+        vi = VaspInput.from_directory(directory)
 
         if "aliasing" in self.errors:
-            with open("OUTCAR") as file:
+            with open(os.path.join(directory, "OUTCAR")) as file:
                 grid_adjusted = False
                 changes_dict = {}
                 r = re.compile(r".+aliasing errors.*(NG.)\s*to\s*(\d+)")
@@ -902,9 +903,9 @@ class DriftErrorHandler(ErrorHandler):
         self.to_average = int(to_average)
         self.enaug_multiply = enaug_multiply
 
-    def check(self):
+    def check(self, directory = './'):
         """Check for error."""
-        incar = Incar.from_file("INCAR")
+        incar = Incar.from_file(os.path.join(directory, "INCAR"))
         if incar.get("EDIFFG", 0.1) >= 0 or incar.get("NSW", 0) <= 1:
             # Only activate when force relaxing and ionic steps
             # NSW check prevents accidental effects when running DFPT
@@ -914,7 +915,7 @@ class DriftErrorHandler(ErrorHandler):
             self.max_drift = incar["EDIFFG"] * -1
 
         try:
-            outcar = load_outcar(os.path.join(os.getcwd(), "OUTCAR"))
+            outcar = load_outcar(os.path.join(directory, "OUTCAR"))
         except Exception:
             # Can't perform check if Outcar not valid
             return False
@@ -927,14 +928,14 @@ class DriftErrorHandler(ErrorHandler):
         curr_drift = np.average([np.linalg.norm(dct) for dct in curr_drift])
         return curr_drift > self.max_drift
 
-    def correct(self):
+    def correct(self, directory = './'):
         """Perform corrections."""
         backup(VASP_BACKUP_FILES)
         actions = []
-        vi = VaspInput.from_directory(".")
+        vi = VaspInput.from_directory(directory)
 
         incar = vi["INCAR"]
-        outcar = load_outcar(os.path.join(os.getcwd(), "OUTCAR"))
+        outcar = load_outcar(os.path.join(directory, "OUTCAR"))
 
         # Move CONTCAR to POSCAR
         actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
@@ -986,11 +987,11 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         self.output_filename = output_filename
         self.output_vasprun = output_vasprun
 
-    def check(self):
+    def check(self, directory = './'):
         """Check for error."""
         msg = "Reciprocal lattice and k-lattice belong to different class of lattices."
 
-        vi = VaspInput.from_directory(".")
+        vi = VaspInput.from_directory(directory)
         # disregard this error if KSPACING is set and no KPOINTS file is generated
         if vi["INCAR"].get("KSPACING", False):
             return False
@@ -1004,22 +1005,22 @@ class MeshSymmetryErrorHandler(ErrorHandler):
             return False
 
         try:
-            v = load_vasprun(os.path.join(os.getcwd(), self.output_vasprun))
+            v = load_vasprun(os.path.join(directory, self.output_vasprun))
             if v.converged:
                 return False
         except Exception:
             pass
-        with open(self.output_filename) as f:
+        with open(os.path.join(directory, self.output_filename)) as f:
             for line in f:
                 line = line.strip()
                 if line.find(msg) != -1:
                     return True
         return False
 
-    def correct(self):
+    def correct(self, directory = './'):
         """Perform corrections."""
         backup(VASP_BACKUP_FILES | {self.output_filename})
-        vi = VaspInput.from_directory(".")
+        vi = VaspInput.from_directory(directory)
         m = prod(vi["KPOINTS"].kpts[0])
         m = max(int(round(m ** (1 / 3))), 1)
         if vi["KPOINTS"] and vi["KPOINTS"].style.name.lower().startswith("m"):
@@ -1043,19 +1044,19 @@ class UnconvergedErrorHandler(ErrorHandler):
         """
         self.output_filename = output_filename
 
-    def check(self):
+    def check(self, directory = './'):
         """Check for error."""
         try:
-            v = load_vasprun(os.path.join(os.getcwd(), self.output_filename))
+            v = load_vasprun(os.path.join(directory, self.output_filename))
             if not v.converged:
                 return True
         except Exception:
             pass
         return False
 
-    def correct(self):
+    def correct(self, directory = './'):
         """Perform corrections."""
-        v = load_vasprun(os.path.join(os.getcwd(), self.output_filename))
+        v = load_vasprun(os.path.join(directory, self.output_filename))
         algo = v.incar.get("ALGO", "Normal").lower()
         actions = []
         if not v.converged_electronic:
@@ -1123,14 +1124,14 @@ class UnconvergedErrorHandler(ErrorHandler):
             ]
 
         if actions:
-            vi = VaspInput.from_directory(".")
+            vi = VaspInput.from_directory(directory)
 
             # Check for PSMAXN errors - see extensive discussion here
             # https://github.com/materialsproject/custodian/issues/133
             # Only correct PSMAXN when run couldn't converge for any reason
             errors = ["Unconverged"]
             if os.path.isfile("OUTCAR"):
-                with open("OUTCAR") as file:
+                with open(os.path.join(directory,  "OUTCAR")) as file:
                     outcar_as_str = file.read()
                 if "PSMAXN for non-local potential too small" in outcar_as_str:
                     if vi["INCAR"].get("LREAL", False) not in [False, "False", "false"]:
@@ -1166,10 +1167,10 @@ class IncorrectSmearingHandler(ErrorHandler):
         """
         self.output_filename = output_filename
 
-    def check(self):
+    def check(self, directory = './'):
         """Check for error."""
         try:
-            v = load_vasprun(os.path.join(os.getcwd(), self.output_filename))
+            v = load_vasprun(os.path.join(directory, self.output_filename))
             # check whether bandgap is zero, tetrahedron smearing was used
             # and relaxation is performed.
             if v.eigenvalue_band_properties[0] == 0 and v.incar.get("ISMEAR", 1) < -3 and v.incar.get("NSW", 0) > 1:
@@ -1178,10 +1179,10 @@ class IncorrectSmearingHandler(ErrorHandler):
             pass
         return False
 
-    def correct(self):
+    def correct(self, directory = './'):
         """Perform corrections."""
         backup(VASP_BACKUP_FILES | {self.output_filename})
-        vi = VaspInput.from_directory(".")
+        vi = VaspInput.from_directory(directory)
 
         actions = [
             {"dict": "INCAR", "action": {"_set": {"ISMEAR": 2}}},
@@ -1212,10 +1213,10 @@ class KspacingMetalHandler(ErrorHandler):
         """
         self.output_filename = output_filename
 
-    def check(self):
+    def check(self, directory = './'):
         """Check for error."""
         try:
-            v = load_vasprun(os.path.join(os.getcwd(), self.output_filename))
+            v = load_vasprun(os.path.join(directory, self.output_filename))
             # check whether bandgap is zero and KSPACING is too large
             # using 0 as fallback value for KSPACING so that this handler does not trigger if KSPACING is not set
             if v.eigenvalue_band_properties[0] == 0 and v.incar.get("KSPACING", 0) > 0.22:
@@ -1224,10 +1225,10 @@ class KspacingMetalHandler(ErrorHandler):
             pass
         return False
 
-    def correct(self):
+    def correct(self, directory = './'):
         """Perform corrections."""
         backup(VASP_BACKUP_FILES | {self.output_filename})
-        vi = VaspInput.from_directory(".")
+        vi = VaspInput.from_directory(directory)
 
         _dummy_structure = Structure(
             [1, 0, 0, 0, 1, 0, 0, 0, 1],
@@ -1280,11 +1281,11 @@ class LargeSigmaHandler(ErrorHandler):
     def __init__(self):
         """Initializes the handler with a buffer time."""
 
-    def check(self):
+    def check(self, directory = './'):
         """Check for error."""
-        incar = Incar.from_file("INCAR")
+        incar = Incar.from_file(os.path.join(directory, "INCAR"))
         try:
-            outcar = load_outcar(os.path.join(os.getcwd(), "OUTCAR"))
+            outcar = load_outcar(os.path.join(directory, "OUTCAR"))
         except Exception:
             # Can't perform check if Outcar not valid
             return False
@@ -1294,7 +1295,7 @@ class LargeSigmaHandler(ErrorHandler):
             outcar.read_pattern(
                 {"entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"}, postprocess=float, reverse=True, terminate_on_match=True
             )
-            n_atoms = Structure.from_file("POSCAR").num_sites
+            n_atoms = Structure.from_file(os.path.join(directory, "POSCAR")).num_sites
             if outcar.data.get("entropy", []):
                 entropy_per_atom = abs(np.max(outcar.data.get("entropy"))) / n_atoms
 
@@ -1304,11 +1305,11 @@ class LargeSigmaHandler(ErrorHandler):
 
         return False
 
-    def correct(self):
+    def correct(self, directory = './'):
         """Perform corrections."""
         backup(VASP_BACKUP_FILES)
         actions = []
-        vi = VaspInput.from_directory(".")
+        vi = VaspInput.from_directory(directory)
         sigma = vi["INCAR"].get("SIGMA", 0.2)
 
         # Reduce SIGMA by 0.06 if larger than 0.08
@@ -1360,10 +1361,10 @@ class PotimErrorHandler(ErrorHandler):
         self.output_filename = output_filename
         self.dE_threshold = dE_threshold
 
-    def check(self):
+    def check(self, directory = './'):
         """Check for error."""
         try:
-            oszicar = Oszicar(self.output_filename)
+            oszicar = Oszicar(os.path.join(directory,self.output_filename))
             n = len(Poscar.from_file(self.input_filename).structure)
             max_dE = max(s["dE"] for s in oszicar.ionic_steps[1:]) / n
             if max_dE > self.dE_threshold:
@@ -1372,10 +1373,10 @@ class PotimErrorHandler(ErrorHandler):
             return False
         return None
 
-    def correct(self):
+    def correct(self, directory = './'):
         """Perform corrections."""
         backup(VASP_BACKUP_FILES)
-        vi = VaspInput.from_directory(".")
+        vi = VaspInput.from_directory(directory)
         potim = vi["INCAR"].get("POTIM", 0.5)
         ibrion = vi["INCAR"].get("IBRION", 0)
         if potim < 0.2 and ibrion != 3:
@@ -1412,18 +1413,18 @@ class FrozenJobErrorHandler(ErrorHandler):
         self.output_filename = output_filename
         self.timeout = timeout
 
-    def check(self):
+    def check(self, directory = './'):
         """Check for error."""
-        st = os.stat(self.output_filename)
+        st = os.stat(os.path.join(directory,self.output_filename))
         if time.time() - st.st_mtime > self.timeout:
             return True
         return None
 
-    def correct(self):
+    def correct(self, directory = './'):
         """Perform corrections."""
         backup(VASP_BACKUP_FILES | {self.output_filename})
 
-        vi = VaspInput.from_directory(".")
+        vi = VaspInput.from_directory(directory)
         actions = []
         if vi["INCAR"].get("ALGO", "Normal").lower() == "fast":
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
@@ -1457,12 +1458,12 @@ class NonConvergingErrorHandler(ErrorHandler):
         self.output_filename = output_filename
         self.nionic_steps = nionic_steps
 
-    def check(self):
+    def check(self, directory = './'):
         """Check for error."""
-        vi = VaspInput.from_directory(".")
+        vi = VaspInput.from_directory(directory)
         n_elm = vi["INCAR"].get("NELM", 60)  # number of electronic steps
         try:
-            oszicar = Oszicar(self.output_filename)
+            oszicar = Oszicar(os.path.join(directory,self.output_filename))
             elec_steps = oszicar.electronic_steps
             if len(elec_steps) > self.nionic_steps:
                 return all(len(e) == n_elm for e in elec_steps[-(self.nionic_steps + 1) : -1])
@@ -1470,9 +1471,9 @@ class NonConvergingErrorHandler(ErrorHandler):
             pass
         return False
 
-    def correct(self):
+    def correct(self, directory = './'):
         """Perform corrections."""
-        incar = (vi := VaspInput.from_directory("."))["INCAR"]
+        incar = (vi := VaspInput.from_directory(directory))["INCAR"]
         algo = incar.get("ALGO", "Normal").lower()
         amix = incar.get("AMIX", 0.4)
         bmix = incar.get("BMIX", 1.0)
@@ -1501,7 +1502,7 @@ class NonConvergingErrorHandler(ErrorHandler):
 
         # NOTE: This is the amin error handler
         # Sometimes an AMIN warning can appear with large unit cell dimensions, so we'll address it now
-        if max(Structure.from_file("CONTCAR").lattice.abc) > 50 and amin > 0.01:
+        if max(Structure.from_file(os.path.join(directory, "CONTCAR")).lattice.abc) > 50 and amin > 0.01:
             actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}})
 
         # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
@@ -1632,12 +1633,12 @@ class WalltimeHandler(ErrorHandler):
         self.electronic_steps_timings = [0]
         self.prev_check_time = self.start_time
 
-    def check(self):
+    def check(self, directory = './'):
         """Check for error."""
         if self.wall_time:
             run_time = datetime.datetime.now() - self.start_time
             total_secs = run_time.total_seconds()
-            outcar = load_outcar(os.path.join(os.getcwd(), "OUTCAR"))
+            outcar = load_outcar(os.path.join(directory, "OUTCAR"))
             if not self.electronic_step_stop:
                 # Determine max time per ionic step.
                 outcar.read_pattern({"timings": r"LOOP\+.+real time(.+)"}, postprocess=float)
@@ -1655,7 +1656,7 @@ class WalltimeHandler(ErrorHandler):
 
         return False
 
-    def correct(self):
+    def correct(self, directory = './'):
         """Perform corrections."""
         content = "LSTOP = .TRUE." if not self.electronic_step_stop else "LABORT = .TRUE."
         # Write STOPCAR
@@ -1696,7 +1697,7 @@ class CheckpointHandler(ErrorHandler):
         self.start_time = datetime.datetime.now()
         self.chk_counter = 0
 
-    def check(self):
+    def check(self, directory = './'):
         """Check for error."""
         run_time = datetime.datetime.now() - self.start_time
         total_secs = run_time.seconds + run_time.days * 3600 * 24
@@ -1704,7 +1705,7 @@ class CheckpointHandler(ErrorHandler):
             return True
         return False
 
-    def correct(self):
+    def correct(self, directory = './'):
         """Perform corrections."""
         content = "LSTOP = .TRUE."
         chkpt_content = f'Index: {self.chk_counter}\nTime: "{datetime.datetime.now()}"'
@@ -1753,15 +1754,15 @@ class StoppedRunHandler(ErrorHandler):
     def __init__(self):
         """Dummy init."""
 
-    def check(self):
+    def check(self, directory = './'):
         """Check for error."""
         return os.path.isfile("chkpt.yaml")
 
-    def correct(self):
+    def correct(self, directory = './'):
         """Perform corrections."""
         d = loadfn("chkpt.yaml")
         i = d["Index"]
-        name = shutil.make_archive(os.path.join(os.getcwd(), f"vasp.chk.{i}"), "gztar")
+        name = shutil.make_archive(os.path.join(directory, f"vasp.chk.{i}"), "gztar")
 
         actions = [{"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}]
 
@@ -1791,20 +1792,20 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         """
         self.output_filename = output_filename
 
-    def check(self):
+    def check(self, directory = './'):
         """Check for error."""
         try:
-            oszicar = Oszicar(self.output_filename)
+            oszicar = Oszicar(os.path.join(directory,self.output_filename))
             if oszicar.final_energy > 0:
                 return True
         except Exception:
             pass
         return False
 
-    def correct(self):
+    def correct(self, directory = './'):
         """Perform corrections."""
         # change ALGO = Fast to Normal if ALGO is !Normal
-        vi = VaspInput.from_directory(".")
+        vi = VaspInput.from_directory(directory)
         algo = vi["INCAR"].get("ALGO", "Normal").lower()
         if algo not in {"normal", "n"}:
             backup(VASP_BACKUP_FILES)
