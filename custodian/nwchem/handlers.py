@@ -2,6 +2,7 @@
 This module implements error handlers for Nwchem runs. Currently tested only
 for B3LYP DFT jobs.
 """
+import os
 
 from pymatgen.io.nwchem import NwInput, NwOutput
 
@@ -28,9 +29,9 @@ class NwchemErrorHandler(ErrorHandler):
         """
         self.output_filename = output_filename
 
-    def check(self):
+    def check(self, directory="./"):
         """Check for errors."""
-        out = NwOutput(self.output_filename)
+        out = NwOutput(os.path.join(directory, self.output_filename))
         self.errors = []
         self.input_file = out.job_info["input"]
         if out.data[-1]["has_error"]:
@@ -39,8 +40,8 @@ class NwchemErrorHandler(ErrorHandler):
         self.ntasks = len(out.data)
         return len(self.errors) > 0
 
-    def _mod_input(self, search_string_func, mod_string_func):
-        with open(self.input_file) as file:
+    def _mod_input(self, search_string_func, mod_string_func, directory):
+        with open(os.path.join(directory, self.input_file)) as file:
             lines = []
             for line in file:
                 if search_string_func(line):
@@ -48,14 +49,14 @@ class NwchemErrorHandler(ErrorHandler):
                 else:
                     lines.append(line)
 
-        with open(self.input_file, "w") as fout:
+        with open(os.path.join(directory, self.input_file), "w") as fout:
             fout.write("".join(lines))
 
-    def correct(self):
+    def correct(self, directory="./"):
         """Correct errors."""
-        backup("*.nw*")
+        backup("*.nw*", directory=directory)
         actions = []
-        nwi = NwInput.from_file(self.input_file)
+        nwi = NwInput.from_file(os.path.join(directory, self.input_file))
         for e in self.errors:
             if e == "autoz error":
                 action = {"_set": {"geometry_options": ["units", "angstroms", "noautoz"]}}
@@ -77,7 +78,7 @@ class NwchemErrorHandler(ErrorHandler):
                 # die.
                 return {"errors": self.errors, "actions": None}
 
-        m = Modder()
+        m = Modder(directory=directory)
         for action in actions:
             nwi = m.modify_object(action, nwi)
         nwi.write_file(self.input_file)
