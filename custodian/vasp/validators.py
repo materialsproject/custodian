@@ -26,7 +26,7 @@ class VasprunXMLValidator(Validator):
         self.logger = logging.getLogger(type(self).__name__)
 
     def check(self, directory="./"):
-        """Check for error."""
+        """Check for errors."""
         try:
             load_vasprun(os.path.join(directory, "vasprun.xml"))
         except Exception:
