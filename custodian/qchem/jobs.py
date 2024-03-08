@@ -99,26 +99,29 @@ class QCJob(Job):
             print("SLURM_CPUS_ON_NODE not in environment")
 
     @property
-    def current_command(self):
+    def current_command(self, directory="./"):
         """The command to run QChem."""
+        self._input_path = os.path.join(directory, self.input_file)
+        self._output_path = os.path.join(directory, self.output_file)
         multi = {"openmp": "-nt", "mpi": "-np"}
         if self.multimode not in multi:
             raise RuntimeError("ERROR: Multimode should only be set to openmp or mpi")
-        command = [multi[self.multimode], str(self.max_cores), self.input_file, self.output_file, "scratch"]
+        command = [multi[self.multimode], str(self.max_cores), self._input_path, self._output_path, "scratch"]
         command = self.qchem_command + command
         return " ".join(command)
 
-    def setup(self):
+    def setup(self, directory="./"):
         """Sets up environment variables necessary to efficiently run QChem."""
+        self._input_path = os.path.join(directory, self.input_file)
         if self.backup:
-            shutil.copy(self.input_file, f"{self.input_file}.orig")
+            shutil.copy(self._input_path, os.path.join(directory, f"{self.input_file}.orig"))
         if self.multimode == "openmp":
             os.environ["QCTHREADS"] = str(self.max_cores)
             os.environ["OMP_NUM_THREADS"] = str(self.max_cores)
         os.environ["QCSCRATCH"] = os.getcwd()
         if self.calc_loc is not None:
             os.environ["QCLOCALSCR"] = self.calc_loc
-        qcinp = QCInput.from_file(self.input_file)
+        qcinp = QCInput.from_file(self._input_path)
         if (
             qcinp.rem.get("run_nbo6", "none").lower() == "true"
             or qcinp.rem.get("nbo_external", "none").lower() == "true"
@@ -128,17 +131,20 @@ class QCJob(Job):
                 raise RuntimeError("Trying to run NBO7 without providing NBOEXE in fworker! Exiting...")
             os.environ["NBOEXE"] = self.nboexe
 
-    def postprocess(self):
+    def postprocess(self, directory="./"):
         """Renames and removes scratch files after running QChem."""
+        self._input_path = os.path.join(directory, self.input_file)
+        self._output_path = os.path.join(directory, self.output_file)
+        self._qclog_path = os.path.join(directory, self.qclog_file)
         scratch_dir = os.path.join(os.environ["QCSCRATCH"], "scratch")
         for file in ["HESS", "GRAD", "plots/dens.0.cube", "131.0", "53.0", "132.0"]:
             file_path = os.path.join(scratch_dir, file)
             if os.path.isfile(file_path):
                 shutil.copy(file_path, os.getcwd())
         if self.suffix != "":
-            shutil.move(self.input_file, self.input_file + self.suffix)
-            shutil.move(self.output_file, self.output_file + self.suffix)
-            shutil.move(self.qclog_file, self.qclog_file + self.suffix)
+            shutil.move(self._input_path, os.path.join(directory, self.input_file + self.suffix))
+            shutil.move(self._output_path, os.path.join(directory, self.output_file + self.suffix))
+            shutil.move(self._qclog_path, os.path.join(directory, self.qclog_file + self.suffix))
             for file in ["HESS", "GRAD", "dens.0.cube"]:
                 if os.path.isfile(file):
                     shutil.move(file, file + self.suffix)

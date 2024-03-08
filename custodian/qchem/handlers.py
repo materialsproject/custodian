@@ -55,9 +55,10 @@ class QChemErrorHandler(ErrorHandler):
         self.errors = []
         self.opt_error_history = []
 
-    def check(self):
+    def check(self, directory="./"):
         """Checks output file for errors."""
-        self.outdata = QCOutput(self.output_file).data
+        self._output_path = os.path.join(directory, self.output_file)
+        self.outdata = QCOutput(self._output_path).data
         self.errors = self.outdata.get("errors")
         self.warnings = self.outdata.get("warnings")
         # If we aren't out of optimization cycles, but we were in the past, reset the history
@@ -68,11 +69,13 @@ class QChemErrorHandler(ErrorHandler):
             return False
         return len(self.errors) > 0
 
-    def correct(self):
+    def correct(self, directory="./"):
         """Perform corrections."""
-        backup({self.input_file, self.output_file})
+        self._input_path = os.path.join(directory, self.input_file)
+        self._output_path = os.path.join(directory, self.output_file)
+        backup({self._input_pat, self._output_path})
         actions = []
-        self.qcinp = QCInput.from_file(self.input_file)
+        self.qcinp = QCInput.from_file(self._input_path)
 
         if "SCF_failed_to_converge" in self.errors:
             # Given defaults, the first handlers will typically be skipped.
@@ -380,6 +383,6 @@ class QChemErrorHandler(ErrorHandler):
         ) and str(self.qcinp.geom_opt["initial_hessian"]).lower() == "read":
             del self.qcinp.geom_opt["initial_hessian"]
             actions.append({"initial_hessian": "deleted"})
-        os.rename(self.input_file, self.input_file + ".last")
-        self.qcinp.write_file(self.input_file)
+        os.rename(self._input_path, os.path.join(directory, self.input_file + ".last"))
+        self.qcinp.write_file(self._input_path)
         return {"errors": self.errors, "warnings": self.warnings, "actions": actions}
