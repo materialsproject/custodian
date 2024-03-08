@@ -1,12 +1,15 @@
 import pytest
+from pathlib import Path
 
 from custodian import Custodian
 from custodian.qchem.handlers import QChemErrorHandler
 from custodian.qchem.jobs import QCJob
 
 pytest.importorskip("openbabel")
-my_input = "test.qin"
-my_output = "test.qout"
+FILE_DIR = Path(__file__).parent
+
+my_input = str(FILE_DIR / "test.qin")
+my_output = str(FILE_DIR / "test.qout")
 
 job = QCJob.opt_with_frequency_flattener(
     qchem_command="qchem -slurm",
