@@ -73,7 +73,7 @@ class QChemErrorHandler(ErrorHandler):
         """Perform corrections."""
         self._input_path = os.path.join(directory, self.input_file)
         self._output_path = os.path.join(directory, self.output_file)
-        backup({self._input_pat, self._output_path})
+        backup({self._input_path, self._output_path})
         actions = []
         self.qcinp = QCInput.from_file(self._input_path)
 
