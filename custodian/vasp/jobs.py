@@ -213,7 +213,7 @@ class VaspJob(Job):
                 actions = loadfn(os.path.join(self.directory, "continue.json")).get("actions")
                 logger.info(f"Continuing previous VaspJob. Actions: {actions}")
                 backup([os.path.join(self.directory, file) for file in VASP_BACKUP_FILES], prefix="prev_run")
-                VaspModder().apply_actions(actions, self.directory)
+                VaspModder(directory=self.directory).apply_actions(actions)
 
             else:
                 # Default functionality is to copy CONTCAR to POSCAR and set
@@ -231,7 +231,7 @@ class VaspJob(Job):
                 dumpfn({"actions": actions}, os.path.join(self.directory, "continue.json"))
 
         if self.settings_override is not None:
-            VaspModder().apply_actions(self.settings_override, self.directory)
+            VaspModder(directory=self.directory).apply_actions(self.settings_override)
 
     def run(self):
         """
@@ -882,7 +882,7 @@ class VaspNEBJob(VaspJob):
                 shutil.copy(contcar, poscar)
 
         if self.settings_override is not None:
-            VaspModder().apply_actions(self.settings_override, self.directory)
+            VaspModder(directory=self.directory).apply_actions(self.settings_override)
 
     def run(self):
         """
@@ -904,10 +904,13 @@ class VaspNEBJob(VaspJob):
                 elif which(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
         logger.info(f"Running {' '.join(cmd)}")
-        with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
+        with open(os.path.join(self.directory, self.output_file), "w") as f_std, open(
+            os.path.join(self.directory, self.stderr_file), "w", buffering=1
+        ) as f_err:
             # Use line buffering for stderr
             return subprocess.Popen(
                 cmd,
+                cwd=self.directory,
                 stdout=f_std,
                 stderr=f_err,
                 start_new_session=True,
