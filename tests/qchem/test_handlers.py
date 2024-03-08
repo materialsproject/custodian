@@ -37,8 +37,8 @@ class QChemErrorHandlerTest(TestCase):
     def _check_equivalent_inputs(self, input1, input2):
         QCinput1 = QCInput.from_file(input1)
         QCinput2 = QCInput.from_file(input2)
-        sections1 = QCInput.find_sections(QCinput1.get_string())
-        sections2 = QCInput.find_sections(QCinput2.get_string())
+        sections1 = QCInput.find_sections(QCinput1.get_str())
+        sections2 = QCInput.find_sections(QCinput2.get_str())
         assert sections1 == sections2
         for key in sections1:
             assert QCinput1.as_dict().get(key) == QCinput2.as_dict().get(key)
