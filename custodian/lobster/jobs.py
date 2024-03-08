@@ -70,35 +70,37 @@ class LobsterJob(Job):
         self.add_files_to_gzip = add_files_to_gzip
         self.backup = backup
 
-    def setup(self):
+    def setup(self, directory="./"):
         """Will backup lobster input files."""
         if self.backup:
             for file in LOBSTERINPUT_FILES:
-                shutil.copy(file, f"{file}.orig")
+                shutil.copy(os.path.join(directory, file), os.path.join(directory, f"{file}.orig"))
 
-    def run(self):
+    def run(self, directory="./"):
         """Runs the job."""
         cmd = self.lobster_cmd
 
         logger.info(f"Running {' '.join(cmd)}")
 
-        with zopen(self.output_file, "w") as f_std, zopen(self.stderr_file, "w", buffering=1) as f_err:
+        with zopen(os.path.join(directory, self.output_file), "w") as f_std, zopen(
+            os.path.join(directory, self.stderr_file), "w", buffering=1
+        ) as f_err:
             # use line buffering for stderr
-            return subprocess.Popen(cmd, stdout=f_std, stderr=f_err)  # pylint: disable=R1732
+            return subprocess.Popen(cmd, cwd=directory, stdout=f_std, stderr=f_err)  # pylint: disable=R1732
 
-    def postprocess(self):
+    def postprocess(self, directory="./"):
         """Will gzip relevant files (won't gzip custodian.json and other output files from the cluster)."""
         if self.gzipped:
             for file in LOBSTEROUTPUT_FILES:
-                if os.path.isfile(file):
-                    compress_file(file, compression="gz")
+                if os.path.isfile(os.path.join(directory, file)):
+                    compress_file(os.path.join(directory, file), compression="gz")
             for file in LOBSTERINPUT_FILES:
-                if os.path.isfile(file):
-                    compress_file(file, compression="gz")
-            if self.backup and os.path.isfile("lobsterin.orig"):
-                compress_file("lobsterin.orig", compression="gz")
+                if os.path.isfile(os.path.join(directory, file)):
+                    compress_file(os.path.join(directory, file), compression="gz")
+            if self.backup and os.path.isfile(os.path.join(directory, "lobsterin.orig")):
+                compress_file(os.path.join(directory, "lobsterin.orig"), compression="gz")
             for file in FW_FILES:
-                if os.path.isfile(file):
-                    compress_file(file, compression="gz")
+                if os.path.isfile(os.path.join(directory, file)):
+                    compress_file(os.path.join(directory, file), compression="gz")
             for file in self.add_files_to_gzip:
-                compress_file(file, compression="gz")
+                compress_file(os.path.join(directory, file), compression="gz")
