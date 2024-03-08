@@ -223,7 +223,7 @@ class Custodian:
 
                     return prefix == abs_directory
 
-                def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+                def safe_extract(tar, path=directory, members=None, *, numeric_owner=False):
                     for member in tar.getmembers():
                         member_path = os.path.join(path, member.name)
                         if not is_within_directory(path, member_path):
@@ -231,9 +231,9 @@ class Custodian:
 
                     tar.extractall(path, members, numeric_owner=numeric_owner)
 
-                safe_extract(t)
+                safe_extract(t, directory)
             # Log the corrections to a json file.
-            run_log = loadfn(Custodian.LOG_FILE, cls=MontyDecoder)
+            run_log = loadfn(os.path.join(directory, Custodian.LOG_FILE), cls=MontyDecoder)
 
         return restart, run_log
 
@@ -565,7 +565,7 @@ class Custodian:
 
             # load run log
             if os.path.isfile(Custodian.LOG_FILE):
-                self.run_log = loadfn(Custodian.LOG_FILE, cls=MontyDecoder)
+                self.run_log = loadfn(os.path.join(self.directory, Custodian.LOG_FILE), cls=MontyDecoder)
 
             if len(self.run_log) == 0:
                 # starting up an initial job - setup input and quit
