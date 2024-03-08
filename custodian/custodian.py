@@ -122,7 +122,7 @@ class Custodian:
         checkpoint=False,
         terminate_func=None,
         terminate_on_nonzero_returncode=True,
-        directory = None,
+        directory=None,
         **kwargs,
     ):
         """Initialize a Custodian from a list of jobs and error handlers.
@@ -452,7 +452,7 @@ class Custodian:
                 f"errors in job thus far = {self.total_errors}, {self.errors_current_job}."
             )
 
-            p = job.run(directory = self.directory)
+            p = job.run(directory=self.directory)
             # Check for errors using the error handlers and perform
             # corrections.
             has_error = False
@@ -515,7 +515,7 @@ class Custodian:
                         logger.info(msg)
                         raise ReturnCodeError(msg, raises=True)
                     warnings.warn("subprocess returned a non-zero return code. Check outputs carefully...")
-                job.postprocess(directory = self.directory)
+                job.postprocess(directory=self.directory)
                 return
 
             # Check that all errors could be handled
@@ -572,7 +572,7 @@ class Custodian:
                 job_n = 0
                 job = self.jobs[job_n]
                 logger.info(f"Setting up job no. 1 ({job.name}) ")
-                job.setup(directory = self.directory)
+                job.setup(directory=self.directory)
                 self.run_log.append({"job": job.as_dict(), "corrections": [], "job_n": job_n})
                 return len(self.jobs)
 
@@ -603,14 +603,14 @@ class Custodian:
             # check validators
             logger.info(f"Checking validator for {job.name}.run")
             for v in self.validators:
-                if v.check(directory = self.directory):
+                if v.check(directory=self.directory):
                     self.run_log[-1]["validator"] = v
                     logger.info("Failed validation based on validator")
                     s = f"Validation failed: {v}"
                     raise ValidationError(s, raises=True, validator=v)
 
             logger.info(f"Postprocessing for {job.name}.run")
-            job.postprocess(directory = self.directory)
+            job.postprocess(directory=self.directory)
 
             # IF DONE WITH ALL JOBS - DELETE ALL CHECKPOINTS AND RETURN
             # VALIDATED
@@ -622,7 +622,7 @@ class Custodian:
             job_n += 1
             job = self.jobs[job_n]
             self.run_log.append({"job": job.as_dict(), "corrections": [], "job_n": job_n})
-            job.setup(directory = self.directory)
+            job.setup(directory=self.directory)
             return len(self.jobs) - job_n
 
         except CustodianError as ex:
@@ -647,7 +647,7 @@ class Custodian:
         corrections = []
         for handler in handlers:
             try:
-                if handler.check(directory = self.directory):
+                if handler.check(directory=self.directory):
                     if (
                         handler.max_num_corrections is not None
                         and handler.n_applied_corrections >= handler.max_num_corrections
@@ -665,10 +665,10 @@ class Custodian:
                         continue
                     if terminate_func is not None and handler.is_terminating:
                         logger.info("Terminating job")
-                        terminate_func(directory = self.directory)
+                        terminate_func(directory=self.directory)
                         # make sure we don't terminate twice
                         terminate_func = None
-                    dct = handler.correct(directory = self.directory)
+                    dct = handler.correct(directory=self.directory)
                     logger.error(type(handler).__name__, extra=dct)
                     dct["handler"] = handler
                     corrections.append(dct)
@@ -695,28 +695,28 @@ class Job(MSONable):
     """Abstract base class defining the interface for a Job."""
 
     @abstractmethod
-    def setup(self, directory = "./"):
+    def setup(self, directory="./"):
         """
         This method is run before the start of a job. Allows for some
         pre-processing.
         """
 
     @abstractmethod
-    def run(self, directory = "./"):
+    def run(self, directory="./"):
         """
         This method perform the actual work for the job. If parallel error
         checking (monitoring) is desired, this must return a Popen process.
         """
 
     @abstractmethod
-    def postprocess(self, directory = "./"):
+    def postprocess(self, directory="./"):
         """
         This method is called at the end of a job, *after* error detection.
         This allows post-processing, such as cleanup, analysis of results,
         etc.
         """
 
-    def terminate(self, directory = "./"):
+    def terminate(self, directory="./"):
         """Implement termination function."""
         return
 
@@ -773,7 +773,7 @@ class ErrorHandler(MSONable):
     """
 
     @abstractmethod
-    def check(self, directory = "./"):
+    def check(self, directory="./"):
         """
         This method is called during the job (for monitors) or at the end of
         the job to check for errors.
@@ -783,7 +783,7 @@ class ErrorHandler(MSONable):
         """
 
     @abstractmethod
-    def correct(self, directory = "./"):
+    def correct(self, directory="./"):
         """
         This method is called at the end of a job when an error is detected.
         It should perform any corrective measures relating to the detected
@@ -831,7 +831,7 @@ class Validator(MSONable):
     """
 
     @abstractmethod
-    def check(self, directory = "./"):
+    def check(self, directory="./"):
         """
         This method is called at the end of a job.
 
