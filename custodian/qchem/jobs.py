@@ -6,12 +6,13 @@ import shutil
 import subprocess
 import warnings
 
+from pathlib import Path
+
 import numpy as np
 from pymatgen.core import Molecule
 from pymatgen.io.qchem.inputs import QCInput
 from pymatgen.io.qchem.outputs import QCOutput, check_for_structure_changes
 from pymatgen.io.qchem.sets import OptSet
-
 from custodian.custodian import Job
 from custodian.qchem.utils import perturb_coordinates, vector_list_diff
 
@@ -118,7 +119,7 @@ class QCJob(Job):
         if self.multimode == "openmp":
             os.environ["QCTHREADS"] = str(self.max_cores)
             os.environ["OMP_NUM_THREADS"] = str(self.max_cores)
-        os.environ["QCSCRATCH"] = os.getcwd()
+        os.environ["QCSCRATCH"] = str(Path(directory).resolve())
         if self.calc_loc is not None:
             os.environ["QCLOCALSCR"] = self.calc_loc
         qcinp = QCInput.from_file(self._input_path)
@@ -140,7 +141,7 @@ class QCJob(Job):
         for file in ["HESS", "GRAD", "plots/dens.0.cube", "131.0", "53.0", "132.0"]:
             file_path = os.path.join(scratch_dir, file)
             if os.path.isfile(file_path):
-                shutil.copy(file_path, os.getcwd())
+                shutil.copy(file_path, directory)
         if self.suffix != "":
             shutil.move(self._input_path, os.path.join(directory, self.input_file + self.suffix))
             shutil.move(self._output_path, os.path.join(directory, self.output_file + self.suffix))
