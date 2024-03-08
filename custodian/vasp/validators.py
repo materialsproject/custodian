@@ -25,7 +25,7 @@ class VasprunXMLValidator(Validator):
         self.stderr_file = stderr_file
         self.logger = logging.getLogger(type(self).__name__)
 
-    def check(self, directory = "./"):
+    def check(self, directory="./"):
         """Check for error."""
         try:
             load_vasprun(os.path.join(directory, "vasprun.xml"))
@@ -68,9 +68,11 @@ class VaspFilesValidator(Validator):
     def __init__(self):
         """Dummy init."""
 
-    def check(self, directory = "./"):
+    def check(self, directory="./"):
         """Check for error."""
-        return any(not os.path.isfile(os.path.join(self.directory, vfile)) for vfile in ["CONTCAR", "OSZICAR", "OUTCAR"])
+        return any(
+            not os.path.isfile(os.path.join(self.directory, vfile)) for vfile in ["CONTCAR", "OSZICAR", "OUTCAR"]
+        )
 
 
 class VaspNpTMDValidator(Validator):
@@ -82,7 +84,7 @@ class VaspNpTMDValidator(Validator):
     def __init__(self):
         """Dummy init."""
 
-    def check(self, directory = "./"):
+    def check(self, directory="./"):
         """Check for error."""
         incar = Incar.from_file(os.path.join(directory, "INCAR"))
         is_npt = incar.get("MDALGO") == 3
@@ -103,7 +105,7 @@ class VaspAECCARValidator(Validator):
     def __init__(self):
         """Dummy init."""
 
-    def check(self, directory = "./"):
+    def check(self, directory="./"):
         """Check for error."""
         aeccar0 = Chgcar.from_file(os.path.join(directory, "AECCAR0"))
         aeccar2 = Chgcar.from_file(os.path.join(directory, "AECCAR2"))
