@@ -678,7 +678,7 @@ class VaspErrorHandler(ErrorHandler):
                     )
             self.error_count["algo_tet"] += 1
 
-        VaspModder(vi=vi, directory=self.directory).apply_actions(actions)
+        VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
 
 
