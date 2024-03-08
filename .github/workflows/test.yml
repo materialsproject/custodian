@@ -31,9 +31,9 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v3
         with:
           python-version: ${{ matrix.python-version }}
+          activate-environment: myenv
 
       - name: Install OpenBabel
-        shell: bash -l {0}
         run: conda install -c conda-forge openbabel
 
       - name: Install dependencies
