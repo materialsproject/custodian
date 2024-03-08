@@ -348,7 +348,6 @@ class VaspJob(Job):
                 auto_npar=auto_npar,
                 auto_continue=auto_continue,
                 settings_override=settings_overide_1,
-                directory=directory,
             ),
             VaspJob(
                 vasp_cmd,
@@ -358,7 +357,6 @@ class VaspJob(Job):
                 auto_npar=auto_npar,
                 auto_continue=auto_continue,
                 settings_override=settings_overide_2,
-                directory=directory,
             ),
         ]
 
@@ -397,7 +395,6 @@ class VaspJob(Job):
                 final=False,
                 suffix=".precondition",
                 settings_override=pre_opt_settings,
-                directory=directory,
             )
         ]
 
@@ -514,7 +511,6 @@ class VaspJob(Job):
                 backup=backup,
                 suffix=f".relax{i + 1}",
                 settings_override=settings,
-                directory=directory,
                 **vasp_job_kwargs,
             )
 
@@ -867,7 +863,7 @@ class VaspNEBJob(VaspJob):
             os.remove(os.path.join(directory, "STOPCAR"))
 
             # Copy CONTCAR to POSCAR
-            for path in self.neb_sub:
+            for path in neb_sub:
                 contcar = os.path.join(path, "CONTCAR")
                 poscar = os.path.join(path, "POSCAR")
                 shutil.copy(contcar, poscar)
@@ -914,7 +910,7 @@ class VaspNEBJob(VaspJob):
 
         neb_dirs, neb_sub = self._get_neb_dirs(directory)
 
-        for path in self.neb_dirs:
+        for path in neb_dirs:
             for file in VASP_NEB_OUTPUT_SUB_FILES:
                 file = os.path.join(path, file)
                 if os.path.isfile(file):
@@ -936,7 +932,7 @@ class VaspNEBJob(VaspJob):
         neb_dirs = sorted(  # 00, 01, etc.
             path for path in os.listdir(directory) if os.path.isdir(path) and path.isdigit()
         )
-        neb_sub = self.neb_dirs[1:-1]  # 01, 02, etc.
+        neb_sub = neb_dirs[1:-1]  # 01, 02, etc.
         return neb_dirs, neb_sub
 
 

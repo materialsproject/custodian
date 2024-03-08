@@ -32,8 +32,8 @@ class VasprunXMLValidator(Validator):
         except Exception:
             exception_context = {}
 
-            if os.path.isfile(os.path.join(self.directory, self.output_file)):
-                with open(os.path.join(self.directory, self.output_file)) as output_file:
+            if os.path.isfile(os.path.join(directory, self.output_file)):
+                with open(os.path.join(directory, self.output_file)) as output_file:
                     output_file_tail = deque(output_file, maxlen=10)
                 exception_context["output_file_tail"] = "".join(output_file_tail)
 
@@ -42,14 +42,14 @@ class VasprunXMLValidator(Validator):
                     stderr_file_tail = deque(stderr_file, maxlen=10)
                 exception_context["stderr_file_tail"] = "".join(stderr_file_tail)
 
-            if os.path.isfile(os.path.join(self.directory, "vasprun.xml")):
-                stat = os.stat(os.path.join(self.directory, "vasprun.xml"))
+            if os.path.isfile(os.path.join(directory, "vasprun.xml")):
+                stat = os.stat(os.path.join(directory, "vasprun.xml"))
                 exception_context["vasprun_st_size"] = stat.st_size
                 exception_context["vasprun_st_atime"] = stat.st_atime
                 exception_context["vasprun_st_mtime"] = stat.st_mtime
                 exception_context["vasprun_st_ctime"] = stat.st_ctime
 
-                with open(os.path.join(self.directory, "vasprun.xml")) as vasprun:
+                with open(os.path.join(directory, "vasprun.xml")) as vasprun:
                     vasprun_tail = deque(vasprun, maxlen=10)
                 exception_context["vasprun_tail"] = "".join(vasprun_tail)
 
@@ -70,9 +70,7 @@ class VaspFilesValidator(Validator):
 
     def check(self, directory="./"):
         """Check for error."""
-        return any(
-            not os.path.isfile(os.path.join(self.directory, vfile)) for vfile in ["CONTCAR", "OSZICAR", "OUTCAR"]
-        )
+        return any(not os.path.isfile(os.path.join(directory, vfile)) for vfile in ["CONTCAR", "OSZICAR", "OUTCAR"])
 
 
 class VaspNpTMDValidator(Validator):
