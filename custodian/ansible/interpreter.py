@@ -5,7 +5,7 @@ using support actions.
 
 import re
 
-from custodian.ansible.actions import DictActions, FileActions
+from custodian.ansible.actions import DictActions
 
 
 class Modder:
@@ -66,10 +66,7 @@ class Modder:
         """
         for action, settings in modification.items():
             if action in self.supported_actions:
-                if isinstance(action, FileActions):
-                    self.supported_actions[action](obj, settings, directory=self.directory)
-                else:
-                    self.supported_actions[action](obj, settings)
+                self.supported_actions[action](obj, settings, directory=self.directory)
             elif self.strict:
                 raise ValueError(f"{action} is not a supported action!")
 
