@@ -678,7 +678,7 @@ class VaspErrorHandler(ErrorHandler):
                     )
             self.error_count["algo_tet"] += 1
 
-        VaspModder(vi=vi).apply_actions(actions)
+        VaspModder(vi=vi, directory=self.directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
 
 
@@ -731,7 +731,7 @@ class LrfCommutatorHandler(ErrorHandler):
         ):
             actions.append({"dict": "INCAR", "action": {"_set": {"LPEAD": True}}})
 
-        VaspModder(vi=vi).apply_actions(actions)
+        VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
 
 
@@ -792,7 +792,7 @@ class StdErrHandler(ErrorHandler):
             reduced_kpar = max(vi["INCAR"].get("KPAR", 1) // 2, 1)
             actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": reduced_kpar}}})
 
-        VaspModder(vi=vi).apply_actions(actions)
+        VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
 
 
@@ -885,7 +885,7 @@ class AliasingErrorHandler(ErrorHandler):
                     ]
                 )
 
-        VaspModder(vi=vi).apply_actions(actions)
+        VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
 
 
@@ -956,7 +956,7 @@ class DriftErrorHandler(ErrorHandler):
 
         curr_drift = outcar.data.get("drift", [])[::-1][: self.to_average]
         curr_drift = np.average([np.linalg.norm(dct) for dct in curr_drift])
-        VaspModder(vi=vi).apply_actions(actions)
+        VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {
             "errors": f"Excessive drift {curr_drift} > {self.max_drift}",
             "actions": actions,
@@ -1025,7 +1025,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         if vi["KPOINTS"] and vi["KPOINTS"].style.name.lower().startswith("m"):
             m += m % 2
         actions = [{"dict": "KPOINTS", "action": {"_set": {"kpoints": [[m] * 3]}}}]
-        VaspModder(vi=vi).apply_actions(actions)
+        VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": ["mesh_symmetry"], "actions": actions}
 
 
@@ -1140,7 +1140,7 @@ class UnconvergedErrorHandler(ErrorHandler):
                     errors += ["psmaxn"]
 
             backup(VASP_BACKUP_FILES)
-            VaspModder(vi=vi).apply_actions(actions)
+            VaspModder(vi=vi, directory=directory).apply_actions(actions)
             return {"errors": errors, "actions": actions}
 
         # Unfixable error. Just return None for actions.
@@ -1188,7 +1188,7 @@ class IncorrectSmearingHandler(ErrorHandler):
             {"dict": "INCAR", "action": {"_set": {"SIGMA": 0.2}}},
         ]
 
-        VaspModder(vi=vi).apply_actions(actions)
+        VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": ["IncorrectSmearing"], "actions": actions}
 
 
@@ -1239,7 +1239,7 @@ class KspacingMetalHandler(ErrorHandler):
         actions = []
         actions.append({"dict": "INCAR", "action": {"_set": {"KSPACING": new_vis.incar["KSPACING"]}}})
 
-        VaspModder(vi=vi).apply_actions(actions)
+        VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": ["ScanMetal"], "actions": actions}
 
 
@@ -1331,7 +1331,7 @@ class LargeSigmaHandler(ErrorHandler):
                 }
             )
 
-        VaspModder(vi=vi).apply_actions(actions)
+        VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": ["LargeSigma"], "actions": actions}
 
 
@@ -1385,7 +1385,7 @@ class PotimErrorHandler(ErrorHandler):
         else:
             actions = [{"dict": "INCAR", "action": {"_set": {"POTIM": potim * 0.5}}}]
 
-        VaspModder(vi=vi).apply_actions(actions)
+        VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": ["POTIM"], "actions": actions}
 
 
@@ -1430,7 +1430,7 @@ class FrozenJobErrorHandler(ErrorHandler):
         else:
             actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8}}})
 
-        VaspModder(vi=vi).apply_actions(actions)
+        VaspModder(vi=vi, directory=directory).apply_actions(actions)
 
         return {"errors": ["Frozen job"], "actions": actions}
 
@@ -1543,7 +1543,7 @@ class NonConvergingErrorHandler(ErrorHandler):
 
         if actions:
             backup(VASP_BACKUP_FILES)
-            VaspModder(vi=vi).apply_actions(actions)
+            VaspModder(vi=vi, directory=directory).apply_actions(actions)
             return {"errors": ["Non-converging job"], "actions": actions}
         # Unfixable error. Just return None for actions.
         return {"errors": ["Non-converging job"], "actions": None}
@@ -1809,13 +1809,13 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         if algo not in {"normal", "n"}:
             backup(VASP_BACKUP_FILES)
             actions = [{"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}}]
-            VaspModder(vi=vi).apply_actions(actions)
+            VaspModder(vi=vi, directory=directory).apply_actions(actions)
             return {"errors": ["Positive energy"], "actions": actions}
         # decrease POTIM if ALGO is 'normal' and IBRION != -1 (i.e. it's not a static calculation)
         if algo == "normal" and vi["INCAR"].get("IBRION", 1) > -1:
             potim = round(vi["INCAR"].get("POTIM", 0.5) / 2.0, 2)
             actions = [{"dict": "INCAR", "action": {"_set": {"POTIM": potim}}}]
-            VaspModder(vi=vi).apply_actions(actions)
+            VaspModder(vi=vi, directory=directory).apply_actions(actions)
             return {"errors": ["Positive energy"], "actions": actions}
         # Unfixable error. Just return None for actions.
         return {"errors": ["Positive energy"], "actions": None}
