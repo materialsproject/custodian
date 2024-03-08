@@ -59,30 +59,32 @@ class FeffJob(Job):
         self.gzipped = gzipped
         self.gzipped_prefix = gzipped_prefix
 
-    def setup(self) -> None:
+    def setup(self, directory="./") -> None:
         """Performs initial setup for FeffJob, do backing up."""
-        decompress_dir(".")
+        decompress_dir(directory)
 
         if self.backup:
             for file in FEFF_INPUT_FILES:
-                shutil.copy(file, f"{file}.orig")
+                shutil.copy(os.path.join(directory, file), os.path.join(directory, f"{file}.orig"))
 
             for file in FEFF_BACKUP_FILES:
-                if os.path.isfile(file):
-                    shutil.copy(file, f"{file}.orig")
+                if os.path.isfile(os.path.join(directory, file)):
+                    shutil.copy(os.path.join(directory, file), os.path.join(directory, f"{file}.orig"))
 
-    def run(self):
+    def run(self, directory="./"):
         """
         Performs the actual FEFF run
         Returns:
             (subprocess.Popen) Used for monitoring.
         """
-        with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
+        with open(os.path.join(directory, self.output_file), "w") as f_std, open(
+            os.path.join(directory, self.stderr_file), "w", buffering=1
+        ) as f_err:
             # Use line buffering for stderr
             # On TSCC, need to run shell command
-            return subprocess.Popen(self.feff_cmd, stdout=f_std, stderr=f_err, shell=True)  # pylint: disable=R1732
+            return subprocess.Popen(self.feff_cmd, cwd=directory, stdout=f_std, stderr=f_err, shell=True)  # pylint: disable=R1732
 
-    def postprocess(self):
+    def postprocess(self, directory="./"):
         """Renaming or gzipping all the output as needed."""
         if self.gzipped:
-            backup("*", prefix=self.gzipped_prefix)
+            backup("*", directory=directory, prefix=self.gzipped_prefix)
