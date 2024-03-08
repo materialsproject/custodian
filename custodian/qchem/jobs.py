@@ -5,7 +5,6 @@ import os
 import shutil
 import subprocess
 import warnings
-
 from pathlib import Path
 
 import numpy as np
@@ -13,6 +12,7 @@ from pymatgen.core import Molecule
 from pymatgen.io.qchem.inputs import QCInput
 from pymatgen.io.qchem.outputs import QCOutput, check_for_structure_changes
 from pymatgen.io.qchem.sets import OptSet
+
 from custodian.custodian import Job
 from custodian.qchem.utils import perturb_coordinates, vector_list_diff
 
