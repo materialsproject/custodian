@@ -17,6 +17,7 @@ def backup(filenames, prefix="error", directory="./"):
             *.*.
         prefix (str): prefix to the files. Defaults to error, which means a
             series of error.1.tar.gz, error.2.tar.gz, ... will be generated.
+        directory (str): directory where files exist
     """
     num = max([0] + [int(file.split(".")[-3]) for file in glob(os.path.join(directory, f"{prefix}.*.tar.gz"))])
     filename = os.path.join(directory, f"{prefix}.{num + 1}.tar.gz")
