@@ -777,8 +777,8 @@ class OptFFTest5690(TestCase):
             QCInput.from_file(f"{TEST_DIR}/5690_frag18/mol.qin.freq_2").as_dict()
             == QCInput.from_file(os.path.join(SCR_DIR, "mol.qin")).as_dict()
         )
-        with pytest.raises(Exception, match="ERROR: Can't deal with multiple neg frequencies yet! Exiting..."):
-            job.__next__()
+        with pytest.raises(ValueError, match="ERROR: Can't deal with multiple neg frequencies yet! Exiting..."):
+            next(job)
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
