@@ -287,7 +287,7 @@ class QChemErrorHandlerTest(TestCase):
     def test_gdm_neg_precon_error(self):
         shutil.copyfile(f"{TEST_DIR}/gdm_neg_precon_error.qin.gz", f"{SCR_DIR}/mol.qin.gz")
         shutil.copyfile(f"{TEST_DIR}/gdm_neg_precon_error.qout.gz", f"{SCR_DIR}/mol.qout.gz")
-        handler = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
+        handler = QChemErrorHandler(input_file="mol.qin.gz", output_file="mol.qout.gz")
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["gdm_neg_precon_error"]
@@ -296,7 +296,7 @@ class QChemErrorHandlerTest(TestCase):
     def test_fileman_cpscf_nseg_error(self):
         shutil.copyfile(f"{TEST_DIR}/fileman_cpscf.qin.gz", f"{SCR_DIR}/mol.qin.gz")
         shutil.copyfile(f"{TEST_DIR}/fileman_cpscf.qout.gz", f"{SCR_DIR}/mol.qout.gz")
-        handler = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
+        handler = QChemErrorHandler(input_file="mol.qin.gz", output_file="mol.qout.gz")
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["premature_end_FileMan_error"]
