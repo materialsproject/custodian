@@ -626,6 +626,7 @@ class OptFFTest5952(TestCase):
         shutil.copyfile(f"{TEST_DIR}/5952_frag16/mol.qin.orig", f"{SCR_DIR}/mol.qin")
         shutil.copyfile(f"{TEST_DIR}/5952_frag16/mol.qout.opt_0", f"{SCR_DIR}/mol.qout.opt_0")
         shutil.copyfile(f"{TEST_DIR}/5952_frag16/mol.qout.freq_0", f"{SCR_DIR}/mol.qout.freq_0")
+        shutil.copyfile(f"{TEST_DIR}/5952_frag16/mol.qin.freq_0", f"{SCR_DIR}/mol.qin.freq_0")
         os.chdir(SCR_DIR)
 
     def tearDown(self):
@@ -661,7 +662,7 @@ class OptFFTest5952(TestCase):
         ).as_dict()
         assert next(job).as_dict() == expected_next
         assert (
-            QCInput.from_file(f"{TEST_DIR}/5952_frag16/mol.qin.freq_0").as_dict()
+            QCInput.from_file(f"{SCR_DIR}/mol.qin.freq_0").as_dict()
             == QCInput.from_file(os.path.join(SCR_DIR, "mol.qin")).as_dict()
         )
         with pytest.raises(StopIteration):
@@ -776,8 +777,8 @@ class OptFFTest5690(TestCase):
             QCInput.from_file(f"{TEST_DIR}/5690_frag18/mol.qin.freq_2").as_dict()
             == QCInput.from_file(os.path.join(SCR_DIR, "mol.qin")).as_dict()
         )
-        with pytest.raises(StopIteration):
-            job.__next__()
+        with pytest.raises(ValueError, match="ERROR: Can't deal with multiple neg frequencies yet! Exiting..."):
+            next(job)
 
 
 @unittest.skipIf(ob is None, "openbabel not installed")
