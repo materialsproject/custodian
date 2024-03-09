@@ -41,7 +41,8 @@ dependencies = ["monty>=2.0.6", "psutil", "ruamel.yaml>=0.15.6"]
 vasp = ["pymatgen"]
 nwchem = ["pymatgen"]
 qchem = ["pymatgen"]
-dev = ["mypy", "pre-commit", "pymatgen", "pytest", "pytest-cov", "ruff"]
+dev = ["pymatgen", "pytest", "pytest-cov"]
+lint = ["mypy", "pre-commit", "ruff"]
 error-statistics = ["sentry-sdk>=0.8.0"]
 
 [project.scripts]
@@ -63,7 +64,9 @@ exclude = ["*.tests", "*.tests.*"]
 [tool.ruff]
 target-version = "py39"
 line-length = 120
-lint.select = [
+
+[tool.ruff.lint]
+select = [
   "B",    # flake8-bugbear
   "C4",   # flake8-comprehensions
   "D",    # pydocstyle
@@ -94,7 +97,7 @@ lint.select = [
   "W",    # pycodestyle warning
   "YTT",  # flake8-2020
 ]
-lint.ignore = [
+ignore = [
   "B023",    # Function definition does not bind loop variable
   "B028",    # No explicit stacklevel keyword argument found
   "B904",    # Within an except clause, raise exceptions with ...
@@ -102,6 +105,7 @@ lint.ignore = [
   "D105",    # Missing docstring in magic method
   "D205",    # 1 blank line required between summary line and description
   "D212",    # Multi-line docstring summary should start at the first line
+  "ISC001",
   "PD011",   # pandas-use-of-dot-values
   "PD901",   # pandas-df-variable-name
   "PERF203", # try-except-in-loop
@@ -111,8 +115,8 @@ lint.ignore = [
   "RUF012",  # Disable checks for mutable class args. This is a non-problem.
   "SIM105",  # Use contextlib.suppress(OSError) instead of try-except-pass
 ]
-lint.pydocstyle.convention = "google"
-lint.isort.split-on-trailing-comma = false
+pydocstyle.convention = "google"
+isort.split-on-trailing-comma = false
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
