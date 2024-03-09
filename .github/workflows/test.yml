@@ -34,6 +34,9 @@ jobs:
           cache: pip
           cache-dependency-path: pyproject.toml
 
+      - name: Install uv
+        run: pip install uv
+
       - uses: conda-incubator/setup-miniconda@v3
         with:
           python-version: ${{ matrix.python-version }}
@@ -43,7 +46,7 @@ jobs:
         run: conda install -c conda-forge openbabel
 
       - name: Install dependencies
-        run: pip install '.[dev]'
+        run: uv pip install '.[dev]' --system
 
       - name: pytest
         env:
