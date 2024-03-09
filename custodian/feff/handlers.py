@@ -1,6 +1,5 @@
 """This module implements specific error handler for FEFF runs."""
 
-
 import logging
 import re
 

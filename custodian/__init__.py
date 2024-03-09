@@ -3,7 +3,6 @@ Custodian is a simple, robust and flexible just-in-time (JIT) job management
 framework written in Python.
 """
 
-
 import os
 
 from .custodian import Custodian
