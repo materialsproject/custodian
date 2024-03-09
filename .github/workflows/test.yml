@@ -20,9 +20,6 @@ jobs:
         python-version: ["3.10"]
 
     runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        shell: bash -l {0}
 
     steps:
       - uses: actions/checkout@v4
@@ -34,13 +31,12 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v3
         with:
           python-version: ${{ matrix.python-version }}
-          activate-environment: myenv
 
       - name: Install OpenBabel
         run: conda install -c conda-forge openbabel
 
       - name: Install dependencies
-        run: pip install .[dev]
+        run: pip install '.[dev]'
 
       - name: pytest
         env:
