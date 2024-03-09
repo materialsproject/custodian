@@ -165,7 +165,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         return False
 
     def correct(self, directory="./"):
-        """Apply corrections to aid convergence, if possible."""
+        """Apply corrections to aid convergence if possible."""
         ci = Cp2kInput.from_file(os.path.join(directory, self.input_file))
 
         actions = self.__correct_ot(ci=ci) if self.is_ot else self.__correct_diag(ci=ci)
