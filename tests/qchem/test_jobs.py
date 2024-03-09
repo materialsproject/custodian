@@ -46,8 +46,8 @@ class QCJobTest(TestCase):
             job = QCJob(qchem_command="qchem", max_cores=32)
             assert job.current_command == "qchem -nt 32 ./mol.qin ./mol.qout scratch"
             job.setup()
-            assert copy_patch.call_args_list[0][0][0] == "mol.qin"
-            assert copy_patch.call_args_list[0][0][1] == "mol.qin.orig"
+            assert copy_patch.call_args_list[0][0][0] == "./mol.qin"
+            assert copy_patch.call_args_list[0][0][1] == "./mol.qin.orig"
             assert os.environ["QCSCRATCH"] == os.getcwd()
             assert os.environ["QCTHREADS"] == "32"
             assert os.environ["OMP_NUM_THREADS"] == "32"
@@ -80,8 +80,8 @@ class QCJobTest(TestCase):
             )
             assert job.current_command == "qchem -slurm -nt 32 ./mol.qin ./mol.qout scratch"
             job.setup()
-            assert copy_patch.call_args_list[0][0][0] == "mol.qin"
-            assert copy_patch.call_args_list[0][0][1] == "mol.qin.orig"
+            assert copy_patch.call_args_list[0][0][0] == "./mol.qin"
+            assert copy_patch.call_args_list[0][0][1] == "./mol.qin.orig"
             assert os.environ["QCSCRATCH"] == os.getcwd()
             assert os.environ["QCTHREADS"] == "32"
             assert os.environ["OMP_NUM_THREADS"] == "32"
