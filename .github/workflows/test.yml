@@ -16,8 +16,8 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.10"]
+        os: [ubuntu-latest, windows-latest, macos-14]
+        python-version: ["3.9", "3.11"]
 
     runs-on: ${{ matrix.os }}
 
@@ -31,6 +31,7 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v3
         with:
           python-version: ${{ matrix.python-version }}
+          activate-environment: myenv
 
       - name: Install OpenBabel
         run: conda install -c conda-forge openbabel
