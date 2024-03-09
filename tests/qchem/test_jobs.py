@@ -44,7 +44,7 @@ class QCJobTest(TestCase):
     def test_defaults(self):
         with patch("custodian.qchem.jobs.shutil.copy") as copy_patch:
             job = QCJob(qchem_command="qchem", max_cores=32)
-            assert job.current_command == "qchem -nt 32 mol.qin mol.qout scratch"
+            assert job.current_command == "qchem -nt 32 ./mol.qin ./mol.qout scratch"
             job.setup()
             assert copy_patch.call_args_list[0][0][0] == "mol.qin"
             assert copy_patch.call_args_list[0][0][1] == "mol.qin.orig"
@@ -63,7 +63,7 @@ class QCJobTest(TestCase):
             nboexe="/path/to/nbo7.i4.exe",
             backup=False,
         )
-        assert job.current_command == "qchem -slurm -np 12 different.qin not_default.qout scratch"
+        assert job.current_command == "qchem -slurm -np 12 ./different.qin ./not_default.qout scratch"
         job.setup()
         assert os.environ["QCSCRATCH"] == os.getcwd()
         assert os.environ["QCLOCALSCR"] == "/not/default/"
@@ -78,7 +78,7 @@ class QCJobTest(TestCase):
                 calc_loc="/tmp/scratch",
                 save_scratch=True,
             )
-            assert job.current_command == "qchem -slurm -nt 32 mol.qin mol.qout scratch"
+            assert job.current_command == "qchem -slurm -nt 32 ./mol.qin ./mol.qout scratch"
             job.setup()
             assert copy_patch.call_args_list[0][0][0] == "mol.qin"
             assert copy_patch.call_args_list[0][0][1] == "mol.qin.orig"
