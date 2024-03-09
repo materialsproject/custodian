@@ -285,8 +285,8 @@ class QChemErrorHandlerTest(TestCase):
         self._check_equivalent_inputs(f"{TEST_DIR}/OOS_read_hess_next.qin", "mol.qin")
 
     def test_gdm_neg_precon_error(self):
-        shutil.copyfile(f"{TEST_DIR}/gdm_neg_precon_error.qin.gz", f"{SCR_DIR}/mol.qin.gz")
-        shutil.copyfile(f"{TEST_DIR}/gdm_neg_precon_error.qout.gz", f"{SCR_DIR}/mol.qout.gz")
+        shutil.copyfile(f"{TEST_DIR}/gdm_neg_precon_error.qin", f"{SCR_DIR}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/gdm_neg_precon_error.qout", f"{SCR_DIR}/mol.qout")
         handler = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         handler.check()
         dct = handler.correct()
@@ -294,8 +294,8 @@ class QChemErrorHandlerTest(TestCase):
         assert dct["actions"] == [{"molecule": "molecule_from_last_geometry"}]
 
     def test_fileman_cpscf_nseg_error(self):
-        shutil.copyfile(f"{TEST_DIR}/fileman_cpscf.qin.gz", f"{SCR_DIR}/mol.qin.gz")
-        shutil.copyfile(f"{TEST_DIR}/fileman_cpscf.qout.gz", f"{SCR_DIR}/mol.qout.gz")
+        shutil.copyfile(f"{TEST_DIR}/fileman_cpscf.qin", f"{SCR_DIR}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/fileman_cpscf.qout", f"{SCR_DIR}/mol.qout")
         handler = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         handler.check()
         dct = handler.correct()

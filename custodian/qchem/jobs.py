@@ -597,7 +597,7 @@ class QCJob(Job):
                                 else:
                                     good_child = copy.deepcopy(history[-1])
                                 if good_child["num_neg_freqs"] > 1:
-                                    raise Exception(
+                                    raise ValueError(
                                         "ERROR: Child with lower energy has more negative frequencies! Exiting..."
                                     )
                                 if good_child["energy"] < parent_hist["energy"] or (
@@ -609,7 +609,7 @@ class QCJob(Job):
                                 ):
                                     make_good_child_next_parent = True
                                 else:
-                                    raise Exception("ERROR: Good child not good enough! Exiting...")
+                                    raise ValueError("ERROR: Good child not good enough! Exiting...")
                                 if make_good_child_next_parent:
                                     good_child["index"] = len(history)
                                     history.append(good_child)
@@ -617,9 +617,9 @@ class QCJob(Job):
                                     geom_to_perturb = history[-1]["geometry"]
                                     negative_freq_vecs = history[-1]["frequency_mode_vectors"][perturb_index]
                             else:
-                                raise Exception("ERROR: Can't deal with multiple neg frequencies yet! Exiting...")
+                                raise ValueError("ERROR: Can't deal with multiple neg frequencies yet! Exiting...")
                         else:
-                            raise AssertionError("ERROR: Parent cannot have more than two children! Exiting...")
+                            raise ValueError("ERROR: Parent cannot have more than two children! Exiting...")
                     # Implicitly, if the number of negative frequencies decreased from parent to child,
                     # continue normally.
                 if standard:

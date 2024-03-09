@@ -383,6 +383,7 @@ class QChemErrorHandler(ErrorHandler):
         ) and str(self.qcinp.geom_opt["initial_hessian"]).lower() == "read":
             del self.qcinp.geom_opt["initial_hessian"]
             actions.append({"initial_hessian": "deleted"})
-        os.rename(self._input_path, os.path.join(directory, self.input_file + ".last"))
+
+        os.replace(self._input_path, os.path.join(directory, self.input_file + ".last"))
         self.qcinp.write_file(self._input_path)
         return {"errors": self.errors, "warnings": self.warnings, "actions": actions}
