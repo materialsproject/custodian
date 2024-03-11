@@ -37,7 +37,7 @@ class QChemErrorHandler(ErrorHandler):
         output_file="mol.qout",
         scf_max_cycles=100,
         geom_max_cycles=200,
-    ) -> dict:
+    ):
         """Initialize the error handler from a set of input and output files.
 
         Args:
