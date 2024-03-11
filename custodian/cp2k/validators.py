@@ -1,5 +1,6 @@
 """Validators for CP2K calculations."""
 
+import os
 from abc import abstractmethod, abstractproperty
 
 from pymatgen.io.cp2k.outputs import Cp2kOutput
@@ -16,22 +17,22 @@ class Cp2kValidator(Validator):
     """Base validator."""
 
     @abstractmethod
-    def check(self):
+    def check(self, directory="./"):
         """
         Check whether validation failed. Here, True means
         validation failed.
         """
 
     @abstractproperty
-    def kill(self):
+    def kill(self, directory="./"):
         """Kill the job with raise error."""
 
     @abstractproperty
-    def exit(self):
+    def exit(self, directory="./"):
         """Don't raise error, but exit the job."""
 
     @abstractproperty
-    def no_children(self):
+    def no_children(self, directory="./"):
         """Job should not have children."""
 
 
@@ -46,14 +47,14 @@ class Cp2kOutputValidator(Cp2kValidator):
         self.output_file = output_file
         self._check = False
 
-    def check(self):
+    def check(self, directory="./"):
         """
         Check for valid output. Checks that the end of the
         program was reached, and that convergence was
         achieved.
         """
         try:
-            o = Cp2kOutput(self.output_file)
+            o = Cp2kOutput(os.path.join(directory, self.output_file))
             o.ran_successfully()
             o.convergence()
             if (not o.data.get("geo_opt_converged") and not o.data.get("geo_opt_not_converged")) or o.data.get(
@@ -71,16 +72,16 @@ class Cp2kOutputValidator(Cp2kValidator):
             return True
 
     @property
-    def kill(self):
+    def kill(self, directory="./"):
         """Kill the job with raise error."""
         return True
 
     @property
-    def exit(self):
+    def exit(self, directory="./"):
         """Don't raise error, but exit the job."""
         return True
 
     @property
-    def no_children(self):
+    def no_children(self, directory="./"):
         """Job should not have children."""
         return True

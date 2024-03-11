@@ -25,31 +25,31 @@ class VasprunXMLValidator(Validator):
         self.stderr_file = stderr_file
         self.logger = logging.getLogger(type(self).__name__)
 
-    def check(self):
-        """Check for error."""
+    def check(self, directory="./"):
+        """Check for errors."""
         try:
-            load_vasprun(os.path.join(os.getcwd(), "vasprun.xml"))
+            load_vasprun(os.path.join(directory, "vasprun.xml"))
         except Exception:
             exception_context = {}
 
-            if os.path.isfile(self.output_file):
-                with open(self.output_file) as output_file:
+            if os.path.isfile(os.path.join(directory, self.output_file)):
+                with open(os.path.join(directory, self.output_file)) as output_file:
                     output_file_tail = deque(output_file, maxlen=10)
                 exception_context["output_file_tail"] = "".join(output_file_tail)
 
-            if os.path.isfile(self.stderr_file):
-                with open(self.stderr_file) as stderr_file:
+            if os.path.isfile(os.path.join(directory, self.stderr_file)):
+                with open(os.path.join(directory, self.stderr_file)) as stderr_file:
                     stderr_file_tail = deque(stderr_file, maxlen=10)
                 exception_context["stderr_file_tail"] = "".join(stderr_file_tail)
 
-            if os.path.isfile("vasprun.xml"):
-                stat = os.stat("vasprun.xml")
+            if os.path.isfile(os.path.join(directory, "vasprun.xml")):
+                stat = os.stat(os.path.join(directory, "vasprun.xml"))
                 exception_context["vasprun_st_size"] = stat.st_size
                 exception_context["vasprun_st_atime"] = stat.st_atime
                 exception_context["vasprun_st_mtime"] = stat.st_mtime
                 exception_context["vasprun_st_ctime"] = stat.st_ctime
 
-                with open("vasprun.xml") as vasprun:
+                with open(os.path.join(directory, "vasprun.xml")) as vasprun:
                     vasprun_tail = deque(vasprun, maxlen=10)
                 exception_context["vasprun_tail"] = "".join(vasprun_tail)
 
@@ -68,9 +68,9 @@ class VaspFilesValidator(Validator):
     def __init__(self):
         """Dummy init."""
 
-    def check(self):
+    def check(self, directory="./"):
         """Check for error."""
-        return any(not os.path.isfile(vfile) for vfile in ["CONTCAR", "OSZICAR", "OUTCAR"])
+        return any(not os.path.isfile(os.path.join(directory, vfile)) for vfile in ["CONTCAR", "OSZICAR", "OUTCAR"])
 
 
 class VaspNpTMDValidator(Validator):
@@ -82,14 +82,14 @@ class VaspNpTMDValidator(Validator):
     def __init__(self):
         """Dummy init."""
 
-    def check(self):
+    def check(self, directory="./"):
         """Check for error."""
-        incar = Incar.from_file("INCAR")
+        incar = Incar.from_file(os.path.join(directory, "INCAR"))
         is_npt = incar.get("MDALGO") == 3
         if not is_npt:
             return False
 
-        outcar = load_outcar(os.path.join(os.getcwd(), "OUTCAR"))
+        outcar = load_outcar(os.path.join(directory, "OUTCAR"))
         patterns = {"MDALGO": r"MDALGO\s+=\s+([\d]+)"}
         outcar.read_pattern(patterns=patterns)
         if outcar.data["MDALGO"] == [["3"]]:
@@ -103,10 +103,10 @@ class VaspAECCARValidator(Validator):
     def __init__(self):
         """Dummy init."""
 
-    def check(self):
+    def check(self, directory="./"):
         """Check for error."""
-        aeccar0 = Chgcar.from_file("AECCAR0")
-        aeccar2 = Chgcar.from_file("AECCAR2")
+        aeccar0 = Chgcar.from_file(os.path.join(directory, "AECCAR0"))
+        aeccar2 = Chgcar.from_file(os.path.join(directory, "AECCAR2"))
         aeccar = aeccar0 + aeccar2
         return check_broken_chgcar(aeccar)
 

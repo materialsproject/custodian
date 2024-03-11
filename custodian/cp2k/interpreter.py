@@ -1,5 +1,7 @@
 """CP2K adapted interpreter and modder for custodian."""
 
+import os
+
 from pymatgen.io.cp2k.inputs import Cp2kInput
 
 from custodian.ansible.actions import DictActions, FileActions
@@ -18,7 +20,7 @@ class Cp2kModder(Modder):
     also supports modifications that are file operations (e.g. copying).
     """
 
-    def __init__(self, filename="cp2k.inp", actions=None, strict=True, ci=None):
+    def __init__(self, filename="cp2k.inp", actions=None, strict=True, ci=None, directory="./"):
         """Initialize a Modder for Cp2kInput sets.
 
         Args:
@@ -35,7 +37,8 @@ class Cp2kModder(Modder):
                 Initialized automatically if not passed (but passing it will
                 avoid having to reparse the directory).
         """
-        self.ci = ci or Cp2kInput.from_file(filename)
+        self.directory = directory
+        self.ci = ci or Cp2kInput.from_file(os.path.join(self.directory, filename))
         self.filename = filename
         actions = actions or [FileActions, DictActions]
         super().__init__(actions, strict)
@@ -58,11 +61,11 @@ class Cp2kModder(Modder):
                 Cp2kModder._modify(a["action"], self.ci)
             elif "file" in a:
                 self.modify(a["action"], a["file"])
-                self.ci = Cp2kInput.from_file(self.filename)
+                self.ci = Cp2kInput.from_file(os.path.join(self.directory, self.filename))
             else:
                 raise ValueError(f"Unrecognized format: {a}")
         cleanup_input(self.ci)
-        self.ci.write_file(self.filename)
+        self.ci.write_file(os.path.join(self.directory, self.filename))
 
     @staticmethod
     def _modify(modification, obj):

@@ -25,13 +25,13 @@ class ExitCodeJob(Job):
     def __init__(self, exitcode=0):
         self.exitcode = exitcode
 
-    def setup(self):
+    def setup(self, directory="./"):
         pass
 
-    def run(self):
-        return subprocess.Popen(f"exit {self.exitcode}", shell=True)
+    def run(self, directory="./"):
+        return subprocess.Popen(f"exit {self.exitcode}", cwd=directory, shell=True)
 
-    def postprocess(self):
+    def postprocess(self, directory="./"):
         pass
 
 
@@ -42,15 +42,15 @@ class ExampleJob(Job):
         self.jobid = jobid
         self.params = params
 
-    def setup(self):
+    def setup(self, directory="./"):
         self.params["initial"] = 0
         self.params["total"] = 0
 
-    def run(self):
+    def run(self, directory="./"):
         sequence = [random.uniform(0, 1) for i in range(100)]
         self.params["total"] = self.params["initial"] + sum(sequence)
 
-    def postprocess(self):
+    def postprocess(self, directory="./"):
         pass
 
     @property
@@ -62,10 +62,10 @@ class ExampleHandler(ErrorHandler):
     def __init__(self, params):
         self.params = params
 
-    def check(self):
+    def check(self, directory="./"):
         return self.params["total"] < 50
 
-    def correct(self):
+    def correct(self, directory="./"):
         self.params["initial"] += 1
         return {"errors": "total < 50", "actions": "increment by 1"}
 
@@ -97,10 +97,10 @@ class ExampleHandler2(ErrorHandler):
         self.params = params
         self.has_error = False
 
-    def check(self):
+    def check(self, directory="./"):
         return True
 
-    def correct(self):
+    def correct(self, directory="./"):
         self.has_error = True
         return {"errors": "Unrecoverable error", "actions": None}
 
@@ -112,7 +112,7 @@ class ExampleHandler2b(ExampleHandler2):
 
     raises_runtime_error = False
 
-    def correct(self):
+    def correct(self, directory="./"):
         self.has_error = True
         return {"errors": "Unrecoverable error", "actions": []}
 
@@ -121,7 +121,7 @@ class ExampleValidator1(Validator):
     def __init__(self):
         pass
 
-    def check(self):
+    def check(self, directory="./"):
         return False
 
 
@@ -129,7 +129,7 @@ class ExampleValidator2(Validator):
     def __init__(self):
         pass
 
-    def check(self):
+    def check(self, directory="./"):
         return True
 
 

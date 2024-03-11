@@ -7,7 +7,7 @@ import tarfile
 from glob import glob
 
 
-def backup(filenames, prefix="error"):
+def backup(filenames, prefix="error", directory="./"):
     """
     Backup files to a tar.gz file. Used, for example, in backing up the
     files of an errored run before performing corrections.
@@ -17,9 +17,10 @@ def backup(filenames, prefix="error"):
             *.*.
         prefix (str): prefix to the files. Defaults to error, which means a
             series of error.1.tar.gz, error.2.tar.gz, ... will be generated.
+        directory (str): directory where the files exist
     """
-    num = max([0] + [int(file.split(".")[1]) for file in glob(f"{prefix}.*.tar.gz")])
-    filename = f"{prefix}.{num + 1}.tar.gz"
+    num = max([0] + [int(file.split(".")[-3]) for file in glob(os.path.join(directory, f"{prefix}.*.tar.gz"))])
+    filename = os.path.join(directory, f"{prefix}.{num + 1}.tar.gz")
     logging.info(f"Backing up run to {filename}.")
     with tarfile.open(filename, "w:gz") as tar:
         for fname in filenames:
