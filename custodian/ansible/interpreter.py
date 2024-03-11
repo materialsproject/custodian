@@ -30,7 +30,7 @@ class Modder:
     'Universe'
     """
 
-    def __init__(self, actions=None, strict=True):
+    def __init__(self, actions=None, strict=True, directory="./"):
         """Initialize a Modder from a list of supported actions.
 
         Args:
@@ -49,6 +49,7 @@ class Modder:
                 if (not re.match(r"__\w+__", i)) and callable(getattr(action, i)):
                     self.supported_actions["_" + i] = getattr(action, i)
         self.strict = strict
+        self.directory = directory
 
     def modify(self, modification, obj):
         """
@@ -65,7 +66,7 @@ class Modder:
         """
         for action, settings in modification.items():
             if action in self.supported_actions:
-                self.supported_actions[action](obj, settings)
+                self.supported_actions[action](obj, settings, directory=self.directory)
             elif self.strict:
                 raise ValueError(f"{action} is not a supported action!")
 

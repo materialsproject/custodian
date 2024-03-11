@@ -122,6 +122,7 @@ class Custodian:
         checkpoint=False,
         terminate_func=None,
         terminate_on_nonzero_returncode=True,
+        directory=None,
         **kwargs,
     ):
         """Initialize a Custodian from a list of jobs and error handlers.
@@ -189,9 +190,11 @@ class Custodian:
         self.scratch_dir = scratch_dir
         self.gzipped_output = gzipped_output
         self.checkpoint = checkpoint
-        cwd = os.getcwd()
+        if directory is None:
+            directory = os.getcwd()
+        self.directory = directory
         if self.checkpoint:
-            self.restart, self.run_log = Custodian._load_checkpoint(cwd)
+            self.restart, self.run_log = Custodian._load_checkpoint(directory)
         else:
             self.restart = 0
             self.run_log = []
@@ -202,10 +205,10 @@ class Custodian:
         self.finished = False
 
     @staticmethod
-    def _load_checkpoint(cwd):
+    def _load_checkpoint(directory):
         restart = 0
         run_log = []
-        chkpts = glob(os.path.join(cwd, "custodian.chk.*.tar.gz"))
+        chkpts = glob(os.path.join(directory, "custodian.chk.*.tar.gz"))
         if chkpts:
             chkpt = sorted(chkpts, key=lambda c: int(c.split(".")[-3]))[0]
             restart = int(chkpt.split(".")[-3])
@@ -220,7 +223,7 @@ class Custodian:
 
                     return prefix == abs_directory
 
-                def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+                def safe_extract(tar, path=directory, members=None, *, numeric_owner=False):
                     for member in tar.getmembers():
                         member_path = os.path.join(path, member.name)
                         if not is_within_directory(path, member_path):
@@ -228,24 +231,24 @@ class Custodian:
 
                     tar.extractall(path, members, numeric_owner=numeric_owner)
 
-                safe_extract(t)
+                safe_extract(t, directory)
             # Log the corrections to a json file.
-            run_log = loadfn(Custodian.LOG_FILE, cls=MontyDecoder)
+            run_log = loadfn(os.path.join(directory, Custodian.LOG_FILE), cls=MontyDecoder)
 
         return restart, run_log
 
     @staticmethod
-    def _delete_checkpoints(cwd):
-        for file in glob(os.path.join(cwd, "custodian.chk.*.tar.gz")):
+    def _delete_checkpoints(directory):
+        for file in glob(os.path.join(directory, "custodian.chk.*.tar.gz")):
             os.remove(file)
 
     @staticmethod
-    def _save_checkpoint(cwd, index):
+    def _save_checkpoint(directory, index):
         try:
-            Custodian._delete_checkpoints(cwd)
-            n = os.path.join(cwd, f"custodian.chk.{index}.tar.gz")
+            Custodian._delete_checkpoints(directory)
+            n = os.path.join(directory, f"custodian.chk.{index}.tar.gz")
             with tarfile.open(n, mode="w:gz", compresslevel=3) as f:
-                f.add(cwd, arcname=".")
+                f.add(directory, arcname=".")
             logger.info(f"Checkpoint written to {n}")
         except Exception:
             logger.info("Checkpointing failed")
@@ -358,8 +361,6 @@ class Custodian:
             MaxCorrectionsError: if max_errors is reached
             MaxCorrectionsPerHandlerError: if max_errors_per_handler is reached
         """
-        cwd = os.getcwd()
-
         with ScratchDir(
             self.scratch_dir,
             create_symbolic_link=True,
@@ -379,20 +380,20 @@ class Custodian:
                 for job_n, job in islice(enumerate(self.jobs, 1), self.restart, None):
                     self._run_job(job_n, job)
                     # We do a dump of the run log after each job.
-                    dumpfn(self.run_log, Custodian.LOG_FILE, cls=MontyEncoder, indent=4)
+                    dumpfn(self.run_log, os.path.join(self.directory, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
                     # Checkpoint after each job so that we can recover from last
                     # point and remove old checkpoints
                     if self.checkpoint:
                         self.restart = job_n
-                        Custodian._save_checkpoint(cwd, job_n)
+                        Custodian._save_checkpoint(self.directory, job_n)
             except CustodianError as ex:
                 logger.error(ex.message)
                 if ex.raises:
                     raise
             finally:
                 # Log the corrections to a json file.
-                logger.info(f"Logging to {Custodian.LOG_FILE}...")
-                dumpfn(self.run_log, Custodian.LOG_FILE, cls=MontyEncoder, indent=4)
+                logger.info(f"Logging to {os.path.join(self.directory, Custodian.LOG_FILE)}...")
+                dumpfn(self.run_log, os.path.join(self.directory, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
                 end = datetime.datetime.now()
                 logger.info(f"Run ended at {end}.")
                 run_time = end - start
@@ -401,7 +402,7 @@ class Custodian:
                     gzip_dir(".")
 
             # Cleanup checkpoint files (if any) if run is successful.
-            Custodian._delete_checkpoints(cwd)
+            Custodian._delete_checkpoints(self.directory)
 
         return self.run_log
 
@@ -440,7 +441,7 @@ class Custodian:
         for handler in self.handlers:
             handler.n_applied_corrections = 0
 
-        job.setup()
+        job.setup(self.directory)
 
         attempt = 0
         while self.total_errors < self.max_errors and self.errors_current_job < self.max_errors_per_job:
@@ -450,7 +451,7 @@ class Custodian:
                 f"errors in job thus far = {self.total_errors}, {self.errors_current_job}."
             )
 
-            p = job.run()
+            p = job.run(directory=self.directory)
             # Check for errors using the error handlers and perform
             # corrections.
             has_error = False
@@ -502,7 +503,7 @@ class Custodian:
             # postprocessing and exit.
             if not has_error:
                 for validator in self.validators:
-                    if validator.check():
+                    if validator.check(self.directory):
                         self.run_log[-1]["validator"] = validator
                         msg = f"Validation failed: {type(validator).__name__}"
                         raise ValidationError(msg, raises=True, validator=validator)
@@ -513,7 +514,7 @@ class Custodian:
                         logger.info(msg)
                         raise ReturnCodeError(msg, raises=True)
                     warnings.warn("subprocess returned a non-zero return code. Check outputs carefully...")
-                job.postprocess()
+                job.postprocess(directory=self.directory)
                 return
 
             # Check that all errors could be handled
@@ -557,21 +558,20 @@ class Custodian:
         """
         start = datetime.datetime.now()
         try:
-            cwd = os.getcwd()
             v = sys.version.replace("\n", " ")
-            logger.info(f"Custodian started in singleshot mode at {start} in {cwd}.")
+            logger.info(f"Custodian started in singleshot mode at {start} in {self.directory}.")
             logger.info(f"Custodian running on Python version {v}")
 
             # load run log
             if os.path.isfile(Custodian.LOG_FILE):
-                self.run_log = loadfn(Custodian.LOG_FILE, cls=MontyDecoder)
+                self.run_log = loadfn(os.path.join(self.directory, Custodian.LOG_FILE), cls=MontyDecoder)
 
             if len(self.run_log) == 0:
                 # starting up an initial job - setup input and quit
                 job_n = 0
                 job = self.jobs[job_n]
                 logger.info(f"Setting up job no. 1 ({job.name}) ")
-                job.setup()
+                job.setup(directory=self.directory)
                 self.run_log.append({"job": job.as_dict(), "corrections": [], "job_n": job_n})
                 return len(self.jobs)
 
@@ -602,14 +602,14 @@ class Custodian:
             # check validators
             logger.info(f"Checking validator for {job.name}.run")
             for v in self.validators:
-                if v.check():
+                if v.check(directory=self.directory):
                     self.run_log[-1]["validator"] = v
                     logger.info("Failed validation based on validator")
                     s = f"Validation failed: {v}"
                     raise ValidationError(s, raises=True, validator=v)
 
             logger.info(f"Postprocessing for {job.name}.run")
-            job.postprocess()
+            job.postprocess(directory=self.directory)
 
             # IF DONE WITH ALL JOBS - DELETE ALL CHECKPOINTS AND RETURN
             # VALIDATED
@@ -621,7 +621,7 @@ class Custodian:
             job_n += 1
             job = self.jobs[job_n]
             self.run_log.append({"job": job.as_dict(), "corrections": [], "job_n": job_n})
-            job.setup()
+            job.setup(directory=self.directory)
             return len(self.jobs) - job_n
 
         except CustodianError as ex:
@@ -632,13 +632,13 @@ class Custodian:
         finally:
             # Log the corrections to a json file.
             logger.info(f"Logging to {Custodian.LOG_FILE}...")
-            dumpfn(self.run_log, Custodian.LOG_FILE, cls=MontyEncoder, indent=4)
+            dumpfn(self.run_log, os.path.join(self.directory, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
             end = datetime.datetime.now()
             logger.info(f"Run ended at {end}.")
             run_time = end - start
             logger.info(f"Run completed. Total time taken = {run_time}.")
             if self.finished and self.gzipped_output:
-                gzip_dir(".")
+                gzip_dir(self.directory)
         return None
 
     def _do_check(self, handlers, terminate_func=None):
@@ -646,7 +646,7 @@ class Custodian:
         corrections = []
         for handler in handlers:
             try:
-                if handler.check():
+                if handler.check(directory=self.directory):
                     if (
                         handler.max_num_corrections is not None
                         and handler.n_applied_corrections >= handler.max_num_corrections
@@ -664,10 +664,10 @@ class Custodian:
                         continue
                     if terminate_func is not None and handler.is_terminating:
                         logger.info("Terminating job")
-                        terminate_func()
+                        terminate_func(directory=self.directory)
                         # make sure we don't terminate twice
                         terminate_func = None
-                    dct = handler.correct()
+                    dct = handler.correct(directory=self.directory)
                     logger.error(type(handler).__name__, extra=dct)
                     dct["handler"] = handler
                     corrections.append(dct)
@@ -684,7 +684,7 @@ class Custodian:
         self.errors_current_job += len(corrections)
         self.run_log[-1]["corrections"].extend(corrections)
         # We do a dump of the run log after each check.
-        dumpfn(self.run_log, Custodian.LOG_FILE, cls=MontyEncoder, indent=4)
+        dumpfn(self.run_log, os.path.join(self.directory, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
         # Clear all the cached values to avoid reusing them in a subsequent check
         tracked_lru_cache.tracked_cache_clear()
         return len(corrections) > 0
@@ -694,28 +694,28 @@ class Job(MSONable):
     """Abstract base class defining the interface for a Job."""
 
     @abstractmethod
-    def setup(self):
+    def setup(self, directory="./"):
         """
         This method is run before the start of a job. Allows for some
         pre-processing.
         """
 
     @abstractmethod
-    def run(self):
+    def run(self, directory="./"):
         """
         This method perform the actual work for the job. If parallel error
         checking (monitoring) is desired, this must return a Popen process.
         """
 
     @abstractmethod
-    def postprocess(self):
+    def postprocess(self, directory="./"):
         """
         This method is called at the end of a job, *after* error detection.
         This allows post-processing, such as cleanup, analysis of results,
         etc.
         """
 
-    def terminate(self):
+    def terminate(self, directory="./"):
         """Implement termination function."""
         return
 
@@ -772,7 +772,7 @@ class ErrorHandler(MSONable):
     """
 
     @abstractmethod
-    def check(self):
+    def check(self, directory="./"):
         """
         This method is called during the job (for monitors) or at the end of
         the job to check for errors.
@@ -782,7 +782,7 @@ class ErrorHandler(MSONable):
         """
 
     @abstractmethod
-    def correct(self):
+    def correct(self, directory="./"):
         """
         This method is called at the end of a job when an error is detected.
         It should perform any corrective measures relating to the detected
@@ -830,7 +830,7 @@ class Validator(MSONable):
     """
 
     @abstractmethod
-    def check(self):
+    def check(self, directory="./"):
         """
         This method is called at the end of a job.
 

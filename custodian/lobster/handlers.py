@@ -25,7 +25,7 @@ class EnoughBandsValidator(Validator):
         """
         self.output_filename = output_filename
 
-    def check(self) -> bool:
+    def check(self, directory: str = "./") -> bool:
         """
         checks if the VASP calculation had enough bands
         Returns:
@@ -33,7 +33,7 @@ class EnoughBandsValidator(Validator):
         """
         # checks if correct number of bands is available
         try:
-            with open(self.output_filename) as f:
+            with open(os.path.join(directory, self.output_filename)) as f:
                 data = f.read()
             return "You are employing too few bands in your PAW calculation." in data
         except OSError:
@@ -50,12 +50,12 @@ class LobsterFilesValidator(Validator):
     def __init__(self):
         """Dummy init."""
 
-    def check(self) -> bool:
+    def check(self, directory: str = "./") -> bool:
         """Check for errors."""
         for filename in ["lobsterout"]:
-            if not os.path.isfile(filename):
+            if not os.path.isfile(os.path.join(directory, filename)):
                 return True
-        with open("lobsterout") as file:
+        with open(os.path.join(directory, "lobsterout")) as file:
             data = file.read()
         return "finished" not in data
 
@@ -73,10 +73,10 @@ class ChargeSpillingValidator(Validator):
         self.output_filename = output_filename
         self.charge_spilling_limit = charge_spilling_limit
 
-    def check(self) -> bool:
+    def check(self, directory: str = "./") -> bool:
         """Open lobsterout and find charge spilling."""
-        if os.path.isfile(self.output_filename):
-            lobsterout = Lobsterout(self.output_filename)
+        if os.path.isfile(os.path.join(directory, self.output_filename)):
+            lobsterout = Lobsterout(os.path.join(directory, self.output_filename))
             if lobsterout.charge_spilling[0] > self.charge_spilling_limit:
                 return True
             if len(lobsterout.charge_spilling) > 1 and lobsterout.charge_spilling[1] > self.charge_spilling_limit:

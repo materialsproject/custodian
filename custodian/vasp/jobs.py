@@ -166,24 +166,24 @@ class VaspJob(Job):
                     logger.exception(f"Failed to detect VASP path: {vasp_cmd}")
                     scope.set_tag("vasp_cmd", vasp_cmd)
 
-    def setup(self):
+    def setup(self, directory="./"):
         """
         Performs initial setup for VaspJob, including overriding any settings
         and backing up.
         """
-        decompress_dir(".")
+        decompress_dir(directory)
 
         if self.backup:
             for file in VASP_INPUT_FILES:
                 try:
-                    shutil.copy(file, f"{file}.orig")
+                    shutil.copy(os.path.join(directory, file), os.path.join(directory, f"{file}.orig"))
                 except FileNotFoundError:  # handle the situation when there is no KPOINTS file
                     if file == "KPOINTS":
                         pass
 
         if self.auto_npar:
             try:
-                incar = Incar.from_file("INCAR")
+                incar = Incar.from_file(os.path.join(directory, "INCAR"))
                 # Only optimized NPAR for non-HF and non-RPA calculations.
                 if not (incar.get("LHFCALC") or incar.get("LRPA") or incar.get("LEPSILON")):
                     if incar.get("IBRION") in {5, 6, 7, 8}:
@@ -202,16 +202,16 @@ class VaspJob(Job):
                             if ncores % npar == 0:
                                 incar["NPAR"] = npar
                                 break
-                    incar.write_file("INCAR")
+                    incar.write_file(os.path.join(directory, "INCAR"))
             except Exception:
                 pass
 
         if self.auto_continue:
-            if os.path.isfile("continue.json"):
-                actions = loadfn("continue.json").get("actions")
+            if os.path.isfile(os.path.join(directory, "continue.json")):
+                actions = loadfn(os.path.join(directory, "continue.json")).get("actions")
                 logger.info(f"Continuing previous VaspJob. Actions: {actions}")
-                backup(VASP_BACKUP_FILES, prefix="prev_run")
-                VaspModder().apply_actions(actions)
+                backup(VASP_BACKUP_FILES, prefix="prev_run", directory=directory)
+                VaspModder(directory=directory).apply_actions(actions)
 
             else:
                 # Default functionality is to copy CONTCAR to POSCAR and set
@@ -226,12 +226,12 @@ class VaspJob(Job):
                     ]
                 else:
                     actions = self.auto_continue
-                dumpfn({"actions": actions}, "continue.json")
+                dumpfn({"actions": actions}, os.path.join(directory, "continue.json"))
 
         if self.settings_override is not None:
-            VaspModder().apply_actions(self.settings_override)
+            VaspModder(directory=directory).apply_actions(self.settings_override)
 
-    def run(self):
+    def run(self, directory="./"):
         """
         Perform the actual VASP run.
 
@@ -240,7 +240,7 @@ class VaspJob(Job):
         """
         cmd = list(self.vasp_cmd)
         if self.auto_gamma:
-            vi = VaspInput.from_directory(".")
+            vi = VaspInput.from_directory(directory)
             kpts = vi["KPOINTS"]
             if kpts is not None and kpts.style == Kpoints.supported_modes.Gamma and tuple(kpts.kpts[0]) == (1, 1, 1):
                 if self.gamma_vasp_cmd is not None and which(self.gamma_vasp_cmd[-1]):  # pylint: disable=E1136
@@ -248,16 +248,20 @@ class VaspJob(Job):
                 elif which(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
         logger.info(f"Running {' '.join(cmd)}")
-        with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
+        with (
+            open(os.path.join(directory, self.output_file), "w") as f_std,
+            open(os.path.join(directory, self.stderr_file), "w", buffering=1) as f_err,
+        ):
             # use line buffering for stderr
-            return subprocess.Popen(cmd, stdout=f_std, stderr=f_err, start_new_session=True)  # pylint: disable=R1732
+            return subprocess.Popen(cmd, cwd=directory, stdout=f_std, stderr=f_err, start_new_session=True)  # pylint: disable=R1732
 
-    def postprocess(self):
+    def postprocess(self, directory="./"):
         """
         Postprocessing includes renaming and gzipping where necessary.
         Also copies the magmom to the incar if necessary.
         """
         for file in [*VASP_OUTPUT_FILES, self.output_file]:
+            file = os.path.join(directory, file)
             if os.path.isfile(file):
                 if self.final and self.suffix != "":
                     shutil.move(file, f"{file}{self.suffix}")
@@ -266,18 +270,18 @@ class VaspJob(Job):
 
         if self.copy_magmom and not self.final:
             try:
-                outcar = Outcar("OUTCAR")
+                outcar = Outcar(os.path.join(directory, "OUTCAR"))
                 magmom = [m["tot"] for m in outcar.magnetization]
-                incar = Incar.from_file("INCAR")
+                incar = Incar.from_file(os.path.join(directory, "INCAR"))
                 incar["MAGMOM"] = magmom
-                incar.write_file("INCAR")
+                incar.write_file(os.path.join(directory, "INCAR"))
             except Exception:
                 logger.error("MAGMOM copy from OUTCAR to INCAR failed")
 
         # Remove continuation so if a subsequent job is run in
         # the same directory, will not restart this job.
-        if os.path.isfile("continue.json"):
-            os.remove("continue.json")
+        if os.path.isfile(os.path.join(directory, "continue.json")):
+            os.remove(os.path.join(directory, "continue.json"))
 
     @classmethod
     def double_relaxation_run(
@@ -287,6 +291,7 @@ class VaspJob(Job):
         ediffg=-0.05,
         half_kpts_first_relax=False,
         auto_continue=False,
+        directory="./",
     ):
         """
         Returns a list of two jobs corresponding to an AFLOW style double
@@ -322,8 +327,12 @@ class VaspJob(Job):
             {"dict": "INCAR", "action": {"_set": incar_update}},
             {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}},
         ]
-        if half_kpts_first_relax and os.path.isfile("KPOINTS") and os.path.isfile("POSCAR"):
-            kpts = Kpoints.from_file("KPOINTS")
+        if (
+            half_kpts_first_relax
+            and os.path.isfile(os.path.join(directory, "KPOINTS"))
+            and os.path.isfile(os.path.join(directory, "POSCAR"))
+        ):
+            kpts = Kpoints.from_file(os.path.join(directory, "KPOINTS"))
             orig_kpts_dict = kpts.as_dict()
             # lattice vectors with length < 8 will get >1 KPOINT
             kpts.kpts = np.round(np.maximum(np.array(kpts.kpts) / 2, 1)).astype(int).tolist()
@@ -359,6 +368,7 @@ class VaspJob(Job):
         ediffg=-0.05,
         half_kpts_first_relax=False,
         auto_continue=False,
+        directory="./",
     ):
         """
         Returns a list of three jobs to perform an optimization for any
@@ -367,7 +377,7 @@ class VaspJob(Job):
         to precondition the electronic structure optimizer. The metaGGA
         optimization is performed using the double relaxation scheme.
         """
-        incar = Incar.from_file("INCAR")
+        incar = Incar.from_file(os.path.join(directory, "INCAR"))
         # Defaults to using the SCAN metaGGA
         metaGGA = incar.get("METAGGA", "SCAN")
 
@@ -395,6 +405,7 @@ class VaspJob(Job):
                 auto_npar=auto_npar,
                 ediffg=ediffg,
                 half_kpts_first_relax=half_kpts_first_relax,
+                directory=directory,
             )
         )
 
@@ -424,7 +435,14 @@ class VaspJob(Job):
 
     @classmethod
     def full_opt_run(
-        cls, vasp_cmd, vol_change_tol=0.02, max_steps=10, ediffg=-0.05, half_kpts_first_relax=False, **vasp_job_kwargs
+        cls,
+        vasp_cmd,
+        vol_change_tol=0.02,
+        max_steps=10,
+        ediffg=-0.05,
+        half_kpts_first_relax=False,
+        directory="./",
+        **vasp_job_kwargs,
     ):
         r"""
         Returns a generator of jobs for a full optimization run. Basically,
@@ -454,16 +472,20 @@ class VaspJob(Job):
             if i == 0:
                 settings = None
                 backup = True
-                if half_kpts_first_relax and os.path.isfile("KPOINTS") and os.path.isfile("POSCAR"):
-                    kpts = Kpoints.from_file("KPOINTS")
+                if (
+                    half_kpts_first_relax
+                    and os.path.isfile(os.path.join(directory, "KPOINTS"))
+                    and os.path.isfile(os.path.join(directory, "POSCAR"))
+                ):
+                    kpts = Kpoints.from_file(os.path.join(directory, "KPOINTS"))
                     orig_kpts_dict = kpts.as_dict()
                     kpts.kpts = np.maximum(np.array(kpts.kpts) / 2, 1).tolist()
                     low_kpts_dict = kpts.as_dict()
                     settings = [{"dict": "KPOINTS", "action": {"_set": low_kpts_dict}}]
             else:
                 backup = False
-                initial = Poscar.from_file("POSCAR").structure
-                final = Poscar.from_file("CONTCAR").structure
+                initial = Poscar.from_file(os.path.join(directory, "POSCAR")).structure
+                final = Poscar.from_file(os.path.join(directory, "CONTCAR")).structure
                 vol_change = (final.volume - initial.volume) / initial.volume
 
                 logger.info(f"Vol change = {vol_change:.1%}!")
@@ -494,7 +516,15 @@ class VaspJob(Job):
 
     @classmethod
     def constrained_opt_run(
-        cls, vasp_cmd, lattice_direction, initial_strain, atom_relax=True, max_steps=20, algo="bfgs", **vasp_job_kwargs
+        cls,
+        vasp_cmd,
+        lattice_direction,
+        initial_strain,
+        atom_relax=True,
+        max_steps=20,
+        algo="bfgs",
+        directory="./",
+        **vasp_job_kwargs,
     ):
         r"""
         Returns a generator of jobs for a constrained optimization run. Typical
@@ -539,7 +569,7 @@ class VaspJob(Job):
         """
         nsw = 99 if atom_relax else 0
 
-        incar = Incar.from_file("INCAR")
+        incar = Incar.from_file(os.path.join(directory, "INCAR"))
 
         # Set the energy convergence criteria as the EDIFFG (if present) or
         # 10 x EDIFF (which itself defaults to 1e-4 if not present).
@@ -557,7 +587,7 @@ class VaspJob(Job):
         for i in range(max_steps):
             if i == 0:
                 settings = [{"dict": "INCAR", "action": {"_set": {"ISIF": 2, "NSW": nsw}}}]
-                structure = Poscar.from_file("POSCAR").structure
+                structure = Poscar.from_file(os.path.join(directory, "POSCAR")).structure
                 x = structure.lattice.abc[lattice_index]
                 backup = True
             else:
@@ -631,7 +661,7 @@ class VaspJob(Job):
                 lattice[lattice_index] = lattice[lattice_index] / np.linalg.norm(lattice[lattice_index]) * x
 
                 s = Structure(lattice, structure.species, structure.frac_coords)
-                fname = f"POSCAR.{x}"
+                fname = os.path.join(directory, f"POSCAR.{x}")
                 s.to(filename=fname)
 
                 incar_update = {"ISTART": 1, "NSW": nsw, "ISIF": 2}
@@ -651,12 +681,12 @@ class VaspJob(Job):
                 **vasp_job_kwargs,
             )
 
-        with open("EOS.txt", "w") as file:
+        with open(os.path.join(directory, "EOS.txt"), "w") as file:
             file.write(f"# {lattice_direction} energy\n")
             for key in sorted(energies):
                 file.write(f"{key} {energies[key]}\n")
 
-    def terminate(self):
+    def terminate(self, directory="./"):
         """
         Kill all VASP processes associated with the current job.
         This is done by looping over all processes and selecting the ones
@@ -667,7 +697,7 @@ class VaspJob(Job):
         simultaneously executed on the same node). However, this should never
         happen.
         """
-        workdir = os.getcwd()
+        workdir = directory
         logger.info(f"Killing VASP processes in workdir {workdir}.")
         for proc in psutil.process_iter():
             try:
@@ -779,40 +809,35 @@ class VaspNEBJob(VaspJob):
         self.auto_continue = auto_continue
         self.settings_override = settings_override
 
-        self.neb_dirs = sorted(  # 00, 01, etc.
-            path for path in os.listdir(".") if os.path.isdir(path) and path.isdigit()
-        )
-        self.neb_sub = self.neb_dirs[1:-1]  # 01, 02, etc.
-
-    def setup(self):
+    def setup(self, directory="./"):
         """
         Performs initial setup for VaspNEBJob, including overriding any settings
         and backing up.
         """
-        neb_dirs = self.neb_dirs
+        neb_dirs, neb_sub = self._get_neb_dirs(directory)
 
         if self.backup:
             # Back up KPOINTS, INCAR, POTCAR
             for file in VASP_NEB_INPUT_FILES:
-                shutil.copy(file, f"{file}.orig")
+                shutil.copy(os.path.join(directory, file), os.path.join(directory, f"{file}.orig"))
             # Back up POSCARs
             for path in neb_dirs:
                 poscar = os.path.join(path, "POSCAR")
                 shutil.copy(poscar, f"{poscar}.orig")
 
-        if self.half_kpts and os.path.isfile("KPOINTS"):
-            kpts = Kpoints.from_file("KPOINTS")
+        if self.half_kpts and os.path.isfile(os.path.join(directory, "KPOINTS")):
+            kpts = Kpoints.from_file(os.path.join(directory, "KPOINTS"))
             kpts.kpts = np.maximum(np.array(kpts.kpts) / 2, 1)
             kpts.kpts = kpts.kpts.astype(int).tolist()
             if tuple(kpts.kpts[0]) == (1, 1, 1):
                 kpt_dic = kpts.as_dict()
                 kpt_dic["generation_style"] = "Gamma"
                 kpts = Kpoints.from_dict(kpt_dic)
-            kpts.write_file("KPOINTS")
+            kpts.write_file(os.path.join(directory, "KPOINTS"))
 
         if self.auto_npar:
             try:
-                incar = Incar.from_file("INCAR")
+                incar = Incar.from_file(os.path.join(directory, "INCAR"))
                 import multiprocessing
 
                 # Try sge environment variable first
@@ -824,25 +849,29 @@ class VaspNEBJob(VaspJob):
                     if ncores % npar == 0:
                         incar["NPAR"] = npar
                         break
-                incar.write_file("INCAR")
+                incar.write_file(os.path.join(directory, "INCAR"))
             except Exception:
                 pass
 
-        if self.auto_continue and os.path.isfile("STOPCAR") and not os.access("STOPCAR", os.W_OK):
+        if (
+            self.auto_continue
+            and os.path.isfile(os.path.join(directory, "STOPCAR"))
+            and not os.access(os.path.join(directory, "STOPCAR"), os.W_OK)
+        ):
             # Remove STOPCAR
-            os.chmod("STOPCAR", 0o644)
-            os.remove("STOPCAR")
+            os.chmod(os.path.join(directory, "STOPCAR"), 0o644)
+            os.remove(os.path.join(directory, "STOPCAR"))
 
             # Copy CONTCAR to POSCAR
-            for path in self.neb_sub:
+            for path in neb_sub:
                 contcar = os.path.join(path, "CONTCAR")
                 poscar = os.path.join(path, "POSCAR")
                 shutil.copy(contcar, poscar)
 
         if self.settings_override is not None:
-            VaspModder().apply_actions(self.settings_override)
+            VaspModder(directory=directory).apply_actions(self.settings_override)
 
-    def run(self):
+    def run(self, directory="./"):
         """
         Perform the actual VASP run.
 
@@ -851,7 +880,7 @@ class VaspNEBJob(VaspJob):
         """
         cmd = list(self.vasp_cmd)
         if self.auto_gamma:
-            kpts = Kpoints.from_file("KPOINTS")
+            kpts = Kpoints.from_file(os.path.join(directory, "KPOINTS"))
             if kpts.style == Kpoints.supported_modes.Gamma and tuple(kpts.kpts[0]) == (
                 1,
                 1,
@@ -862,14 +891,26 @@ class VaspNEBJob(VaspJob):
                 elif which(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
         logger.info(f"Running {' '.join(cmd)}")
-        with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
+        with (
+            open(os.path.join(directory, self.output_file), "w") as f_std,
+            open(os.path.join(directory, self.stderr_file), "w", buffering=1) as f_err,
+        ):
             # Use line buffering for stderr
-            return subprocess.Popen(cmd, stdout=f_std, stderr=f_err, start_new_session=True)  # pylint: disable=R1732
+            return subprocess.Popen(
+                cmd,
+                cwd=directory,
+                stdout=f_std,
+                stderr=f_err,
+                start_new_session=True,
+            )  # pylint: disable=R1732
 
-    def postprocess(self):
+    def postprocess(self, directory="./"):
         """Postprocessing includes renaming and gzipping where necessary."""
         # Add suffix to all sub_dir/{items}
-        for path in self.neb_dirs:
+
+        neb_dirs, neb_sub = self._get_neb_dirs(directory)
+
+        for path in neb_dirs:
             for file in VASP_NEB_OUTPUT_SUB_FILES:
                 file = os.path.join(path, file)
                 if os.path.isfile(file):
@@ -880,11 +921,19 @@ class VaspNEBJob(VaspJob):
 
         # Add suffix to all output files
         for file in [*VASP_NEB_OUTPUT_FILES, self.output_file]:
+            file = os.path.join(directory, file)
             if os.path.isfile(file):
                 if self.final and self.suffix != "":
                     shutil.move(file, f"{file}{self.suffix}")
                 elif self.suffix != "":
                     shutil.copy(file, f"{file}{self.suffix}")
+
+    def _get_neb_dirs(self, directory):
+        neb_dirs = sorted(  # 00, 01, etc.
+            path for path in os.listdir(directory) if os.path.isdir(path) and path.isdigit()
+        )
+        neb_sub = neb_dirs[1:-1]  # 01, 02, etc.
+        return neb_dirs, neb_sub
 
 
 class GenerateVaspInputJob(Job):
@@ -906,21 +955,21 @@ class GenerateVaspInputJob(Job):
         self.contcar_only = contcar_only
         self.kwargs = kwargs
 
-    def setup(self):
+    def setup(self, directory="./"):
         """Dummy setup."""
 
-    def run(self):
+    def run(self, directory="./"):
         """Run the calculation."""
-        if os.path.isfile("CONTCAR"):
-            structure = Structure.from_file("CONTCAR")
-        elif (not self.contcar_only) and os.path.isfile("POSCAR"):
-            structure = Structure.from_file("POSCAR")
+        if os.path.isfile(os.path.join(directory, "CONTCAR")):
+            structure = Structure.from_file(os.path.join(directory, "CONTCAR"))
+        elif (not self.contcar_only) and os.path.isfile(os.path.join(directory, "POSCAR")):
+            structure = Structure.from_file(os.path.join(directory, "POSCAR"))
         else:
             raise RuntimeError("No CONTCAR/POSCAR detected to generate input!")
         modname, classname = self.input_set.rsplit(".", 1)
         mod = __import__(modname, globals(), locals(), [classname], 0)
         vis = getattr(mod, classname)(structure, **self.kwargs)
-        vis.write_input(".")
+        vis.write_input(directory)
 
-    def postprocess(self):
+    def postprocess(self, directory="./"):
         """Dummy postprocess."""

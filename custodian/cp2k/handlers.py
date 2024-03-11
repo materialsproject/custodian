@@ -70,7 +70,7 @@ class StdErrHandler(ErrorHandler):
         self.std_err = std_err
         self.errors = set()
 
-    def check(self):
+    def check(self, directory="./"):
         """Check for error in std_err file."""
         self.errors = set()
         with open(self.std_err) as file:
@@ -82,7 +82,7 @@ class StdErrHandler(ErrorHandler):
                             self.errors.add(err)
         return len(self.errors) > 0
 
-    def correct(self):
+    def correct(self, directory="./"):
         """Log error, perform no corrections."""
         return {"errors": [f"System error(s): {self.errors}"], "actions": []}
 
@@ -147,12 +147,12 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         self.scf = None
         self.restart = None
 
-    def check(self):
+    def check(self, directory="./"):
         """Check output file for failed SCF convergence."""
         # Checks output file for errors.
-        out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
+        out = Cp2kOutput(os.path.join(directory, self.output_file), auto_load=False, verbose=False)
         out.convergence()
-        ci = Cp2kInput.from_file(zpath(self.input_file))
+        ci = Cp2kInput.from_file(zpath(os.path.join(directory, self.input_file)))
         self.is_ot = ci.check("FORCE_EVAL/DFT/SCF/OT")
         if out.filenames.get("restart"):
             self.restart = out.filenames["restart"][-1]
@@ -164,14 +164,14 @@ class UnconvergedScfErrorHandler(ErrorHandler):
             return True
         return False
 
-    def correct(self):
-        """Apply corrections to aid convergence, if possible."""
-        ci = Cp2kInput.from_file(self.input_file)
+    def correct(self, directory="./"):
+        """Apply corrections to aid convergence if possible."""
+        ci = Cp2kInput.from_file(os.path.join(directory, self.input_file))
 
         actions = self.__correct_ot(ci=ci) if self.is_ot else self.__correct_diag(ci=ci)
 
-        restart(actions, self.output_file, self.input_file)
-        Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
+        restart(actions, os.path.join(directory, self.output_file), os.path.join(directory, self.input_file))
+        Cp2kModder(ci=ci, filename=self.input_file, directory=directory).apply_actions(actions)
         return {"errors": ["Non-converging Job"], "actions": actions}
 
     def __correct_ot(self, ci):
@@ -411,17 +411,17 @@ class DivergingScfErrorHandler(ErrorHandler):
         self.output_file = output_file
         self.input_file = input_file
 
-    def check(self):
+    def check(self, directory="./"):
         """Check for diverging SCF."""
-        conv = get_conv(self.output_file)
+        conv = get_conv(os.path.join(directory, self.output_file))
         tmp = np.diff(conv[-10:])
         if len(conv) > 10 and all(_ > 0 for _ in tmp) and any(_ > 1 for _ in conv):
             return True
         return False
 
-    def correct(self):
+    def correct(self, directory="./"):
         """Correct issue if possible."""
-        ci = Cp2kInput.from_file(self.input_file)
+        ci = Cp2kInput.from_file(os.path.join(directory, self.input_file))
         actions = []
 
         p = ci["force_eval"]["dft"]["qs"].get("EPS_DEFAULT", Keyword("EPS_DEFAULT", 1e-10)).values[0]
@@ -434,7 +434,7 @@ class DivergingScfErrorHandler(ErrorHandler):
             actions.append(
                 {"dict": self.input_file, "action": {"_set": {"FORCE_EVAL": {"DFT": {"QS": {"EPS_PGF_ORB": 1e-12}}}}}}
             )
-        Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
+        Cp2kModder(ci=ci, filename=self.input_file, directory=directory).apply_actions(actions)
         return {"errors": ["Diverging SCF"], "actions": actions}
 
 
@@ -483,10 +483,10 @@ class FrozenJobErrorHandler(ErrorHandler):
         self.frozen_preconditioner = False
         self.restart = None
 
-    def check(self):
+    def check(self, directory="./"):
         """Check for frozen jobs."""
-        st = os.stat(self.output_file)
-        out = Cp2kOutput(self.output_file, auto_load=False, verbose=False)
+        st = os.stat(os.path.join(directory, self.output_file))
+        out = Cp2kOutput(os.path.join(directory, self.output_file), auto_load=False, verbose=False)
         try:
             out.ran_successfully()
             # If job finished, then hung, don't need to wait very long to confirm frozen
@@ -504,9 +504,9 @@ class FrozenJobErrorHandler(ErrorHandler):
 
         return False
 
-    def correct(self):
+    def correct(self, directory="./"):
         """Correct issue if possible."""
-        ci = Cp2kInput.from_file(self.input_file)
+        ci = Cp2kInput.from_file(os.path.join(directory, self.input_file))
         actions = []
         errors = []
 
@@ -583,8 +583,8 @@ class FrozenJobErrorHandler(ErrorHandler):
         else:
             errors.append("Frozen job")
 
-        restart(actions, self.output_file, self.input_file)
-        Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
+        restart(actions, os.path.join(directory, self.output_file), os.path.join(self.input_file))
+        Cp2kModder(ci=ci, filename=self.input_file, directory=directory).apply_actions(actions)
         return {"errors": errors, "actions": actions}
 
 
@@ -622,19 +622,23 @@ class AbortHandler(ErrorHandler):
         }
         self.responses = []
 
-    def check(self):
+    def check(self, directory="./"):
         """Check for abort messages."""
         matches = regrep(
-            self.output_file, patterns=self.messages, reverse=True, terminate_on_match=True, postprocess=str
+            os.path.join(directory, self.output_file),
+            patterns=self.messages,
+            reverse=True,
+            terminate_on_match=True,
+            postprocess=str,
         )
         for m in matches:
             self.responses.append(m)
             return True
         return False
 
-    def correct(self):
+    def correct(self, directory="./"):
         """Correct issue if possible."""
-        ci = Cp2kInput.from_file(self.input_file)
+        ci = Cp2kInput.from_file(os.path.join(directory, self.input_file))
         actions = []
 
         if self.responses[-1] == "cholesky":
@@ -736,8 +740,8 @@ class AbortHandler(ErrorHandler):
                         }
                     )
 
-        restart(actions, self.output_file, self.input_file)
-        Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
+        restart(actions, os.path.join(directory, self.output_file), os.path.join(self.input_file))
+        Cp2kModder(ci=ci, filename=self.input_file, directory=directory).apply_actions(actions)
         return {"errors": [self.responses[-1]], "actions": actions}
 
 
@@ -819,17 +823,17 @@ class NumericalPrecisionHandler(ErrorHandler):
         self.eps_default_strict = eps_default_strict
         self.eps_gvg_strict = eps_gvg_strict
 
-    def check(self):
+    def check(self, directory="./"):
         """Check for stuck SCF convergence."""
-        conv = get_conv(self.output_file)
+        conv = get_conv(os.path.join(directory, self.output_file))
         counts = [sum(1 for i in g) for k, g in itertools.groupby(conv)]
         if any(c > self.max_same for c in counts):
             return True
         return False
 
-    def correct(self):
+    def correct(self, directory="/."):
         """Correct issue if possible."""
-        ci = Cp2kInput.from_file(self.input_file)
+        ci = Cp2kInput.from_file(os.path.join(directory, self.input_file))
         actions = []
 
         if ci.check("FORCE_EVAL/DFT/XC/HF"):  # Hybrid has special considerations
@@ -913,8 +917,8 @@ class NumericalPrecisionHandler(ErrorHandler):
                     }
                 )
 
-        restart(actions, self.output_file, self.input_file)
-        Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
+        restart(actions, os.path.join(directory, self.output_file), os.path.join(self.input_file))
+        Cp2kModder(ci=ci, filename=self.input_file, directory=directory).apply_actions(actions)
         return {"errors": ["Insufficient precision"], "actions": actions}
 
     def __set_pgf_orb(self):
@@ -968,17 +972,17 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
         self.optimizers = optimizers
         self.optimizer_id = 0
 
-    def check(self):
+    def check(self, directory="./"):
         """Check for unconverged geometry optimization."""
-        o = Cp2kOutput(self.output_file)
+        o = Cp2kOutput(os.path.join(directory, self.output_file))
         o.convergence()
         if o.data.get("geo_opt_not_converged"):
             return True
         return False
 
-    def correct(self):
+    def correct(self, directory):
         """Correct issue if possible."""
-        ci = Cp2kInput.from_file(self.input_file)
+        ci = Cp2kInput.from_file(os.path.join(directory, self.input_file))
         actions = []
 
         max_iter = ci["motion"]["geo_opt"].get("MAX_ITER", Keyword("", 200)).values[0]
@@ -1013,8 +1017,8 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
             )
 
         self.optimizer_id += 1
-        restart(actions, self.output_file, self.input_file)
-        Cp2kModder(ci=ci, filename=self.input_file).apply_actions(actions)
+        restart(actions, os.path.join(directory, self.output_file), os.path.join(self.input_file))
+        Cp2kModder(ci=ci, filename=self.input_file, directory=directory).apply_actions(actions)
         return {"errors": ["Unsuccessful relaxation"], "actions": actions}
 
 
@@ -1042,10 +1046,10 @@ class WalltimeHandler(ErrorHandler):
         self.output_file = output_file
         self.enable_checkpointing = enable_checkpointing
 
-    def check(self):
+    def check(self, directory="./"):
         """Check if internal CP2K walltime handler was tripped."""
         if regrep(
-            filename=self.output_file,
+            filename=os.path.join(directory, self.output_file),
             patterns={"walltime": r"(exceeded requested execution time)"},
             reverse=True,
             terminate_on_match=True,
@@ -1054,8 +1058,8 @@ class WalltimeHandler(ErrorHandler):
             return True
         return False
 
-    def correct(self):
+    def correct(self, directory="./"):
         """Dump checkpoint info if requested."""
         if self.enable_checkpointing:
-            dumpfn({"_path": os.getcwd()}, fn="checkpoint.json")
+            dumpfn({"_path": directory}, fn=(os.path.join(directory, "checkpoint.json")))
         return {"errors": ["Walltime error"], "actions": []}
