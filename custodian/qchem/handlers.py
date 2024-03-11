@@ -1,4 +1,4 @@
-"""This module implements new error handlers for QChem runs."""
+"""This module implements error handlers for QChem runs."""
 
 import os
 
