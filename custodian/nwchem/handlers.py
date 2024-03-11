@@ -40,18 +40,6 @@ class NwchemErrorHandler(ErrorHandler):
         self.ntasks = len(out.data)
         return len(self.errors) > 0
 
-    def _mod_input(self, search_string_func, mod_string_func, directory):
-        with open(os.path.join(directory, self.input_file)) as file:
-            lines = []
-            for line in file:
-                if search_string_func(line):
-                    lines.append(mod_string_func(line))
-                else:
-                    lines.append(line)
-
-        with open(os.path.join(directory, self.input_file), "w") as fout:
-            fout.write("".join(lines))
-
     def correct(self, directory="./"):
         """Correct errors."""
         backup("*.nw*", directory=directory)
