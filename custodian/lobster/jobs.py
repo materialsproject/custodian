@@ -82,9 +82,10 @@ class LobsterJob(Job):
 
         logger.info(f"Running {' '.join(cmd)}")
 
-        with zopen(os.path.join(directory, self.output_file), "w") as f_std, zopen(
-            os.path.join(directory, self.stderr_file), "w", buffering=1
-        ) as f_err:
+        with (
+            zopen(os.path.join(directory, self.output_file), "w") as f_std,
+            zopen(os.path.join(directory, self.stderr_file), "w", buffering=1) as f_err,
+        ):
             # use line buffering for stderr
             return subprocess.Popen(cmd, cwd=directory, stdout=f_std, stderr=f_err)  # pylint: disable=R1732
 

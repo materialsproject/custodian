@@ -2,6 +2,7 @@
 This module implements error handlers for Nwchem runs. Currently tested only
 for B3LYP DFT jobs.
 """
+
 import os
 
 from pymatgen.io.nwchem import NwInput, NwOutput

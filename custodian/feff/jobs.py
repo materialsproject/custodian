@@ -77,9 +77,10 @@ class FeffJob(Job):
         Returns:
             (subprocess.Popen) Used for monitoring.
         """
-        with open(os.path.join(directory, self.output_file), "w") as f_std, open(
-            os.path.join(directory, self.stderr_file), "w", buffering=1
-        ) as f_err:
+        with (
+            open(os.path.join(directory, self.output_file), "w") as f_std,
+            open(os.path.join(directory, self.stderr_file), "w", buffering=1) as f_err,
+        ):
             # Use line buffering for stderr
             # On TSCC, need to run shell command
             return subprocess.Popen(self.feff_cmd, cwd=directory, stdout=f_std, stderr=f_err, shell=True)  # pylint: disable=R1732
