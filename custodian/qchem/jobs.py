@@ -155,7 +155,7 @@ class QCJob(Job):
             except FileNotFoundError:
                 pass
 
-    def run(self):
+    def run(self, directory="./"):
         """
         Perform the actual QChem run.
 
@@ -172,7 +172,7 @@ class QCJob(Job):
             os.makedirs(local_scratch, exist_ok=True)
             shutil.move(os.path.join(os.environ["QCSCRATCH"], "53.0"), local_scratch)
         with open(self.qclog_file, "w") as qclog:
-            return subprocess.Popen(self.current_command, stdout=qclog, shell=True)  # pylint: disable=R1732
+            return subprocess.Popen(self.current_command, cwd=directory, stdout=qclog, shell=True)  # pylint: disable=R1732
 
     @classmethod
     def opt_with_frequency_flattener(
