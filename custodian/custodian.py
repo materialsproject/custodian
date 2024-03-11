@@ -175,6 +175,8 @@ class Custodian:
                 running job. If None, the default is to call Popen.terminate.
             terminate_on_nonzero_returncode (bool): If True, a non-zero return
                 code on any Job will result in a termination. Defaults to True.
+            directory (str): The directory to run the jobs in. Defaults to
+                the current working directory.
             **kwargs: Any other kwargs are ignored. This is to allow for easy
                  subclassing and instantiation from a dict.
         """
