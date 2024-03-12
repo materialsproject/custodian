@@ -707,8 +707,8 @@ class VaspJob(Job):
                     if (vasprun_path in open_paths) and psutil.pid_exists(proc.pid):
                         proc.kill()
                         return
-            except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
-                logger.warning(f"Exception {e} encountered while killing VASP.")
+            except (psutil.NoSuchProcess, psutil.AccessDenied) as exc:
+                logger.warning(f"Exception {exc} encountered while killing VASP.")
                 continue
 
         logger.warning(

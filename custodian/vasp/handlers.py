@@ -709,8 +709,8 @@ class LrfCommutatorHandler(ErrorHandler):
     def check(self, directory="./"):
         """Check for error."""
         self.errors = set()
-        with open(os.path.join(directory, self.output_filename)) as f:
-            for line in f:
+        with open(os.path.join(directory, self.output_filename)) as file:
+            for line in file:
                 line = line.strip()
                 for err, msgs in LrfCommutatorHandler.error_msgs.items():
                     for msg in msgs:
@@ -825,8 +825,8 @@ class AliasingErrorHandler(ErrorHandler):
         """Check for error."""
         incar = Incar.from_file(os.path.join(directory, "INCAR"))
         self.errors = set()
-        with open(os.path.join(directory, self.output_filename)) as f:
-            for line in f:
+        with open(os.path.join(directory, self.output_filename)) as file:
+            for line in file:
                 line = line.strip()
                 for err, msgs in AliasingErrorHandler.error_msgs.items():
                     for msg in msgs:
@@ -1009,8 +1009,8 @@ class MeshSymmetryErrorHandler(ErrorHandler):
                 return False
         except Exception:
             pass
-        with open(os.path.join(directory, self.output_filename)) as f:
-            for line in f:
+        with open(os.path.join(directory, self.output_filename)) as file:
+            for line in file:
                 line = line.strip()
                 if line.find(msg) != -1:
                     return True

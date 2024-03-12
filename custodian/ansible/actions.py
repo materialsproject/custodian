@@ -231,8 +231,8 @@ class FileActions:
             raise ValueError("Settings must only contain one item with key 'content'.")
         for k, v in settings.items():
             if k == "content":
-                with open(filename, "w") as f:
-                    f.write(v)
+                with open(filename, "w") as file:
+                    file.write(v)
 
     @staticmethod
     def file_move(filename, settings, directory):

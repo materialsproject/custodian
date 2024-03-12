@@ -933,8 +933,8 @@ class WalltimeHandlerTest(PymatgenTest):
 
         # Test that the STOPCAR is written correctly.
         handler.correct()
-        with open("STOPCAR") as f:
-            content = f.read()
+        with open("STOPCAR") as file:
+            content = file.read()
             assert content == "LSTOP = .TRUE."
         os.remove("STOPCAR")
 
@@ -945,8 +945,8 @@ class WalltimeHandlerTest(PymatgenTest):
         assert handler.check()
 
         handler.correct()
-        with open("STOPCAR") as f:
-            content = f.read()
+        with open("STOPCAR") as file:
+            content = file.read()
             assert content == "LABORT = .TRUE."
         os.remove("STOPCAR")
 

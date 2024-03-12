@@ -191,8 +191,8 @@ class QCJob(Job):
         if os.path.exists(os.path.join(os.environ["QCSCRATCH"], "53.0")):
             os.makedirs(local_scratch, exist_ok=True)
             shutil.move(os.path.join(os.environ["QCSCRATCH"], "53.0"), local_scratch)
-        with open(self.qclog_file, "w") as qclog:
-            return subprocess.Popen(self.current_command, cwd=directory, stdout=qclog, shell=True)  # pylint: disable=R1732
+        with open(self.qclog_file, "w") as qc_log:
+            return subprocess.Popen(self.current_command, cwd=directory, stdout=qc_log, shell=True)  # pylint: disable=R1732
 
     @classmethod
     def opt_with_frequency_flattener(

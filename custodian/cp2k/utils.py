@@ -176,8 +176,8 @@ def can_use_ot(output, ci, minimum_band_gap=0.1):
 
 def tail(filename, n=10):
     """Returns the last n lines of a file as a list (including empty lines)."""
-    with open(filename) as f:
-        t = deque(f, n)
+    with open(filename) as file:
+        t = deque(file, n)
         if t:
             return t
         return [""] * n

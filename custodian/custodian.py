@@ -215,7 +215,7 @@ class Custodian:
             chkpt = sorted(chkpts, key=lambda c: int(c.split(".")[-3]))[0]
             restart = int(chkpt.split(".")[-3])
             logger.info(f"Loading from checkpoint file {chkpt}...")
-            with tarfile.open(chkpt) as t:
+            with tarfile.open(chkpt) as file:
 
                 def is_within_directory(directory, target):
                     abs_directory = os.path.abspath(directory)
@@ -233,7 +233,7 @@ class Custodian:
 
                     tar.extractall(path, members, numeric_owner=numeric_owner)
 
-                safe_extract(t, directory)
+                safe_extract(file, directory)
             # Log the corrections to a json file.
             run_log = loadfn(os.path.join(directory, Custodian.LOG_FILE), cls=MontyDecoder)
 
@@ -249,8 +249,8 @@ class Custodian:
         try:
             Custodian._delete_checkpoints(directory)
             n = os.path.join(directory, f"custodian.chk.{index}.tar.gz")
-            with tarfile.open(n, mode="w:gz", compresslevel=3) as f:
-                f.add(directory, arcname=".")
+            with tarfile.open(n, mode="w:gz", compresslevel=3) as file:
+                file.add(directory, arcname=".")
             logger.info(f"Checkpoint written to {n}")
         except Exception:
             logger.info("Checkpointing failed")

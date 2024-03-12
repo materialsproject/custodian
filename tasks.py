@@ -27,14 +27,14 @@ def make_doc(ctx):
         ctx.run("cp markdown/custodian*.md .")
         ctx.run("rm custodian*tests*.md", warn=True)
         for fn in glob("custodian*.md"):
-            with open(fn) as f:
-                lines = [line.rstrip() for line in f if "Submodules" not in line]
+            with open(fn) as file:
+                lines = [line.rstrip() for line in file if "Submodules" not in line]
             if fn == "custodian.md":
                 preamble = ["---", "layout: default", "title: API Documentation", "nav_order: 6", "---", ""]
             else:
                 preamble = ["---", "layout: default", "title: " + fn, "nav_exclude: true", "---", ""]
-            with open(fn, "w") as f:
-                f.write("\n".join(preamble + lines))
+            with open(fn, "w") as file:
+                file.write("\n".join(preamble + lines))
         ctx.run("rm -r markdown doctrees", warn=True)
 
 
@@ -117,16 +117,16 @@ def update_changelog(ctx, version=None, sim=False):
                 pass
         else:
             misc.append("- " + line)
-    with open("docs/changelog.md") as f:
-        contents = f.read()
+    with open("docs/changelog.md") as file:
+        contents = file.read()
     head = "# Change Log"
     i = contents.find(head)
     i += len(head)
 
     contents = contents[0:i] + f"\n\n## {NEW_VER}\n" + "\n".join(lines) + contents[i:]
     if not sim:
-        with open("docs/changelog.md", "w") as f:
-            f.write(contents)
+        with open("docs/changelog.md", "w") as file:
+            file.write(contents)
         ctx.run("open docs/changelog.md")
     else:
         print(contents)

@@ -56,8 +56,8 @@ class UnconvergedErrorHandler(ErrorHandler):
         # Process the output file and get converge information
         not_converge_pattern = re.compile("Convergence not reached.*")
         converge_pattern = re.compile("Convergence reached.*")
-        with open(os.path.join(directory, self.output_filename)) as f:
-            for line in f:
+        with open(os.path.join(directory, self.output_filename)) as file:
+            for line in file:
                 if len(not_converge_pattern.findall(line)) > 0:
                     return True
 

@@ -33,8 +33,8 @@ class EnoughBandsValidator(Validator):
         """
         # checks if correct number of bands is available
         try:
-            with open(os.path.join(directory, self.output_filename)) as f:
-                data = f.read()
+            with open(os.path.join(directory, self.output_filename)) as file:
+                data = file.read()
             return "You are employing too few bands in your PAW calculation." in data
         except OSError:
             return False

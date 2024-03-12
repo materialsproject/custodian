@@ -25,9 +25,10 @@ __date__ = "6/3/22"
 TEST_DIR = f"{TEST_FILES}/qchem/new_test_files"
 SCR_DIR = f"{TEST_DIR}/scratch"
 CWD = os.getcwd()
+skip_if_no_openbabel = unittest.skipIf(ob is None, "openbabel not installed")
 
 
-@unittest.skipIf(ob is None, "openbabel not installed")
+@skip_if_no_openbabel
 class FFOptJobHandlerInteraction(TestCase):
     def _check_equivalent_inputs(self, input1, input2):
         QCinput1 = QCInput.from_file(input1)

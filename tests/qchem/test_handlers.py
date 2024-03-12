@@ -26,9 +26,10 @@ __credits__ = "Xiaohui Qu"
 TEST_DIR = f"{TEST_FILES}/qchem/new_test_files"
 SCR_DIR = f"{TEST_DIR}/scratch"
 CWD = os.getcwd()
+skip_if_no_openbabel = unittest.skipIf(ob is None, "openbabel not installed")
 
 
-@unittest.skipIf(ob is None, "openbabel not installed")
+@skip_if_no_openbabel
 class QChemErrorHandlerTest(TestCase):
     def setUp(self):
         os.makedirs(SCR_DIR)

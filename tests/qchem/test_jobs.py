@@ -27,9 +27,10 @@ __credits__ = "Shyam Dwaraknath"
 TEST_DIR = f"{TEST_FILES}/qchem/new_test_files"
 SCR_DIR = f"{TEST_DIR}/scratch"
 CWD = os.getcwd()
+skip_if_no_openbabel = unittest.skipIf(ob is None, "openbabel not installed")
 
 
-@unittest.skipIf(ob is None, "openbabel not installed")
+@skip_if_no_openbabel
 class QCJobTest(TestCase):
     def setUp(self):
         os.makedirs(SCR_DIR)
@@ -88,7 +89,7 @@ class QCJobTest(TestCase):
             assert os.environ["QCLOCALSCR"] == "/tmp/scratch"
 
 
-@unittest.skipIf(ob is None, "openbabel not installed")
+@skip_if_no_openbabel
 class OptFFComplexUnlinkedTest(TestCase):
     def setUp(self):
         os.makedirs(SCR_DIR)
@@ -151,7 +152,7 @@ class OptFFComplexUnlinkedTest(TestCase):
         )
 
 
-@unittest.skipIf(ob is None, "openbabel not installed")
+@skip_if_no_openbabel
 class OptFFTestComplexLinkedChangeNsegTest(TestCase):
     def setUp(self):
         os.makedirs(SCR_DIR)
@@ -236,7 +237,7 @@ class OptFFTestComplexLinkedChangeNsegTest(TestCase):
         )
 
 
-@unittest.skipIf(ob is None, "openbabel not installed")
+@skip_if_no_openbabel
 class OptFFTest(TestCase):
     def setUp(self):
         os.makedirs(SCR_DIR)
@@ -317,7 +318,7 @@ class OptFFTest(TestCase):
             job.__next__()
 
 
-@unittest.skipIf(ob is None, "openbabel not installed")
+@skip_if_no_openbabel
 class OptFFTest1(TestCase):
     def setUp(self):
         os.makedirs(SCR_DIR)
@@ -347,7 +348,7 @@ class OptFFTest1(TestCase):
             job.__next__()
 
 
-@unittest.skipIf(ob is None, "openbabel not installed")
+@skip_if_no_openbabel
 class OptFFTest2(TestCase):
     def setUp(self):
         os.makedirs(SCR_DIR)
@@ -397,7 +398,7 @@ class OptFFTest2(TestCase):
             job.__next__()
 
 
-@unittest.skipIf(ob is None, "openbabel not installed")
+@skip_if_no_openbabel
 class OptFFTestSwitching(TestCase):
     def setUp(self):
         os.makedirs(SCR_DIR)
@@ -509,7 +510,7 @@ class OptFFTestSwitching(TestCase):
             job.__next__()
 
 
-@unittest.skipIf(ob is None, "openbabel not installed")
+@skip_if_no_openbabel
 class OptFFTest6004(TestCase):
     def setUp(self):
         os.makedirs(SCR_DIR)
@@ -619,7 +620,7 @@ class OptFFTest6004(TestCase):
         )
 
 
-@unittest.skipIf(ob is None, "openbabel not installed")
+@skip_if_no_openbabel
 class OptFFTest5952(TestCase):
     def setUp(self):
         os.makedirs(SCR_DIR)
@@ -669,7 +670,7 @@ class OptFFTest5952(TestCase):
             job.__next__()
 
 
-@unittest.skipIf(ob is None, "openbabel not installed")
+@skip_if_no_openbabel
 class OptFFTest5690(TestCase):
     def setUp(self):
         os.makedirs(SCR_DIR)
@@ -781,7 +782,7 @@ class OptFFTest5690(TestCase):
             next(job)
 
 
-@unittest.skipIf(ob is None, "openbabel not installed")
+@skip_if_no_openbabel
 class OptFFSmallNegFreqTest(TestCase):
     def setUp(self):
         os.makedirs(f"{SCR_DIR}/scratch", exist_ok=True)
@@ -917,7 +918,7 @@ class OptFFSmallNegFreqTest(TestCase):
             job.__next__()
 
 
-@unittest.skipIf(ob is None, "openbabel not installed")
+@skip_if_no_openbabel
 class OptFFSingleFreqFragsTest(TestCase):
     def setUp(self):
         os.makedirs(f"{SCR_DIR}/scratch", exist_ok=True)
@@ -973,7 +974,7 @@ class OptFFSingleFreqFragsTest(TestCase):
             job.__next__()
 
 
-@unittest.skipIf(ob is None, "openbabel not installed")
+@skip_if_no_openbabel
 class TSFFTest(TestCase):
     def setUp(self):
         os.makedirs(SCR_DIR)
@@ -1024,7 +1025,7 @@ class TSFFTest(TestCase):
             job.__next__()
 
 
-@unittest.skipIf(ob is None, "openbabel not installed")
+@skip_if_no_openbabel
 class TSFFFreqfirstTest(TestCase):
     def setUp(self):
         os.makedirs(f"{SCR_DIR}/scratch", exist_ok=True)
@@ -1096,7 +1097,7 @@ class TSFFFreqfirstTest(TestCase):
             job.__next__()
 
 
-@unittest.skipIf(ob is None, "openbabel not installed")
+@skip_if_no_openbabel
 class TSFFFreqFirstMultipleCyclesTest(TestCase):
     def setUp(self):
         os.makedirs(f"{SCR_DIR}/scratch", exist_ok=True)
