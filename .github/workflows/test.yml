@@ -51,7 +51,7 @@ jobs:
       - name: pytest
         env:
           PMG_MAPI_KEY: ${{ secrets.PMG_MAPI_KEY }}
-          MPLBACKEND: "Agg"
+          MPLBACKEND: Agg
         run: pytest --cov=custodian --color=yes tests
 
       - name: Upload coverage reports to Codecov
