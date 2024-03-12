@@ -685,9 +685,6 @@ class VaspErrorHandler(ErrorHandler):
             except Exception:
                 nelect = None  # dummy value
             if nelect and nbands > 2 * nelect:
-                nions = len(vi["POSCAR"].structure)
-                default_nbands = round(max([nelect / 2 + nions / 2, nelect * 0.6]))
-                actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": default_nbands}}})
                 self.error_count["auto_nbands"] += 1
                 warnings.warn(
                     "NBANDS seems to be too high. The electronic structure may be inaccurate. "
