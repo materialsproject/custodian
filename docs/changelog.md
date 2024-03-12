@@ -6,6 +6,10 @@ nav_order: 2
 
 # Change Log
 
+## 2024.3.12
+
+* Make Custodian threadsafe with explicit file paths (@zulissimeta).
+
 ## v2024.2.15
 
 ### 🐛 Bug Fixes
