@@ -678,18 +678,18 @@ class VaspErrorHandler(ErrorHandler):
                         UserWarning,
                     )
             self.error_count["algo_tet"] += 1
-        
+
         if "auto_nbands" in self.errors:
             if nbands := vi["INCAR"].get("NBANDS"):
                 try:
                     nelect = load_outcar(os.path.join(directory, "OUTCAR")).nelect
                 except Exception:
                     nelect = None  # dummy value
-                if nelect and nbands > 2*nelect:
+                if nelect and nbands > 2 * nelect:
                     nions = len(vi["POSCAR"].structure)
                     default_nbands = round(max([nelect/2+nions/2, nelect*0.6]))
                     actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": default_nbands}}})
-                    self.error_count['auto_nbands'] += 1
+                    self.error_count["auto_nbands"] += 1
 
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
