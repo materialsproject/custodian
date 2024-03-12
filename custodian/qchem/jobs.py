@@ -1,5 +1,7 @@
 """This module implements basic kinds of jobs for QChem runs."""
 
+from __future__ import annotations
+
 import copy
 import os
 import shutil
@@ -100,8 +102,15 @@ class QCJob(Job):
             print("SLURM_CPUS_ON_NODE not in environment")
 
     @property
-    def current_command(self, directory="./"):
-        """The command to run QChem."""
+    def current_command(self, directory: str | Path = "./"):
+        """The command to run QChem.
+
+        Args:
+            directory (str): The directory to run in. Defaults to "./".
+
+        Returns:
+            (str) The command to run QChem.
+        """
         self._input_path = os.path.join(directory, self.input_file)
         self._output_path = os.path.join(directory, self.output_file)
         multi = {"openmp": "-nt", "mpi": "-np"}
@@ -111,8 +120,12 @@ class QCJob(Job):
         command = self.qchem_command + command
         return " ".join(command)
 
-    def setup(self, directory="./"):
-        """Sets up environment variables necessary to efficiently run QChem."""
+    def setup(self, directory: str | Path = "./"):
+        """Sets up environment variables necessary to efficiently run QChem.
+
+        Args:
+            directory (str): The directory to run in. Defaults to "./".
+        """
         self._input_path = os.path.join(directory, self.input_file)
         if self.backup:
             shutil.copy(self._input_path, os.path.join(directory, f"{self.input_file}.orig"))
@@ -132,8 +145,12 @@ class QCJob(Job):
                 raise RuntimeError("Trying to run NBO7 without providing NBOEXE in fworker! Exiting...")
             os.environ["NBOEXE"] = self.nboexe
 
-    def postprocess(self, directory="./"):
-        """Renames and removes scratch files after running QChem."""
+    def postprocess(self, directory: str | Path = "./"):
+        """Renames and removes scratch files after running QChem.
+
+        Args:
+            directory (str): The directory to run in. Defaults to "./".
+        """
         self._input_path = os.path.join(directory, self.input_file)
         self._output_path = os.path.join(directory, self.output_file)
         self._qclog_path = os.path.join(directory, self.qclog_file)
@@ -155,9 +172,12 @@ class QCJob(Job):
             except FileNotFoundError:
                 pass
 
-    def run(self):
+    def run(self, directory: str | Path = "./"):
         """
         Perform the actual QChem run.
+
+        Args:
+            directory (str): The directory to run in. Defaults to "./".
 
         Returns:
             (subprocess.Popen) Used for monitoring.
@@ -172,7 +192,7 @@ class QCJob(Job):
             os.makedirs(local_scratch, exist_ok=True)
             shutil.move(os.path.join(os.environ["QCSCRATCH"], "53.0"), local_scratch)
         with open(self.qclog_file, "w") as qclog:
-            return subprocess.Popen(self.current_command, stdout=qclog, shell=True)  # pylint: disable=R1732
+            return subprocess.Popen(self.current_command, cwd=directory, stdout=qclog, shell=True)  # pylint: disable=R1732
 
     @classmethod
     def opt_with_frequency_flattener(
