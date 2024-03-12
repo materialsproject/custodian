@@ -687,7 +687,7 @@ class VaspErrorHandler(ErrorHandler):
                     nelect = None  # dummy value
                 if nelect and nbands > 2 * nelect:
                     nions = len(vi["POSCAR"].structure)
-                    default_nbands = round(max([nelect/2+nions/2, nelect*0.6]))
+                    default_nbands = round(max([nelect / 2 + nions / 2, nelect * 0.6]))
                     actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": default_nbands}}})
                     self.error_count["auto_nbands"] += 1
 
