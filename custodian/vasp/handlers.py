@@ -691,8 +691,9 @@ class VaspErrorHandler(ErrorHandler):
                 self.error_count["auto_nbands"] += 1
                 warnings.warn(
                     "NBANDS seems to be too high. The electronic structure may be inaccurate. "
-                    "You may want to rerun this job with a smaller number of cores.", UserWarning
-                    )
+                    "You may want to rerun this job with a smaller number of cores.",
+                    UserWarning,
+                )
 
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
