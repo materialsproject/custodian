@@ -305,21 +305,21 @@ class Custodian:
         dec = MontyDecoder()
 
         def load_class(dotpath):
-            modname, classname = dotpath.rsplit(".", 1)
-            mod = __import__(modname, globals(), locals(), [classname], 0)
+            mod_name, classname = dotpath.rsplit(".", 1)
+            mod = __import__(mod_name, globals(), locals(), [classname], 0)
             return getattr(mod, classname)
 
         def process_params(dct):
             decoded = {}
-            for k, v in dct.items():
-                if k.startswith("$"):
-                    if isinstance(v, list):
-                        v = [os.path.expandvars(i) for i in v]
-                    elif isinstance(v, dict):
-                        v = {k2: os.path.expandvars(v2) for k2, v2 in v.items()}
+            for key, val in dct.items():
+                if key.startswith("$"):
+                    if isinstance(val, list):
+                        val = [os.path.expandvars(path) for path in val]
+                    elif isinstance(val, dict):
+                        val = {k2: os.path.expandvars(v2) for k2, v2 in val.items()}
                     else:
-                        v = os.path.expandvars(v)
-                decoded[k.strip("$")] = dec.process_decoded(v)
+                        val = os.path.expandvars(val)
+                decoded[key.strip("$")] = dec.process_decoded(val)
             return decoded
 
         jobs = []
@@ -520,16 +520,16 @@ class Custodian:
                 return
 
             # Check that all errors could be handled
-            for x in self.run_log[-1]["corrections"]:
-                if not x["actions"] and x["handler"].raises_runtime_error:
-                    self.run_log[-1]["handler"] = x["handler"]
-                    msg = f"Unrecoverable error for handler: {x['handler']}"
-                    raise NonRecoverableError(msg, raises=True, handler=x["handler"])
-            for x in self.run_log[-1]["corrections"]:
-                if not x["actions"]:
-                    self.run_log[-1]["handler"] = x["handler"]
-                    msg = f"Unrecoverable error for handler: {x['handler']}"
-                    raise NonRecoverableError(msg, raises=False, handler=x["handler"])
+            for corr in self.run_log[-1]["corrections"]:
+                if not corr["actions"] and corr["handler"].raises_runtime_error:
+                    self.run_log[-1]["handler"] = corr["handler"]
+                    msg = f"Unrecoverable error for handler: {corr['handler']}"
+                    raise NonRecoverableError(msg, raises=True, handler=corr["handler"])
+            for corr in self.run_log[-1]["corrections"]:
+                if not corr["actions"]:
+                    self.run_log[-1]["handler"] = corr["handler"]
+                    msg = f"Unrecoverable error for handler: {corr['handler']}"
+                    raise NonRecoverableError(msg, raises=False, handler=corr["handler"])
 
         if self.errors_current_job >= self.max_errors_per_job:
             self.run_log[-1]["max_errors_per_job"] = True
@@ -560,9 +560,9 @@ class Custodian:
         """
         start = datetime.datetime.now()
         try:
-            v = sys.version.replace("\n", " ")
+            validator = sys.version.replace("\n", " ")
             logger.info(f"Custodian started in singleshot mode at {start} in {self.directory}.")
-            logger.info(f"Custodian running on Python version {v}")
+            logger.info(f"Custodian running on Python version {validator}")
 
             # load run log
             if os.path.isfile(Custodian.LOG_FILE):
@@ -591,11 +591,11 @@ class Custodian:
             if self._do_check(self.handlers):
                 logger.info("Failed validation based on error handlers")
                 # raise an error for an unrecoverable error
-                for x in self.run_log[-1]["corrections"]:
-                    if not x["actions"] and x["handler"].raises_runtime_error:
-                        self.run_log[-1]["handler"] = x["handler"]
-                        s = f"Unrecoverable error for handler: {x['handler']}. Raising RuntimeError"
-                        raise NonRecoverableError(s, raises=True, handler=x["handler"])
+                for corr in self.run_log[-1]["corrections"]:
+                    if not corr["actions"] and corr["handler"].raises_runtime_error:
+                        self.run_log[-1]["handler"] = corr["handler"]
+                        s = f"Unrecoverable error for handler: {corr['handler']}. Raising RuntimeError"
+                        raise NonRecoverableError(s, raises=True, handler=corr["handler"])
                 logger.info("Corrected input based on error handlers")
                 # Return with more jobs to run if recoverable error caught
                 # and corrected for
@@ -603,12 +603,12 @@ class Custodian:
 
             # check validators
             logger.info(f"Checking validator for {job.name}.run")
-            for v in self.validators:
-                if v.check(directory=self.directory):
-                    self.run_log[-1]["validator"] = v
+            for validator in self.validators:
+                if validator.check(directory=self.directory):
+                    self.run_log[-1]["validator"] = validator
                     logger.info("Failed validation based on validator")
-                    s = f"Validation failed: {v}"
-                    raise ValidationError(s, raises=True, validator=v)
+                    s = f"Validation failed: {validator}"
+                    raise ValidationError(s, raises=True, validator=validator)
 
             logger.info(f"Postprocessing for {job.name}.run")
             job.postprocess(directory=self.directory)
@@ -684,7 +684,7 @@ class Custodian:
                 corrections.append({"errors": [f"Bad handler {handler}"], "actions": []})
         self.total_errors += len(corrections)
         self.errors_current_job += len(corrections)
-        self.run_log[-1]["corrections"].extend(corrections)
+        self.run_log[-1]["corrections"] += corrections
         # We do a dump of the run log after each check.
         dumpfn(self.run_log, os.path.join(self.directory, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
         # Clear all the cached values to avoid reusing them in a subsequent check

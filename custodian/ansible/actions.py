@@ -100,12 +100,12 @@ class DictActions:
             settings (dict): The specification of the modification to be made.
             directory (None): dummy parameter for compatibility with FileActions
         """
-        for k, v in settings.items():
-            (d, key) = get_nested_dict(input_dict, k)
-            if key in d:
-                d[key].extend(v)
+        for k1, val in settings.items():
+            dct, k2 = get_nested_dict(input_dict, k1)
+            if k2 in dct:
+                dct[k2] += val
             else:
-                d[key] = v
+                dct[k2] = val
 
     @staticmethod
     def inc(input_dict, settings, directory=None):
@@ -167,12 +167,12 @@ class DictActions:
             settings (dict): The specification of the modification to be made.
             directory (None): dummy parameter for compatibility with FileActions
         """
-        for k, v in settings.items():
-            (d, key) = get_nested_dict(input_dict, k)
-            if key in d and (not isinstance(d[key], list)):
-                raise ValueError(f"Keyword {k} does not refer to an array.")
-            if key in d:
-                d[key] = [i for i in d[key] if i != v]
+        for k1, val in settings.items():
+            dct, k2 = get_nested_dict(input_dict, k1)
+            if k2 in dct and (not isinstance(dct[k2], list)):
+                raise ValueError(f"Keyword {k1} does not refer to an array.")
+            if k2 in dct:
+                dct[k2] = [itm for itm in dct[k2] if itm != val]
 
     @staticmethod
     def pull_all(input_dict, settings, directory=None):
@@ -184,11 +184,11 @@ class DictActions:
             settings (dict): The specification of the modification to be made.
             directory (None): dummy parameter for compatibility with FileActions
         """
-        for k, v in settings.items():
-            if k in input_dict and (not isinstance(input_dict[k], list)):
-                raise ValueError(f"Keyword {k} does not refer to an array.")
-            for i in v:
-                DictActions.pull(input_dict, {k: i})
+        for key, val in settings.items():
+            if key in input_dict and (not isinstance(input_dict[key], list)):
+                raise ValueError(f"Keyword {key} does not refer to an array.")
+            for itm in val:
+                DictActions.pull(input_dict, {key: itm})
 
     @staticmethod
     def pop(input_dict, settings, directory=None):

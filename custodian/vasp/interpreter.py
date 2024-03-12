@@ -42,14 +42,14 @@ class VaspModder(Modder):
                 'action': moddermodification}.
         """
         modified = []
-        for a in actions:
-            if "dict" in a:
-                k = a["dict"]
+        for action in actions:
+            if "dict" in action:
+                k = action["dict"]
                 modified.append(k)
-                self.vi[k] = self.modify_object(a["action"], self.vi[k])
-            elif "file" in a:
-                self.modify(a["action"], a["file"])
+                self.vi[k] = self.modify_object(action["action"], self.vi[k])
+            elif "file" in action:
+                self.modify(action["action"], action["file"])
             else:
-                raise ValueError(f"Unrecognized format: {a}")
+                raise ValueError(f"Unrecognized format: {action}")
         for file in modified:
             self.vi[file].write_file(os.path.join(self.directory, file))

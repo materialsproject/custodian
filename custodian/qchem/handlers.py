@@ -278,7 +278,7 @@ class QChemErrorHandler(ErrorHandler):
             if not self.qcinp.rem.get("sym_ignore") or self.qcinp.rem.get("symmetry"):
                 self.qcinp.rem["sym_ignore"] = "true"
                 self.qcinp.rem["symmetry"] = "false"
-                actions.extend(({"sym_ignore": "true"}, {"symmetry": "false"}))
+                actions += ({"sym_ignore": "true"}, {"symmetry": "false"})
             else:
                 print("Not sure how else to fix a failed coordinate transformation")
 
@@ -292,13 +292,13 @@ class QChemErrorHandler(ErrorHandler):
             # "run_nbo6" has to change to "nbo_external" in QChem 5.4.2 and later
             del self.qcinp.rem["run_nbo6"]
             self.qcinp.rem["nbo_external"] = "true"
-            actions.extend(({"run_nbo6": "deleted"}, {"nbo_external": "true"}))
+            actions += ({"run_nbo6": "deleted"}, {"nbo_external": "true"})
 
         elif "bad_new_nbo_external_rem" in self.errors:
             # Have to use "run_nbo6" instead of "nbo_external" for QChem 5.4.1 or earlier
             del self.qcinp.rem["nbo_external"]
             self.qcinp.rem["run_nbo6"] = "true"
-            actions.extend(({"nbo_external": "deleted"}, {"run_nbo6": "true"}))
+            actions += ({"nbo_external": "deleted"}, {"run_nbo6": "true"})
 
         elif "esp_chg_fit_error" in self.errors:
             # this error should only be possible if resp_charges or esp_charges is set
@@ -348,7 +348,7 @@ class QChemErrorHandler(ErrorHandler):
 
         elif any(
             err in self.errors
-            for err in ["failed_to_read_input", "read_molecule_error", "never_called_qchem", "licensing_error"]
+            for err in ("failed_to_read_input", "read_molecule_error", "never_called_qchem", "licensing_error")
         ):
             # Almost certainly just a temporary problem that will not be encountered again. Rerun job as-is.
             actions.append({"rerun_job_no_changes": True})

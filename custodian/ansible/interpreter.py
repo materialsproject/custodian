@@ -45,9 +45,9 @@ class Modder:
         self.supported_actions = {}
         actions = actions if actions is not None else [DictActions]
         for action in actions:
-            for i in dir(action):
-                if (not re.match(r"__\w+__", i)) and callable(getattr(action, i)):
-                    self.supported_actions["_" + i] = getattr(action, i)
+            for attr in dir(action):
+                if (not re.match(r"__\w+__", attr)) and callable(getattr(action, attr)):
+                    self.supported_actions[f"_{attr}"] = getattr(action, attr)
         self.strict = strict
         self.directory = directory
 

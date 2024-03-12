@@ -52,7 +52,7 @@ class LobsterFilesValidator(Validator):
 
     def check(self, directory: str = "./") -> bool:
         """Check for errors."""
-        for filename in ["lobsterout"]:
+        for filename in ("lobsterout",):
             if not os.path.isfile(os.path.join(directory, filename)):
                 return True
         with open(os.path.join(directory, "lobsterout")) as file:

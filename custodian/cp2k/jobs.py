@@ -116,7 +116,7 @@ class Cp2kJob(Job):
         """
         # TODO: cp2k has bizarre in/out streams. Some errors that should go to std_err are not sent anywhere...
         cmd = list(self.cp2k_cmd)
-        cmd.extend(["-i", self.input_file])
+        cmd += ["-i", self.input_file]
         cmd_str = " ".join(cmd)
         logger.info(f"Running {cmd_str}")
         with (

@@ -186,12 +186,12 @@ class UnconvergedScfErrorHandler(ErrorHandler):
 
         # Try going from DIIS -> CG (slower, but more robust)
         if minimizer == "DIIS":
-            actions.append(
+            actions += [
                 {
                     "dict": self.input_file,
                     "action": {"_set": {"FORCE_EVAL": {"DFT": {"SCF": {"OT": {"MINIMIZER": "CG"}}}}}},
                 }
-            )
+            ]
 
         # Try going from 2pnt to 3pnt line search (slower, but more robust)
         elif minimizer == "CG":
@@ -200,14 +200,14 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                 != "3PNT"
                 and not rotate
             ):
-                actions.append(
+                actions += [
                     {
                         "dict": self.input_file,
                         "action": {"_set": {"FORCE_EVAL": {"DFT": {"SCF": {"OT": {"LINESEARCH": "3PNT"}}}}}},
                     }
-                )
+                ]
             elif ci["FORCE_EVAL"]["DFT"]["SCF"].get("MAX_SCF", Keyword("MAX_SCF", 50)).values[0] < 50:
-                actions.append(
+                actions += [
                     {
                         "dict": self.input_file,
                         "action": {
@@ -220,7 +220,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
                             }
                         },
                     }
-                )
+                ]
 
         """
         Switch to more robust OT framework.
@@ -415,9 +415,7 @@ class DivergingScfErrorHandler(ErrorHandler):
         """Check for diverging SCF."""
         conv = get_conv(os.path.join(directory, self.output_file))
         tmp = np.diff(conv[-10:])
-        if len(conv) > 10 and all(_ > 0 for _ in tmp) and any(_ > 1 for _ in conv):
-            return True
-        return False
+        return len(conv) > 10 and all(_ > 0 for _ in tmp) and any(_ > 1 for _ in conv)
 
     def correct(self, directory="./"):
         """Correct issue if possible."""
@@ -631,8 +629,8 @@ class AbortHandler(ErrorHandler):
             terminate_on_match=True,
             postprocess=str,
         )
-        for m in matches:
-            self.responses.append(m)
+        for match in matches:
+            self.responses.append(match)
             return True
         return False
 
@@ -826,8 +824,8 @@ class NumericalPrecisionHandler(ErrorHandler):
     def check(self, directory="./"):
         """Check for stuck SCF convergence."""
         conv = get_conv(os.path.join(directory, self.output_file))
-        counts = [sum(1 for i in g) for k, g in itertools.groupby(conv)]
-        if any(c > self.max_same for c in counts):
+        counts = [len([*group]) for _k, group in itertools.groupby(conv)]
+        if any(cnt > self.max_same for cnt in counts):
             return True
         return False
 

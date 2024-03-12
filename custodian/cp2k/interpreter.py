@@ -54,16 +54,16 @@ class Cp2kModder(Modder):
                 'action': moddermodification}.
         """
         modified = []
-        for a in actions:
-            if "dict" in a:
-                k = a["dict"]
+        for action in actions:
+            if "dict" in action:
+                k = action["dict"]
                 modified.append(k)
-                Cp2kModder._modify(a["action"], self.ci)
-            elif "file" in a:
-                self.modify(a["action"], a["file"])
+                Cp2kModder._modify(action["action"], self.ci)
+            elif "file" in action:
+                self.modify(action["action"], action["file"])
                 self.ci = Cp2kInput.from_file(os.path.join(self.directory, self.filename))
             else:
-                raise ValueError(f"Unrecognized format: {a}")
+                raise ValueError(f"Unrecognized format: {action}")
         cleanup_input(self.ci)
         self.ci.write_file(os.path.join(self.directory, self.filename))
 

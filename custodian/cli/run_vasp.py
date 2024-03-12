@@ -18,9 +18,9 @@ def load_class(mod, name):
     toks = name.split("?")
     params = {}
     if len(toks) == 2:
-        for p in toks[-1].split(","):
-            ptoks = p.split("=")
-            params[ptoks[0]] = YAML(typ="rt").load(ptoks[1])
+        for tok in toks[-1].split(","):
+            p_toks = tok.split("=")
+            params[p_toks[0]] = YAML(typ="rt").load(p_toks[1])
     elif len(toks) > 2:
         print("Bad handler specification")
         sys.exit(-1)
@@ -43,7 +43,7 @@ def get_jobs(args):
     post_settings = []  # append to this list to have settings applied on next job
     for i, job in enumerate(args.jobs):
         final = i == n_jobs - 1
-        suffix = "." + job if any(c.isdigit() for c in job) else f".{job}{i + 1}"
+        suffix = "." + job if any(char.isdigit() for char in job) else f".{job}{i + 1}"
         settings = post_settings
         post_settings = []
         backup = i == 0
@@ -66,12 +66,10 @@ def get_jobs(args):
                 user_incar_settings={"LWAVE": True, "EDIFF": 1e-6},
                 ediff_per_atom=False,
             )
-            settings.extend(
-                [
-                    {"dict": "INCAR", "action": {"_set": dict(vis.incar)}},
-                    {"dict": "KPOINTS", "action": {"_set": vis.kpoints.as_dict()}},
-                ]
-            )
+            settings += [
+                {"dict": "INCAR", "action": {"_set": dict(vis.incar)}},
+                {"dict": "KPOINTS", "action": {"_set": vis.kpoints.as_dict()}},
+            ]
 
         if job_type.startswith("static_dielectric_derived"):
             from pymatgen.io.vasp.sets import MPStaticDielectricDFPTVaspInputSet, MPStaticSet
@@ -92,37 +90,31 @@ def get_jobs(args):
             vis = MPStaticDielectricDFPTVaspInputSet()
             incar = vis.get_incar(vinput["POSCAR"].structure)
             unset = {}
-            for k in ["NPAR", "KPOINT_BSE", "LAECHG", "LCHARG", "LVHAR", "NSW"]:
-                incar.pop(k, None)
-                if k in vinput["INCAR"]:
-                    unset[k] = 1
+            for key in ("NPAR", "KPOINT_BSE", "LAECHG", "LCHARG", "LVHAR", "NSW"):
+                incar.pop(key, None)
+                if key in vinput["INCAR"]:
+                    unset[key] = 1
             kpoints = vis.get_kpoints(vinput["POSCAR"].structure)
-            settings.extend(
-                [
-                    {"dict": "INCAR", "action": {"_set": dict(incar), "_unset": unset}},
-                    {"dict": "KPOINTS", "action": {"_set": kpoints.as_dict()}},
-                ]
-            )
+            settings += [
+                {"dict": "INCAR", "action": {"_set": dict(incar), "_unset": unset}},
+                {"dict": "KPOINTS", "action": {"_set": kpoints.as_dict()}},
+            ]
             auto_npar = False
         elif job_type.startswith("static") and vinput["KPOINTS"]:
-            m = [i * args.static_kpoint for i in vinput["KPOINTS"].kpts[0]]
-            settings.extend(
-                [
-                    {"dict": "INCAR", "action": {"_set": {"NSW": 0}}},
-                    {"dict": "KPOINTS", "action": {"_set": {"kpoints": [m]}}},
-                ]
-            )
+            m = [kpt * args.static_kpoint for kpt in vinput["KPOINTS"].kpts[0]]
+            settings += [
+                {"dict": "INCAR", "action": {"_set": {"NSW": 0}}},
+                {"dict": "KPOINTS", "action": {"_set": {"kpoints": [m]}}},
+            ]
 
         elif job_type.startswith("nonscf_derived"):
             from pymatgen.io.vasp.sets import MPNonSCFSet
 
             vis = MPNonSCFSet.from_prev_calc(".", copy_chgcar=False, user_incar_settings={"LWAVE": True})
-            settings.extend(
-                [
-                    {"dict": "INCAR", "action": {"_set": dict(vis.incar)}},
-                    {"dict": "KPOINTS", "action": {"_set": vis.kpoints.as_dict()}},
-                ]
-            )
+            settings += [
+                {"dict": "INCAR", "action": {"_set": dict(vis.incar)}},
+                {"dict": "KPOINTS", "action": {"_set": vis.kpoints.as_dict()}},
+            ]
 
         elif job_type.startswith("optics_derived"):
             from pymatgen.io.vasp.sets import MPNonSCFSet
@@ -142,12 +134,10 @@ def get_jobs(args):
                 },
                 ediff_per_atom=False,
             )
-            settings.extend(
-                [
-                    {"dict": "INCAR", "action": {"_set": dict(vis.incar)}},
-                    {"dict": "KPOINTS", "action": {"_set": vis.kpoints.as_dict()}},
-                ]
-            )
+            settings += [
+                {"dict": "INCAR", "action": {"_set": dict(vis.incar)}},
+                {"dict": "KPOINTS", "action": {"_set": vis.kpoints.as_dict()}},
+            ]
 
         elif job_type.startswith("rampu"):
             f = ramps / (n_ramp_u - 1)
@@ -175,12 +165,10 @@ def get_jobs(args):
             post_settings.append({"dict": "KPOINTS", "action": {"_set": kpoints.as_dict()}})
             # lattice vectors with length < 9 will get >1 KPOINT
             low_kpoints = Kpoints.gamma_automatic([max(int(18 / length), 1) for length in structure.lattice.abc])
-            settings.extend(
-                [
-                    {"dict": "INCAR", "action": {"_set": {"ISMEAR": 0}}},
-                    {"dict": "KPOINTS", "action": {"_set": low_kpoints.as_dict()}},
-                ]
-            )
+            settings += [
+                {"dict": "INCAR", "action": {"_set": {"ISMEAR": 0}}},
+                {"dict": "KPOINTS", "action": {"_set": low_kpoints.as_dict()}},
+            ]
 
             # let vasp determine encut (will be lower than
             # needed for compatibility with other runs)
@@ -213,8 +201,8 @@ def do_run(args):
     FORMAT = "%(asctime)s %(message)s"
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
     logging.info(f"Handlers used are {args.handlers}")
-    handlers = [load_class("custodian.vasp.handlers", n) for n in args.handlers]
-    validators = [load_class("custodian.vasp.validators", n) for n in args.validators]
+    handlers = [load_class("custodian.vasp.handlers", handler) for handler in args.handlers]
+    validators = [load_class("custodian.vasp.validators", validator) for validator in args.validators]
 
     c = Custodian(
         handlers,

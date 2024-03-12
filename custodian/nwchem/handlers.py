@@ -36,7 +36,7 @@ class NwchemErrorHandler(ErrorHandler):
         self.errors = []
         self.input_file = out.job_info["input"]
         if out.data[-1]["has_error"]:
-            self.errors.extend(out.data[-1]["errors"])
+            self.errors += out.data[-1]["errors"]
         self.errors = list(set(self.errors))
         self.ntasks = len(out.data)
         return len(self.errors) > 0
@@ -46,20 +46,20 @@ class NwchemErrorHandler(ErrorHandler):
         backup("*.nw*", directory=directory)
         actions = []
         nwi = NwInput.from_file(os.path.join(directory, self.input_file))
-        for e in self.errors:
-            if e == "autoz error":
+        for err in self.errors:
+            if err == "autoz error":
                 action = {"_set": {"geometry_options": ["units", "angstroms", "noautoz"]}}
                 actions.append(action)
-            elif e == "Bad convergence":
-                t = nwi.tasks[self.ntasks - 1]
-                if "cgmin" in t.theory_directives:
+            elif err == "Bad convergence":
+                task = nwi.tasks[self.ntasks - 1]
+                if "cgmin" in task.theory_directives:
                     nwi.tasks.pop(self.ntasks - 1)
                 else:
-                    t.theory_directives["cgmin"] = ""
-                for t in nwi.tasks:
-                    if t.operation.startswith("freq"):
+                    task.theory_directives["cgmin"] = ""
+                for task in nwi.tasks:
+                    if task.operation.startswith("freq"):
                         # You cannot calculate hessian with cgmin.
-                        t.theory_directives["nocgmin"] = ""
+                        task.theory_directives["nocgmin"] = ""
                 action = {"_set": {"tasks": [t.as_dict() for t in nwi.tasks]}}
                 actions.append(action)
             else:

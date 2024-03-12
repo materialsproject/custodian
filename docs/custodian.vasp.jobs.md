@@ -128,7 +128,7 @@ i.  It is recommended you do not use the Auto kpoint generation. The
     which is fast, but can be sensitive to numerical noise
     in energy calculations. The alternative is “bisection”,
     which is more robust but can be a bit slow. The code does fall
-    back on the bisection when bfgs gives a non-sensical result,
+    back on the bisection when bfgs gives a nonsensical result,
     e.g., negative lattice params.
   * **\*\*vasp_job_kwargs** – Passthrough kwargs to VaspJob. See
     `custodian.vasp.jobs.VaspJob`.

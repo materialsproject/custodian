@@ -71,7 +71,7 @@ class HandlerTests(unittest.TestCase):
 
     def test_handler_inits(self):
         """Ensure handlers initialize fine without real input/output files"""
-        for handler in [AbortHandler, FrozenJobErrorHandler, NumericalPrecisionHandler, UnconvergedScfErrorHandler]:
+        for handler in (AbortHandler, FrozenJobErrorHandler, NumericalPrecisionHandler, UnconvergedScfErrorHandler):
             handler()
 
     def test_frozenjobhandler(self):

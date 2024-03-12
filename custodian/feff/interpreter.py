@@ -44,18 +44,20 @@ class FeffModder(Modder):
                 'action': moddermodification}
         """
         modified = []
-        for a in actions:
-            if "dict" in a:
-                k = a["dict"]
+        for action in actions:
+            if "dict" in action:
+                k = action["dict"]
                 modified.append(k)
-                self.feffinp[k] = self.modify_object(a["action"], self.feffinp[k])
-            elif "file" in a:
-                self.modify(a["action"], a["file"])
+                self.feffinp[k] = self.modify_object(action["action"], self.feffinp[k])
+            elif "file" in action:
+                self.modify(action["action"], action["file"])
             else:
-                raise ValueError(f"Unrecognized format: {a}")
+                raise ValueError(f"Unrecognized format: {action}")
         if modified:
             feff = self.feffinp
-            feff_input = "\n\n".join(str(feff[k]) for k in ["HEADER", "PARAMETERS", "POTENTIALS", "ATOMS"] if k in feff)
+            feff_input = "\n\n".join(
+                str(feff[key]) for key in ("HEADER", "PARAMETERS", "POTENTIALS", "ATOMS") if key in feff
+            )
             for k, v in feff.items():
                 with open(os.path.join(self.directory, k), "w") as file:
                     file.write(str(v))

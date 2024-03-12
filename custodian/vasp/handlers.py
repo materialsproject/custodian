@@ -862,28 +862,26 @@ class AliasingErrorHandler(ErrorHandler):
                         if vi["INCAR"].get("ICHARG", 0) < 10:
                             delete_chgcar = {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}}
                             delete_wavecar = {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}}
-                            actions.extend([delete_chgcar, delete_wavecar])
+                            actions += [delete_chgcar, delete_wavecar]
                         break
 
         if "aliasing_incar" in self.errors:
             # vasp seems to give different warnings depending on whether the
             # aliasing error was caused by user supplied inputs
-            dct = {k: 1 for k in ["NGX", "NGY", "NGZ"] if k in vi["INCAR"]}
+            dct = {k: 1 for k in ("NGX", "NGY", "NGZ") if k in vi["INCAR"]}
             actions.append({"dict": "INCAR", "action": {"_unset": dct}})
 
             if vi["INCAR"].get("ICHARG", 0) < 10:
-                actions.extend(
-                    [
-                        {
-                            "file": "CHGCAR",
-                            "action": {"_file_delete": {"mode": "actual"}},
-                        },
-                        {
-                            "file": "WAVECAR",
-                            "action": {"_file_delete": {"mode": "actual"}},
-                        },
-                    ]
-                )
+                actions += [
+                    {
+                        "file": "CHGCAR",
+                        "action": {"_file_delete": {"mode": "actual"}},
+                    },
+                    {
+                        "file": "WAVECAR",
+                        "action": {"_file_delete": {"mode": "actual"}},
+                    },
+                ]
 
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
@@ -1133,7 +1131,7 @@ class UnconvergedErrorHandler(ErrorHandler):
                 with open(os.path.join(directory, "OUTCAR")) as file:
                     outcar_as_str = file.read()
                 if "PSMAXN for non-local potential too small" in outcar_as_str:
-                    if vi["INCAR"].get("LREAL", False) not in [False, "False", "false"]:
+                    if vi["INCAR"].get("LREAL", False) not in (False, "False", "false"):
                         actions += [
                             {"dict": "INCAR", "action": {"_set": {"LREAL": False}}},
                         ]
@@ -1661,9 +1659,9 @@ class WalltimeHandler(ErrorHandler):
         # Write STOPCAR
         actions = [{"file": "STOPCAR", "action": {"_file_create": {"content": content}}}]
 
-        m = Modder(actions=[FileActions], directory=directory)
-        for a in actions:
-            m.modify(a["action"], a["file"])
+        modder = Modder(actions=[FileActions], directory=directory)
+        for action in actions:
+            modder.modify(action["action"], action["file"])
         return {"errors": ["Walltime reached"], "actions": None}
 
 
@@ -1719,9 +1717,9 @@ class CheckpointHandler(ErrorHandler):
             },
         ]
 
-        m = Modder(actions=[FileActions], directory=directory)
-        for a in actions:
-            m.modify(a["action"], a["file"])
+        modder = Modder(actions=[FileActions], directory=directory)
+        for action in actions:
+            modder.modify(action["action"], action["file"])
 
         # Reset the clock.
         self.start_time = datetime.datetime.now()
@@ -1765,9 +1763,9 @@ class StoppedRunHandler(ErrorHandler):
 
         actions = [{"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}]
 
-        m = Modder(actions=[FileActions], directory=directory)
-        for a in actions:
-            m.modify(a["action"], a["file"])
+        modder = Modder(actions=[FileActions], directory=directory)
+        for action in actions:
+            modder.modify(action["action"], action["file"])
 
         actions.append({"Checkpoint": name})
 

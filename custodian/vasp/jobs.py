@@ -260,7 +260,7 @@ class VaspJob(Job):
         Postprocessing includes renaming and gzipping where necessary.
         Also copies the magmom to the incar if necessary.
         """
-        for file in [*VASP_OUTPUT_FILES, self.output_file]:
+        for file in (*VASP_OUTPUT_FILES, self.output_file):
             file = os.path.join(directory, file)
             if os.path.isfile(file):
                 if self.final and self.suffix != "":
@@ -399,14 +399,12 @@ class VaspJob(Job):
         ]
 
         # Finish with regular double relaxation style run using SCAN
-        jobs.extend(
-            VaspJob.double_relaxation_run(
-                vasp_cmd,
-                auto_npar=auto_npar,
-                ediffg=ediffg,
-                half_kpts_first_relax=half_kpts_first_relax,
-                directory=directory,
-            )
+        jobs += VaspJob.double_relaxation_run(
+            vasp_cmd,
+            auto_npar=auto_npar,
+            ediffg=ediffg,
+            half_kpts_first_relax=half_kpts_first_relax,
+            directory=directory,
         )
 
         # Ensure the first relaxation doesn't overwrite the original inputs
@@ -468,8 +466,8 @@ class VaspJob(Job):
         Returns:
             Generator of jobs.
         """
-        for i in range(max_steps):
-            if i == 0:
+        for step in range(max_steps):
+            if step == 0:
                 settings = None
                 backup = True
                 if (
@@ -502,14 +500,14 @@ class VaspJob(Job):
                         "action": {"_file_copy": {"dest": "POSCAR"}},
                     },
                 ]
-                if i == 1 and half_kpts_first_relax:
+                if step == 1 and half_kpts_first_relax:
                     settings.append({"dict": "KPOINTS", "action": {"_set": orig_kpts_dict}})
-            logger.info(f"Generating job = {i + 1}!")
+            logger.info(f"Generating job = {step + 1}!")
             yield VaspJob(
                 vasp_cmd,
                 final=False,
                 backup=backup,
-                suffix=f".relax{i + 1}",
+                suffix=f".relax{step + 1}",
                 settings_override=settings,
                 **vasp_job_kwargs,
             )
@@ -558,7 +556,7 @@ class VaspJob(Job):
                 which is fast, but can be sensitive to numerical noise
                 in energy calculations. The alternative is "bisection",
                 which is more robust but can be a bit slow. The code does fall
-                back on the bisection when bfgs gives a non-sensical result,
+                back on the bisection when bfgs gives a nonsensical result,
                 e.g., negative lattice params.
             **vasp_job_kwargs: Passthrough kwargs to VaspJob. See
                 :class:`custodian.vasp.jobs.VaspJob`.
@@ -584,8 +582,8 @@ class VaspJob(Job):
 
         energies = {}
 
-        for i in range(max_steps):
-            if i == 0:
+        for step in range(max_steps):
+            if step == 0:
                 settings = [{"dict": "INCAR", "action": {"_set": {"ISIF": 2, "NSW": nsw}}}]
                 structure = Poscar.from_file(os.path.join(directory, "POSCAR")).structure
                 x = structure.lattice.abc[lattice_index]
@@ -601,7 +599,7 @@ class VaspJob(Job):
 
                 energies[x] = energy
 
-                if i == 1:
+                if step == 1:
                     x *= 1 + initial_strain
                 else:
                     # Sort the lattice parameter by energies.
@@ -671,7 +669,7 @@ class VaspJob(Job):
                     {"file": fname, "action": {"_file_copy": {"dest": "POSCAR"}}},
                 ]
 
-            logger.info(f"Generating job = {i + 1} with parameter {x}!")
+            logger.info(f"Generating job = {step + 1} with parameter {x}!")
             yield VaspJob(
                 vasp_cmd,
                 final=False,
@@ -718,9 +716,9 @@ class VaspJob(Job):
         cmds = self.vasp_cmd
         if self.gamma_vasp_cmd:
             cmds += self.gamma_vasp_cmd
-        for k in cmds:
-            if "vasp" in k:
-                subprocess.run(["killall", f"{k}"], check=False)
+        for cmd in cmds:
+            if "vasp" in cmd:
+                subprocess.run(["killall", f"{cmd}"], check=False)
 
 
 class VaspNEBJob(VaspJob):
@@ -920,7 +918,7 @@ class VaspNEBJob(VaspJob):
                         shutil.copy(file, f"{file}{self.suffix}")
 
         # Add suffix to all output files
-        for file in [*VASP_NEB_OUTPUT_FILES, self.output_file]:
+        for file in (*VASP_NEB_OUTPUT_FILES, self.output_file):
             file = os.path.join(directory, file)
             if os.path.isfile(file):
                 if self.final and self.suffix != "":

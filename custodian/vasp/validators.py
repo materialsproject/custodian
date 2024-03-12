@@ -70,7 +70,7 @@ class VaspFilesValidator(Validator):
 
     def check(self, directory="./"):
         """Check for error."""
-        return any(not os.path.isfile(os.path.join(directory, vfile)) for vfile in ["CONTCAR", "OSZICAR", "OUTCAR"])
+        return any(not os.path.isfile(os.path.join(directory, vfile)) for vfile in ("CONTCAR", "OSZICAR", "OUTCAR"))
 
 
 class VaspNpTMDValidator(Validator):

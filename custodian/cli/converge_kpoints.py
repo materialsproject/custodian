@@ -16,11 +16,11 @@ logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
 def get_runs(vasp_command, target=1e-3, max_steps=10, mode="linear"):
     """Generate the runs using a generator until convergence is achieved."""
     energy = 0
-    vinput = VaspInput.from_directory(".")
-    kpoints = vinput["KPOINTS"].kpts[0]
-    for i in range(max_steps):
-        m = [(k * (i + 1)) for k in kpoints] if mode == "linear" else [(k + 1) for k in kpoints]
-        if i == 0:
+    vasp_input = VaspInput.from_directory(".")
+    kpoints = vasp_input["KPOINTS"].kpts[0]
+    for step in range(max_steps):
+        m = [(kpt * (step + 1)) for kpt in kpoints] if mode == "linear" else [(kpt + 1) for kpt in kpoints]
+        if step == 0:
             settings = None
             backup = True
         else:

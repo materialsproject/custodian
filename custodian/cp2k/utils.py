@@ -63,8 +63,8 @@ def cleanup_input(ci):
         return
     if any(k.upper() == "POTENTIAL" for k in ci.subsections):
         ci.subsections.pop("POTENTIAL")
-    for v in ci.subsections.values():
-        cleanup_input(v)
+    for val in ci.subsections.values():
+        cleanup_input(val)
 
 
 def activate_ot(actions, ci):
@@ -115,7 +115,7 @@ def activate_ot(actions, ci):
             ],
         },
     ]
-    actions.extend(ot_actions)
+    actions += ot_actions
 
 
 def activate_diag(actions):
@@ -149,7 +149,7 @@ def activate_diag(actions):
             ),
         },
     ]
-    actions.extend(diag_actions)
+    actions += diag_actions
 
 
 def can_use_ot(output, ci, minimum_band_gap=0.1):

@@ -155,7 +155,7 @@ class QCJob(Job):
         self._output_path = os.path.join(directory, self.output_file)
         self._qclog_path = os.path.join(directory, self.qclog_file)
         scratch_dir = os.path.join(os.environ["QCSCRATCH"], "scratch")
-        for file in ["HESS", "GRAD", "plots/dens.0.cube", "131.0", "53.0", "132.0"]:
+        for file in ("HESS", "GRAD", "plots/dens.0.cube", "131.0", "53.0", "132.0"):
             file_path = os.path.join(scratch_dir, file)
             if os.path.isfile(file_path):
                 shutil.copy(file_path, directory)
@@ -163,7 +163,7 @@ class QCJob(Job):
             shutil.move(self._input_path, os.path.join(directory, self.input_file + self.suffix))
             shutil.move(self._output_path, os.path.join(directory, self.output_file + self.suffix))
             shutil.move(self._qclog_path, os.path.join(directory, self.qclog_file + self.suffix))
-            for file in ["HESS", "GRAD", "dens.0.cube"]:
+            for file in ("HESS", "GRAD", "dens.0.cube"):
                 if os.path.isfile(file):
                     shutil.move(file, file + self.suffix)
         if not self.save_scratch:
