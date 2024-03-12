@@ -689,6 +689,10 @@ class VaspErrorHandler(ErrorHandler):
                 default_nbands = round(max([nelect / 2 + nions / 2, nelect * 0.6]))
                 actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": default_nbands}}})
                 self.error_count["auto_nbands"] += 1
+                warnings.warn(
+                    "NBANDS seems to be too high. The electronic structure may be inaccurate. "
+                    "You may want to rerun this job with a smaller number of cores.", UserWarning
+                    )
 
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
