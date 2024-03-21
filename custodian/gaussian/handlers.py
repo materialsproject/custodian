@@ -41,18 +41,6 @@ BACKUP_FILES = {
 }
 
 
-def backup_gaussian_files(filenames, prefix):
-    all_files = {}
-    for k, v in BACKUP_FILES.items():
-        files = glob.glob(v)
-        if files:
-            all_files[k] = files
-            for file in files:
-                filenames.append(file)
-    backup(filenames, prefix)
-    return all_files
-
-
 class GaussianErrorHandler(ErrorHandler):
     # definition of job errors as they appear in Gaussian output file
     error_defs = {'Optimization stopped': 'opt_steps',
@@ -406,7 +394,6 @@ class GaussianErrorHandler(ErrorHandler):
             BACKUP_FILES.values()
         )
         backup(backup_files, prefix=self.prefix, directory=directory)
-        # backup_gaussian_files(backup_files, prefix=self.prefix)
         if "scf_convergence" in self.errors:
             self.gin.route_parameters = GaussianErrorHandler._update_route_params(
                 self.gin.route_parameters, "scf", {}
