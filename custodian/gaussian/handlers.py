@@ -390,7 +390,7 @@ class GaussianErrorHandler(ErrorHandler):
                     self.scf_max_cycles
                 actions.append({'scf_max_cycles': self.scf_max_cycles})
 
-            elif {'xqc', 'yqc', 'qc'}.intersection(
+            elif not {'xqc', 'yqc', 'qc'}.intersection(
                     self.gin.route_parameters.get('scf')):
                 # use an alternate SCF converger
                 self.gin.route_parameters['scf']['xqc'] = None
@@ -416,7 +416,7 @@ class GaussianErrorHandler(ErrorHandler):
                         'lower level of theory')
                 else:
                     self.logger.info('SCF calculation failed. Exiting...')
-                return {'errors': self.errors, 'actions': None}
+                return {'errors': list[self.errors], 'actions': None}
 
         elif 'opt_steps' in self.errors:
             # int_actions = self._add_int()
@@ -464,7 +464,7 @@ class GaussianErrorHandler(ErrorHandler):
                         'lower level of theory')
                 else:
                     self.logger.info('Geometry optimization failed. Exiting...')
-                return {'errors': [self.errors], 'actions': None}
+                return {'errors': list(self.errors), 'actions': None}
 
         elif 'linear_bend' in self.errors:
             # if there is some linear bend around an angle in the geometry,
