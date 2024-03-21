@@ -81,7 +81,8 @@ class GaussianJob(Job):
             directory (str): Directory where the job will be run. Defaults to './'.
 
         Returns:
-            subprocess.Popen: The process running the Gaussian job.
+            subprocess.Popen:
+                The process running the Gaussian job.
         """
         logger.info("Running command: {}".format(self.gaussian_cmd))
         with (
