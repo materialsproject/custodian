@@ -14,12 +14,12 @@ from pymatgen.io.gaussian import GaussianInput, GaussianOutput
 from custodian.custodian import Job
 from custodian.gaussian.handlers import GaussianErrorHandler
 
-__author__ = 'Rasha Atwi'
-__version__ = '0.1'
-__maintainer__ = 'Rasha Atwi'
-__email__ = 'rasha.atwi@stonybrook.edu'
-__status__ = 'Alpha'
-__date__ = '5/13/21'
+__author__ = "Rasha Atwi"
+__version__ = "0.1"
+__maintainer__ = "Rasha Atwi"
+__email__ = "rasha.atwi@stonybrook.edu"
+__status__ = "Alpha"
+__date__ = "5/13/21"
 
 logger = logging.getLogger(__name__)
 
@@ -30,13 +30,14 @@ class GaussianJob(Job):
     """
 
     def __init__(
-            self,
-            gaussian_cmd,
-            input_file,
-            output_file,
-            stderr_file='stderr.txt',
-            suffix='',
-            backup=True):
+        self,
+        gaussian_cmd,
+        input_file,
+        output_file,
+        stderr_file="stderr.txt",
+        suffix="",
+        backup=True,
+    ):
         """
         Args:
             gaussian_cmd (str): Command to run Gaussian.
@@ -67,7 +68,10 @@ class GaussianJob(Job):
             directory (str): Directory where the job will be run. Defaults to './'.
         """
         if self.backup:
-            shutil.copy(os.path.join(directory, self.input_file), os.path.join(directory, f"{self.input_file}.orig"))
+            shutil.copy(
+                os.path.join(directory, self.input_file),
+                os.path.join(directory, f"{self.input_file}.orig"),
+            )
 
     def run(self, directory="./"):
         """
@@ -79,15 +83,16 @@ class GaussianJob(Job):
         Returns:
             subprocess.Popen: The process running the Gaussian job.
         """
-        logger.info('Running command: {}'.format(self.gaussian_cmd))
+        logger.info("Running command: {}".format(self.gaussian_cmd))
         with (
             open(os.path.join(directory, self.output_file), "w") as out_file,
-            open(os.path.join(directory, self.stderr_file), "w", buffering=1) as error_file,
+            open(
+                os.path.join(directory, self.stderr_file), "w", buffering=1
+            ) as error_file,
         ):
-            process = subprocess.Popen(self.gaussian_cmd,
-                                       stdout=out_file,
-                                       stderr=error_file,
-                                       shell=True)
+            process = subprocess.Popen(
+                self.gaussian_cmd, stdout=out_file, stderr=error_file, shell=True
+            )
         self.process = process
         return process
 
@@ -102,8 +107,8 @@ class GaussianJob(Job):
         for file in [self.input_file, self.output_file]:
             file = os.path.join(directory, file)
             if os.path.exists(file):
-                if self.suffix != '':
-                    shutil.copy(file, f'{file}{self.suffix}')
+                if self.suffix != "":
+                    shutil.copy(file, f"{file}{self.suffix}")
 
     def terminate(self, directory="./"):
         """
@@ -116,14 +121,16 @@ class GaussianJob(Job):
         return
 
     @classmethod
-    def better_guess(cls,
-                     gaussian_cmd,
-                     input_file,
-                     output_file,
-                     stderr_file='stderr.txt',
-                     backup=True,
-                     cart_coords=True,
-                     directory="./"):
+    def better_guess(
+        cls,
+        gaussian_cmd,
+        input_file,
+        output_file,
+        stderr_file="stderr.txt",
+        backup=True,
+        cart_coords=True,
+        directory="./",
+    ):
         """
         Generate a better initial guess for a Gaussian calculation (optimization or
         SCF run). This is done by running the job at a lower level of theory
@@ -142,12 +149,16 @@ class GaussianJob(Job):
             directory (str): Directory where the job will be run. Defaults to './'.
         """
         orig_input = GaussianInput.from_file(os.path.join(directory, input_file))
-        yield (GaussianJob(gaussian_cmd=gaussian_cmd,
-                           input_file=input_file,
-                           output_file=output_file,
-                           stderr_file=stderr_file,
-                           suffix='.guess1',
-                           backup=backup))
+        yield (
+            GaussianJob(
+                gaussian_cmd=gaussian_cmd,
+                input_file=input_file,
+                output_file=output_file,
+                stderr_file=stderr_file,
+                suffix=".guess1",
+                backup=backup,
+            )
+        )
         if GaussianErrorHandler.activate_better_guess:
             # TODO: check why it comes here only if the lower job is not
             #  failing and not in the else condition
@@ -155,9 +166,10 @@ class GaussianJob(Job):
             lower_output = GaussianOutput(os.path.join(directory, output_file))
             if len(lower_output.errors) == 0:
                 # if the calculation at the lower level of theory succeeded
-                if not filter(os.listdir('.'), '*.[Cc][Hh][Kk]'):
-                    raise FileNotFoundError('Missing checkpoint file. Required '
-                                            'to read initial guesses')
+                if not filter(os.listdir("."), "*.[Cc][Hh][Kk]"):
+                    raise FileNotFoundError(
+                        "Missing checkpoint file. Required " "to read initial guesses"
+                    )
 
                 gin = GaussianInput(
                     mol=None,
@@ -170,20 +182,29 @@ class GaussianJob(Job):
                     input_parameters=orig_input.input_parameters,
                     link0_parameters=orig_input.link0_parameters,
                     dieze_tag=orig_input.dieze_tag,
-                    gen_basis=orig_input.gen_basis)
-                gin.route_parameters['Guess'] = 'Read'
-                gin.route_parameters['Geom'] = 'Checkpoint'
-                gin.write_file(os.path.join(directory, input_file), cart_coords=cart_coords)
+                    gen_basis=orig_input.gen_basis,
+                )
+                gin.route_parameters["Guess"] = "Read"
+                gin.route_parameters["Geom"] = "Checkpoint"
+                gin.write_file(
+                    os.path.join(directory, input_file), cart_coords=cart_coords
+                )
 
-                yield (GaussianJob(gaussian_cmd=gaussian_cmd,
-                                   input_file=input_file,
-                                   output_file=output_file,
-                                   stderr_file=stderr_file,
-                                   suffix='.guess2',
-                                   backup=backup))
+                yield (
+                    GaussianJob(
+                        gaussian_cmd=gaussian_cmd,
+                        input_file=input_file,
+                        output_file=output_file,
+                        stderr_file=stderr_file,
+                        suffix=".guess2",
+                        backup=backup,
+                    )
+                )
             else:
-                logger.info('Failed to generate a better initial guess')
+                logger.info("Failed to generate a better initial guess")
 
         else:
-            logger.info('Calculation completed normally without having to '
-                        'generate a better initial guess')
+            logger.info(
+                "Calculation completed normally without having to "
+                "generate a better initial guess"
+            )
