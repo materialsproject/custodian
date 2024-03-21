@@ -105,6 +105,16 @@ class GaussianJob(Job):
                 if self.suffix != '':
                     shutil.copy(file, f'{file}{self.suffix}')
 
+    def terminate(self, directory="./"):
+        """
+        Terminate the Gaussian job.
+
+        Args:
+            directory (str): Directory where the job was run. Defaults to './'.
+        """
+        self.process.terminate()
+        return
+
     @classmethod
     def better_guess(cls,
                      gaussian_cmd,
