@@ -25,7 +25,7 @@ from custodian.utils import backup
 from custodian.custodian import ErrorHandler
 
 __author__ = 'Rasha Atwi'
-__version__ = '0.0'
+__version__ = '0.1'
 __maintainer__ = 'Rasha Atwi'
 __email__ = 'rasha.atwi@stonybrook.edu'
 __status__ = 'Alpha'
