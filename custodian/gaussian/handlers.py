@@ -42,6 +42,10 @@ BACKUP_FILES = {
 
 
 class GaussianErrorHandler(ErrorHandler):
+    """
+    Master GaussianErrorHandler class that handles a number of common errors that occur
+    during Gaussian runs.
+    """
     # definition of job errors as they appear in Gaussian output file
     error_defs = {'Optimization stopped': 'opt_steps',
                   'Convergence failure': 'scf_convergence',
@@ -110,6 +114,33 @@ class GaussianErrorHandler(ErrorHandler):
         prefix="error",
         check_convergence=True,
     ):
+        """
+        Initialize the GaussianErrorHandler class.
+
+        Args:
+            input_file (str): The name of the input file for the Gaussian job.
+            output_file (str): The name of the output file for the Gaussian job.
+            stderr_file (str): The name of the standard error file for the Gaussian job.
+                Defaults to 'stderr.txt'.
+            cart_coords (bool): Whether the coordinates are in cartesian format.
+                Defaults to True.
+            scf_max_cycles (int): The maximum number of SCF cycles. Defaults to 100.
+            opt_max_cycles (int): The maximum number of optimization cycles. Defaults to
+                100.
+            job_type (str): The type of job to run. Supported options are 'normal' and
+                'better_guess'. Defaults to 'normal'. If 'better_guess' is chosen, the
+                job will be rerun at a lower level of theory to get a better initial
+                guess of molecular orbitals or geometry, if needed.
+            lower_functional (str): The lower level of theory to use for a better guess.
+            lower_basis_set (str): The lower basis set to use for a better guess.
+            prefix (str): The prefix to use for the backup files. Defaults to error,
+                which means a series of error.1.tar.gz, error.2.tar.gz, ... will be
+                generated.
+            check_convergence (bool): Whether to check for convergence during an
+                optimization job. Defaults to True. If True, the convergence data will
+                be monitored and plotted (convergence criteria versus cycle number) and
+                saved to a file called 'convergence.png'.
+        """
         self.input_file = input_file
         self.output_file = output_file
         self.stderr_file = stderr_file
@@ -131,6 +162,28 @@ class GaussianErrorHandler(ErrorHandler):
 
     @staticmethod
     def _recursive_lowercase(obj):
+        """
+        Recursively convert all string elements in a given object to lowercase.
+
+        This method iterates over the input object. If the object is a dictionary, it
+        converts all its string keys and values to lowercase, applying the same logic
+        recursively to the values. If the object is a string, it directly converts it
+        to lowercase. If the object is iterable (but not a string or dictionary), it
+        applies the same lowercase conversion to each element in the iterable. For all
+        other types, the object is returned unchanged.
+
+        Args:
+            obj (dict | str | iterable): The object to be converted to lowercase.
+                This can be a dictionary, a string, or any iterable collection.
+                Non-iterable objects or non-string elements within iterables are
+                returned unchanged.
+
+        Returns:
+            dict | str | iterable:
+                A new object with all string elements converted to
+                lowercase. The type of the returned object matches the type of the
+                input `obj`.
+        """
         if isinstance(obj, dict):
             updated_obj = {}
             for k, v in obj.items():
@@ -148,6 +201,26 @@ class GaussianErrorHandler(ErrorHandler):
 
     @staticmethod
     def _recursive_remove_space(obj):
+        """
+        Recursively remove leading and trailing whitespace from keys and string values
+        in a dictionary.
+
+        This method processes each key-value pair in the given dictionary. If a value
+        is a string, it strips leading and trailing whitespace from it. If a value is
+        a dictionary, it applies the same stripping process recursively to that
+        dictionary. The keys of the dictionary are also stripped of leading and trailing
+        whitespace. Non-string values are included in the output without modification.
+
+        Args:
+            obj (dict): The dictionary whose keys and string values will have whitespace
+                removed. It can be nested, with dictionaries as values, which will
+                also be processed.
+
+        Returns:
+            dict:
+                A new dictionary with all keys and string values stripped of leading
+                and trailing whitespace. The structure of the dictionary is preserved.
+        """
         updated_obj = {}
         for key, value in obj.items():
             if isinstance(value, dict):
@@ -162,6 +235,21 @@ class GaussianErrorHandler(ErrorHandler):
 
     @staticmethod
     def _update_route_params(route_params, key, value):
+        """
+        Update Gaussian route parameters with new key-value pairs, handling nested
+        structures.
+
+        Args:
+            route_params (dict): The dictionary of route parameters to be updated.
+            key (str): The key in the route parameters to update or add.
+            value (str | dict): The new value to set or add to the route parameters.
+                This can be a string or a dictionary. If it is a dictionary, it is
+                merged with the existing dictionary at `key`.
+
+        Returns:
+            dict:
+                The updated route parameters.
+        """
         obj = route_params.get(key, {})
         if not obj:
             route_params[key] = value
@@ -179,6 +267,20 @@ class GaussianErrorHandler(ErrorHandler):
 
     @staticmethod
     def _int_keyword(route_params):
+        """
+        Determine the keyword used for 'Integral' in the Gaussian route parameters of
+        the input file. Possible keywords are 'int' and 'integral'. If neither keyword
+        is found, an empty string is returned.
+
+        Args:
+            route_params (dict): The route parameters dictionary.
+
+        Returns:
+            tuple:
+                The key ('int' or 'integral' or an empty string if neither is found),
+                and the value associated with this key in `route_params`. If the key is
+                not found, the second element in the tuple is an empty string.
+        """
         if "int" in route_params:
             int_key = "int"
         elif "integral" in route_params:
@@ -190,6 +292,18 @@ class GaussianErrorHandler(ErrorHandler):
 
     @staticmethod
     def _int_grid(route_params):
+        """
+        Check if the integration grid used for numerical integrations matches specific
+        options.
+
+        Args:
+            route_params (dict): The route parameters dictionary.
+
+        Returns:
+            bool:
+                True if the integral grid parameter matches one of the predefined
+                options, otherwise False.
+        """
         _, int_value = GaussianErrorHandler._int_keyword(route_params)
         options = ["ultrafine", "ultrafinegrid", "99590"]
 
@@ -204,7 +318,19 @@ class GaussianErrorHandler(ErrorHandler):
 
     @staticmethod
     def convert_mem(mem, unit):
-        # convert dynamic mem to Mb
+        """
+        Convert memory size between different units to megabytes (MB).
+
+        Args:
+            mem (float | int): The memory size to convert.
+            unit (str): The unit of the input memory size. Supported units include
+                'kb', 'mb', 'gb', 'tb', and word units ('kw', 'mw', 'gw', 'tw'), or an
+                empty string for default conversion (from words).
+
+        Returns:
+            float:
+                The memory size in MB.
+        """
         conversion = {
             "kb": 1 / 1000,
             "mb": 1,
@@ -220,6 +346,23 @@ class GaussianErrorHandler(ErrorHandler):
 
     @staticmethod
     def _find_dynamic_memory_allocated(link0_params):
+        """
+        Find and convert the memory allocation from Gaussian link0 parameters. This
+        method searches for the '%mem' key in the link0 parameters of a Gaussian job
+        to determine the memory allocated for the job. It extracts the memory value
+        and its unit, then converts the  memory allocation to MB. The default memory
+        unit used in Gaussian is words, and this method accounts for different units
+        specified in the memory string.
+
+        Args:
+            link0_params (dict): A dictionary of link0 parameters from a Gaussian input
+                file.
+
+        Returns:
+            tuple:
+                The memory key (None if '%mem' is not found) and the converted memory
+                allocation in MB. If '%mem' is not found, the second element will be None.
+        """
         mem_key = None
         for k in link0_params:
             if k.lower() == "%mem":
@@ -239,6 +382,14 @@ class GaussianErrorHandler(ErrorHandler):
         return mem_key, dynamic_mem
 
     def _add_int(self):
+        """
+        Check and update the integration grid setting ('int') in the Gaussian input
+        file's route parameters to 'ultrafine', if necessary.
+
+        Returns:
+        bool:
+            True if changes were made to the integration grid setting, False otherwise.
+        """
         if not GaussianErrorHandler._int_grid(self.gin.route_parameters):
             # nothing int is set or is set to different values
             warning_msg = (
@@ -297,10 +448,33 @@ class GaussianErrorHandler(ErrorHandler):
 
     @staticmethod
     def _not_g16(gout):
+        """
+        Determine if the Gaussian version is not 16.
+
+        Args:
+        gout (GaussianOutput): A GaussianOuput object.
+
+        Returns:
+        bool:
+            True if the Gaussian version is not 16, False otherwise.
+        """
         return "16" not in gout.version
 
     @staticmethod
     def _monitor_convergence(data, directory="./"):
+        """
+        Plot and save a convergence graph for an optimization job as a function of the
+        number of iterations.
+
+        Parameters:
+        data (dict): A dictionary containing two keys: 'values' and 'thresh'. 'values'
+            is a dictionary where each key-value pair represents a parameter and its
+            values across iterations. 'thresh' is a dictionary where each key-value pair
+            represents a parameter and its threshold value. The convergence parameters
+            are: 'max_force', 'rms_force', 'max_disp', and 'rms_disp'.
+        directory (str, optional): The directory where the convergence plot image will
+            be saved. Defaults to "./".
+        """
         fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(12, 10))
         for i, (k, v) in enumerate(data["values"].items()):
             row = int(np.floor(i / 2))
@@ -322,6 +496,7 @@ class GaussianErrorHandler(ErrorHandler):
         plt.savefig(os.path.join(directory, "convergence.png"))
 
     def check(self, directory="./"):
+        """Check for errors in the Gaussian output file."""
         # TODO: this backups the original file instead of the actual one
         if "linear_bend" in self.errors:
             os.rename(
@@ -377,6 +552,7 @@ class GaussianErrorHandler(ErrorHandler):
         return len(self.errors) > 0
 
     def correct(self, directory="./"):
+        """Perform necessary actions to correct the errors in the Gaussian output."""
         actions = []
         # to avoid situations like 'linear_bend', where if we backup input_file,
         # it will not be the actual input used in the current calc
@@ -743,6 +919,11 @@ class GaussianErrorHandler(ErrorHandler):
 
 
 class WalTimeErrorHandler(ErrorHandler):
+    """
+    Check if a run is nearing the walltime. If so, terminate the job and restart from
+    the last .rwf file. A job is considered to be nearing the walltime if the remaining
+    time is less than or equal to the buffer time.
+    """
     is_monitor = True
 
     def __init__(
@@ -754,6 +935,22 @@ class WalTimeErrorHandler(ErrorHandler):
         stderr_file="stderr.txt",
         prefix="error",
     ):
+        """
+        Initialize the WalTimeErrorHandler class.
+
+        Args:
+            wall_time (int): The total wall time for the job in seconds.
+            buffer_time (int): The buffer time in seconds. If the remaining time is less
+                than or equal to the buffer time, the job is considered to be nearing the
+                walltime and will be terminated.
+            input_file (str): The name of the input file for the Gaussian job.
+            output_file (str): The name of the output file for the Gaussian job.
+            stderr_file (str): The name of the standard error file for the Gaussian job.
+                Defaults to 'stderr.txt'.
+            prefix (str): The prefix to use for the backup files. Defaults to error,
+                which means a series of error.1.tar.gz, error.2.tar.gz, ... will be
+                generated.
+        """
         self.wall_time = wall_time
         self.buffer_time = buffer_time
         self.input_file = input_file
@@ -773,6 +970,7 @@ class WalTimeErrorHandler(ErrorHandler):
         )
 
     def check(self, directory="./"):
+        """Check if the job is nearing the walltime. If so, return True, else False."""
         if self.wall_time:
             run_time = datetime.datetime.now() - self.init_time
             remaining_time = self.wall_time - run_time.total_seconds()
@@ -781,6 +979,7 @@ class WalTimeErrorHandler(ErrorHandler):
         return False
 
     def correct(self, directory="./"):
+        """"Perform the corrections."""
         # TODO: when using restart, the rwf file might be in a different dir
         backup_files = [self.input_file, self.output_file, self.stderr_file] + list(
             BACKUP_FILES.values()
