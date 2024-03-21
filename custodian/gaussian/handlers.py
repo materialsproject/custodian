@@ -289,7 +289,7 @@ class GaussianErrorHandler(ErrorHandler):
         return '16' not in gout.version
 
     @staticmethod
-    def _monitor_convergence(data):
+    def _monitor_convergence(data, directory="./"):
         fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(12, 10))
         for i, (k, v) in enumerate(data['values'].items()):
             row = int(np.floor(i / 2))
@@ -306,25 +306,25 @@ class GaussianErrorHandler(ErrorHandler):
             ax[row, col].xaxis.set_major_locator(MaxNLocator(integer=True))
             ax[row, col].grid(ls='--', zorder=1)
         plt.tight_layout()
-        plt.savefig('convergence.png')
+        plt.savefig(os.path.join(directory, 'convergence.png'))
 
-    def check(self):
+    def check(self, directory="./"):
         # TODO: this backups the original file instead of the actual one
         if 'linear_bend' in self.errors:
-            os.rename(self.input_file + '.prev', self.input_file)
+            os.rename(os.path.join(directory, self.input_file + '.prev'), os.path.join(directory, self.input_file))
 
-        self.gin = GaussianInput.from_file(self.input_file)
+        self.gin = GaussianInput.from_file(os.path.join(directory, self.input_file))
         self.gin.route_parameters = \
             GaussianErrorHandler._recursive_lowercase(self.gin.route_parameters)
         self.gin.route_parameters = \
             GaussianErrorHandler._recursive_remove_space(
                 self.gin.route_parameters)
-        self.gout = GaussianOutput(self.output_file)
+        self.gout = GaussianOutput(os.path.join(directory, self.output_file))
         self.errors = set()
         error_patts = set()
         # TODO: move this to pymatgen?
         self.conv_data = {'values': {}, 'thresh': {}}
-        with zopen(self.output_file) as f:
+        with zopen(os.path.join(directory, self.output_file)) as f:
             for line in f:
                 error_match = GaussianErrorHandler.error_patt.search(line)
                 mem_match = GaussianErrorHandler.recom_mem_patt.search(line)
@@ -359,7 +359,7 @@ class GaussianErrorHandler(ErrorHandler):
             self.logger.error(patt)
         return len(self.errors) > 0
 
-    def correct(self):
+    def correct(self, directory="./"):
         actions = []
         # to avoid situations like 'linear_bend', where if we backup input_file,
         # it will not be the actual input used in the current calc
@@ -375,7 +375,7 @@ class GaussianErrorHandler(ErrorHandler):
         # os.remove(f'{self.input_file}.backup')
         backup_files = [self.input_file, self.output_file, self.stderr_file] + \
                        list(BACKUP_FILES.values())
-        backup(backup_files, prefix=self.prefix)
+        backup(backup_files, prefix=self.prefix, directory=directory)
         # backup_gaussian_files(backup_files, prefix=self.prefix)
         if 'scf_convergence' in self.errors:
             self.gin.route_parameters = \
@@ -538,7 +538,7 @@ class GaussianErrorHandler(ErrorHandler):
                 return {'errors': [self.errors], 'actions': None}
 
         elif 'zmatrix' in self.errors:
-            gfile = open(self.input_file)
+            gfile = open(os.path.join(directory, self.input_file))
             lines = gfile.readlines()
             last_lines = lines[-2:]
             gfile.close()
@@ -655,11 +655,11 @@ class GaussianErrorHandler(ErrorHandler):
                              'handled yet. Fix manually!')
             return {'errors': list(self.errors), 'actions': None}
 
-        os.rename(self.input_file, self.input_file + '.prev')
-        self.gin.write_file(self.input_file, self.cart_coords)
+        os.rename(os.path.join(directory, self.input_file), os.path.join(directory, self.input_file + '.prev'))
+        self.gin.write_file(os.path.join(directory, self.input_file), self.cart_coords)
         # TODO: ADDED
-        if os.path.exists(self.input_file + '.wt'):
-            shutil.copyfile(self.input_file, self.input_file + '.wt')
+        if os.path.exists(os.path.join(directory, self.input_file) + '.wt'):
+            shutil.copyfile(os.path.join(directory, self.input_file), os.path.join(directory, self.input_file + '.wt'))
         return {'errors': list(self.errors), 'actions': actions}
 
 
@@ -685,7 +685,7 @@ class WalTimeErrorHandler(ErrorHandler):
         self.init_time = datetime.datetime.strptime(self.init_time,
                                                     '%a %b %d %H:%M:%S %Z %Y')
 
-    def check(self):
+    def check(self, directory="./"):
         if self.wall_time:
             run_time = datetime.datetime.now() - self.init_time
             remaining_time = self.wall_time - run_time.total_seconds()
@@ -693,14 +693,14 @@ class WalTimeErrorHandler(ErrorHandler):
                 return True
         return False
 
-    def correct(self):
+    def correct(self, directory="./"):
         # TODO: when using restart, the rwf file might be in a different dir
         backup_files = [self.input_file, self.output_file, self.stderr_file] + \
                        list(BACKUP_FILES.values())
-        backup(backup_files, prefix=self.prefix)
-        if glob.glob(BACKUP_FILES['rwf']):
-            rwf = glob.glob(BACKUP_FILES['rwf'])[0]
-            gin = GaussianInput.from_file(self.input_file)
+        backup(backup_files, prefix=self.prefix, directory=directory)
+        if glob.glob(os.path.join(directory, BACKUP_FILES['rwf'])):
+            rwf = glob.glob(os.path.join(directory, BACKUP_FILES['rwf']))[0]
+            gin = GaussianInput.from_file(os.path.join(directory, self.input_file))
             # TODO: check if rwf is already there like RWF or Rwf or ...
             # gin.link0_parameters.update({'%rwf': rwf})
             # gin.route_parameters = {'Restart': None}
@@ -708,7 +708,7 @@ class WalTimeErrorHandler(ErrorHandler):
             input_str = [f'%rwf={rwf}'] + \
                         [f'{i}={j}' for i, j in gin.link0_parameters.items()]
             input_str.append(f'{gin.dieze_tag} Restart\n\n')
-            with open(self.input_file + '.wt', 'w') as f:
+            with open(os.path.join(directory, self.input_file + '.wt'), 'w') as f:
                 f.write('\n'.join(input_str))
             return {'errors': ['wall_time_limit'], 'actions': None}
         else:
