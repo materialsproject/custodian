@@ -135,6 +135,8 @@ class TestGaussianErrorHandler(TestCase):
         assert dct["errors"] == ["scf_convergence"]
         assert dct["actions"] == [{"scf_level_of_theory": "better_scf_guess"}]
 
+        GaussianErrorHandler.activate_better_guess = False
+
     def test_linear_bend(self):
         for file in ["linear_bend.com", "linear_bend.out"]:
             shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
