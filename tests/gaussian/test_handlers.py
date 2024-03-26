@@ -285,7 +285,7 @@ class TestGaussianErrorHandler(TestCase):
         shutil.rmtree(SCR_DIR)
 
 
-class TestWalTimeErrorHandler(TestCase):
+class TestWallTimeErrorHandler(TestCase):
     def setUp(self):
         os.makedirs(SCR_DIR)
         os.chdir(SCR_DIR)
