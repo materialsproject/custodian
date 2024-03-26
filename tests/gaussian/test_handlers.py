@@ -25,10 +25,6 @@ class TestGaussianErrorHandler(TestCase):
         os.makedirs(SCR_DIR)
         os.chdir(SCR_DIR)
 
-    def tearDown(self):
-        os.chdir(CWD)
-        shutil.rmtree(SCR_DIR)
-
     def test_opt_steps_cycles(self):
         for file in ["opt_steps_cycles.com", "opt_steps_cycles.out"]:
             shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
