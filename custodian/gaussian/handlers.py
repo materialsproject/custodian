@@ -497,7 +497,11 @@ class GaussianErrorHandler(ErrorHandler):
                 if error_match:
                     patt = error_match.group(0)
                     error_patts.add(patt)
-                    self.errors.add(GaussianErrorHandler.error_defs[patt])
+                    for pattern, error_key in GaussianErrorHandler.error_defs.items():
+                        if re.match(pattern, patt):
+                            self.errors.add(error_key)
+                            break
+                    # self.errors.add(GaussianErrorHandler.error_defs[patt])
                 if mem_match:
                     mem = mem_match.group(1)
                     self.recom_mem = GaussianErrorHandler.convert_mem(float(mem), "mw")
