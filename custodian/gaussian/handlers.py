@@ -917,7 +917,7 @@ class GaussianErrorHandler(ErrorHandler):
         return {"errors": list(self.errors), "actions": actions}
 
 
-class WalTimeErrorHandler(ErrorHandler):
+class WallTimeErrorHandler(ErrorHandler):
     """
     Check if a run is nearing the walltime. If so, terminate the job and restart from
     the last .rwf file. A job is considered to be nearing the walltime if the remaining
