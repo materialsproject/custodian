@@ -1,11 +1,11 @@
-# coding: utf-8
-
 """
 This module implements error handlers for Nwchem runs. Currently tested only
 for B3LYP DFT jobs.
 """
 
-from pymatgen.io.nwchem import NwOutput, NwInput
+import os
+
+from pymatgen.io.nwchem import NwInput, NwOutput
 
 from custodian.ansible.interpreter import Modder
 from custodian.custodian import ErrorHandler
@@ -19,8 +19,7 @@ class NwchemErrorHandler(ErrorHandler):
     """
 
     def __init__(self, output_filename="mol.nwout"):
-        """
-        Initializes with an output file name.
+        """Initialize with an output file name.
 
         Args:
             output_filename (str): This is the file where the stdout for nwchem
@@ -31,50 +30,36 @@ class NwchemErrorHandler(ErrorHandler):
         """
         self.output_filename = output_filename
 
-    def check(self):
-        """
-        Check for errors.
-        """
-        out = NwOutput(self.output_filename)
+    def check(self, directory="./"):
+        """Check for errors."""
+        out = NwOutput(os.path.join(directory, self.output_filename))
         self.errors = []
         self.input_file = out.job_info["input"]
         if out.data[-1]["has_error"]:
-            self.errors.extend(out.data[-1]["errors"])
+            self.errors += out.data[-1]["errors"]
         self.errors = list(set(self.errors))
         self.ntasks = len(out.data)
         return len(self.errors) > 0
 
-    def _mod_input(self, search_string_func, mod_string_func):
-        with open(self.input_file) as f:
-            lines = []
-            for l in f:
-                if search_string_func(l):
-                    lines.append(mod_string_func(l))
-                else:
-                    lines.append(l)
-
-        with open(self.input_file, "w") as fout:
-            fout.write("".join(lines))
-
-    def correct(self):
-        """Correct errors"""
-        backup("*.nw*")
+    def correct(self, directory="./"):
+        """Correct errors."""
+        backup("*.nw*", directory=directory)
         actions = []
-        nwi = NwInput.from_file(self.input_file)
-        for e in self.errors:
-            if e == "autoz error":
+        nwi = NwInput.from_file(os.path.join(directory, self.input_file))
+        for err in self.errors:
+            if err == "autoz error":
                 action = {"_set": {"geometry_options": ["units", "angstroms", "noautoz"]}}
                 actions.append(action)
-            elif e == "Bad convergence":
-                t = nwi.tasks[self.ntasks - 1]
-                if "cgmin" in t.theory_directives:
+            elif err == "Bad convergence":
+                task = nwi.tasks[self.ntasks - 1]
+                if "cgmin" in task.theory_directives:
                     nwi.tasks.pop(self.ntasks - 1)
                 else:
-                    t.theory_directives["cgmin"] = ""
-                for t in nwi.tasks:
-                    if t.operation.startswith("freq"):
+                    task.theory_directives["cgmin"] = ""
+                for task in nwi.tasks:
+                    if task.operation.startswith("freq"):
                         # You cannot calculate hessian with cgmin.
-                        t.theory_directives["nocgmin"] = ""
+                        task.theory_directives["nocgmin"] = ""
                 action = {"_set": {"tasks": [t.as_dict() for t in nwi.tasks]}}
                 actions.append(action)
             else:
@@ -82,7 +67,7 @@ class NwchemErrorHandler(ErrorHandler):
                 # die.
                 return {"errors": self.errors, "actions": None}
 
-        m = Modder()
+        m = Modder(directory=directory)
         for action in actions:
             nwi = m.modify_object(action, nwi)
         nwi.write_file(self.input_file)

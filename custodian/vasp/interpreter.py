@@ -1,23 +1,18 @@
-# coding: utf-8
+"""Implements various interpreters and modders for VASP."""
 
-"""
-Implements various interpreters and modders for VASP.
-"""
+import os
 
 from pymatgen.io.vasp.inputs import VaspInput
 
-from custodian.ansible.actions import FileActions, DictActions
+from custodian.ansible.actions import DictActions, FileActions
 from custodian.ansible.interpreter import Modder
 
 
 class VaspModder(Modder):
-    """
-    A Modder for VaspInputSets.
-    """
+    """A Modder for VaspInputSets."""
 
-    def __init__(self, actions=None, strict=True, vi=None):
-        """
-        Initializes a Modder for VaspInput sets
+    def __init__(self, actions=None, strict=True, vi=None, directory="./"):
+        """Initialize a Modder for VaspInput sets.
 
         Args:
             actions ([Action]): A sequence of supported actions. See
@@ -31,7 +26,8 @@ class VaspModder(Modder):
                 Initialized automatically if not passed (but passing it will
                 avoid having to reparse the directory).
         """
-        self.vi = vi or VaspInput.from_directory(".")
+        self.vi = vi or VaspInput.from_directory(directory)
+        self.directory = directory
         actions = actions or [FileActions, DictActions]
         super().__init__(actions, strict)
 
@@ -39,20 +35,21 @@ class VaspModder(Modder):
         """
         Applies a list of actions to the Vasp Input Set and rewrites modified
         files.
+
         Args:
-            actions [dict]: A list of actions of the form {'file': filename,
+            actions (dict): A list of actions of the form {'file': filename,
                 'action': moddermodification} or {'dict': vaspinput_key,
-                'action': moddermodification}
+                'action': moddermodification}.
         """
         modified = []
-        for a in actions:
-            if "dict" in a:
-                k = a["dict"]
+        for action in actions:
+            if "dict" in action:
+                k = action["dict"]
                 modified.append(k)
-                self.vi[k] = self.modify_object(a["action"], self.vi[k])
-            elif "file" in a:
-                self.modify(a["action"], a["file"])
+                self.vi[k] = self.modify_object(action["action"], self.vi[k])
+            elif "file" in action:
+                self.modify(action["action"], action["file"])
             else:
-                raise ValueError("Unrecognized format: {}".format(a))
-        for f in modified:
-            self.vi[f].write_file(f)
+                raise ValueError(f"Unrecognized format: {action}")
+        for file in modified:
+            self.vi[file].write_file(os.path.join(self.directory, file))

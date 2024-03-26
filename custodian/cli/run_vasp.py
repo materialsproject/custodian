@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """
 This is a master vasp running script to perform various combinations of VASP
 runs.
@@ -8,23 +6,21 @@ runs.
 import logging
 import sys
 
-import ruamel.yaml as yaml
-from pymatgen.io.vasp.inputs import VaspInput, Incar, Kpoints
+from pymatgen.io.vasp.inputs import Incar, Kpoints, VaspInput
+from ruamel.yaml import YAML
 
 from custodian.custodian import Custodian
 from custodian.vasp.jobs import VaspJob
 
 
 def load_class(mod, name):
-    """
-    Load the class from mod and name specification.
-    """
+    """Load the class from mod and name specification."""
     toks = name.split("?")
     params = {}
     if len(toks) == 2:
-        for p in toks[-1].split(","):
-            ptoks = p.split("=")
-            params[ptoks[0]] = yaml.safe_load(ptoks[1])
+        for tok in toks[-1].split(","):
+            p_toks = tok.split("=")
+            params[p_toks[0]] = YAML(typ="rt").load(p_toks[1])
     elif len(toks) > 2:
         print("Bad handler specification")
         sys.exit(-1)
@@ -33,9 +29,7 @@ def load_class(mod, name):
 
 
 def get_jobs(args):
-    """
-    Returns a generator of jobs. Allows of "infinite" jobs.
-    """
+    """Returns a generator of jobs. Allows of "infinite" jobs."""
     vasp_command = args.command.split()
     # save initial INCAR for rampU runs
     n_ramp_u = args.jobs.count("rampU")
@@ -45,14 +39,11 @@ def get_jobs(args):
         ldauu = incar["LDAUU"]
         ldauj = incar["LDAUJ"]
 
-    njobs = len(args.jobs)
+    n_jobs = len(args.jobs)
     post_settings = []  # append to this list to have settings applied on next job
     for i, job in enumerate(args.jobs):
-        final = i == njobs - 1
-        if any(c.isdigit() for c in job):
-            suffix = "." + job
-        else:
-            suffix = ".{}{}".format(job, i + 1)
+        final = i == n_jobs - 1
+        suffix = "." + job if any(char.isdigit() for char in job) else f".{job}{i + 1}"
         settings = post_settings
         post_settings = []
         backup = i == 0
@@ -75,59 +66,55 @@ def get_jobs(args):
                 user_incar_settings={"LWAVE": True, "EDIFF": 1e-6},
                 ediff_per_atom=False,
             )
-            settings.extend(
-                [
-                    {"dict": "INCAR", "action": {"_set": dict(vis.incar)}},
-                    {"dict": "KPOINTS", "action": {"_set": vis.kpoints.as_dict()}},
-                ]
-            )
+            settings += [
+                {"dict": "INCAR", "action": {"_set": dict(vis.incar)}},
+                {"dict": "KPOINTS", "action": {"_set": vis.kpoints.as_dict()}},
+            ]
 
         if job_type.startswith("static_dielectric_derived"):
-            from pymatgen.io.vasp.sets import (
-                MPStaticSet,
-                MPStaticDielectricDFPTVaspInputSet,
-            )
+            from pymatgen.io.vasp.sets import MPStaticDielectricDFPTVaspInputSet, MPStaticSet
 
             # vis = MPStaticSet.from_prev_calc(
-            #     ".", user_incar_settings={"EDIFF": 1e-6, "IBRION": 8,
-            #                               "LEPSILON": True, 'LREAL':False,
-            #                               "LPEAD": True, "ISMEAR": 0,
-            #                               "SIGMA": 0.01},
-            #     ediff_per_atom=False)
+            #     ".",
+            #     user_incar_settings={
+            #         "EDIFF": 1e-6,
+            #         "IBRION": 8,
+            #         "LEPSILON": True,
+            #         "LREAL": False,
+            #         "LPEAD": True,
+            #         "ISMEAR": 0,
+            #         "SIGMA": 0.01,
+            #     },
+            #     ediff_per_atom=False,
+            # )
             vis = MPStaticDielectricDFPTVaspInputSet()
             incar = vis.get_incar(vinput["POSCAR"].structure)
             unset = {}
-            for k in ["NPAR", "KPOINT_BSE", "LAECHG", "LCHARG", "LVHAR", "NSW"]:
-                incar.pop(k, None)
-                if k in vinput["INCAR"]:
-                    unset[k] = 1
+            for key in ("NPAR", "KPOINT_BSE", "LAECHG", "LCHARG", "LVHAR", "NSW"):
+                incar.pop(key, None)
+                if key in vinput["INCAR"]:
+                    unset[key] = 1
             kpoints = vis.get_kpoints(vinput["POSCAR"].structure)
-            settings.extend(
-                [
-                    {"dict": "INCAR", "action": {"_set": dict(incar), "_unset": unset}},
-                    {"dict": "KPOINTS", "action": {"_set": kpoints.as_dict()}},
-                ]
-            )
+            settings += [
+                {"dict": "INCAR", "action": {"_set": dict(incar), "_unset": unset}},
+                {"dict": "KPOINTS", "action": {"_set": kpoints.as_dict()}},
+            ]
             auto_npar = False
-        elif job_type.startswith("static"):
-            m = [i * args.static_kpoint for i in vinput["KPOINTS"].kpts[0]]
-            settings.extend(
-                [
-                    {"dict": "INCAR", "action": {"_set": {"NSW": 0}}},
-                    {"dict": "KPOINTS", "action": {"_set": {"kpoints": [m]}}},
-                ]
-            )
+        elif job_type.startswith("static") and vinput["KPOINTS"]:
+            m = [kpt * args.static_kpoint for kpt in vinput["KPOINTS"].kpts[0]]
+            settings += [
+                {"dict": "INCAR", "action": {"_set": {"NSW": 0}}},
+                {"dict": "KPOINTS", "action": {"_set": {"kpoints": [m]}}},
+            ]
 
         elif job_type.startswith("nonscf_derived"):
             from pymatgen.io.vasp.sets import MPNonSCFSet
 
             vis = MPNonSCFSet.from_prev_calc(".", copy_chgcar=False, user_incar_settings={"LWAVE": True})
-            settings.extend(
-                [
-                    {"dict": "INCAR", "action": {"_set": dict(vis.incar)}},
-                    {"dict": "KPOINTS", "action": {"_set": vis.kpoints.as_dict()}},
-                ]
-            )
+            settings += [
+                {"dict": "INCAR", "action": {"_set": dict(vis.incar)}},
+                {"dict": "KPOINTS", "action": {"_set": vis.kpoints.as_dict()}},
+            ]
 
         elif job_type.startswith("optics_derived"):
             from pymatgen.io.vasp.sets import MPNonSCFSet
@@ -147,12 +134,10 @@ def get_jobs(args):
                 },
                 ediff_per_atom=False,
             )
-            settings.extend(
-                [
-                    {"dict": "INCAR", "action": {"_set": dict(vis.incar)}},
-                    {"dict": "KPOINTS", "action": {"_set": vis.kpoints.as_dict()}},
-                ]
-            )
+            settings += [
+                {"dict": "INCAR", "action": {"_set": dict(vis.incar)}},
+                {"dict": "KPOINTS", "action": {"_set": vis.kpoints.as_dict()}},
+            ]
 
         elif job_type.startswith("rampu"):
             f = ramps / (n_ramp_u - 1)
@@ -169,7 +154,7 @@ def get_jobs(args):
             )
             copy_magmom = True
             ramps += 1
-        elif job_type.startswith("quick_relax") or job_type.startswith("quickrelax"):
+        elif job_type.startswith(("quick_relax", "quickrelax")):
             kpoints = vinput["KPOINTS"]
             incar = vinput["INCAR"]
             structure = vinput["POSCAR"].structure
@@ -179,13 +164,11 @@ def get_jobs(args):
                 post_settings.append({"dict": "INCAR", "action": {"_unset": {"ISMEAR": 1}}})
             post_settings.append({"dict": "KPOINTS", "action": {"_set": kpoints.as_dict()}})
             # lattice vectors with length < 9 will get >1 KPOINT
-            low_kpoints = Kpoints.gamma_automatic([max(int(18 / l), 1) for l in structure.lattice.abc])
-            settings.extend(
-                [
-                    {"dict": "INCAR", "action": {"_set": {"ISMEAR": 0}}},
-                    {"dict": "KPOINTS", "action": {"_set": low_kpoints.as_dict()}},
-                ]
-            )
+            low_kpoints = Kpoints.gamma_automatic([max(int(18 / length), 1) for length in structure.lattice.abc])
+            settings += [
+                {"dict": "INCAR", "action": {"_set": {"ISMEAR": 0}}},
+                {"dict": "KPOINTS", "action": {"_set": low_kpoints.as_dict()}},
+            ]
 
             # let vasp determine encut (will be lower than
             # needed for compatibility with other runs)
@@ -196,10 +179,9 @@ def get_jobs(args):
         elif job_type.startswith("relax"):
             pass
         elif job_type.startswith("full_relax"):
-            for j in VaspJob.full_opt_run(vasp_command):
-                yield j
+            yield from VaspJob.full_opt_run(vasp_command)
         else:
-            print("Unsupported job type: {}".format(job))
+            print(f"Unsupported job type: {job}")
             sys.exit(-1)
 
         if not job_type.startswith("full_relax"):
@@ -215,14 +197,12 @@ def get_jobs(args):
 
 
 def do_run(args):
-    """
-    Do the run.
-    """
+    """Do the run."""
     FORMAT = "%(asctime)s %(message)s"
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
-    logging.info("Handlers used are %s" % args.handlers)
-    handlers = [load_class("custodian.vasp.handlers", n) for n in args.handlers]
-    validators = [load_class("custodian.vasp.validators", n) for n in args.validators]
+    logging.info(f"Handlers used are {args.handlers}")
+    handlers = [load_class("custodian.vasp.handlers", handler) for handler in args.handlers]
+    validators = [load_class("custodian.vasp.validators", validator) for validator in args.validators]
 
     c = Custodian(
         handlers,
@@ -237,9 +217,7 @@ def do_run(args):
 
 
 def main():
-    """
-    Main method
-    """
+    """Main method."""
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -254,7 +232,7 @@ def main():
         nargs="?",
         default="pvasp",
         type=str,
-        help="VASP command. Defaults to pvasp. If you are using mpirun, " 'set this to something like "mpirun pvasp".',
+        help="VASP command. Defaults to pvasp. If you are using mpirun, set this to something like 'mpirun pvasp'.",
     )
 
     parser.add_argument(
@@ -358,7 +336,7 @@ def main():
         'supported at the moment. For example, "relax relax static" '
         "will run a double relaxation followed by a static "
         "run. By default, suffixes are given sequential numbering,"
-        "but this can be overrridden by adding a number to the job"
+        "but this can be overridden by adding a number to the job"
         "type, e.g. relax5 relax6 relax7",
     )
 

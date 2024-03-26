@@ -9,5 +9,5 @@ or tracked changes (though without undo capability unless the input is
 stored at each step).
 """
 
+from .actions import DictActions, FileActions
 from .interpreter import Modder
-from .actions import FileActions, DictActions

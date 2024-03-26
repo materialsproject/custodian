@@ -1,6 +1,4 @@
-# coding: utf-8
-
-""" This module implements basic kinds of jobs for FEFF runs."""
+"""This module implements basic kinds of jobs for FEFF runs."""
 
 import logging
 import os
@@ -26,9 +24,7 @@ FEFF_BACKUP_FILES = {"ATOMS", "HEADER", "PARAMETERS", "POTENTIALS"}
 
 
 class FeffJob(Job):
-    """
-    A basic FEFF job, run whatever is in the directory.
-    """
+    """A basic FEFF job, run whatever is in the directory."""
 
     def __init__(
         self,
@@ -40,7 +36,7 @@ class FeffJob(Job):
         gzipped_prefix="feff_out",
     ):
         """
-        This constructor is used for a standard FEFF initialization
+        This constructor is used for a standard FEFF initialization.
 
         Args:
             feff_cmd (str): the name of the full executable for running FEFF
@@ -63,39 +59,33 @@ class FeffJob(Job):
         self.gzipped = gzipped
         self.gzipped_prefix = gzipped_prefix
 
-    def setup(self):
-        """
-        Performs initial setup for FeffJob, do backing up.
-        Returns:
-
-        """
-        decompress_dir(".")
+    def setup(self, directory="./") -> None:
+        """Performs initial setup for FeffJob, do backing up."""
+        decompress_dir(directory)
 
         if self.backup:
-            for f in FEFF_INPUT_FILES:
-                shutil.copy(f, "{}.orig".format(f))
+            for file in FEFF_INPUT_FILES:
+                shutil.copy(os.path.join(directory, file), os.path.join(directory, f"{file}.orig"))
 
-            for f in FEFF_BACKUP_FILES:
-                if os.path.isfile(f):
-                    shutil.copy(f, "{}.orig".format(f))
+            for file in FEFF_BACKUP_FILES:
+                if os.path.isfile(os.path.join(directory, file)):
+                    shutil.copy(os.path.join(directory, file), os.path.join(directory, f"{file}.orig"))
 
-    def run(self):
-
+    def run(self, directory="./"):
         """
         Performs the actual FEFF run
         Returns:
             (subprocess.Popen) Used for monitoring.
         """
-        with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
+        with (
+            open(os.path.join(directory, self.output_file), "w") as f_std,
+            open(os.path.join(directory, self.stderr_file), "w", buffering=1) as f_err,
+        ):
             # Use line buffering for stderr
             # On TSCC, need to run shell command
-            p = subprocess.Popen(self.feff_cmd, stdout=f_std, stderr=f_err, shell=True)
+            return subprocess.Popen(self.feff_cmd, cwd=directory, stdout=f_std, stderr=f_err, shell=True)  # pylint: disable=R1732
 
-        return p
-
-    def postprocess(self):
-        """
-        Renaming or gzipping all the output as needed
-        """
+    def postprocess(self, directory="./"):
+        """Renaming or gzipping all the output as needed."""
         if self.gzipped:
-            backup("*", prefix=self.gzipped_prefix)
+            backup("*", directory=directory, prefix=self.gzipped_prefix)

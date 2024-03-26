@@ -41,7 +41,9 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
-
+_build
+_site
+Gemfile.lock
 .DS_Store
 docs/_build
 

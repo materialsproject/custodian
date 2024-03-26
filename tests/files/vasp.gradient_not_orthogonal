@@ -1,0 +1,72 @@
+ running on   64 total cores
+ distrk:  each k-point on   64 cores,    1 groups
+ distr:  one band on   16 cores,    4 groups
+ using from now: INCAR     
+ vasp.5.4.1 24Jun15 (build Jun 30 2016 13:43:19) complex                        
+  
+ POSCAR found type information on POSCAR  Mg H  C  O 
+ POSCAR found :  4 types and      74 ions
+ scaLAPACK will be used
+
+ ----------------------------------------------------------------------------- 
+|                                                                             |
+|  ADVICE TO THIS USER RUNNING 'VASP/VAMP'   (HEAR YOUR MASTER'S VOICE ...):  |
+|                                                                             |
+|      You have a (more or less) 'large supercell' and for larger cells       |
+|      it might be more efficient to use real space projection opertators     |
+|      So try LREAL= Auto  in the INCAR   file.                               |
+|      Mind: At the moment your POTCAR file does not contain real space       |
+|       projectors, and has to be modified,  BUT if you                       |
+|      want to do an extremely  accurate calculation you might also keep the  |
+|      reciprocal projection scheme          (i.e. LREAL=.FALSE.)             |
+|                                                                             |
+ ----------------------------------------------------------------------------- 
+
+ LDA part: xc-table for Pade appr. of Perdew
+ POSCAR found type information on POSCAR  Mg H  C  O 
+ POSCAR found :  4 types and      74 ions
+ POSCAR, INCAR and KPOINTS ok, starting setup
+ WARNING: small aliasing (wrap around) errors must be expected
+ FFT: planning ...
+ WAVECAR not read
+ entering main loop
+
+       N       E                     dE             d eps       ncg     rms          ort
+ gam= 0.000 g(H,U,f)=  0.237E-01 0.674E-03 0.579E-07 ort(H,U,f) = 0.000E+00 0.000E+00 0.000E+00
+SDA:   1    -0.460178726827E+03   -0.17840E-01    0.00000E+00  7168   0.244E-01 0.000E+00
+ gam= 0.000 trial= 0.399  step= 0.777 mean= 0.399
+ gam= 0.333 g(H,U,f)=  0.799E-02 0.143E-03 0.296E-07 ort(H,U,f) =-0.117E-02-0.215E-03-0.306E-07
+CGA:   2    -0.460187857467E+03   -0.91306E-02   -0.94739E-02  7168   0.813E-02-0.139E-02
+ gam= 0.333 trial= 0.418  step= 0.631 mean= 0.418
+ EDWAV: internal error, the gradient is not orthogonal           1           2
+  1.046520053834623E-004
+ EDWAV: internal error, the gradient is not orthogonal           1           2
+  1.046520053834623E-004
+ EDWAV: internal error, the gradient is not orthogonal           1           2
+  1.046520053834623E-004
+ EDWAV: internal error, the gradient is not orthogonal           1           2
+  1.046520053834623E-004
+ EDWAV: internal error, the gradient is not orthogonal           1           2
+  1.046520053834623E-004
+ EDWAV: internal error, the gradient is not orthogonal           1           2
+  1.046520053834623E-004
+ EDWAV: internal error, the gradient is not orthogonal           1           2
+  1.046520053834623E-004
+ EDWAV: internal error, the gradient is not orthogonal           1           2
+  1.046520053834623E-004
+ EDWAV: internal error, the gradient is not orthogonal           1           2
+  1.046520053834623E-004
+ EDWAV: internal error, the gradient is not orthogonal           1           2
+  1.046520053834623E-004
+ EDWAV: internal error, the gradient is not orthogonal           1           2
+  1.046520053834623E-004
+ EDWAV: internal error, the gradient is not orthogonal           1           2
+  1.046520053834623E-004
+ EDWAV: internal error, the gradient is not orthogonal           1           2
+  1.046520053834623E-004
+ EDWAV: internal error, the gradient is not orthogonal           1           2
+  1.046520053834623E-004
+ EDWAV: internal error, the gradient is not orthogonal           1           2
+  1.046520053834623E-004
+ EDWAV: internal error, the gradient is not orthogonal           1           2
+  1.046520053834623E-004

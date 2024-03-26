@@ -1,8 +1,4 @@
-# coding: utf-8
-
-"""
-This module contains utility functions that are useful for Q-Chem jobs.
-"""
+"""This module contains utility functions that are useful for Q-Chem jobs."""
 
 import math
 
@@ -11,7 +7,7 @@ import numpy as np
 
 def perturb_coordinates(old_coords, negative_freq_vecs, molecule_perturb_scale, reversed_direction):
     """
-    Perturbs a structure along the imaginary mode vibrational frequency vectors
+    Perturbs a structure along the imaginary mode vibrational frequency vectors.
 
     old_coords (np.ndarray): Initial molecule coordinates
     negative_freq_vecs (list of np.ndarray): Vibrational frequency vectors corresponding to
@@ -21,7 +17,7 @@ def perturb_coordinates(old_coords, negative_freq_vecs, molecule_perturb_scale, 
     reversed_direction (bool): If True, then perturb in direction opposite of frequency modes.
 
     """
-    max_dis = max([math.sqrt(sum([x ** 2 for x in vec])) for vec in negative_freq_vecs])
+    max_dis = max(math.sqrt(sum(x**2 for x in vec)) for vec in negative_freq_vecs)
     scale = molecule_perturb_scale / max_dis
     normalized_vecs = [[x * scale for x in vec] for vec in negative_freq_vecs]
     direction = 1.0
@@ -32,7 +28,7 @@ def perturb_coordinates(old_coords, negative_freq_vecs, molecule_perturb_scale, 
 
 def vector_list_diff(vecs1, vecs2):
     """
-    Calculates the summed difference of two vectors
+    Calculates the summed difference of two vectors.
 
     Typically this function is used to compare between the different atom-wise
     components of a vibrational frequency mode vector.

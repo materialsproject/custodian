@@ -1,21 +1,156 @@
-[tool.black]
-line-length = 120
-target-version = ['py38']
-include = '\.pyi?$'
-exclude = '''
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
 
-(
-  /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-  )/
-)
-'''
+[project]
+name = "custodian"
+version = "2024.3.12"
+description = "A simple JIT job management framework in Python."
+authors = [
+  { name = "Janosh Riebesell", email = "janosh.riebesell@gmail.com" },
+  { name = "Matthew Horton" },
+  { name = "Samuel M. Blau" },
+  { name = "Shyue Ping Ong", email = "ongsp@ucsd.edu" },
+  { name = "Stephen Dacek" },
+  { name = "William Davidson Richards" },
+  { name = "Xiaohui Qu" },
+]
+maintainers = [{ name = "Janosh Riebesell" }, { name = "Shyue Ping Ong" }]
+readme = "README.md"
+keywords = ["jit", "job", "just-in-time", "management", "vasp"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.9",
+  "Topic :: Scientific/Engineering :: Chemistry",
+  "Topic :: Scientific/Engineering :: Physics",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
+
+dependencies = ["monty>=2.0.6", "psutil", "ruamel.yaml>=0.15.6"]
+
+[project.optional-dependencies]
+vasp = ["pymatgen"]
+nwchem = ["pymatgen"]
+qchem = ["pymatgen"]
+gaussian = ["pymatgen", "matplotlib"]
+dev = ["pymatgen", "pytest", "pytest-cov"]
+lint = ["mypy", "pre-commit", "ruff"]
+error-statistics = ["sentry-sdk>=0.8.0"]
+
+[project.scripts]
+cstdn = "custodian.cli.cstdn:main"
+run_vasp = "custodian.cli.run_vasp:main"
+run_nwchem = "custodian.cli.run_nwchem:main"
+converge_kpoints = "custodian.cli.converge_kpoints:main"
+converge_geometry = "custodian.cli.converge_geometry:main"
+
+[project.urls]
+Docs = "https://materialsproject.github.io/custodian"
+Repo = "https://github.com/materialsproject/custodian"
+Package = "https://pypi.org/project/custodian"
+
+[tool.setuptools.packages.find]
+include = ["custodian*"]
+exclude = ["*.tests", "*.tests.*"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+  "B",    # flake8-bugbear
+  "C4",   # flake8-comprehensions
+  "D",    # pydocstyle
+  "E",    # pycodestyle error
+  "EXE",  # flake8-executable
+  "F",    # pyflakes
+  "FA",   # flake8-future-annotations
+  "FLY",  # flynt
+  "I",    # isort
+  "ICN",  # flake8-import-conventions
+  "ISC",  # flake8-implicit-str-concat
+  "PD",   # pandas-vet
+  "PERF", # perflint
+  "PIE",  # flake8-pie
+  "PL",   # pylint
+  "PT",   # flake8-pytest-style
+  "PYI",  # flakes8-pyi
+  "Q",    # flake8-quotes
+  "RET",  # flake8-return
+  "RSE",  # flake8-raise
+  "RUF",  # Ruff-specific rules
+  "SIM",  # flake8-simplify
+  "SLOT", # flake8-slots
+  "TCH",  # flake8-type-checking
+  "TID",  # tidy imports
+  "TID",  # flake8-tidy-imports
+  "UP",   # pyupgrade
+  "W",    # pycodestyle warning
+  "YTT",  # flake8-2020
+]
+ignore = [
+  "B023",    # Function definition does not bind loop variable
+  "B028",    # No explicit stacklevel keyword argument found
+  "B904",    # Within an except clause, raise exceptions with ...
+  "C408",    # unnecessary-collection-call
+  "D105",    # Missing docstring in magic method
+  "D205",    # 1 blank line required between summary line and description
+  "D212",    # Multi-line docstring summary should start at the first line
+  "ISC001",
+  "PD011",   # pandas-use-of-dot-values
+  "PD901",   # pandas-df-variable-name
+  "PERF203", # try-except-in-loop
+  "PLR",     # pylint refactor
+  "PLW2901", # Outer for loop variable overwritten by inner assignment target
+  "PT013",   # pytest-incorrect-pytest-import
+  "RUF012",  # Disable checks for mutable class args. This is a non-problem.
+  "SIM105",  # Use contextlib.suppress(OSError) instead of try-except-pass
+]
+pydocstyle.convention = "google"
+isort.split-on-trailing-comma = false
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["D"]
+"tasks.py" = ["D", "E"]
+
+[tool.pytest.ini_options]
+addopts = "--color=yes -p no:warnings --import-mode=importlib"
+
+[tool.mypy]
+ignore_missing_imports = true
+namespace_packages = true
+explicit_package_bases = true
+no_implicit_optional = false
+
+[tool.codespell]
+ignore-words-list = "ot,atomate"
+check-filenames = true
+
+[tool.coverage.run]
+relative_files = true
+
+[tool.coverage.report]
+exclude_lines = [
+  "@deprecated",
+  "def __repr__",
+  "if 0:",
+  "if TYPE_CHECKING:",
+  "if __name__ == .__main__.:",
+  "if self.debug:",
+  "if settings.DEBUG",
+  "input",
+  "pragma: no cover",
+  "raise AssertionError",
+  "raise NotImplementedError",
+]

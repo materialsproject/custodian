@@ -1,3 +1,1 @@
-"""
-Jobs and Handlers for FEFF calculations.
-"""
+"""Jobs and Handlers for FEFF calculations."""

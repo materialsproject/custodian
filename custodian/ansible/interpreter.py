@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """
 This module implements a Modder class that performs modifications on objects
 using support actions.
@@ -23,18 +21,17 @@ class Modder:
 
     Examples:
     >>> modder = Modder()
-    >>> d = {"Hello": "World"}
+    >>> dct = {"Hello": "World"}
     >>> mod = {'_set': {'Hello':'Universe', 'Bye': 'World'}}
-    >>> modder.modify(mod, d)
-    >>> d['Bye']
+    >>> modder.modify(mod, dct)
+    >>> dct['Bye']
     'World'
-    >>> d['Hello']
+    >>> dct['Hello']
     'Universe'
     """
 
-    def __init__(self, actions=None, strict=True):
-        """
-        Initializes a Modder from a list of supported actions.
+    def __init__(self, actions=None, strict=True, directory="./"):
+        """Initialize a Modder from a list of supported actions.
 
         Args:
             actions ([Action]): A sequence of supported actions. See
@@ -48,10 +45,11 @@ class Modder:
         self.supported_actions = {}
         actions = actions if actions is not None else [DictActions]
         for action in actions:
-            for i in dir(action):
-                if (not re.match(r"__\w+__", i)) and callable(getattr(action, i)):
-                    self.supported_actions["_" + i] = getattr(action, i)
+            for attr in dir(action):
+                if (not re.match(r"__\w+__", attr)) and callable(getattr(action, attr)):
+                    self.supported_actions[f"_{attr}"] = getattr(action, attr)
         self.strict = strict
+        self.directory = directory
 
     def modify(self, modification, obj):
         """
@@ -68,9 +66,9 @@ class Modder:
         """
         for action, settings in modification.items():
             if action in self.supported_actions:
-                self.supported_actions[action].__call__(obj, settings)
+                self.supported_actions[action](obj, settings, directory=self.directory)
             elif self.strict:
-                raise ValueError("{} is not a supported action!".format(action))
+                raise ValueError(f"{action} is not a supported action!")
 
     def modify_object(self, modification, obj):
         """
@@ -81,9 +79,9 @@ class Modder:
                 settings}. E.g., {'_set': {'Hello':'Universe', 'Bye': 'World'}}
             obj (object): Object to modify
         """
-        d = obj.as_dict()
-        self.modify(modification, d)
-        return obj.from_dict(d)
+        dct = obj.as_dict()
+        self.modify(modification, dct)
+        return obj.from_dict(dct)
 
 
 if __name__ == "__main__":

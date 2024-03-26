@@ -1,8 +1,4 @@
-#!/usr/bin/env python
-
-"""
-This is a script to converge the geometry of a system
-"""
+"""This is a script to converge the geometry of a system."""
 
 import logging
 
@@ -10,11 +6,11 @@ from pymatgen.io.vasp.outputs import Vasprun
 
 from custodian.custodian import Custodian
 from custodian.vasp.handlers import (
-    VaspErrorHandler,
-    UnconvergedErrorHandler,
     MeshSymmetryErrorHandler,
     NonConvergingErrorHandler,
     PotimErrorHandler,
+    UnconvergedErrorHandler,
+    VaspErrorHandler,
 )
 from custodian.vasp.jobs import VaspJob
 
@@ -23,16 +19,13 @@ logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
 
 
 def get_runs(args):
-    """
-    Get the runs.
-    """
+    """Get the runs."""
     vasp_command = args.command.split()
     converged = False
     job_number = 0
 
     while (not converged) and (job_number < args.max_relax):
-
-        suffix = ".{}{}".format("relax", job_number + 1)
+        suffix = f".relax{job_number + 1}"
 
         if job_number == 0:
             backup = True
@@ -48,7 +41,6 @@ def get_runs(args):
                 converged = True
 
             if job_number < 2 and not converged:
-
                 settings = [
                     {"dict": "INCAR", "action": {"_set": {"ISTART": 1}}},
                     {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}},
@@ -73,9 +65,7 @@ def get_runs(args):
 
 
 def do_run(args):
-    """
-    Perform the run.
-    """
+    """Perform the run."""
     handlers = [
         VaspErrorHandler(),
         MeshSymmetryErrorHandler(),
@@ -109,7 +99,7 @@ if __name__ == "__main__":
         nargs="?",
         default="pvasp",
         type=str,
-        help="VASP command. Defaults to pvasp. If you are using mpirun, " 'set this to something like "mpirun pvasp".',
+        help="VASP command. Defaults to pvasp. If you are using mpirun, set this to something like 'mpirun pvasp'.",
     )
 
     parser.add_argument(

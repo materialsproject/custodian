@@ -1,0 +1,421 @@
+ vasp.6.2.1 16May21 (build Jul 28 2021 23:24:15) complex                        
+  
+ executed on      IFC19_CrayMPICH date 2022.01.12  22:01:04
+ running  256 mpi-ranks, with    1 threads/rank
+ distrk:  each k-point on   64 cores,    4 groups
+ distr:  one band on NCORE=   4 cores,   16 groups
+
+
+--------------------------------------------------------------------------------------------------------
+
+
+ INCAR:
+   ENCUT = 450.000000
+   SIGMA = 0.050000
+   EDIFF = 1.00e-05
+   ALGO = fast
+   GGA = RP
+   PREC = accurate
+   IDIPOL = 3
+   ISMEAR = -5
+   ISYM = 2
+   KPAR = 4
+   LMAXMIX = 4
+   LORBIT = 11
+   NELM = 120
+   NSW = 0
+   IVDW = 0
+   NCORE = 4
+   NEDOS = 5000
+   DIPOL = 0.5148 0.5415 0.5010
+   LAECHG = .TRUE.
+   LASPH = .TRUE.
+   LCHARG = .TRUE.
+   LDIPOL = .TRUE.
+   LVHAR = .TRUE.
+   LWAVE = .TRUE.
+
+ POTCAR:    PAW_PBE Ir 06Sep2000                  
+ POTCAR:    PAW_PBE Pd 04Jan2005                  
+ POTCAR:    PAW_PBE Y_sv 25May2007                
+ POTCAR:    PAW_PBE Ir 06Sep2000                  
+   VRHFIN =Ir: s1d8                                                                                 
+   LEXCH  = PE                                                                                      
+   EATOM  =   560.1833 eV,   41.1723 Ry                                                             
+                                                                                                    
+   TITEL  = PAW_PBE Ir 06Sep2000                                                                    
+   LULTRA =        F    use ultrasoft PP ?                                                          
+   IUNSCR =        1    unscreen: 0-lin 1-nonlin 2-no                                               
+   RPACOR =    2.250    partial core radius                                                         
+   POMASS =  192.220; ZVAL   =    9.000    mass and valenz                                          
+   RCORE  =    2.600    outmost cutoff radius                                                       
+   RWIGS  =    2.690; RWIGS  =    1.423    wigner-seitz radius (au A)                               
+   ENMAX  =  210.864; ENMIN  =  158.148 eV                                                          
+   RCLOC  =    1.857    cutoff for local pot                                                        
+   LCOR   =        T    correct aug charges                                                         
+   LPAW   =        T    paw PP                                                                      
+   EAUG   =  318.962                                                                                
+   DEXC   =    0.000                                                                                
+   RMAX   =    2.667    core radius for proj-oper                                                   
+   RAUG   =    1.300    factor for augmentation sphere                                              
+   RDEP   =    2.748    radius for radial grids                                                     
+   RDEPT  =    2.300    core radius for aug-charge                                                  
+                                                                                                    
+   Atomic configuration                                                                             
+   16 entries                                                                                       
+     n  l   j            E        occ.                                                              
+     1  0  0.50    -76100.0449   2.0000                                                             
+     2  0  0.50    -13308.1683   2.0000                                                             
+     2  1  1.50    -11558.0021   6.0000                                                             
+     3  0  0.50     -3110.7274   2.0000                                                             
+     3  1  1.50     -2599.2109   6.0000                                                             
+     3  2  2.50     -2037.1515  10.0000                                                             
+     4  0  0.50      -661.6001   2.0000                                                             
+     4  1  1.50      -493.8981   6.0000                                                             
+     4  2  2.50      -288.1909  10.0000                                                             
+     4  3  3.50       -59.5718  14.0000                                                             
+     5  0  0.50       -95.3879   2.0000                                                             
+     5  1  1.50       -52.2747   6.0000                                                             
+     5  2  2.50        -5.4180   8.0000                                                             
+     6  0  0.50        -5.5479   1.0000                                                             
+     6  1  1.50        -6.8029   0.0000                                                             
+     5  3  2.50        -1.3606   0.0000                                                             
+   Description                                                                                      
+     l       E           TYP  RCUT    TYP  RCUT                                                     
+     2     -5.4179967     23  2.600                                                                 
+     2     -6.7785793     23  2.600                                                                 
+     0     -5.5478636     23  2.600                                                                 
+     0      2.2542272     23  2.600                                                                 
+     1     -2.7211652     23  2.600                                                                 
+     1     20.4087390     23  2.600                                                                 
+  local pseudopotential read in
+  partial core-charges read in
+  partial kinetic energy density read in
+  atomic valenz-charges read in
+  non local Contribution for L=           2  read in
+    real space projection operators read in
+  non local Contribution for L=           2  read in
+    real space projection operators read in
+  non local Contribution for L=           0  read in
+    real space projection operators read in
+  non local Contribution for L=           0  read in
+    real space projection operators read in
+  non local Contribution for L=           1  read in
+    real space projection operators read in
+  non local Contribution for L=           1  read in
+    real space projection operators read in
+    PAW grid and wavefunctions read in
+ 
+   number of l-projection  operators is LMAX  =           6
+   number of lm-projection operators is LMMAX =          18
+ 
+ POTCAR:    PAW_PBE Pd 04Jan2005                  
+   VRHFIN =Pd : s1 d9                                                                               
+   LEXCH  = PE                                                                                      
+   EATOM  =   809.7530 eV,   59.5152 Ry                                                             
+                                                                                                    
+   TITEL  = PAW_PBE Pd 04Jan2005                                                                    
+   LULTRA =        F    use ultrasoft PP ?                                                          
+   IUNSCR =        1    unscreen: 0-lin 1-nonlin 2-no                                               
+   RPACOR =    2.000    partial core radius                                                         
+   POMASS =  106.420; ZVAL   =   10.000    mass and valenz                                          
+   RCORE  =    2.600    outmost cutoff radius                                                       
+   RWIGS  =    2.710; RWIGS  =    1.434    wigner-seitz radius (au A)                               
+   ENMAX  =  250.925; ENMIN  =  188.194 eV                                                          
+   ICORE  =        3    local potential                                                             
+   LCOR   =        T    correct aug charges                                                         
+   LPAW   =        T    paw PP                                                                      
+   EAUG   =  416.230                                                                                
+   DEXC   =    0.000                                                                                
+   RMAX   =    2.653    core radius for proj-oper                                                   
+   RAUG   =    1.300    factor for augmentation sphere                                              
+   RDEP   =    2.734    radius for radial grids                                                     
+   RDEPT  =    2.103    core radius for aug-charge                                                  
+                                                                                                    
+   Atomic configuration                                                                             
+   12 entries                                                                                       
+     n  l   j            E        occ.                                                              
+     1  0  0.50    -24164.6631   2.0000                                                             
+     2  0  0.50     -3530.9218   2.0000                                                             
+     2  1  1.50     -3165.6822   6.0000                                                             
+     3  0  0.50      -639.4577   2.0000                                                             
+     3  1  1.50      -519.4532   6.0000                                                             
+     3  2  2.50      -328.9757  10.0000                                                             
+     4  0  0.50       -88.7014   2.0000                                                             
+     4  1  1.50       -54.4540   6.0000                                                             
+     4  2  2.50        -6.6878   9.0000                                                             
+     5  0  0.50        -4.3543   1.0000                                                             
+     5  1  0.50        -1.3606   0.0000                                                             
+     4  3  2.50        -1.3606   0.0000                                                             
+   Description                                                                                      
+     l       E           TYP  RCUT    TYP  RCUT                                                     
+     2     -6.6878251     23  2.400                                                                 
+     2     -8.0484077     23  2.400                                                                 
+     0     -4.3542939     23  2.400                                                                 
+     0      4.3406793     23  2.400                                                                 
+     1     -4.0817478     23  2.600                                                                 
+     1     15.8380318     23  2.600                                                                 
+     3     -4.0817478     23  2.400                                                                 
+  local pseudopotential read in
+  partial core-charges read in
+  partial kinetic energy density read in
+  atomic valenz-charges read in
+  non local Contribution for L=           2  read in
+    real space projection operators read in
+  non local Contribution for L=           2  read in
+    real space projection operators read in
+  non local Contribution for L=           0  read in
+    real space projection operators read in
+  non local Contribution for L=           0  read in
+    real space projection operators read in
+  non local Contribution for L=           1  read in
+    real space projection operators read in
+  non local Contribution for L=           1  read in
+    real space projection operators read in
+    PAW grid and wavefunctions read in
+ 
+   number of l-projection  operators is LMAX  =           6
+   number of lm-projection operators is LMMAX =          18
+ 
+ POTCAR:    PAW_PBE Y_sv 25May2007                
+   VRHFIN =Y: 4s4p5s4d                                                                              
+   LEXCH  = PE                                                                                      
+   EATOM  =  1046.9140 eV,   76.9460 Ry                                                             
+                                                                                                    
+   TITEL  = PAW_PBE Y_sv 25May2007                                                                  
+   LULTRA =        F    use ultrasoft PP ?                                                          
+   IUNSCR =        1    unscreen: 0-lin 1-nonlin 2-no                                               
+   RPACOR =    2.200    partial core radius                                                         
+   POMASS =   88.906; ZVAL   =   11.000    mass and valenz                                          
+   RCORE  =    2.800    outmost cutoff radius                                                       
+   RWIGS  =    3.430; RWIGS  =    1.815    wigner-seitz radius (au A)                               
+   ENMAX  =  202.626; ENMIN  =  151.970 eV                                                          
+   RCLOC  =    2.212    cutoff for local pot                                                        
+   LCOR   =        T    correct aug charges                                                         
+   LPAW   =        T    paw PP                                                                      
+   EAUG   =  470.889                                                                                
+   DEXC   =    0.000                                                                                
+   RMAX   =    2.863    core radius for proj-oper                                                   
+   RAUG   =    1.300    factor for augmentation sphere                                              
+   RDEP   =    2.926    radius for radial grids                                                     
+   RDEPT  =    2.280    core radius for aug-charge                                                  
+                                                                                                    
+   Atomic configuration                                                                             
+   11 entries                                                                                       
+     n  l   j            E        occ.                                                              
+     1  0  0.50    -16863.0720   2.0000                                                             
+     2  0  0.50     -2309.2881   2.0000                                                             
+     2  1  1.50     -2055.5536   6.0000                                                             
+     3  0  0.50      -367.1837   2.0000                                                             
+     3  1  1.50      -284.8912   6.0000                                                             
+     3  2  2.50      -149.4324  10.0000                                                             
+     4  0  0.50       -46.3345   2.0000                                                             
+     5  0  0.50        -3.6387   1.0000                                                             
+     4  1  1.50       -26.3769   6.0000                                                             
+     4  2  2.50        -1.6291   2.0000                                                             
+     4  3  2.50        -1.3606   0.0000                                                             
+   Description                                                                                      
+     l       E           TYP  RCUT    TYP  RCUT                                                     
+     0    -46.3344714     23  2.600                                                                 
+     0     -3.6387002     23  2.700                                                                 
+     1    -26.3769044     23  2.600                                                                 
+     1    -27.7374870     23  2.600                                                                 
+     2     -1.6291019     23  2.600                                                                 
+     2      0.1354037     23  2.600                                                                 
+     3     -1.3605826     23  2.800                                                                 
+  local pseudopotential read in
+  partial core-charges read in
+  partial kinetic energy density read in
+  atomic valenz-charges read in
+  non local Contribution for L=           0  read in
+    real space projection operators read in
+  non local Contribution for L=           0  read in
+    real space projection operators read in
+  non local Contribution for L=           1  read in
+    real space projection operators read in
+  non local Contribution for L=           1  read in
+    real space projection operators read in
+  non local Contribution for L=           2  read in
+    real space projection operators read in
+  non local Contribution for L=           2  read in
+    real space projection operators read in
+  non local Contribution for L=           3  read in
+    real space projection operators read in
+    PAW grid and wavefunctions read in
+ 
+   number of l-projection  operators is LMAX  =           7
+   number of lm-projection operators is LMMAX =          25
+ 
+ -----------------------------------------------------------------------------
+|                                                                             |
+|               ----> ADVICE to this user running VASP <----                  |
+|                                                                             |
+|     You have a (more or less) 'large supercell' and for larger cells it     |
+|     might be more efficient to use real-space projection operators.         |
+|     Therefore, try LREAL= Auto in the INCAR file.                           |
+|     Mind: For very accurate calculation, you might also keep the            |
+|     reciprocal projection scheme (i.e. LREAL=.FALSE.).                      |
+|                                                                             |
+ -----------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+|                                                                             |
+|               ----> ADVICE to this user running VASP <----                  |
+|                                                                             |
+|     You enforced a specific xc type in the INCAR file but a different       |
+|     type was found in the POTCAR file.                                      |
+|     I HOPE YOU KNOW WHAT YOU ARE DOING!                                     |
+|                                                                             |
+ -----------------------------------------------------------------------------
+
+  PAW_PBE Ir 06Sep2000                  :
+ energy of atom  1       EATOM= -560.1833
+ kinetic energy error for atom=    0.0034 (will be added to EATOM!!)
+  PAW_PBE Pd 04Jan2005                  :
+ energy of atom  2       EATOM= -809.7530
+ kinetic energy error for atom=    0.0051 (will be added to EATOM!!)
+  PAW_PBE Y_sv 25May2007                :
+ energy of atom  3       EATOM=-1046.9140
+ kinetic energy error for atom=    0.0015 (will be added to EATOM!!)
+ 
+ 
+ POSCAR: Ir Pd  Y
+  positions in cartesian coordinates
+  No initial velocities read in
+ exchange correlation table for  LEXCH =        9
+   RHO(1)=    0.500       N(1)  =     2000
+   RHO(2)=  100.500       N(2)  =     4000
+ 
+
+
+--------------------------------------------------------------------------------------------------------
+
+
+ ion  position               nearest neighbor table
+   1  0.477  0.102  0.637-  33 2.91  32 2.99  31 2.99  29 2.99  28 3.04  26 3.04  25 3.04
+   2  0.477  0.602  0.637-  34 2.91  31 2.99  32 2.99  30 2.99  27 3.04  25 3.04  26 3.04
+   3  0.977  0.102  0.637-  35 2.91  30 2.99  29 2.99  31 2.99  26 3.04  28 3.04  27 3.04
+   4  0.977  0.602  0.637-  36 2.91  29 2.99  30 2.99  32 2.99  25 3.04  27 3.04  28 3.04
+   5  0.164  0.289  0.516-  39 3.03  33 3.03  36 3.03  38 3.03  35 3.03  37 3.03  29 3.03  41 3.03
+
+   6  0.164  0.789  0.516-  40 3.03  34 3.03  35 3.03  37 3.03  36 3.03  38 3.03  30 3.03  42 3.03
+
+   7  0.664  0.289  0.516-  37 3.03  35 3.03  34 3.03  40 3.03  33 3.03  39 3.03  31 3.03  43 3.03
+
+   8  0.664  0.789  0.516-  38 3.03  36 3.03  33 3.03  39 3.03  34 3.03  40 3.03  32 3.03  44 3.03
+
+   9  0.352  0.477  0.391-  46 3.03  43 3.03  42 3.03  47 3.03  41 3.03  48 3.03  37 3.03
+  10  0.352  0.977  0.391-  45 3.03  44 3.03  41 3.03  48 3.03  42 3.03  47 3.03  38 3.03
+  11  0.852  0.477  0.391-  48 3.03  41 3.03  44 3.03  45 3.03  43 3.03  46 3.03  39 3.03
+  12  0.852  0.977  0.391-  47 3.03  42 3.03  43 3.03  46 3.03  44 3.03  45 3.03  40 3.03
+  13  0.320  0.445  0.578-  25 2.95  29 3.03  36 3.03  30 3.03  31 3.03  34 3.03  33 3.03  37 3.03
+
+  14  0.320  0.945  0.578-  26 2.95  30 3.03  35 3.03  29 3.03  32 3.03  33 3.03  34 3.03  38 3.03
+
+  15  0.820  0.445  0.578-  27 2.95  31 3.03  34 3.03  32 3.03  29 3.03  36 3.03  35 3.03  39 3.03
+
+  16  0.820  0.945  0.578-  28 2.95  32 3.03  33 3.03  31 3.03  30 3.03  35 3.03  36 3.03  40 3.03
+
+  17  0.008  0.133  0.453-  40 3.03  43 3.03  39 3.03  38 3.03  41 3.03  42 3.03  35 3.03  45 3.03
+
+  18  0.008  0.633  0.453-  39 3.03  44 3.03  40 3.03  37 3.03  42 3.03  41 3.03  36 3.03  46 3.03
+
+  19  0.508  0.133  0.453-  38 3.03  41 3.03  37 3.03  40 3.03  43 3.03  44 3.03  33 3.03  47 3.03
+
+  20  0.508  0.633  0.453-  37 3.03  42 3.03  38 3.03  39 3.03  44 3.03  43 3.03  34 3.03  48 3.03
+
+  21  0.195  0.320  0.328-  45 3.03  46 3.03  47 3.03  41 3.03
+  22  0.195  0.820  0.328-  46 3.03  45 3.03  48 3.03  42 3.03
+  23  0.695  0.320  0.328-  47 3.03  48 3.03  45 3.03  43 3.03
+  24  0.695  0.820  0.328-  48 3.03  47 3.03  46 3.03  44 3.03
+  25  0.305  0.430  0.669-  13 2.95   4 3.04   2 3.04   1 3.04  30 3.45  29 3.45  31 3.45
+  26  0.305  0.930  0.669-  14 2.95   3 3.04   1 3.04   2 3.04  29 3.45  32 3.45  30 3.45
+  27  0.805  0.430  0.669-  15 2.95   2 3.04   4 3.04   3 3.04  32 3.45  29 3.45  31 3.45
+  28  0.805  0.930  0.669-  16 2.95   1 3.04   3 3.04   4 3.04  31 3.45  32 3.45  30 3.45
+  29  0.148  0.273  0.609-   4 2.99   3 2.99   1 2.99  13 3.03  14 3.03  15 3.03   5 3.03  26 3.45
+                            27 3.45  25 3.45  33 3.50  36 3.50  35 3.50
+  30  0.148  0.773  0.609-   3 2.99   4 2.99   2 2.99  14 3.03  13 3.03  16 3.03   6 3.03  26 3.45
+                            25 3.45  28 3.45  34 3.50  35 3.50  36 3.50
+  31  0.648  0.273  0.609-   2 2.99   1 2.99   3 2.99  15 3.03  16 3.03  13 3.03   7 3.03  27 3.45
+                            28 3.45  25 3.45  35 3.50  34 3.50  33 3.50
+  32  0.648  0.773  0.609-   1 2.99   2 2.99   4 2.99  16 3.03  15 3.03  14 3.03   8 3.03  27 3.45
+                            26 3.45  28 3.45  36 3.50  33 3.50  34 3.50
+  33  0.492  0.117  0.547-   1 2.91   5 3.03  16 3.03   8 3.03  14 3.03   7 3.03  13 3.03  19 3.03
+                            29 3.50  40 3.50  32 3.50  37 3.50  38 3.50  31 3.50
+  34  0.492  0.617  0.547-   2 2.91   6 3.03  15 3.03   7 3.03  13 3.03   8 3.03  14 3.03  20 3.03
+                            30 3.50  39 3.50  31 3.50  38 3.50  37 3.50  32 3.50
+  35  0.992  0.117  0.547-   3 2.91   7 3.03  14 3.03   6 3.03  16 3.03   5 3.03  15 3.03  17 3.03
+                            31 3.50  38 3.50  30 3.50  39 3.50  40 3.50  29 3.50
+  36  0.992  0.617  0.547-   4 2.91   8 3.03  13 3.03   5 3.03  15 3.03   6 3.03  16 3.03  18 3.03
+                            32 3.50  37 3.50  29 3.50  40 3.50  39 3.50  30 3.50
+  37  0.336  0.461  0.484-   7 3.03  20 3.03  19 3.03  18 3.03   6 3.03   5 3.03   9 3.03  13 3.03
+                            43 3.50  36 3.50  42 3.50  33 3.50  34 3.50  41 3.50
+  38  0.336  0.961  0.484-   8 3.03  19 3.03  20 3.03  17 3.03   5 3.03   6 3.03  10 3.03  14 3.03
+                            44 3.50  35 3.50  41 3.50  34 3.50  33 3.50  42 3.50
+  39  0.836  0.461  0.484-   5 3.03  18 3.03  17 3.03  20 3.03   8 3.03   7 3.03  11 3.03  15 3.03
+                            41 3.50  34 3.50  44 3.50  35 3.50  36 3.50  43 3.50
+  40  0.836  0.961  0.484-   6 3.03  17 3.03  18 3.03  19 3.03   7 3.03   8 3.03  12 3.03  16 3.03
+                            42 3.50  33 3.50  43 3.50  36 3.50  35 3.50  44 3.50
+  41  0.180  0.305  0.422-  11 3.03  19 3.03  10 3.03  17 3.03   9 3.03  18 3.03  21 3.03   5 3.03
+                            39 3.50  47 3.50  38 3.50  46 3.50  45 3.50  37 3.50
+  42  0.180  0.805  0.422-  12 3.03  20 3.03   9 3.03  18 3.03  10 3.03  17 3.03  22 3.03   6 3.03
+                            40 3.50  48 3.50  37 3.50  45 3.50  46 3.50  38 3.50
+  43  0.680  0.305  0.422-   9 3.03  17 3.03  12 3.03  19 3.03  11 3.03  20 3.03  23 3.03   7 3.03
+                            37 3.50  45 3.50  40 3.50  48 3.50  47 3.50  39 3.50
+  44  0.680  0.805  0.422-  10 3.03  18 3.03  11 3.03  20 3.03  12 3.03  19 3.03  24 3.03   8 3.03
+                            38 3.50  46 3.50  39 3.50  47 3.50  48 3.50  40 3.50
+  45  0.023  0.148  0.359-  10 3.03  21 3.03  22 3.03  23 3.03  11 3.03  12 3.03  17 3.03  43 3.50
+                            42 3.50  41 3.50
+  46  0.023  0.648  0.359-   9 3.03  22 3.03  21 3.03  24 3.03  12 3.03  11 3.03  18 3.03  44 3.50
+                            41 3.50  42 3.50
+  47  0.523  0.148  0.359-  12 3.03  23 3.03  24 3.03  21 3.03   9 3.03  10 3.03  19 3.03  41 3.50
+                            44 3.50  43 3.50
+  48  0.523  0.648  0.359-  11 3.03  24 3.03  23 3.03  22 3.03  10 3.03   9 3.03  20 3.03  42 3.50
+                            43 3.50  44 3.50
+ 
+  LATTYP: Found a base centered monoclinic cell.
+ ALAT       =    17.1273450202
+ B/A-ratio  =     0.5773501531
+ C/A-ratio  =     1.8929694800
+ COS(beta)  =    -0.0880453468
+  
+  Lattice vectors:
+  
+ A1 = (  -9.8596889939,   0.0000000000,  -0.7539915383)
+ A2 = (  -4.9010164412,  -8.5553205475,  -0.7539914944)
+ A3 = (   0.0000000000,   0.0000000000,  32.4215413959)
+
+
+Analysis of symmetry for initial positions (statically):
+=====================================================================
+ Subroutine PRICEL returns following result:
+ 
+  LATTYP: Found a trigonal (rhomboedric) cell.
+ ALAT       =    32.4215282907
+ COS(alpha) =     0.9883720920
+  
+  Lattice vectors:
+  
+ A1 = (  -2.4505075160,  -4.2776590437,  32.0445337417)
+ A2 = (   0.0000000000,   0.0000000000,  32.4215413959)
+ A3 = (  -4.9298057534,   0.0000000000,  32.0445362733)
+ 
+   4 primitive cells build up your supercell.
+ 
+ -----------------------------------------------------------------------------
+|                                                                             |
+|     EEEEEEE  RRRRRR   RRRRRR   OOOOOOO  RRRRRR      ###     ###     ###     |
+|     E        R     R  R     R  O     O  R     R     ###     ###     ###     |
+|     E        R     R  R     R  O     O  R     R     ###     ###     ###     |
+|     EEEEE    RRRRRR   RRRRRR   O     O  RRRRRR       #       #       #      |
+|     E        R   R    R   R    O     O  R   R                               |
+|     E        R    R   R    R   O     O  R    R      ###     ###     ###     |
+|     EEEEEEE  R     R  R     R  OOOOOOO  R     R     ###     ###     ###     |
+|                                                                             |
+|     HNFORM: k-point generating vectors and reciprocal lattice are           |
+|     incommensurate.                                                         |
+|                                                                             |
+|       ---->  I REFUSE TO CONTINUE WITH THIS SICK JOB ... BYE!!! <----       |
+|                                                                             |
+ -----------------------------------------------------------------------------
+

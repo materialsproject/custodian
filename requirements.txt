@@ -1,4 +1,0 @@
-matplotlib
-monty==2021.3.3
-ruamel.yaml==0.16.12
-sentry-sdk==0.19.5

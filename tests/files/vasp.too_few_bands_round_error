@@ -1,0 +1,153 @@
+ running on   28 total cores
+ distrk:  each k-point on   28 cores,    1 groups
+ distr:  one band on    4 cores,    7 groups
+ using from now: INCAR     
+ vasp.5.4.4.18Apr17-6-g9f103f2a35 (build Mar 02 2020 17:06:24) complex          
+  
+ POSCAR found type information on POSCAR  Al
+ POSCAR found :  1 types and       2 ions
+ scaLAPACK will be used
+ LDA part: xc-table for Pade appr. of Perdew
+ POSCAR, INCAR and KPOINTS ok, starting setup
+ FFT: planning ...
+ WAVECAR not read
+ WARNING: random wavefunctions but no delay for mixing, default for NELMDL
+ entering main loop
+       N       E                     dE             d eps       ncg     rms          rms(c)
+DAV:   1     0.103374660419E+01    0.10337E+01   -0.25529E+03  3080   0.837E+02
+DAV:   2    -0.687335767327E+01   -0.79071E+01   -0.74952E+01  3878   0.536E+01
+DAV:   3    -0.699757385841E+01   -0.12422E+00   -0.11255E+00  4319   0.734E+00
+DAV:   4    -0.699832365759E+01   -0.74980E-03   -0.74877E-03  4424   0.494E-01
+DAV:   5    -0.699835777898E+01   -0.34121E-04   -0.31566E-04  4326   0.230E-02    0.127E+00
+DAV:   6    -0.697539094892E+01    0.22967E-01   -0.56702E-03  3885   0.555E-01    0.740E-01
+DAV:   7    -0.695973894352E+01    0.15652E-01   -0.15978E-02  3612   0.886E-01    0.153E-01
+DAV:   8    -0.695970837978E+01    0.30564E-04   -0.72191E-05  4256   0.855E-02    0.159E-02
+DAV:   9    -0.695970752281E+01    0.85697E-06   -0.26020E-06  4403   0.988E-03    0.168E-03
+DAV:  10    -0.695970630938E+01    0.12134E-05   -0.30400E-08  4578   0.152E-03    0.576E-04
+DAV:  11    -0.695970603247E+01    0.27691E-06   -0.22841E-09  2877   0.409E-04    0.599E-05
+DAV:  12    -0.695970606403E+01   -0.31562E-07   -0.19215E-10  2282   0.106E-04    0.401E-05
+DAV:  13    -0.695970606582E+01   -0.17887E-08   -0.27239E-11  1995   0.437E-05
+
+ ----------------------------------------------------------------------------- 
+|                                                                             |
+|           W    W    AA    RRRRR   N    N  II  N    N   GGGG   !!!           |
+|           W    W   A  A   R    R  NN   N  II  NN   N  G    G  !!!           |
+|           W    W  A    A  R    R  N N  N  II  N N  N  G       !!!           |
+|           W WW W  AAAAAA  RRRRR   N  N N  II  N  N N  G  GGG   !            |
+|           WW  WW  A    A  R   R   N   NN  II  N   NN  G    G                |
+|           W    W  A    A  R    R  N    N  II  N    N   GGGG   !!!           |
+|                                                                             |
+|      Your highest band is occupied at some k-points! Unless you are         |
+|      performing a calculation for an insulator or semiconductor, without    |
+|      unoccupied bands, you have included TOO FEW BANDS!! Please increase    |
+|      the parameter NBANDS in file INCAR to ensure that the highest band     |
+|      is unoccupied at all k-points. It is always recommended to             |
+|      include a few unoccupied bands to accelerate the convergence of        |
+|      molecular dynamics runs (even for insulators or semiconductors).       |
+|      Because the presence of unoccupied bands improves wavefunction         |
+|      prediction, and helps to suppress 'band-crossings.'                    |
+|                                                                             |
+ ----------------------------------------------------------------------------- 
+
+   1 F= -.69597061E+01 E0= -.69434310E+01  d E =-.695971E+01
+ curvature:   0.00 expect dE= 0.000E+00 dE for cont linesearch  0.000E+00
+ trial: gam= 0.00000 g(F)=  0.398E-65 g(S)=  0.487E+00 ort = 0.000E+00 (trialstep = 0.100E+01)
+ search vector abs. value=  0.487E+00
+ bond charge predicted
+       N       E                     dE             d eps       ncg     rms          rms(c)
+DAV:   1    -0.733800793405E+01   -0.37830E+00   -0.49071E+00  3850   0.138E+01    0.173E+00
+DAV:   2    -0.731436222134E+01    0.23646E-01   -0.32942E-02  3395   0.151E+00    0.686E-01
+DAV:   3    -0.729840527165E+01    0.15957E-01   -0.59595E-03  3570   0.508E-01    0.265E-01
+DAV:   4    -0.729650003941E+01    0.19052E-02   -0.11255E-03  3787   0.208E-01    0.136E-01
+DAV:   5    -0.729650058880E+01   -0.54939E-06   -0.92422E-06  3717   0.330E-02    0.802E-03
+DAV:   6    -0.729672092032E+01   -0.22033E-03   -0.10944E-04  3976   0.242E-03    0.237E-03
+DAV:   7    -0.729699695229E+01   -0.27603E-03   -0.15755E-03  3696   0.405E-03    0.294E-04
+DAV:   8    -0.729699809451E+01   -0.11422E-05   -0.13369E-05  2009   0.882E-04    0.159E-04
+DAV:   9    -0.729699811081E+01   -0.16306E-07   -0.10550E-07  1911   0.224E-04    0.323E-05
+DAV:  10    -0.729699810521E+01    0.56062E-08   -0.32902E-09  1918   0.755E-05
+
+ ----------------------------------------------------------------------------- 
+|                                                                             |
+|           W    W    AA    RRRRR   N    N  II  N    N   GGGG   !!!           |
+|           W    W   A  A   R    R  NN   N  II  NN   N  G    G  !!!           |
+|           W    W  A    A  R    R  N N  N  II  N N  N  G       !!!           |
+|           W WW W  AAAAAA  RRRRR   N  N N  II  N  N N  G  GGG   !            |
+|           WW  WW  A    A  R   R   N   NN  II  N   NN  G    G                |
+|           W    W  A    A  R    R  N    N  II  N    N   GGGG   !!!           |
+|                                                                             |
+|      Your highest band is occupied at some k-points! Unless you are         |
+|      performing a calculation for an insulator or semiconductor, without    |
+|      unoccupied bands, you have included TOO FEW BANDS!! Please increase    |
+|      the parameter NBANDS in file INCAR to ensure that the highest band     |
+|      is unoccupied at all k-points. It is always recommended to             |
+|      include a few unoccupied bands to accelerate the convergence of        |
+|      molecular dynamics runs (even for insulators or semiconductors).       |
+|      Because the presence of unoccupied bands improves wavefunction         |
+|      prediction, and helps to suppress 'band-crossings.'                    |
+|                                                                             |
+ ----------------------------------------------------------------------------- 
+
+   2 F= -.72969981E+01 E0= -.72829538E+01  d E =-.337292E+00
+ trial-energy change:   -0.337292  1 .order   -0.309236   -0.486807   -0.131665
+ step:   1.2339(harm=  1.3707)  dis= 0.00000  next Energy=    -7.312757 (dE=-0.353E+00)
+ bond charge predicted
+       N       E                     dE             d eps       ncg     rms          rms(c)
+DAV:   1    -0.731725944810E+01   -0.20261E-01   -0.24510E-01  3955   0.311E+00    0.399E-01
+DAV:   2    -0.731612364397E+01    0.11358E-02   -0.16480E-03  3360   0.332E-01    0.156E-01
+DAV:   3    -0.731537447118E+01    0.74917E-03   -0.25307E-04  3570   0.108E-01    0.553E-02
+DAV:   4    -0.731529296357E+01    0.81508E-04   -0.42197E-05  3696   0.413E-02    0.299E-02
+DAV:   5    -0.731529377264E+01   -0.80907E-06   -0.37626E-07  3850   0.645E-03    0.128E-03
+DAV:   6    -0.731529380484E+01   -0.32199E-07   -0.19812E-09  2541   0.448E-04    0.572E-04
+DAV:   7    -0.731529376299E+01    0.41847E-07   -0.20692E-10  1715   0.134E-04    0.179E-05
+DAV:   8    -0.731529376009E+01    0.29043E-08   -0.51451E-11  1673   0.460E-05
+
+ ----------------------------------------------------------------------------- 
+|                                                                             |
+|  ADVICE TO THIS USER RUNNING 'VASP/VAMP'   (HEAR YOUR MASTER'S VOICE ...):  |
+|                                                                             |
+|      Your highest band is occupied at some k-points! Unless you are         |
+|      performing a calculation for an insulator or semiconductor, without    |
+|      unoccupied bands, you have included TOO FEW BANDS!! Please increase    |
+|      the parameter NBANDS in file INCAR to ensure that the highest band     |
+|      is unoccupied at all k-points. It is always recommended to             |
+|      include a few unoccupied bands to accelerate the convergence of        |
+|      molecular dynamics runs (even for insulators or semiconductors).       |
+|      Because the presence of unoccupied bands improves wavefunction         |
+|      prediction, and helps to suppress 'band-crossings.'                    |
+|                                                                             |
+ ----------------------------------------------------------------------------- 
+
+   3 F= -.73152938E+01 E0= -.73017512E+01  d E =-.355588E+00
+ curvature:  -0.59 expect dE=-0.154E-03 dE for cont linesearch -0.154E-03
+ ZBRENT: extrapolating
+ opt :   1.2558  next Energy=    -7.315417 (dE=-0.356E+00)
+ bond charge predicted
+       N       E                     dE             d eps       ncg     rms          rms(c)
+DAV:   1    -0.731543415955E+01   -0.14040E-03   -0.20925E-03  3962   0.286E-01    0.370E-02
+DAV:   2    -0.731542512205E+01    0.90375E-05   -0.14039E-05  3367   0.306E-02    0.145E-02
+DAV:   3    -0.731541947001E+01    0.56520E-05   -0.21153E-06  3549   0.991E-03    0.497E-03
+DAV:   4    -0.731541916414E+01    0.30587E-06   -0.32949E-07  3703   0.367E-03    0.274E-03
+DAV:   5    -0.731541924530E+01   -0.81160E-07   -0.26987E-09  2051   0.570E-04    0.525E-05
+DAV:   6    -0.731541924674E+01   -0.14486E-08   -0.29932E-10  1603   0.166E-04
+
+ ----------------------------------------------------------------------------- 
+|                                                                             |
+|  ADVICE TO THIS USER RUNNING 'VASP/VAMP'   (HEAR YOUR MASTER'S VOICE ...):  |
+|                                                                             |
+|      Your highest band is occupied at some k-points! Unless you are         |
+|      performing a calculation for an insulator or semiconductor, without    |
+|      unoccupied bands, you have included TOO FEW BANDS!! Please increase    |
+|      the parameter NBANDS in file INCAR to ensure that the highest band     |
+|      is unoccupied at all k-points. It is always recommended to             |
+|      include a few unoccupied bands to accelerate the convergence of        |
+|      molecular dynamics runs (even for insulators or semiconductors).       |
+|      Because the presence of unoccupied bands improves wavefunction         |
+|      prediction, and helps to suppress 'band-crossings.'                    |
+|                                                                             |
+ ----------------------------------------------------------------------------- 
+
+   4 F= -.73154192E+01 E0= -.73019163E+01  d E =-.355713E+00
+ curvature:  -0.47 expect dE=-0.703E-06 dE for cont linesearch -0.703E-06
+ trial: gam= 0.00000 g(F)=  0.163E-65 g(S)=  0.149E-05 ort =-0.851E-03 (trialstep = 0.105E+01)
+ search vector abs. value=  0.149E-05
+ reached required accuracy - stopping structural energy minimisation

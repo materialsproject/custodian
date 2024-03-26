@@ -1,8 +1,4 @@
-#!/usr/bin/env python
-
-"""
-Basic script to run nwchem job.
-"""
+"""Basic script to run nwchem job."""
 
 import logging
 
@@ -12,9 +8,7 @@ from custodian.nwchem.jobs import NwchemJob
 
 
 def do_run(args):
-    """
-    Do the run.
-    """
+    """Do the run."""
     logging.basicConfig(format="%(asctime)s %(message)s", level=logging.INFO, filename="run.log")
     job = NwchemJob(
         nwchem_cmd=args.command.split(),
@@ -33,9 +27,7 @@ def do_run(args):
 
 
 def main():
-    """
-    Main method
-    """
+    """Main method."""
     import argparse
 
     parser = argparse.ArgumentParser(
