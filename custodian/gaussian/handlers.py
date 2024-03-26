@@ -2,25 +2,22 @@
 This module implements error handlers for Gaussian runs.
 """
 
+import datetime
+import glob
+import logging
+import math
 import os
 import re
-import math
-import glob
 import shutil
-import logging
-import datetime
 
-import numpy as np
 import matplotlib.pyplot as plt
-
+import numpy as np
 from matplotlib.ticker import MaxNLocator
-
 from monty.io import zopen
-
 from pymatgen.io.gaussian import GaussianInput, GaussianOutput
 
-from custodian.utils import backup
 from custodian.custodian import ErrorHandler
+from custodian.utils import backup
 
 __author__ = "Rasha Atwi"
 __version__ = "0.1"
@@ -46,41 +43,37 @@ class GaussianErrorHandler(ErrorHandler):
     Master GaussianErrorHandler class that handles a number of common errors that occur
     during Gaussian runs.
     """
+
     # definition of job errors as they appear in Gaussian output file
-    error_defs = {'Optimization stopped': 'opt_steps',
-                  'Convergence failure': 'scf_convergence',
-                  'FormBX had a problem': 'linear_bend',
-                  'Linear angle in Tors.': 'linear_bend',
-                  'Inv3 failed in PCMMkU': 'solute_solvent_surface',
-                  'Error in internal coordinate system': 'internal_coords',
-                  'End of file in ZSymb': 'zmatrix',
-                  'There are no atoms in this input structure !': 'missing_mol',
-                  'Atom specifications unexpectedly found in input stream.': 'found_coords',
-                  'End of file reading connectivity.': 'coords',
-                  'FileIO operation on non-existent file.': 'missing_file',
-                  'No data on chk file.': 'empty_file',
-                  'Bad file opened by FileIO': 'bad_file',
-                  'Z-matrix optimization but no Z-matrix variables.': 'coord_inputs',
-                  'A syntax error was detected in the input line.': 'syntax',
-                  'The combination of multiplicity ([0-9]+) and \s+? ([0-9]+) '
-                  'electrons is impossible.': 'charge',
-                  'Out-of-memory error in routine': 'insufficient_mem'}
+    error_defs = {
+        "Optimization stopped": "opt_steps",
+        "Convergence failure": "scf_convergence",
+        "FormBX had a problem": "linear_bend",
+        "Linear angle in Tors.": "linear_bend",
+        "Inv3 failed in PCMMkU": "solute_solvent_surface",
+        "Error in internal coordinate system": "internal_coords",
+        "End of file in ZSymb": "zmatrix",
+        "There are no atoms in this input structure !": "missing_mol",
+        "Atom specifications unexpectedly found in input stream.": "found_coords",
+        "End of file reading connectivity.": "coords",
+        "FileIO operation on non-existent file.": "missing_file",
+        "No data on chk file.": "empty_file",
+        "Bad file opened by FileIO": "bad_file",
+        "Z-matrix optimization but no Z-matrix variables.": "coord_inputs",
+        "A syntax error was detected in the input line.": "syntax",
+        r"The combination of multiplicity ([0-9]+) and \s+? ([0-9]+) electrons is impossible.": "charge",
+        "Out-of-memory error in routine": "insufficient_mem",
+    }
 
     error_patt = re.compile("|".join(list(error_defs)))
     recom_mem_patt = re.compile(
-        r"Use %mem=([0-9]+)MW to provide the minimum "
-        r"amount of memory required to complete this "
-        r"step."
+        r"Use %mem=([0-9]+)MW to provide the minimum " r"amount of memory required to complete this " r"step."
     )
     conv_critera = {
         "max_force": re.compile(r"\s+(Maximum Force)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)"),
         "rms_force": re.compile(r"\s+(RMS {5}Force)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)"),
-        "max_disp": re.compile(
-            r"\s+(Maximum Displacement)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)"
-        ),
-        "rms_disp": re.compile(
-            r"\s+(RMS {5}Displacement)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)"
-        ),
+        "max_disp": re.compile(r"\s+(Maximum Displacement)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)"),
+        "rms_disp": re.compile(r"\s+(RMS {5}Displacement)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)"),
     }
 
     grid_patt = re.compile(r"(-?\d{5})")
@@ -189,15 +182,14 @@ class GaussianErrorHandler(ErrorHandler):
             for k, v in obj.items():
                 updated_obj[k.lower()] = GaussianErrorHandler._recursive_lowercase(v)
             return updated_obj
-        elif isinstance(obj, str):
+        if isinstance(obj, str):
             return obj.lower()
-        elif hasattr(obj, "__iter__"):
+        if hasattr(obj, "__iter__"):
             updated_obj = []
             for i in obj:
                 updated_obj.append(GaussianErrorHandler._recursive_lowercase(i))
             return updated_obj
-        else:
-            return obj
+        return obj
 
     @staticmethod
     def _recursive_remove_space(obj):
@@ -224,9 +216,7 @@ class GaussianErrorHandler(ErrorHandler):
         updated_obj = {}
         for key, value in obj.items():
             if isinstance(value, dict):
-                updated_obj[key.strip()] = GaussianErrorHandler._recursive_remove_space(
-                    value
-                )
+                updated_obj[key.strip()] = GaussianErrorHandler._recursive_remove_space(value)
             elif isinstance(value, str):
                 updated_obj[key.strip()] = value.strip()
             else:
@@ -254,11 +244,7 @@ class GaussianErrorHandler(ErrorHandler):
         if not obj:
             route_params[key] = value
         elif isinstance(obj, str):
-            update = (
-                {key: {obj: None, **value}}
-                if isinstance(value, dict)
-                else {key: {obj: None, value: None}}
-            )
+            update = {key: {obj: None, **value}} if isinstance(value, dict) else {key: {obj: None, value: None}}
             route_params.update(update)
         elif isinstance(obj, dict):
             update = value if isinstance(value, dict) else {value: None}
@@ -309,7 +295,7 @@ class GaussianErrorHandler(ErrorHandler):
 
         if isinstance(int_value, str) and int_value in options:
             return True
-        elif isinstance(int_value, dict):
+        if isinstance(int_value, dict):
             if int_value.get("grid") in options:
                 return True
             if set(int_value) & set(options):
@@ -402,9 +388,7 @@ class GaussianErrorHandler(ErrorHandler):
                 "comparable."
             )
 
-            int_key, int_value = GaussianErrorHandler._int_keyword(
-                self.gin.route_parameters
-            )
+            int_key, int_value = GaussianErrorHandler._int_keyword(self.gin.route_parameters)
             if not int_value and GaussianErrorHandler._not_g16(self.gout):
                 # if int keyword is missing and Gaussian version is 03 or
                 # 09, set integration grid to ultrafine
@@ -412,11 +396,13 @@ class GaussianErrorHandler(ErrorHandler):
                 self.logger.warning(warning_msg)
                 self.gin.route_parameters[int_key] = "ultrafine"
                 return True
-            elif isinstance(int_value, dict):
+            if isinstance(int_value, dict):
                 # if int grid is set and is different from ultrafine,
                 # set it to ultrafine (works when others int options are
                 # specified)
-                flag = True if "grid" in self.gin.route_parameters[int_key] else False
+                flag = False
+                if "grid" in self.gin.route_parameters[int_key]:
+                    flag = True
                 for key in self.gin.route_parameters[int_key]:
                     if key in self.GRID_NAMES or self.grid_patt.match(key):
                         self.gin.route_parameters[int_key].pop(key)
@@ -426,23 +412,19 @@ class GaussianErrorHandler(ErrorHandler):
                     self.logger.warning(warning_msg)
                     self.gin.route_parameters[int_key]["grid"] = "ultrafine"
                     return True
-            else:
-                if int_value in self.GRID_NAMES or self.grid_patt.match(int_value):
-                    # if int grid is set and is different from ultrafine,
-                    # set it to ultrafine (works when no other int options
-                    # are specified)
-                    self.logger.warning(warning_msg)
-                    self.gin.route_parameters[int_key] = "ultrafine"
-                    return True
-                elif GaussianErrorHandler._not_g16(self.gout):
-                    # if int grid is not specified, and Gaussian version is
-                    # not 16, update with ultrafine integral grid
-                    self.logger.warning(warning_msg)
-                    GaussianErrorHandler._update_route_params(
-                        self.gin.route_parameters, int_key, {"grid": "ultrafine"}
-                    )
-                    return True
-        else:
+            if int_value in self.GRID_NAMES or self.grid_patt.match(int_value):
+                # if int grid is set and is different from ultrafine,
+                # set it to ultrafine (works when no other int options
+                # are specified)
+                self.logger.warning(warning_msg)
+                self.gin.route_parameters[int_key] = "ultrafine"
+                return True
+            if GaussianErrorHandler._not_g16(self.gout):
+                # if int grid is not specified, and Gaussian version is
+                # not 16, update with ultrafine integral grid
+                self.logger.warning(warning_msg)
+                GaussianErrorHandler._update_route_params(self.gin.route_parameters, int_key, {"grid": "ultrafine"})
+                return True
             return False
         return False
 
@@ -479,17 +461,13 @@ class GaussianErrorHandler(ErrorHandler):
         for i, (k, v) in enumerate(data["values"].items()):
             row = int(np.floor(i / 2))
             col = i % 2
-            iters = range(0, len(v))
+            iters = range(len(v))
             ax[row, col].plot(iters, v, color="#cf3759", linewidth=2)
-            ax[row, col].axhline(
-                y=data["thresh"][k], linewidth=2, color="black", linestyle="--"
-            )
+            ax[row, col].axhline(y=data["thresh"][k], linewidth=2, color="black", linestyle="--")
             ax[row, col].tick_params(which="major", length=8)
-            ax[row, col].tick_params(
-                axis="both", which="both", direction="in", labelsize=16
-            )
+            ax[row, col].tick_params(axis="both", which="both", direction="in", labelsize=16)
             ax[row, col].set_xlabel("Iteration", fontsize=16)
-            ax[row, col].set_ylabel("{}".format(k), fontsize=16)
+            ax[row, col].set_ylabel(f"{k}", fontsize=16)
             ax[row, col].xaxis.set_major_locator(MaxNLocator(integer=True))
             ax[row, col].grid(ls="--", zorder=1)
         plt.tight_layout()
@@ -505,12 +483,8 @@ class GaussianErrorHandler(ErrorHandler):
             )
 
         self.gin = GaussianInput.from_file(os.path.join(directory, self.input_file))
-        self.gin.route_parameters = GaussianErrorHandler._recursive_lowercase(
-            self.gin.route_parameters
-        )
-        self.gin.route_parameters = GaussianErrorHandler._recursive_remove_space(
-            self.gin.route_parameters
-        )
+        self.gin.route_parameters = GaussianErrorHandler._recursive_lowercase(self.gin.route_parameters)
+        self.gin.route_parameters = GaussianErrorHandler._recursive_remove_space(self.gin.route_parameters)
         self.gout = GaussianOutput(os.path.join(directory, self.output_file))
         self.errors = set()
         error_patts = set()
@@ -539,9 +513,7 @@ class GaussianErrorHandler(ErrorHandler):
                                 self.conv_data["values"][k].append(m.group(2))
 
         # TODO: it only plots after the job finishes, modify?
-        if self.conv_data["values"] and all(
-            len(v) >= 2 for v in self.conv_data["values"].values()
-        ):
+        if self.conv_data["values"] and all(len(v) >= 2 for v in self.conv_data["values"].values()):
             for k, v in self.conv_data["values"].items():
                 # convert strings to float taking into account the
                 # possibility of having ******** values
@@ -566,34 +538,23 @@ class GaussianErrorHandler(ErrorHandler):
         #  if i]
         # backup(backup_files, self.prefix)
         # os.remove(f'{self.input_file}.backup')
-        backup_files = [self.input_file, self.output_file, self.stderr_file] + list(
-            BACKUP_FILES.values()
-        )
+        backup_files = [self.input_file, self.output_file, self.stderr_file, *BACKUP_FILES.values()]
         backup(backup_files, prefix=self.prefix, directory=directory)
         if "scf_convergence" in self.errors:
-            self.gin.route_parameters = GaussianErrorHandler._update_route_params(
-                self.gin.route_parameters, "scf", {}
-            )
+            self.gin.route_parameters = GaussianErrorHandler._update_route_params(self.gin.route_parameters, "scf", {})
             # if the SCF procedure has failed to converge
-            if self.gin.route_parameters.get("scf").get("maxcycle") != str(
-                self.scf_max_cycles
-            ):
+            if self.gin.route_parameters.get("scf").get("maxcycle") != str(self.scf_max_cycles):
                 # increase number of cycles if not already set or is different
                 # from scf_max_cycles
                 self.gin.route_parameters["scf"]["maxcycle"] = self.scf_max_cycles
                 actions.append({"scf_max_cycles": self.scf_max_cycles})
 
-            elif not {"xqc", "yqc", "qc"}.intersection(
-                self.gin.route_parameters.get("scf")
-            ):
+            elif not {"xqc", "yqc", "qc"}.intersection(self.gin.route_parameters.get("scf")):
                 # use an alternate SCF converger
                 self.gin.route_parameters["scf"]["xqc"] = None
                 actions.append({"scf_algorithm": "xqc"})
 
-            elif (
-                self.job_type == "better_guess"
-                and not GaussianErrorHandler.activate_better_guess
-            ):
+            elif self.job_type == "better_guess" and not GaussianErrorHandler.activate_better_guess:
                 # try to get a better initial guess at a lower level of theory
                 self.logger.info(
                     "SCF calculation failed. Switching to a lower "
@@ -619,18 +580,14 @@ class GaussianErrorHandler(ErrorHandler):
 
         elif "opt_steps" in self.errors:
             # int_actions = self._add_int()
-            if self.gin.route_parameters.get("opt").get("maxcycles") != str(
-                self.opt_max_cycles
-            ):
+            if self.gin.route_parameters.get("opt").get("maxcycles") != str(self.opt_max_cycles):
                 self.gin.route_parameters["opt"]["maxcycles"] = self.opt_max_cycles
                 if len(self.gout.structures) > 1:
                     self.gin._mol = self.gout.final_structure
                     actions.append({"structure": "from_final_structure"})
                 actions.append({"opt_max_cycles": self.opt_max_cycles})
 
-            elif self.check_convergence and all(
-                v[-1] < v[0] for v in self.conv_data["values"].values()
-            ):
+            elif self.check_convergence and all(v[-1] < v[0] for v in self.conv_data["values"].values()):
                 self.gin._mol = self.gout.final_structure
                 actions.append({"structure": "from_final_structure"})
 
@@ -642,14 +599,11 @@ class GaussianErrorHandler(ErrorHandler):
             # TODO: check if the defined methods are clean
             # TODO: don't enter this if condition if g16 and ...
 
-            elif (
-                self.job_type == "better_guess"
-                and not GaussianErrorHandler.activate_better_guess
-            ):
+            elif self.job_type == "better_guess" and not GaussianErrorHandler.activate_better_guess:
                 # TODO: check if the logic is correct since this is used with scf
                 # try to get a better initial guess at a lower level of theory
                 self.logger.info(
-                    "Geometry optimiztion failed. Switching to a "
+                    "Geometry optimization failed. Switching to a "
                     "lower level of theory to get a better "
                     "initial guess of molecular geometry"
                 )
@@ -673,33 +627,25 @@ class GaussianErrorHandler(ErrorHandler):
             # if there is some linear bend around an angle in the geometry,
             # restart the job at the point it stopped while forcing Gaussian
             # to rebuild the set of redundant internals
-            if not list(
-                filter(
-                    re.compile(r"%[Cc][Hh][Kk]").match, self.gin.link0_parameters.keys()
-                )
-            ):
+            if not list(filter(re.compile(r"%[Cc][Hh][Kk]").match, self.gin.link0_parameters.keys())):
                 raise KeyError(
-                    "This remedy reads coords from checkpoint "
-                    "file. Consider adding CHK to link0_parameters"
+                    "This remedy reads coords from checkpoint " "file. Consider adding CHK to link0_parameters"
                 )
-            else:
-                self.gin = GaussianInput(
-                    mol=None,
-                    charge=self.gin.charge,
-                    spin_multiplicity=self.gin.spin_multiplicity,
-                    title=self.gin.title,
-                    functional=self.gin.functional,
-                    basis_set=self.gin.basis_set,
-                    route_parameters=self.gin.route_parameters,
-                    input_parameters=self.gin.input_parameters,
-                    link0_parameters=self.gin.link0_parameters,
-                    dieze_tag=self.gin.dieze_tag,
-                    gen_basis=self.gin.gen_basis,
-                )
-                self.gin.route_parameters.update(
-                    {"geom": "(checkpoint, newdefinition)"}
-                )
-                actions.append({"coords": "rebuild_redundant_internals"})
+            self.gin = GaussianInput(
+                mol=None,
+                charge=self.gin.charge,
+                spin_multiplicity=self.gin.spin_multiplicity,
+                title=self.gin.title,
+                functional=self.gin.functional,
+                basis_set=self.gin.basis_set,
+                route_parameters=self.gin.route_parameters,
+                input_parameters=self.gin.input_parameters,
+                link0_parameters=self.gin.link0_parameters,
+                dieze_tag=self.gin.dieze_tag,
+                gen_basis=self.gin.gen_basis,
+            )
+            self.gin.route_parameters.update({"geom": "(checkpoint, newdefinition)"})
+            actions.append({"coords": "rebuild_redundant_internals"})
 
         elif "solute_solvent_surface" in self.errors:
             # if non-convergence in the iteration of the PCM matrix is
@@ -707,21 +653,14 @@ class GaussianErrorHandler(ErrorHandler):
             # the solute-solvent boundary
             # TODO: test
             input_parms = {
-                key.lower() if isinstance(key, str) else key: value
-                for key, value in self.gin.input_parameters.items()
+                key.lower() if isinstance(key, str) else key: value for key, value in self.gin.input_parameters.items()
             }
             if input_parms.get("surface", "none").lower() != "sas":
-                GaussianErrorHandler._update_route_params(
-                    self.gin.route_parameters, "scrf", "read"
-                )
+                GaussianErrorHandler._update_route_params(self.gin.route_parameters, "scrf", "read")
                 self.gin.input_parameters.update({"surface": "SAS"})
                 actions.append({"surface": "SAS"})
             else:
-                self.logger.info(
-                    "Not sure how to fix "
-                    "solute_solvent_surface_error if surface is "
-                    "already SAS!"
-                )
+                self.logger.info("Not sure how to fix " "solute_solvent_surface_error if surface is " "already SAS!")
                 return {"errors": [self.errors], "actions": None}
 
         elif "internal_coords" in self.errors:
@@ -730,17 +669,11 @@ class GaussianErrorHandler(ErrorHandler):
             # coord systems, disable symmetry if applicable, and rerun
             # however, this will come at a higher computational cost
             if "opt" in self.gin.route_parameters and not any(
-                n in (self.gin.route_parameters.get("opt") or {})
-                for n in ["cart", "cartesian"]
+                n in (self.gin.route_parameters.get("opt") or {}) for n in ["cart", "cartesian"]
             ):
-                GaussianErrorHandler._update_route_params(
-                    self.gin.route_parameters, "opt", "cartesian"
-                )
+                GaussianErrorHandler._update_route_params(self.gin.route_parameters, "opt", "cartesian")
                 if isinstance(self.gin.route_parameters["opt"], dict):
-                    [
-                        self.gin.route_parameters["opt"].pop(i, None)
-                        for i in ["redundant", "zmatrix", "z-matrix"]
-                    ]
+                    [self.gin.route_parameters["opt"].pop(i, None) for i in ["redundant", "zmatrix", "z-matrix"]]
 
                 if (
                     not self.gin.route_parameters.get("nosymmetry")
@@ -760,46 +693,33 @@ class GaussianErrorHandler(ErrorHandler):
                 return {"errors": [self.errors], "actions": None}
 
         elif "zmatrix" in self.errors:
-            gfile = open(os.path.join(directory, self.input_file))
-            lines = gfile.readlines()
-            last_lines = lines[-2:]
-            gfile.close()
-            if not set(last_lines) == {"\n"}:
+            with open(os.path.join(directory, self.input_file)) as gfile:
+                lines = gfile.readlines()
+                last_lines = lines[-2:]
+            if set(last_lines) != {"\n"}:
                 # if the required blank lines at the end of the input file are
                 # missing, just rewrite the file
                 self.logger.info("Missing blank line at the end of the input " "file.")
                 actions.append({"blank_lines": "rewrite_input_file"})
             else:
-                self.logger.info(
-                    "Not sure how to fix zmatrix error. " "Check manually?"
-                )
+                self.logger.info("Not sure how to fix zmatrix error. " "Check manually?")
                 return {"errors": [self.errors], "actions": None}
 
         elif "coords" in self.errors:
             if "connectivity" in self.gin.route_parameters.get("geom"):
-                self.logger.info(
-                    "Explicit atom bonding is requested but no "
-                    "such input is provided"
-                )
-                if (
-                    isinstance(self.gin.route_parameters["geom"], dict)
-                    and len(self.gin.route_parameters["geom"]) > 1
-                ):
+                self.logger.info("Explicit atom bonding is requested but no " "such input is provided")
+                if isinstance(self.gin.route_parameters["geom"], dict) and len(self.gin.route_parameters["geom"]) > 1:
                     self.gin.route_parameters["geom"].pop("connectivity", None)
                 else:
                     del self.gin.route_parameters["geom"]
                 actions.append({"coords": "remove_connectivity"})
             else:
-                self.logger.info(
-                    "Missing connectivity info. Not sure how to "
-                    "fix this error. Exiting!"
-                )
+                self.logger.info("Missing connectivity info. Not sure how to " "fix this error. Exiting!")
                 return {"errors": [self.errors], "actions": None}
 
         elif "found_coords" in self.errors:
             if self.gin.molecule and any(
-                key in self.gin.route_parameters.get("geom", {})
-                for key in ["checkpoint", "check", "allcheck"]
+                key in self.gin.route_parameters.get("geom", {}) for key in ["checkpoint", "check", "allcheck"]
             ):
                 # if coords are found in the input and the user chooses to read
                 # the molecule specification from the checkpoint file,
@@ -808,17 +728,13 @@ class GaussianErrorHandler(ErrorHandler):
                 actions.append({"mol": "remove_from_input"})
             else:
                 self.logger.info(
-                    "Not sure why atom specifications should not "
-                    "be found in the input. Examine manually!"
+                    "Not sure why atom specifications should not " "be found in the input. Examine manually!"
                 )
                 return {"errors": [self.errors], "actions": None}
 
         elif "coord_inputs" in self.errors:
             if (
-                any(
-                    key in self.gin.route_parameters.get("opt", {})
-                    for key in ["z-matrix", "zmatrix"]
-                )
+                any(key in self.gin.route_parameters.get("opt", {}) for key in ["z-matrix", "zmatrix"])
                 and self.cart_coords
             ):
                 # if molecule is specified in xyz format, but the user chooses
@@ -840,8 +756,7 @@ class GaussianErrorHandler(ErrorHandler):
                 not self.gin.molecule
                 and "read" in self.gin.route_parameters.get("guess")
                 and not any(
-                    key in self.gin.route_parameters.get("geom", {})
-                    for key in ["checkpoint", "check", "allcheck"]
+                    key in self.gin.route_parameters.get("geom", {}) for key in ["checkpoint", "check", "allcheck"]
                 )
             ):
                 # if molecule is not specified and the user requests that the
@@ -849,20 +764,14 @@ class GaussianErrorHandler(ErrorHandler):
                 # take the geom from the checkpoint file, add geom=check
                 if not glob.glob("*.[Cc][Hh][Kk]"):
                     raise FileNotFoundError(
-                        "This remedy reads geometry from "
-                        "checkpoint file. This file is "
-                        "missing!"
+                        "This remedy reads geometry from " "checkpoint file. This file is " "missing!"
                     )
-                GaussianErrorHandler._update_route_params(
-                    self.gin.route_parameters, "geom", "check"
-                )
+                GaussianErrorHandler._update_route_params(self.gin.route_parameters, "geom", "check")
                 self.gin.route_parameters["geom"] = "check"
                 actions.append({"mol": "get_from_checkpoint"})
             else:
                 # error cannot be fixed automatically. Return None for actions
-                self.logger.info(
-                    "Molecule is not found in the input file. " "Fix manually!"
-                )
+                self.logger.info("Molecule is not found in the input file. " "Fix manually!")
                 # TODO: check if logger.info is enough here or return is needed
                 return {"errors": list(self.errors), "actions": None}
 
@@ -876,31 +785,22 @@ class GaussianErrorHandler(ErrorHandler):
 
         elif "syntax" in self.errors:
             # error cannot be fixed automatically. Return None for actions
-            self.logger.info(
-                "A syntax error was detected in the input file. " "Fix manually!"
-            )
+            self.logger.info("A syntax error was detected in the input file. " "Fix manually!")
             return {"errors": list(self.errors), "actions": None}
 
         elif "insufficient_mem" in self.errors:
-            mem_key, dynamic_mem = GaussianErrorHandler._find_dynamic_memory_allocated(
-                self.gin.link0_parameters
-            )
+            mem_key, dynamic_mem = GaussianErrorHandler._find_dynamic_memory_allocated(self.gin.link0_parameters)
             if dynamic_mem and self.recom_mem and dynamic_mem < self.recom_mem:
                 # this assumes that 1.5*minimum required memory is available
                 mem = math.ceil(self.recom_mem * 1.5)
                 self.gin.link0_parameters[mem_key] = f"{mem}MB"
                 actions.append({"memory": "increase_to_gaussian_recommendation"})
             else:
-                self.logger.info(
-                    "Check job memory requirements manually and " "set as needed."
-                )
+                self.logger.info("Check job memory requirements manually and " "set as needed.")
                 return {"errors": list(self.errors), "actions": None}
 
         else:
-            self.logger.info(
-                "Must have gotten an error that is parsed but not "
-                "handled yet. Fix manually!"
-            )
+            self.logger.info("Must have gotten an error that is parsed but not " "handled yet. Fix manually!")
             return {"errors": list(self.errors), "actions": None}
 
         os.rename(
@@ -923,6 +823,7 @@ class WallTimeErrorHandler(ErrorHandler):
     the last .rwf file. A job is considered to be nearing the walltime if the remaining
     time is less than or equal to the buffer time.
     """
+
     is_monitor = True
 
     def __init__(
@@ -964,9 +865,7 @@ class WallTimeErrorHandler(ErrorHandler):
 
         self.init_time = os.environ.get("JOB_START_TIME", now_str)
         os.environ["JOB_START_TIME"] = self.init_time
-        self.init_time = datetime.datetime.strptime(
-            self.init_time, "%a %b %d %H:%M:%S %Z %Y"
-        )
+        self.init_time = datetime.datetime.strptime(self.init_time, "%a %b %d %H:%M:%S %Z %Y")
 
     def check(self, directory="./"):
         """Check if the job is nearing the walltime. If so, return True, else False."""
@@ -980,9 +879,7 @@ class WallTimeErrorHandler(ErrorHandler):
     def correct(self, directory="./"):
         """Perform the corrections."""
         # TODO: when using restart, the rwf file might be in a different dir
-        backup_files = [self.input_file, self.output_file, self.stderr_file] + list(
-            BACKUP_FILES.values()
-        )
+        backup_files = [self.input_file, self.output_file, self.stderr_file, *BACKUP_FILES.values()]
         backup(backup_files, prefix=self.prefix, directory=directory)
         if glob.glob(os.path.join(directory, BACKUP_FILES["rwf"])):
             rwf = glob.glob(os.path.join(directory, BACKUP_FILES["rwf"]))[0]
@@ -991,15 +888,12 @@ class WallTimeErrorHandler(ErrorHandler):
             # gin.link0_parameters.update({'%rwf': rwf})
             # gin.route_parameters = {'Restart': None}
             # os.rename(self.input_file, self.input_file + '.prev')
-            input_str = [f"%rwf={rwf}"] + [
-                f"{i}={j}" for i, j in gin.link0_parameters.items()
-            ]
+            input_str = [f"%rwf={rwf}"] + [f"{i}={j}" for i, j in gin.link0_parameters.items()]
             input_str.append(f"{gin.dieze_tag} Restart\n\n")
             with open(os.path.join(directory, self.input_file + ".wt"), "w") as f:
                 f.write("\n".join(input_str))
             return {"errors": ["wall_time_limit"], "actions": None}
-        else:
-            self.logger.info(
-                "Wall time handler requires a read-write gaussian "
-                "file to be available. No such file is found."
-            )
+        self.logger.info(
+            "Wall time handler requires a read-write gaussian " "file to be available. No such file is found."
+        )
+        return {"errors": ["Walltime reached but not rwf file found"], "actions": None}

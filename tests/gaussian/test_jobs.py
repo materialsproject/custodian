@@ -1,10 +1,8 @@
 import os
 import shutil
-
 from unittest import TestCase
 
 from custodian.gaussian.jobs import GaussianJob
-
 from tests.conftest import TEST_FILES
 
 __author__ = "Rasha Atwi"
@@ -64,9 +62,7 @@ class TestGaussianJob(TestCase):
             self.directory,
         )
         jobs = list(g)
-        self.assertEqual(
-            len(jobs), 1, "One job should be generated under normal conditions."
-        )
+        assert len(jobs) == 1, "One job should be generated under normal conditions."
         jobs[0].setup()
         assert os.path.exists(f"{SCR_DIR}/test.com.orig")
         shutil.copy(f"{TEST_DIR}/mol_opt.out", f"{SCR_DIR}/test.out")

@@ -1,11 +1,9 @@
+import datetime
 import os
 import shutil
-import datetime
-
 from unittest import TestCase
 
 from custodian.gaussian.handlers import GaussianErrorHandler, WallTimeErrorHandler
-
 from tests.conftest import TEST_FILES
 
 __author__ = "Rasha Atwi"
@@ -301,9 +299,7 @@ class TestWallTimeErrorHandler(TestCase):
             output_file="wall_time.out",
         )
         init_time = handler.init_time
-        assert os.environ.get("JOB_START_TIME") == init_time.strftime(
-            "%a %b %d %H:%M:%S UTC %Y"
-        )
+        assert os.environ.get("JOB_START_TIME") == init_time.strftime("%a %b %d %H:%M:%S UTC %Y")
         # Test that walltime persists if new handler is created
         handler = WallTimeErrorHandler(
             wall_time=3600,
@@ -311,9 +307,7 @@ class TestWallTimeErrorHandler(TestCase):
             input_file="walltime.com",
             output_file="walltime.out",
         )
-        assert os.environ.get("JOB_START_TIME") == init_time.strftime(
-            "%a %b %d %H:%M:%S UTC %Y"
-        )
+        assert os.environ.get("JOB_START_TIME") == init_time.strftime("%a %b %d %H:%M:%S UTC %Y")
 
     def test_walltime_check_and_correct(self):
         # Try a 1 hr wall time with a 5 mins buffer
@@ -332,7 +326,7 @@ class TestWallTimeErrorHandler(TestCase):
         # Test that the input file is written correctly
         handler.correct()
         assert os.path.exists("walltime.com.wt")
-        with open("walltime.com.wt", 'r') as file:
+        with open("walltime.com.wt") as file:
             first_line = file.readline().strip()
         # assert first_line == "%rwf=./Gau-mock.rwf"
         assert "rwf" in first_line

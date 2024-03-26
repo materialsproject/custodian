@@ -2,11 +2,10 @@
 This module implements basic kinds of jobs for Gaussian runs.
 """
 
+import logging
 import os
 import shutil
-import logging
 import subprocess
-
 from fnmatch import filter
 
 from pymatgen.io.gaussian import GaussianInput, GaussianOutput
@@ -84,16 +83,12 @@ class GaussianJob(Job):
             subprocess.Popen:
                 The process running the Gaussian job.
         """
-        logger.info("Running command: {}".format(self.gaussian_cmd))
+        logger.info(f"Running command: {self.gaussian_cmd}")
         with (
             open(os.path.join(directory, self.output_file), "w") as out_file,
-            open(
-                os.path.join(directory, self.stderr_file), "w", buffering=1
-            ) as error_file,
+            open(os.path.join(directory, self.stderr_file), "w", buffering=1) as error_file,
         ):
-            process = subprocess.Popen(
-                self.gaussian_cmd, stdout=out_file, stderr=error_file, shell=True
-            )
+            process = subprocess.Popen(self.gaussian_cmd, stdout=out_file, stderr=error_file, shell=True)
         self.process = process
         return process
 
@@ -107,9 +102,8 @@ class GaussianJob(Job):
         """
         for file in [self.input_file, self.output_file]:
             file = os.path.join(directory, file)
-            if os.path.exists(file):
-                if self.suffix != "":
-                    shutil.copy(file, f"{file}{self.suffix}")
+            if os.path.exists(file) and self.suffix != "":
+                shutil.copy(file, f"{file}{self.suffix}")
 
     def terminate(self, directory="./"):
         """
@@ -168,9 +162,7 @@ class GaussianJob(Job):
             if len(lower_output.errors) == 0:
                 # if the calculation at the lower level of theory succeeded
                 if not filter(os.listdir("."), "*.[Cc][Hh][Kk]"):
-                    raise FileNotFoundError(
-                        "Missing checkpoint file. Required " "to read initial guesses"
-                    )
+                    raise FileNotFoundError("Missing checkpoint file. Required " "to read initial guesses")
 
                 gin = GaussianInput(
                     mol=None,
@@ -187,9 +179,7 @@ class GaussianJob(Job):
                 )
                 gin.route_parameters["Guess"] = "Read"
                 gin.route_parameters["Geom"] = "Checkpoint"
-                gin.write_file(
-                    os.path.join(directory, input_file), cart_coords=cart_coords
-                )
+                gin.write_file(os.path.join(directory, input_file), cart_coords=cart_coords)
 
                 yield (
                     GaussianJob(
@@ -205,7 +195,4 @@ class GaussianJob(Job):
                 logger.info("Failed to generate a better initial guess")
 
         else:
-            logger.info(
-                "Calculation completed normally without having to "
-                "generate a better initial guess"
-            )
+            logger.info("Calculation completed normally without having to " "generate a better initial guess")
