@@ -659,7 +659,6 @@ class GaussianErrorHandler(ErrorHandler):
                 actions.append({"opt_level_of_theory": "better_geom_guess"})
 
             else:
-                # TODO: custodian file is empty if actions are None, why?
                 if self.job_type != "better_guess":
                     self.logger.info(
                         "Try to switch to better_guess job type to "
@@ -803,7 +802,7 @@ class GaussianErrorHandler(ErrorHandler):
                 for key in ["checkpoint", "check", "allcheck"]
             ):
                 # if coords are found in the input and the user chooses to read
-                # the the molecule specification from the checkpoint file,
+                # the molecule specification from the checkpoint file,
                 # remove mol
                 self.gin._mol = None
                 actions.append({"mol": "remove_from_input"})
@@ -979,7 +978,7 @@ class WalTimeErrorHandler(ErrorHandler):
         return False
 
     def correct(self, directory="./"):
-        """"Perform the corrections."""
+        """Perform the corrections."""
         # TODO: when using restart, the rwf file might be in a different dir
         backup_files = [self.input_file, self.output_file, self.stderr_file] + list(
             BACKUP_FILES.values()
