@@ -1,6 +1,4 @@
-"""
-This module implements error handlers for Gaussian runs.
-"""
+"""This module implements error handlers for Gaussian runs."""
 
 import datetime
 import glob
@@ -10,9 +8,7 @@ import os
 import re
 import shutil
 
-import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.ticker import MaxNLocator
 from monty.io import zopen
 from pymatgen.io.gaussian import GaussianInput, GaussianOutput
 
@@ -373,8 +369,7 @@ class GaussianErrorHandler(ErrorHandler):
         file's route parameters to 'ultrafine', if necessary.
 
         Returns:
-        bool:
-            True if changes were made to the integration grid setting, False otherwise.
+            bool: True if changes were made to the integration grid setting, False otherwise.
         """
         if not GaussianErrorHandler._int_grid(self.gin.route_parameters):
             # nothing int is set or is set to different values
@@ -434,11 +429,10 @@ class GaussianErrorHandler(ErrorHandler):
         Determine if the Gaussian version is not 16.
 
         Args:
-        gout (GaussianOutput): A GaussianOuput object.
+        gout (GaussianOutput): A GaussianOutput object.
 
         Returns:
-        bool:
-            True if the Gaussian version is not 16, False otherwise.
+            bool: True if the Gaussian version is not 16, False otherwise.
         """
         return "16" not in gout.version
 
@@ -457,6 +451,9 @@ class GaussianErrorHandler(ErrorHandler):
         directory (str, optional): The directory where the convergence plot image will
             be saved. Defaults to "./".
         """
+        import matplotlib.pyplot as plt
+        from matplotlib.ticker import MaxNLocator
+
         fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(12, 10))
         for i, (k, v) in enumerate(data["values"].items()):
             row = int(np.floor(i / 2))
