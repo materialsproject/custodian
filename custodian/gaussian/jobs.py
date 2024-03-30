@@ -1,17 +1,21 @@
-"""
-This module implements basic kinds of jobs for Gaussian runs.
-"""
+"""This module implements basic kinds of jobs for Gaussian runs."""
+
+from __future__ import annotations
 
 import logging
 import os
 import shutil
 import subprocess
 from fnmatch import filter
+from typing import TYPE_CHECKING
 
 from pymatgen.io.gaussian import GaussianInput, GaussianOutput
 
 from custodian.custodian import Job
 from custodian.gaussian.handlers import GaussianErrorHandler
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 __author__ = "Rasha Atwi"
 __version__ = "0.1"
@@ -24,18 +28,16 @@ logger = logging.getLogger(__name__)
 
 
 class GaussianJob(Job):
-    """
-    A basic Gaussian job.
-    """
+    """A basic Gaussian job."""
 
     def __init__(
         self,
-        gaussian_cmd,
-        input_file,
-        output_file,
-        stderr_file="stderr.txt",
-        suffix="",
-        backup=True,
+        gaussian_cmd: str,
+        input_file: str,
+        output_file: str,
+        stderr_file: str = "stderr.txt",
+        suffix: str = "",
+        backup: bool = True,
     ):
         """
         Args:
@@ -56,9 +58,9 @@ class GaussianJob(Job):
         self.stderr_file = stderr_file
         self.suffix = suffix
         self.backup = backup
-        self.process = None
+        self.process: subprocess.Popen | None = None
 
-    def setup(self, directory="./"):
+    def setup(self, directory: str = "./") -> None:
         """
         Perform initial setup for the job, i.e., make a backup of the input file if
         requested.
@@ -72,7 +74,7 @@ class GaussianJob(Job):
                 os.path.join(directory, f"{self.input_file}.orig"),
             )
 
-    def run(self, directory="./"):
+    def run(self, directory: str = "./") -> subprocess.Popen:
         """
         Perform the actual Gaussian run.
 
@@ -92,7 +94,7 @@ class GaussianJob(Job):
         self.process = process
         return process
 
-    def postprocess(self, directory="./"):
+    def postprocess(self, directory: str = "./") -> None:
         """
         Perform any postprocessing of the Gaussian run. This includes making a copy
         of the input and output file if a suffix is specified.
@@ -101,31 +103,31 @@ class GaussianJob(Job):
             directory (str): Directory where the job was run. Defaults to './'.
         """
         for file in [self.input_file, self.output_file]:
-            file = os.path.join(directory, file)
-            if os.path.exists(file) and self.suffix != "":
-                shutil.copy(file, f"{file}{self.suffix}")
+            file_path = os.path.join(directory, file)
+            if os.path.exists(file_path) and self.suffix != "":
+                shutil.copy(file_path, f"{file_path}{self.suffix}")
 
-    def terminate(self, directory="./"):
+    def terminate(self, directory: str = "./") -> None:
         """
         Terminate the Gaussian job.
 
         Args:
             directory (str): Directory where the job was run. Defaults to './'.
         """
-        self.process.terminate()
-        return
+        if self.process:
+            self.process.terminate()
 
     @classmethod
-    def better_guess(
+    def generate_better_guess(
         cls,
-        gaussian_cmd,
-        input_file,
-        output_file,
-        stderr_file="stderr.txt",
-        backup=True,
-        cart_coords=True,
-        directory="./",
-    ):
+        gaussian_cmd: str,
+        input_file: str,
+        output_file: str,
+        stderr_file: str = "stderr.txt",
+        backup: bool = True,
+        cart_coords: bool = True,
+        directory: str = "./",
+    ) -> Generator[GaussianJob, None, None]:
         """
         Generate a better initial guess for a Gaussian calculation (optimization or
         SCF run). This is done by running the job at a lower level of theory
@@ -142,6 +144,9 @@ class GaussianJob(Job):
             cart_coords (bool): Whether to use Cartesian coordinates in the input file.
                 Defaults to True.
             directory (str): Directory where the job will be run. Defaults to './'.
+
+        Yields:
+            GaussianJob: The Gaussian job instance.
         """
         orig_input = GaussianInput.from_file(os.path.join(directory, input_file))
         yield (
@@ -162,7 +167,7 @@ class GaussianJob(Job):
             if len(lower_output.errors) == 0:
                 # if the calculation at the lower level of theory succeeded
                 if not filter(os.listdir("."), "*.[Cc][Hh][Kk]"):
-                    raise FileNotFoundError("Missing checkpoint file. Required " "to read initial guesses")
+                    raise FileNotFoundError("Missing checkpoint file. Required to read initial guesses")
 
                 gin = GaussianInput(
                     mol=None,
@@ -193,6 +198,5 @@ class GaussianJob(Job):
                 )
             else:
                 logger.info("Failed to generate a better initial guess")
-
         else:
-            logger.info("Calculation completed normally without having to " "generate a better initial guess")
+            logger.info("Calculation completed normally without having to generate a better initial guess")
