@@ -87,8 +87,8 @@ class LobsterJob(Job):
             zopen(os.path.join(directory, self.stderr_file), "w", buffering=1) as f_err,
         ):
             # use line buffering for stderr
-            cmd = ' '.join(cmd) # to join split commands (e.g., from atomate and atomate2)
-            return subprocess.run(cmd, stdout=f_std, stderr=f_err, shell=True)  # pylint: disable=R1732
+            cmd = " ".join(cmd)  # to join split commands (e.g., from atomate and atomate2)
+            return subprocess.run(cmd, stdout=f_std, stderr=f_err, shell=True, check=False)  # pylint: disable=R1732
 
     def postprocess(self, directory="./"):
         """Will gzip relevant files (won't gzip custodian.json and other output files from the cluster)."""
