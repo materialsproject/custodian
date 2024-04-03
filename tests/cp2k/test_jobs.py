@@ -17,10 +17,10 @@ TEST_FILES_DIR = f"{TEST_FILES}/cp2k"
 cwd = os.getcwd()
 
 
-def clean_dir(dir):
-    for file in glob(os.path.join(dir, "error.*.tar.gz")):
+def clean_dir(folder):
+    for file in glob(os.path.join(folder, "error.*.tar.gz")):
         os.remove(file)
-    for file in glob(os.path.join(dir, "custodian.chk.*.tar.gz")):
+    for file in glob(os.path.join(folder, "custodian.chk.*.tar.gz")):
         os.remove(file)
 
 

@@ -315,7 +315,7 @@ class OptFFTest(TestCase):
             == QCInput.from_file(os.path.join(SCR_DIR, "test.qin")).as_dict()
         )
         with pytest.raises(StopIteration):
-            job.__next__()
+            next(job)
 
 
 @skip_if_no_openbabel
@@ -345,7 +345,7 @@ class OptFFTest1(TestCase):
         ).as_dict()
         assert next(job).as_dict() == expected_next
         with pytest.raises(StopIteration):
-            job.__next__()
+            next(job)
 
 
 @skip_if_no_openbabel
@@ -395,7 +395,7 @@ class OptFFTest2(TestCase):
             == QCInput.from_file(os.path.join(SCR_DIR, "mol.qin")).as_dict()
         )
         with pytest.raises(StopIteration):
-            job.__next__()
+            next(job)
 
 
 @skip_if_no_openbabel
@@ -507,7 +507,7 @@ class OptFFTestSwitching(TestCase):
             == QCInput.from_file(os.path.join(SCR_DIR, "mol.qin")).as_dict()
         )
         with pytest.raises(StopIteration):
-            job.__next__()
+            next(job)
 
 
 @skip_if_no_openbabel
@@ -667,7 +667,7 @@ class OptFFTest5952(TestCase):
             == QCInput.from_file(os.path.join(SCR_DIR, "mol.qin")).as_dict()
         )
         with pytest.raises(StopIteration):
-            job.__next__()
+            next(job)
 
 
 @skip_if_no_openbabel
@@ -915,7 +915,7 @@ class OptFFSmallNegFreqTest(TestCase):
             os.path.join(SCR_DIR, "mol.qin.freq_2"),
         )
         with pytest.raises(StopIteration):
-            job.__next__()
+            next(job)
 
 
 @skip_if_no_openbabel
@@ -971,7 +971,7 @@ class OptFFSingleFreqFragsTest(TestCase):
         shutil.copyfile(f"{SCR_DIR}/mol.qin", f"{SCR_DIR}/mol.qin.freq_0")
 
         with pytest.raises(StopIteration):
-            job.__next__()
+            next(job)
 
 
 @skip_if_no_openbabel
@@ -1022,7 +1022,7 @@ class TSFFTest(TestCase):
             == QCInput.from_file(f"{SCR_DIR}/test.qin").as_dict()
         )
         with pytest.raises(StopIteration):
-            job.__next__()
+            next(job)
 
 
 @skip_if_no_openbabel
@@ -1094,7 +1094,7 @@ class TSFFFreqfirstTest(TestCase):
         )
         shutil.copyfile(f"{SCR_DIR}/mol.qin", f"{SCR_DIR}/mol.qin.freq_0")
         with pytest.raises(StopIteration):
-            job.__next__()
+            next(job)
 
 
 @skip_if_no_openbabel
@@ -1201,4 +1201,4 @@ class TSFFFreqFirstMultipleCyclesTest(TestCase):
         shutil.copyfile(f"{SCR_DIR}/mol.qin", f"{SCR_DIR}/mol.qin.freq_1")
 
         with pytest.raises(StopIteration):
-            job.__next__()
+            next(job)

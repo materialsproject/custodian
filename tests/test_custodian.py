@@ -75,7 +75,7 @@ class ExampleHandler1b(ExampleHandler):
     This handler always can apply a correction, but will only apply it twice before raising.
     """
 
-    max_num_corrections = 2  # type: ignore
+    max_num_corrections = 2
     raise_on_max = True
 
 
@@ -84,7 +84,7 @@ class ExampleHandler1c(ExampleHandler):
     This handler always can apply a correction, but will only apply it twice and then not anymore.
     """
 
-    max_num_corrections = 2  # type: ignore
+    max_num_corrections = 2
     raise_on_max = False
 
 

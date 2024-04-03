@@ -906,7 +906,7 @@ class VaspNEBJob(VaspJob):
         """Postprocessing includes renaming and gzipping where necessary."""
         # Add suffix to all sub_dir/{items}
 
-        neb_dirs, neb_sub = self._get_neb_dirs(directory)
+        neb_dirs, _neb_sub = self._get_neb_dirs(directory)
 
         for path in neb_dirs:
             for file in VASP_NEB_OUTPUT_SUB_FILES:

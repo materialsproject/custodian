@@ -160,9 +160,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         # General catch for SCF not converged
         # TODO: should not-static runs allow for some unconverged scf? Leads to issues in my experience
         scf = out.data["scf_converged"] or [True]
-        if not scf[0]:
-            return True
-        return False
+        return bool(not scf[0])
 
     def correct(self, directory="./"):
         """Apply corrections to aid convergence if possible."""
@@ -488,9 +486,7 @@ class FrozenJobErrorHandler(ErrorHandler):
         try:
             out.ran_successfully()
             # If job finished, then hung, don't need to wait very long to confirm frozen
-            if time.time() - st.st_mtime > 300:
-                return True
-            return False
+            return time.time() - st.st_mtime > 300
         except ValueError:
             pass
 
@@ -825,9 +821,7 @@ class NumericalPrecisionHandler(ErrorHandler):
         """Check for stuck SCF convergence."""
         conv = get_conv(os.path.join(directory, self.output_file))
         counts = [len([*group]) for _k, group in itertools.groupby(conv)]
-        if any(cnt > self.max_same for cnt in counts):
-            return True
-        return False
+        return bool(any(cnt > self.max_same for cnt in counts))
 
     def correct(self, directory="/."):
         """Correct issue if possible."""
@@ -974,9 +968,7 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
         """Check for unconverged geometry optimization."""
         o = Cp2kOutput(os.path.join(directory, self.output_file))
         o.convergence()
-        if o.data.get("geo_opt_not_converged"):
-            return True
-        return False
+        return bool(o.data.get("geo_opt_not_converged"))
 
     def correct(self, directory):
         """Correct issue if possible."""
@@ -1046,15 +1038,15 @@ class WalltimeHandler(ErrorHandler):
 
     def check(self, directory="./"):
         """Check if internal CP2K walltime handler was tripped."""
-        if regrep(
-            filename=os.path.join(directory, self.output_file),
-            patterns={"walltime": r"(exceeded requested execution time)"},
-            reverse=True,
-            terminate_on_match=True,
-            postprocess=bool,
-        ).get("walltime"):
-            return True
-        return False
+        return bool(
+            regrep(
+                filename=os.path.join(directory, self.output_file),
+                patterns={"walltime": "(exceeded requested execution time)"},
+                reverse=True,
+                terminate_on_match=True,
+                postprocess=bool,
+            ).get("walltime")
+        )
 
     def correct(self, directory="./"):
         """Dump checkpoint info if requested."""

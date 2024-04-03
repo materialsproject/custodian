@@ -92,9 +92,7 @@ class VaspNpTMDValidator(Validator):
         outcar = load_outcar(os.path.join(directory, "OUTCAR"))
         patterns = {"MDALGO": r"MDALGO\s+=\s+([\d]+)"}
         outcar.read_pattern(patterns=patterns)
-        if outcar.data["MDALGO"] == [["3"]]:
-            return False
-        return True
+        return outcar.data["MDALGO"] != [["3"]]
 
 
 class VaspAECCARValidator(Validator):

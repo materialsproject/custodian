@@ -4,6 +4,8 @@ given a set of error handlers, the abstract base classes for the
 ErrorHandlers and Jobs.
 """
 
+from __future__ import annotations
+
 import datetime
 import logging
 import os
@@ -662,7 +664,7 @@ class Custodian:
                             raise MaxCorrectionsPerHandlerError(
                                 msg, raises=True, max_errors_per_handler=handler.max_num_corrections, handler=handler
                             )
-                        logger.warning(msg + " Correction not applied.")
+                        logger.warning(f"{msg} Correction not applied.")
                         continue
                     if terminate_func is not None and handler.is_terminating:
                         logger.info("Terminating job")
@@ -760,7 +762,7 @@ class ErrorHandler(MSONable):
     "actions":[])
     """
 
-    max_num_corrections = None
+    max_num_corrections: int | None = None
     raise_on_max = False
     """
     Whether corrections from this specific handler should be applied only a

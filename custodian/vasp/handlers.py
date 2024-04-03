@@ -1698,9 +1698,7 @@ class CheckpointHandler(ErrorHandler):
         """Check for error."""
         run_time = datetime.datetime.now() - self.start_time
         total_secs = run_time.seconds + run_time.days * 3600 * 24
-        if total_secs > self.interval:
-            return True
-        return False
+        return total_secs > self.interval
 
     def correct(self, directory="./"):
         """Perform corrections."""

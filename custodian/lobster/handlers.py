@@ -79,7 +79,7 @@ class ChargeSpillingValidator(Validator):
             lobsterout = Lobsterout(os.path.join(directory, self.output_filename))
             if lobsterout.charge_spilling[0] > self.charge_spilling_limit:
                 return True
-            if len(lobsterout.charge_spilling) > 1 and lobsterout.charge_spilling[1] > self.charge_spilling_limit:
-                return True
-            return False
+            return bool(
+                len(lobsterout.charge_spilling) > 1 and lobsterout.charge_spilling[1] > self.charge_spilling_limit
+            )
         return False
