@@ -59,7 +59,7 @@ class TestGaussianJob(TestCase):
         assert os.path.exists(f"{SCR_DIR}/test.out{self.suffix}")
 
     def test_better_guess(self):
-        g = GaussianJob.better_guess(
+        g = GaussianJob.generate_better_guess(
             self.gaussian_cmd,
             self.input_file,
             self.output_file,
