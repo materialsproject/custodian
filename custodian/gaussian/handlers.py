@@ -297,12 +297,12 @@ class GaussianErrorHandler(ErrorHandler):
         return False
 
     @staticmethod
-    def convert_mem(mem: float | int, unit: str) -> float:
+    def convert_mem(mem: float, unit: str) -> float:
         """
         Convert memory size between different units to megabytes (MB).
 
         Args:
-            mem (float | int): The memory size to convert.
+            mem (float): The memory size to convert.
             unit (str): The unit of the input memory size. Supported units include
                 'kb', 'mb', 'gb', 'tb', and word units ('kw', 'mw', 'gw', 'tw'), or an
                 empty string for default conversion (from words).
