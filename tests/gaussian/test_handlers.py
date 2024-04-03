@@ -29,7 +29,7 @@ def gunzip_file(gauss_file):
 
 class TestGaussianErrorHandler(TestCase):
     def setUp(self):
-        os.makedirs(SCR_DIR)
+        os.makedirs(SCR_DIR, exist_ok=True)
         os.chdir(SCR_DIR)
 
     def test_opt_steps_cycles(self):
@@ -316,7 +316,7 @@ class TestGaussianErrorHandler(TestCase):
 
 class TestWallTimeErrorHandler(TestCase):
     def setUp(self):
-        os.makedirs(SCR_DIR)
+        os.makedirs(SCR_DIR, exist_ok=True)
         os.chdir(SCR_DIR)
         os.environ.pop("JOB_START_TIME", None)
         gunzip_file(f"{TEST_DIR}/walltime.out.gz")
@@ -331,7 +331,7 @@ class TestWallTimeErrorHandler(TestCase):
             output_file="wall_time.out",
         )
         init_time = handler.init_time
-        assert os.environ.get("JOB_START_TIME") == init_time.strftime("%a %b %d %H:%M:%S UTC %Y")
+        assert os.environ.get("JOB_START_TIME") == f"{init_time:%a %b %d %H:%M:%S UTC %Y}"
         # Test that walltime persists if new handler is created
         handler = WallTimeErrorHandler(
             wall_time=3600,
@@ -339,7 +339,7 @@ class TestWallTimeErrorHandler(TestCase):
             input_file="walltime.com",
             output_file="walltime.out",
         )
-        assert os.environ.get("JOB_START_TIME") == init_time.strftime("%a %b %d %H:%M:%S UTC %Y")
+        assert os.environ.get("JOB_START_TIME") == f"{init_time:%a %b %d %H:%M:%S UTC %Y}"
 
     def test_walltime_check_and_correct(self):
         # Try a 1 hr wall time with a 5 mins buffer

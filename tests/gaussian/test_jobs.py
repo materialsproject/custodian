@@ -29,7 +29,7 @@ class TestGaussianJob(TestCase):
         self.backup = True
         self.directory = SCR_DIR
 
-        os.makedirs(SCR_DIR)
+        os.makedirs(SCR_DIR, exist_ok=True)
         shutil.copyfile(f"{TEST_DIR}/mol_opt.com", f"{SCR_DIR}/test.com")
         os.chdir(SCR_DIR)
 
@@ -41,7 +41,7 @@ class TestGaussianJob(TestCase):
             os.remove(file_path)
 
     def test_normal(self):
-        g = GaussianJob(
+        job = GaussianJob(
             self.gaussian_cmd,
             self.input_file,
             self.output_file,
@@ -49,17 +49,17 @@ class TestGaussianJob(TestCase):
             self.suffix,
             self.backup,
         )
-        g.setup()
+        job.setup()
         assert os.path.exists(f"{SCR_DIR}/test.com.orig")
         with gzip.open(f"{TEST_DIR}/mol_opt.out.gz", "rb") as f_in, open(f"{TEST_DIR}/mol_opt.out", "wb") as f_out:
             shutil.copyfileobj(f_in, f_out)
         shutil.copy(f"{TEST_DIR}/mol_opt.out", f"{SCR_DIR}/test.out")
-        g.postprocess()
+        job.postprocess()
         assert os.path.exists(f"{SCR_DIR}/test.com{self.suffix}")
         assert os.path.exists(f"{SCR_DIR}/test.out{self.suffix}")
 
     def test_better_guess(self):
-        g = GaussianJob.generate_better_guess(
+        job_gen = GaussianJob.generate_better_guess(
             self.gaussian_cmd,
             self.input_file,
             self.output_file,
@@ -68,7 +68,7 @@ class TestGaussianJob(TestCase):
             True,
             self.directory,
         )
-        jobs = list(g)
+        jobs = list(job_gen)
         assert len(jobs) == 1, "One job should be generated under normal conditions."
         jobs[0].setup()
         assert os.path.exists(f"{SCR_DIR}/test.com.orig")

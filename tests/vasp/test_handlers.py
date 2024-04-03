@@ -685,7 +685,7 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         assert handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
-        assert [{"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}}] == dct["actions"]
+        assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}}]
 
     def test_check_correct_electronic_repeat(self):
         shutil.copy("vasprun.xml.electronic2", "vasprun.xml")
@@ -714,7 +714,7 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         handler = UnconvergedErrorHandler()
         assert handler.check()
         dct = handler.correct()
-        assert [{"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}}] == dct["actions"]
+        assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}}]
 
     def test_as_from_dict(self):
         handler = UnconvergedErrorHandler("random_name.xml")
