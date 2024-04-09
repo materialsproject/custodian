@@ -53,7 +53,7 @@ class LobsterJob(Job):
         gzipped: bool = True,
         add_files_to_gzip=(),
         backup: bool = True,
-    ):
+    ) -> None:
         """
 
         Args:
@@ -71,7 +71,7 @@ class LobsterJob(Job):
         self.add_files_to_gzip = add_files_to_gzip
         self.backup = backup
 
-    def setup(self, directory="./"):
+    def setup(self, directory="./") -> None:
         """Will backup lobster input files."""
         if self.backup:
             for file in LOBSTERINPUT_FILES:
@@ -91,7 +91,7 @@ class LobsterJob(Job):
         ):
             return subprocess.run(cmd, stdout=f_std, stderr=f_err, shell=True, check=False)
 
-    def postprocess(self, directory="./"):
+    def postprocess(self, directory="./") -> None:
         """Will gzip relevant files (won't gzip custodian.json and other output files from the cluster)."""
         if self.gzipped:
             for file in LOBSTEROUTPUT_FILES:

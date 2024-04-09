@@ -7,7 +7,7 @@ from custodian.nwchem.handlers import NwchemErrorHandler
 from custodian.nwchem.jobs import NwchemJob
 
 
-def do_run(args):
+def do_run(args) -> None:
     """Do the run."""
     logging.basicConfig(format="%(asctime)s %(message)s", level=logging.INFO, filename="run.log")
     job = NwchemJob(
@@ -26,7 +26,7 @@ def do_run(args):
     c.run()
 
 
-def main():
+def main() -> None:
     """Main method."""
     import argparse
 

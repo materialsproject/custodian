@@ -11,7 +11,7 @@ from custodian.ansible.interpreter import Modder
 class FeffModder(Modder):
     """A Modder for FeffInput sets."""
 
-    def __init__(self, actions=None, strict=True, feffinp=None, directory="./"):
+    def __init__(self, actions=None, strict=True, feffinp=None, directory="./") -> None:
         """
         Args:
             actions ([Action]): A sequence of supported actions. See
@@ -33,7 +33,7 @@ class FeffModder(Modder):
         actions = actions or [FileActions, DictActions]
         super().__init__(actions, strict)
 
-    def apply_actions(self, actions):
+    def apply_actions(self, actions) -> None:
         """
         Applies a list of actions to the FEFF Input Set and rewrites modified
         files.

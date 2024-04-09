@@ -84,7 +84,7 @@ class VaspJob(Job):
         gamma_vasp_cmd=None,
         copy_magmom=False,
         auto_continue=False,
-    ):
+    ) -> None:
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -166,7 +166,7 @@ class VaspJob(Job):
                     logger.exception(f"Failed to detect VASP path: {vasp_cmd}")
                     scope.set_tag("vasp_cmd", vasp_cmd)
 
-    def setup(self, directory="./"):
+    def setup(self, directory="./") -> None:
         """
         Performs initial setup for VaspJob, including overriding any settings
         and backing up.
@@ -255,7 +255,7 @@ class VaspJob(Job):
             # use line buffering for stderr
             return subprocess.Popen(cmd, cwd=directory, stdout=f_std, stderr=f_err, start_new_session=True)  # pylint: disable=R1732
 
-    def postprocess(self, directory="./"):
+    def postprocess(self, directory="./") -> None:
         """
         Postprocessing includes renaming and gzipping where necessary.
         Also copies the magmom to the incar if necessary.
@@ -684,7 +684,7 @@ class VaspJob(Job):
             for key in sorted(energies):
                 file.write(f"{key} {energies[key]}\n")
 
-    def terminate(self, directory="./"):
+    def terminate(self, directory="./") -> None:
         """
         Kill all VASP processes associated with the current job.
         This is done by looping over all processes and selecting the ones
@@ -741,7 +741,7 @@ class VaspNEBJob(VaspJob):
         auto_continue=False,
         gamma_vasp_cmd=None,
         settings_override=None,
-    ):
+    ) -> None:
         """
         This constructor is a simplified version of VaspJob, which satisfies
         the need for flexibility. For standard kinds of runs, it's often
@@ -806,7 +806,7 @@ class VaspNEBJob(VaspJob):
         self.auto_continue = auto_continue
         self.settings_override = settings_override
 
-    def setup(self, directory="./"):
+    def setup(self, directory="./") -> None:
         """
         Performs initial setup for VaspNEBJob, including overriding any settings
         and backing up.
@@ -901,7 +901,7 @@ class VaspNEBJob(VaspJob):
                 start_new_session=True,
             )  # pylint: disable=R1732
 
-    def postprocess(self, directory="./"):
+    def postprocess(self, directory="./") -> None:
         """Postprocessing includes renaming and gzipping where necessary."""
         # Add suffix to all sub_dir/{items}
 
@@ -939,7 +939,7 @@ class GenerateVaspInputJob(Job):
     used to modify the VASP input files before the next VaspJob.
     """
 
-    def __init__(self, input_set, contcar_only=True, **kwargs):
+    def __init__(self, input_set, contcar_only=True, **kwargs) -> None:
         """
         Args:
             input_set (str): Full path to the input set. E.g.,
@@ -952,10 +952,10 @@ class GenerateVaspInputJob(Job):
         self.contcar_only = contcar_only
         self.kwargs = kwargs
 
-    def setup(self, directory="./"):
+    def setup(self, directory="./") -> None:
         """Dummy setup."""
 
-    def run(self, directory="./"):
+    def run(self, directory="./") -> None:
         """Run the calculation."""
         if os.path.isfile(os.path.join(directory, "CONTCAR")):
             structure = Structure.from_file(os.path.join(directory, "CONTCAR"))
@@ -968,5 +968,5 @@ class GenerateVaspInputJob(Job):
         vis = getattr(mod, classname)(structure, **self.kwargs)
         vis.write_input(directory)
 
-    def postprocess(self, directory="./"):
+    def postprocess(self, directory="./") -> None:
         """Dummy postprocess."""

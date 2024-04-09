@@ -196,7 +196,7 @@ def get_jobs(args):
             )
 
 
-def do_run(args):
+def do_run(args) -> None:
     """Do the run."""
     FORMAT = "%(asctime)s %(message)s"
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
@@ -216,7 +216,7 @@ def do_run(args):
     c.run()
 
 
-def main():
+def main() -> None:
     """Main method."""
     import argparse
 

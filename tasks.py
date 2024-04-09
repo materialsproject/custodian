@@ -17,7 +17,7 @@ NEW_VER = datetime.datetime.today().strftime("%Y.%-m.%-d")
 
 
 @task
-def make_doc(ctx):
+def make_doc(ctx) -> None:
     with cd("docs"):
         ctx.run("touch index.rst")
         ctx.run("rm custodian.*.rst", warn=True)
@@ -39,7 +39,7 @@ def make_doc(ctx):
 
 
 @task
-def update_doc(ctx):
+def update_doc(ctx) -> None:
     make_doc(ctx)
     ctx.run("git add .", warn=True)
     ctx.run('git commit -a -m "Update dev docs"', warn=True)
@@ -47,7 +47,7 @@ def update_doc(ctx):
 
 
 @task
-def release_github(ctx):
+def release_github(ctx) -> None:
     payload = {
         "tag_name": "v" + NEW_VER,
         "target_commitish": "master",
@@ -65,12 +65,12 @@ def release_github(ctx):
 
 
 @task
-def test(ctx):
+def test(ctx) -> None:
     ctx.run("pytest custodian")
 
 
 @task
-def set_ver(ctx):
+def set_ver(ctx) -> None:
     with open("custodian/__init__.py") as file:
         lines = [f'__version__ = "{NEW_VER}"' if "__version__" in line else line.rstrip() for line in file]
 
@@ -85,7 +85,7 @@ def set_ver(ctx):
 
 
 @task
-def update_changelog(ctx, version=None, sim=False):
+def update_changelog(ctx, version=None, sim=False) -> None:
     """
     Create a preliminary change log using the git logs.
 
@@ -135,7 +135,7 @@ def update_changelog(ctx, version=None, sim=False):
 
 
 @task
-def release(ctx):
+def release(ctx) -> None:
     set_ver(ctx)
     update_doc(ctx)
     release_github(ctx)

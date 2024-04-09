@@ -16,13 +16,13 @@ pymatgen.core.SETTINGS["PMG_VASP_PSP_DIR"] = TEST_FILES
 
 
 class TestVaspJob:
-    def test_as_from_dict(self):
+    def test_as_from_dict(self) -> None:
         v = VaspJob(["hello"])
         v2 = VaspJob.from_dict(v.as_dict())
         assert type(v2) == type(v)
         assert v2.vasp_cmd == ("hello",)
 
-    def test_setup(self):
+    def test_setup(self) -> None:
         with cd(TEST_FILES), ScratchDir(".", copy_from_current_on_enter=True):
             v = VaspJob(["hello"], auto_npar=True)
             v.setup()
@@ -32,7 +32,7 @@ class TestVaspJob:
             if count > 3:
                 assert incar["NPAR"] > 1
 
-    def test_setup_run_no_kpts(self):
+    def test_setup_run_no_kpts(self) -> None:
         # just make sure v.setup() and v.run() exit cleanly when no KPOINTS file is present
         with cd(f"{TEST_FILES}/kspacing"), ScratchDir(".", copy_from_current_on_enter=True):
             v = VaspJob(["hello"], auto_npar=True)
@@ -44,7 +44,7 @@ class TestVaspJob:
                 # directory.
                 v.run()
 
-    def test_postprocess(self):
+    def test_postprocess(self) -> None:
         with cd(f"{TEST_FILES}/postprocess"), ScratchDir(".", copy_from_current_on_enter=True):
             shutil.copy("INCAR", "INCAR.backup")
 
@@ -69,7 +69,7 @@ class TestVaspJob:
             assert incar["MAGMOM"] == pytest.approx([3.007, 1.397, -0.189, -0.189])
             assert incar_prev["MAGMOM"] == pytest.approx([5, -5, 0.6, 0.6])
 
-    def test_continue(self):
+    def test_continue(self) -> None:
         # Test the continuation functionality
         with cd(f"{TEST_FILES}/postprocess"):
             # Test default functionality
@@ -94,19 +94,19 @@ class TestVaspJob:
                 assert Incar.from_file("INCAR")["ISTART"] == 1
                 v.postprocess()
 
-    def test_static(self):
+    def test_static(self) -> None:
         # Just a basic test of init.
         VaspJob.double_relaxation_run(["vasp"])
 
 
 class TestVaspNEBJob:
-    def test_as_from_dict(self):
+    def test_as_from_dict(self) -> None:
         v = VaspNEBJob(["hello"])
         v2 = VaspNEBJob.from_dict(v.as_dict())
         assert type(v2) == type(v)
         assert v2.vasp_cmd == ("hello",)
 
-    def test_setup(self):
+    def test_setup(self) -> None:
         with cd(f"{TEST_FILES}/setup_neb"), ScratchDir(".", copy_from_current_on_enter=True):
             v = VaspNEBJob("hello", half_kpts=True)
             v.setup()
@@ -121,7 +121,7 @@ class TestVaspNEBJob:
             assert kpt_pre.style.name == "Monkhorst"
             assert kpt.style.name == "Gamma"
 
-    def test_postprocess(self):
+    def test_postprocess(self) -> None:
         neb_outputs = ["INCAR", "KPOINTS", "POTCAR", "vasprun.xml"]
         neb_sub_outputs = [
             "CHG",
@@ -160,7 +160,7 @@ class TestVaspNEBJob:
 
 
 class TestGenerateVaspInputJob:
-    def test_run(self):
+    def test_run(self) -> None:
         with ScratchDir("."):
             for file in ("INCAR", "POSCAR", "POTCAR", "KPOINTS"):
                 shutil.copy(f"{TEST_FILES}/{file}", file)

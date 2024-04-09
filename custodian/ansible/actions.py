@@ -46,7 +46,7 @@ class DictActions:
     """
 
     @staticmethod
-    def set(input_dict, settings, directory=None):
+    def set(input_dict, settings, directory=None) -> None:
         """
         Sets a value using MongoDB syntax.
 
@@ -60,7 +60,7 @@ class DictActions:
             d[key] = v
 
     @staticmethod
-    def unset(input_dict, settings, directory=None):
+    def unset(input_dict, settings, directory=None) -> None:
         """
         Unset a value using MongoDB syntax.
 
@@ -74,7 +74,7 @@ class DictActions:
             del dct[inner_key]
 
     @staticmethod
-    def push(input_dict, settings, directory=None):
+    def push(input_dict, settings, directory=None) -> None:
         """
         Push to a list using MongoDB syntax.
 
@@ -91,7 +91,7 @@ class DictActions:
                 d[key] = [v]
 
     @staticmethod
-    def push_all(input_dict, settings, directory=None):
+    def push_all(input_dict, settings, directory=None) -> None:
         """
         Push multiple items to a list using MongoDB syntax.
 
@@ -108,7 +108,7 @@ class DictActions:
                 dct[k2] = val
 
     @staticmethod
-    def inc(input_dict, settings, directory=None):
+    def inc(input_dict, settings, directory=None) -> None:
         """
         Increment a value using MongdoDB syntax.
 
@@ -125,7 +125,7 @@ class DictActions:
                 d[key] = v
 
     @staticmethod
-    def rename(input_dict, settings, directory=None):
+    def rename(input_dict, settings, directory=None) -> None:
         """
         Rename a key using MongoDB syntax.
 
@@ -139,7 +139,7 @@ class DictActions:
                 input_dict[v] = val
 
     @staticmethod
-    def add_to_set(input_dict, settings, directory=None):
+    def add_to_set(input_dict, settings, directory=None) -> None:
         """
         Add to set using MongoDB syntax.
 
@@ -158,7 +158,7 @@ class DictActions:
                 d[key] = v
 
     @staticmethod
-    def pull(input_dict, settings, directory=None):
+    def pull(input_dict, settings, directory=None) -> None:
         """
         Pull an item using MongoDB syntax.
 
@@ -175,7 +175,7 @@ class DictActions:
                 dct[k2] = [itm for itm in dct[k2] if itm != val]
 
     @staticmethod
-    def pull_all(input_dict, settings, directory=None):
+    def pull_all(input_dict, settings, directory=None) -> None:
         """
         Pull multiple items to a list using MongoDB syntax.
 
@@ -191,7 +191,7 @@ class DictActions:
                 DictActions.pull(input_dict, {key: itm})
 
     @staticmethod
-    def pop(input_dict, settings, directory=None):
+    def pop(input_dict, settings, directory=None) -> None:
         """
         Pop item from a list using MongoDB syntax.
 
@@ -218,7 +218,7 @@ class FileActions:
     """
 
     @staticmethod
-    def file_create(filename, settings, directory):
+    def file_create(filename, settings, directory) -> None:
         """
         Creates a file.
 
@@ -235,7 +235,7 @@ class FileActions:
                     file.write(v)
 
     @staticmethod
-    def file_move(filename, settings, directory):
+    def file_move(filename, settings, directory) -> None:
         """
         Moves a file. {'_file_move': {'dest': 'new_file_name'}}.
 
@@ -251,7 +251,7 @@ class FileActions:
                 shutil.move(os.path.join(directory, filename), os.path.join(directory, v))
 
     @staticmethod
-    def file_delete(filename, settings, directory):
+    def file_delete(filename, settings, directory) -> None:
         """
         Deletes a file. {'_file_delete': {'mode': "actual"}}.
 
@@ -274,7 +274,7 @@ class FileActions:
                 print(f"Simulated removal of {filename}")
 
     @staticmethod
-    def file_copy(filename, settings, directory):
+    def file_copy(filename, settings, directory) -> None:
         """
         Copies a file. {'_file_copy': {'dest': 'new_file_name'}}.
 
@@ -288,7 +288,7 @@ class FileActions:
                 shutil.copyfile(os.path.join(directory, filename), os.path.join(directory, v))
 
     @staticmethod
-    def file_modify(filename, settings, directory):
+    def file_modify(filename, settings, directory) -> None:
         """
         Modifies file access.
 
@@ -297,8 +297,9 @@ class FileActions:
             settings (dict): Can be "mode" or "owners"
             directory (str): Directory to modify file in
         """
-        for k, v in settings.items():
-            if k == "mode":
-                os.chmod(os.path.join(directory, filename), v)
-            if k == "owners":
-                os.chown(os.path.join(directory, filename), v)
+        for key, val in settings.items():
+            if key == "mode":
+                os.chmod(os.path.join(directory, filename), val)
+            if key == "owners":
+                # TODO fix this mypy error, missing 3rd positional argument to chown
+                os.chown(os.path.join(directory, filename), val)  # type: ignore[call-arg]

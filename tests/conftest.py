@@ -10,6 +10,6 @@ TEST_FILES = f"{TEST_DIR}/files"
 
 
 @pytest.fixture(autouse=True)
-def _patch_get_potential_energy(monkeypatch):
+def _patch_get_potential_energy(monkeypatch) -> None:
     """Monkeypatch the multiprocessing.cpu_count() function to always return 64."""
     monkeypatch.setattr(multiprocessing, "cpu_count", lambda: 64)

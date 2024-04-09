@@ -1,5 +1,7 @@
 """This module implements specific error handler for FEFF runs."""
 
+from __future__ import annotations
+
 import logging
 import os
 import re
@@ -35,7 +37,7 @@ class UnconvergedErrorHandler(ErrorHandler):
 
     is_monitor = False
 
-    def __init__(self, output_filename="log1.dat"):
+    def __init__(self, output_filename="log1.dat") -> None:
         """Initialize the handler with the output file to check.
 
         Args:
@@ -52,7 +54,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         """
         return self._notconverge_check(directory)
 
-    def _notconverge_check(self, directory):
+    def _notconverge_check(self, directory) -> bool | None:
         # Process the output file and get converge information
         not_converge_pattern = re.compile("Convergence not reached.*")
         converge_pattern = re.compile("Convergence reached.*")

@@ -126,7 +126,7 @@ class Custodian:
         terminate_on_nonzero_returncode=True,
         directory=None,
         **kwargs,
-    ):
+    ) -> None:
         """Initialize a Custodian from a list of jobs and error handlers.
 
         Args:
@@ -227,7 +227,7 @@ class Custodian:
 
                     return prefix == abs_directory
 
-                def safe_extract(tar, path=directory, members=None, *, numeric_owner=False):
+                def safe_extract(tar, path=directory, members=None, *, numeric_owner=False) -> None:
                     for member in tar.getmembers():
                         member_path = os.path.join(path, member.name)
                         if not is_within_directory(path, member_path):
@@ -242,12 +242,12 @@ class Custodian:
         return restart, run_log
 
     @staticmethod
-    def _delete_checkpoints(directory):
+    def _delete_checkpoints(directory) -> None:
         for file in glob(os.path.join(directory, "custodian.chk.*.tar.gz")):
             os.remove(file)
 
     @staticmethod
-    def _save_checkpoint(directory, index):
+    def _save_checkpoint(directory, index) -> None:
         try:
             Custodian._delete_checkpoints(directory)
             n = os.path.join(directory, f"custodian.chk.{index}.tar.gz")
@@ -410,7 +410,7 @@ class Custodian:
 
         return self.run_log
 
-    def _run_job(self, job_n, job):
+    def _run_job(self, job_n, job) -> None:
         """
         Runs a single job.
 
@@ -717,7 +717,7 @@ class Job(MSONable):
         etc.
         """
 
-    def terminate(self, directory="./"):
+    def terminate(self, directory="./") -> None:
         """Implement termination function."""
         return
 
@@ -813,7 +813,7 @@ class ErrorHandler(MSONable):
             return self._num_applied_corrections
 
     @n_applied_corrections.setter
-    def n_applied_corrections(self, value):
+    def n_applied_corrections(self, value) -> None:
         """
         Setter for the number of corrections applied.
 
@@ -844,7 +844,7 @@ class Validator(MSONable):
 class CustodianError(RuntimeError):
     """Exception class for Custodian errors."""
 
-    def __init__(self, message, raises=False):
+    def __init__(self, message, raises=False) -> None:
         """Initialize the error with a message.
 
         Args:
@@ -859,7 +859,7 @@ class CustodianError(RuntimeError):
 class ValidationError(CustodianError):
     """Error raised when a validator does not pass the check."""
 
-    def __init__(self, message, raises, validator):
+    def __init__(self, message, raises, validator) -> None:
         """
         Args:
             message (str): Message passed to Exception
@@ -873,7 +873,7 @@ class ValidationError(CustodianError):
 class NonRecoverableError(CustodianError):
     """Error raised when a handler found an error but could not fix it."""
 
-    def __init__(self, message, raises, handler):
+    def __init__(self, message, raises, handler) -> None:
         """
         Args:
             message (str): Message passed to Exception
@@ -891,7 +891,7 @@ class ReturnCodeError(CustodianError):
 class MaxCorrectionsError(CustodianError):
     """Error raised when the maximum allowed number of errors is reached."""
 
-    def __init__(self, message, raises, max_errors):
+    def __init__(self, message, raises, max_errors) -> None:
         """
         Args:
             message (str): Message passed to Exception
@@ -905,7 +905,7 @@ class MaxCorrectionsError(CustodianError):
 class MaxCorrectionsPerJobError(CustodianError):
     """Error raised when the maximum allowed number of errors per job is reached."""
 
-    def __init__(self, message, raises, max_errors_per_job, job):
+    def __init__(self, message, raises, max_errors_per_job, job) -> None:
         """
         Args:
             message (str): Message passed to Exception

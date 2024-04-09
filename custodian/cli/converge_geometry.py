@@ -64,7 +64,7 @@ def get_runs(args):
         )
 
 
-def do_run(args):
+def do_run(args) -> None:
     """Perform the run."""
     handlers = [
         VaspErrorHandler(),

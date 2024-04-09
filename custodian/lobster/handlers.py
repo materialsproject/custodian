@@ -17,7 +17,7 @@ __date__ = "April 27, 2020"
 class EnoughBandsValidator(Validator):
     """validates if enough bands for COHP calculation are available."""
 
-    def __init__(self, output_filename: str = "lobsterout"):
+    def __init__(self, output_filename: str = "lobsterout") -> None:
         """
 
         Args:
@@ -47,7 +47,7 @@ class LobsterFilesValidator(Validator):
     Check if lobster terminated normally by looking for finished.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Dummy init."""
 
     def check(self, directory: str = "./") -> bool:
@@ -63,7 +63,7 @@ class LobsterFilesValidator(Validator):
 class ChargeSpillingValidator(Validator):
     """Check if spilling is below certain threshold!"""
 
-    def __init__(self, output_filename: str = "lobsterout", charge_spilling_limit: float = 0.05):
+    def __init__(self, output_filename: str = "lobsterout", charge_spilling_limit: float = 0.05) -> None:
         """
 
         Args:
