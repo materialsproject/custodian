@@ -2,6 +2,7 @@
 
 import logging
 import os
+import shlex
 import shutil
 import subprocess
 
@@ -78,7 +79,8 @@ class LobsterJob(Job):
 
     def run(self, directory="./"):
         """Runs the job."""
-        cmd = " ".join(self.lobster_cmd)  # join split commands (e.g., from atomate and atomate2)
+        # join split commands (e.g. from atomate and atomate2)
+        cmd = self.lobster_cmd if isinstance(self.lobster_cmd, str) else shlex.join(self.lobster_cmd)
 
         logger.info(f"Running {cmd}")
 
