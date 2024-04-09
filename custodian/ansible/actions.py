@@ -135,8 +135,8 @@ class DictActions:
             directory (None): dummy parameter for compatibility with FileActions
         """
         for key, val in settings.items():
-            if val := input_dict.pop(key, None):
-                input_dict[val] = val
+            if input_val := input_dict.pop(key, None):
+                input_dict[val] = input_val
 
     @staticmethod
     def add_to_set(input_dict, settings, directory=None) -> None:
