@@ -73,7 +73,7 @@ custodian_params:
 """
 
 
-def run(args):
+def run(args) -> None:
     """Perform a single run."""
     FORMAT = "%(asctime)s %(message)s"
     logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
@@ -83,12 +83,12 @@ def run(args):
     c.run()
 
 
-def print_example(args):
+def print_example(args) -> None:
     """Print the example_yaml."""
     print(example_yaml)
 
 
-def main():
+def main() -> None:
     """Main method."""
     parser = argparse.ArgumentParser(
         description="""

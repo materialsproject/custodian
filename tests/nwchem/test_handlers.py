@@ -13,7 +13,7 @@ __status__ = "Beta"
 __date__ = "6/18/13"
 
 
-def test_check_correct():
+def test_check_correct() -> None:
     os.chdir(f"{TEST_FILES}/nwchem")
     shutil.copy("C1N1Cl1_1.nw", "C1N1Cl1_1.nw.orig")
     handler = NwchemErrorHandler(output_filename="C1N1Cl1_1.nwout")

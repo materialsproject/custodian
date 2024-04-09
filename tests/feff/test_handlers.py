@@ -14,13 +14,13 @@ __email__ = "chz022@ucsd.edu"
 __date__ = "Oct 18, 2017"
 
 
-def clean_dir():
+def clean_dir() -> None:
     for file in glob("error.*.tar.gz"):
         os.remove(file)
 
 
 class UnconvergedErrorHandlerTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         os.chdir(TEST_FILES)
         subdir = f"{TEST_FILES}/feff_unconverged"
         os.chdir(subdir)
@@ -31,7 +31,7 @@ class UnconvergedErrorHandlerTest(unittest.TestCase):
         shutil.copy("feff.inp", "feff.inp.orig")
         shutil.copy("log1.dat", "log1.dat.orig")
 
-    def test_check_unconverged(self):
+    def test_check_unconverged(self) -> None:
         handler = UnconvergedErrorHandler()
         assert handler.check()
         dct = handler.correct()

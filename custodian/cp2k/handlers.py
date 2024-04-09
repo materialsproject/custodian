@@ -58,7 +58,7 @@ class StdErrHandler(ErrorHandler):
 
     error_msgs = {"seg_fault": ["SIGSEGV"], "out_of_memory": ["insufficient virtual memory"], "abort": ["SIGABRT"]}
 
-    def __init__(self, std_err="std_err.txt"):
+    def __init__(self, std_err="std_err.txt") -> None:
         """Initialize the handler with the output file to check.
 
         Args:
@@ -68,7 +68,7 @@ class StdErrHandler(ErrorHandler):
                 default redirect used by :class:`custodian.cp2k.jobs.Cp2kJob`.
         """
         self.std_err = std_err
-        self.errors = set()
+        self.errors: set[str] = set()
 
     def check(self, directory="./"):
         """Check for error in std_err file."""
@@ -133,7 +133,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out"):
+    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out") -> None:
         """Initialize the error handler from a set of input and output files.
 
         Args:
@@ -399,7 +399,7 @@ class DivergingScfErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, output_file="cp2k.out", input_file="cp2k.inp"):
+    def __init__(self, output_file="cp2k.out", input_file="cp2k.inp") -> None:
         """Initializes the error handler from an output files.
 
         Args:
@@ -461,7 +461,7 @@ class FrozenJobErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out", timeout=3600):
+    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out", timeout=3600) -> None:
         """Initialize the handler with the output file to check.
 
         Args:
@@ -600,7 +600,7 @@ class AbortHandler(ErrorHandler):
     is_monitor = False
     is_terminating = True
 
-    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out"):
+    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out") -> None:
         """
         Initialize handler for CP2K abort messages.
 
@@ -614,9 +614,9 @@ class AbortHandler(ErrorHandler):
             "cholesky": r"(Cholesky decomposition failed. Matrix ill conditioned ?)",
             "cholesky_scf": r"(Cholesky decompose failed: the matrix is not positive definite or)",
         }
-        self.responses = []
+        self.responses: list[str] = []
 
-    def check(self, directory="./"):
+    def check(self, directory="./") -> bool:
         """Check for abort messages."""
         matches = regrep(
             os.path.join(directory, self.output_file),
@@ -786,7 +786,7 @@ class NumericalPrecisionHandler(ErrorHandler):
         pgf_orb_strict=1e-20,
         eps_default_strict=1e-12,
         eps_gvg_strict=1e-10,
-    ):
+    ) -> None:
         """
         Initialize the error handler.
 
@@ -942,7 +942,7 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
         max_iter=20,
         max_total_iter=200,
         optimizers=("BFGS", "CG", "BFGS", "CG"),
-    ):
+    ) -> None:
         """
         Initialize the error handler.
 
@@ -1026,7 +1026,7 @@ class WalltimeHandler(ErrorHandler):
     raises_runtime_error = False
     is_terminating = False
 
-    def __init__(self, output_file="cp2k.out", enable_checkpointing=True):
+    def __init__(self, output_file="cp2k.out", enable_checkpointing=True) -> None:
         """
         Args:
             output_file (str): name of the cp2k output file

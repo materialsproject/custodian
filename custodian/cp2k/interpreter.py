@@ -20,7 +20,7 @@ class Cp2kModder(Modder):
     also supports modifications that are file operations (e.g. copying).
     """
 
-    def __init__(self, filename="cp2k.inp", actions=None, strict=True, ci=None, directory="./"):
+    def __init__(self, filename="cp2k.inp", actions=None, strict=True, ci=None, directory="./") -> None:
         """Initialize a Modder for Cp2kInput sets.
 
         Args:
@@ -43,7 +43,7 @@ class Cp2kModder(Modder):
         actions = actions or [FileActions, DictActions]
         super().__init__(actions, strict)
 
-    def apply_actions(self, actions):
+    def apply_actions(self, actions) -> None:
         """
         Applies a list of actions to the CP2K Input Set and rewrites modified
         files.
@@ -68,7 +68,7 @@ class Cp2kModder(Modder):
         self.ci.write_file(os.path.join(self.directory, self.filename))
 
     @staticmethod
-    def _modify(modification, obj):
+    def _modify(modification, obj) -> None:
         """
         Note that modify makes actual in-place modifications. It does not
         return a copy.

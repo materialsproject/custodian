@@ -8,7 +8,7 @@ from tests.conftest import TEST_FILES
 
 
 @pytest.fixture(autouse=True)
-def _clear_tracked_cache():
+def _clear_tracked_cache() -> None:
     """Clear the cache of the stored functions between the tests."""
     from custodian.utils import tracked_lru_cache
 
@@ -16,7 +16,7 @@ def _clear_tracked_cache():
 
 
 class TestVasprunXMLValidator:
-    def test_check_and_correct(self):
+    def test_check_and_correct(self) -> None:
         os.chdir(f"{TEST_FILES}/bad_vasprun")
         handler = VasprunXMLValidator()
         assert handler.check()
@@ -27,7 +27,7 @@ class TestVasprunXMLValidator:
         assert not handler.check()
         os.remove("vasprun.xml")
 
-    def test_as_dict(self):
+    def test_as_dict(self) -> None:
         handler = VasprunXMLValidator()
         dct = handler.as_dict()
         h2 = VasprunXMLValidator.from_dict(dct)
@@ -35,7 +35,7 @@ class TestVasprunXMLValidator:
 
 
 class TestVaspFilesValidator:
-    def test_check_and_correct(self):
+    def test_check_and_correct(self) -> None:
         # just an example where CONTCAR is not present
         os.chdir(f"{TEST_FILES}/positive_energy")
         handler = VaspFilesValidator()
@@ -44,7 +44,7 @@ class TestVaspFilesValidator:
         os.chdir(f"{TEST_FILES}/postprocess")
         assert not handler.check()
 
-    def test_as_dict(self):
+    def test_as_dict(self) -> None:
         handler = VaspFilesValidator()
         dct = handler.as_dict()
         h2 = VaspFilesValidator.from_dict(dct)
@@ -52,7 +52,7 @@ class TestVaspFilesValidator:
 
 
 class TestVaspNpTMDValidator:
-    def test_check_and_correct(self):
+    def test_check_and_correct(self) -> None:
         # NPT-AIMD using correct VASP
         os.chdir(f"{TEST_FILES}/npt_common")
         handler = VaspNpTMDValidator()
@@ -66,7 +66,7 @@ class TestVaspNpTMDValidator:
         os.chdir(f"{TEST_FILES}/npt_bad_vasp")
         assert handler.check()
 
-    def test_as_dict(self):
+    def test_as_dict(self) -> None:
         handler = VaspNpTMDValidator()
         dct = handler.as_dict()
         h2 = VaspNpTMDValidator.from_dict(dct)
@@ -74,7 +74,7 @@ class TestVaspNpTMDValidator:
 
 
 class TestVaspAECCARValidator:
-    def test_check_and_correct(self):
+    def test_check_and_correct(self) -> None:
         # NPT-AIMD using correct VASP
         os.chdir(f"{TEST_FILES}/bad_aeccar")
         handler = VaspAECCARValidator()

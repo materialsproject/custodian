@@ -11,13 +11,13 @@ import shutil
 def get_nested_dict(input_dict, key):
     """Helper function to interpret a nested dict input."""
     current = input_dict
-    toks = key.split("->")
-    n = len(toks)
-    for i, tok in enumerate(toks):
+    tokens = key.split("->")
+    n = len(tokens)
+    for i, tok in enumerate(tokens):
         if tok not in current and i < n - 1:
             current[tok] = {}
         elif i == n - 1:
-            return current, toks[-1]
+            return current, tokens[-1]
         current = current[tok]
     return None
 
@@ -46,7 +46,7 @@ class DictActions:
     """
 
     @staticmethod
-    def set(input_dict, settings, directory=None):
+    def set(input_dict, settings, directory=None) -> None:
         """
         Sets a value using MongoDB syntax.
 
@@ -55,12 +55,12 @@ class DictActions:
             settings (dict): The specification of the modification to be made.
             directory (None): dummy parameter for compatibility with FileActions
         """
-        for k, v in settings.items():
-            (d, key) = get_nested_dict(input_dict, k)
-            d[key] = v
+        for key, val in settings.items():
+            dct, key = get_nested_dict(input_dict, key)
+            dct[key] = val
 
     @staticmethod
-    def unset(input_dict, settings, directory=None):
+    def unset(input_dict, settings, directory=None) -> None:
         """
         Unset a value using MongoDB syntax.
 
@@ -74,7 +74,7 @@ class DictActions:
             del dct[inner_key]
 
     @staticmethod
-    def push(input_dict, settings, directory=None):
+    def push(input_dict, settings, directory=None) -> None:
         """
         Push to a list using MongoDB syntax.
 
@@ -83,15 +83,15 @@ class DictActions:
             settings (dict): The specification of the modification to be made.
             directory (None): dummy parameter for compatibility with FileActions
         """
-        for k, v in settings.items():
-            (d, key) = get_nested_dict(input_dict, k)
-            if key in d:
-                d[key].append(v)
+        for key, val in settings.items():
+            dct, key = get_nested_dict(input_dict, key)
+            if key in dct:
+                dct[key].append(val)
             else:
-                d[key] = [v]
+                dct[key] = [val]
 
     @staticmethod
-    def push_all(input_dict, settings, directory=None):
+    def push_all(input_dict, settings, directory=None) -> None:
         """
         Push multiple items to a list using MongoDB syntax.
 
@@ -108,7 +108,7 @@ class DictActions:
                 dct[k2] = val
 
     @staticmethod
-    def inc(input_dict, settings, directory=None):
+    def inc(input_dict, settings, directory=None) -> None:
         """
         Increment a value using MongdoDB syntax.
 
@@ -117,15 +117,15 @@ class DictActions:
             settings (dict): The specification of the modification to be made.
             directory (None): dummy parameter for compatibility with FileActions
         """
-        for k, v in settings.items():
-            (d, key) = get_nested_dict(input_dict, k)
-            if key in d:
-                d[key] += v
+        for key, val in settings.items():
+            dct, key = get_nested_dict(input_dict, key)
+            if key in dct:
+                dct[key] += val
             else:
-                d[key] = v
+                dct[key] = val
 
     @staticmethod
-    def rename(input_dict, settings, directory=None):
+    def rename(input_dict, settings, directory=None) -> None:
         """
         Rename a key using MongoDB syntax.
 
@@ -134,12 +134,12 @@ class DictActions:
             settings (dict): The specification of the modification to be made.
             directory (None): dummy parameter for compatibility with FileActions
         """
-        for key, v in settings.items():
+        for key, val in settings.items():
             if val := input_dict.pop(key, None):
-                input_dict[v] = val
+                input_dict[val] = val
 
     @staticmethod
-    def add_to_set(input_dict, settings, directory=None):
+    def add_to_set(input_dict, settings, directory=None) -> None:
         """
         Add to set using MongoDB syntax.
 
@@ -148,17 +148,17 @@ class DictActions:
             settings (dict): The specification of the modification to be made.
             directory (None): dummy parameter for compatibility with FileActions
         """
-        for k, v in settings.items():
-            (d, key) = get_nested_dict(input_dict, k)
-            if key in d and (not isinstance(d[key], list)):
-                raise ValueError(f"Keyword {k} does not refer to an array.")
-            if key in d and v not in d[key]:
-                d[key].append(v)
-            elif key not in d:
-                d[key] = v
+        for key, val in settings.items():
+            dct, key = get_nested_dict(input_dict, key)
+            if key in dct and (not isinstance(dct[key], list)):
+                raise ValueError(f"Keyword {key} does not refer to an array.")
+            if key in dct and val not in dct[key]:
+                dct[key].append(val)
+            elif key not in dct:
+                dct[key] = val
 
     @staticmethod
-    def pull(input_dict, settings, directory=None):
+    def pull(input_dict, settings, directory=None) -> None:
         """
         Pull an item using MongoDB syntax.
 
@@ -175,7 +175,7 @@ class DictActions:
                 dct[k2] = [itm for itm in dct[k2] if itm != val]
 
     @staticmethod
-    def pull_all(input_dict, settings, directory=None):
+    def pull_all(input_dict, settings, directory=None) -> None:
         """
         Pull multiple items to a list using MongoDB syntax.
 
@@ -191,7 +191,7 @@ class DictActions:
                 DictActions.pull(input_dict, {key: itm})
 
     @staticmethod
-    def pop(input_dict, settings, directory=None):
+    def pop(input_dict, settings, directory=None) -> None:
         """
         Pop item from a list using MongoDB syntax.
 
@@ -200,14 +200,14 @@ class DictActions:
             settings (dict): The specification of the modification to be made.
             directory (None): dummy parameter for compatibility with FileActions
         """
-        for k, v in settings.items():
-            (d, key) = get_nested_dict(input_dict, k)
-            if key in d and (not isinstance(d[key], list)):
-                raise ValueError(f"Keyword {k} does not refer to an array.")
-            if v == 1:
-                d[key].pop()
-            elif v == -1:
-                d[key].pop(0)
+        for key, val in settings.items():
+            dct, key = get_nested_dict(input_dict, key)
+            if key in dct and (not isinstance(dct[key], list)):
+                raise ValueError(f"Keyword {key} does not refer to an array.")
+            if val == 1:
+                dct[key].pop()
+            elif val == -1:
+                dct[key].pop(0)
 
 
 class FileActions:
@@ -218,7 +218,7 @@ class FileActions:
     """
 
     @staticmethod
-    def file_create(filename, settings, directory):
+    def file_create(filename, settings, directory) -> None:
         """
         Creates a file.
 
@@ -229,13 +229,13 @@ class FileActions:
         """
         if len(settings) != 1:
             raise ValueError("Settings must only contain one item with key 'content'.")
-        for k, v in settings.items():
-            if k == "content":
+        for key, val in settings.items():
+            if key == "content":
                 with open(filename, "w") as file:
-                    file.write(v)
+                    file.write(val)
 
     @staticmethod
-    def file_move(filename, settings, directory):
+    def file_move(filename, settings, directory) -> None:
         """
         Moves a file. {'_file_move': {'dest': 'new_file_name'}}.
 
@@ -246,12 +246,12 @@ class FileActions:
         """
         if len(settings) != 1:
             raise ValueError("Settings must only contain one item with key 'dest'.")
-        for k, v in settings.items():
-            if k == "dest":
-                shutil.move(os.path.join(directory, filename), os.path.join(directory, v))
+        for key, val in settings.items():
+            if key == "dest":
+                shutil.move(os.path.join(directory, filename), os.path.join(directory, val))
 
     @staticmethod
-    def file_delete(filename, settings, directory):
+    def file_delete(filename, settings, directory) -> None:
         """
         Deletes a file. {'_file_delete': {'mode': "actual"}}.
 
@@ -263,18 +263,18 @@ class FileActions:
         """
         if len(settings) != 1:
             raise ValueError("Settings must only contain one item with key 'mode'.")
-        for k, v in settings.items():
-            if k == "mode" and v == "actual":
+        for key, val in settings.items():
+            if key == "mode" and val == "actual":
                 try:
                     os.remove(os.path.join(directory, filename))
                 except OSError:
                     # Skip file not found error.
                     pass
-            elif k == "mode" and v == "simulated":
+            elif key == "mode" and val == "simulated":
                 print(f"Simulated removal of {filename}")
 
     @staticmethod
-    def file_copy(filename, settings, directory):
+    def file_copy(filename, settings, directory) -> None:
         """
         Copies a file. {'_file_copy': {'dest': 'new_file_name'}}.
 
@@ -283,12 +283,12 @@ class FileActions:
             settings (dict): Must be {"dest": path of new file}
             directory (str): Directory to copy file to/from
         """
-        for k, v in settings.items():
-            if k.startswith("dest"):
-                shutil.copyfile(os.path.join(directory, filename), os.path.join(directory, v))
+        for key, val in settings.items():
+            if key.startswith("dest"):
+                shutil.copyfile(os.path.join(directory, filename), os.path.join(directory, val))
 
     @staticmethod
-    def file_modify(filename, settings, directory):
+    def file_modify(filename, settings, directory) -> None:
         """
         Modifies file access.
 
@@ -297,8 +297,9 @@ class FileActions:
             settings (dict): Can be "mode" or "owners"
             directory (str): Directory to modify file in
         """
-        for k, v in settings.items():
-            if k == "mode":
-                os.chmod(os.path.join(directory, filename), v)
-            if k == "owners":
-                os.chown(os.path.join(directory, filename), v)
+        for key, val in settings.items():
+            if key == "mode":
+                os.chmod(os.path.join(directory, filename), val)
+            if key == "owners":
+                # TODO fix this mypy error, missing 3rd positional argument to chown
+                os.chown(os.path.join(directory, filename), val)  # type: ignore[call-arg]

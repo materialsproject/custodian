@@ -49,7 +49,7 @@ class QCJob(Job):
         nboexe=None,
         save_scratch=False,
         backup=True,
-    ):
+    ) -> None:
         """
         Args:
             qchem_command (str): Command to run QChem.
@@ -120,7 +120,7 @@ class QCJob(Job):
         command = self.qchem_command + command
         return " ".join(command)
 
-    def setup(self, directory: str | Path = "./"):
+    def setup(self, directory: str | Path = "./") -> None:
         """Sets up environment variables necessary to efficiently run QChem.
 
         Args:
@@ -145,7 +145,7 @@ class QCJob(Job):
                 raise RuntimeError("Trying to run NBO7 without providing NBOEXE in fworker! Exiting...")
             os.environ["NBOEXE"] = self.nboexe
 
-    def postprocess(self, directory: str | Path = "./"):
+    def postprocess(self, directory: str | Path = "./") -> None:
         """Renames and removes scratch files after running QChem.
 
         Args:
