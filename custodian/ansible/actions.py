@@ -11,13 +11,13 @@ import shutil
 def get_nested_dict(input_dict, key):
     """Helper function to interpret a nested dict input."""
     current = input_dict
-    toks = key.split("->")
-    n = len(toks)
-    for i, tok in enumerate(toks):
+    tokens = key.split("->")
+    n = len(tokens)
+    for i, tok in enumerate(tokens):
         if tok not in current and i < n - 1:
             current[tok] = {}
         elif i == n - 1:
-            return current, toks[-1]
+            return current, tokens[-1]
         current = current[tok]
     return None
 
@@ -55,9 +55,9 @@ class DictActions:
             settings (dict): The specification of the modification to be made.
             directory (None): dummy parameter for compatibility with FileActions
         """
-        for k, v in settings.items():
-            (d, key) = get_nested_dict(input_dict, k)
-            d[key] = v
+        for key, val in settings.items():
+            dct, key = get_nested_dict(input_dict, key)
+            dct[key] = val
 
     @staticmethod
     def unset(input_dict, settings, directory=None) -> None:
@@ -83,12 +83,12 @@ class DictActions:
             settings (dict): The specification of the modification to be made.
             directory (None): dummy parameter for compatibility with FileActions
         """
-        for k, v in settings.items():
-            (d, key) = get_nested_dict(input_dict, k)
-            if key in d:
-                d[key].append(v)
+        for key, val in settings.items():
+            dct, key = get_nested_dict(input_dict, key)
+            if key in dct:
+                dct[key].append(val)
             else:
-                d[key] = [v]
+                dct[key] = [val]
 
     @staticmethod
     def push_all(input_dict, settings, directory=None) -> None:
@@ -117,12 +117,12 @@ class DictActions:
             settings (dict): The specification of the modification to be made.
             directory (None): dummy parameter for compatibility with FileActions
         """
-        for k, v in settings.items():
-            (d, key) = get_nested_dict(input_dict, k)
-            if key in d:
-                d[key] += v
+        for key, val in settings.items():
+            dct, key = get_nested_dict(input_dict, key)
+            if key in dct:
+                dct[key] += val
             else:
-                d[key] = v
+                dct[key] = val
 
     @staticmethod
     def rename(input_dict, settings, directory=None) -> None:
@@ -134,9 +134,9 @@ class DictActions:
             settings (dict): The specification of the modification to be made.
             directory (None): dummy parameter for compatibility with FileActions
         """
-        for key, v in settings.items():
+        for key, val in settings.items():
             if val := input_dict.pop(key, None):
-                input_dict[v] = val
+                input_dict[val] = val
 
     @staticmethod
     def add_to_set(input_dict, settings, directory=None) -> None:
@@ -148,14 +148,14 @@ class DictActions:
             settings (dict): The specification of the modification to be made.
             directory (None): dummy parameter for compatibility with FileActions
         """
-        for k, v in settings.items():
-            (d, key) = get_nested_dict(input_dict, k)
-            if key in d and (not isinstance(d[key], list)):
-                raise ValueError(f"Keyword {k} does not refer to an array.")
-            if key in d and v not in d[key]:
-                d[key].append(v)
-            elif key not in d:
-                d[key] = v
+        for key, val in settings.items():
+            dct, key = get_nested_dict(input_dict, key)
+            if key in dct and (not isinstance(dct[key], list)):
+                raise ValueError(f"Keyword {key} does not refer to an array.")
+            if key in dct and val not in dct[key]:
+                dct[key].append(val)
+            elif key not in dct:
+                dct[key] = val
 
     @staticmethod
     def pull(input_dict, settings, directory=None) -> None:
@@ -200,14 +200,14 @@ class DictActions:
             settings (dict): The specification of the modification to be made.
             directory (None): dummy parameter for compatibility with FileActions
         """
-        for k, v in settings.items():
-            (d, key) = get_nested_dict(input_dict, k)
-            if key in d and (not isinstance(d[key], list)):
-                raise ValueError(f"Keyword {k} does not refer to an array.")
-            if v == 1:
-                d[key].pop()
-            elif v == -1:
-                d[key].pop(0)
+        for key, val in settings.items():
+            dct, key = get_nested_dict(input_dict, key)
+            if key in dct and (not isinstance(dct[key], list)):
+                raise ValueError(f"Keyword {key} does not refer to an array.")
+            if val == 1:
+                dct[key].pop()
+            elif val == -1:
+                dct[key].pop(0)
 
 
 class FileActions:
@@ -229,10 +229,10 @@ class FileActions:
         """
         if len(settings) != 1:
             raise ValueError("Settings must only contain one item with key 'content'.")
-        for k, v in settings.items():
-            if k == "content":
+        for key, val in settings.items():
+            if key == "content":
                 with open(filename, "w") as file:
-                    file.write(v)
+                    file.write(val)
 
     @staticmethod
     def file_move(filename, settings, directory) -> None:
@@ -246,9 +246,9 @@ class FileActions:
         """
         if len(settings) != 1:
             raise ValueError("Settings must only contain one item with key 'dest'.")
-        for k, v in settings.items():
-            if k == "dest":
-                shutil.move(os.path.join(directory, filename), os.path.join(directory, v))
+        for key, val in settings.items():
+            if key == "dest":
+                shutil.move(os.path.join(directory, filename), os.path.join(directory, val))
 
     @staticmethod
     def file_delete(filename, settings, directory) -> None:
@@ -263,14 +263,14 @@ class FileActions:
         """
         if len(settings) != 1:
             raise ValueError("Settings must only contain one item with key 'mode'.")
-        for k, v in settings.items():
-            if k == "mode" and v == "actual":
+        for key, val in settings.items():
+            if key == "mode" and val == "actual":
                 try:
                     os.remove(os.path.join(directory, filename))
                 except OSError:
                     # Skip file not found error.
                     pass
-            elif k == "mode" and v == "simulated":
+            elif key == "mode" and val == "simulated":
                 print(f"Simulated removal of {filename}")
 
     @staticmethod
@@ -283,9 +283,9 @@ class FileActions:
             settings (dict): Must be {"dest": path of new file}
             directory (str): Directory to copy file to/from
         """
-        for k, v in settings.items():
-            if k.startswith("dest"):
-                shutil.copyfile(os.path.join(directory, filename), os.path.join(directory, v))
+        for key, val in settings.items():
+            if key.startswith("dest"):
+                shutil.copyfile(os.path.join(directory, filename), os.path.join(directory, val))
 
     @staticmethod
     def file_modify(filename, settings, directory) -> None:
