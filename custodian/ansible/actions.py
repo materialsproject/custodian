@@ -56,8 +56,8 @@ class DictActions:
             directory (None): dummy parameter for compatibility with FileActions
         """
         for key, val in settings.items():
-            dct, key = get_nested_dict(input_dict, key)
-            dct[key] = val
+            dct, sub_key = get_nested_dict(input_dict, key)
+            dct[sub_key] = val
 
     @staticmethod
     def unset(input_dict, settings, directory=None) -> None:
@@ -84,11 +84,11 @@ class DictActions:
             directory (None): dummy parameter for compatibility with FileActions
         """
         for key, val in settings.items():
-            dct, key = get_nested_dict(input_dict, key)
-            if key in dct:
-                dct[key].append(val)
+            dct, sub_key = get_nested_dict(input_dict, key)
+            if sub_key in dct:
+                dct[sub_key].append(val)
             else:
-                dct[key] = [val]
+                dct[sub_key] = [val]
 
     @staticmethod
     def push_all(input_dict, settings, directory=None) -> None:
@@ -110,7 +110,7 @@ class DictActions:
     @staticmethod
     def inc(input_dict, settings, directory=None) -> None:
         """
-        Increment a value using MongdoDB syntax.
+        Increment a value using MongoDB syntax.
 
         Args:
             input_dict (dict): The input dictionary to be modified.
@@ -118,11 +118,11 @@ class DictActions:
             directory (None): dummy parameter for compatibility with FileActions
         """
         for key, val in settings.items():
-            dct, key = get_nested_dict(input_dict, key)
-            if key in dct:
-                dct[key] += val
+            dct, sub_key = get_nested_dict(input_dict, key)
+            if sub_key in dct:
+                dct[sub_key] += val
             else:
-                dct[key] = val
+                dct[sub_key] = val
 
     @staticmethod
     def rename(input_dict, settings, directory=None) -> None:
@@ -149,13 +149,13 @@ class DictActions:
             directory (None): dummy parameter for compatibility with FileActions
         """
         for key, val in settings.items():
-            dct, key = get_nested_dict(input_dict, key)
-            if key in dct and (not isinstance(dct[key], list)):
+            dct, sub_key = get_nested_dict(input_dict, key)
+            if sub_key in dct and (not isinstance(dct[sub_key], list)):
                 raise ValueError(f"Keyword {key} does not refer to an array.")
-            if key in dct and val not in dct[key]:
-                dct[key].append(val)
-            elif key not in dct:
-                dct[key] = val
+            if sub_key in dct and val not in dct[sub_key]:
+                dct[sub_key].append(val)
+            elif sub_key not in dct:
+                dct[sub_key] = val
 
     @staticmethod
     def pull(input_dict, settings, directory=None) -> None:
@@ -201,13 +201,13 @@ class DictActions:
             directory (None): dummy parameter for compatibility with FileActions
         """
         for key, val in settings.items():
-            dct, key = get_nested_dict(input_dict, key)
-            if key in dct and (not isinstance(dct[key], list)):
+            dct, sub_key = get_nested_dict(input_dict, key)
+            if sub_key in dct and (not isinstance(dct[sub_key], list)):
                 raise ValueError(f"Keyword {key} does not refer to an array.")
             if val == 1:
-                dct[key].pop()
+                dct[sub_key].pop()
             elif val == -1:
-                dct[key].pop(0)
+                dct[sub_key].pop(0)
 
 
 class FileActions:
