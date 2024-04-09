@@ -78,17 +78,16 @@ class LobsterJob(Job):
 
     def run(self, directory="./"):
         """Runs the job."""
-        cmd = self.lobster_cmd
+        cmd = " ".join(self.lobster_cmd)  # join split commands (e.g., from atomate and atomate2)
 
-        logger.info(f"Running {' '.join(cmd)}")
+        logger.info(f"Running {cmd}")
 
         with (
             zopen(os.path.join(directory, self.output_file), "w") as f_std,
+            # use line buffering for stderr
             zopen(os.path.join(directory, self.stderr_file), "w", buffering=1) as f_err,
         ):
-            # use line buffering for stderr
-            cmd = " ".join(cmd)  # to join split commands (e.g., from atomate and atomate2)
-            return subprocess.run(cmd, stdout=f_std, stderr=f_err, shell=True, check=False)  # pylint: disable=R1732
+            return subprocess.run(cmd, stdout=f_std, stderr=f_err, shell=True, check=False)
 
     def postprocess(self, directory="./"):
         """Will gzip relevant files (won't gzip custodian.json and other output files from the cluster)."""
