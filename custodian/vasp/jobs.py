@@ -571,7 +571,7 @@ class VaspJob(Job):
 
         # Set the energy convergence criteria as the EDIFFG (if present) or
         # 10 x EDIFF (which itself defaults to 1e-4 if not present).
-        etol = incar["EDIFFG"] if incar.get("EDIFFG") and incar.get("EDIFFG") > 0 else incar.get("EDIFF", 0.0001) * 10
+        e_tol = incar["EDIFFG"] if incar.get("EDIFFG") and incar.get("EDIFFG") > 0 else incar.get("EDIFF", 0.0001) * 10
 
         if lattice_direction == "a":
             lattice_index = 0
@@ -612,7 +612,7 @@ class VaspJob(Job):
                         other = ind - 1
                     else:
                         other = ind + 1 if energies[sorted_x[ind + 1]] < energies[sorted_x[ind - 1]] else ind - 1
-                    if abs(energies[min_x] - energies[sorted_x[other]]) < etol:
+                    if abs(energies[min_x] - energies[sorted_x[other]]) < e_tol:
                         logger.info(f"Stopping optimization! Final {lattice_direction} = {min_x}")
                         break
 
@@ -695,13 +695,13 @@ class VaspJob(Job):
         simultaneously executed on the same node). However, this should never
         happen.
         """
-        workdir = directory
-        logger.info(f"Killing VASP processes in workdir {workdir}.")
+        work_dir = directory
+        logger.info(f"Killing VASP processes in {work_dir=}.")
         for proc in psutil.process_iter():
             try:
                 if "vasp" in proc.name().lower():
                     open_paths = [file.path for file in proc.open_files()]
-                    vasprun_path = os.path.join(workdir, "vasprun.xml")
+                    vasprun_path = os.path.join(work_dir, "vasprun.xml")
                     if (vasprun_path in open_paths) and psutil.pid_exists(proc.pid):
                         proc.kill()
                         return
@@ -710,8 +710,7 @@ class VaspJob(Job):
                 continue
 
         logger.warning(
-            f"Killing VASP processes in workdir {workdir} failed with subprocess.Popen.terminate(). "
-            "Resorting to 'killall'."
+            f"Killing VASP processes in {work_dir=} failed with subprocess.Popen.terminate(). Resorting to 'killall'."
         )
         cmds = self.vasp_cmd
         if self.gamma_vasp_cmd:

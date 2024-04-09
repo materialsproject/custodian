@@ -655,9 +655,7 @@ class Custodian:
                         handler.max_num_corrections is not None
                         and handler.n_applied_corrections >= handler.max_num_corrections
                     ):
-                        msg = (
-                            f"Maximum number of corrections {handler.max_num_corrections} reached for handler {handler}"
-                        )
+                        msg = f"Maximum number of corrections {handler.max_num_corrections} reached for {handler=}"
                         if handler.raise_on_max:
                             self.run_log[-1]["handler"] = handler
                             self.run_log[-1]["max_errors_per_handler"] = True
@@ -681,9 +679,9 @@ class Custodian:
                     raise
                 import traceback
 
-                logger.error(f"Bad handler {handler}")
+                logger.error(f"Bad {handler=}")
                 logger.error(traceback.format_exc())
-                corrections.append({"errors": [f"Bad handler {handler}"], "actions": []})
+                corrections.append({"errors": [f"Bad {handler=}"], "actions": []})
         self.total_errors += len(corrections)
         self.errors_current_job += len(corrections)
         self.run_log[-1]["corrections"] += corrections
