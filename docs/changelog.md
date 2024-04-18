@@ -6,6 +6,12 @@ nav_order: 2
 
 # Change Log
 
+## 2024.4.18
+- Enable export of environment variables plus lobster run as a command enhancement lobster (@JaGeo)
+- New Gaussian plugin (@rashatwi)
+- Add missing directory kwarg on QCJob run() method (@Andrew-S-Rosen)
+- Add support for directory for Q-Chem (@Andrew-S-Rosen)
+
 ## 2024.3.12
 
 * Make Custodian threadsafe with explicit file paths (@zulissimeta).
