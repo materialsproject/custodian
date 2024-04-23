@@ -22,8 +22,9 @@ CWD = os.getcwd()
 
 def gunzip_file(gauss_file):
     output_file = os.path.splitext(gauss_file)[0]
-    with gzip.open(gauss_file, "rb") as f_in, open(output_file, "wb") as f_out:
-        shutil.copyfileobj(f_in, f_out)
+    if not os.path.exists(output_file) and os.path.exists(gauss_file):
+        with gzip.open(gauss_file, "rb") as f_in, open(output_file, "wb") as f_out:
+            shutil.copyfileobj(f_in, f_out)
     return output_file
 
 
@@ -310,8 +311,9 @@ class TestGaussianErrorHandler(TestCase):
         os.chdir(CWD)
         shutil.rmtree(SCR_DIR)
         files_to_remove = glob.glob(f"{TEST_DIR}/*.out")
-        for file_path in files_to_remove:
-            os.remove(file_path)
+        if files_to_remove and glob.glob(f"{TEST_DIR}/*.out.gz"):
+            for file_path in files_to_remove:
+                os.remove(file_path)
 
 
 class TestWallTimeErrorHandler(TestCase):
@@ -367,5 +369,6 @@ class TestWallTimeErrorHandler(TestCase):
         os.chdir(CWD)
         shutil.rmtree(SCR_DIR)
         files_to_remove = glob.glob(f"{TEST_DIR}/*.out")
-        for file_path in files_to_remove:
-            os.remove(file_path)
+        if files_to_remove and glob.glob(f"{TEST_DIR}/*.out.gz"):
+            for file_path in files_to_remove:
+                os.remove(file_path)
