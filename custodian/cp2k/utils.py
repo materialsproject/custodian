@@ -8,7 +8,7 @@ from pymatgen.io.cp2k.inputs import Cp2kInput
 from pymatgen.io.cp2k.outputs import Cp2kOutput
 
 
-def restart(actions, output_file, input_file, no_actions_needed=False):
+def restart(actions, output_file, input_file, no_actions_needed=False) -> None:
     """
     Helper function. To discard old restart if convergence is already good, and copy
     the restart file to the input file. Restart also supports switching back and forth
@@ -51,7 +51,7 @@ def restart(actions, output_file, input_file, no_actions_needed=False):
 
 
 # TODO Not sure I like this solution
-def cleanup_input(ci):
+def cleanup_input(ci) -> None:
     """
     Intention is to use this to remove problematic parts of the input file.
 
@@ -67,7 +67,7 @@ def cleanup_input(ci):
         cleanup_input(val)
 
 
-def activate_ot(actions, ci):
+def activate_ot(actions, ci) -> None:
     """
     Activate OT scheme.
 
@@ -118,7 +118,7 @@ def activate_ot(actions, ci):
     actions += ot_actions
 
 
-def activate_diag(actions):
+def activate_diag(actions) -> None:
     """
     Activate diagonalization.
 
@@ -164,14 +164,12 @@ def can_use_ot(output, ci, minimum_band_gap=0.1):
         minimum_band_gap (float): the minimum band gap for OT
     """
     output.parse_dos()
-    if (
+    return bool(
         not ci.check("FORCE_EVAL/DFT/SCF/OT")
         and not ci.check("FORCE_EVAL/DFT/KPOINTS")
         and output.band_gap
         and output.band_gap > minimum_band_gap
-    ):
-        return True
-    return False
+    )
 
 
 def tail(filename, n=10):

@@ -58,7 +58,7 @@ class StdErrHandler(ErrorHandler):
 
     error_msgs = {"seg_fault": ["SIGSEGV"], "out_of_memory": ["insufficient virtual memory"], "abort": ["SIGABRT"]}
 
-    def __init__(self, std_err="std_err.txt"):
+    def __init__(self, std_err="std_err.txt") -> None:
         """Initialize the handler with the output file to check.
 
         Args:
@@ -68,7 +68,7 @@ class StdErrHandler(ErrorHandler):
                 default redirect used by :class:`custodian.cp2k.jobs.Cp2kJob`.
         """
         self.std_err = std_err
-        self.errors = set()
+        self.errors: set[str] = set()
 
     def check(self, directory="./"):
         """Check for error in std_err file."""
@@ -133,7 +133,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out"):
+    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out") -> None:
         """Initialize the error handler from a set of input and output files.
 
         Args:
@@ -160,9 +160,7 @@ class UnconvergedScfErrorHandler(ErrorHandler):
         # General catch for SCF not converged
         # TODO: should not-static runs allow for some unconverged scf? Leads to issues in my experience
         scf = out.data["scf_converged"] or [True]
-        if not scf[0]:
-            return True
-        return False
+        return bool(not scf[0])
 
     def correct(self, directory="./"):
         """Apply corrections to aid convergence if possible."""
@@ -401,7 +399,7 @@ class DivergingScfErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, output_file="cp2k.out", input_file="cp2k.inp"):
+    def __init__(self, output_file="cp2k.out", input_file="cp2k.inp") -> None:
         """Initializes the error handler from an output files.
 
         Args:
@@ -463,7 +461,7 @@ class FrozenJobErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out", timeout=3600):
+    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out", timeout=3600) -> None:
         """Initialize the handler with the output file to check.
 
         Args:
@@ -488,9 +486,7 @@ class FrozenJobErrorHandler(ErrorHandler):
         try:
             out.ran_successfully()
             # If job finished, then hung, don't need to wait very long to confirm frozen
-            if time.time() - st.st_mtime > 300:
-                return True
-            return False
+            return time.time() - st.st_mtime > 300
         except ValueError:
             pass
 
@@ -604,7 +600,7 @@ class AbortHandler(ErrorHandler):
     is_monitor = False
     is_terminating = True
 
-    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out"):
+    def __init__(self, input_file="cp2k.inp", output_file="cp2k.out") -> None:
         """
         Initialize handler for CP2K abort messages.
 
@@ -618,9 +614,9 @@ class AbortHandler(ErrorHandler):
             "cholesky": r"(Cholesky decomposition failed. Matrix ill conditioned ?)",
             "cholesky_scf": r"(Cholesky decompose failed: the matrix is not positive definite or)",
         }
-        self.responses = []
+        self.responses: list[str] = []
 
-    def check(self, directory="./"):
+    def check(self, directory="./") -> bool:
         """Check for abort messages."""
         matches = regrep(
             os.path.join(directory, self.output_file),
@@ -790,7 +786,7 @@ class NumericalPrecisionHandler(ErrorHandler):
         pgf_orb_strict=1e-20,
         eps_default_strict=1e-12,
         eps_gvg_strict=1e-10,
-    ):
+    ) -> None:
         """
         Initialize the error handler.
 
@@ -825,9 +821,7 @@ class NumericalPrecisionHandler(ErrorHandler):
         """Check for stuck SCF convergence."""
         conv = get_conv(os.path.join(directory, self.output_file))
         counts = [len([*group]) for _k, group in itertools.groupby(conv)]
-        if any(cnt > self.max_same for cnt in counts):
-            return True
-        return False
+        return bool(any(cnt > self.max_same for cnt in counts))
 
     def correct(self, directory="/."):
         """Correct issue if possible."""
@@ -948,7 +942,7 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
         max_iter=20,
         max_total_iter=200,
         optimizers=("BFGS", "CG", "BFGS", "CG"),
-    ):
+    ) -> None:
         """
         Initialize the error handler.
 
@@ -974,9 +968,7 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
         """Check for unconverged geometry optimization."""
         o = Cp2kOutput(os.path.join(directory, self.output_file))
         o.convergence()
-        if o.data.get("geo_opt_not_converged"):
-            return True
-        return False
+        return bool(o.data.get("geo_opt_not_converged"))
 
     def correct(self, directory):
         """Correct issue if possible."""
@@ -1034,7 +1026,7 @@ class WalltimeHandler(ErrorHandler):
     raises_runtime_error = False
     is_terminating = False
 
-    def __init__(self, output_file="cp2k.out", enable_checkpointing=True):
+    def __init__(self, output_file="cp2k.out", enable_checkpointing=True) -> None:
         """
         Args:
             output_file (str): name of the cp2k output file
@@ -1046,15 +1038,15 @@ class WalltimeHandler(ErrorHandler):
 
     def check(self, directory="./"):
         """Check if internal CP2K walltime handler was tripped."""
-        if regrep(
-            filename=os.path.join(directory, self.output_file),
-            patterns={"walltime": r"(exceeded requested execution time)"},
-            reverse=True,
-            terminate_on_match=True,
-            postprocess=bool,
-        ).get("walltime"):
-            return True
-        return False
+        return bool(
+            regrep(
+                filename=os.path.join(directory, self.output_file),
+                patterns={"walltime": "(exceeded requested execution time)"},
+                reverse=True,
+                terminate_on_match=True,
+                postprocess=bool,
+            ).get("walltime")
+        )
 
     def correct(self, directory="./"):
         """Dump checkpoint info if requested."""

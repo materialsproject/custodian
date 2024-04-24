@@ -49,7 +49,7 @@ def get_runs(vasp_command, target=1e-3, max_steps=10, mode="linear"):
         )
 
 
-def do_run(args):
+def do_run(args) -> None:
     """Perform the run."""
     handlers = [VaspErrorHandler(), UnconvergedErrorHandler()]
     c = Custodian(
@@ -65,7 +65,7 @@ def do_run(args):
     c.run()
 
 
-def main():
+def main() -> None:
     """Main method."""
     import argparse
 

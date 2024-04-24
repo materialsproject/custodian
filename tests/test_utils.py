@@ -1,7 +1,7 @@
 from custodian.utils import tracked_lru_cache
 
 
-def test_cache_and_clear():
+def test_cache_and_clear() -> None:
     n_calls = 0
 
     @tracked_lru_cache

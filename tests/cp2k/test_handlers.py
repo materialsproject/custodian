@@ -25,7 +25,7 @@ from tests.conftest import TEST_FILES
 TEST_FILES_DIR = f"{TEST_FILES}/cp2k"
 
 
-def clean_dir(dct):
+def clean_dir(dct) -> None:
     for file in glob(os.path.join(dct, "error.*.tar.gz")):
         os.remove(file)
     for file in glob(os.path.join(dct, "custodian.chk.*.tar.gz")):
@@ -33,7 +33,7 @@ def clean_dir(dct):
 
 
 class HandlerTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         warnings.filterwarnings("ignore")
 
         clean_dir(TEST_FILES_DIR)
@@ -54,7 +54,7 @@ class HandlerTests(unittest.TestCase):
 
         self.modder = Cp2kModder(filename=self.input_file)
 
-    def test(self):
+    def test(self) -> None:
         """Ensure modder works"""
         kwds = KeywordList(keywords=[Keyword("BASIS_SET_FILE_NAME", "FILE1"), Keyword("BASIS_SET_FILE_NAME", "FILE2")])
         actions = [
@@ -69,12 +69,12 @@ class HandlerTests(unittest.TestCase):
         assert self.modder.ci["FORCE_EVAL"]["METHOD"] == Keyword("METHOD", "NOT QA")
         assert isinstance(self.modder.ci["FORCE_EVAL"]["DFT"]["BASIS_SET_FILE_NAME"], KeywordList)
 
-    def test_handler_inits(self):
+    def test_handler_inits(self) -> None:
         """Ensure handlers initialize fine without real input/output files"""
         for handler in (AbortHandler, FrozenJobErrorHandler, NumericalPrecisionHandler, UnconvergedScfErrorHandler):
             handler()
 
-    def test_frozenjobhandler(self):
+    def test_frozenjobhandler(self) -> None:
         """Handler for frozen job"""
         handler = FrozenJobErrorHandler(
             input_file=self.input_file, output_file=self.output_file_preconditioner, timeout=1
@@ -100,7 +100,7 @@ class HandlerTests(unittest.TestCase):
         handler = FrozenJobErrorHandler(input_file=self.input_file, output_file=self.output_file_imprecise, timeout=1)
         handler.check()
 
-    def test_unconverged_handler(self):
+    def test_unconverged_handler(self) -> None:
         """Handler for SCF handling not working"""
         ci = StaticSet.from_file(self.input_file)
         handler = UnconvergedScfErrorHandler(input_file=self.input_file, output_file=self.output_file_unconverged)
@@ -119,24 +119,24 @@ class HandlerTests(unittest.TestCase):
         ci = StaticSet.from_file(self.input_file)
         assert ci["force_eval"]["dft"]["scf"]["MIXING"]["ALPHA"] == Keyword("ALPHA", 0.1)
 
-    def test_abort_handler(self):
+    def test_abort_handler(self) -> None:
         """Checks if cp2k called abort"""
         handler = AbortHandler(input_file=self.input_file, output_file=self.output_file_cholesky)
         assert handler.check()
 
-    def test_imprecision_handler(self):
+    def test_imprecision_handler(self) -> None:
         """Check for low precision leading to stagnant SCF"""
         handler = NumericalPrecisionHandler(self.input_file, output_file=self.output_file_imprecise, max_same=3)
         assert handler.check()
         c = handler.correct()
         assert c["errors"], ["Insufficient precision"]
 
-    def test_std_out(self):
+    def test_std_out(self) -> None:
         """Errors sent to the std out instead of cp2k out"""
         handler = StdErrHandler(std_err=self.output_file_stderr)
         assert handler.check()
         handler.correct()
 
-    def test_conv(self):
+    def test_conv(self) -> None:
         """Check that SCF convergence can be read"""
         assert len(get_conv(self.output_file_conv)) == 45

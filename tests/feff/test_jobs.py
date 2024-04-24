@@ -17,14 +17,14 @@ __date__ = "Oct 18, 2017"
 TEST_DIR = f"{TEST_FILES}/feff_unconverged"
 
 
-def test_as_from_dict():
+def test_as_from_dict() -> None:
     f = FeffJob("hello")
     f2 = FeffJob.from_dict(f.as_dict())
     assert type(f) == type(f2)
     assert f2.feff_cmd == "hello"
 
 
-def test_setup():
+def test_setup() -> None:
     with cd(TEST_DIR), ScratchDir(".", copy_from_current_on_enter=True):
         f = FeffJob("hello", backup=True)
         f.setup()
@@ -38,7 +38,7 @@ def test_setup():
         assert atom == atom_origin
 
 
-def test_postprocess():
+def test_postprocess() -> None:
     with cd(TEST_DIR), ScratchDir(".", copy_from_current_on_enter=True):
         f = FeffJob("hello", backup=True, gzipped=True)
         f.postprocess()

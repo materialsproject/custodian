@@ -7,7 +7,7 @@ import tarfile
 from glob import glob
 
 
-def backup(filenames, prefix="error", directory="./"):
+def backup(filenames, prefix="error", directory="./") -> None:
     """
     Backup files to a tar.gz file. Used, for example, in backing up the
     files of an errored run before performing corrections.
@@ -62,7 +62,7 @@ class tracked_lru_cache:
 
     cached_functions: set = set()
 
-    def __init__(self, func):
+    def __init__(self, func) -> None:
         """
         Args:
             func: function to be decorated.
@@ -81,7 +81,7 @@ class tracked_lru_cache:
         return result
 
     @classmethod
-    def tracked_cache_clear(cls):
+    def tracked_cache_clear(cls) -> None:
         """Clear the cache of all the decorated functions."""
         while cls.cached_functions:
             f = cls.cached_functions.pop()

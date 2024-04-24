@@ -42,7 +42,7 @@ os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_FILES)
 
 
 @pytest.fixture(autouse=True)
-def _clear_tracked_cache():
+def _clear_tracked_cache() -> None:
     """Clear the cache of the stored functions between the tests."""
     from custodian.utils import tracked_lru_cache
 
@@ -61,16 +61,16 @@ def copy_tmp_files(tmp_path: str, *file_paths: str) -> None:
 
 
 class VaspErrorHandlerTest(PymatgenTest):
-    def setUp(self):
+    def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, *glob("*", root_dir=TEST_FILES))
 
-    def test_frozen_job(self):
+    def test_frozen_job(self) -> None:
         handler = FrozenJobErrorHandler()
         dct = handler.correct()
         assert dct["errors"] == ["Frozen job"]
         assert Incar.from_file("INCAR")["ALGO"] == "Normal"
 
-    def test_algotet(self):
+    def test_algotet(self) -> None:
         shutil.copy("INCAR.algo_tet_only", "INCAR")
         handler = VaspErrorHandler("vasp.algo_tet_only")
         handler.check()
@@ -86,7 +86,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert handler.error_count["algo_tet"] == 2
         assert dct["actions"] == [{"action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}, "dict": "INCAR"}]
 
-    def test_subspace(self):
+    def test_subspace(self) -> None:
         handler = VaspErrorHandler("vasp.subspace")
         handler.check()
         dct = handler.correct()
@@ -99,7 +99,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["errors"] == ["subspacematrix"]
         assert dct["actions"] == [{"action": {"_set": {"PREC": "Accurate"}}, "dict": "INCAR"}]
 
-    def test_check_correct(self):
+    def test_check_correct(self) -> None:
         handler = VaspErrorHandler("vasp.teterror")
         handler.check()
         dct = handler.correct()
@@ -126,14 +126,14 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["errors"] == ["real_optlay"]
         assert dct["actions"] == [{"action": {"_set": {"LREAL": False}}, "dict": "INCAR"}]
 
-    def test_mesh_symmetry(self):
+    def test_mesh_symmetry(self) -> None:
         handler = MeshSymmetryErrorHandler("vasp.ibzkpt")
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["mesh_symmetry"]
         assert dct["actions"] == [{"action": {"_set": {"kpoints": [[4, 4, 4]]}}, "dict": "KPOINTS"}]
 
-    def test_brions(self):
+    def test_brions(self) -> None:
         shutil.copy("INCAR.ibrion", "INCAR")
         handler = VaspErrorHandler("vasp.brions")
         handler.check()
@@ -150,7 +150,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert incar["IBRION"] == 2
         assert incar["POTIM"] == pytest.approx(0.5)
 
-    def test_dentet(self):
+    def test_dentet(self) -> None:
         handler = VaspErrorHandler("vasp.dentet")
         handler.check()
         dct = handler.correct()
@@ -162,7 +162,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["errors"] == ["dentet"]
         assert dct["actions"] == [{"action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}, "dict": "INCAR"}]
 
-    def test_zbrent(self):
+    def test_zbrent(self) -> None:
         handler = VaspErrorHandler("vasp.zbrent")
         handler.check()
         dct = handler.correct()
@@ -221,7 +221,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert incar["EDIFF"] == 1e-08
         assert incar["NELMIN"] == 8
 
-    def test_brmix(self):
+    def test_brmix(self) -> None:
         handler = VaspErrorHandler("vasp.brmix")
         assert handler.check() is True
 
@@ -253,7 +253,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         dct = handler.correct()
         assert dct["errors"] == []
 
-    def test_too_few_bands(self):
+    def test_too_few_bands(self) -> None:
         shutil.copytree(f"{TEST_FILES}/too_few_bands", self.tmp_path, dirs_exist_ok=True, symlinks=True)
         os.chdir(self.tmp_path)
         shutil.copy("INCAR", "INCAR.orig")
@@ -263,7 +263,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["errors"] == ["too_few_bands"]
         assert dct["actions"] == [{"action": {"_set": {"NBANDS": 501}}, "dict": "INCAR"}]
 
-    def test_rot_matrix(self):
+    def test_rot_matrix(self) -> None:
         shutil.copytree(f"{TEST_FILES}/poscar_error", self.tmp_path, dirs_exist_ok=True, symlinks=True)
         os.chdir(self.tmp_path)
         shutil.copy("KPOINTS", "KPOINTS.orig")
@@ -272,12 +272,12 @@ class VaspErrorHandlerTest(PymatgenTest):
         dct = handler.correct()
         assert dct["errors"] == ["rot_matrix"]
 
-    def test_rot_matrix_vasp6(self):
+    def test_rot_matrix_vasp6(self) -> None:
         handler = VaspErrorHandler("vasp6.sgrcon")
         assert handler.check() is True
         assert handler.correct()["errors"] == ["rot_matrix"]
 
-    def test_coef(self):
+    def test_coef(self) -> None:
         handler = VaspErrorHandler("vasp6.coef")
         handler.check()
         dct = handler.correct()
@@ -288,13 +288,13 @@ class VaspErrorHandlerTest(PymatgenTest):
         dct = handler.correct()
         assert dct["actions"] == [{"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}}]
 
-    def test_as_from_dict(self):
+    def test_as_from_dict(self) -> None:
         handler = VaspErrorHandler("random_name")
         h2 = VaspErrorHandler.from_dict(handler.as_dict())
         assert type(h2) == type(handler)
         assert h2.output_filename == "random_name"
 
-    def test_pssyevx_pdsyevx(self):
+    def test_pssyevx_pdsyevx(self) -> None:
         incar_orig = Incar.from_file("INCAR")
         # Joining tests for these three tags as they have identical handling
         for error_name in ("pssyevx", "pdsyevx"):
@@ -305,7 +305,7 @@ class VaspErrorHandlerTest(PymatgenTest):
             assert incar["ALGO"] == "Normal"
             incar_orig.write_file("INCAR")
 
-    def test_eddrmm(self):
+    def test_eddrmm(self) -> None:
         shutil.copy("CONTCAR.eddav_eddrmm", "CONTCAR")
         handler = VaspErrorHandler("vasp.eddrmm")
         assert handler.check() is True
@@ -319,14 +319,14 @@ class VaspErrorHandlerTest(PymatgenTest):
         c = Structure.from_file("CONTCAR")
         assert p == c
 
-    def test_nicht_konv(self):
+    def test_nicht_konv(self) -> None:
         handler = VaspErrorHandler("vasp.nicht_konvergent")
         assert handler.check() is True
         assert handler.correct()["errors"] == ["nicht_konv"]
         incar = Incar.from_file("INCAR")
         assert incar["LREAL"] is False
 
-    def test_edddav(self):
+    def test_edddav(self) -> None:
         shutil.copy("CONTCAR.eddav_eddrmm", "CONTCAR")
         handler = VaspErrorHandler("vasp.edddav2")
         assert handler.check() is True
@@ -345,7 +345,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         c = Structure.from_file("CONTCAR")
         assert p == c
 
-    def test_gradient_not_orthogonal(self):
+    def test_gradient_not_orthogonal(self) -> None:
         handler = VaspErrorHandler("vasp.gradient_not_orthogonal")
         assert handler.check() is True
         assert "grad_not_orth" in handler.correct()["errors"]
@@ -388,7 +388,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         incar = Incar.from_file("INCAR")
         assert incar["ALGO"] == "All"
 
-    def test_rhosyg(self):
+    def test_rhosyg(self) -> None:
         handler = VaspErrorHandler("vasp.rhosyg")
         assert handler.check() is True
         assert handler.correct()["errors"] == ["rhosyg"]
@@ -398,7 +398,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         incar = Incar.from_file("INCAR")
         assert incar["ISYM"] == 0
 
-    def test_rhosyg_vasp6(self):
+    def test_rhosyg_vasp6(self) -> None:
         handler = VaspErrorHandler("vasp6.rhosyg")
         assert handler.check() is True
         assert handler.correct()["errors"] == ["rhosyg"]
@@ -408,14 +408,14 @@ class VaspErrorHandlerTest(PymatgenTest):
         incar = Incar.from_file("INCAR")
         assert incar["ISYM"] == 0
 
-    def test_hnform(self):
+    def test_hnform(self) -> None:
         handler = VaspErrorHandler("vasp.hnform")
         assert handler.check() is True
         assert handler.correct()["errors"] == ["hnform"]
         incar = Incar.from_file("INCAR")
         assert incar["ISYM"] == 0
 
-    def test_bravais(self):
+    def test_bravais(self) -> None:
         handler = VaspErrorHandler("vasp6.bravais")
         assert handler.check() is True
         assert handler.correct()["errors"] == ["bravais"]
@@ -457,21 +457,21 @@ class VaspErrorHandlerTest(PymatgenTest):
 
             incar_orig.write_file("INCAR")
 
-    def test_point_group(self):
+    def test_point_group(self) -> None:
         handler = VaspErrorHandler("vasp.point_group")
         assert handler.check() is True
         assert handler.correct()["errors"] == ["point_group"]
         incar = Incar.from_file("INCAR")
         assert incar["ISYM"] == 0
 
-    def test_symprec_noise(self):
+    def test_symprec_noise(self) -> None:
         handler = VaspErrorHandler("vasp.symprec_noise")
         assert handler.check() is True
         assert handler.correct()["errors"] == ["symprec_noise"]
         incar = Incar.from_file("INCAR")
         assert incar["SYMPREC"] == 1e-06
 
-    def test_dfpt_ncore(self):
+    def test_dfpt_ncore(self) -> None:
         handler = VaspErrorHandler("vasp.dfpt_ncore")
         assert handler.check() is True
         assert handler.correct()["errors"] == ["dfpt_ncore"]
@@ -479,7 +479,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert "NPAR" not in incar
         assert "NCORE" not in incar
 
-    def test_finite_difference_ncore(self):
+    def test_finite_difference_ncore(self) -> None:
         handler = VaspErrorHandler("vasp.fd_ncore")
         assert handler.check() is True
         assert handler.correct()["errors"] == ["dfpt_ncore"]
@@ -487,7 +487,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert "NPAR" not in incar
         assert "NCORE" not in incar
 
-    def test_point_group_vasp6(self):
+    def test_point_group_vasp6(self) -> None:
         # the error message is formatted differently in VASP6 compared to VASP5
         handler = VaspErrorHandler("vasp6.point_group")
         assert handler.check() is True
@@ -495,7 +495,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         incar = Incar.from_file("INCAR")
         assert incar["ISYM"] == 0
 
-    def test_inv_rot_matrix_vasp6(self):
+    def test_inv_rot_matrix_vasp6(self) -> None:
         # the error message is formatted differently in VASP6 compared to VASP5
         handler = VaspErrorHandler("vasp6.inv_rot_mat")
         assert handler.check() is True
@@ -503,7 +503,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         incar = Incar.from_file("INCAR")
         assert incar["SYMPREC"] == 1e-08
 
-    def test_bzint_vasp6(self):
+    def test_bzint_vasp6(self) -> None:
         # the BZINT error message is formatted differently in VASP6 compared to VASP5
         handler = VaspErrorHandler("vasp6.bzint")
         assert handler.check() is True
@@ -520,7 +520,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert incar["ISMEAR"] == 0
         assert incar["SIGMA"] == 0.05
 
-    def test_too_large_kspacing(self):
+    def test_too_large_kspacing(self) -> None:
         shutil.copy("INCAR.kspacing", "INCAR")
         vi = VaspInput.from_directory(".")
         handler = VaspErrorHandler("vasp.teterror")
@@ -531,14 +531,14 @@ class VaspErrorHandlerTest(PymatgenTest):
             {"action": {"_set": {"KSPACING": vi["INCAR"].get("KSPACING") * 0.8}}, "dict": "INCAR"}
         ]
 
-    def test_nbands_not_sufficient(self):
+    def test_nbands_not_sufficient(self) -> None:
         handler = VaspErrorHandler("vasp.nbands_not_sufficient")
         assert handler.check() is True
         dct = handler.correct()
         assert dct["errors"] == ["nbands_not_sufficient"]
         assert dct["actions"] is None
 
-    def test_too_few_bands_round_error(self):
+    def test_too_few_bands_round_error(self) -> None:
         # originally there are NBANDS= 7
         # correction should increase it
         shutil.copy("INCAR.too_few_bands_round_error", "INCAR")
@@ -548,21 +548,21 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["errors"] == ["too_few_bands"]
         assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"NBANDS": 8}}}]
 
-    def test_set_core_wf(self):
+    def test_set_core_wf(self) -> None:
         handler = VaspErrorHandler("vasp.set_core_wf")
         assert handler.check() is True
         dct = handler.correct()
         assert dct["errors"] == ["set_core_wf"]
         assert dct["actions"] is None
 
-    def test_read_error(self):
+    def test_read_error(self) -> None:
         handler = VaspErrorHandler("vasp.read_error")
         assert handler.check() is True
         dct = handler.correct()
         assert dct["errors"] == ["read_error"]
         assert dct["actions"] is None
 
-    def test_amin(self):
+    def test_amin(self) -> None:
         # Cell with at least one dimension >= 50 A, but AMIN > 0.01, and calculation not yet complete
         shutil.copy("INCAR.amin", "INCAR")
         handler = VaspErrorHandler("vasp.amin")
@@ -571,7 +571,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["errors"] == ["amin"]
         assert dct["actions"] == [{"action": {"_set": {"AMIN": 0.01}}, "dict": "INCAR"}]
 
-    def test_eddiag(self):
+    def test_eddiag(self) -> None:
         # subspace rotation error
         os.remove("CONTCAR")
         shutil.copy("INCAR.amin", "INCAR")
@@ -596,10 +596,10 @@ class VaspErrorHandlerTest(PymatgenTest):
 
 
 class AliasingErrorHandlerTest(PymatgenTest):
-    def setUp(self):
+    def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, *glob("aliasing/*", root_dir=TEST_FILES))
 
-    def test_aliasing(self):
+    def test_aliasing(self) -> None:
         handler = AliasingErrorHandler("vasp.aliasing")
         handler.check()
         dct = handler.correct()
@@ -611,7 +611,7 @@ class AliasingErrorHandlerTest(PymatgenTest):
             {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}},
         ]
 
-    def test_aliasing_incar(self):
+    def test_aliasing_incar(self) -> None:
         shutil.copy("INCAR", "INCAR.orig")
         handler = AliasingErrorHandler("vasp.aliasing_incar")
         handler.check()
@@ -633,10 +633,10 @@ class AliasingErrorHandlerTest(PymatgenTest):
 
 
 class UnconvergedErrorHandlerTest(PymatgenTest):
-    def setUp(self):
+    def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, *glob("unconverged/*", root_dir=TEST_FILES))
 
-    def test_check_correct_electronic(self):
+    def test_check_correct_electronic(self) -> None:
         shutil.copy("vasprun.xml.electronic", "vasprun.xml")
         handler = UnconvergedErrorHandler()
         assert handler.check()
@@ -685,23 +685,23 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         assert handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
-        assert [{"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}}] == dct["actions"]
+        assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}}]
 
-    def test_check_correct_electronic_repeat(self):
+    def test_check_correct_electronic_repeat(self) -> None:
         shutil.copy("vasprun.xml.electronic2", "vasprun.xml")
         handler = UnconvergedErrorHandler()
         assert handler.check()
         dct = handler.correct()
         assert dct == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
 
-    def test_check_correct_ionic(self):
+    def test_check_correct_ionic(self) -> None:
         shutil.copy("vasprun.xml.ionic", "vasprun.xml")
         handler = UnconvergedErrorHandler()
         assert handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
 
-    def test_check_correct_scan(self):
+    def test_check_correct_scan(self) -> None:
         shutil.copy("vasprun.xml.scan", "vasprun.xml")
         handler = UnconvergedErrorHandler()
         assert handler.check()
@@ -709,20 +709,20 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         assert dct["errors"] == ["Unconverged"]
         assert {"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}} in dct["actions"]
 
-    def test_amin(self):
+    def test_amin(self) -> None:
         shutil.copy("vasprun.xml.electronic_amin", "vasprun.xml")
         handler = UnconvergedErrorHandler()
         assert handler.check()
         dct = handler.correct()
-        assert [{"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}}] == dct["actions"]
+        assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}}]
 
-    def test_as_from_dict(self):
+    def test_as_from_dict(self) -> None:
         handler = UnconvergedErrorHandler("random_name.xml")
         h2 = UnconvergedErrorHandler.from_dict(handler.as_dict())
         assert type(h2) == UnconvergedErrorHandler
         assert h2.output_filename == "random_name.xml"
 
-    def test_correct_normal_with_condition(self):
+    def test_correct_normal_with_condition(self) -> None:
         shutil.copy("vasprun.xml.electronic_normal", "vasprun.xml")  # Reuse an existing file
         handler = UnconvergedErrorHandler()
         assert handler.check()
@@ -730,7 +730,7 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         assert dct["errors"] == ["Unconverged"]
         assert dct == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
 
-    def test_psmaxn(self):
+    def test_psmaxn(self) -> None:
         shutil.copy("vasprun.xml.electronic", "vasprun.xml")
         shutil.copy(f"{TEST_FILES}/large_cell_real_optlay/OUTCAR", "OUTCAR")
         handler = UnconvergedErrorHandler()
@@ -743,7 +743,7 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         ]
         tracked_lru_cache.tracked_cache_clear()
 
-    def test_uncorrectable(self):
+    def test_uncorrectable(self) -> None:
         shutil.copy("vasprun.xml.unconverged_unfixable", "vasprun.xml")
         handler = UnconvergedErrorHandler()
         assert handler.check()
@@ -753,10 +753,10 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
 
 
 class IncorrectSmearingHandlerTest(PymatgenTest):
-    def setUp(self):
+    def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "scan_metal/INCAR", "scan_metal/vasprun.xml")
 
-    def test_check_correct_scan_metal(self):
+    def test_check_correct_scan_metal(self) -> None:
         handler = IncorrectSmearingHandler()
         assert handler.check()
         dct = handler.correct()
@@ -767,28 +767,28 @@ class IncorrectSmearingHandlerTest(PymatgenTest):
 
 
 class IncorrectSmearingHandlerStaticTest(PymatgenTest):
-    def setUp(self):
+    def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "static_smearing/INCAR", "static_smearing/vasprun.xml")
 
-    def test_check_correct_scan_metal(self):
+    def test_check_correct_scan_metal(self) -> None:
         handler = IncorrectSmearingHandler()
         assert not handler.check()
 
 
 class IncorrectSmearingHandlerFermiTest(PymatgenTest):
-    def setUp(self):
+    def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "fermi_smearing/INCAR", "fermi_smearing/vasprun.xml")
 
-    def test_check_correct_scan_metal(self):
+    def test_check_correct_scan_metal(self) -> None:
         handler = IncorrectSmearingHandler()
         assert not handler.check()
 
 
 class KspacingMetalHandlerTest(PymatgenTest):
-    def setUp(self):
+    def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "scan_metal/INCAR", "scan_metal/vasprun.xml")
 
-    def test_check_correct_scan_metal(self):
+    def test_check_correct_scan_metal(self) -> None:
         handler = KspacingMetalHandler()
         assert handler.check()
         dct = handler.correct()
@@ -796,7 +796,7 @@ class KspacingMetalHandlerTest(PymatgenTest):
         assert Incar.from_file("INCAR")["KSPACING"] == 0.22
         os.remove("vasprun.xml")
 
-    def test_check_with_non_kspacing_wf(self):
+    def test_check_with_non_kspacing_wf(self) -> None:
         os.chdir(TEST_FILES)
         shutil.copy("INCAR", f"{self.tmp_path}/INCAR")
         shutil.copy("vasprun.xml", f"{self.tmp_path}/vasprun.xml")
@@ -809,12 +809,12 @@ class KspacingMetalHandlerTest(PymatgenTest):
 
 
 class LargeSigmaHandlerTest(PymatgenTest):
-    def setUp(self):
+    def setUp(self) -> None:
         copy_tmp_files(
             self.tmp_path, "large_sigma/INCAR", "large_sigma/vasprun.xml", "large_sigma/OUTCAR", "large_sigma/POSCAR"
         )
 
-    def test_check_correct_large_sigma(self):
+    def test_check_correct_large_sigma(self) -> None:
         handler = LargeSigmaHandler()
         assert handler.check()
         dct = handler.correct()
@@ -824,7 +824,7 @@ class LargeSigmaHandlerTest(PymatgenTest):
 
 
 class ZpotrfErrorHandlerTest(PymatgenTest):
-    def setUp(self):
+    def setUp(self) -> None:
         copy_tmp_files(
             self.tmp_path,
             "zpotrf/INCAR",
@@ -834,7 +834,7 @@ class ZpotrfErrorHandlerTest(PymatgenTest):
             "zpotrf/OSZICAR.one_step",
         )
 
-    def test_first_step(self):
+    def test_first_step(self) -> None:
         shutil.copy("OSZICAR.empty", "OSZICAR")
         s1 = Structure.from_file("POSCAR")
         handler = VaspErrorHandler("vasp.out")
@@ -848,7 +848,7 @@ class ZpotrfErrorHandlerTest(PymatgenTest):
         assert s2.volume == pytest.approx(s1.volume)
         assert s1.volume == pytest.approx(64.346221)
 
-    def test_potim_correction(self):
+    def test_potim_correction(self) -> None:
         shutil.copy("OSZICAR.one_step", "OSZICAR")
         s1 = Structure.from_file("POSCAR")
         handler = VaspErrorHandler("vasp.out")
@@ -860,7 +860,7 @@ class ZpotrfErrorHandlerTest(PymatgenTest):
         assert s1.volume == pytest.approx(64.3462)
         assert Incar.from_file("INCAR")["POTIM"] == pytest.approx(0.25)
 
-    def test_static_run_correction(self):
+    def test_static_run_correction(self) -> None:
         shutil.copy("OSZICAR.empty", "OSZICAR")
         s1 = Structure.from_file("POSCAR")
         incar = Incar.from_file("INCAR")
@@ -879,7 +879,7 @@ class ZpotrfErrorHandlerTest(PymatgenTest):
 
 
 class ZpotrfErrorHandlerSmallTest(PymatgenTest):
-    def setUp(self):
+    def setUp(self) -> None:
         copy_tmp_files(
             self.tmp_path,
             "zpotrf_small/INCAR",
@@ -888,7 +888,7 @@ class ZpotrfErrorHandlerSmallTest(PymatgenTest):
             "zpotrf_small/vasp.out",
         )
 
-    def test_small(self):
+    def test_small(self) -> None:
         handler = VaspErrorHandler("vasp.out")
         shutil.copy("OSZICAR.empty", "OSZICAR")
         assert handler.check()
@@ -901,11 +901,11 @@ class ZpotrfErrorHandlerSmallTest(PymatgenTest):
 
 
 class WalltimeHandlerTest(PymatgenTest):
-    def setUp(self):
+    def setUp(self) -> None:
         os.chdir(f"{TEST_FILES}/postprocess")
         os.environ.pop("CUSTODIAN_WALLTIME_START", None)
 
-    def test_walltime_start(self):
+    def test_walltime_start(self) -> None:
         # checks the walltime handlers starttime initialization
         handler = WalltimeHandler(wall_time=3600)
         new_starttime = handler.start_time
@@ -914,7 +914,7 @@ class WalltimeHandlerTest(PymatgenTest):
         handler = WalltimeHandler(wall_time=3600)
         assert os.environ.get("CUSTODIAN_WALLTIME_START") == new_starttime.strftime("%a %b %d %H:%M:%S UTC %Y")
 
-    def test_check_and_correct(self):
+    def test_check_and_correct(self) -> None:
         # Try a 1 hr wall time with a 2 min buffer
         handler = WalltimeHandler(wall_time=3600, buffer_time=120)
         assert not handler.check()
@@ -951,16 +951,16 @@ class WalltimeHandlerTest(PymatgenTest):
         os.remove("STOPCAR")
 
     @classmethod
-    def tearDown(cls):
+    def tearDown(cls) -> None:
         os.environ.pop("CUSTODIAN_WALLTIME_START", None)
         os.chdir(CWD)
 
 
 class PositiveEnergyHandlerTest(PymatgenTest):
-    def setUp(self):
+    def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "positive_energy/INCAR", "positive_energy/POSCAR", "positive_energy/OSZICAR")
 
-    def test_check_correct(self):
+    def test_check_correct(self) -> None:
         handler = PositiveEnergyErrorHandler()
         assert handler.check()
         dct = handler.correct()
@@ -974,10 +974,10 @@ class PositiveEnergyHandlerTest(PymatgenTest):
 
 
 class PotimHandlerTest(PymatgenTest):
-    def setUp(self):
+    def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "potim/INCAR", "potim/POSCAR", "potim/OSZICAR")
 
-    def test_check_correct(self):
+    def test_check_correct(self) -> None:
         incar = Incar.from_file("INCAR")
         original_potim = incar["POTIM"]
 
@@ -996,10 +996,10 @@ class PotimHandlerTest(PymatgenTest):
 
 
 class LrfCommHandlerTest(PymatgenTest):
-    def setUp(self):
+    def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "lrf_comm/INCAR", "lrf_comm/OUTCAR", "lrf_comm/std_err.txt")
 
-    def test_lrf_comm(self):
+    def test_lrf_comm(self) -> None:
         handler = LrfCommutatorHandler("std_err.txt")
         assert handler.check() is True
         dct = handler.correct()
@@ -1009,10 +1009,10 @@ class LrfCommHandlerTest(PymatgenTest):
 
 
 class KpointsTransHandlerTest(PymatgenTest):
-    def setUp(self):
+    def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "KPOINTS", "std_err.txt.kpoints_trans")
 
-    def test_kpoints_trans(self):
+    def test_kpoints_trans(self) -> None:
         handler = StdErrHandler("std_err.txt.kpoints_trans")
         assert handler.check() is True
         dct = handler.correct()
@@ -1026,10 +1026,10 @@ class KpointsTransHandlerTest(PymatgenTest):
 
 
 class OutOfMemoryHandlerTest(PymatgenTest):
-    def setUp(self):
+    def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "INCAR", "std_err.txt.oom")
 
-    def test_oom(self):
+    def test_oom(self) -> None:
         vi = VaspInput.from_directory(".")
         from custodian.vasp.interpreter import VaspModder
 
@@ -1042,10 +1042,10 @@ class OutOfMemoryHandlerTest(PymatgenTest):
 
 
 class DriftErrorHandlerTest(PymatgenTest):
-    def setUp(self):
+    def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "INCAR", "drift/OUTCAR", "drift/CONTCAR")
 
-    def test_check(self):
+    def test_check(self) -> None:
         handler = DriftErrorHandler(max_drift=0.05, to_average=11)
         assert not handler.check()
 
@@ -1066,7 +1066,7 @@ class DriftErrorHandlerTest(PymatgenTest):
         handler.check()
         assert handler.max_drift == 0.01
 
-    def test_correct(self):
+    def test_correct(self) -> None:
         handler = DriftErrorHandler(max_drift=0.0001, enaug_multiply=2)
         handler.check()
         handler.correct()
@@ -1136,7 +1136,7 @@ class NonConvergingErrorHandlerTest(PymatgenTest):
             incar = Incar.from_file("INCAR")
             assert incar["ALGO"].lower() == "all"
 
-    def test_as_from_dict(self):
+    def test_as_from_dict(self) -> None:
         handler = NonConvergingErrorHandler("OSZICAR_random")
         h2 = NonConvergingErrorHandler.from_dict(handler.as_dict())
         assert type(h2) == type(handler)

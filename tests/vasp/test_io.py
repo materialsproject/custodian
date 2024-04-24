@@ -6,7 +6,7 @@ from tests.conftest import TEST_FILES
 
 
 @pytest.fixture(autouse=True)
-def _clear_tracked_cache():
+def _clear_tracked_cache() -> None:
     """Clear the cache of the stored functions between the tests."""
     from custodian.utils import tracked_lru_cache
 
@@ -14,7 +14,7 @@ def _clear_tracked_cache():
 
 
 class TestIO:
-    def test_load_outcar(self):
+    def test_load_outcar(self) -> None:
         outcar = load_outcar(f"{TEST_FILES}/large_sigma/OUTCAR")
         assert outcar is not None
         outcar2 = load_outcar(f"{TEST_FILES}/large_sigma/OUTCAR")
@@ -23,7 +23,7 @@ class TestIO:
 
         assert len(tracked_lru_cache.cached_functions) == 1
 
-    def test_load_vasprun(self):
+    def test_load_vasprun(self) -> None:
         vr = load_vasprun(f"{TEST_FILES}/large_sigma/vasprun.xml")
         assert vr is not None
         vr2 = load_vasprun(f"{TEST_FILES}/large_sigma/vasprun.xml")

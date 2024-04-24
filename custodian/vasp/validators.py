@@ -1,5 +1,7 @@
 """Implements various validators, e.g., check if vasprun.xml is valid, for VASP."""
 
+from __future__ import annotations
+
 import logging
 import os
 from collections import deque
@@ -25,12 +27,12 @@ class VasprunXMLValidator(Validator):
         self.stderr_file = stderr_file
         self.logger = logging.getLogger(type(self).__name__)
 
-    def check(self, directory="./"):
+    def check(self, directory="./") -> bool:
         """Check for errors."""
         try:
             load_vasprun(os.path.join(directory, "vasprun.xml"))
         except Exception:
-            exception_context = {}
+            exception_context: dict[str, str | float] = {}
 
             if os.path.isfile(os.path.join(directory, self.output_file)):
                 with open(os.path.join(directory, self.output_file)) as output_file:
@@ -65,7 +67,7 @@ class VaspFilesValidator(Validator):
         normally create upon running.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Dummy init."""
 
     def check(self, directory="./"):
@@ -79,7 +81,7 @@ class VaspNpTMDValidator(Validator):
     Currently, VASP only have Langevin thermostat (MDALGO = 3) for NpT ensemble.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Dummy init."""
 
     def check(self, directory="./"):
@@ -92,15 +94,13 @@ class VaspNpTMDValidator(Validator):
         outcar = load_outcar(os.path.join(directory, "OUTCAR"))
         patterns = {"MDALGO": r"MDALGO\s+=\s+([\d]+)"}
         outcar.read_pattern(patterns=patterns)
-        if outcar.data["MDALGO"] == [["3"]]:
-            return False
-        return True
+        return outcar.data["MDALGO"] != [["3"]]
 
 
 class VaspAECCARValidator(Validator):
     """Check if the data in the AECCAR is corrupted."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Dummy init."""
 
     def check(self, directory="./"):
@@ -111,7 +111,7 @@ class VaspAECCARValidator(Validator):
         return check_broken_chgcar(aeccar)
 
 
-def check_broken_chgcar(chgcar, diff_thresh=None):
+def check_broken_chgcar(chgcar, diff_thresh=None) -> bool:
     """
     Check if the charge density file is corrupt
     Args:

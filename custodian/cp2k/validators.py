@@ -1,5 +1,7 @@
 """Validators for CP2K calculations."""
 
+from __future__ import annotations
+
 import os
 from abc import abstractmethod, abstractproperty
 
@@ -39,7 +41,7 @@ class Cp2kValidator(Validator):
 class Cp2kOutputValidator(Cp2kValidator):
     """Checks that a valid cp2k output file was generated."""
 
-    def __init__(self, output_file="cp2k.out"):
+    def __init__(self, output_file="cp2k.out") -> None:
         """
         Args:
             output_file (str): cp2k output file to analyze.
@@ -47,7 +49,7 @@ class Cp2kOutputValidator(Cp2kValidator):
         self.output_file = output_file
         self._check = False
 
-    def check(self, directory="./"):
+    def check(self, directory="./") -> bool | None:
         """
         Check for valid output. Checks that the end of the
         program was reached, and that convergence was
@@ -72,16 +74,16 @@ class Cp2kOutputValidator(Cp2kValidator):
             return True
 
     @property
-    def kill(self, directory="./"):
+    def kill(self, directory="./") -> bool:
         """Kill the job with raise error."""
         return True
 
     @property
-    def exit(self, directory="./"):
+    def exit(self, directory="./") -> bool:
         """Don't raise error, but exit the job."""
         return True
 
     @property
-    def no_children(self, directory="./"):
+    def no_children(self, directory="./") -> bool:
         """Job should not have children."""
         return True

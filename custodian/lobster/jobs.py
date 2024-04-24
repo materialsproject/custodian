@@ -2,6 +2,7 @@
 
 import logging
 import os
+import shlex
 import shutil
 import subprocess
 
@@ -52,7 +53,7 @@ class LobsterJob(Job):
         gzipped: bool = True,
         add_files_to_gzip=(),
         backup: bool = True,
-    ):
+    ) -> None:
         """
 
         Args:
@@ -70,7 +71,7 @@ class LobsterJob(Job):
         self.add_files_to_gzip = add_files_to_gzip
         self.backup = backup
 
-    def setup(self, directory="./"):
+    def setup(self, directory="./") -> None:
         """Will backup lobster input files."""
         if self.backup:
             for file in LOBSTERINPUT_FILES:
@@ -78,18 +79,19 @@ class LobsterJob(Job):
 
     def run(self, directory="./"):
         """Runs the job."""
-        cmd = self.lobster_cmd
+        # join split commands (e.g. from atomate and atomate2)
+        cmd = self.lobster_cmd if isinstance(self.lobster_cmd, str) else shlex.join(self.lobster_cmd)
 
-        logger.info(f"Running {' '.join(cmd)}")
+        logger.info(f"Running {cmd}")
 
         with (
             zopen(os.path.join(directory, self.output_file), "w") as f_std,
+            # use line buffering for stderr
             zopen(os.path.join(directory, self.stderr_file), "w", buffering=1) as f_err,
         ):
-            # use line buffering for stderr
-            return subprocess.Popen(cmd, cwd=directory, stdout=f_std, stderr=f_err)  # pylint: disable=R1732
+            return subprocess.run(cmd, stdout=f_std, stderr=f_err, shell=True, check=False)
 
-    def postprocess(self, directory="./"):
+    def postprocess(self, directory="./") -> None:
         """Will gzip relevant files (won't gzip custodian.json and other output files from the cluster)."""
         if self.gzipped:
             for file in LOBSTEROUTPUT_FILES:

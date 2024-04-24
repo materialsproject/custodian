@@ -127,7 +127,7 @@ class VaspErrorHandler(ErrorHandler):
         errors_subset_to_catch=None,
         vtst_fixes=False,
         **kwargs,
-    ):
+    ) -> None:
         """Initialize the handler with the output file to check.
 
         Args:
@@ -155,8 +155,8 @@ class VaspErrorHandler(ErrorHandler):
             **kwargs: Ignored. Added to increase signature flexibility.
         """
         self.output_filename = output_filename
-        self.errors = set()
-        self.error_count = Counter()
+        self.errors: set[str] = set()
+        self.error_count: Counter[str] = Counter()
         self.errors_subset_to_catch = errors_subset_to_catch or list(VaspErrorHandler.error_msgs)
         self.vtst_fixes = vtst_fixes
         self.logger = logging.getLogger(type(self).__name__)
@@ -693,7 +693,7 @@ class LrfCommutatorHandler(ErrorHandler):
 
     error_msgs = {"lrf_comm": ["LRF_COMMUTATOR internal error"]}
 
-    def __init__(self, output_filename: str = "std_err.txt"):
+    def __init__(self, output_filename: str = "std_err.txt") -> None:
         """Initialize the handler with the output file to check.
 
         Args:
@@ -749,7 +749,7 @@ class StdErrHandler(ErrorHandler):
         "out_of_memory": ["Allocation would exceed memory limit"],
     }
 
-    def __init__(self, output_filename: str = "std_err.txt"):
+    def __init__(self, output_filename: str = "std_err.txt") -> None:
         """Initialize the handler with the output file to check.
 
         Args:
@@ -809,7 +809,7 @@ class AliasingErrorHandler(ErrorHandler):
         "aliasing_incar": ["Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate"],
     }
 
-    def __init__(self, output_filename: str = "vasp.out"):
+    def __init__(self, output_filename: str = "vasp.out") -> None:
         """Initialize the handler with the output file to check.
 
         Args:
@@ -890,7 +890,7 @@ class AliasingErrorHandler(ErrorHandler):
 class DriftErrorHandler(ErrorHandler):
     """Corrects for total drift exceeding the force convergence criteria."""
 
-    def __init__(self, max_drift=None, to_average=3, enaug_multiply=2):
+    def __init__(self, max_drift=None, to_average=3, enaug_multiply=2) -> None:
         """Initialize the handler with max drift
         Args:
             max_drift (float): This defines the max drift. Leaving this at the default of None gets the max_drift from
@@ -970,7 +970,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
 
     is_monitor = False
 
-    def __init__(self, output_filename: str = "vasp.out", output_vasprun="vasprun.xml"):
+    def __init__(self, output_filename: str = "vasp.out", output_vasprun="vasprun.xml") -> None:
         """Initialize the handler with the output files to check.
 
         Args:
@@ -984,7 +984,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         self.output_filename = output_filename
         self.output_vasprun = output_vasprun
 
-    def check(self, directory="./"):
+    def check(self, directory="./") -> bool:
         """Check for error."""
         msg = "Reciprocal lattice and k-lattice belong to different class of lattices."
 
@@ -1032,7 +1032,7 @@ class UnconvergedErrorHandler(ErrorHandler):
 
     is_monitor = False
 
-    def __init__(self, output_filename: str = "vasprun.xml"):
+    def __init__(self, output_filename: str = "vasprun.xml") -> None:
         """Initialize the handler with the output file to check.
 
         Args:
@@ -1041,7 +1041,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         """
         self.output_filename = output_filename
 
-    def check(self, directory="./"):
+    def check(self, directory="./") -> bool:
         """Check for error."""
         try:
             v = load_vasprun(os.path.join(directory, self.output_filename))
@@ -1155,7 +1155,7 @@ class IncorrectSmearingHandler(ErrorHandler):
 
     is_monitor = False
 
-    def __init__(self, output_filename: str = "vasprun.xml"):
+    def __init__(self, output_filename: str = "vasprun.xml") -> None:
         """Initialize the handler with the output file to check.
 
         Args:
@@ -1164,7 +1164,7 @@ class IncorrectSmearingHandler(ErrorHandler):
         """
         self.output_filename = output_filename
 
-    def check(self, directory="./"):
+    def check(self, directory="./") -> bool:
         """Check for error."""
         try:
             v = load_vasprun(os.path.join(directory, self.output_filename))
@@ -1201,7 +1201,7 @@ class KspacingMetalHandler(ErrorHandler):
 
     is_monitor = False
 
-    def __init__(self, output_filename: str = "vasprun.xml"):
+    def __init__(self, output_filename: str = "vasprun.xml") -> None:
         """Initialize the handler with the output file to check.
 
         Args:
@@ -1210,7 +1210,7 @@ class KspacingMetalHandler(ErrorHandler):
         """
         self.output_filename = output_filename
 
-    def check(self, directory="./"):
+    def check(self, directory="./") -> bool:
         """Check for error."""
         try:
             v = load_vasprun(os.path.join(directory, self.output_filename))
@@ -1275,10 +1275,10 @@ class LargeSigmaHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initializes the handler with a buffer time."""
 
-    def check(self, directory="./"):
+    def check(self, directory="./") -> bool:
         """Check for error."""
         incar = Incar.from_file(os.path.join(directory, "INCAR"))
         try:
@@ -1343,7 +1343,7 @@ class PotimErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, input_filename="POSCAR", output_filename="OSZICAR", dE_threshold=1):
+    def __init__(self, input_filename="POSCAR", output_filename="OSZICAR", dE_threshold=1) -> None:
         """Initialize the handler with the input and output files to check.
 
         Args:
@@ -1358,7 +1358,7 @@ class PotimErrorHandler(ErrorHandler):
         self.output_filename = output_filename
         self.dE_threshold = dE_threshold
 
-    def check(self, directory="./"):
+    def check(self, directory="./") -> bool | None:
         """Check for error."""
         try:
             oszicar = Oszicar(os.path.join(directory, self.output_filename))
@@ -1410,7 +1410,7 @@ class FrozenJobErrorHandler(ErrorHandler):
         self.output_filename = output_filename
         self.timeout = timeout
 
-    def check(self, directory="./"):
+    def check(self, directory="./") -> bool | None:
         """Check for error."""
         st = os.stat(os.path.join(directory, self.output_filename))
         if time.time() - st.st_mtime > self.timeout:
@@ -1442,7 +1442,7 @@ class NonConvergingErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, output_filename: str = "OSZICAR", nionic_steps=10):
+    def __init__(self, output_filename: str = "OSZICAR", nionic_steps=10) -> None:
         """Initialize the handler with the output file to check.
 
         Args:
@@ -1578,7 +1578,7 @@ class WalltimeHandler(ErrorHandler):
     # error
     raises_runtime_error = False
 
-    def __init__(self, wall_time=None, buffer_time=300, electronic_step_stop=False):
+    def __init__(self, wall_time=None, buffer_time=300, electronic_step_stop=False) -> None:
         """Initialize the handler with a buffer time.
 
         Args:
@@ -1630,7 +1630,7 @@ class WalltimeHandler(ErrorHandler):
         self.electronic_steps_timings = [0]
         self.prev_check_time = self.start_time
 
-    def check(self, directory="./"):
+    def check(self, directory="./") -> bool:
         """Check for error."""
         if self.wall_time:
             run_time = datetime.datetime.now() - self.start_time
@@ -1683,7 +1683,7 @@ class CheckpointHandler(ErrorHandler):
     # itself naturally with the STOPCAR.
     is_terminating = False
 
-    def __init__(self, interval=3600):
+    def __init__(self, interval=3600) -> None:
         """Initialize the handler with an interval.
 
         Args:
@@ -1698,9 +1698,7 @@ class CheckpointHandler(ErrorHandler):
         """Check for error."""
         run_time = datetime.datetime.now() - self.start_time
         total_secs = run_time.seconds + run_time.days * 3600 * 24
-        if total_secs > self.interval:
-            return True
-        return False
+        return total_secs > self.interval
 
     def correct(self, directory="./"):
         """Perform corrections."""
@@ -1726,7 +1724,7 @@ class CheckpointHandler(ErrorHandler):
 
         return {"errors": ["Checkpoint reached"], "actions": actions}
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"CheckpointHandler with interval {self.interval}"
 
 
@@ -1748,7 +1746,7 @@ class StoppedRunHandler(ErrorHandler):
     # itself naturally with the STOPCAR.
     is_terminating = False
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Dummy init."""
 
     def check(self, directory="./"):
@@ -1780,7 +1778,7 @@ class PositiveEnergyErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, output_filename: str = "OSZICAR"):
+    def __init__(self, output_filename: str = "OSZICAR") -> None:
         """Initialize the handler with the output file to check.
 
         Args:
@@ -1789,7 +1787,7 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         """
         self.output_filename = output_filename
 
-    def check(self, directory="./"):
+    def check(self, directory="./") -> bool:
         """Check for error."""
         try:
             oszicar = Oszicar(os.path.join(directory, self.output_filename))

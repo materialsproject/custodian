@@ -4,6 +4,8 @@ given a set of error handlers, the abstract base classes for the
 ErrorHandlers and Jobs.
 """
 
+from __future__ import annotations
+
 import datetime
 import logging
 import os
@@ -124,7 +126,7 @@ class Custodian:
         terminate_on_nonzero_returncode=True,
         directory=None,
         **kwargs,
-    ):
+    ) -> None:
         """Initialize a Custodian from a list of jobs and error handlers.
 
         Args:
@@ -225,7 +227,7 @@ class Custodian:
 
                     return prefix == abs_directory
 
-                def safe_extract(tar, path=directory, members=None, *, numeric_owner=False):
+                def safe_extract(tar, path=directory, members=None, *, numeric_owner=False) -> None:
                     for member in tar.getmembers():
                         member_path = os.path.join(path, member.name)
                         if not is_within_directory(path, member_path):
@@ -240,12 +242,12 @@ class Custodian:
         return restart, run_log
 
     @staticmethod
-    def _delete_checkpoints(directory):
+    def _delete_checkpoints(directory) -> None:
         for file in glob(os.path.join(directory, "custodian.chk.*.tar.gz")):
             os.remove(file)
 
     @staticmethod
-    def _save_checkpoint(directory, index):
+    def _save_checkpoint(directory, index) -> None:
         try:
             Custodian._delete_checkpoints(directory)
             n = os.path.join(directory, f"custodian.chk.{index}.tar.gz")
@@ -408,7 +410,7 @@ class Custodian:
 
         return self.run_log
 
-    def _run_job(self, job_n, job):
+    def _run_job(self, job_n, job) -> None:
         """
         Runs a single job.
 
@@ -653,16 +655,14 @@ class Custodian:
                         handler.max_num_corrections is not None
                         and handler.n_applied_corrections >= handler.max_num_corrections
                     ):
-                        msg = (
-                            f"Maximum number of corrections {handler.max_num_corrections} reached for handler {handler}"
-                        )
+                        msg = f"Maximum number of corrections {handler.max_num_corrections} reached for {handler=}"
                         if handler.raise_on_max:
                             self.run_log[-1]["handler"] = handler
                             self.run_log[-1]["max_errors_per_handler"] = True
                             raise MaxCorrectionsPerHandlerError(
                                 msg, raises=True, max_errors_per_handler=handler.max_num_corrections, handler=handler
                             )
-                        logger.warning(msg + " Correction not applied.")
+                        logger.warning(f"{msg} Correction not applied.")
                         continue
                     if terminate_func is not None and handler.is_terminating:
                         logger.info("Terminating job")
@@ -679,9 +679,9 @@ class Custodian:
                     raise
                 import traceback
 
-                logger.error(f"Bad handler {handler}")
+                logger.error(f"Bad {handler=}")
                 logger.error(traceback.format_exc())
-                corrections.append({"errors": [f"Bad handler {handler}"], "actions": []})
+                corrections.append({"errors": [f"Bad {handler=}"], "actions": []})
         self.total_errors += len(corrections)
         self.errors_current_job += len(corrections)
         self.run_log[-1]["corrections"] += corrections
@@ -717,7 +717,7 @@ class Job(MSONable):
         etc.
         """
 
-    def terminate(self, directory="./"):
+    def terminate(self, directory="./") -> None:
         """Implement termination function."""
         return
 
@@ -760,7 +760,7 @@ class ErrorHandler(MSONable):
     "actions":[])
     """
 
-    max_num_corrections = None
+    max_num_corrections: int | None = None
     raise_on_max = False
     """
     Whether corrections from this specific handler should be applied only a
@@ -813,7 +813,7 @@ class ErrorHandler(MSONable):
             return self._num_applied_corrections
 
     @n_applied_corrections.setter
-    def n_applied_corrections(self, value):
+    def n_applied_corrections(self, value) -> None:
         """
         Setter for the number of corrections applied.
 
@@ -844,7 +844,7 @@ class Validator(MSONable):
 class CustodianError(RuntimeError):
     """Exception class for Custodian errors."""
 
-    def __init__(self, message, raises=False):
+    def __init__(self, message, raises=False) -> None:
         """Initialize the error with a message.
 
         Args:
@@ -859,7 +859,7 @@ class CustodianError(RuntimeError):
 class ValidationError(CustodianError):
     """Error raised when a validator does not pass the check."""
 
-    def __init__(self, message, raises, validator):
+    def __init__(self, message, raises, validator) -> None:
         """
         Args:
             message (str): Message passed to Exception
@@ -873,7 +873,7 @@ class ValidationError(CustodianError):
 class NonRecoverableError(CustodianError):
     """Error raised when a handler found an error but could not fix it."""
 
-    def __init__(self, message, raises, handler):
+    def __init__(self, message, raises, handler) -> None:
         """
         Args:
             message (str): Message passed to Exception
@@ -891,7 +891,7 @@ class ReturnCodeError(CustodianError):
 class MaxCorrectionsError(CustodianError):
     """Error raised when the maximum allowed number of errors is reached."""
 
-    def __init__(self, message, raises, max_errors):
+    def __init__(self, message, raises, max_errors) -> None:
         """
         Args:
             message (str): Message passed to Exception
@@ -905,7 +905,7 @@ class MaxCorrectionsError(CustodianError):
 class MaxCorrectionsPerJobError(CustodianError):
     """Error raised when the maximum allowed number of errors per job is reached."""
 
-    def __init__(self, message, raises, max_errors_per_job, job):
+    def __init__(self, message, raises, max_errors_per_job, job) -> None:
         """
         Args:
             message (str): Message passed to Exception
