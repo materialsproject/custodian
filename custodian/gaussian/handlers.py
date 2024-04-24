@@ -69,7 +69,7 @@ class GaussianErrorHandler(ErrorHandler):
 
     error_patt = re.compile("|".join(list(error_defs)))
     recom_mem_patt = re.compile(
-        r"Use %mem=([0-9]+)MW to provide the minimum " r"amount of memory required to complete this " r"step."
+        r"Use %mem=([0-9]+)MW to provide the minimum amount of memory required to complete this step."
     )
     conv_critera = {
         "max_force": re.compile(r"\s+(Maximum Force)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)"),
@@ -453,7 +453,7 @@ class GaussianErrorHandler(ErrorHandler):
         import matplotlib.pyplot as plt
         from matplotlib.ticker import MaxNLocator
 
-        fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(12, 10))
+        _fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(12, 10))
         for i, (k, v) in enumerate(data["values"].items()):
             row = int(np.floor(i / 2))
             col = i % 2
@@ -629,9 +629,7 @@ class GaussianErrorHandler(ErrorHandler):
             # restart the job at the point it stopped while forcing Gaussian
             # to rebuild the set of redundant internals
             if not list(filter(re.compile(r"%[Cc][Hh][Kk]").match, self.gin.link0_parameters.keys())):
-                raise KeyError(
-                    "This remedy reads coords from checkpoint " "file. Consider adding CHK to link0_parameters"
-                )
+                raise KeyError("This remedy reads coords from checkpoint file. Consider adding CHK to link0_parameters")
             self.gin = GaussianInput(
                 mol=None,
                 charge=self.gin.charge,
@@ -661,7 +659,7 @@ class GaussianErrorHandler(ErrorHandler):
                 self.gin.input_parameters.update({"surface": "SAS"})
                 actions.append({"surface": "SAS"})
             else:
-                self.logger.info("Not sure how to fix " "solute_solvent_surface_error if surface is " "already SAS!")
+                self.logger.info("Not sure how to fix solute_solvent_surface_error if surface is already SAS!")
                 return {"errors": [self.errors], "actions": None}
 
         elif "internal_coords" in self.errors:
@@ -700,22 +698,22 @@ class GaussianErrorHandler(ErrorHandler):
             if set(last_lines) != {"\n"}:
                 # if the required blank lines at the end of the input file are
                 # missing, just rewrite the file
-                self.logger.info("Missing blank line at the end of the input " "file.")
+                self.logger.info("Missing blank line at the end of the input file.")
                 actions.append({"blank_lines": "rewrite_input_file"})
             else:
-                self.logger.info("Not sure how to fix zmatrix error. " "Check manually?")
+                self.logger.info("Not sure how to fix zmatrix error. Check manually?")
                 return {"errors": [self.errors], "actions": None}
 
         elif "coords" in self.errors:
             if "connectivity" in self.gin.route_parameters.get("geom"):
-                self.logger.info("Explicit atom bonding is requested but no " "such input is provided")
+                self.logger.info("Explicit atom bonding is requested but no such input is provided")
                 if isinstance(self.gin.route_parameters["geom"], dict) and len(self.gin.route_parameters["geom"]) > 1:
                     self.gin.route_parameters["geom"].pop("connectivity", None)
                 else:
                     del self.gin.route_parameters["geom"]
                 actions.append({"coords": "remove_connectivity"})
             else:
-                self.logger.info("Missing connectivity info. Not sure how to " "fix this error. Exiting!")
+                self.logger.info("Missing connectivity info. Not sure how to fix this error. Exiting!")
                 return {"errors": [self.errors], "actions": None}
 
         elif "found_coords" in self.errors:
@@ -728,9 +726,7 @@ class GaussianErrorHandler(ErrorHandler):
                 self.gin._mol = None
                 actions.append({"mol": "remove_from_input"})
             else:
-                self.logger.info(
-                    "Not sure why atom specifications should not " "be found in the input. Examine manually!"
-                )
+                self.logger.info("Not sure why atom specifications should not be found in the input. Examine manually!")
                 return {"errors": [self.errors], "actions": None}
 
         elif "coord_inputs" in self.errors:
@@ -764,20 +760,18 @@ class GaussianErrorHandler(ErrorHandler):
                 # initial guess be read from the checkpoint file but forgot to
                 # take the geom from the checkpoint file, add geom=check
                 if not glob.glob("*.[Cc][Hh][Kk]"):
-                    raise FileNotFoundError(
-                        "This remedy reads geometry from " "checkpoint file. This file is " "missing!"
-                    )
+                    raise FileNotFoundError("This remedy reads geometry from checkpoint file. This file is missing!")
                 GaussianErrorHandler._update_route_params(self.gin.route_parameters, "geom", "check")
                 self.gin.route_parameters["geom"] = "check"
                 actions.append({"mol": "get_from_checkpoint"})
             else:
                 # error cannot be fixed automatically. Return None for actions
-                self.logger.info("Molecule is not found in the input file. " "Fix manually!")
+                self.logger.info("Molecule is not found in the input file. Fix manually!")
                 # TODO: check if logger.info is enough here or return is needed
                 return {"errors": list(self.errors), "actions": None}
 
         elif any(err in self.errors for err in ["empty_file", "bad_file"]):
-            self.logger.error("Required checkpoint file is bad. Fix " "manually!")
+            self.logger.error("Required checkpoint file is bad. Fix manually!")
             return {"errors": list(self.errors), "actions": None}
 
         elif "missing_file" in self.errors:
@@ -786,7 +780,7 @@ class GaussianErrorHandler(ErrorHandler):
 
         elif "syntax" in self.errors:
             # error cannot be fixed automatically. Return None for actions
-            self.logger.info("A syntax error was detected in the input file. " "Fix manually!")
+            self.logger.info("A syntax error was detected in the input file. Fix manually!")
             return {"errors": list(self.errors), "actions": None}
 
         elif "insufficient_mem" in self.errors:
@@ -797,11 +791,11 @@ class GaussianErrorHandler(ErrorHandler):
                 self.gin.link0_parameters[mem_key] = f"{mem}MB"
                 actions.append({"memory": "increase_to_gaussian_recommendation"})
             else:
-                self.logger.info("Check job memory requirements manually and " "set as needed.")
+                self.logger.info("Check job memory requirements manually and set as needed.")
                 return {"errors": list(self.errors), "actions": None}
 
         else:
-            self.logger.info("Must have gotten an error that is parsed but not " "handled yet. Fix manually!")
+            self.logger.info("Must have gotten an error that is parsed but not handled yet. Fix manually!")
             return {"errors": list(self.errors), "actions": None}
 
         os.rename(
@@ -894,6 +888,6 @@ class WallTimeErrorHandler(ErrorHandler):
                 f.write("\n".join(input_str))
             return {"errors": ["wall_time_limit"], "actions": None}
         self.logger.info(
-            "Wall time handler requires a read-write gaussian " "file to be available. No such file is found."
+            "Wall time handler requires a read-write gaussian file to be available. No such file is found."
         )
         return {"errors": ["Walltime reached but not rwf file found"], "actions": None}
