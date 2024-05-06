@@ -24,7 +24,8 @@ class VaspModder(Modder):
                 supplied, a ValueError is raised. Defaults to True.
             vi (VaspInput): A VaspInput object from the current directory.
                 Initialized automatically if not passed (but passing it will
-                avoid having to reparse the directory).
+                avoid having to re-parse the directory).
+            directory (str): The directory containing the VaspInput set.
         """
         self.vi = vi or VaspInput.from_directory(directory)
         self.directory = directory
