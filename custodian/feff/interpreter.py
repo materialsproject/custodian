@@ -25,8 +25,8 @@ class FeffModder(Modder):
                 supplied, a ValueError is raised. Defaults to True.
             feffinp (FEFFInput): A FeffInput object from the current directory.
                 Initialized automatically if not passed (but passing it will
-                avoid having to reparse the directory).
-            directory (str): Directory to run in
+                avoid having to re-parse the directory).
+            directory (str): The directory containing the FeffInput set. Defaults to "./".
         """
         self.directory = directory
         self.feffinp = feffinp or FEFFDictSet.from_directory(self.directory)

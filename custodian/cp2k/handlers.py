@@ -18,6 +18,7 @@ import itertools
 import os
 import re
 import time
+from typing import ClassVar
 
 import numpy as np
 from monty.os.path import zpath
@@ -56,7 +57,11 @@ class StdErrHandler(ErrorHandler):
     is_monitor = True
     raises_runtime_error = False
 
-    error_msgs = {"seg_fault": ["SIGSEGV"], "out_of_memory": ["insufficient virtual memory"], "abort": ["SIGABRT"]}
+    error_msgs: ClassVar = {
+        "seg_fault": ["SIGSEGV"],
+        "out_of_memory": ["insufficient virtual memory"],
+        "abort": ["SIGABRT"],
+    }
 
     def __init__(self, std_err="std_err.txt") -> None:
         """Initialize the handler with the output file to check.

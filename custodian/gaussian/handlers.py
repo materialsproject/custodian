@@ -9,7 +9,7 @@ import math
 import os
 import re
 import shutil
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 from monty.io import zopen
@@ -47,7 +47,7 @@ class GaussianErrorHandler(ErrorHandler):
     """
 
     # definition of job errors as they appear in Gaussian output file
-    error_defs = {
+    error_defs: ClassVar = {
         "Optimization stopped": "opt_steps",
         "Convergence failure": "scf_convergence",
         "FormBX had a problem": "linear_bend",
@@ -71,7 +71,7 @@ class GaussianErrorHandler(ErrorHandler):
     recom_mem_patt = re.compile(
         r"Use %mem=([0-9]+)MW to provide the minimum amount of memory required to complete this step."
     )
-    conv_criteria = {
+    conv_criteria: ClassVar = {
         "max_force": re.compile(r"\s+(Maximum Force)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)"),
         "rms_force": re.compile(r"\s+(RMS {5}Force)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)"),
         "max_disp": re.compile(r"\s+(Maximum Displacement)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)"),

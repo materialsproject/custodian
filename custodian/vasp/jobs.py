@@ -806,8 +806,7 @@ class VaspNEBJob(VaspJob):
         self.settings_override = settings_override
 
     def setup(self, directory="./") -> None:
-        """
-        Performs initial setup for VaspNEBJob, including overriding any settings
+        """Performs initial setup for VaspNEBJob, including overriding any settings
         and backing up.
         """
         neb_dirs, neb_sub = self._get_neb_dirs(directory)
