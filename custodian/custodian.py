@@ -212,12 +212,12 @@ class Custodian:
     def _load_checkpoint(directory):
         restart = 0
         run_log = []
-        chkpts = glob(os.path.join(directory, "custodian.chk.*.tar.gz"))
-        if chkpts:
-            chkpt = sorted(chkpts, key=lambda c: int(c.split(".")[-3]))[0]
-            restart = int(chkpt.split(".")[-3])
-            logger.info(f"Loading from checkpoint file {chkpt}...")
-            with tarfile.open(chkpt) as file:
+        chk_pts = glob(os.path.join(directory, "custodian.chk.*.tar.gz"))
+        if chk_pts:
+            chk_pt = min(chk_pts, key=lambda c: int(c.split(".")[-3]))
+            restart = int(chk_pt.split(".")[-3])
+            logger.info(f"Loading from checkpoint file {chk_pt}...")
+            with tarfile.open(chk_pt) as file:
 
                 def is_within_directory(directory, target):
                     abs_directory = os.path.abspath(directory)
@@ -381,7 +381,7 @@ class Custodian:
 
             try:
                 # skip jobs until the restart
-                for job_n, job in islice(enumerate(self.jobs, 1), self.restart, None):
+                for job_n, job in islice(enumerate(self.jobs, start=1), self.restart, None):
                     self._run_job(job_n, job)
                     # We do a dump of the run log after each job.
                     dumpfn(self.run_log, os.path.join(self.directory, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)

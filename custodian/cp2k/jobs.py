@@ -77,7 +77,7 @@ class Cp2kJob(Job):
         self.final = final
         self.backup = backup
         self.suffix = suffix
-        self.settings_override = settings_override if settings_override else []
+        self.settings_override = settings_override or []
         self.restart = restart
 
     def setup(self, directory="./") -> None:
