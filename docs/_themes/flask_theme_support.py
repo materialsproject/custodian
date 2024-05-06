@@ -1,5 +1,7 @@
 """flasky extensions. flasky pygments style based on tango style."""
 
+from typing import ClassVar
+
 from pygments.style import Style
 from pygments.token import (
     Comment,
@@ -23,7 +25,7 @@ class FlaskyStyle(Style):
     background_color = "#f8f8f8"
     default_style = ""
 
-    styles = {
+    styles: ClassVar = {
         # No corresponding class for the following:
         # Text:                     "", # class:  ''
         Whitespace: "underline #f8f8f8",  # class: 'w'

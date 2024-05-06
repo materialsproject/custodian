@@ -16,6 +16,7 @@ import time
 import warnings
 from collections import Counter
 from math import prod
+from typing import ClassVar
 
 import numpy as np
 from monty.dev import deprecated
@@ -804,7 +805,7 @@ class AliasingErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    error_msgs = {
+    error_msgs: ClassVar = {
         "aliasing": ["WARNING: small aliasing (wrap around) errors must be expected"],
         "aliasing_incar": ["Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate"],
     }
