@@ -35,7 +35,8 @@ class Cp2kModder(Modder):
                 supplied, a ValueError is raised. Defaults to True.
             ci (Cp2kInput): A Cp2kInput object from the current directory.
                 Initialized automatically if not passed (but passing it will
-                avoid having to reparse the directory).
+                avoid having to re-parse the directory).
+            directory (str): The directory containing the Cp2kInput set. Defaults to "./".
         """
         self.directory = directory
         self.ci = ci or Cp2kInput.from_file(os.path.join(self.directory, filename))

@@ -9,7 +9,7 @@ import math
 import os
 import re
 import shutil
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 from monty.io import zopen
@@ -47,7 +47,7 @@ class GaussianErrorHandler(ErrorHandler):
     """
 
     # definition of job errors as they appear in Gaussian output file
-    error_defs = {
+    error_defs: ClassVar = {
         "Optimization stopped": "opt_steps",
         "Convergence failure": "scf_convergence",
         "FormBX had a problem": "linear_bend",
@@ -71,7 +71,7 @@ class GaussianErrorHandler(ErrorHandler):
     recom_mem_patt = re.compile(
         r"Use %mem=([0-9]+)MW to provide the minimum amount of memory required to complete this step."
     )
-    conv_critera = {
+    conv_criteria: ClassVar = {
         "max_force": re.compile(r"\s+(Maximum Force)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)"),
         "rms_force": re.compile(r"\s+(RMS {5}Force)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)"),
         "max_disp": re.compile(r"\s+(Maximum Displacement)\s+(-?\d+.?\d*|.*)\s+(-?\d+.?\d*)"),
@@ -79,7 +79,7 @@ class GaussianErrorHandler(ErrorHandler):
     }
 
     grid_patt = re.compile(r"(-?\d{5})")
-    GRID_NAMES = [
+    GRID_NAMES = (
         "finegrid",
         "fine",
         "superfinegrid",
@@ -90,8 +90,8 @@ class GaussianErrorHandler(ErrorHandler):
         "sg1",
         "pass0grid",
         "pass0",
-    ]
-    MEM_UNITS = ["kb", "mb", "gb", "tb", "kw", "mw", "gw", "tw"]
+    )
+    MEM_UNITS = ("kb", "mb", "gb", "tb", "kw", "mw", "gw", "tw")
 
     activate_better_guess = False
 
@@ -504,7 +504,7 @@ class GaussianErrorHandler(ErrorHandler):
                     self.recom_mem = GaussianErrorHandler.convert_mem(float(mem), "mw")
 
                 if self.check_convergence and "opt" in self.gin.route_parameters:
-                    for k, v in GaussianErrorHandler.conv_critera.items():
+                    for k, v in GaussianErrorHandler.conv_criteria.items():
                         m = v.search(line)
                         if m:
                             if k not in self.conv_data["values"]:

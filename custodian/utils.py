@@ -5,6 +5,7 @@ import logging
 import os
 import tarfile
 from glob import glob
+from typing import ClassVar
 
 
 def backup(filenames, prefix="error", directory="./") -> None:
@@ -60,7 +61,7 @@ class tracked_lru_cache:
     Allows Custodian to clear the cache after all the checks have been performed.
     """
 
-    cached_functions: set = set()
+    cached_functions: ClassVar = set()
 
     def __init__(self, func) -> None:
         """

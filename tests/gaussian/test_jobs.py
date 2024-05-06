@@ -67,8 +67,8 @@ class TestGaussianJob(TestCase):
             self.output_file,
             self.stderr_file,
             self.backup,
-            True,
-            self.directory,
+            cart_coords=True,
+            directory=self.directory,
         )
         jobs = list(job_gen)
         assert len(jobs) == 1, "One job should be generated under normal conditions."

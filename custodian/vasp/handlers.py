@@ -16,6 +16,7 @@ import time
 import warnings
 from collections import Counter
 from math import prod
+from typing import ClassVar
 
 import numpy as np
 from monty.dev import deprecated
@@ -66,7 +67,7 @@ class VaspErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    error_msgs = {
+    error_msgs: ClassVar = {
         "tet": [
             "Tetrahedron method fails",
             "tetrahedron method fails",
@@ -135,20 +136,17 @@ class VaspErrorHandler(ErrorHandler):
                 is being redirected. The error messages that are checked are
                 present in the stdout. Defaults to "vasp.out", which is the
                 default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
-            errors_subset_to_detect (list): A subset of errors to catch. The
+            errors_subset_to_catch (list): A subset of errors to catch. The
                 default is None, which means all supported errors are detected.
                 Use this to catch only a subset of supported errors.
                 E.g., ["eddrmm", "zheev"] will only catch the eddrmm and zheev
                 errors, and not others. If you wish to only exclude one or
-                two of the errors, you can create this list by the following
-                lines:
+                two of the errors, you can create this list by the following lines:
 
-                ```
-                subset = list(VaspErrorHandler().error_msgs)
-                subset.remove("eddrmm")
+                    subset = list(VaspErrorHandler().error_msgs)
+                    subset.remove("eddrmm")
+                    handler = VaspErrorHandler(errors_subset_to_catch=subset)
 
-                handler = VaspErrorHandler(errors_subset_to_catch=subset)
-                ```
             vtst_fixes (bool): Whether to consider VTST optimizers. Defaults to
                 False for compatibility purposes, but if you have VTST, you
                 would likely benefit from setting this to True.
@@ -691,7 +689,7 @@ class LrfCommutatorHandler(ErrorHandler):
 
     is_monitor = True
 
-    error_msgs = {"lrf_comm": ["LRF_COMMUTATOR internal error"]}
+    error_msgs: ClassVar = {"lrf_comm": ["LRF_COMMUTATOR internal error"]}
 
     def __init__(self, output_filename: str = "std_err.txt") -> None:
         """Initialize the handler with the output file to check.
@@ -744,7 +742,7 @@ class StdErrHandler(ErrorHandler):
 
     is_monitor = True
 
-    error_msgs = {
+    error_msgs: ClassVar = {
         "kpoints_trans": ["internal error in GENERATE_KPOINTS_TRANS: number of G-vector changed in star"],
         "out_of_memory": ["Allocation would exceed memory limit"],
     }
@@ -804,7 +802,7 @@ class AliasingErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    error_msgs = {
+    error_msgs: ClassVar = {
         "aliasing": ["WARNING: small aliasing (wrap around) errors must be expected"],
         "aliasing_incar": ["Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate"],
     }

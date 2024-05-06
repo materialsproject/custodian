@@ -315,6 +315,7 @@ class VaspJob(Job):
                 wall-time handler which will write a read-only STOPCAR to
                 prevent VASP from deleting it once it finishes. Defaults to
                 False.
+            directory (str): Directory where the job was run. Defaults to './'.
 
         Returns:
             List of two jobs corresponding to an AFLOW style run.
@@ -382,12 +383,8 @@ class VaspJob(Job):
         metaGGA = incar.get("METAGGA", "SCAN")
 
         # Pre optimize WAVECAR and structure using regular GGA
-        pre_opt_settings = [
-            {
-                "dict": "INCAR",
-                "action": {"_set": {"METAGGA": None, "LWAVE": True, "NSW": 0}},
-            }
-        ]
+        new_settings = {"METAGGA": None, "LWAVE": True, "NSW": 0}
+        pre_opt_settings = [{"dict": "INCAR", "action": {"_set": new_settings}}]
         jobs = [
             VaspJob(
                 vasp_cmd,
@@ -460,6 +457,7 @@ class VaspJob(Job):
             half_kpts_first_relax (bool): Whether to halve the kpoint grid
                 for the first relaxation. Speeds up difficult convergence
                 considerably. Defaults to False.
+            directory (str): Directory where the job was run. Defaults to './'.
             **vasp_job_kwargs: Passthrough kwargs to VaspJob. See
                 :class:`custodian.vasp.jobs.VaspJob`.
 
@@ -558,6 +556,7 @@ class VaspJob(Job):
                 which is more robust but can be a bit slow. The code does fall
                 back on the bisection when bfgs gives a nonsensical result,
                 e.g., negative lattice params.
+            directory (str): Directory where the job was run. Defaults to './'.
             **vasp_job_kwargs: Passthrough kwargs to VaspJob. See
                 :class:`custodian.vasp.jobs.VaspJob`.
 
@@ -807,8 +806,7 @@ class VaspNEBJob(VaspJob):
         self.settings_override = settings_override
 
     def setup(self, directory="./") -> None:
-        """
-        Performs initial setup for VaspNEBJob, including overriding any settings
+        """Performs initial setup for VaspNEBJob, including overriding any settings
         and backing up.
         """
         neb_dirs, neb_sub = self._get_neb_dirs(directory)
@@ -825,7 +823,6 @@ class VaspNEBJob(VaspJob):
         if self.half_kpts and os.path.isfile(os.path.join(directory, "KPOINTS")):
             kpts = Kpoints.from_file(os.path.join(directory, "KPOINTS"))
             kpts.kpts = np.maximum(np.array(kpts.kpts) / 2, 1)
-            kpts.kpts = kpts.kpts.astype(int).tolist()
             if tuple(kpts.kpts[0]) == (1, 1, 1):
                 kpt_dic = kpts.as_dict()
                 kpt_dic["generation_style"] = "Gamma"

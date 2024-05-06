@@ -1,6 +1,4 @@
-"""
-This package implements various Gaussian Jobs and Error Handlers.
-"""
+"""This package implements various Gaussian Jobs and Error Handlers."""
 
 __author__ = "Rasha Atwi"
 __version__ = "0.1"

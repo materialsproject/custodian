@@ -41,6 +41,8 @@ class Modder:
                 mode, unsupported actions are simply ignored without any
                 errors raised. In strict mode, if an unsupported action is
                 supplied, a ValueError is raised. Defaults to True.
+            directory (str): The directory containing the files to be modified.
+                Defaults to "./".
         """
         self.supported_actions = {}
         actions = actions if actions is not None else [DictActions]
