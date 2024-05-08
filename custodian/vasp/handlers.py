@@ -1272,6 +1272,7 @@ class LargeSigmaHandler(ErrorHandler):
     """
 
     is_monitor: bool = True
+    e_entropy_tol: float = 1e-3
     min_sigma: float = 0.01
 
     def __init__(self) -> None:
@@ -1292,11 +1293,12 @@ class LargeSigmaHandler(ErrorHandler):
                 {"entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"}, postprocess=float, reverse=True, terminate_on_match=True
             )
             n_atoms = Structure.from_file(os.path.join(directory, "POSCAR")).num_sites
+            self.entropy_per_atom = None
             if outcar.data.get("entropy", []):
-                entropy_per_atom = abs(np.max(outcar.data.get("entropy"))) / n_atoms
+                self.entropy_per_atom = abs(np.max(outcar.data.get("entropy"))) / n_atoms
 
                 # if more than 1 meV/atom, reduce sigma
-                if entropy_per_atom > 0.001:
+                if self.entropy_per_atom > self.e_entropy_tol:
                     return True
 
         return False
@@ -1309,15 +1311,23 @@ class LargeSigmaHandler(ErrorHandler):
         ismear = vi["INCAR"].get("ISMEAR", 1)
         sigma = vi["INCAR"].get("SIGMA", 0.2)
 
-        # Reduce SIGMA by a factor of 0.46 if larger than 0.08
-        # The 0.46 factor is chosen to reduce SIGMA from the default of 0.2
-        # to a practical minimum value of ~0.02 in 3 steps
-        # For Gaussian smearing with starting smearing width of 0.05 eV, this will reach 0.01 eV smearing in 3 steps
+        # From F.J. dos Santos and N. Marzari, Phys. Rev. B 107, 195122 (2023),
+        # DOI: 10.1103/PhysRevB.107.195122, Eq. (19)
+        # When the smearing width is acceptably small, the electronic free energy
+        # F(sigma) \approx E(0) + gamma * sigma**2 / 2
+        # where E(0) = F(sigma --> 0) is the actual ground-state energy
+        # we can approximate the ``optimal'' sigma to reduce to via
+        # sigma_new = [E_entropy(new) / E_entropy(current) ]**(0.5) * sigma_current,
+        # Practically, E_entropy(new) = 1 meV/atom
         if sigma > self.min_sigma:
             actions.append(
                 {
                     "dict": "INCAR",
-                    "action": {"_set": {"SIGMA": max(self.min_sigma, sigma * 0.46)}},
+                    "action": {
+                        "_set": {
+                            "SIGMA": max(self.min_sigma, (self.e_entropy_tol / self.entropy_per_atom) ** (0.5) * sigma)
+                        }
+                    },
                 }
             )
         elif ismear != 0:
