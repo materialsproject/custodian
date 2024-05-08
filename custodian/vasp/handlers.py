@@ -1327,7 +1327,9 @@ class LargeSigmaHandler(ErrorHandler):
                     "dict": "INCAR",
                     "action": {
                         "_set": {
-                            "SIGMA": max(self.min_sigma, 0.8*(self.e_entropy_tol / self.entropy_per_atom) ** (0.5) * sigma)
+                            "SIGMA": max(
+                                self.min_sigma, 0.8 * (self.e_entropy_tol / self.entropy_per_atom) ** (0.5) * sigma
+                            )
                         }
                     },
                 }
