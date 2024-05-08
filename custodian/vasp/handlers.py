@@ -1285,7 +1285,7 @@ class LargeSigmaHandler(ErrorHandler):
             # Can't perform check if Outcar not valid
             return False
 
-        if incar.get("ISMEAR", 1) > 0:
+        if incar.get("ISMEAR", 1) >= 0:
             # Read the latest entropy term.
             outcar.read_pattern(
                 {"entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"}, postprocess=float, reverse=True, terminate_on_match=True
@@ -1305,6 +1305,7 @@ class LargeSigmaHandler(ErrorHandler):
         backup(VASP_BACKUP_FILES, directory=directory)
         actions = []
         vi = VaspInput.from_directory(directory)
+        ismear = vi["INCAR"].get("ISMEAR",1)
         sigma = vi["INCAR"].get("SIGMA", 0.2)
 
         # Reduce SIGMA by 0.06 if larger than 0.08
@@ -1317,13 +1318,22 @@ class LargeSigmaHandler(ErrorHandler):
                     "action": {"_set": {"SIGMA": sigma - 0.06}},
                 }
             )
-        else:
+        elif ismear != 0:
             # https://vasp.at/wiki/index.php/ISMEAR recommends ISMEAR = 0 if you have
             # no a priori knowledge of your system ("then always use Gaussian smearing"
             actions.append(
                 {
                     "dict": "INCAR",
                     "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}},
+                }
+            )
+        else:
+            # if entropy is too large with Gaussian smearing, reduce sigma by 20% until 
+            # we reach a 0.01 eV smearing width
+            actions.append(
+                {
+                    "dict": "INCAR",
+                    "action": {"_set": {"ISMEAR": 0, "SIGMA": max(0.01, sigma * 0.8)}},
                 }
             )
 
