@@ -1271,7 +1271,8 @@ class LargeSigmaHandler(ErrorHandler):
     value of SIGMA. See VASP documentation for ISMEAR.
     """
 
-    is_monitor = True
+    is_monitor : bool = True
+    min_sigma : float = 0.01
 
     def __init__(self) -> None:
         """Initializes the handler with a buffer time."""
@@ -1308,14 +1309,14 @@ class LargeSigmaHandler(ErrorHandler):
         ismear = vi["INCAR"].get("ISMEAR", 1)
         sigma = vi["INCAR"].get("SIGMA", 0.2)
 
-        # Reduce SIGMA by 0.06 if larger than 0.08
-        # this will reduce SIGMA from the default of 0.2 to the practical
-        # minimum value of 0.02 in 3 steps
-        if sigma > 0.08:
+        # Reduce SIGMA by a factor of 0.46 if larger than 0.08
+        # The 0.46 factor is chosen to reduce SIGMA from the default of 0.2 to a practical minimum value of ~0.02 in 3 steps
+        # For Gaussian smearing with starting smearing width of 0.05 eV, this will reach 0.01 eV smearing in 3 steps
+        if sigma > self.min_sigma:
             actions.append(
                 {
                     "dict": "INCAR",
-                    "action": {"_set": {"SIGMA": sigma - 0.06}},
+                    "action": {"_set": {"SIGMA": max(self.min_sigma, sigma*0.46)}},
                 }
             )
         elif ismear != 0:
@@ -1325,15 +1326,6 @@ class LargeSigmaHandler(ErrorHandler):
                 {
                     "dict": "INCAR",
                     "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}},
-                }
-            )
-        else:
-            # if entropy is too large with Gaussian smearing, reduce sigma by 20% until
-            # we reach a 0.01 eV smearing width
-            actions.append(
-                {
-                    "dict": "INCAR",
-                    "action": {"_set": {"ISMEAR": 0, "SIGMA": max(0.01, sigma * 0.8)}},
                 }
             )
 
