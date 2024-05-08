@@ -1305,7 +1305,7 @@ class LargeSigmaHandler(ErrorHandler):
         backup(VASP_BACKUP_FILES, directory=directory)
         actions = []
         vi = VaspInput.from_directory(directory)
-        ismear = vi["INCAR"].get("ISMEAR",1)
+        ismear = vi["INCAR"].get("ISMEAR", 1)
         sigma = vi["INCAR"].get("SIGMA", 0.2)
 
         # Reduce SIGMA by 0.06 if larger than 0.08
@@ -1328,7 +1328,7 @@ class LargeSigmaHandler(ErrorHandler):
                 }
             )
         else:
-            # if entropy is too large with Gaussian smearing, reduce sigma by 20% until 
+            # if entropy is too large with Gaussian smearing, reduce sigma by 20% until
             # we reach a 0.01 eV smearing width
             actions.append(
                 {
