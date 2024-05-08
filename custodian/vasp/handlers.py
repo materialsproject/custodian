@@ -1316,7 +1316,9 @@ class LargeSigmaHandler(ErrorHandler):
         # When the smearing width is acceptably small, the electronic free energy
         # F(sigma) \approx E(0) + gamma * sigma**2 / 2
         # where E(0) = F(sigma --> 0) is the actual ground-state energy
-        # we can approximate the ``optimal'' sigma to reduce to via
+        # E_entropy(sigma) = gamma * sigma**2 / 2
+        # is the contribution electronic smearing entropy
+        # We can approximate the ``optimal'' sigma to reduce to via
         # sigma_new = [E_entropy(new) / E_entropy(current) ]**(0.5) * sigma_current,
         # Practically, E_entropy(new) = 1 meV/atom
         if sigma > self.min_sigma:
@@ -1325,7 +1327,7 @@ class LargeSigmaHandler(ErrorHandler):
                     "dict": "INCAR",
                     "action": {
                         "_set": {
-                            "SIGMA": max(self.min_sigma, (self.e_entropy_tol / self.entropy_per_atom) ** (0.5) * sigma)
+                            "SIGMA": max(self.min_sigma, 0.8*(self.e_entropy_tol / self.entropy_per_atom) ** (0.5) * sigma)
                         }
                     },
                 }

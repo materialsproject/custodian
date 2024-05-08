@@ -819,7 +819,7 @@ class LargeSigmaHandlerTest(PymatgenTest):
         assert handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["LargeSigma"]
-        assert Incar.from_file("INCAR")["SIGMA"] == pytest.approx(0.901, rel=1.0e-3)
+        assert Incar.from_file("INCAR")["SIGMA"] == pytest.approx(0.721, rel=1.0e-3)
         assert os.path.isfile("vasprun.xml")
 
 
