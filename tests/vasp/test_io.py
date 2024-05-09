@@ -24,9 +24,9 @@ class TestIO:
         assert len(tracked_lru_cache.cached_functions) == 1
 
     def test_load_vasprun(self) -> None:
-        vr = load_vasprun(f"{TEST_FILES}/large_sigma/vasprun.xml")
+        vr = load_vasprun(f"{TEST_FILES}/large_sigma/vasprun.xml.1")
         assert vr is not None
-        vr2 = load_vasprun(f"{TEST_FILES}/large_sigma/vasprun.xml")
+        vr2 = load_vasprun(f"{TEST_FILES}/large_sigma/vasprun.xml.1")
 
         assert vr is vr2
 
