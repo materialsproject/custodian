@@ -1272,32 +1272,35 @@ class LargeSigmaHandler(ErrorHandler):
     """
 
     is_monitor: bool = True
-    e_entropy_tol: float = 1e-3
-    min_sigma: float = 0.01
-
-    def __init__(self) -> None:
+    
+    def __init__(self, e_entropy_tol: float = 1e-3, min_sigma: float = 0.01, output_vasprun : str = "vasprun.xml") -> None:
         """Initializes the handler with a buffer time."""
+        self.e_entropy_tol = e_entropy_tol
+        self.min_sigma = min_sigma
+        self.output_vasprun = output_vasprun
 
     def check(self, directory="./") -> bool:
         """Check for error."""
         incar = Incar.from_file(os.path.join(directory, "INCAR"))
         try:
-            outcar = load_outcar(os.path.join(directory, "OUTCAR"))
+            vrun = load_vasprun(os.path.join(directory, self.output_vasprun))
         except Exception:
-            # Can't perform check if Outcar not valid
+            # Can't perform check if vasprun not valid
             return False
 
         if incar.get("ISMEAR", 1) >= 0:
-            # Read the latest entropy term.
-            outcar.read_pattern(
-                {"entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"}, postprocess=float, reverse=True, terminate_on_match=True
-            )
-            n_atoms = Structure.from_file(os.path.join(directory, "POSCAR")).num_sites
+            # Read the entropy terms at the end of each ionic step
+            entropies = [
+                abs(
+                    step["electronic_steps"][-1].get("eentropy")
+                    / vrun.structures[-1].num_sites
+                ) for step in vrun.ionic_steps
+            ]
             self.entropy_per_atom = None
-            if outcar.data.get("entropy", []):
-                self.entropy_per_atom = abs(np.max(outcar.data.get("entropy"))) / n_atoms
-
-                # if more than 1 meV/atom, reduce sigma
+            if len(entropies) > 0:
+                self.entropy_per_atom = max(entropies)
+                # if the max is more than 1 meV/atom in magnitude, reduce sigma
+                # note that the entropy per atom is stored for the correction step
                 if self.entropy_per_atom > self.e_entropy_tol:
                     return True
 

@@ -816,6 +816,8 @@ class LargeSigmaHandlerTest(PymatgenTest):
 
     def test_check_correct_large_sigma(self) -> None:
         handler = LargeSigmaHandler()
+        handler.check()
+        print(handler.entropy_per_atom)
         assert handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["LargeSigma"]
