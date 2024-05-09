@@ -809,20 +809,23 @@ class KspacingMetalHandlerTest(PymatgenTest):
 
 
 class LargeSigmaHandlerTest(PymatgenTest):
+        
     def setUp(self) -> None:
         copy_tmp_files(
-            self.tmp_path, "large_sigma/INCAR", "large_sigma/vasprun.xml", "large_sigma/OUTCAR", "large_sigma/POSCAR"
+            self.tmp_path, *[f"large_sigma/{f}" for f in ("INCAR","vasprun.xml.1", "vasprun.xml.2",)]
         )
 
     def test_check_correct_large_sigma(self) -> None:
-        handler = LargeSigmaHandler()
-        handler.check()
-        print(handler.entropy_per_atom)
+        # first check should reduce sigma
+        handler = LargeSigmaHandler(output_vasprun = "vasprun.xml.1")
         assert handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["LargeSigma"]
-        assert Incar.from_file("INCAR")["SIGMA"] == pytest.approx(0.721, rel=1.0e-3)
-        assert os.path.isfile("vasprun.xml")
+        assert Incar.from_file("INCAR")["SIGMA"] == pytest.approx(0.1115, rel=1.0e-3)
+
+        # second check should find that sigma is appropriately reduced
+        handler = LargeSigmaHandler(output_vasprun = "vasprun.xml.2")
+        assert not handler.check()
 
 
 class ZpotrfErrorHandlerTest(PymatgenTest):
