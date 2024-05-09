@@ -1272,8 +1272,10 @@ class LargeSigmaHandler(ErrorHandler):
     """
 
     is_monitor: bool = True
-    
-    def __init__(self, e_entropy_tol: float = 1e-3, min_sigma: float = 0.01, output_vasprun : str = "vasprun.xml") -> None:
+
+    def __init__(
+        self, e_entropy_tol: float = 1e-3, min_sigma: float = 0.01, output_vasprun: str = "vasprun.xml"
+    ) -> None:
         """Initializes the handler with a buffer time."""
         self.e_entropy_tol = e_entropy_tol
         self.min_sigma = min_sigma
@@ -1291,10 +1293,8 @@ class LargeSigmaHandler(ErrorHandler):
         if incar.get("ISMEAR", 1) >= 0:
             # Read the entropy terms at the end of each ionic step
             entropies = [
-                abs(
-                    step["electronic_steps"][-1].get("eentropy")
-                    / vrun.structures[-1].num_sites
-                ) for step in vrun.ionic_steps
+                abs(step["electronic_steps"][-1].get("eentropy") / vrun.structures[-1].num_sites)
+                for step in vrun.ionic_steps
             ]
             self.entropy_per_atom = None
             if len(entropies) > 0:
