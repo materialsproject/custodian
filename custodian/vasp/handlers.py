@@ -1266,8 +1266,9 @@ class ScanMetalHandler(KspacingMetalHandler):
 
 class LargeSigmaHandler(ErrorHandler):
     """
-    When ISMEAR > 0 (Methfessel-Paxton), monitor the magnitude of the entropy
-    term T*S in the OUTCAR file. If the entropy term is larger than 1 meV/atom, reduce the
+    When ISMEAR >= 0 (Methfessel-Paxton order ISMEAR; order-0 is equivalent to Gaussian smearing),
+    monitor the magnitude of the entropy term `eentropy` in the vasprun.xml ionic steps.
+    If the entropy term is larger than 1 meV/atom, reduce the
     value of SIGMA. See VASP documentation for ISMEAR.
     """
 
