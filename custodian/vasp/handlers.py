@@ -1275,36 +1275,57 @@ class LargeSigmaHandler(ErrorHandler):
     is_monitor: bool = True
 
     def __init__(
-        self, e_entropy_tol: float = 1e-3, min_sigma: float = 0.01, output_vasprun: str = "vasprun.xml"
+        self, e_entropy_tol: float = 1e-3, min_sigma: float = 0.01, output_filename: str = "OUTCAR"
     ) -> None:
         """Initializes the handler with a buffer time."""
         self.e_entropy_tol = e_entropy_tol
         self.min_sigma = min_sigma
-        self.output_vasprun = output_vasprun
+        self.output_filename = output_filename
 
     def check(self, directory="./") -> bool:
         """Check for error."""
         incar = Incar.from_file(os.path.join(directory, "INCAR"))
         try:
-            vrun = load_vasprun(os.path.join(directory, self.output_vasprun))
+            outcar = load_outcar(os.path.join(directory, self.output_filename))
         except Exception:
-            # Can't perform check if vasprun not valid
+            # Can't perform check if outcar not valid
             return False
 
         if incar.get("ISMEAR", 1) >= 0:
-            # Read the entropy terms at the end of each ionic step
-            entropies = [
-                abs(step["electronic_steps"][-1].get("eentropy") / vrun.structures[-1].num_sites)
-                for step in vrun.ionic_steps
-            ]
-            self.entropy_per_atom = None
-            if len(entropies) > 0:
-                self.entropy_per_atom = max(entropies)
-                # if the max is more than 1 meV/atom in magnitude, reduce sigma
-                # note that the entropy per atom is stored for the correction step
+            # get entropy terms, ionic step counts, and number of completed ionic steps
+            outcar.read_pattern(
+                {"entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"}, postprocess=float, reverse=False, terminate_on_match=False
+            )
+            outcar.read_pattern(
+                {"steps": r"Iteration *(\D\d*\ \d*)"}, postprocess=int, reverse=False, terminate_on_match=False
+            )
+            outcar.read_pattern(
+                {"number_of_completed_loops": r"(aborting loop)"}, reverse=False, terminate_on_match=False
+            )
+
+            all_entropies = outcar.data.get("entropy")
+            steps = sum(outcar.data.get("steps"), []) # flatten list
+
+            # removes incomplete electronic steps, for which an entropy has not been printed yet
+            if len(steps) != len(all_entropies):
+                steps = steps[:-1]
+            unique_steps = set(steps)
+
+            # find final entropy for each ionic step (including incomplete ionic steps)
+            final_entropies = []
+            for step_num in unique_steps:
+                index = [i for i, x in enumerate(steps) if x == step_num][-1]
+                final_entropies.append(all_entropies[index][0])
+
+            # remove final entropies for incomplete ionic steps
+            num_completed_steps = len(outcar.data.get("number_of_completed_loops"))
+            final_entropies = final_entropies[:num_completed_steps]
+
+            if len(final_entropies) > 0:
+                n_atoms = len(Structure.from_file(os.path.join(directory, "POSCAR")))
+                self.entropy_per_atom = np.max(np.abs(final_entropies)) / n_atoms
                 if self.entropy_per_atom > self.e_entropy_tol:
                     return True
-
         return False
 
     def correct(self, directory="./"):
