@@ -7,8 +7,10 @@ by modifying the input files.
 from __future__ import annotations
 
 import datetime
+import functools
 import logging
 import multiprocessing
+import operator
 import os
 import re
 import shutil
@@ -1274,9 +1276,7 @@ class LargeSigmaHandler(ErrorHandler):
 
     is_monitor: bool = True
 
-    def __init__(
-        self, e_entropy_tol: float = 1e-3, min_sigma: float = 0.01, output_filename: str = "OUTCAR"
-    ) -> None:
+    def __init__(self, e_entropy_tol: float = 1e-3, min_sigma: float = 0.01, output_filename: str = "OUTCAR") -> None:
         """Initializes the handler with a buffer time."""
         self.e_entropy_tol = e_entropy_tol
         self.min_sigma = min_sigma
@@ -1294,7 +1294,10 @@ class LargeSigmaHandler(ErrorHandler):
         if incar.get("ISMEAR", 1) >= 0:
             # get entropy terms, ionic step counts, and number of completed ionic steps
             outcar.read_pattern(
-                {"entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"}, postprocess=float, reverse=False, terminate_on_match=False
+                {"entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"},
+                postprocess=float,
+                reverse=False,
+                terminate_on_match=False,
             )
             outcar.read_pattern(
                 {"steps": r"Iteration *(\D\d*\ \d*)"}, postprocess=int, reverse=False, terminate_on_match=False
@@ -1304,7 +1307,7 @@ class LargeSigmaHandler(ErrorHandler):
             )
 
             all_entropies = outcar.data.get("entropy")
-            steps = sum(outcar.data.get("steps"), []) # flatten list
+            steps = functools.reduce(operator.iadd, outcar.data.get("steps"), [])  # flatten list
 
             # removes incomplete electronic steps, for which an entropy has not been printed yet
             if len(steps) != len(all_entropies):
