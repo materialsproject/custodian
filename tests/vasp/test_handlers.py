@@ -816,22 +816,23 @@ class LargeSigmaHandlerTest(PymatgenTest):
                 f"large_sigma/{f}"
                 for f in (
                     "INCAR",
-                    "vasprun.xml.1",
-                    "vasprun.xml.2",
+                    "POSCAR",
+                    "OUTCAR_should_pass",
+                    "OUTCAR_should_fail_and_has_incomplete_electronic_steps",
                 )
             ],
         )
 
     def test_check_correct_large_sigma(self) -> None:
         # first check should reduce sigma
-        handler = LargeSigmaHandler(output_vasprun="vasprun.xml.1")
+        handler = LargeSigmaHandler(output_filename="OUTCAR_should_fail_and_has_incomplete_electronic_steps")
         assert handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["LargeSigma"]
-        assert Incar.from_file("INCAR")["SIGMA"] == pytest.approx(0.1115, rel=1.0e-3)
+        assert Incar.from_file("INCAR")["SIGMA"] == pytest.approx(0.05059644, rel=1.0e-3)
 
-        # second check should find that sigma is appropriately reduced
-        handler = LargeSigmaHandler(output_vasprun="vasprun.xml.2")
+        # second check should find that sigma is correct as-is
+        handler = LargeSigmaHandler(output_filename="OUTCAR_should_pass")
         assert not handler.check()
 
 
