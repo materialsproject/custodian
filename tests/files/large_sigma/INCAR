@@ -16,4 +16,4 @@ NCORE = 8
 NELM = 100
 NSW = 99
 PREC = Accurate
-SIGMA = 0.8
+SIGMA = 0.20
