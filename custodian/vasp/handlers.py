@@ -7,10 +7,8 @@ by modifying the input files.
 from __future__ import annotations
 
 import datetime
-import functools
 import logging
 import multiprocessing
-import operator
 import os
 import re
 import shutil
@@ -1294,41 +1292,35 @@ class LargeSigmaHandler(ErrorHandler):
         if incar.get("ISMEAR", 1) >= 0:
             # get entropy terms, ionic step counts, and number of completed ionic steps
             outcar.read_pattern(
-                {"entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"},
+                {"smearing_entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"},
                 postprocess=float,
                 reverse=False,
                 terminate_on_match=False,
             )
             outcar.read_pattern(
-                {"steps": r"Iteration *(\D\d*\ \d*)"}, postprocess=int, reverse=False, terminate_on_match=False
+                {"electronic_steps": r"Iteration *(\D\d*\ \d*)"}, postprocess=int, reverse=False, terminate_on_match=False
             )
             outcar.read_pattern(
-                {"number_of_completed_loops": r"(aborting loop)"}, reverse=False, terminate_on_match=False
+                {"completed_ionic_steps": r"(aborting loop)"}, reverse=False, terminate_on_match=False
             )
 
-            all_entropies = outcar.data.get("entropy")
-            steps = functools.reduce(operator.iadd, outcar.data.get("steps"), [])  # flatten list
+            completed_ionic_steps = len(outcar.data.get("completed_ionic_steps"))
+            entropies_per_atom = [0. for _ in range(completed_ionic_steps)]
+            n_atoms = len(Structure.from_file(os.path.join(directory, "POSCAR")))
 
-            # removes incomplete electronic steps, for which an entropy has not been printed yet
-            if len(steps) != len(all_entropies):
-                steps = steps[:-1]
-            unique_steps = set(steps)
+            # `Iteration (#ionic step # electronic step)` always written before entropy
+            e_step_idx = [step[0] for step in outcar.data.get("electronic_steps",[])]
+            smearing_entropy = outcar.data.get("smearing_entropy", [0. for _ in e_step_idx])
+            for ie_step_idx, ie_step in enumerate(e_step_idx):
+                if ie_step <= completed_ionic_steps:
+                    entropies_per_atom[ie_step - 1] = smearing_entropy[ie_step_idx]
 
-            # find final entropy for each ionic step (including incomplete ionic steps)
-            final_entropies = []
-            for step_num in unique_steps:
-                index = [i for i, x in enumerate(steps) if x == step_num][-1]
-                final_entropies.append(all_entropies[index][0])
-
-            # remove final entropies for incomplete ionic steps
-            num_completed_steps = len(outcar.data.get("number_of_completed_loops"))
-            final_entropies = final_entropies[:num_completed_steps]
-
-            if len(final_entropies) > 0:
+            if len(entropies_per_atom) > 0:
                 n_atoms = len(Structure.from_file(os.path.join(directory, "POSCAR")))
-                self.entropy_per_atom = np.max(np.abs(final_entropies)) / n_atoms
+                self.entropy_per_atom = np.max(np.abs(entropies_per_atom)) / n_atoms
                 if self.entropy_per_atom > self.e_entropy_tol:
                     return True
+                
         return False
 
     def correct(self, directory="./"):
