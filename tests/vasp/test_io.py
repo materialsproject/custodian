@@ -15,18 +15,18 @@ def _clear_tracked_cache() -> None:
 
 class TestIO:
     def test_load_outcar(self) -> None:
-        outcar = load_outcar(f"{TEST_FILES}/OUTCAR")
+        outcar = load_outcar(f"{TEST_FILES}/io/OUTCAR")
         assert outcar is not None
-        outcar2 = load_outcar(f"{TEST_FILES}/OUTCAR")
+        outcar2 = load_outcar(f"{TEST_FILES}/io/OUTCAR")
 
         assert outcar is outcar2
 
         assert len(tracked_lru_cache.cached_functions) == 1
 
     def test_load_vasprun(self) -> None:
-        vr = load_vasprun(f"{TEST_FILES}/vasprun.xml")
+        vr = load_vasprun(f"{TEST_FILES}/io/vasprun.xml")
         assert vr is not None
-        vr2 = load_vasprun(f"{TEST_FILES}/vasprun.xml")
+        vr2 = load_vasprun(f"{TEST_FILES}/io/vasprun.xml")
 
         assert vr is vr2
 
