@@ -812,7 +812,15 @@ class LargeSigmaHandlerTest(PymatgenTest):
     def setUp(self) -> None:
         copy_tmp_files(
             self.tmp_path,
-            *[f"large_sigma/{f}" for f in ("INCAR","POSCAR","OUTCAR_fail_sigma_check","OUTCAR_pass_sigma_check",)],
+            *[
+                f"large_sigma/{f}"
+                for f in (
+                    "INCAR",
+                    "POSCAR",
+                    "OUTCAR_fail_sigma_check",
+                    "OUTCAR_pass_sigma_check",
+                )
+            ],
         )
 
     def test_check_correct_large_sigma(self) -> None:
