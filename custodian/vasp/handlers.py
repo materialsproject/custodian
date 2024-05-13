@@ -1298,19 +1298,20 @@ class LargeSigmaHandler(ErrorHandler):
                 terminate_on_match=False,
             )
             outcar.read_pattern(
-                {"electronic_steps": r"Iteration *(\D\d*\ \d*)"}, postprocess=int, reverse=False, terminate_on_match=False
+                {"electronic_steps": r"Iteration *(\D\d*\ \d*)"},
+                postprocess=int,
+                reverse=False,
+                terminate_on_match=False,
             )
-            outcar.read_pattern(
-                {"completed_ionic_steps": r"(aborting loop)"}, reverse=False, terminate_on_match=False
-            )
+            outcar.read_pattern({"completed_ionic_steps": r"(aborting loop)"}, reverse=False, terminate_on_match=False)
 
             completed_ionic_steps = len(outcar.data.get("completed_ionic_steps"))
-            entropies_per_atom = [0. for _ in range(completed_ionic_steps)]
+            entropies_per_atom = [0.0 for _ in range(completed_ionic_steps)]
             n_atoms = len(Structure.from_file(os.path.join(directory, "POSCAR")))
 
             # `Iteration (#ionic step # electronic step)` always written before entropy
-            e_step_idx = [step[0] for step in outcar.data.get("electronic_steps",[])]
-            smearing_entropy = outcar.data.get("smearing_entropy", [0. for _ in e_step_idx])
+            e_step_idx = [step[0] for step in outcar.data.get("electronic_steps", [])]
+            smearing_entropy = outcar.data.get("smearing_entropy", [0.0 for _ in e_step_idx])
             for ie_step_idx, ie_step in enumerate(e_step_idx):
                 if ie_step <= completed_ionic_steps:
                     entropies_per_atom[ie_step - 1] = smearing_entropy[ie_step_idx]
@@ -1320,7 +1321,7 @@ class LargeSigmaHandler(ErrorHandler):
                 self.entropy_per_atom = np.max(np.abs(entropies_per_atom)) / n_atoms
                 if self.entropy_per_atom > self.e_entropy_tol:
                     return True
-                
+
         return False
 
     def correct(self, directory="./"):

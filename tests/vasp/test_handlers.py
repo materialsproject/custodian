@@ -812,27 +812,19 @@ class LargeSigmaHandlerTest(PymatgenTest):
     def setUp(self) -> None:
         copy_tmp_files(
             self.tmp_path,
-            *[
-                f"large_sigma/{f}"
-                for f in (
-                    "INCAR",
-                    "POSCAR",
-                    "OUTCAR_should_pass",
-                    "OUTCAR_should_fail_and_has_incomplete_electronic_steps",
-                )
-            ],
+            *[f"large_sigma/{f}" for f in ("INCAR","POSCAR","OUTCAR_fail_sigma_check","OUTCAR_pass_sigma_check",)],
         )
 
     def test_check_correct_large_sigma(self) -> None:
         # first check should reduce sigma
-        handler = LargeSigmaHandler(output_filename="OUTCAR_should_fail_and_has_incomplete_electronic_steps")
+        handler = LargeSigmaHandler(output_filename="OUTCAR_fail_sigma_check")
         assert handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["LargeSigma"]
-        assert Incar.from_file("INCAR")["SIGMA"] == pytest.approx(0.05059644, rel=1.0e-3)
+        assert Incar.from_file("INCAR")["SIGMA"] == pytest.approx(0.1115, rel=1.0e-3)
 
         # second check should find that sigma is correct as-is
-        handler = LargeSigmaHandler(output_filename="OUTCAR_should_pass")
+        handler = LargeSigmaHandler(output_filename="OUTCAR_pass_sigma_check")
         assert not handler.check()
 
 
