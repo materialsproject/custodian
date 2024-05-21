@@ -598,8 +598,11 @@ class VaspErrorHandlerTest(PymatgenTest):
         shutil.copy("OUTCAR_auto_nbands", "OUTCAR")
         handler = VaspErrorHandler("vasp.auto_nbands")
         handler.check()
-        dct = handler.correct()
+        with pytest.warns(UserWarning, match="NBANDS seems to be too high"):
+            dct = handler.correct()
         assert "auto_nbands" in dct["errors"]
+
+
  
 class AliasingErrorHandlerTest(PymatgenTest):
     def setUp(self) -> None:

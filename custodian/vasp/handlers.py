@@ -663,7 +663,7 @@ class VaspErrorHandler(ErrorHandler):
                     )
             self.error_count["algo_tet"] += 1
 
-        if "auto_nbands" in self.errors and not (nbands := self._get_nbands_from_outcar(directory)):
+        if "auto_nbands" in self.errors and (nbands := self._get_nbands_from_outcar(directory)):
             nelect = load_outcar(os.path.join(directory, "OUTCAR")).nelect
             if nelect and nbands > 2 * nelect:
                 self.error_count["auto_nbands"] += 1
