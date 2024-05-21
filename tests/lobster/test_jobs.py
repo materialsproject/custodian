@@ -60,13 +60,13 @@ FW_FILES = ("custodian.json", "FW.json", "FW_submit.script")
 class TestLobsterJob:
     """Similar to VaspJobTest. Omit test of run."""
 
-    def test_as_from_dict(self):
+    def test_as_from_dict(self) -> None:
         v = LobsterJob(lobster_cmd="hello")
         v2 = LobsterJob.from_dict(v.as_dict())
         assert type(v2) == type(v)
         assert v2.lobster_cmd == "hello"
 
-    def test_setup(self):
+    def test_setup(self) -> None:
         with cd(test_files_lobster2):
             with ScratchDir(".", copy_from_current_on_enter=True):
                 # check if backup is done correctly
@@ -79,7 +79,7 @@ class TestLobsterJob:
                 v.setup()
                 assert not os.path.isfile("lobsterin.orig")
 
-    def test_postprocess(self):
+    def test_postprocess(self) -> None:
         # test gzipped and zipping of additional files
         with cd(os.path.join(test_files_lobster3)):
             with ScratchDir(".", copy_from_current_on_enter=True):

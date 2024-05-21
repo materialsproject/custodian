@@ -22,44 +22,44 @@ from custodian.custodian import (
 
 
 class ExitCodeJob(Job):
-    def __init__(self, exitcode=0):
+    def __init__(self, exitcode=0) -> None:
         self.exitcode = exitcode
 
-    def setup(self, directory="./"):
+    def setup(self, directory="./") -> None:
         pass
 
     def run(self, directory="./"):
         return subprocess.Popen(f"exit {self.exitcode}", cwd=directory, shell=True)
 
-    def postprocess(self, directory="./"):
+    def postprocess(self, directory="./") -> None:
         pass
 
 
 class ExampleJob(Job):
-    def __init__(self, jobid, params=None):
+    def __init__(self, jobid, params=None) -> None:
         if params is None:
             params = {"initial": 0, "total": 0}
         self.jobid = jobid
         self.params = params
 
-    def setup(self, directory="./"):
+    def setup(self, directory="./") -> None:
         self.params["initial"] = 0
         self.params["total"] = 0
 
-    def run(self, directory="./"):
+    def run(self, directory="./") -> None:
         sequence = [random.uniform(0, 1) for i in range(100)]
         self.params["total"] = self.params["initial"] + sum(sequence)
 
-    def postprocess(self, directory="./"):
+    def postprocess(self, directory="./") -> None:
         pass
 
     @property
-    def name(self):
+    def name(self) -> str:
         return f"ExampleJob{self.jobid}"
 
 
 class ExampleHandler(ErrorHandler):
-    def __init__(self, params):
+    def __init__(self, params) -> None:
         self.params = params
 
     def check(self, directory="./"):
@@ -75,7 +75,7 @@ class ExampleHandler1b(ExampleHandler):
     This handler always can apply a correction, but will only apply it twice before raising.
     """
 
-    max_num_corrections = 2  # type: ignore
+    max_num_corrections = 2
     raise_on_max = True
 
 
@@ -84,7 +84,7 @@ class ExampleHandler1c(ExampleHandler):
     This handler always can apply a correction, but will only apply it twice and then not anymore.
     """
 
-    max_num_corrections = 2  # type: ignore
+    max_num_corrections = 2
     raise_on_max = False
 
 
@@ -93,11 +93,11 @@ class ExampleHandler2(ErrorHandler):
     This handler always result in an error.
     """
 
-    def __init__(self, params):
+    def __init__(self, params) -> None:
         self.params = params
         self.has_error = False
 
-    def check(self, directory="./"):
+    def check(self, directory="./") -> bool:
         return True
 
     def correct(self, directory="./"):
@@ -118,27 +118,27 @@ class ExampleHandler2b(ExampleHandler2):
 
 
 class ExampleValidator1(Validator):
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def check(self, directory="./"):
+    def check(self, directory="./") -> bool:
         return False
 
 
 class ExampleValidator2(Validator):
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def check(self, directory="./"):
+    def check(self, directory="./") -> bool:
         return True
 
 
 class CustodianTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.cwd = os.getcwd()
         os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
-    def test_exitcode_error(self):
+    def test_exitcode_error(self) -> None:
         c = Custodian([], [ExitCodeJob(0)])
         c.run()
         c = Custodian([], [ExitCodeJob(1)])
@@ -150,7 +150,7 @@ class CustodianTest(unittest.TestCase):
         c = Custodian([], [ExitCodeJob(1)], terminate_on_nonzero_returncode=False)
         c.run()
 
-    def test_run(self):
+    def test_run(self) -> None:
         n_jobs = 100
         params = {"initial": 0, "total": 0}
         c = Custodian(
@@ -162,7 +162,7 @@ class CustodianTest(unittest.TestCase):
         assert len(output) == n_jobs
         ExampleHandler(params).as_dict()
 
-    def test_run_interrupted(self):
+    def test_run_interrupted(self) -> None:
         n_jobs = 100
         params = {"initial": 0, "total": 0}
         c = Custodian(
@@ -181,7 +181,7 @@ class CustodianTest(unittest.TestCase):
                 assert c.run_interrupted() == n_jobs - total_done
                 total_done += 1
 
-    def test_unrecoverable(self):
+    def test_unrecoverable(self) -> None:
         n_jobs = 100
         params = {"initial": 0, "total": 0}
         handler = ExampleHandler2(params)
@@ -195,7 +195,7 @@ class CustodianTest(unittest.TestCase):
         assert handler.has_error
         assert c.run_log[-1]["handler"] == handler
 
-    def test_max_errors(self):
+    def test_max_errors(self) -> None:
         n_jobs = 100
         params = {"initial": 0, "total": 0}
         handler = ExampleHandler(params)
@@ -209,7 +209,7 @@ class CustodianTest(unittest.TestCase):
             c.run()
         assert c.run_log[-1]["max_errors"]
 
-    def test_max_errors_per_job(self):
+    def test_max_errors_per_job(self) -> None:
         n_jobs = 100
         params = {"initial": 0, "total": 0}
         handler = ExampleHandler(params)
@@ -223,7 +223,7 @@ class CustodianTest(unittest.TestCase):
             c.run()
         assert c.run_log[-1]["max_errors_per_job"]
 
-    def test_max_errors_per_handler_raise(self):
+    def test_max_errors_per_handler_raise(self) -> None:
         n_jobs = 100
         params = {"initial": 0, "total": 0}
         handler = ExampleHandler1b(params)
@@ -240,7 +240,7 @@ class CustodianTest(unittest.TestCase):
         assert c.run_log[-1]["max_errors_per_handler"]
         assert c.run_log[-1]["handler"] == handler
 
-    def test_max_errors_per_handler_warning(self):
+    def test_max_errors_per_handler_warning(self) -> None:
         n_jobs = 100
         params = {"initial": 0, "total": 0}
         c = Custodian(
@@ -252,7 +252,7 @@ class CustodianTest(unittest.TestCase):
         c.run()
         assert all(len(r["corrections"]) <= 2 for r in c.run_log)
 
-    def test_validators(self):
+    def test_validators(self) -> None:
         n_jobs = 100
         params = {"initial": 0, "total": 0}
         c = Custodian(
@@ -277,7 +277,7 @@ class CustodianTest(unittest.TestCase):
             c.run()
         assert c.run_log[-1]["validator"] == v
 
-    def test_from_spec(self):
+    def test_from_spec(self) -> None:
         spec = """jobs:
 - jb: custodian.vasp.jobs.VaspJob
   params:
@@ -309,7 +309,7 @@ custodian_params:
         assert len(c.handlers) == 3
         assert len(c.validators) == 1
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         for file in glob("custodian.*.tar.gz"):
             os.remove(file)
         try:

@@ -30,7 +30,7 @@ class Modder:
     'Universe'
     """
 
-    def __init__(self, actions=None, strict=True, directory="./"):
+    def __init__(self, actions=None, strict=True, directory="./") -> None:
         """Initialize a Modder from a list of supported actions.
 
         Args:
@@ -41,6 +41,8 @@ class Modder:
                 mode, unsupported actions are simply ignored without any
                 errors raised. In strict mode, if an unsupported action is
                 supplied, a ValueError is raised. Defaults to True.
+            directory (str): The directory containing the files to be modified.
+                Defaults to "./".
         """
         self.supported_actions = {}
         actions = actions if actions is not None else [DictActions]
@@ -51,7 +53,7 @@ class Modder:
         self.strict = strict
         self.directory = directory
 
-    def modify(self, modification, obj):
+    def modify(self, modification, obj) -> None:
         """
         Note that modify makes actual in-place modifications. It does not
         return a copy.

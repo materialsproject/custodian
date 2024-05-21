@@ -34,7 +34,7 @@ class FeffJob(Job):
         backup=True,
         gzipped=False,
         gzipped_prefix="feff_out",
-    ):
+    ) -> None:
         """
         This constructor is used for a standard FEFF initialization.
 
@@ -85,7 +85,7 @@ class FeffJob(Job):
             # On TSCC, need to run shell command
             return subprocess.Popen(self.feff_cmd, cwd=directory, stdout=f_std, stderr=f_err, shell=True)  # pylint: disable=R1732
 
-    def postprocess(self, directory="./"):
+    def postprocess(self, directory="./") -> None:
         """Renaming or gzipping all the output as needed."""
         if self.gzipped:
             backup("*", directory=directory, prefix=self.gzipped_prefix)

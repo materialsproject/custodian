@@ -17,15 +17,15 @@ TEST_FILES_DIR = f"{TEST_FILES}/cp2k"
 cwd = os.getcwd()
 
 
-def clean_dir(dir):
-    for file in glob(os.path.join(dir, "error.*.tar.gz")):
+def clean_dir(folder) -> None:
+    for file in glob(os.path.join(folder, "error.*.tar.gz")):
         os.remove(file)
-    for file in glob(os.path.join(dir, "custodian.chk.*.tar.gz")):
+    for file in glob(os.path.join(folder, "custodian.chk.*.tar.gz")):
         os.remove(file)
 
 
 class HandlerTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         warnings.filterwarnings("ignore")
 
         clean_dir(TEST_FILES_DIR)
@@ -43,7 +43,7 @@ class HandlerTests(unittest.TestCase):
         if os.path.isfile(self.output_file):
             os.remove(self.output_file)
 
-    def test_job(self):
+    def test_job(self) -> None:
         job = Cp2kJob(
             cp2k_cmd=["echo"],
             input_file=self.input_file,
@@ -61,7 +61,7 @@ class HandlerTests(unittest.TestCase):
         if os.path.isfile(self.std_err):
             os.remove(self.std_err)
 
-    def test_double(self):
+    def test_double(self) -> None:
         jobs = Cp2kJob.double_job(
             cp2k_cmd=["echo"],
             input_file=self.input_file_hybrid,

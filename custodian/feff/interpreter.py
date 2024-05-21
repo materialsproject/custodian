@@ -11,8 +11,9 @@ from custodian.ansible.interpreter import Modder
 class FeffModder(Modder):
     """A Modder for FeffInput sets."""
 
-    def __init__(self, actions=None, strict=True, feffinp=None, directory="./"):
-        """
+    def __init__(self, actions=None, strict=True, feffinp=None, directory="./") -> None:
+        """Initialize a FeffModder.
+
         Args:
             actions ([Action]): A sequence of supported actions. See
             actions ([Action]): A sequence of supported actions. See
@@ -24,8 +25,8 @@ class FeffModder(Modder):
                 supplied, a ValueError is raised. Defaults to True.
             feffinp (FEFFInput): A FeffInput object from the current directory.
                 Initialized automatically if not passed (but passing it will
-                avoid having to reparse the directory).
-            directory (str): Directory to run in
+                avoid having to re-parse the directory).
+            directory (str): The directory containing the FeffInput set. Defaults to "./".
         """
         self.directory = directory
         self.feffinp = feffinp or FEFFDictSet.from_directory(self.directory)
@@ -33,7 +34,7 @@ class FeffModder(Modder):
         actions = actions or [FileActions, DictActions]
         super().__init__(actions, strict)
 
-    def apply_actions(self, actions):
+    def apply_actions(self, actions) -> None:
         """
         Applies a list of actions to the FEFF Input Set and rewrites modified
         files.
@@ -46,9 +47,9 @@ class FeffModder(Modder):
         modified = []
         for action in actions:
             if "dict" in action:
-                k = action["dict"]
-                modified.append(k)
-                self.feffinp[k] = self.modify_object(action["action"], self.feffinp[k])
+                key = action["dict"]
+                modified.append(key)
+                self.feffinp[key] = self.modify_object(action["action"], self.feffinp[key])
             elif "file" in action:
                 self.modify(action["action"], action["file"])
             else:
@@ -58,9 +59,9 @@ class FeffModder(Modder):
             feff_input = "\n\n".join(
                 str(feff[key]) for key in ("HEADER", "PARAMETERS", "POTENTIALS", "ATOMS") if key in feff
             )
-            for k, v in feff.items():
-                with open(os.path.join(self.directory, k), "w") as file:
-                    file.write(str(v))
+            for key, val in feff.items():
+                with open(os.path.join(self.directory, key), "w") as file:
+                    file.write(str(val))
 
             with open(os.path.join(self.directory, "feff.inp"), "w") as file:
                 file.write(feff_input)

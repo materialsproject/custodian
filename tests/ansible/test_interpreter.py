@@ -1,5 +1,9 @@
 """Created on Jun 1, 2012."""
 
+from __future__ import annotations
+
+from typing import Any
+
 import pytest
 
 from custodian.ansible.actions import FileActions
@@ -14,10 +18,10 @@ __date__ = "Jun 1, 2012"
 
 
 class TestModder:
-    def test_dict_modify(self):
+    def test_dict_modify(self) -> None:
         modder = Modder()
         dct = {"Hello": "World"}
-        mod = {"_set": {"Hello": "Universe", "Bye": "World"}}
+        mod: dict[str, Any] = {"_set": {"Hello": "Universe", "Bye": "World"}}
         modder.modify(mod, dct)
         assert dct == {"Bye": "World", "Hello": "Universe"}
         mod = {"_unset": {"Hello": 1}}
@@ -100,7 +104,7 @@ class TestModder:
         modder.modify(mod, dct)
         assert dct == {"a": {"b": {"c": 102}, "e": {"f": [201, 301]}}}
 
-    def test_file_modify(self):
+    def test_file_modify(self) -> None:
         modder = Modder(actions=[FileActions])
         modder.modify({"_file_create": {"content": "Test data"}}, "test_file")
         modder.modify({"_file_copy": {"dest": "test_file_copy"}}, "test_file")
@@ -115,7 +119,7 @@ class TestModder:
         modder.modify({"_file_delete": {"mode": "actual"}}, "test_file_copy1")
         modder.modify({"_file_delete": {"mode": "actual"}}, "test_file_copy2")
 
-    def test_strict_mode(self):
+    def test_strict_mode(self) -> None:
         modder = Modder(actions=[FileActions])
         dct = {"Hello": "World"}
         mod = {"_set": {"Hello": "Universe", "Bye": "World"}}
@@ -136,7 +140,7 @@ class TestModder:
                 "test_file",
             )
 
-    def test_modify_object(self):
+    def test_modify_object(self) -> None:
         modder = Modder()
         o = MyObject(1)
         assert o.b["a"] == 1
@@ -145,7 +149,7 @@ class TestModder:
 
 
 class MyObject:
-    def __init__(self, a):
+    def __init__(self, a) -> None:
         self.b = {"a": a}
 
     def as_dict(self):

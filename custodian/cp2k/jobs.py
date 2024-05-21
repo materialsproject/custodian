@@ -39,7 +39,7 @@ class Cp2kJob(Job):
         backup=True,
         settings_override=None,
         restart=False,
-    ):
+    ) -> None:
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -77,10 +77,10 @@ class Cp2kJob(Job):
         self.final = final
         self.backup = backup
         self.suffix = suffix
-        self.settings_override = settings_override if settings_override else []
+        self.settings_override = settings_override or []
         self.restart = restart
 
-    def setup(self, directory="./"):
+    def setup(self, directory="./") -> None:
         """
         Performs initial setup for Cp2k in three stages. First, if custodian is running in restart mode, then
         the restart function will copy the restart file to self.input_file, and remove any previous WFN initialization
@@ -128,7 +128,7 @@ class Cp2kJob(Job):
 
     # TODO double jobs, file manipulations, etc. should be done in atomate in the future
     # and custodian should only run the job itself
-    def postprocess(self, directory="./"):
+    def postprocess(self, directory="./") -> None:
         """Postprocessing includes renaming and gzipping where necessary."""
         files = os.listdir(directory)
         if os.path.isfile(self.output_file) and self.suffix != "":
@@ -147,7 +147,7 @@ class Cp2kJob(Job):
         if os.path.isfile(os.path.join(directory, "continue.json")):
             os.remove(os.path.join(directory, "continue.json"))
 
-    def terminate(self, directory="./"):
+    def terminate(self, directory="./") -> None:
         """Terminate cp2k."""
         for cmd in self.cp2k_cmd:
             if "cp2k" in cmd:

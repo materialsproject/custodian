@@ -30,7 +30,7 @@ skip_if_no_openbabel = unittest.skipIf(ob is None, "openbabel not installed")
 
 @skip_if_no_openbabel
 class FFOptJobHandlerInteraction(TestCase):
-    def _check_equivalent_inputs(self, input1, input2):
+    def _check_equivalent_inputs(self, input1, input2) -> None:
         QCinput1 = QCInput.from_file(input1)
         QCinput2 = QCInput.from_file(input2)
         sections1 = QCInput.find_sections(QCinput1.get_str())
@@ -39,7 +39,7 @@ class FFOptJobHandlerInteraction(TestCase):
         for key in sections1:
             assert QCinput1.as_dict().get(key) == QCinput2.as_dict().get(key)
 
-    def setUp(self):
+    def setUp(self) -> None:
         os.makedirs(f"{SCR_DIR}/scratch", exist_ok=True)
         shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/mol.qin.orig", f"{SCR_DIR}/mol.qin")
         shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/error.1/mol.qout", f"{SCR_DIR}/mol.qout.error1")
@@ -56,11 +56,11 @@ class FFOptJobHandlerInteraction(TestCase):
         shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/mol.qin.opt_1", f"{SCR_DIR}/mol.qin.opt_1")
         os.chdir(SCR_DIR)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         os.chdir(CWD)
         shutil.rmtree(SCR_DIR)
 
-    def test_OptFF(self):
+    def test_OptFF(self) -> None:
         job = QCJob.opt_with_frequency_flattener(
             qchem_command="qchem",
             max_cores=40,

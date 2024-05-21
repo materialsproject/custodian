@@ -37,7 +37,7 @@ class QChemErrorHandler(ErrorHandler):
         output_file="mol.qout",
         scf_max_cycles=100,
         geom_max_cycles=200,
-    ):
+    ) -> None:
         """Initialize the error handler from a set of input and output files.
 
         Args:
@@ -52,8 +52,8 @@ class QChemErrorHandler(ErrorHandler):
         self.scf_max_cycles = scf_max_cycles
         self.geom_max_cycles = geom_max_cycles
         self.outdata = None
-        self.errors = []
-        self.opt_error_history = []
+        self.errors: list[str] = []
+        self.opt_error_history: list[str] = []
 
     def check(self, directory="./"):
         """Checks output file for errors."""

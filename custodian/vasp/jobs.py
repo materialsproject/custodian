@@ -84,7 +84,7 @@ class VaspJob(Job):
         gamma_vasp_cmd=None,
         copy_magmom=False,
         auto_continue=False,
-    ):
+    ) -> None:
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -166,7 +166,7 @@ class VaspJob(Job):
                     logger.exception(f"Failed to detect VASP path: {vasp_cmd}")
                     scope.set_tag("vasp_cmd", vasp_cmd)
 
-    def setup(self, directory="./"):
+    def setup(self, directory="./") -> None:
         """
         Performs initial setup for VaspJob, including overriding any settings
         and backing up.
@@ -255,7 +255,7 @@ class VaspJob(Job):
             # use line buffering for stderr
             return subprocess.Popen(cmd, cwd=directory, stdout=f_std, stderr=f_err, start_new_session=True)  # pylint: disable=R1732
 
-    def postprocess(self, directory="./"):
+    def postprocess(self, directory="./") -> None:
         """
         Postprocessing includes renaming and gzipping where necessary.
         Also copies the magmom to the incar if necessary.
@@ -315,6 +315,7 @@ class VaspJob(Job):
                 wall-time handler which will write a read-only STOPCAR to
                 prevent VASP from deleting it once it finishes. Defaults to
                 False.
+            directory (str): Directory where the job was run. Defaults to './'.
 
         Returns:
             List of two jobs corresponding to an AFLOW style run.
@@ -382,12 +383,8 @@ class VaspJob(Job):
         metaGGA = incar.get("METAGGA", "SCAN")
 
         # Pre optimize WAVECAR and structure using regular GGA
-        pre_opt_settings = [
-            {
-                "dict": "INCAR",
-                "action": {"_set": {"METAGGA": None, "LWAVE": True, "NSW": 0}},
-            }
-        ]
+        new_settings = {"METAGGA": None, "LWAVE": True, "NSW": 0}
+        pre_opt_settings = [{"dict": "INCAR", "action": {"_set": new_settings}}]
         jobs = [
             VaspJob(
                 vasp_cmd,
@@ -460,6 +457,7 @@ class VaspJob(Job):
             half_kpts_first_relax (bool): Whether to halve the kpoint grid
                 for the first relaxation. Speeds up difficult convergence
                 considerably. Defaults to False.
+            directory (str): Directory where the job was run. Defaults to './'.
             **vasp_job_kwargs: Passthrough kwargs to VaspJob. See
                 :class:`custodian.vasp.jobs.VaspJob`.
 
@@ -558,6 +556,7 @@ class VaspJob(Job):
                 which is more robust but can be a bit slow. The code does fall
                 back on the bisection when bfgs gives a nonsensical result,
                 e.g., negative lattice params.
+            directory (str): Directory where the job was run. Defaults to './'.
             **vasp_job_kwargs: Passthrough kwargs to VaspJob. See
                 :class:`custodian.vasp.jobs.VaspJob`.
 
@@ -571,7 +570,7 @@ class VaspJob(Job):
 
         # Set the energy convergence criteria as the EDIFFG (if present) or
         # 10 x EDIFF (which itself defaults to 1e-4 if not present).
-        etol = incar["EDIFFG"] if incar.get("EDIFFG") and incar.get("EDIFFG") > 0 else incar.get("EDIFF", 0.0001) * 10
+        e_tol = incar["EDIFFG"] if incar.get("EDIFFG") and incar.get("EDIFFG") > 0 else incar.get("EDIFF", 0.0001) * 10
 
         if lattice_direction == "a":
             lattice_index = 0
@@ -612,7 +611,7 @@ class VaspJob(Job):
                         other = ind - 1
                     else:
                         other = ind + 1 if energies[sorted_x[ind + 1]] < energies[sorted_x[ind - 1]] else ind - 1
-                    if abs(energies[min_x] - energies[sorted_x[other]]) < etol:
+                    if abs(energies[min_x] - energies[sorted_x[other]]) < e_tol:
                         logger.info(f"Stopping optimization! Final {lattice_direction} = {min_x}")
                         break
 
@@ -684,7 +683,7 @@ class VaspJob(Job):
             for key in sorted(energies):
                 file.write(f"{key} {energies[key]}\n")
 
-    def terminate(self, directory="./"):
+    def terminate(self, directory="./") -> None:
         """
         Kill all VASP processes associated with the current job.
         This is done by looping over all processes and selecting the ones
@@ -695,13 +694,13 @@ class VaspJob(Job):
         simultaneously executed on the same node). However, this should never
         happen.
         """
-        workdir = directory
-        logger.info(f"Killing VASP processes in workdir {workdir}.")
+        work_dir = directory
+        logger.info(f"Killing VASP processes in {work_dir=}.")
         for proc in psutil.process_iter():
             try:
                 if "vasp" in proc.name().lower():
                     open_paths = [file.path for file in proc.open_files()]
-                    vasprun_path = os.path.join(workdir, "vasprun.xml")
+                    vasprun_path = os.path.join(work_dir, "vasprun.xml")
                     if (vasprun_path in open_paths) and psutil.pid_exists(proc.pid):
                         proc.kill()
                         return
@@ -710,8 +709,7 @@ class VaspJob(Job):
                 continue
 
         logger.warning(
-            f"Killing VASP processes in workdir {workdir} failed with subprocess.Popen.terminate(). "
-            "Resorting to 'killall'."
+            f"Killing VASP processes in {work_dir=} failed with subprocess.Popen.terminate(). Resorting to 'killall'."
         )
         cmds = self.vasp_cmd
         if self.gamma_vasp_cmd:
@@ -742,7 +740,7 @@ class VaspNEBJob(VaspJob):
         auto_continue=False,
         gamma_vasp_cmd=None,
         settings_override=None,
-    ):
+    ) -> None:
         """
         This constructor is a simplified version of VaspJob, which satisfies
         the need for flexibility. For standard kinds of runs, it's often
@@ -807,9 +805,8 @@ class VaspNEBJob(VaspJob):
         self.auto_continue = auto_continue
         self.settings_override = settings_override
 
-    def setup(self, directory="./"):
-        """
-        Performs initial setup for VaspNEBJob, including overriding any settings
+    def setup(self, directory="./") -> None:
+        """Performs initial setup for VaspNEBJob, including overriding any settings
         and backing up.
         """
         neb_dirs, neb_sub = self._get_neb_dirs(directory)
@@ -826,7 +823,6 @@ class VaspNEBJob(VaspJob):
         if self.half_kpts and os.path.isfile(os.path.join(directory, "KPOINTS")):
             kpts = Kpoints.from_file(os.path.join(directory, "KPOINTS"))
             kpts.kpts = np.maximum(np.array(kpts.kpts) / 2, 1)
-            kpts.kpts = kpts.kpts.astype(int).tolist()
             if tuple(kpts.kpts[0]) == (1, 1, 1):
                 kpt_dic = kpts.as_dict()
                 kpt_dic["generation_style"] = "Gamma"
@@ -902,11 +898,11 @@ class VaspNEBJob(VaspJob):
                 start_new_session=True,
             )  # pylint: disable=R1732
 
-    def postprocess(self, directory="./"):
+    def postprocess(self, directory="./") -> None:
         """Postprocessing includes renaming and gzipping where necessary."""
         # Add suffix to all sub_dir/{items}
 
-        neb_dirs, neb_sub = self._get_neb_dirs(directory)
+        neb_dirs, _neb_sub = self._get_neb_dirs(directory)
 
         for path in neb_dirs:
             for file in VASP_NEB_OUTPUT_SUB_FILES:
@@ -940,7 +936,7 @@ class GenerateVaspInputJob(Job):
     used to modify the VASP input files before the next VaspJob.
     """
 
-    def __init__(self, input_set, contcar_only=True, **kwargs):
+    def __init__(self, input_set, contcar_only=True, **kwargs) -> None:
         """
         Args:
             input_set (str): Full path to the input set. E.g.,
@@ -953,10 +949,10 @@ class GenerateVaspInputJob(Job):
         self.contcar_only = contcar_only
         self.kwargs = kwargs
 
-    def setup(self, directory="./"):
+    def setup(self, directory="./") -> None:
         """Dummy setup."""
 
-    def run(self, directory="./"):
+    def run(self, directory="./") -> None:
         """Run the calculation."""
         if os.path.isfile(os.path.join(directory, "CONTCAR")):
             structure = Structure.from_file(os.path.join(directory, "CONTCAR"))
@@ -969,5 +965,5 @@ class GenerateVaspInputJob(Job):
         vis = getattr(mod, classname)(structure, **self.kwargs)
         vis.write_input(directory)
 
-    def postprocess(self, directory="./"):
+    def postprocess(self, directory="./") -> None:
         """Dummy postprocess."""

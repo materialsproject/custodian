@@ -11,7 +11,7 @@ from custodian.ansible.interpreter import Modder
 class VaspModder(Modder):
     """A Modder for VaspInputSets."""
 
-    def __init__(self, actions=None, strict=True, vi=None, directory="./"):
+    def __init__(self, actions=None, strict=True, vi=None, directory="./") -> None:
         """Initialize a Modder for VaspInput sets.
 
         Args:
@@ -24,14 +24,15 @@ class VaspModder(Modder):
                 supplied, a ValueError is raised. Defaults to True.
             vi (VaspInput): A VaspInput object from the current directory.
                 Initialized automatically if not passed (but passing it will
-                avoid having to reparse the directory).
+                avoid having to re-parse the directory).
+            directory (str): The directory containing the VaspInput set.
         """
         self.vi = vi or VaspInput.from_directory(directory)
         self.directory = directory
         actions = actions or [FileActions, DictActions]
         super().__init__(actions, strict)
 
-    def apply_actions(self, actions):
+    def apply_actions(self, actions) -> None:
         """
         Applies a list of actions to the Vasp Input Set and rewrites modified
         files.
