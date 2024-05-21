@@ -678,8 +678,8 @@ class VaspErrorHandler(ErrorHandler):
 
     @staticmethod
     def _get_nbands_from_outcar(directory: str) -> int | None:
+        nbands = None
         with open(os.path.join(directory, "OUTCAR")) as file:
-            nbands = None
             for line in file:
                 # Have to take the last NBANDS line since sometimes VASP
                 # updates it automatically even if the user specifies it.
@@ -691,7 +691,7 @@ class VaspErrorHandler(ErrorHandler):
                         break
                     except (IndexError, ValueError):
                         pass
-            return nbands
+        return nbands
 
 
 class LrfCommutatorHandler(ErrorHandler):
