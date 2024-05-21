@@ -693,6 +693,7 @@ class VaspErrorHandler(ErrorHandler):
                         pass
             return nbands
 
+
 class LrfCommutatorHandler(ErrorHandler):
     """
     Corrects LRF_COMMUTATOR errors by setting LPEAD=True if not already set.

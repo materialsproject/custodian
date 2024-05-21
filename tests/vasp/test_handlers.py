@@ -600,7 +600,8 @@ class VaspErrorHandlerTest(PymatgenTest):
         handler.check()
         dct = handler.correct()
         assert "auto_nbands" in dct["errors"]
- 
+
+
 class AliasingErrorHandlerTest(PymatgenTest):
     def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, *glob("aliasing/*", root_dir=TEST_FILES))
