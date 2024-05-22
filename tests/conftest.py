@@ -32,7 +32,7 @@ def get_gzip_or_unzipped(test_file_or_dir: str) -> str:
     if os.path.isdir(test_file_or_dir):
         return test_file_or_dir
 
-    for file_to_test in [test_file_or_dir, test_file_or_dir.split(".gz")[0], test_file_or_dir.split(".GZ")[0]]:
-        if os.path.isfile(file_to_test):
-            return file_to_test
+    for file_name in [test_file_or_dir, test_file_or_dir.split(".gz")[0], test_file_or_dir.split(".GZ")[0]]:
+        if os.path.isfile(file_name):
+            return file_name
     raise FileNotFoundError(f"Cannot find {test_file_or_dir}")
