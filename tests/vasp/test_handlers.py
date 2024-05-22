@@ -6,6 +6,7 @@ import shutil
 from glob import glob
 
 import pytest
+from monty.os.path import zpath
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
 from pymatgen.util.testing import PymatgenTest
 
@@ -52,7 +53,7 @@ def _clear_tracked_cache() -> None:
 def copy_tmp_files(tmp_path: str, *file_paths: str) -> None:
     for file_path in file_paths:
         src_path = get_gzip_or_unzipped(f"{TEST_FILES}/{file_path}")
-        dst_path = f"{tmp_path}/{os.path.basename(file_path)}"
+        dst_path = f"{tmp_path}/{os.path.basename(src_path)}"
         if os.path.isdir(src_path):
             shutil.copytree(src_path, dst_path)
         else:
@@ -825,14 +826,14 @@ class LargeSigmaHandlerTest(PymatgenTest):
 
     def test_check_correct_large_sigma(self) -> None:
         # first check should reduce sigma
-        handler = LargeSigmaHandler(output_filename="OUTCAR_fail_sigma_check.gz")
+        handler = LargeSigmaHandler(output_filename=zpath("OUTCAR_fail_sigma_check"))
         assert handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["LargeSigma"]
         assert Incar.from_file("INCAR")["SIGMA"] == pytest.approx(0.1115, rel=1.0e-3)
 
         # second check should find that sigma is correct as-is
-        handler = LargeSigmaHandler(output_filename="OUTCAR_pass_sigma_check.gz")
+        handler = LargeSigmaHandler(output_filename=zpath("OUTCAR_pass_sigma_check"))
         assert not handler.check()
 
 
