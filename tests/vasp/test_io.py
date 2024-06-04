@@ -1,8 +1,9 @@
 import pytest
+from monty.os.path import zpath
 
 from custodian.utils import tracked_lru_cache
 from custodian.vasp.io import load_outcar, load_vasprun
-from tests.conftest import TEST_FILES, get_gzip_or_unzipped
+from tests.conftest import TEST_FILES
 
 
 @pytest.fixture(autouse=True)
@@ -15,7 +16,7 @@ def _clear_tracked_cache() -> None:
 
 class TestIO:
     def test_load_outcar(self) -> None:
-        outcar_file = get_gzip_or_unzipped(f"{TEST_FILES}/io/OUTCAR.gz")
+        outcar_file = zpath(f"{TEST_FILES}/io/OUTCAR")
         outcar = load_outcar(outcar_file)
         assert outcar is not None
         outcar2 = load_outcar(outcar_file)
@@ -25,7 +26,7 @@ class TestIO:
         assert len(tracked_lru_cache.cached_functions) == 1
 
     def test_load_vasprun(self) -> None:
-        vasprun_file = get_gzip_or_unzipped(f"{TEST_FILES}/io/vasprun.xml.gz")
+        vasprun_file = zpath(f"{TEST_FILES}/io/vasprun.xml")
         vr = load_vasprun(vasprun_file)
         assert vr is not None
         vr2 = load_vasprun(vasprun_file)
