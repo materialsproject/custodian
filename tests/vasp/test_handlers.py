@@ -6,6 +6,7 @@ import shutil
 from glob import glob
 
 import pytest
+from monty.os.path import zpath
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
 from pymatgen.util.testing import PymatgenTest
 
@@ -51,8 +52,12 @@ def _clear_tracked_cache() -> None:
 
 def copy_tmp_files(tmp_path: str, *file_paths: str) -> None:
     for file_path in file_paths:
-        src_path = f"{TEST_FILES}/{file_path}"
-        dst_path = f"{tmp_path}/{os.path.basename(file_path)}"
+        for ext in (".gz", ".bz2"):
+            # TODO remove this when https://github.com/materialsvirtuallab/monty/pull/682
+            # is released
+            file_path = file_path.removesuffix(ext)
+        src_path = zpath(f"{TEST_FILES}/{file_path}")
+        dst_path = f"{tmp_path}/{os.path.basename(src_path)}"
         if os.path.isdir(src_path):
             shutil.copytree(src_path, dst_path)
         else:
@@ -810,17 +815,19 @@ class KspacingMetalHandlerTest(PymatgenTest):
 
 class LargeSigmaHandlerTest(PymatgenTest):
     def setUp(self) -> None:
-        copy_tmp_files(
-            self.tmp_path, "large_sigma/INCAR", "large_sigma/vasprun.xml", "large_sigma/OUTCAR", "large_sigma/POSCAR"
-        )
+        copy_tmp_files(self.tmp_path, *glob("large_sigma/*", root_dir=TEST_FILES))
 
     def test_check_correct_large_sigma(self) -> None:
-        handler = LargeSigmaHandler()
+        # first check should reduce sigma
+        handler = LargeSigmaHandler(output_filename=zpath("OUTCAR_fail_sigma_check"))
         assert handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["LargeSigma"]
-        assert Incar.from_file("INCAR")["SIGMA"] == 1.44
-        assert os.path.isfile("vasprun.xml")
+        assert Incar.from_file("INCAR")["SIGMA"] == pytest.approx(0.1115, rel=1.0e-3)
+
+        # second check should find that sigma is correct as-is
+        handler = LargeSigmaHandler(output_filename=zpath("OUTCAR_pass_sigma_check"))
+        assert not handler.check()
 
 
 class ZpotrfErrorHandlerTest(PymatgenTest):

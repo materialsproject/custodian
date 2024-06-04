@@ -1266,36 +1266,60 @@ class ScanMetalHandler(KspacingMetalHandler):
 
 class LargeSigmaHandler(ErrorHandler):
     """
-    When ISMEAR > 0 (Methfessel-Paxton), monitor the magnitude of the entropy
-    term T*S in the OUTCAR file. If the entropy term is larger than 1 meV/atom, reduce the
+    When ISMEAR >= 0 (Methfessel-Paxton order ISMEAR; order-0 is equivalent to Gaussian smearing),
+    monitor the magnitude of the entropy term `eentropy` in the vasprun.xml ionic steps.
+    If the entropy term is larger than 1 meV/atom, reduce the
     value of SIGMA. See VASP documentation for ISMEAR.
     """
 
-    is_monitor = True
+    is_monitor: bool = True
 
-    def __init__(self) -> None:
+    def __init__(self, e_entropy_tol: float = 1e-3, min_sigma: float = 0.01, output_filename: str = "OUTCAR") -> None:
         """Initializes the handler with a buffer time."""
+        self.e_entropy_tol = e_entropy_tol
+        self.min_sigma = min_sigma
+        self.output_filename = output_filename
 
     def check(self, directory="./") -> bool:
         """Check for error."""
         incar = Incar.from_file(os.path.join(directory, "INCAR"))
         try:
-            outcar = load_outcar(os.path.join(directory, "OUTCAR"))
+            outcar = load_outcar(os.path.join(directory, self.output_filename))
         except Exception:
-            # Can't perform check if Outcar not valid
+            # Can't perform check if outcar not valid
             return False
 
-        if incar.get("ISMEAR", 1) > 0:
-            # Read the latest entropy term.
+        if incar.get("ISMEAR", 1) >= 0:
+            # get entropy terms, ionic step counts, and number of completed ionic steps
             outcar.read_pattern(
-                {"entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"}, postprocess=float, reverse=True, terminate_on_match=True
+                {"smearing_entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"},
+                postprocess=float,
+                reverse=False,
+                terminate_on_match=False,
             )
-            n_atoms = Structure.from_file(os.path.join(directory, "POSCAR")).num_sites
-            if outcar.data.get("entropy", []):
-                entropy_per_atom = abs(np.max(outcar.data.get("entropy"))) / n_atoms
+            outcar.read_pattern(
+                {"electronic_steps": r"Iteration *(\D\d*\ \d*)"},
+                postprocess=int,
+                reverse=False,
+                terminate_on_match=False,
+            )
+            outcar.read_pattern({"completed_ionic_steps": r"(aborting loop)"}, reverse=False, terminate_on_match=False)
 
-                # if more than 1 meV/atom, reduce sigma
-                if entropy_per_atom > 0.001:
+            completed_ionic_steps = len(outcar.data.get("completed_ionic_steps"))
+            entropies_per_atom = [0.0 for _ in range(completed_ionic_steps)]
+            n_atoms = len(Structure.from_file(os.path.join(directory, "POSCAR")))
+
+            # `Iteration (#ionic step # electronic step)` always written before entropy
+            e_step_idx = [step[0] for step in outcar.data.get("electronic_steps", [])]
+            smearing_entropy = outcar.data.get("smearing_entropy", [0.0 for _ in e_step_idx])
+            for ie_step_idx, ie_step in enumerate(e_step_idx):
+                if ie_step <= completed_ionic_steps:
+                    entropies_per_atom[ie_step - 1] = smearing_entropy[ie_step_idx]
+
+            if len(entropies_per_atom) > 0:
+                n_atoms = len(Structure.from_file(os.path.join(directory, "POSCAR")))
+                self.entropy_per_atom = np.max(np.abs(entropies_per_atom)) / n_atoms
+                if self.entropy_per_atom > self.e_entropy_tol:
                     return True
 
         return False
@@ -1305,19 +1329,28 @@ class LargeSigmaHandler(ErrorHandler):
         backup(VASP_BACKUP_FILES, directory=directory)
         actions = []
         vi = VaspInput.from_directory(directory)
+        ismear = vi["INCAR"].get("ISMEAR", 1)
         sigma = vi["INCAR"].get("SIGMA", 0.2)
 
-        # Reduce SIGMA by 0.06 if larger than 0.08
-        # this will reduce SIGMA from the default of 0.2 to the practical
-        # minimum value of 0.02 in 3 steps
-        if sigma > 0.08:
+        # From F.J. dos Santos and N. Marzari, Phys. Rev. B 107, 195122 (2023),
+        # DOI: 10.1103/PhysRevB.107.195122, Eq. (19)
+        # When the smearing width is acceptably small, the electronic free energy
+        # F(sigma) \approx E(0) + gamma * sigma**2 / 2
+        # where E(0) = F(sigma --> 0) is the actual ground-state energy
+        # E_entropy(sigma) = gamma * sigma**2 / 2
+        # is the contribution electronic smearing entropy
+        # We can approximate the ``optimal'' sigma to reduce to via
+        # sigma_new = [E_entropy(new) / E_entropy(current) ]**(0.5) * sigma_current,
+        # Practically, E_entropy(new) = 1 meV/atom
+        if sigma > self.min_sigma:
+            updated_sigma = max(self.min_sigma, 0.8 * (self.e_entropy_tol / self.entropy_per_atom) ** (0.5) * sigma)
             actions.append(
                 {
                     "dict": "INCAR",
-                    "action": {"_set": {"SIGMA": sigma - 0.06}},
+                    "action": {"_set": {"SIGMA": updated_sigma}},
                 }
             )
-        else:
+        elif ismear != 0:
             # https://vasp.at/wiki/index.php/ISMEAR recommends ISMEAR = 0 if you have
             # no a priori knowledge of your system ("then always use Gaussian smearing"
             actions.append(
