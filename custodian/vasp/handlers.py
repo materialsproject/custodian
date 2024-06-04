@@ -1343,16 +1343,11 @@ class LargeSigmaHandler(ErrorHandler):
         # sigma_new = [E_entropy(new) / E_entropy(current) ]**(0.5) * sigma_current,
         # Practically, E_entropy(new) = 1 meV/atom
         if sigma > self.min_sigma:
+            updated_sigma = max(self.min_sigma, 0.8 * (self.e_entropy_tol / self.entropy_per_atom) ** (0.5) * sigma)
             actions.append(
                 {
                     "dict": "INCAR",
-                    "action": {
-                        "_set": {
-                            "SIGMA": max(
-                                self.min_sigma, 0.8 * (self.e_entropy_tol / self.entropy_per_atom) ** (0.5) * sigma
-                            )
-                        }
-                    },
+                    "action": {"_set": {"SIGMA": updated_sigma}},
                 }
             )
         elif ismear != 0:
