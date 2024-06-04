@@ -815,7 +815,7 @@ class KspacingMetalHandlerTest(PymatgenTest):
 
 class LargeSigmaHandlerTest(PymatgenTest):
     def setUp(self) -> None:
-        copy_tmp_files(self.tmp_path, **glob("large_sigma/*", root_dir=TEST_FILES))
+        copy_tmp_files(self.tmp_path, *glob("large_sigma/*", root_dir=TEST_FILES))
 
     def test_check_correct_large_sigma(self) -> None:
         # first check should reduce sigma
