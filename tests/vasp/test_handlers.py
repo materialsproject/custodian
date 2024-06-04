@@ -29,7 +29,7 @@ from custodian.vasp.handlers import (
     VaspErrorHandler,
     WalltimeHandler,
 )
-from tests.conftest import TEST_FILES, get_gzip_or_unzipped
+from tests.conftest import TEST_FILES
 
 __author__ = "Shyue Ping Ong, Stephen Dacek, Janosh Riebesell"
 __copyright__ = "Copyright 2012, The Materials Project"
@@ -52,7 +52,11 @@ def _clear_tracked_cache() -> None:
 
 def copy_tmp_files(tmp_path: str, *file_paths: str) -> None:
     for file_path in file_paths:
-        src_path = get_gzip_or_unzipped(f"{TEST_FILES}/{file_path}")
+        for ext in (".gz", ".bz2"):
+            # TODO remove this when https://github.com/materialsvirtuallab/monty/pull/682
+            # is released
+            file_path = file_path.removesuffix(ext)
+        src_path = zpath(f"{TEST_FILES}/{file_path}")
         dst_path = f"{tmp_path}/{os.path.basename(src_path)}"
         if os.path.isdir(src_path):
             shutil.copytree(src_path, dst_path)
