@@ -519,7 +519,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         handler = VaspErrorHandler("vasp.dentet")
         handler.check()
         dct = handler.correct()
-        assert dct["errors"] == ["tet"]
+        assert dct["errors"] == ["dentet"]
         assert dct["actions"] == [
             {"action": {"_set": {"KSPACING": vi["INCAR"].get("KSPACING") * 0.8}}, "dict": "INCAR"}
         ]
