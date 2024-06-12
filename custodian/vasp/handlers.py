@@ -198,7 +198,7 @@ class VaspErrorHandler(ErrorHandler):
             # For dentet: follow advice in this thread
             # https://vasp.at/forum/viewtopic.php?f=3&t=416&p=4047&hilit=dentet#p4047
             if (self.error_count["dentet"] == 0) and (
-                (uses_kspacing := vi["INCAR"].get("KSPACING",False))
+                (uses_kspacing := vi["INCAR"].get("KSPACING", False))
                 or (uses_auto_kpoints := (vi["KPOINTS"] and vi["KPOINTS"].num_kpts == 0))
             ):
                 if uses_kspacing:
@@ -211,9 +211,11 @@ class VaspErrorHandler(ErrorHandler):
                     new_kpoints = _increase_k_point_density(
                         vi["KPOINTS"],
                         vi["POSCAR"].structure,
-                        min_kpoints = 4 if vi["INCAR"].get("ISMEAR",0) == -5 else None
+                        min_kpoints=4 if vi["INCAR"].get("ISMEAR", 0) == -5 else None,
                     )
-                    actions.append({"dict": "KPOINTS", "action": {"_set": {"kpoints": (tuple(new_kpoints["kpoints"][0]),)}}})
+                    actions.append(
+                        {"dict": "KPOINTS", "action": {"_set": {"kpoints": (tuple(new_kpoints["kpoints"][0]),)}}}
+                    )
             else:
                 # If this is the second time we hit this error, or if explicit k-points were set,
                 # modify smearing instead
@@ -611,12 +613,12 @@ class VaspErrorHandler(ErrorHandler):
             if "NPAR" in vi["INCAR"]:
                 actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 0}}})
 
-        if self.errors.intersection(["bravais","ksymm"]):
-            # For bravais: VASP recommends refining the lattice parameters 
+        if self.errors.intersection(["bravais", "ksymm"]):
+            # For bravais: VASP recommends refining the lattice parameters
             # or changing SYMPREC. See https://www.vasp.at/forum/viewtopic.php?f=3&t=19109
             # Appears to occur when SYMPREC is very low, so we change it to
             # the default if it's not already. If it's the default, we x10.
-            # For ksymm, there's not much information about the issue other than the 
+            # For ksymm, there's not much information about the issue other than the
             # direct and reciprocal meshes being incompatible.
             # This is basically the same as bravais
             vasp_recommended_symprec = 1e-6
@@ -1859,12 +1861,13 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         # Unfixable error. Just return None for actions.
         return {"errors": ["Positive energy"], "actions": None}
 
+
 def _increase_k_point_density(
-    kpoints : Kpoints | dict,
-    structure : Structure,
-    factor : float = 0.2,
-    max_inc : int = 100,
-    min_kpoints : int | None = None
+    kpoints: Kpoints | dict,
+    structure: Structure,
+    factor: float = 0.2,
+    max_inc: int = 100,
+    min_kpoints: int | None = None,
 ) -> dict:
     """
     Inputs:
@@ -1873,41 +1876,34 @@ def _increase_k_point_density(
         factor (float) : factor used to increase k-point density.
             The first increase uses approximately (1 + factor) higher k-point density.
             The second increase: ~ (1 + 2*factor) higher k-kpoint density, etc.
-        max_inc (int) : the maximum permitted increases in k-point density 
+        max_inc (int) : the maximum permitted increases in k-point density
             before giving up
-        min_kpoints (int or None): if an int, the minimum permitted number of 
+        min_kpoints (int or None): if an int, the minimum permitted number of
             k-points. Could be useful if using the tetrahedron method, where
             at least 4 k-points are needed.
     Outputs:
         dict : the new Kpoints object as a dict
     """
 
-    if isinstance(kpoints,Kpoints):
+    if isinstance(kpoints, Kpoints):
         kpoints = kpoints.as_dict()
     orig_num_kpoints = np.prod(kpoints["kpoints"][0])
-    is_gamma_centered = kpoints.get("generation_style","Gamma").lower() == "gamma"
+    is_gamma_centered = kpoints.get("generation_style", "Gamma").lower() == "gamma"
 
     # try to approximate k-points per reciprocal atom used in pymatgen
     lengths = structure.lattice.abc
-    mult = max([nk*lengths[ik] for ik, nk in enumerate(kpoints["kpoints"][0])])
-    ngrid = mult**3/np.prod(lengths)
-    kppa = len(structure)*ngrid
+    mult = max([nk * lengths[ik] for ik, nk in enumerate(kpoints["kpoints"][0])])
+    ngrid = mult**3 / np.prod(lengths)
+    kppa = len(structure) * ngrid
 
-    mult_fac = 1. + factor
+    mult_fac = 1.0 + factor
     min_kpoints = min_kpoints or 1
     for _ in range(max_inc):
+        new_kpoints = Kpoints.automatic_density(structure, mult_fac * kppa, force_gamma=is_gamma_centered)
 
-        new_kpoints = Kpoints.automatic_density(
-            structure,
-            mult_fac*kppa,
-            force_gamma = is_gamma_centered
-        )
-
-        if (new_num_kpoints := np.prod(new_kpoints.kpts[0]) ) > orig_num_kpoints and (
-            new_num_kpoints > min_kpoints
-        ):
+        if (new_num_kpoints := np.prod(new_kpoints.kpts[0])) > orig_num_kpoints and (new_num_kpoints > min_kpoints):
             break
-        
+
         mult_fac += factor
 
     return new_kpoints.as_dict()

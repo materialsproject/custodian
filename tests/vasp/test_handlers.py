@@ -109,7 +109,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["ksymm"]
-        assert dct["actions"] == [{"action": {"_set": {"SYMPREC": 1.e-4}}, "dict": "INCAR"}]
+        assert dct["actions"] == [{"action": {"_set": {"SYMPREC": 1.0e-4}}, "dict": "INCAR"}]
 
         handler = VaspErrorHandler("vasp.ksymm", errors_subset_to_catch=["eddrmm"])
         assert not handler.check()
