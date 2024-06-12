@@ -71,11 +71,13 @@ class VaspErrorHandler(ErrorHandler):
         "tet": [
             "Tetrahedron method fails",
             "tetrahedron method fails",
-            "Fatal error detecting k-mesh",
-            "Fatal error: unable to match k-point",
             "Routine TETIRR needs special values",
             "Tetrahedron method fails (number of k-points < 4)",
             "BZINTS",
+        ],
+        "ksymm": [
+            "Fatal error detecting k-mesh",
+            "Fatal error: unable to match k-point",
         ],
         "inv_rot_mat": ["rotation matrix was not found (increase SYMPREC)"],
         "brmix": ["BRMIX: very serious problems"],
@@ -193,24 +195,28 @@ class VaspErrorHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
 
         if "dentet" in self.errors:
-            # follow advice in this thread
+            # For dentet: follow advice in this thread
             # https://vasp.at/forum/viewtopic.php?f=3&t=416&p=4047&hilit=dentet#p4047
-            if self.error_count["dentet"] == 0:
-                if vi["INCAR"].get("KSPACING"):
+            if (self.error_count["dentet"] == 0) and (
+                (uses_kspacing := vi["INCAR"].get("KSPACING",False))
+                or (uses_auto_kpoints := (vi["KPOINTS"] and vi["KPOINTS"].num_kpts == 0))
+            ):
+                if uses_kspacing:
                     # decrease KSPACING by 20% in each direction (approximately double no. of kpoints)
                     action = {"_set": {"KSPACING": vi["INCAR"].get("KSPACING") * 0.8}}
                     actions.append({"dict": "INCAR", "action": action})
-                elif vi["KPOINTS"] and vi["KPOINTS"].num_kpts < 1:
-                    # increase KPOINTS by 20% in each direction (approximately double no. of kpoints)
-                    new_kpts = tuple(int(round(num * 1.2, 0)) for num in vi["KPOINTS"].kpts[0])
-                    actions.append({"dict": "KPOINTS", "action": {"_set": {"kpoints": (new_kpts,)}}})
-                elif vi["KPOINTS"] and vi["KPOINTS"].num_kpts >= 1:
-                    n_kpts = vi["KPOINTS"].num_kpts * 1.2
-                    new_kpts = tuple([int(round(n_kpts**1 / 3, 0))] * 3)
-                    actions.append(
-                        {"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma", "kpoints": (new_kpts,)}}}
+                elif uses_auto_kpoints:
+                    # For automatic k-point generation, increase KPOINTS by 20% in
+                    #  each direction (approximately double no. of kpoints)
+                    new_kpoints = _increase_k_point_density(
+                        vi["KPOINTS"],
+                        vi["POSCAR"].structure,
+                        min_kpoints = 4 if vi["INCAR"].get("ISMEAR",0) == -5 else None
                     )
+                    actions.append({"dict": "KPOINTS", "action": {"_set": {"kpoints": (tuple(new_kpoints["kpoints"][0]),)}}})
             else:
+                # If this is the second time we hit this error, or if explicit k-points were set,
+                # modify smearing instead
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
             self.error_count["dentet"] += 1
 
@@ -605,11 +611,15 @@ class VaspErrorHandler(ErrorHandler):
             if "NPAR" in vi["INCAR"]:
                 actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 0}}})
 
-        if "bravais" in self.errors:
-            # VASP recommends refining the lattice parameters or changing SYMPREC.
+        if self.errors.intersection(["bravais","ksymm"]):
+            # For bravais: VASP recommends refining the lattice parameters 
+            # or changing SYMPREC. See https://www.vasp.at/forum/viewtopic.php?f=3&t=19109
             # Appears to occur when SYMPREC is very low, so we change it to
             # the default if it's not already. If it's the default, we x10.
-            vasp_recommended_symprec = 1e-6  # https://www.vasp.at/forum/viewtopic.php?f=3&t=19109
+            # For ksymm, there's not much information about the issue other than the 
+            # direct and reciprocal meshes being incompatible.
+            # This is basically the same as bravais
+            vasp_recommended_symprec = 1e-6
             symprec = vi["INCAR"].get("SYMPREC", vasp_recommended_symprec)
             if symprec < vasp_recommended_symprec:
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": vasp_recommended_symprec}}})
@@ -1848,3 +1858,56 @@ class PositiveEnergyErrorHandler(ErrorHandler):
             return {"errors": ["Positive energy"], "actions": actions}
         # Unfixable error. Just return None for actions.
         return {"errors": ["Positive energy"], "actions": None}
+
+def _increase_k_point_density(
+    kpoints : Kpoints | dict,
+    structure : Structure,
+    factor : float = 0.2,
+    max_inc : int = 100,
+    min_kpoints : int | None = None
+) -> dict:
+    """
+    Inputs:
+        kpoints (Kpoints or dict) : original Kpoints used in the calculation
+        structure (Structure) : associated structure
+        factor (float) : factor used to increase k-point density.
+            The first increase uses approximately (1 + factor) higher k-point density.
+            The second increase: ~ (1 + 2*factor) higher k-kpoint density, etc.
+        max_inc (int) : the maximum permitted increases in k-point density 
+            before giving up
+        min_kpoints (int or None): if an int, the minimum permitted number of 
+            k-points. Could be useful if using the tetrahedron method, where
+            at least 4 k-points are needed.
+    Outputs:
+        dict : the new Kpoints object as a dict
+    """
+
+    if isinstance(kpoints,Kpoints):
+        kpoints = kpoints.as_dict()
+    orig_num_kpoints = np.prod(kpoints["kpoints"][0])
+    is_gamma_centered = kpoints.get("generation_style","Gamma").lower() == "gamma"
+
+    # try to approximate k-points per reciprocal atom used in pymatgen
+    lengths = structure.lattice.abc
+    mult = max([nk*lengths[ik] for ik, nk in enumerate(kpoints["kpoints"][0])])
+    ngrid = mult**3/np.prod(lengths)
+    kppa = len(structure)*ngrid
+
+    mult_fac = 1. + factor
+    min_kpoints = min_kpoints or 1
+    for _ in range(max_inc):
+
+        new_kpoints = Kpoints.automatic_density(
+            structure,
+            mult_fac*kppa,
+            force_gamma = is_gamma_centered
+        )
+
+        if (new_num_kpoints := np.prod(new_kpoints.kpts[0]) ) > orig_num_kpoints and (
+            new_num_kpoints > min_kpoints
+        ):
+            break
+        
+        mult_fac += factor
+
+    return new_kpoints.as_dict()

@@ -822,7 +822,7 @@ class VaspNEBJob(VaspJob):
 
         if self.half_kpts and os.path.isfile(os.path.join(directory, "KPOINTS")):
             kpts = Kpoints.from_file(os.path.join(directory, "KPOINTS"))
-            kpts.kpts = np.maximum(np.array(kpts.kpts) / 2, 1)
+            kpts.kpts = [tuple(int(nk) for nk in kv) for kv in np.maximum(np.array(kpts.kpts) / 2, 1)]
             if tuple(kpts.kpts[0]) == (1, 1, 1):
                 kpt_dic = kpts.as_dict()
                 kpt_dic["generation_style"] = "Gamma"

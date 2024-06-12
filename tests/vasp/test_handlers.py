@@ -105,13 +105,13 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["actions"] == [{"action": {"_set": {"PREC": "Accurate"}}, "dict": "INCAR"}]
 
     def test_check_correct(self) -> None:
-        handler = VaspErrorHandler("vasp.teterror")
+        handler = VaspErrorHandler("vasp.ksymm")
         handler.check()
         dct = handler.correct()
-        assert dct["errors"] == ["tet"]
-        assert dct["actions"] == [{"action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}, "dict": "INCAR"}]
+        assert dct["errors"] == ["ksymm"]
+        assert dct["actions"] == [{"action": {"_set": {"SYMPREC": 1.e-4}}, "dict": "INCAR"}]
 
-        handler = VaspErrorHandler("vasp.teterror", errors_subset_to_catch=["eddrmm"])
+        handler = VaspErrorHandler("vasp.ksymm", errors_subset_to_catch=["eddrmm"])
         assert not handler.check()
 
         handler = VaspErrorHandler("vasp.sgrcon")
@@ -155,7 +155,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["dentet"]
-        assert dct["actions"] == [{"action": {"_set": {"kpoints": ((10, 2, 2),)}}, "dict": "KPOINTS"}]
+        assert dct["actions"] == [{"action": {"_set": {"kpoints": ((8, 4, 4),)}}, "dict": "KPOINTS"}]
 
         handler.check()
         dct = handler.correct()
