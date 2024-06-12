@@ -193,21 +193,10 @@ class VaspErrorHandler(ErrorHandler):
             # follow advice in this thread
             # https://vasp.at/forum/viewtopic.php?f=3&t=416&p=4047&hilit=dentet#p4047
             err_type = "tet" if "tet" in self.errors else "dentet"
-            if self.error_count[err_type] == 0:
-                if vi["INCAR"].get("KSPACING"):
-                    # decrease KSPACING by 20% in each direction (approximately double no. of kpoints)
-                    action = {"_set": {"KSPACING": vi["INCAR"].get("KSPACING") * 0.8}}
-                    actions.append({"dict": "INCAR", "action": action})
-                elif vi["KPOINTS"] and vi["KPOINTS"].num_kpts < 1:
-                    # increase KPOINTS by 20% in each direction (approximately double no. of kpoints)
-                    new_kpts = tuple(int(round(num * 1.2, 0)) for num in vi["KPOINTS"].kpts[0])
-                    actions.append({"dict": "KPOINTS", "action": {"_set": {"kpoints": (new_kpts,)}}})
-                elif vi["KPOINTS"] and vi["KPOINTS"].num_kpts >= 1:
-                    n_kpts = vi["KPOINTS"].num_kpts * 1.2
-                    new_kpts = tuple([int(round(n_kpts**1 / 3, 0))] * 3)
-                    actions.append(
-                        {"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma", "kpoints": (new_kpts,)}}}
-                    )
+            if vi["INCAR"].get("KSPACING"):
+                # decrease KSPACING by 20% in each direction (approximately double no. of kpoints)
+                action = {"_set": {"KSPACING": vi["INCAR"].get("KSPACING") * 0.8}}
+                actions.append({"dict": "INCAR", "action": action})
             else:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
             self.error_count[err_type] += 1

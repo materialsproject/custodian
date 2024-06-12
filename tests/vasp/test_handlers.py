@@ -111,6 +111,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["errors"] == ["tet"]
         assert dct["actions"] == [{"action": {"_set": {"kpoints": ((10, 2, 2),)}}, "dict": "KPOINTS"}]
 
+        handler = VaspErrorHandler("vasp.teterror")
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["tet"]
@@ -157,11 +158,6 @@ class VaspErrorHandlerTest(PymatgenTest):
 
     def test_dentet(self) -> None:
         handler = VaspErrorHandler("vasp.dentet")
-        handler.check()
-        dct = handler.correct()
-        assert dct["errors"] == ["dentet"]
-        assert dct["actions"] == [{"action": {"_set": {"kpoints": ((10, 2, 2),)}}, "dict": "KPOINTS"}]
-
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["dentet"]
@@ -514,13 +510,6 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert handler.check() is True
         dct = handler.correct()
         assert dct["errors"] == ["tet"]
-        incar = Incar.from_file("INCAR")
-        assert incar["ISMEAR"] == -5
-        assert incar["SIGMA"] == 0.05
-        assert dct["actions"] == [{"action": {"_set": {"kpoints": ((10, 2, 2),)}}, "dict": "KPOINTS"}]
-
-        assert handler.check() is True
-        assert handler.correct()["errors"] == ["tet"]
         incar = Incar.from_file("INCAR")
         assert incar["ISMEAR"] == 0
         assert incar["SIGMA"] == 0.05
