@@ -107,12 +107,6 @@ class VaspErrorHandlerTest(PymatgenTest):
     def test_check_correct(self) -> None:
         handler = VaspErrorHandler("vasp.teterror")
         handler.check()
-        dct = handler.correct()
-        assert dct["errors"] == ["tet"]
-        assert dct["actions"] == [{"action": {"_set": {"kpoints": ((10, 2, 2),)}}, "dict": "KPOINTS"}]
-
-        handler.check()
-        dct = handler.correct()
         assert dct["errors"] == ["tet"]
         assert dct["actions"] == [{"action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}, "dict": "INCAR"}]
 
@@ -514,13 +508,6 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert handler.check() is True
         dct = handler.correct()
         assert dct["errors"] == ["tet"]
-        incar = Incar.from_file("INCAR")
-        assert incar["ISMEAR"] == -5
-        assert incar["SIGMA"] == 0.05
-        assert dct["actions"] == [{"action": {"_set": {"kpoints": ((10, 2, 2),)}}, "dict": "KPOINTS"}]
-
-        assert handler.check() is True
-        assert handler.correct()["errors"] == ["tet"]
         incar = Incar.from_file("INCAR")
         assert incar["ISMEAR"] == 0
         assert incar["SIGMA"] == 0.05

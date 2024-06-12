@@ -189,11 +189,13 @@ class VaspErrorHandler(ErrorHandler):
         actions = []
         vi = VaspInput.from_directory(directory)
 
-        if self.errors.intersection(["tet", "dentet"]):
+        if "tet" in self.errors:
+            actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+
+        if "dentet" in self.errors:
             # follow advice in this thread
             # https://vasp.at/forum/viewtopic.php?f=3&t=416&p=4047&hilit=dentet#p4047
-            err_type = "tet" if "tet" in self.errors else "dentet"
-            if self.error_count[err_type] == 0:
+            if self.error_count["dentet"] == 0:
                 if vi["INCAR"].get("KSPACING"):
                     # decrease KSPACING by 20% in each direction (approximately double no. of kpoints)
                     action = {"_set": {"KSPACING": vi["INCAR"].get("KSPACING") * 0.8}}
@@ -210,7 +212,7 @@ class VaspErrorHandler(ErrorHandler):
                     )
             else:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
-            self.error_count[err_type] += 1
+            self.error_count["dentet"] += 1
 
         # Missing AMIN error handler:
         # previously, custodian would kill the job without letting it run if AMIN was flagged
