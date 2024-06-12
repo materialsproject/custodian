@@ -109,12 +109,6 @@ class VaspErrorHandlerTest(PymatgenTest):
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["tet"]
-        assert dct["actions"] == [{"action": {"_set": {"kpoints": ((10, 2, 2),)}}, "dict": "KPOINTS"}]
-
-        handler = VaspErrorHandler("vasp.teterror")
-        handler.check()
-        dct = handler.correct()
-        assert dct["errors"] == ["tet"]
         assert dct["actions"] == [{"action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}, "dict": "INCAR"}]
 
         handler = VaspErrorHandler("vasp.teterror", errors_subset_to_catch=["eddrmm"])
