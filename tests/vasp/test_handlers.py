@@ -107,6 +107,7 @@ class VaspErrorHandlerTest(PymatgenTest):
     def test_check_correct(self) -> None:
         handler = VaspErrorHandler("vasp.teterror")
         handler.check()
+        dct = handler.correct()
         assert dct["errors"] == ["tet"]
         assert dct["actions"] == [{"action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}, "dict": "INCAR"}]
 
