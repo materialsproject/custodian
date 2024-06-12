@@ -515,7 +515,7 @@ class VaspErrorHandlerTest(PymatgenTest):
     def test_too_large_kspacing(self) -> None:
         shutil.copy("INCAR.kspacing", "INCAR")
         vi = VaspInput.from_directory(".")
-        handler = VaspErrorHandler("vasp.teterror")
+        handler = VaspErrorHandler("vasp.dentet")
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["tet"]
