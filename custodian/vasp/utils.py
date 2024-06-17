@@ -30,7 +30,7 @@ def increase_k_point_density(
     structure: Structure,
     factor: float = 0.1,
     max_inc: int = 500,
-    min_kpoints: int | None = None,
+    min_kpoints: int = 1,
     force_gamma: bool = True,
 ) -> dict:
     """
@@ -44,8 +44,8 @@ def increase_k_point_density(
             The second increase: ~ (1 + 2*factor) higher k-kpoint density, etc.
         max_inc (int) : the maximum permitted increases in k-point density
             before giving up
-        min_kpoints (int or None): if an int, the minimum permitted number of
-            k-points. Could be useful if using the tetrahedron method, where
+        min_kpoints (int): The minimum permitted number of k-points.
+            Can be useful if using the tetrahedron method, where
             at least 4 k-points are needed.
         force_gamma (bool) = True: whether to use Gamma-centered or
             Monkhorst-Pack grids
@@ -73,7 +73,7 @@ def increase_k_point_density(
         kppa = len(structure) * ngrid
 
     mult_fac = 1.0 + factor
-    min_kpoints = min_kpoints or 1
+    min_kpoints = max(min_kpoints,1)
 
     success = False
     for _ in range(max_inc):
