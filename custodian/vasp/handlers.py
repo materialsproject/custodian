@@ -67,7 +67,7 @@ class VaspErrorHandler(ErrorHandler):
     """
 
     is_monitor = True
-    max_natoms : int = 50
+    max_natoms: int = 50
 
     error_msgs: ClassVar = {
         "tet": [
