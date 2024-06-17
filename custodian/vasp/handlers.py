@@ -35,6 +35,7 @@ from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from custodian.vasp.interpreter import VaspModder
 from custodian.vasp.io import load_outcar, load_vasprun
+from custodian.vasp.utils import increase_k_point_density
 
 __author__ = (
     "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen, "
@@ -197,31 +198,61 @@ class VaspErrorHandler(ErrorHandler):
         if "dentet" in self.errors:
             # For dentet: follow advice in this thread
             # https://vasp.at/forum/viewtopic.php?f=3&t=416&p=4047&hilit=dentet#p4047
-            if (self.error_count["dentet"] == 0) and (
-                (uses_kspacing := vi["INCAR"].get("KSPACING", False))
-                or (uses_auto_kpoints := (vi["KPOINTS"] and vi["KPOINTS"].num_kpts == 0))
-            ):
-                if uses_kspacing:
-                    # decrease KSPACING by 20% in each direction (approximately double no. of kpoints)
-                    action = {"_set": {"KSPACING": vi["INCAR"].get("KSPACING") * 0.8}}
-                    actions.append({"dict": "INCAR", "action": action})
-                elif uses_auto_kpoints:
-                    # For automatic k-point generation, increase KPOINTS by 20% in
-                    #  each direction (approximately double no. of kpoints)
-                    new_kpoints = _increase_k_point_density(
-                        vi["KPOINTS"],
-                        vi["POSCAR"].structure,
-                        min_kpoints=4 if vi["INCAR"].get("ISMEAR", 0) == -5 else None,
-                    )
-                    actions.append(
-                        {"dict": "KPOINTS", "action": {"_set": {"kpoints": (tuple(new_kpoints["kpoints"][0]),)}}}
-                    )
-            else:
-                # If this is the second time we hit this error, or if explicit k-points were set,
-                # modify smearing instead
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
-            self.error_count["dentet"] += 1
 
+            # This error is caused by using too few k-points with the tetrahedron method.
+            # To fix it, try:
+            #   1. Center k-point grid at Gamma (required for tetrahedron)
+            #   2. Increase k-point density and throw user warning
+            #   3. Use Gaussian smearing and throw user warning
+
+            new_kpoints = {}
+            # 1. Re-center grid at Gamma if possible.
+            if (
+                (uses_kspacing := ("KSPACING" in vi["INCAR"]))
+                and (not vi["INCAR"].get("KGAMMA",True))
+            ): 
+                new_kpoints = {"KGAMMA": True}
+
+            elif (
+                (uses_auto_kpoints := (vi["KPOINTS"] is not None and vi["KPOINTS"].num_kpts == 0))
+                and str(vi["KPOINTS"].style) != "Gamma"
+            ):
+                new_kpoints = {"generation_style": "Gamma"}
+
+            if (new_kpoints == {}) and (self.error_count["dentet"] < 2) and (uses_kspacing or uses_auto_kpoints):
+                
+                # 2. Try to increase k-point density consistent with lattice geometry
+                # Enforce minimum number of k-points = 4 for tetrahedron method
+                new_kpoints = increase_k_point_density(
+                    vi["INCAR"]["KSPACING"] if uses_kspacing else vi["KPOINTS"],
+                    vi["POSCAR"].structure,
+                    min_kpoints=4,
+                    force_gamma=True
+                )
+
+                if new_kpoints:
+                    warnings.warn(
+                        "Your specified k-point density was too low to use with the tetrahedron method. "
+                        "The k-point density has been increased, please check that your results "
+                        "are not impacted by this change.",
+                        UserWarning
+                    )
+
+            if new_kpoints == {}:
+                # 3. If the previous fixes could not be applied: change smearing
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+                warnings.warn(
+                    "Your specified k-point density was too low to use with the tetrahedron method. "
+                    "The smearing method has been changed to Gaussian, please check that your "
+                    "results are not impacted by this change.",
+                    UserWarning
+                )
+
+            else:
+                actions.append({"dict": "INCAR" if uses_kspacing else "KPOINTS", "action": {"_set": new_kpoints}})
+            
+            self.error_count["dentet"] += 1
+  
         # Missing AMIN error handler:
         # previously, custodian would kill the job without letting it run if AMIN was flagged
         if "amin" in self.errors and vi["INCAR"].get("AMIN", 0.1) > 0.01:
@@ -1860,50 +1891,3 @@ class PositiveEnergyErrorHandler(ErrorHandler):
             return {"errors": ["Positive energy"], "actions": actions}
         # Unfixable error. Just return None for actions.
         return {"errors": ["Positive energy"], "actions": None}
-
-
-def _increase_k_point_density(
-    kpoints: Kpoints | dict,
-    structure: Structure,
-    factor: float = 0.2,
-    max_inc: int = 100,
-    min_kpoints: int | None = None,
-) -> dict:
-    """
-    Inputs:
-        kpoints (Kpoints or dict) : original Kpoints used in the calculation
-        structure (Structure) : associated structure
-        factor (float) : factor used to increase k-point density.
-            The first increase uses approximately (1 + factor) higher k-point density.
-            The second increase: ~ (1 + 2*factor) higher k-kpoint density, etc.
-        max_inc (int) : the maximum permitted increases in k-point density
-            before giving up
-        min_kpoints (int or None): if an int, the minimum permitted number of
-            k-points. Could be useful if using the tetrahedron method, where
-            at least 4 k-points are needed.
-    Outputs:
-        dict : the new Kpoints object as a dict
-    """
-
-    if isinstance(kpoints, Kpoints):
-        kpoints = kpoints.as_dict()
-    orig_num_kpoints = np.prod(kpoints["kpoints"][0])
-    is_gamma_centered = kpoints.get("generation_style", "Gamma").lower() == "gamma"
-
-    # try to approximate k-points per reciprocal atom used in pymatgen
-    lengths = structure.lattice.abc
-    mult = max([nk * lengths[ik] for ik, nk in enumerate(kpoints["kpoints"][0])])
-    ngrid = mult**3 / np.prod(lengths)
-    kppa = len(structure) * ngrid
-
-    mult_fac = 1.0 + factor
-    min_kpoints = min_kpoints or 1
-    for _ in range(max_inc):
-        new_kpoints = Kpoints.automatic_density(structure, mult_fac * kppa, force_gamma=is_gamma_centered)
-
-        if (new_num_kpoints := np.prod(new_kpoints.kpts[0])) > orig_num_kpoints and (new_num_kpoints > min_kpoints):
-            break
-
-        mult_fac += factor
-
-    return new_kpoints.as_dict()
