@@ -67,6 +67,7 @@ class VaspErrorHandler(ErrorHandler):
     """
 
     is_monitor = True
+    max_natoms : int = 50
 
     error_msgs: ClassVar = {
         "tet": [
@@ -202,7 +203,9 @@ class VaspErrorHandler(ErrorHandler):
             # This error is caused by using too few k-points with the tetrahedron method.
             # To fix it, try:
             #   1. Center k-point grid at Gamma (required for tetrahedron)
-            #   2. Increase k-point density and throw user warning
+            #   2. Increase k-point density and throw user warning,
+            #      provided that the structure has fewer than `max_natoms`
+            #      sites in the cell.
             #   3. Use Gaussian smearing and throw user warning
 
             new_kpoints = {}
@@ -215,7 +218,12 @@ class VaspErrorHandler(ErrorHandler):
             ) != "Gamma":
                 new_kpoints = {"generation_style": "Gamma"}
 
-            if (new_kpoints == {}) and (self.error_count["dentet"] < 2) and (uses_kspacing or uses_auto_kpoints):
+            if (
+                len(vi["POSCAR"].structure) < self.max_natoms
+                and (new_kpoints == {})
+                and (self.error_count["dentet"] < 2)
+                and (uses_kspacing or uses_auto_kpoints)
+            ):
                 # 2. Try to increase k-point density consistent with lattice geometry
                 # Enforce minimum number of k-points = 4 for tetrahedron method
                 new_kpoints = increase_k_point_density(

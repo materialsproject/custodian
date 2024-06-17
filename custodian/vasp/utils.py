@@ -84,7 +84,7 @@ def increase_k_point_density(
             kpts = Kpoints.automatic_density(structure, mult_fac * kppa, force_gamma=force_gamma)
             new_kpoints = {
                 "generation_style": str(kpts.style),
-                "kpoints": kpts.kpts,
+                "kpoints": (tuple(kpts.kpts[0]),),
             }
             new_nk = new_kpoints["kpoints"][0]  # type: ignore[index]
 

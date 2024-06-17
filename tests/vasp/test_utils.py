@@ -35,12 +35,14 @@ class TestKPointUtils(PymatgenTest):
             (15, 10, 10),
             (30, 20, 20),
         ]
-        for i, kspacing in enumerate(kspacing_values):
-            assert _estimate_num_k_points_from_kspacing(self.large_structure, kspacing) == expected_kpoints_per_axis[i]
+        assert all(
+            _estimate_num_k_points_from_kspacing(self.large_structure, kspacing) == expected_kpoints_per_axis[i]
+            for i, kspacing in enumerate(kspacing_values)
+        )
 
     def test_kpoint_density_increase(self):
         new_kpoints = increase_k_point_density(Kpoints(), self.large_structure, force_gamma=True, min_kpoints=4)
-        assert new_kpoints["kpoints"] == [[2, 2, 1]]
+        assert new_kpoints["kpoints"] == ((2, 2, 1),)
 
         new_kpoints = increase_k_point_density(2, self.large_structure, force_gamma=True, min_kpoints=10)
         assert new_kpoints["KSPACING"] == pytest.approx(1.428571)
@@ -48,4 +50,4 @@ class TestKPointUtils(PymatgenTest):
         assert np.prod(new_kpoints_divis) == 12
 
         new_kpoints = increase_k_point_density(Kpoints(), self.small_structure, force_gamma=True, min_kpoints=14)
-        assert new_kpoints["kpoints"] == [[3, 3, 3]]
+        assert new_kpoints["kpoints"] == ((3, 3, 3),)
