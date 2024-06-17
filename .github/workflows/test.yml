@@ -46,6 +46,7 @@ jobs:
         run: conda install -c conda-forge openbabel
 
       - name: Install dependencies
+        run: uv pip install numpy==1.26.4
         run: uv pip install -e '.[dev]' --system
 
       - name: pytest
