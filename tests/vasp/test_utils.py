@@ -2,6 +2,7 @@
 
 import os
 
+from monty.os.path import zpath
 import numpy as np
 import pytest
 from pymatgen.core import Lattice, Structure
@@ -14,7 +15,8 @@ from tests.conftest import TEST_FILES
 
 class TestKPointUtils(PymatgenTest):
     def setUp(self) -> None:
-        self.large_structure = Structure.from_file(os.path.join(TEST_FILES, "POSCAR_mp-1200292.gz"))
+
+        self.large_structure = Structure.from_file(zpath(os.path.join(TEST_FILES, "POSCAR_mp-1200292")))
 
         self.small_structure = Structure(
             Lattice.from_parameters(a=3.8, b=3.8, c=3.8, alpha=60.0, beta=60.0, gamma=60.0),

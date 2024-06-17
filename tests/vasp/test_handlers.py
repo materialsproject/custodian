@@ -163,8 +163,9 @@ class VaspErrorHandlerTest(PymatgenTest):
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["dentet"]
+        print(dct["actions"])
         assert dct["actions"] == [
-            {"action": {"_set": {"generation_style": "Gamma", "kpoints": [[3, 2, 1]]}}, "dict": "KPOINTS"}
+            {"action": {"_set": {"kpoints": [[3, 2, 1]], "generation_style": "Gamma"}}, "dict": "KPOINTS"}
         ]
 
         handler.check()
