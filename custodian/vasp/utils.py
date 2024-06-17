@@ -73,7 +73,7 @@ def increase_k_point_density(
         kppa = len(structure) * ngrid
 
     mult_fac = 1.0 + factor
-    min_kpoints = max(min_kpoints,1)
+    min_kpoints = max(min_kpoints, 1)
 
     success = False
     for _ in range(max_inc):
