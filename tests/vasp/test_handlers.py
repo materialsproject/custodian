@@ -151,7 +151,6 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert incar["POTIM"] == pytest.approx(0.5)
 
     def test_dentet(self) -> None:
-
         # ensure we use a very small, Monkhorst-Pack k-point grid to check all handler functionality
         Kpoints(style="Monkhorst").write_file("KPOINTS")
 
@@ -164,7 +163,9 @@ class VaspErrorHandlerTest(PymatgenTest):
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["dentet"]
-        assert dct["actions"] == [{"action": {"_set": {"generation_style": "Gamma", "kpoints": [[3, 2, 1]]}}, "dict": "KPOINTS"}]
+        assert dct["actions"] == [
+            {"action": {"_set": {"generation_style": "Gamma", "kpoints": [[3, 2, 1]]}}, "dict": "KPOINTS"}
+        ]
 
         handler.check()
         dct = handler.correct()
@@ -525,14 +526,12 @@ class VaspErrorHandlerTest(PymatgenTest):
     def test_too_large_kspacing(self) -> None:
         shutil.copy("INCAR.kspacing", "INCAR")
         os.remove("KPOINTS")
-        vi = VaspInput.from_directory(".")
+        VaspInput.from_directory(".")
         handler = VaspErrorHandler("vasp.dentet")
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["dentet"]
-        assert dct["actions"] == [
-            {"action": {"_set": {"KSPACING": 1.818182, "KGAMMA": True}}, "dict": "INCAR"}
-        ]
+        assert dct["actions"] == [{"action": {"_set": {"KSPACING": 1.818182, "KGAMMA": True}}, "dict": "INCAR"}]
 
     def test_nbands_not_sufficient(self) -> None:
         handler = VaspErrorHandler("vasp.nbands_not_sufficient")

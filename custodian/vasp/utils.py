@@ -1,17 +1,15 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 from pymatgen.io.vasp.inputs import Kpoints
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pymatgen.core import Structure
-    
 
-def _estimate_num_k_points_from_kspacing(
-    structure : Structure,
-    kspacing : float
-) -> tuple[int,int,int]:
+
+def _estimate_num_k_points_from_kspacing(structure: Structure, kspacing: float) -> tuple[int, ...]:
     """
     Estimate the number of k-points used by VASP.
 
@@ -22,18 +20,18 @@ def _estimate_num_k_points_from_kspacing(
         tuple[int,int,int] : the number of estimated k-points on each axis.s
     """
     return tuple(
-        int(max(1, np.ceil(
-            2*np.pi/kspacing * np.linalg.norm(structure.lattice.reciprocal_lattice.matrix[i])
-        ))) for i in range(3)
+        int(max(1, np.ceil(2 * np.pi / kspacing * np.linalg.norm(structure.lattice.reciprocal_lattice.matrix[i]))))
+        for i in range(3)
     )
 
+
 def increase_k_point_density(
-    kpoints: Kpoints | dict | float | int,
+    kpoints: Kpoints | dict | float,
     structure: Structure,
     factor: float = 0.1,
     max_inc: int = 500,
     min_kpoints: int | None = None,
-    force_gamma : bool = True
+    force_gamma: bool = True,
 ) -> dict:
     """
     Inputs:
@@ -49,7 +47,7 @@ def increase_k_point_density(
         min_kpoints (int or None): if an int, the minimum permitted number of
             k-points. Could be useful if using the tetrahedron method, where
             at least 4 k-points are needed.
-        force_gamma (bool) = True: whether to use Gamma-centered or 
+        force_gamma (bool) = True: whether to use Gamma-centered or
             Monkhorst-Pack grids
     Outputs:
         dict :
@@ -57,31 +55,30 @@ def increase_k_point_density(
             If an empty dict, no new k-point mesh could be found.
     """
 
-    uses_kspacing = isinstance(kpoints, (float,int))
+    uses_kspacing = isinstance(kpoints, (float, int))
 
     if uses_kspacing:
-        orig_num_kpoints = np.prod(_estimate_num_k_points_from_kspacing(structure,kpoints))
+        orig_num_kpoints = np.prod(_estimate_num_k_points_from_kspacing(structure, kpoints))  # type: ignore[arg-type]
 
     else:
         if isinstance(kpoints, Kpoints):
             kpoints = kpoints.as_dict()
 
-        orig_num_kpoints = np.prod(kpoints["kpoints"][0])
+        orig_num_kpoints = np.prod(kpoints["kpoints"][0])  # type: ignore[index]
 
         # try to approximate k-points per reciprocal atom used in pymatgen
         lengths = structure.lattice.abc
-        mult = max([nk * lengths[ik] for ik, nk in enumerate(kpoints["kpoints"][0])])
+        mult = max([nk * lengths[ik] for ik, nk in enumerate(kpoints["kpoints"][0])])  # type: ignore[index]
         ngrid = mult**3 / np.prod(lengths)
         kppa = len(structure) * ngrid
 
     mult_fac = 1.0 + factor
     min_kpoints = min_kpoints or 1
-    
+
     success = False
     for _ in range(max_inc):
-
         if uses_kspacing:
-            new_kpoints = {"KSPACING": round(kpoints/mult_fac,6), "KGAMMA": force_gamma}
+            new_kpoints = {"KSPACING": round(kpoints / mult_fac, 6), "KGAMMA": force_gamma}  # type: ignore[operator]
             new_nk = _estimate_num_k_points_from_kspacing(structure, new_kpoints["KSPACING"])
         else:
             kpts = Kpoints.automatic_density(structure, mult_fac * kppa, force_gamma=force_gamma)
@@ -89,7 +86,7 @@ def increase_k_point_density(
                 "generation_style": str(kpts.style),
                 "kpoints": kpts.kpts,
             }
-            new_nk = new_kpoints["kpoints"][0]
+            new_nk = new_kpoints["kpoints"][0]  # type: ignore[index]
 
         if (new_num_kpoints := np.prod(new_nk)) > orig_num_kpoints and (new_num_kpoints >= min_kpoints):
             success = True

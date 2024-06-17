@@ -207,27 +207,22 @@ class VaspErrorHandler(ErrorHandler):
 
             new_kpoints = {}
             # 1. Re-center grid at Gamma if possible.
-            if (
-                (uses_kspacing := ("KSPACING" in vi["INCAR"]))
-                and (not vi["INCAR"].get("KGAMMA",True))
-            ): 
+            if (uses_kspacing := ("KSPACING" in vi["INCAR"])) and (not vi["INCAR"].get("KGAMMA", True)):
                 new_kpoints = {"KGAMMA": True}
 
-            elif (
-                (uses_auto_kpoints := (vi["KPOINTS"] is not None and vi["KPOINTS"].num_kpts == 0))
-                and str(vi["KPOINTS"].style) != "Gamma"
-            ):
+            elif (uses_auto_kpoints := (vi["KPOINTS"] is not None and vi["KPOINTS"].num_kpts == 0)) and str(
+                vi["KPOINTS"].style
+            ) != "Gamma":
                 new_kpoints = {"generation_style": "Gamma"}
 
             if (new_kpoints == {}) and (self.error_count["dentet"] < 2) and (uses_kspacing or uses_auto_kpoints):
-                
                 # 2. Try to increase k-point density consistent with lattice geometry
                 # Enforce minimum number of k-points = 4 for tetrahedron method
                 new_kpoints = increase_k_point_density(
                     vi["INCAR"]["KSPACING"] if uses_kspacing else vi["KPOINTS"],
                     vi["POSCAR"].structure,
                     min_kpoints=4,
-                    force_gamma=True
+                    force_gamma=True,
                 )
 
                 if new_kpoints:
@@ -235,7 +230,7 @@ class VaspErrorHandler(ErrorHandler):
                         "Your specified k-point density was too low to use with the tetrahedron method. "
                         "The k-point density has been increased, please check that your results "
                         "are not impacted by this change.",
-                        UserWarning
+                        UserWarning,
                     )
 
             if new_kpoints == {}:
@@ -245,14 +240,14 @@ class VaspErrorHandler(ErrorHandler):
                     "Your specified k-point density was too low to use with the tetrahedron method. "
                     "The smearing method has been changed to Gaussian, please check that your "
                     "results are not impacted by this change.",
-                    UserWarning
+                    UserWarning,
                 )
 
             else:
                 actions.append({"dict": "INCAR" if uses_kspacing else "KPOINTS", "action": {"_set": new_kpoints}})
-            
+
             self.error_count["dentet"] += 1
-  
+
         # Missing AMIN error handler:
         # previously, custodian would kill the job without letting it run if AMIN was flagged
         if "amin" in self.errors and vi["INCAR"].get("AMIN", 0.1) > 0.01:
