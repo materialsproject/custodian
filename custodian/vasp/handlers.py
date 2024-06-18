@@ -73,14 +73,14 @@ class VaspErrorHandler(ErrorHandler):
             termination signal, the error is then corrected,
             and then the job is restarted. This is useful for catching errors
             that occur early in the run but do not cause immediate failure.
-        max_natoms (int) :
+        num_sites_kpoint_cutoff (int) :
             The maximum number of atoms in a structure for which increasing the
             k-point density is permitted as a possible error correction.
             Defaults to 50 atoms/structure.
     """
 
     is_monitor = True
-    max_natoms: int = 50
+    num_sites_kpoint_cutoff: int = 50
 
     error_msgs: ClassVar = {
         "tet": [
@@ -217,7 +217,7 @@ class VaspErrorHandler(ErrorHandler):
             # To fix it, try:
             #   1. Center k-point grid at Gamma (required for tetrahedron)
             #   2. Increase k-point density and throw user warning,
-            #      provided that the structure has fewer than `max_natoms`
+            #      provided that the structure has fewer than `num_sites_kpoint_cutoff`
             #      sites in the cell.
             #   3. Use Gaussian smearing and throw user warning
 
@@ -232,7 +232,7 @@ class VaspErrorHandler(ErrorHandler):
                 new_kpoints = {"generation_style": "Gamma"}
 
             if (
-                len(vi["POSCAR"].structure) < self.max_natoms
+                len(vi["POSCAR"].structure) < self.num_sites_kpoint_cutoff
                 and (new_kpoints == {})
                 and (self.error_count["dentet"] < 2)
                 and (uses_kspacing or uses_auto_kpoints)
