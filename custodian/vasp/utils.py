@@ -28,10 +28,7 @@ def _estimate_num_k_points_from_kspacing(structure: Structure, kspacing: float) 
     number of k-points per axis from KSPACING. The formula used
     below has been checked for accuracy against VASP calculations.
     """
-    return tuple(
-        int(max(1, np.ceil(structure.lattice.reciprocal_lattice.abc[i]/kspacing)))
-        for i in range(3)
-    )
+    return tuple(int(max(1, np.ceil(structure.lattice.reciprocal_lattice.abc[i] / kspacing))) for i in range(3))
 
 
 def increase_k_point_density(
