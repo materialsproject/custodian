@@ -531,7 +531,8 @@ class VaspErrorHandlerTest(PymatgenTest):
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["dentet"]
-        assert dct["actions"] == [{"action": {"_set": {"KSPACING": 1.818182, "KGAMMA": True}}, "dict": "INCAR"}]
+        print(dct["actions"])
+        assert dct["actions"] == [{"action": {"_set": {"KSPACING": 1.333333, "KGAMMA": True}}, "dict": "INCAR"}]
 
     def test_nbands_not_sufficient(self) -> None:
         handler = VaspErrorHandler("vasp.nbands_not_sufficient")

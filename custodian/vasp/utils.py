@@ -17,10 +17,19 @@ def _estimate_num_k_points_from_kspacing(structure: Structure, kspacing: float) 
         structure (Structure): structure used in the calculation
         kspacing (float): KSPACING used in the calculation
     Returns:
-        tuple[int,int,int] : the number of estimated k-points on each axis.s
+        tuple[int,int,int] : the number of estimated k-points on each axis.
+
+    Note that there is a typo in the VASP manual:
+        https://www.vasp.at/wiki/index.php/KSPACING
+    The inner product between direct a_i and reciprocal b_i
+    lattice vectors is conventionally a_i . b_j = 2 pi delta_ij
+
+    That leads to an extra 2 pi factor in the expression for the
+    number of k-points per axis from KSPACING. The formula used
+    below has been checked for accuracy against VASP calculations.
     """
     return tuple(
-        int(max(1, np.ceil(2 * np.pi / kspacing * np.linalg.norm(structure.lattice.reciprocal_lattice.matrix[i]))))
+        int(max(1, np.ceil(structure.lattice.reciprocal_lattice.abc[i]/kspacing)))
         for i in range(3)
     )
 
