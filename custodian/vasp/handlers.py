@@ -64,6 +64,19 @@ class VaspErrorHandler(ErrorHandler):
     """
     Master VaspErrorHandler class that handles a number of common errors
     that occur during VASP runs.
+
+    Args:
+        is_monitor (bool):
+            This class property indicates whether the error handler is a monitor,
+            i.e., a handler that monitors a job as it is running. If a
+            monitor-type handler notices an error, the job will be sent a
+            termination signal, the error is then corrected,
+            and then the job is restarted. This is useful for catching errors
+            that occur early in the run but do not cause immediate failure.
+        max_natoms (int) :
+            The maximum number of atoms in a structure for which increasing the
+            k-point density is permitted as a possible error correction.
+            Defaults to 50 atoms/structure.
     """
 
     is_monitor = True
