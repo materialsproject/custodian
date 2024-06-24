@@ -236,7 +236,7 @@ class VaspErrorHandler(ErrorHandler):
                 len(vi["POSCAR"].structure) < self.num_sites_kpoint_cutoff
                 and (new_kpoints == {})
                 and (self.error_count["dentet"] < 2)
-                and (uses_kspacing or uses_auto_kpoints)
+                and (uses_kspacing or uses_auto_kpoints)  # type: ignore
             ):
                 # 2. Try to increase k-point density consistent with lattice geometry
                 # Enforce minimum number of k-points = 4 for tetrahedron method

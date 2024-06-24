@@ -88,7 +88,7 @@ def increase_k_point_density(
             new_kpoints = {"KSPACING": round(kpoints / mult_fac, 6), "KGAMMA": force_gamma}  # type: ignore[operator]
             new_nk = _estimate_num_k_points_from_kspacing(structure, new_kpoints["KSPACING"])
         else:
-            kpts = Kpoints.automatic_density(structure, mult_fac * kppa, force_gamma=force_gamma)
+            kpts = Kpoints.automatic_density(structure, mult_fac * kppa, force_gamma=force_gamma)  # type: ignore
             new_kpoints = {
                 "generation_style": str(kpts.style),
                 "kpoints": (tuple(kpts.kpts[0]),),
@@ -101,4 +101,4 @@ def increase_k_point_density(
 
         mult_fac += factor
 
-    return new_kpoints if success else {}
+    return new_kpoints if success else {}  # type: ignore

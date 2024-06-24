@@ -160,7 +160,7 @@ class VaspJob(Job):
                         vasp_path = which(vasp_cmd.split(" ")[-1])
                     elif isinstance(vasp_cmd, list):
                         vasp_path = which(vasp_cmd[-1])
-                    scope.set_tag("vasp_path", vasp_path)
+                    scope.set_tag("vasp_path", vasp_path)  # type: ignore
                     scope.set_tag("vasp_cmd", vasp_cmd)
                 except Exception:
                     logger.exception(f"Failed to detect VASP path: {vasp_cmd}")
@@ -499,7 +499,7 @@ class VaspJob(Job):
                     },
                 ]
                 if step == 1 and half_kpts_first_relax:
-                    settings.append({"dict": "KPOINTS", "action": {"_set": orig_kpts_dict}})
+                    settings.append({"dict": "KPOINTS", "action": {"_set": orig_kpts_dict}})  # type: ignore
             logger.info(f"Generating job = {step + 1}!")
             yield VaspJob(
                 vasp_cmd,

@@ -146,8 +146,8 @@ def get_jobs(args):
                     "dict": "INCAR",
                     "action": {
                         "_set": {
-                            "LDAUJ": [j * f for j in ldauj],
-                            "LDAUU": [u * f for u in ldauu],
+                            "LDAUJ": [j * f for j in ldauj],  # type: ignore
+                            "LDAUU": [u * f for u in ldauu],  # type: ignore
                         }
                     },
                 }

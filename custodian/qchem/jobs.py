@@ -540,7 +540,7 @@ class QCJob(Job):
                     freq_1 = outdata.get("frequencies")[1]
                     if freq_0 > 0.0:
                         warnings.warn("All frequencies positive!")
-                        if opt_outdata.get("final_energy") > orig_energy:
+                        if opt_outdata.get("final_energy") > orig_energy:  # type: ignore
                             warnings.warn("WARNING: Energy increased during frequency flattening!")
                         break
                     if abs(freq_0) < 15.0 and freq_1 > 0.0:
@@ -662,10 +662,10 @@ class QCJob(Job):
                         reversed_direction=reversed_direction,
                     )
                     new_molecule = Molecule(
-                        species=orig_species,
+                        species=orig_species,  # type: ignore
                         coords=new_coords,
-                        charge=orig_charge,
-                        spin_multiplicity=orig_multiplicity,
+                        charge=orig_charge,  # type: ignore
+                        spin_multiplicity=orig_multiplicity,  # type: ignore
                     )
                     if check_connectivity and not transition_state:
                         structure_successfully_perturbed = (
@@ -680,7 +680,7 @@ class QCJob(Job):
                     )
 
                 new_opt_QCInput = QCInput(
-                    molecule=new_molecule,
+                    molecule=new_molecule,  # type: ignore
                     rem=opt_rem,
                     opt=orig_opt_input.opt,
                     pcm=orig_opt_input.pcm,
