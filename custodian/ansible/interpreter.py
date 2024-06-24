@@ -21,18 +21,17 @@ class Modder:
 
     Examples:
     >>> modder = Modder()
-    >>> d = {"Hello": "World"}
+    >>> dct = {"Hello": "World"}
     >>> mod = {'_set': {'Hello':'Universe', 'Bye': 'World'}}
-    >>> modder.modify(mod, d)
-    >>> d['Bye']
+    >>> modder.modify(mod, dct)
+    >>> dct['Bye']
     'World'
-    >>> d['Hello']
+    >>> dct['Hello']
     'Universe'
     """
 
-    def __init__(self, actions=None, strict=True):
-        """
-        Initializes a Modder from a list of supported actions.
+    def __init__(self, actions=None, strict=True, directory="./") -> None:
+        """Initialize a Modder from a list of supported actions.
 
         Args:
             actions ([Action]): A sequence of supported actions. See
@@ -42,16 +41,19 @@ class Modder:
                 mode, unsupported actions are simply ignored without any
                 errors raised. In strict mode, if an unsupported action is
                 supplied, a ValueError is raised. Defaults to True.
+            directory (str): The directory containing the files to be modified.
+                Defaults to "./".
         """
         self.supported_actions = {}
         actions = actions if actions is not None else [DictActions]
         for action in actions:
-            for i in dir(action):
-                if (not re.match(r"__\w+__", i)) and callable(getattr(action, i)):
-                    self.supported_actions["_" + i] = getattr(action, i)
+            for attr in dir(action):
+                if (not re.match(r"__\w+__", attr)) and callable(getattr(action, attr)):
+                    self.supported_actions[f"_{attr}"] = getattr(action, attr)
         self.strict = strict
+        self.directory = directory
 
-    def modify(self, modification, obj):
+    def modify(self, modification, obj) -> None:
         """
         Note that modify makes actual in-place modifications. It does not
         return a copy.
@@ -66,7 +68,7 @@ class Modder:
         """
         for action, settings in modification.items():
             if action in self.supported_actions:
-                self.supported_actions[action](obj, settings)
+                self.supported_actions[action](obj, settings, directory=self.directory)
             elif self.strict:
                 raise ValueError(f"{action} is not a supported action!")
 
@@ -79,9 +81,9 @@ class Modder:
                 settings}. E.g., {'_set': {'Hello':'Universe', 'Bye': 'World'}}
             obj (object): Object to modify
         """
-        d = obj.as_dict()
-        self.modify(modification, d)
-        return obj.from_dict(d)
+        dct = obj.as_dict()
+        self.modify(modification, dct)
+        return obj.from_dict(dct)
 
 
 if __name__ == "__main__":

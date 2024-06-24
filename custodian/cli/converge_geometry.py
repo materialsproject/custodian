@@ -1,8 +1,4 @@
-#!/usr/bin/env python
-
-"""
-This is a script to converge the geometry of a system
-"""
+"""This is a script to converge the geometry of a system."""
 
 import logging
 
@@ -23,9 +19,7 @@ logging.basicConfig(format=FORMAT, level=logging.INFO, filename="run.log")
 
 
 def get_runs(args):
-    """
-    Get the runs.
-    """
+    """Get the runs."""
     vasp_command = args.command.split()
     converged = False
     job_number = 0
@@ -70,10 +64,8 @@ def get_runs(args):
         )
 
 
-def do_run(args):
-    """
-    Perform the run.
-    """
+def do_run(args) -> None:
+    """Perform the run."""
     handlers = [
         VaspErrorHandler(),
         MeshSymmetryErrorHandler(),
@@ -107,7 +99,7 @@ if __name__ == "__main__":
         nargs="?",
         default="pvasp",
         type=str,
-        help="VASP command. Defaults to pvasp. If you are using mpirun, " 'set this to something like "mpirun pvasp".',
+        help="VASP command. Defaults to pvasp. If you are using mpirun, set this to something like 'mpirun pvasp'.",
     )
 
     parser.add_argument(

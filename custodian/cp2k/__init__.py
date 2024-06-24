@@ -1,3 +1,1 @@
-"""
-This package implements various CP2K Jobs and Error Handlers.
-"""
+"""This package implements various CP2K Jobs and Error Handlers."""

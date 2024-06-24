@@ -1,6 +1,6 @@
-"""
-CP2K adapted interpreter and modder for custodian.
-"""
+"""CP2K adapted interpreter and modder for custodian."""
+
+import os
 
 from pymatgen.io.cp2k.inputs import Cp2kInput
 
@@ -20,9 +20,8 @@ class Cp2kModder(Modder):
     also supports modifications that are file operations (e.g. copying).
     """
 
-    def __init__(self, filename="cp2k.inp", actions=None, strict=True, ci=None):
-        """
-        Initializes a Modder for Cp2kInput sets
+    def __init__(self, filename="cp2k.inp", actions=None, strict=True, ci=None, directory="./") -> None:
+        """Initialize a Modder for Cp2kInput sets.
 
         Args:
             filename (str): name of cp2k input file to modify. This file will be overwritten
@@ -36,38 +35,41 @@ class Cp2kModder(Modder):
                 supplied, a ValueError is raised. Defaults to True.
             ci (Cp2kInput): A Cp2kInput object from the current directory.
                 Initialized automatically if not passed (but passing it will
-                avoid having to reparse the directory).
+                avoid having to re-parse the directory).
+            directory (str): The directory containing the Cp2kInput set. Defaults to "./".
         """
-        self.ci = ci or Cp2kInput.from_file(filename)
+        self.directory = directory
+        self.ci = ci or Cp2kInput.from_file(os.path.join(self.directory, filename))
         self.filename = filename
         actions = actions or [FileActions, DictActions]
         super().__init__(actions, strict)
 
-    def apply_actions(self, actions):
+    def apply_actions(self, actions) -> None:
         """
         Applies a list of actions to the CP2K Input Set and rewrites modified
         files.
+
         Args:
-            actions [dict]: A list of actions of the form {'file': filename,
+            actions (dict): A list of actions of the form {'file': filename,
                 'action': moddermodification} or {'dict': cp2k_key,
-                'action': moddermodification}
+                'action': moddermodification}.
         """
         modified = []
-        for a in actions:
-            if "dict" in a:
-                k = a["dict"]
+        for action in actions:
+            if "dict" in action:
+                k = action["dict"]
                 modified.append(k)
-                Cp2kModder._modify(a["action"], self.ci)
-            elif "file" in a:
-                self.modify(a["action"], a["file"])
-                self.ci = Cp2kInput.from_file(self.filename)
+                Cp2kModder._modify(action["action"], self.ci)
+            elif "file" in action:
+                self.modify(action["action"], action["file"])
+                self.ci = Cp2kInput.from_file(os.path.join(self.directory, self.filename))
             else:
-                raise ValueError(f"Unrecognized format: {a}")
+                raise ValueError(f"Unrecognized format: {action}")
         cleanup_input(self.ci)
-        self.ci.write_file(self.filename)
+        self.ci.write_file(os.path.join(self.directory, self.filename))
 
     @staticmethod
-    def _modify(modification, obj):
+    def _modify(modification, obj) -> None:
         """
         Note that modify makes actual in-place modifications. It does not
         return a copy.

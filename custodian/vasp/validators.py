@@ -1,6 +1,6 @@
-"""
-Implements various validatiors, e.g., check if vasprun.xml is valid, for VASP.
-"""
+"""Implements various validators, e.g., check if vasprun.xml is valid, for VASP."""
+
+from __future__ import annotations
 
 import logging
 import os
@@ -11,14 +11,13 @@ from monty.os.path import zpath
 from pymatgen.io.vasp import Chgcar, Incar, Outcar, Vasprun
 
 from custodian.custodian import Validator
+from custodian.vasp.io import load_outcar, load_vasprun
 
 
 class VasprunXMLValidator(Validator):
-    """
-    Checks that a valid vasprun.xml was generated
-    """
+    """Checks that a valid vasprun.xml was generated."""
 
-    def __init__(self, output_file="vasp.out", stderr_file="std_err.txt"):
+    def __init__(self, output_file: str = "vasp.out", stderr_file: str = "std_err.txt") -> None:
         """
         Args:
             output_file (str): Name of file VASP standard output is directed to.
@@ -28,16 +27,14 @@ class VasprunXMLValidator(Validator):
         """
         self.output_file = output_file
         self.stderr_file = stderr_file
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger = logging.getLogger(type(self).__name__)
 
-    def check(self):
-        """
-        Check for error.
-        """
+    def check(self, directory="./") -> bool:
+        """Check for errors."""
         try:
             Vasprun(zpath("vasprun.xml"))
         except Exception:
-            exception_context = {}
+            exception_context: dict[str, str | float] = {}
 
             if os.path.exists(self.output_file):
                 with zopen(zpath(self.output_file), "rt") as output_file:
@@ -60,7 +57,7 @@ class VasprunXMLValidator(Validator):
                     vasprun_tail = deque(vasprun, maxlen=10)
                 exception_context["vasprun_tail"] = "".join(vasprun_tail)
 
-            self.logger.error("Failed to load vasprun.xml", exc_info=True, extra=exception_context)
+            self.logger.exception("Failed to load vasprun.xml", extra=exception_context)
 
             return True
         return False
@@ -72,10 +69,8 @@ class VaspFilesValidator(Validator):
         normally create upon running.
     """
 
-    def __init__(self):
-        """
-        Dummy init
-        """
+    def __init__(self) -> None:
+        """Dummy init."""
 
     def check(self):
         """
@@ -93,16 +88,15 @@ class VaspNpTMDValidator(Validator):
     Currently, VASP only have Langevin thermostat (MDALGO = 3) for NpT ensemble.
     """
 
-    def __init__(self):
-        """
-        Dummy init.
-        """
+    def __init__(self) -> None:
+        """Dummy init."""
 
     def check(self):
         """
         Check for error.
         """
         incar = Incar.from_file(zpath("INCAR"))
+
         is_npt = incar.get("MDALGO") == 3
         if not is_npt:
             return False
@@ -110,20 +104,14 @@ class VaspNpTMDValidator(Validator):
         outcar = Outcar(zpath("OUTCAR"))
         patterns = {"MDALGO": r"MDALGO\s+=\s+([\d]+)"}
         outcar.read_pattern(patterns=patterns)
-        if outcar.data["MDALGO"] == [["3"]]:
-            return False
-        return True
+        return outcar.data["MDALGO"] != [["3"]]
 
 
 class VaspAECCARValidator(Validator):
-    """
-    Check if the data in the AECCAR is corrupted
-    """
+    """Check if the data in the AECCAR is corrupted."""
 
-    def __init__(self):
-        """
-        Dummy init
-        """
+    def __init__(self) -> None:
+        """Dummy init."""
 
     def check(self):
         """
@@ -135,13 +123,13 @@ class VaspAECCARValidator(Validator):
         return check_broken_chgcar(aeccar)
 
 
-def check_broken_chgcar(chgcar, diff_thresh=None):
+def check_broken_chgcar(chgcar, diff_thresh=None) -> bool:
     """
     Check if the charge density file is corrupt
     Args:
         chgcar (Chgcar): Chgcar-like object.
         diff_thresh (Float): Threshold for diagonal difference.
-                        None means we won't check for this.
+            None means we won't check for this.
     """
     chgcar_data = chgcar.data["total"]
     if (chgcar_data < 0).sum() > 100:

@@ -1,0 +1,58 @@
+ running on    4 total cores
+ distrk:  each k-point on    1 cores,    4 groups
+ distr:  one band on    1 cores,    1 groups
+ OpenACC runtime initialized ...    4 GPUs detected
+ vasp.6.3.2 27Jun22 (build Jun 29 2023 14:50:22) complex                         
+ POSCAR found type information on POSCAR CdI 
+ POSCAR found :  2 types and      99 ions
+ Reading from existing POTCAR
+ scaLAPACK will be used selectively (only on CPU)
+ Reading from existing POTCAR
+ LDA part: xc-table for Pade appr. of Perdew
+ -----------------------------------------------------------------------------
+|                                                                             |
+|           W    W    AA    RRRRR   N    N  II  N    N   GGGG   !!!           |
+|           W    W   A  A   R    R  NN   N  II  NN   N  G    G  !!!           |
+|           W    W  A    A  R    R  N N  N  II  N N  N  G       !!!           |
+|           W WW W  AAAAAA  RRRRR   N  N N  II  N  N N  G  GGG   !            |
+|           WW  WW  A    A  R   R   N   NN  II  N   NN  G    G                |
+|           W    W  A    A  R    R  N    N  II  N    N   GGGG   !!!           |
+|                                                                             |
+|     The requested file  could not be found or opened for reading            |
+|     k-point information. Automatic k-point generation is used as a          |
+|     fallback, which may lead to unwanted results.                           |
+|                                                                             |
+ -----------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+|                                                                             |
+|           W    W    AA    RRRRR   N    N  II  N    N   GGGG   !!!           |
+|           W    W   A  A   R    R  NN   N  II  NN   N  G    G  !!!           |
+|           W    W  A    A  R    R  N N  N  II  N N  N  G       !!!           |
+|           W WW W  AAAAAA  RRRRR   N  N N  II  N  N N  G  GGG   !            |
+|           WW  WW  A    A  R   R   N   NN  II  N   NN  G    G                |
+|           W    W  A    A  R    R  N    N  II  N    N   GGGG   !!!           |
+|                                                                             |
+|     One of the lattice vectors is very long (>50 A), but AMIN is rather     |
+|     large. This can spoil convergence since charge sloshing might occur     |
+|     along the long lattice vector. If problems with convergence are         |
+|     observed, try to decrease AMIN to a smaller value (e.g. 0.01).          |
+|     Note: This warning only applies if the self-consistency cycle is        |
+|     used.                                                                   |
+|                                                                             |
+ -----------------------------------------------------------------------------
+
+ INCAR ok, starting setup
+ POSCAR ok, starting setup
+ FFT: planning ... GRIDC
+ FFT: planning ... GRID_SOFT
+ FFT: planning ... GRID
+ WAVECAR not read
+ entering main loop
+       N       E                     dE             d eps       ncg     rms          rms(c)
+DAV:   1     0.654864287549E+04    0.65486E+04   -0.42351E+05 21824   0.168E+03
+DAV:   2     0.386898823739E+03   -0.61617E+04   -0.59196E+04 25120   0.328E+02
+DAV:   3    -0.172568026248E+03   -0.55947E+03   -0.55436E+03 25024   0.932E+01
+DAV:   4    -0.186061501271E+03   -0.13493E+02   -0.13459E+02 24880   0.139E+01
+DAV:   5    -0.186461852896E+03   -0.40035E+00   -0.40026E+00 27216   0.240E+00    0.439E+01
+RMM:   6    -0.162644121003E+03    0.23818E+02   -0.52634E+01 21774   0.820E+00    0.327E+01

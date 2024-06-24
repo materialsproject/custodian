@@ -1,12 +1,13 @@
-"""
-This module implements basic kinds of jobs for QChem runs.
-"""
+"""This module implements basic kinds of jobs for QChem runs."""
+
+from __future__ import annotations
 
 import copy
 import os
 import shutil
 import subprocess
 import warnings
+from pathlib import Path
 
 import numpy as np
 from pymatgen.core import Molecule
@@ -17,6 +18,11 @@ from pymatgen.io.qchem.sets import OptSet
 from custodian.custodian import Job
 from custodian.qchem.utils import perturb_coordinates, vector_list_diff
 
+try:
+    from openbabel import openbabel as ob
+except ImportError:
+    ob = None
+
 __author__ = "Samuel Blau, Brandon Wood, Shyam Dwaraknath, Evan Spotte-Smith"
 __copyright__ = "Copyright 2018, The Materials Project"
 __version__ = "0.1"
@@ -26,16 +32,9 @@ __status__ = "Alpha"
 __date__ = "3/20/18"
 __credits__ = "Xiaohui Qu"
 
-try:
-    from openbabel import openbabel as ob  # noqa: F401
-except ImportError:
-    raise RuntimeError("ERROR: Openbabel must be installed in order to use Q-Chem Custodian!")
-
 
 class QCJob(Job):
-    """
-    A basic QChem Job.
-    """
+    """A basic QChem Job."""
 
     def __init__(
         self,
@@ -50,7 +49,7 @@ class QCJob(Job):
         nboexe=None,
         save_scratch=False,
         backup=True,
-    ):
+    ) -> None:
         """
         Args:
             qchem_command (str): Command to run QChem.
@@ -69,6 +68,8 @@ class QCJob(Job):
             backup (bool): Whether to backup the initial input file. If True, the
                 input will be copied with a ".orig" appended. Defaults to True.
         """
+        if ob is None:
+            raise RuntimeError("ERROR: Openbabel must be installed in order to use Q-Chem Custodian!")
         try:
             self.qchem_command = qchem_command.split(" ")
         except AttributeError:
@@ -101,31 +102,40 @@ class QCJob(Job):
             print("SLURM_CPUS_ON_NODE not in environment")
 
     @property
-    def current_command(self):
+    def current_command(self, directory: str | Path = "./"):
+        """The command to run QChem.
+
+        Args:
+            directory (str): The directory to run in. Defaults to "./".
+
+        Returns:
+            (str) The command to run QChem.
         """
-        The command to run QChem
-        """
+        self._input_path = os.path.join(directory, self.input_file)
+        self._output_path = os.path.join(directory, self.output_file)
         multi = {"openmp": "-nt", "mpi": "-np"}
         if self.multimode not in multi:
             raise RuntimeError("ERROR: Multimode should only be set to openmp or mpi")
-        command = [multi[self.multimode], str(self.max_cores), self.input_file, self.output_file, "scratch"]
+        command = [multi[self.multimode], str(self.max_cores), self._input_path, self._output_path, "scratch"]
         command = self.qchem_command + command
-        com_str = " ".join(command)
-        return com_str
+        return " ".join(command)
 
-    def setup(self):
+    def setup(self, directory: str | Path = "./") -> None:
+        """Sets up environment variables necessary to efficiently run QChem.
+
+        Args:
+            directory (str): The directory to run in. Defaults to "./".
         """
-        Sets up environment variables necessary to efficiently run QChem
-        """
+        self._input_path = os.path.join(directory, self.input_file)
         if self.backup:
-            shutil.copy(self.input_file, f"{self.input_file}.orig")
+            shutil.copy(self._input_path, os.path.join(directory, f"{self.input_file}.orig"))
         if self.multimode == "openmp":
             os.environ["QCTHREADS"] = str(self.max_cores)
             os.environ["OMP_NUM_THREADS"] = str(self.max_cores)
-        os.environ["QCSCRATCH"] = os.getcwd()
+        os.environ["QCSCRATCH"] = str(Path(directory).resolve())
         if self.calc_loc is not None:
             os.environ["QCLOCALSCR"] = self.calc_loc
-        qcinp = QCInput.from_file(self.input_file)
+        qcinp = QCInput.from_file(self._input_path)
         if (
             qcinp.rem.get("run_nbo6", "none").lower() == "true"
             or qcinp.rem.get("nbo_external", "none").lower() == "true"
@@ -135,21 +145,26 @@ class QCJob(Job):
                 raise RuntimeError("Trying to run NBO7 without providing NBOEXE in fworker! Exiting...")
             os.environ["NBOEXE"] = self.nboexe
 
-    def postprocess(self):
+    def postprocess(self, directory: str | Path = "./") -> None:
+        """Renames and removes scratch files after running QChem.
+
+        Args:
+            directory (str): The directory to run in. Defaults to "./".
         """
-        Renames and removes scratch files after running QChem
-        """
+        self._input_path = os.path.join(directory, self.input_file)
+        self._output_path = os.path.join(directory, self.output_file)
+        self._qclog_path = os.path.join(directory, self.qclog_file)
         scratch_dir = os.path.join(os.environ["QCSCRATCH"], "scratch")
-        for file in ["HESS", "GRAD", "plots/dens.0.cube"]:
+        for file in ("HESS", "GRAD", "plots/dens.0.cube", "131.0", "53.0", "132.0"):
             file_path = os.path.join(scratch_dir, file)
-            if os.path.exists(file_path):
-                shutil.copy(file_path, os.getcwd())
+            if os.path.isfile(file_path):
+                shutil.copy(file_path, directory)
         if self.suffix != "":
-            shutil.move(self.input_file, self.input_file + self.suffix)
-            shutil.move(self.output_file, self.output_file + self.suffix)
-            shutil.move(self.qclog_file, self.qclog_file + self.suffix)
-            for file in ["HESS", "GRAD", "dens.0.cube"]:
-                if os.path.exists(file):
+            shutil.move(self._input_path, os.path.join(directory, self.input_file + self.suffix))
+            shutil.move(self._output_path, os.path.join(directory, self.output_file + self.suffix))
+            shutil.move(self._qclog_path, os.path.join(directory, self.qclog_file + self.suffix))
+            for file in ("HESS", "GRAD", "dens.0.cube"):
+                if os.path.isfile(file):
                     shutil.move(file, file + self.suffix)
         if not self.save_scratch:
             try:
@@ -157,9 +172,12 @@ class QCJob(Job):
             except FileNotFoundError:
                 pass
 
-    def run(self):
+    def run(self, directory: str | Path = "./"):
         """
         Perform the actual QChem run.
+
+        Args:
+            directory (str): The directory to run in. Defaults to "./".
 
         Returns:
             (subprocess.Popen) Used for monitoring.
@@ -170,8 +188,11 @@ class QCJob(Job):
         if os.path.exists(os.path.join(os.environ["QCSCRATCH"], "132.0")):
             os.mkdir(local_scratch)
             shutil.move(os.path.join(os.environ["QCSCRATCH"], "132.0"), local_scratch)
-        with open(self.qclog_file, "w") as qclog:
-            return subprocess.Popen(self.current_command, stdout=qclog, shell=True)  # pylint: disable=R1732
+        if os.path.exists(os.path.join(os.environ["QCSCRATCH"], "53.0")):
+            os.makedirs(local_scratch, exist_ok=True)
+            shutil.move(os.path.join(os.environ["QCSCRATCH"], "53.0"), local_scratch)
+        with open(self.qclog_file, "w") as qc_log:
+            return subprocess.Popen(self.current_command, cwd=directory, stdout=qc_log, shell=True)  # pylint: disable=R1732
 
     @classmethod
     def opt_with_frequency_flattener(
@@ -213,6 +234,7 @@ class QCJob(Job):
             multimode (str): Parallelization scheme, either openmp or mpi.
             input_file (str): Name of the QChem input file.
             output_file (str): Name of the QChem output file.
+            qclog_file (str): Name of the file to redirect the standard output
             max_iterations (int): Number of perturbation -> optimization -> frequency
                 iterations to perform. Defaults to 10.
             max_molecule_perturb_scale (float): The maximum scaled perturbation that
@@ -234,7 +256,7 @@ class QCJob(Job):
                 :class:`custodian.qchem.jobs.QCJob`.
         """
         if not os.path.exists(input_file):
-            raise AssertionError("Input file must be present!")
+            raise AssertionError(f"{input_file=} must be present!")
 
         if transition_state:
             opt_method = "ts"
@@ -251,7 +273,7 @@ class QCJob(Job):
         opt_rem = copy.deepcopy(orig_input.rem)
         opt_rem["job_type"] = opt_method
         opt_geom_opt = None
-        if "geom_opt2" in orig_input.rem.keys():
+        if "geom_opt2" in orig_input.rem:
             freq_rem.pop("geom_opt2", None)
             if linked:
                 opt_rem.pop("geom_opt2", None)
@@ -314,31 +336,33 @@ class QCJob(Job):
                         input_file=input_file,
                         output_file=output_file,
                         qclog_file=qclog_file,
-                        suffix=f".{opt_method}_" + str(ii),
+                        suffix=f".{opt_method}_{ii}",
                         save_scratch=True,
                         backup=first,
                         **QCJob_kwargs,
                     )
                 )
-                opt_outdata = QCOutput(output_file + f".{opt_method}_" + str(ii)).data
-                opt_indata = QCInput.from_file(input_file + f".{opt_method}_" + str(ii))
+                opt_outdata = QCOutput(f"{output_file}.{opt_method}_{ii}").data
+                opt_indata = QCInput.from_file(f"{input_file}.{opt_method}_{ii}")
                 if opt_outdata["version"] == "6":
                     opt_geom_opt = copy.deepcopy(opt_indata.geom_opt)
                     opt_geom_opt["initial_hessian"] = "read"
                 for key in opt_indata.rem:
-                    if key not in ["job_type", "geom_opt2", "scf_guess_always"]:
-                        if freq_rem.get(key, None) != opt_indata.rem[key]:
-                            if "geom_opt" not in key:
-                                freq_rem[key] = opt_indata.rem[key]
+                    if key not in {"job_type", "geom_opt2", "scf_guess_always"}:
+                        if freq_rem.get(key, None) != opt_indata.rem[key] and "geom_opt" not in key:
+                            freq_rem[key] = opt_indata.rem[key]
                         if opt_rem.get(key, None) != opt_indata.rem[key]:
                             opt_rem[key] = opt_indata.rem[key]
                 first = False
-                if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
-                    if not transition_state:
-                        warnings.warn(
-                            "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
-                        )
-                        break
+                if (
+                    opt_outdata["structure_change"] == "unconnected_fragments"
+                    and not opt_outdata["completion"]
+                    and not transition_state
+                ):
+                    warnings.warn(
+                        "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
+                    )
+                    break
                 energy_history.append(opt_outdata.get("final_energy"))
                 freq_QCInput = QCInput(
                     molecule=opt_outdata.get("molecule_from_optimized_geometry"),
@@ -359,22 +383,21 @@ class QCJob(Job):
                         input_file=input_file,
                         output_file=output_file,
                         qclog_file=qclog_file,
-                        suffix=".freq_" + str(ii),
+                        suffix=f".freq_{ii}",
                         save_scratch=True,
                         backup=first,
                         **QCJob_kwargs,
                     )
                 )
 
-                freq_outdata = QCOutput(output_file + ".freq_" + str(ii)).data
-                freq_indata = QCInput.from_file(input_file + ".freq_" + str(ii))
+                freq_outdata = QCOutput(f"{output_file}.freq_{ii}").data
+                freq_indata = QCInput.from_file(f"{input_file}.freq_{ii}")
                 for key in freq_indata.rem:
-                    if key not in ["job_type", "geom_opt2", "scf_guess_always"]:
+                    if key not in {"job_type", "geom_opt2", "scf_guess_always"}:
                         if freq_rem.get(key, None) != freq_indata.rem[key]:
                             freq_rem[key] = freq_indata.rem[key]
-                        if opt_rem.get(key, None) != freq_indata.rem[key]:
-                            if key != "cpscf_nseg":
-                                opt_rem[key] = freq_indata.rem[key]
+                        if opt_rem.get(key, None) != freq_indata.rem[key] and key != "cpscf_nseg":
+                            opt_rem[key] = freq_indata.rem[key]
                 errors = freq_outdata.get("errors")
 
                 if len(errors) != 0:
@@ -398,10 +421,9 @@ class QCJob(Job):
                     if abs(freq_0) < 15.0 and freq_1 > 0.0:
                         warnings.warn("One negative frequency smaller than 15.0 - not worth further flattening!")
                         break
-                    if len(energy_history) > 1:
-                        if abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
-                            warnings.warn("Energy change below cutoff!")
-                            break
+                    if len(energy_history) > 1 and abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
+                        warnings.warn("Energy change below cutoff!")
+                        break
                     tmp_opt_rem = copy.deepcopy(opt_rem)
                     if opt_rem["scf_algorithm"] == "diis":
                         tmp_opt_rem["scf_guess_always"] = "True"
@@ -461,24 +483,27 @@ class QCJob(Job):
                         input_file=input_file,
                         output_file=output_file,
                         qclog_file=qclog_file,
-                        suffix=f".{opt_method}_" + str(ii),
+                        suffix=f".{opt_method}_{ii}",
                         backup=first,
                         **QCJob_kwargs,
                     )
                 )
-                opt_outdata = QCOutput(output_file + f".{opt_method}_" + str(ii)).data
+                opt_outdata = QCOutput(f"{output_file}.{opt_method}_{ii}").data
                 if first:
                     orig_species = copy.deepcopy(opt_outdata.get("species"))
                     orig_charge = copy.deepcopy(opt_outdata.get("charge"))
                     orig_multiplicity = copy.deepcopy(opt_outdata.get("multiplicity"))
                     orig_energy = copy.deepcopy(opt_outdata.get("final_energy"))
                 first = False
-                if opt_outdata["structure_change"] == "unconnected_fragments" and not opt_outdata["completion"]:
-                    if not transition_state:
-                        warnings.warn(
-                            "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
-                        )
-                        break
+                if (
+                    opt_outdata["structure_change"] == "unconnected_fragments"
+                    and not opt_outdata["completion"]
+                    and not transition_state
+                ):
+                    warnings.warn(
+                        "Unstable molecule broke into unconnected fragments which failed to optimize! Exiting..."
+                    )
+                    break
                 freq_QCInput = QCInput(
                     molecule=opt_outdata.get("molecule_from_optimized_geometry"),
                     rem=freq_rem,
@@ -498,13 +523,13 @@ class QCJob(Job):
                         input_file=input_file,
                         output_file=output_file,
                         qclog_file=qclog_file,
-                        suffix=".freq_" + str(ii),
+                        suffix=f".freq_{ii}",
                         backup=first,
                         **QCJob_kwargs,
                     )
                 )
-                outdata = QCOutput(output_file + ".freq_" + str(ii)).data
-                indata = QCInput.from_file(input_file + ".freq_" + str(ii))
+                outdata = QCOutput(f"{output_file}.freq_{ii}").data
+                indata = QCInput.from_file(f"{input_file}.freq_{ii}")
                 if "cpscf_nseg" in indata.rem:
                     freq_rem["cpscf_nseg"] = indata.rem["cpscf_nseg"]
                 errors = outdata.get("errors")
@@ -521,10 +546,9 @@ class QCJob(Job):
                     if abs(freq_0) < 15.0 and freq_1 > 0.0:
                         warnings.warn("One negative frequency smaller than 15.0 - not worth further flattening!")
                         break
-                    if len(energy_history) > 1:
-                        if abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
-                            warnings.warn("Energy change below cutoff!")
-                            break
+                    if len(energy_history) > 1 and abs(energy_history[-1] - energy_history[-2]) < energy_diff_cutoff:
+                        warnings.warn("Energy change below cutoff!")
+                        break
                 else:
                     freq_0 = outdata.get("frequencies")[0]
                     freq_1 = outdata.get("frequencies")[1]
@@ -593,12 +617,10 @@ class QCJob(Job):
                                 else:
                                     good_child = copy.deepcopy(history[-1])
                                 if good_child["num_neg_freqs"] > 1:
-                                    raise Exception(
-                                        "ERROR: Child with lower energy has more negative frequencies! " "Exiting..."
+                                    raise ValueError(
+                                        "ERROR: Child with lower energy has more negative frequencies! Exiting..."
                                     )
-                                if good_child["energy"] < parent_hist["energy"]:
-                                    make_good_child_next_parent = True
-                                elif (
+                                if good_child["energy"] < parent_hist["energy"] or (
                                     vector_list_diff(
                                         good_child["frequency_mode_vectors"][perturb_index],
                                         parent_hist["frequency_mode_vectors"][perturb_index],
@@ -607,7 +629,7 @@ class QCJob(Job):
                                 ):
                                     make_good_child_next_parent = True
                                 else:
-                                    raise Exception("ERROR: Good child not good enough! Exiting...")
+                                    raise ValueError("ERROR: Good child not good enough! Exiting...")
                                 if make_good_child_next_parent:
                                     good_child["index"] = len(history)
                                     history.append(good_child)
@@ -615,9 +637,9 @@ class QCJob(Job):
                                     geom_to_perturb = history[-1]["geometry"]
                                     negative_freq_vecs = history[-1]["frequency_mode_vectors"][perturb_index]
                             else:
-                                raise Exception("ERROR: Can't deal with multiple neg frequencies yet! Exiting...")
+                                raise ValueError("ERROR: Can't deal with multiple neg frequencies yet! Exiting...")
                         else:
-                            raise AssertionError("ERROR: Parent cannot have more than two children! Exiting...")
+                            raise ValueError("ERROR: Parent cannot have more than two children! Exiting...")
                     # Implicitly, if the number of negative frequencies decreased from parent to child,
                     # continue normally.
                 if standard:

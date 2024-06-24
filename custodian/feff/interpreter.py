@@ -1,6 +1,4 @@
-"""
-Implements various interpreters and modders for FEFF calculations.
-"""
+"""Implements various interpreters and modders for FEFF calculations."""
 
 import os
 
@@ -11,12 +9,11 @@ from custodian.ansible.interpreter import Modder
 
 
 class FeffModder(Modder):
-    """
-    A Modder for FeffInput sets
-    """
+    """A Modder for FeffInput sets."""
 
-    def __init__(self, actions=None, strict=True, feffinp=None):
-        """
+    def __init__(self, actions=None, strict=True, feffinp=None, directory="./") -> None:
+        """Initialize a FeffModder.
+
         Args:
             actions ([Action]): A sequence of supported actions. See
             actions ([Action]): A sequence of supported actions. See
@@ -28,39 +25,43 @@ class FeffModder(Modder):
                 supplied, a ValueError is raised. Defaults to True.
             feffinp (FEFFInput): A FeffInput object from the current directory.
                 Initialized automatically if not passed (but passing it will
-                avoid having to reparse the directory).
+                avoid having to re-parse the directory).
+            directory (str): The directory containing the FeffInput set. Defaults to "./".
         """
-        self.feffinp = feffinp or FEFFDictSet.from_directory(".")
+        self.directory = directory
+        self.feffinp = feffinp or FEFFDictSet.from_directory(self.directory)
         self.feffinp = self.feffinp.all_input()
         actions = actions or [FileActions, DictActions]
         super().__init__(actions, strict)
 
-    def apply_actions(self, actions):
+    def apply_actions(self, actions) -> None:
         """
         Applies a list of actions to the FEFF Input Set and rewrites modified
         files.
 
         Args:
-            actions [dict]: A list of actions of the form {'file': filename,
+            actions (dict): A list of actions of the form {'file': filename,
                 'action': moddermodification} or {'dict': feffinput_key,
                 'action': moddermodification}
         """
         modified = []
-        for a in actions:
-            if "dict" in a:
-                k = a["dict"]
-                modified.append(k)
-                self.feffinp[k] = self.modify_object(a["action"], self.feffinp[k])
-            elif "file" in a:
-                self.modify(a["action"], a["file"])
+        for action in actions:
+            if "dict" in action:
+                key = action["dict"]
+                modified.append(key)
+                self.feffinp[key] = self.modify_object(action["action"], self.feffinp[key])
+            elif "file" in action:
+                self.modify(action["action"], action["file"])
             else:
-                raise ValueError(f"Unrecognized format: {a}")
+                raise ValueError(f"Unrecognized format: {action}")
         if modified:
             feff = self.feffinp
-            feff_input = "\n\n".join(str(feff[k]) for k in ["HEADER", "PARAMETERS", "POTENTIALS", "ATOMS"] if k in feff)
-            for k, v in feff.items():
-                with open(os.path.join(".", k), "w") as f:
-                    f.write(str(v))
+            feff_input = "\n\n".join(
+                str(feff[key]) for key in ("HEADER", "PARAMETERS", "POTENTIALS", "ATOMS") if key in feff
+            )
+            for key, val in feff.items():
+                with open(os.path.join(self.directory, key), "w") as file:
+                    file.write(str(val))
 
-            with open(os.path.join(".", "feff.inp"), "w") as f:
-                f.write(feff_input)
+            with open(os.path.join(self.directory, "feff.inp"), "w") as file:
+                file.write(feff_input)

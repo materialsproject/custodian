@@ -1,6 +1,4 @@
-"""
-This module implements basic kinds of jobs for Cp2k runs.
-"""
+"""This module implements basic kinds of jobs for Cp2k runs."""
 
 import logging
 import os
@@ -21,7 +19,6 @@ __author__ = "Nicholas Winner"
 __version__ = "1.0"
 
 CP2K_INPUT_FILES = ["cp2k.inp"]
-
 CP2K_OUTPUT_FILES = ["cp2k.out"]
 
 
@@ -42,7 +39,7 @@ class Cp2kJob(Job):
         backup=True,
         settings_override=None,
         restart=False,
-    ):
+    ) -> None:
         """
         This constructor is necessarily complex due to the need for
         flexibility. For standard kinds of runs, it's often better to use one
@@ -80,37 +77,37 @@ class Cp2kJob(Job):
         self.final = final
         self.backup = backup
         self.suffix = suffix
-        self.settings_override = settings_override if settings_override else []
+        self.settings_override = settings_override or []
         self.restart = restart
 
-    def setup(self):
+    def setup(self, directory="./") -> None:
         """
         Performs initial setup for Cp2k in three stages. First, if custodian is running in restart mode, then
         the restart function will copy the restart file to self.input_file, and remove any previous WFN initialization
         if present. Second, any additional user specified settings will be applied. Lastly, a backup of the input
         file will be made for reference.
         """
-        decompress_dir(".")
+        decompress_dir(directory)
 
-        self.ci = Cp2kInput.from_file(zpath(self.input_file))
+        self.ci = Cp2kInput.from_file(zpath(os.path.join(directory, self.input_file)))
         cleanup_input(self.ci)
 
         if self.restart:
             restart(
                 actions=self.settings_override,
-                output_file=self.output_file,
-                input_file=self.input_file,
+                output_file=os.path.join(directory, self.output_file),
+                input_file=os.path.join(directory, self.input_file),
                 no_actions_needed=True,
             )
 
         if self.settings_override or self.restart:
-            modder = Cp2kModder(filename=self.input_file, actions=[], ci=self.ci)
+            modder = Cp2kModder(filename=os.path.join(directory, self.input_file), actions=[], ci=self.ci)
             modder.apply_actions(self.settings_override)
 
         if self.backup:
-            shutil.copy(self.input_file, f"{self.input_file}.orig")
+            shutil.copy(os.path.join(directory, self.input_file), os.path.join(directory, f"{self.input_file}.orig"))
 
-    def run(self):
+    def run(self, directory="./"):
         """
         Perform the actual CP2K run.
 
@@ -119,45 +116,43 @@ class Cp2kJob(Job):
         """
         # TODO: cp2k has bizarre in/out streams. Some errors that should go to std_err are not sent anywhere...
         cmd = list(self.cp2k_cmd)
-        cmd.extend(["-i", self.input_file])
-        cmdstring = " ".join(cmd)
-        logger.info(f"Running {cmdstring}")
-        with open(self.output_file, "w") as f_std, open(self.stderr_file, "w", buffering=1) as f_err:
+        cmd += ["-i", self.input_file]
+        cmd_str = " ".join(cmd)
+        logger.info(f"Running {cmd_str}")
+        with (
+            open(os.path.join(directory, self.output_file), "w") as f_std,
+            open(os.path.join(directory, self.stderr_file), "w", buffering=1) as f_err,
+        ):
             # use line buffering for stderr
-            return subprocess.Popen(cmd, stdout=f_std, stderr=f_err, shell=False)
+            return subprocess.Popen(cmd, cwd=directory, stdout=f_std, stderr=f_err, shell=False)
 
     # TODO double jobs, file manipulations, etc. should be done in atomate in the future
     # and custodian should only run the job itself
-    def postprocess(self):
-        """
-        Postprocessing includes renaming and gzipping where necessary.
-        """
-        fs = os.listdir(".")
-        if os.path.exists(self.output_file):
-            if self.suffix != "":
-                os.mkdir(f"run{self.suffix}")
-                for f in fs:
-                    if "json" in f:
-                        continue
-                    if not os.path.isdir(f):
-                        if self.final:
-                            shutil.move(f, f"run{self.suffix}/{f}")
-                        else:
-                            shutil.copy(f, f"run{self.suffix}/{f}")
+    def postprocess(self, directory="./") -> None:
+        """Postprocessing includes renaming and gzipping where necessary."""
+        files = os.listdir(directory)
+        if os.path.isfile(self.output_file) and self.suffix != "":
+            os.mkdir(f"run{self.suffix}")
+            for file in files:
+                if "json" in file:
+                    continue
+                if not os.path.isdir(os.path.join(directory, file)):
+                    if self.final:
+                        shutil.move(os.path.join(directory, file), os.path.join(directory, f"run{self.suffix}/{file}"))
+                    else:
+                        shutil.copy(os.path.join(directory, file), os.path.join(directory, f"run{self.suffix}/{file}"))
 
         # Remove continuation so if a subsequent job is run in
         # the same directory, will not restart this job.
-        if os.path.exists("continue.json"):
-            os.remove("continue.json")
+        if os.path.isfile(os.path.join(directory, "continue.json")):
+            os.remove(os.path.join(directory, "continue.json"))
 
-    def terminate(self):
-        """
-        Terminate cp2k
-        """
-        for k in self.cp2k_cmd:
-            if "cp2k" in k:
+    def terminate(self, directory="./") -> None:
+        """Terminate cp2k."""
+        for cmd in self.cp2k_cmd:
+            if "cp2k" in cmd:
                 try:
-                    os.system(f"killall {k}")
+                    os.system(f"killall {cmd}")
                 except Exception:
                     pass
 
@@ -171,13 +166,13 @@ class Cp2kJob(Job):
         backup=True,
         settings_override_gga=None,
         settings_override_hybrid=None,
+        directory="./",
     ):
         """
-        A bare gga to hybrid calculation. Removes all unecessary features
-        from the gga run, and making it only a ENERGY/ENERGY_FORCE
+        A bare GGA to hybrid calculation. Removes all unnecessary features
+        from the GGA run, and making it only a ENERGY/ENERGY_FORCE
         depending on the hybrid run.
         """
-
         job1_settings_override = [
             {
                 "dict": input_file,
@@ -203,9 +198,9 @@ class Cp2kJob(Job):
             settings_override=job1_settings_override,
         )
 
-        ci = Cp2kInput.from_file(zpath(input_file))
-        r = ci["global"].get("run_type", Keyword("RUN_TYPE", "ENERGY_FORCE")).values[0]
-        if r in ["ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT", "ENERGY_FORCE"]:  # no need for double job
+        ci = Cp2kInput.from_file(zpath(os.path.join(directory, input_file)))
+        run_type = ci["global"].get("run_type", Keyword("RUN_TYPE", "ENERGY_FORCE")).values[0]
+        if run_type in {"ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT", "ENERGY_FORCE"}:  # no need for double job
             return [job1]
 
         job2_settings_override = [
@@ -226,7 +221,7 @@ class Cp2kJob(Job):
                                 "WFN_RESTART_FILE_NAME": "GGA-RESTART.wfn",
                             }
                         },
-                        "GLOBAL": {"RUN_TYPE": r},
+                        "GLOBAL": {"RUN_TYPE": run_type},
                     },
                 },
             }
@@ -247,7 +242,13 @@ class Cp2kJob(Job):
 
     @classmethod
     def double_job(
-        cls, cp2k_cmd, input_file="cp2k.inp", output_file="cp2k.out", stderr_file="std_err.txt", backup=True
+        cls,
+        cp2k_cmd,
+        input_file="cp2k.inp",
+        output_file="cp2k.out",
+        stderr_file="std_err.txt",
+        backup=True,
+        directory="./",
     ):
         """
         This creates a sequence of two jobs. The first of which is an "initialization" of the
@@ -255,7 +256,6 @@ class Cp2kJob(Job):
         job can/would benefit from switching to OT scheme. If not, then the second job remains a
         diagonalization job, and there is minimal overhead from restarting.
         """
-
         job1 = Cp2kJob(
             cp2k_cmd,
             input_file=input_file,
@@ -266,9 +266,9 @@ class Cp2kJob(Job):
             suffix="1",
             settings_override={},
         )
-        ci = Cp2kInput.from_file(zpath(input_file))
-        r = ci["global"].get("run_type", Keyword("RUN_TYPE", "ENERGY_FORCE")).values[0]
-        if r not in ["ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT"]:
+        ci = Cp2kInput.from_file(zpath(os.path.join(directory, input_file)))
+        run_type = ci["global"].get("run_type", Keyword("RUN_TYPE", "ENERGY_FORCE")).values[0]
+        if run_type not in {"ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT"}:
             job1.settings_override = [
                 {"dict": input_file, "action": {"_set": {"GLOBAL": {"RUN_TYPE": "ENERGY_FORCE"}}}}
             ]
@@ -283,19 +283,24 @@ class Cp2kJob(Job):
             suffix="2",
             restart=True,
         )
-        job2.settings_override = [{"dict": input_file, "action": {"_set": {"GLOBAL": {"RUN_TYPE": r}}}}]
+        job2.settings_override = [{"dict": input_file, "action": {"_set": {"GLOBAL": {"RUN_TYPE": run_type}}}}]
 
         return [job1, job2]
 
     @classmethod
     def pre_screen_hybrid(
-        cls, cp2k_cmd, input_file="cp2k.inp", output_file="cp2k.out", stderr_file="std_err.txt", backup=True
+        cls,
+        cp2k_cmd,
+        input_file="cp2k.inp",
+        output_file="cp2k.out",
+        stderr_file="std_err.txt",
+        backup=True,
+        directory="./",
     ):
         """
         Build a job where the first job is an unscreened hybrid static calculation, then the second one
         uses the wfn from the first job as a restart to do a screened calculation.
         """
-
         job1_settings_override = [
             {
                 "dict": input_file,
@@ -330,9 +335,9 @@ class Cp2kJob(Job):
             settings_override=job1_settings_override,
         )
 
-        ci = Cp2kInput.from_file(zpath(input_file))
+        ci = Cp2kInput.from_file(zpath(os.path.join(directory, input_file)))
         r = ci["global"].get("run_type", Keyword("RUN_TYPE", "ENERGY_FORCE")).values[0]
-        if r in ["ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT", "ENERGY_FORCE"]:  # no need for double job
+        if r in {"ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT", "ENERGY_FORCE"}:  # no need for double job
             return [job1]
 
         job2_settings_override = [

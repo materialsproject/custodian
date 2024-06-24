@@ -1,7 +1,8 @@
-"""
-Validators for CP2K calculations.
-"""
+"""Validators for CP2K calculations."""
 
+from __future__ import annotations
+
+import os
 from abc import abstractmethod, abstractproperty
 
 from pymatgen.io.cp2k.outputs import Cp2kOutput
@@ -15,62 +16,52 @@ __date__ = "March 2022"
 
 
 class Cp2kValidator(Validator):
-    """
-    Base validator.
-    """
+    """Base validator."""
 
     @abstractmethod
-    def check(self):
+    def check(self, directory="./"):
         """
         Check whether validation failed. Here, True means
         validation failed.
         """
 
     @abstractproperty
-    def kill(self):
-        """
-        Kill the job with raise error.
-        """
+    def kill(self, directory="./"):
+        """Kill the job with raise error."""
 
     @abstractproperty
-    def exit(self):
-        """
-        Don't raise error, but exit the job
-        """
+    def exit(self, directory="./"):
+        """Don't raise error, but exit the job."""
 
     @abstractproperty
-    def no_children(self):
-        """
-        Job should not have children
-        """
+    def no_children(self, directory="./"):
+        """Job should not have children."""
 
 
 class Cp2kOutputValidator(Cp2kValidator):
-    """
-    Checks that a valid cp2k output file was generated
-    """
+    """Checks that a valid cp2k output file was generated."""
 
-    def __init__(self, output_file="cp2k.out"):
+    def __init__(self, output_file="cp2k.out") -> None:
         """
         Args:
-            output_file (str): cp2k output file to analyze
+            output_file (str): cp2k output file to analyze.
         """
         self.output_file = output_file
         self._check = False
 
-    def check(self):
+    def check(self, directory="./") -> bool | None:
         """
         Check for valid output. Checks that the end of the
         program was reached, and that convergence was
         achieved.
         """
         try:
-            o = Cp2kOutput(self.output_file)
+            o = Cp2kOutput(os.path.join(directory, self.output_file))
             o.ran_successfully()
             o.convergence()
-            if not o.data.get("geo_opt_converged") and not o.data.get("geo_opt_not_converged"):
-                geom = True
-            elif o.data.get("geo_opt_converged")[-1]:
+            if (not o.data.get("geo_opt_converged") and not o.data.get("geo_opt_not_converged")) or o.data.get(
+                "geo_opt_converged"
+            )[-1]:
                 geom = True
             else:
                 geom = False
@@ -83,22 +74,16 @@ class Cp2kOutputValidator(Cp2kValidator):
             return True
 
     @property
-    def kill(self):
-        """
-        Kill the job with raise error.
-        """
+    def kill(self, directory="./") -> bool:
+        """Kill the job with raise error."""
         return True
 
     @property
-    def exit(self):
-        """
-        Don't raise error, but exit the job
-        """
+    def exit(self, directory="./") -> bool:
+        """Don't raise error, but exit the job."""
         return True
 
     @property
-    def no_children(self):
-        """
-        Job should not have children
-        """
+    def no_children(self, directory="./") -> bool:
+        """Job should not have children."""
         return True

@@ -1,4 +1,0 @@
-include *.rst LICENSE requirements*.txt setup.*
-recursive-include custodian *.py
-prune */*/tests
-prune */*/*/tests

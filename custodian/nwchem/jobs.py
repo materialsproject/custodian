@@ -1,7 +1,6 @@
-"""
-This module implements basic kinds of jobs for Nwchem runs.
-"""
+"""This module implements basic kinds of jobs for Nwchem runs."""
 
+import os
 import shutil
 import subprocess
 
@@ -19,9 +18,7 @@ __date__ = "5/20/13"
 
 
 class NwchemJob(Job):
-    """
-    A basic Nwchem job.
-    """
+    """A basic Nwchem job."""
 
     def __init__(
         self,
@@ -31,9 +28,8 @@ class NwchemJob(Job):
         gzipped=False,
         backup=True,
         settings_override=None,
-    ):
-        """
-        Initializes a basic NwChem job.
+    ) -> None:
+        """Initialize a basic NwChem job.
 
         Args:
             nwchem_cmd ([str]): Command to run Nwchem as a list of args. For
@@ -57,23 +53,17 @@ class NwchemJob(Job):
         self.gzipped = gzipped
         self.settings_override = settings_override
 
-    def setup(self):
-        """
-        Performs backup if necessary.
-        """
+    def setup(self, directory="./") -> None:
+        """Performs backup if necessary."""
         if self.backup:
-            shutil.copy(self.input_file, f"{self.input_file}.orig")
+            shutil.copy(os.path.join(directory, self.input_file), os.path.join(directory, f"{self.input_file}.orig"))
 
-    def run(self):
-        """
-        Performs actual nwchem run.
-        """
+    def run(self, directory="./"):
+        """Performs actual nwchem run."""
         with zopen(self.output_file, "w") as fout:
-            return subprocess.Popen(self.nwchem_cmd + [self.input_file], stdout=fout)  # pylint: disable=R1732
+            return subprocess.Popen([*self.nwchem_cmd, self.input_file], cwd=directory, stdout=fout)  # pylint: disable=R1732
 
-    def postprocess(self):
-        """
-        Renaming or gzipping as needed.
-        """
+    def postprocess(self, directory="./") -> None:
+        """Renaming or gzipping as needed."""
         if self.gzipped:
-            gzip_dir(".")
+            gzip_dir(directory)
