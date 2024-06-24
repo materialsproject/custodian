@@ -34,7 +34,7 @@ from custodian.ansible.interpreter import Modder
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from custodian.vasp.interpreter import VaspModder
-from custodian.vasp.io import load_outcar, load_vasprun
+from custodian.vasp.io import load_outcar
 from custodian.vasp.utils import increase_k_point_density
 
 __author__ = (
@@ -786,7 +786,7 @@ class LrfCommutatorHandler(ErrorHandler):
         self.errors = set()
         with zopen(zpath(self.output_filename), "rt") as f:
             for line in f:
-                l = line.strip()
+                line.strip()
 
                 for err, msgs in LrfCommutatorHandler.error_msgs.items():
                     for msg in msgs:
@@ -843,7 +843,7 @@ class StdErrHandler(ErrorHandler):
         self.errors = set()
         with zopen(zpath(self.output_filename), "rt") as f:
             for line in f:
-                l = line.strip()
+                line.strip()
                 for err, msgs in StdErrHandler.error_msgs.items():
                     for msg in msgs:
                         if line.find(msg) != -1:
@@ -905,7 +905,7 @@ class AliasingErrorHandler(ErrorHandler):
         self.errors = set()
         with zopen(zpath(self.output_filename), "rt") as f:
             for line in f:
-                l = line.strip()
+                line.strip()
                 for err, msgs in AliasingErrorHandler.error_msgs.items():
                     for msg in msgs:
                         if line.find(msg) != -1:
@@ -925,7 +925,7 @@ class AliasingErrorHandler(ErrorHandler):
         vi = VaspInput.from_directory(directory)
 
         if "aliasing" in self.errors:
-            with zopen(zpath("OUTCAR"), "rt") as f:
+            with zopen(zpath("OUTCAR"), "rt"):
                 grid_adjusted = False
                 changes_dict = {}
                 r = re.compile(r".+aliasing errors.*(NG.)\s*to\s*(\d+)")
@@ -1576,7 +1576,7 @@ class NonConvergingErrorHandler(ErrorHandler):
     def check(self, directory="./"):
         """Check for error."""
         vi = VaspInput.from_directory(directory)
-        n_elm = vi["INCAR"].get("NELM", 60)  # number of electronic steps
+        vi["INCAR"].get("NELM", 60)  # number of electronic steps
         try:
             oszicar = Oszicar(zpath(self.output_filename))
             esteps = oszicar.electronic_steps

@@ -11,7 +11,6 @@ from monty.os.path import zpath
 from pymatgen.io.vasp import Chgcar, Incar, Outcar, Vasprun
 
 from custodian.custodian import Validator
-from custodian.vasp.io import load_outcar, load_vasprun
 
 
 class VasprunXMLValidator(Validator):
@@ -76,10 +75,7 @@ class VaspFilesValidator(Validator):
         """
         Check for error.
         """
-        for vfile in ["CONTCAR", "OSZICAR", "OUTCAR"]:
-            if not os.path.exists(zpath(vfile)):
-                return True
-        return False
+        return any(not os.path.exists(zpath(vfile)) for vfile in ["CONTCAR", "OSZICAR", "OUTCAR"])
 
 
 class VaspNpTMDValidator(Validator):
