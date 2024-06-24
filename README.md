@@ -70,7 +70,7 @@ custodian.
 If you use custodian in your research, especially the VASP component, please
 consider citing the following work:
 
-```
+```txt
 Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Geoffroy Hautier,
 Michael Kocher, Shreyas Cholia, Dan Gunter, Vincent Chevrier, Kristin A.
 Persson, Gerbrand Ceder. *Python Materials Genomics (pymatgen) : A Robust,
