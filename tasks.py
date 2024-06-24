@@ -77,6 +77,9 @@ def set_ver(ctx) -> None:
     with open("pyproject.toml", "w") as file:
         file.write("\n".join(lines) + "\n")
 
+    ctx.run("ruff check --fix custodian")
+    ctx.run("ruff format pyproject.toml")
+
 
 @task
 def update_changelog(ctx, version=None, sim=False) -> None:
