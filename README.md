@@ -46,7 +46,7 @@ version is likely to be more buggy, but may contain new features. The Github ver
 complete unit testing. After cloning the source, you can type
 
 ```sh
-python setup.py install
+pip install -e .
 ```
 
 or to install the package in developmental mode::

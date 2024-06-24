@@ -54,11 +54,9 @@ The developmental version is likely to be more buggy, but may contain new featur
 Github version include test files as well for complete unit testing. After
 cloning the source, you can type::
 
-    python setup.py install
+    pip install -e .
 
-or to install the package in developmental mode::
-
-    python setup.py develop
+to install the package in editable mode.
 
 ## Requirements
 
