@@ -35,6 +35,7 @@ from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from custodian.vasp.interpreter import VaspModder
 from custodian.vasp.io import load_outcar, load_vasprun
+from custodian.vasp.utils import increase_k_point_density
 
 __author__ = (
     "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen, "
@@ -63,19 +64,35 @@ class VaspErrorHandler(ErrorHandler):
     """
     Master VaspErrorHandler class that handles a number of common errors
     that occur during VASP runs.
+
+    Args:
+        is_monitor (bool):
+            This class property indicates whether the error handler is a monitor,
+            i.e., a handler that monitors a job as it is running. If a
+            monitor-type handler notices an error, the job will be sent a
+            termination signal, the error is then corrected,
+            and then the job is restarted. This is useful for catching errors
+            that occur early in the run but do not cause immediate failure.
+        num_sites_kpoint_cutoff (int) :
+            The maximum number of atoms in a structure for which increasing the
+            k-point density is permitted as a possible error correction.
+            Defaults to 50 atoms/structure.
     """
 
     is_monitor = True
+    num_sites_kpoint_cutoff: int = 50
 
     error_msgs: ClassVar = {
         "tet": [
             "Tetrahedron method fails",
             "tetrahedron method fails",
-            "Fatal error detecting k-mesh",
-            "Fatal error: unable to match k-point",
             "Routine TETIRR needs special values",
             "Tetrahedron method fails (number of k-points < 4)",
             "BZINTS",
+        ],
+        "ksymm": [
+            "Fatal error detecting k-mesh",
+            "Fatal error: unable to match k-point",
         ],
         "inv_rot_mat": ["rotation matrix was not found (increase SYMPREC)"],
         "brmix": ["BRMIX: very serious problems"],
@@ -189,28 +206,68 @@ class VaspErrorHandler(ErrorHandler):
         actions = []
         vi = VaspInput.from_directory(directory)
 
-        if self.errors.intersection(["tet", "dentet"]):
-            # follow advice in this thread
+        if "tet" in self.errors:
+            actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+
+        if "dentet" in self.errors:
+            # For dentet: follow advice in this thread
             # https://vasp.at/forum/viewtopic.php?f=3&t=416&p=4047&hilit=dentet#p4047
-            err_type = "tet" if "tet" in self.errors else "dentet"
-            if self.error_count[err_type] == 0:
-                if vi["INCAR"].get("KSPACING"):
-                    # decrease KSPACING by 20% in each direction (approximately double no. of kpoints)
-                    action = {"_set": {"KSPACING": vi["INCAR"].get("KSPACING") * 0.8}}
-                    actions.append({"dict": "INCAR", "action": action})
-                elif vi["KPOINTS"] and vi["KPOINTS"].num_kpts < 1:
-                    # increase KPOINTS by 20% in each direction (approximately double no. of kpoints)
-                    new_kpts = tuple(int(round(num * 1.2, 0)) for num in vi["KPOINTS"].kpts[0])
-                    actions.append({"dict": "KPOINTS", "action": {"_set": {"kpoints": (new_kpts,)}}})
-                elif vi["KPOINTS"] and vi["KPOINTS"].num_kpts >= 1:
-                    n_kpts = vi["KPOINTS"].num_kpts * 1.2
-                    new_kpts = tuple([int(round(n_kpts**1 / 3, 0))] * 3)
-                    actions.append(
-                        {"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma", "kpoints": (new_kpts,)}}}
+
+            # This error is caused by using too few k-points with the tetrahedron method.
+            # To fix it, try:
+            #   1. Center k-point grid at Gamma (required for tetrahedron)
+            #   2. Increase k-point density and throw user warning,
+            #      provided that the structure has fewer than `num_sites_kpoint_cutoff`
+            #      sites in the cell.
+            #   3. Use Gaussian smearing and throw user warning
+
+            new_kpoints = {}
+            # 1. Re-center grid at Gamma if possible.
+            if (uses_kspacing := ("KSPACING" in vi["INCAR"])) and (not vi["INCAR"].get("KGAMMA", True)):
+                new_kpoints = {"KGAMMA": True}
+
+            elif (uses_auto_kpoints := (vi["KPOINTS"] is not None and vi["KPOINTS"].num_kpts == 0)) and str(
+                vi["KPOINTS"].style
+            ) != "Gamma":
+                new_kpoints = {"generation_style": "Gamma"}
+
+            if (
+                len(vi["POSCAR"].structure) < self.num_sites_kpoint_cutoff
+                and (new_kpoints == {})
+                and (self.error_count["dentet"] < 2)
+                and (uses_kspacing or uses_auto_kpoints)
+            ):
+                # 2. Try to increase k-point density consistent with lattice geometry
+                # Enforce minimum number of k-points = 4 for tetrahedron method
+                new_kpoints = increase_k_point_density(
+                    vi["INCAR"]["KSPACING"] if uses_kspacing else vi["KPOINTS"],
+                    vi["POSCAR"].structure,
+                    min_kpoints=4,
+                    force_gamma=True,
+                )
+
+                if new_kpoints:
+                    warnings.warn(
+                        "Your specified k-point density was too low to use with the tetrahedron method. "
+                        "The k-point density has been increased, please check that your results "
+                        "are not impacted by this change.",
+                        UserWarning,
                     )
-            else:
+
+            if new_kpoints == {}:
+                # 3. If the previous fixes could not be applied: change smearing
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
-            self.error_count[err_type] += 1
+                warnings.warn(
+                    "Your specified k-point density was too low to use with the tetrahedron method. "
+                    "The smearing method has been changed to Gaussian, please check that your "
+                    "results are not impacted by this change.",
+                    UserWarning,
+                )
+
+            else:
+                actions.append({"dict": "INCAR" if uses_kspacing else "KPOINTS", "action": {"_set": new_kpoints}})
+
+            self.error_count["dentet"] += 1
 
         # Missing AMIN error handler:
         # previously, custodian would kill the job without letting it run if AMIN was flagged
@@ -603,11 +660,15 @@ class VaspErrorHandler(ErrorHandler):
             if "NPAR" in vi["INCAR"]:
                 actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 0}}})
 
-        if "bravais" in self.errors:
-            # VASP recommends refining the lattice parameters or changing SYMPREC.
+        if self.errors.intersection(["bravais", "ksymm"]):
+            # For bravais: VASP recommends refining the lattice parameters
+            # or changing SYMPREC. See https://www.vasp.at/forum/viewtopic.php?f=3&t=19109
             # Appears to occur when SYMPREC is very low, so we change it to
             # the default if it's not already. If it's the default, we x10.
-            vasp_recommended_symprec = 1e-6  # https://www.vasp.at/forum/viewtopic.php?f=3&t=19109
+            # For ksymm, there's not much information about the issue other than the
+            # direct and reciprocal meshes being incompatible.
+            # This is basically the same as bravais
+            vasp_recommended_symprec = 1e-6
             symprec = vi["INCAR"].get("SYMPREC", vasp_recommended_symprec)
             if symprec < vasp_recommended_symprec:
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": vasp_recommended_symprec}}})
