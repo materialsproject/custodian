@@ -71,12 +71,6 @@ def test(ctx) -> None:
 
 @task
 def set_ver(ctx) -> None:
-    with open("custodian/__init__.py") as file:
-        lines = [f'__version__ = "{NEW_VER}"' if "__version__" in line else line.rstrip() for line in file]
-
-    with open("custodian/__init__.py", "w") as file:
-        file.write("\n".join(lines) + "\n")
-
     with open("pyproject.toml") as file:
         lines = [re.sub(r"^version = \"([^,]+)\"", f'version = "{NEW_VER}"', line.rstrip()) for line in file]
 
