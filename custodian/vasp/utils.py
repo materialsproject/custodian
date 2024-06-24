@@ -1,3 +1,5 @@
+"""Utility methods for VASP error handlers."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -60,7 +62,6 @@ def increase_k_point_density(
             The new Kpoints object / KSPACING consistent with constraints.
             If an empty dict, no new k-point mesh could be found.
     """
-
     uses_kspacing = isinstance(kpoints, (float, int))
 
     if uses_kspacing:
