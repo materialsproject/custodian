@@ -6,6 +6,9 @@ nav_order: 2
 
 # Change Log
 
+## 2024.6.24
+- Improved handling of ISMEAR for NKPT<4 (@Andrew-S-Rosen, @esoteric-ephemera)
+
 ## 2024.4.18
 - Enable export of environment variables plus lobster run as a command enhancement lobster (@JaGeo)
 - New Gaussian plugin (@rashatwi)

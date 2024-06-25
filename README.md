@@ -1,7 +1,7 @@
-![Custodian logo](docs/assets/custodian_logo.png)
+![Custodian logo](https://raw.githubusercontent.com/materialsproject/custodian/master/docs/assets/custodian_logo.png)
 [![GitHub license](https://img.shields.io/github/license/materialsproject/custodian)](https://github.com/materialsproject/custodian/blob/main/LICENSE)
 [![Linting](https://github.com/materialsproject/custodian/workflows/Linting/badge.svg)](https://github.com/materialsproject/custodian/workflows/Linting/badge.svg)
-[![Testing](https://github.com/materialsproject/custodian/actions/workflows/pytest.yml/badge.svg)](https://github.com/materialsproject/custodian/actions/workflows/pytest.yml)
+[![Testing](https://github.com/materialsproject/custodian/actions/workflows/test.yml/badge.svg)](https://github.com/materialsproject/custodian/actions/workflows/test.yml)
 [![Downloads](https://pepy.tech/badge/custodian)](https://pepy.tech/project/custodian)
 [![codecov](https://codecov.io/gh/materialsproject/custodian/branch/master/graph/badge.svg?token=OwDQVJnghu)](https://codecov.io/gh/materialsproject/custodian)
 
@@ -46,14 +46,10 @@ version is likely to be more buggy, but may contain new features. The Github ver
 complete unit testing. After cloning the source, you can type
 
 ```sh
-python setup.py install
+pip install -e .
 ```
 
-or to install the package in developmental mode::
-
-```sh
-python setup.py develop
-```
+to install the package in editable mode.
 
 # Requirements
 
@@ -70,7 +66,7 @@ custodian.
 If you use custodian in your research, especially the VASP component, please
 consider citing the following work:
 
-```
+```txt
 Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Geoffroy Hautier,
 Michael Kocher, Shreyas Cholia, Dan Gunter, Vincent Chevrier, Kristin A.
 Persson, Gerbrand Ceder. *Python Materials Genomics (pymatgen) : A Robust,

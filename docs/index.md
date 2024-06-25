@@ -7,7 +7,7 @@ nav_order: 1
 ![Custodian logo](assets/custodian_logo.png)
 [![GitHub license](https://img.shields.io/github/license/materialsproject/custodian)](https://github.com/materialsproject/custodian/blob/main/LICENSE)
 [![Linting](https://github.com/materialsproject/custodian/workflows/Linting/badge.svg)](https://github.com/materialsproject/custodian/workflows/Linting/badge.svg)
-[![Testing](https://github.com/materialsproject/custodian/actions/workflows/pytest.yml/badge.svg)](https://github.com/materialsproject/custodian/actions/workflows/pytest.yml)
+[![Testing](https://github.com/materialsproject/custodian/actions/workflows/test.yml/badge.svg)](https://github.com/materialsproject/custodian/actions/workflows/test.yml)
 [![Downloads](https://pepy.tech/badge/custodian)](https://pepy.tech/project/custodian)
 [![codecov](https://codecov.io/gh/materialsproject/custodian/branch/master/graph/badge.svg?token=OwDQVJnghu)](https://codecov.io/gh/materialsproject/custodian)
 
@@ -54,11 +54,9 @@ The developmental version is likely to be more buggy, but may contain new featur
 Github version include test files as well for complete unit testing. After
 cloning the source, you can type::
 
-    python setup.py install
+    pip install -e .
 
-or to install the package in developmental mode::
-
-    python setup.py develop
+to install the package in editable mode.
 
 ## Requirements
 
