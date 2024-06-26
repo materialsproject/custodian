@@ -57,7 +57,7 @@ Repo = "https://github.com/materialsproject/custodian"
 Package = "https://pypi.org/project/custodian"
 
 [tool.setuptools.packages.find]
-include = ["custodian.*"]
+include = ["custodian*"]
 exclude = ["*.tests", "*.tests.*"]
 
 [tool.ruff]
