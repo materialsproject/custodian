@@ -9,6 +9,7 @@ from pathlib import Path
 
 from custodian import Custodian
 from custodian.cp2k.jobs import Cp2kJob
+
 from tests.conftest import TEST_FILES
 
 MODULE_DIR = Path(__file__).resolve().parent

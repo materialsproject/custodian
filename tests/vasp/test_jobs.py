@@ -5,11 +5,11 @@ from glob import glob
 
 import pymatgen
 import pytest
+from custodian.vasp.jobs import GenerateVaspInputJob, VaspJob, VaspNEBJob
 from monty.os import cd
 from monty.tempfile import ScratchDir
 from pymatgen.io.vasp import Incar, Kpoints, Poscar
 
-from custodian.vasp.jobs import GenerateVaspInputJob, VaspJob, VaspNEBJob
 from tests.conftest import TEST_FILES
 
 pymatgen.core.SETTINGS["PMG_VASP_PSP_DIR"] = TEST_FILES

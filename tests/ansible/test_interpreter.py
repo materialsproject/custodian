@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-
 from custodian.ansible.actions import FileActions
 from custodian.ansible.interpreter import Modder
 

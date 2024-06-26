@@ -1,10 +1,10 @@
 import os
 
+from custodian.feff.jobs import FeffJob
 from monty.os import cd
 from monty.tempfile import ScratchDir
 from pymatgen.io.feff.inputs import Atoms, Tags
 
-from custodian.feff.jobs import FeffJob
 from tests.conftest import TEST_FILES
 
 __author__ = "Chen Zheng"

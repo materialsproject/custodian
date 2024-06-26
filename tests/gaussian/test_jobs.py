@@ -5,6 +5,7 @@ import shutil
 from unittest import TestCase
 
 from custodian.gaussian.jobs import GaussianJob
+
 from tests.conftest import TEST_FILES
 
 __author__ = "Rasha Atwi"

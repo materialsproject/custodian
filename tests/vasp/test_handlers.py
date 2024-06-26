@@ -6,10 +6,6 @@ import shutil
 from glob import glob
 
 import pytest
-from monty.os.path import zpath
-from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
-from pymatgen.util.testing import PymatgenTest
-
 from custodian.utils import tracked_lru_cache
 from custodian.vasp.handlers import (
     AliasingErrorHandler,
@@ -29,6 +25,10 @@ from custodian.vasp.handlers import (
     VaspErrorHandler,
     WalltimeHandler,
 )
+from monty.os.path import zpath
+from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
+from pymatgen.util.testing import PymatgenTest
+
 from tests.conftest import TEST_FILES
 
 __author__ = "Shyue Ping Ong, Stephen Dacek, Janosh Riebesell"

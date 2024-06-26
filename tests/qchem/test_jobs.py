@@ -5,9 +5,9 @@ from unittest import TestCase
 from unittest.mock import patch
 
 import pytest
+from custodian.qchem.jobs import QCJob
 from pymatgen.io.qchem.inputs import QCInput
 
-from custodian.qchem.jobs import QCJob
 from tests.conftest import TEST_FILES
 
 try:

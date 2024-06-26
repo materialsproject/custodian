@@ -8,12 +8,11 @@ import subprocess
 from glob import glob
 
 import requests
+from custodian import __version__ as CURRENT_VER
 from invoke import task
 from monty.os import cd
 
-from custodian import __version__ as CURRENT_VER
-
-NEW_VER = datetime.datetime.now(tz=datetime.timezone.utc).strftime("%Y.%-m.%-d")
+NEW_VER = datetime.datetime.now(tz=datetime.UTC).strftime("%Y.%-m.%-d")
 
 
 @task

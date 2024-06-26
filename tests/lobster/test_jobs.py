@@ -1,10 +1,10 @@
 import os
 import shutil
 
+from custodian.lobster.jobs import LobsterJob
 from monty.os import cd
 from monty.tempfile import ScratchDir
 
-from custodian.lobster.jobs import LobsterJob
 from tests.conftest import TEST_FILES
 
 test_files_lobster2 = f"{TEST_FILES}/lobster/lobsterins"

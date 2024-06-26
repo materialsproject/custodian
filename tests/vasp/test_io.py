@@ -1,8 +1,8 @@
 import pytest
-from monty.os.path import zpath
-
 from custodian.utils import tracked_lru_cache
 from custodian.vasp.io import load_outcar, load_vasprun
+from monty.os.path import zpath
+
 from tests.conftest import TEST_FILES
 
 

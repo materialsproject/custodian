@@ -3,6 +3,7 @@ import shutil
 from glob import glob
 
 from custodian.nwchem.handlers import NwchemErrorHandler
+
 from tests.conftest import TEST_FILES
 
 __author__ = "shyuepingong"

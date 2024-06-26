@@ -4,6 +4,7 @@ import unittest
 from glob import glob
 
 from custodian.feff.handlers import UnconvergedErrorHandler
+
 from tests.conftest import TEST_FILES
 
 __author__ = "Chen Zheng"
