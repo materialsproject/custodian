@@ -17,7 +17,7 @@ authors = [
 ]
 maintainers = [{ name = "Janosh Riebesell" }, { name = "Shyue Ping Ong" }]
 readme = "README.md"
-keywords = ["jit", "job", "just-in-time", "management", "vasp"]
+keywords = ["jit", "job", "just-in-time", "management", "vasp", "nwchem", "qchem"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
@@ -38,7 +38,7 @@ requires-python = ">=3.9"
 dependencies = ["monty>=2.0.6", "psutil", "ruamel.yaml>=0.15.6"]
 
 [project.optional-dependencies]
-materials = ["pymatgen"]  # Error handlers and jobs for materials simulations, e.g., VASP, Nwchem, qchem, etc.
+matsci = ["pymatgen"]  # Error handlers and jobs for materials simulations, e.g., VASP, Nwchem, qchem, etc.
 gaussian = ["pymatgen", "matplotlib"]
 dev = ["pymatgen", "pytest", "pytest-cov"]
 lint = ["mypy", "pre-commit", "ruff"]
@@ -57,7 +57,7 @@ Repo = "https://github.com/materialsproject/custodian"
 Package = "https://pypi.org/project/custodian"
 
 [tool.setuptools.packages.find]
-include = ["custodian*"]
+include = ["custodian.*"]
 exclude = ["*.tests", "*.tests.*"]
 
 [tool.ruff]
