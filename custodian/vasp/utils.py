@@ -62,7 +62,7 @@ def increase_k_point_density(
             The new Kpoints object / KSPACING consistent with constraints.
             If an empty dict, no new k-point mesh could be found.
     """
-    uses_kspacing = isinstance(kpoints, (float, int))
+    uses_kspacing = isinstance(kpoints, float | int)
 
     if uses_kspacing:
         orig_num_kpoints = np.prod(_estimate_num_k_points_from_kspacing(structure, kpoints))  # type: ignore[arg-type]

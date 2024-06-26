@@ -23,7 +23,10 @@ def perturb_coordinates(old_coords, negative_freq_vecs, molecule_perturb_scale, 
     direction = 1.0
     if reversed_direction:
         direction = -1.0
-    return [[c + v * direction for c, v in zip(coord, vec)] for coord, vec in zip(old_coords, normalized_vecs)]
+    return [
+        [c + v * direction for c, v in zip(coord, vec, strict=False)]
+        for coord, vec in zip(old_coords, normalized_vecs, strict=False)
+    ]
 
 
 def vector_list_diff(vecs1, vecs2):
