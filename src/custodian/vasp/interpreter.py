@@ -30,7 +30,7 @@ class VaspModder(Modder):
         self.vi = vi or VaspInput.from_directory(directory)
         self.directory = directory
         actions = actions or [FileActions, DictActions]
-        super().__init__(actions, strict)
+        super().__init__(actions, strict, directory=directory)
 
     def apply_actions(self, actions) -> None:
         """

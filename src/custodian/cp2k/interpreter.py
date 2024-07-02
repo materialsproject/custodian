@@ -42,7 +42,7 @@ class Cp2kModder(Modder):
         self.ci = ci or Cp2kInput.from_file(os.path.join(self.directory, filename))
         self.filename = filename
         actions = actions or [FileActions, DictActions]
-        super().__init__(actions, strict)
+        super().__init__(actions, strict, directory=directory)
 
     def apply_actions(self, actions) -> None:
         """
