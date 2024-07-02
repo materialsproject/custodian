@@ -101,11 +101,19 @@ class Cp2kJob(Job):
             )
 
         if self.settings_override or self.restart:
-            modder = Cp2kModder(filename=os.path.join(directory, self.input_file), actions=[], ci=self.ci)
+            modder = Cp2kModder(
+                filename=os.path.join(directory, self.input_file),
+                actions=[],
+                ci=self.ci,
+                directory=directory,
+            )
             modder.apply_actions(self.settings_override)
 
         if self.backup:
-            shutil.copy(os.path.join(directory, self.input_file), os.path.join(directory, f"{self.input_file}.orig"))
+            shutil.copy(
+                os.path.join(directory, self.input_file),
+                os.path.join(directory, f"{self.input_file}.orig"),
+            )
 
     def run(self, directory="./"):
         """
@@ -138,9 +146,15 @@ class Cp2kJob(Job):
                     continue
                 if not os.path.isdir(os.path.join(directory, file)):
                     if self.final:
-                        shutil.move(os.path.join(directory, file), os.path.join(directory, f"run{self.suffix}/{file}"))
+                        shutil.move(
+                            os.path.join(directory, file),
+                            os.path.join(directory, f"run{self.suffix}/{file}"),
+                        )
                     else:
-                        shutil.copy(os.path.join(directory, file), os.path.join(directory, f"run{self.suffix}/{file}"))
+                        shutil.copy(
+                            os.path.join(directory, file),
+                            os.path.join(directory, f"run{self.suffix}/{file}"),
+                        )
 
         # Remove continuation so if a subsequent job is run in
         # the same directory, will not restart this job.
@@ -200,7 +214,12 @@ class Cp2kJob(Job):
 
         ci = Cp2kInput.from_file(zpath(os.path.join(directory, input_file)))
         run_type = ci["global"].get("run_type", Keyword("RUN_TYPE", "ENERGY_FORCE")).values[0]
-        if run_type in {"ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT", "ENERGY_FORCE"}:  # no need for double job
+        if run_type in {
+            "ENERGY",
+            "WAVEFUNCTION_OPTIMIZATION",
+            "WFN_OPT",
+            "ENERGY_FORCE",
+        }:  # no need for double job
             return [job1]
 
         job2_settings_override = [
@@ -270,7 +289,10 @@ class Cp2kJob(Job):
         run_type = ci["global"].get("run_type", Keyword("RUN_TYPE", "ENERGY_FORCE")).values[0]
         if run_type not in {"ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT"}:
             job1.settings_override = [
-                {"dict": input_file, "action": {"_set": {"GLOBAL": {"RUN_TYPE": "ENERGY_FORCE"}}}}
+                {
+                    "dict": input_file,
+                    "action": {"_set": {"GLOBAL": {"RUN_TYPE": "ENERGY_FORCE"}}},
+                }
             ]
 
         job2 = Cp2kJob(
@@ -337,7 +359,12 @@ class Cp2kJob(Job):
 
         ci = Cp2kInput.from_file(zpath(os.path.join(directory, input_file)))
         r = ci["global"].get("run_type", Keyword("RUN_TYPE", "ENERGY_FORCE")).values[0]
-        if r in {"ENERGY", "WAVEFUNCTION_OPTIMIZATION", "WFN_OPT", "ENERGY_FORCE"}:  # no need for double job
+        if r in {
+            "ENERGY",
+            "WAVEFUNCTION_OPTIMIZATION",
+            "WFN_OPT",
+            "ENERGY_FORCE",
+        }:  # no need for double job
             return [job1]
 
         job2_settings_override = [

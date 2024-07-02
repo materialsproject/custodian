@@ -32,7 +32,7 @@ class FeffModder(Modder):
         self.feffinp = feffinp or FEFFDictSet.from_directory(self.directory)
         self.feffinp = self.feffinp.all_input()
         actions = actions or [FileActions, DictActions]
-        super().__init__(actions, strict)
+        super().__init__(actions, strict, directory=directory)
 
     def apply_actions(self, actions) -> None:
         """
