@@ -735,8 +735,7 @@ class VaspErrorHandler(ErrorHandler):
                     UserWarning,
                 )
 
-            elif (nbands := vi["INCAR"].get("NBANDS")):
-                
+            elif nbands := vi["INCAR"].get("NBANDS"):
                 kpar = vi["INCAR"].get("KPAR", 1)
                 ncore = vi["INCAR"].get("NCORE", 1)
                 # If the user set an NBANDS that isn't compatible with parallelization settings,
