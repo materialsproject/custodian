@@ -737,12 +737,12 @@ class VaspErrorHandler(ErrorHandler):
                 )
             else:
                 vasprun = load_vasprun(os.path.join(directory, "vasprun.xml"))
-                kpar = vasprun.parameters.get("KPAR",1)
-                ncore = vasprun.parameters.get("NCORE",1)
+                kpar = vasprun.parameters.get("KPAR", 1)
+                ncore = vasprun.parameters.get("NCORE", 1)
                 # If the user set an NBANDS that isn't compatible with parallelization settings,
                 # adjust accordingly and issue a warning.
                 # The number of ranks per band is (number of MPI ranks) / (KPAR * NCORE)
-                if (ranks := outcar.run_stats.get("cores")) and (rem_bands := nbands % (ranks // (kpar*ncore))) != 0:
+                if (ranks := outcar.run_stats.get("cores")) and (rem_bands := nbands % (ranks // (kpar * ncore))) != 0:
                     actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": nbands - rem_bands}}})
                     warnings.warn(
                         f"Your NBANDS={nbands} setting was incompatible with your parallelization "
