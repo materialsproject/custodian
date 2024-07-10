@@ -726,28 +726,28 @@ class VaspErrorHandler(ErrorHandler):
 
         if "auto_nbands" in self.errors and (nbands := self._get_nbands_from_outcar(directory)):
             outcar = load_outcar(os.path.join(directory, "OUTCAR"))
-            nelect = outcar.nelect
 
-            if nelect and nbands > 2 * nelect:
+            if (nelect := outcar.nelect) and (nbands > 2 * nelect):
                 self.error_count["auto_nbands"] += 1
                 warnings.warn(
                     "NBANDS seems to be too high. The electronic structure may be inaccurate. "
                     "You may want to rerun this job with a smaller number of cores.",
                     UserWarning,
                 )
-            else:
-                vasprun = load_vasprun(os.path.join(directory, "vasprun.xml"))
-                kpar = vasprun.parameters.get("KPAR", 1)
-                ncore = vasprun.parameters.get("NCORE", 1)
+
+            elif (nbands := vi["INCAR"].get("NBANDS")):
+                
+                kpar = vi["INCAR"].get("KPAR", 1)
+                ncore = vi["INCAR"].get("NCORE", 1)
                 # If the user set an NBANDS that isn't compatible with parallelization settings,
-                # adjust accordingly and issue a warning.
+                # increase NBANDS to ensure correct task distribution and issue a UserWarning.
                 # The number of ranks per band is (number of MPI ranks) / (KPAR * NCORE)
                 if (ranks := outcar.run_stats.get("cores")) and (rem_bands := nbands % (ranks // (kpar * ncore))) != 0:
-                    actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": nbands - rem_bands}}})
+                    actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": nbands + rem_bands}}})
                     warnings.warn(
                         f"Your NBANDS={nbands} setting was incompatible with your parallelization "
                         f"settings, KPAR={kpar}, NCORE={ncore}, over {ranks} ranks. "
-                        f"The number of bands has been decreased accordingly to {nbands - rem_bands}.",
+                        f"The number of bands has been decreased accordingly to {nbands + rem_bands}.",
                         UserWarning,
                     )
 
