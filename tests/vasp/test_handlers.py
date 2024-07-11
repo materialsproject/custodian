@@ -599,11 +599,23 @@ class VaspErrorHandlerTest(PymatgenTest):
 
     def test_auto_nbands(self) -> None:
         shutil.copy("OUTCAR_auto_nbands", "OUTCAR")
-        handler = VaspErrorHandler("vasp.auto_nbands")
+        handler = VaspErrorHandler(zpath("vasp.auto_nbands"))
         handler.check()
         with pytest.warns(UserWarning, match="NBANDS seems to be too high"):
             dct = handler.correct()
         assert "auto_nbands" in dct["errors"]
+
+    def test_auto_nbands_bad_parallelization(self) -> None:
+        shutil.copy("OUTCAR_auto_nbands_parallel", "OUTCAR")
+        # hacky way to deal with custodian CI unzipping test files
+        Incar.from_file(zpath("INCAR.auto_nbands_parallel")).write_file("INCAR")
+
+        handler = VaspErrorHandler(zpath("vasp.auto_nbands"))
+        handler.check()
+        with pytest.warns(UserWarning, match="setting was incompatible with your parallelization"):
+            dct = handler.correct()
+        assert "auto_nbands" in dct["errors"]
+        assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"NBANDS": 64}}}]
 
 
 class AliasingErrorHandlerTest(PymatgenTest):
