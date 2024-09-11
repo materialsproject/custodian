@@ -16,8 +16,6 @@ class JDFTxJob(Job):
     # job = JDFTxJob()
     # job.run()  # assumes input files already written to directory
 
-    # Used Cp2kJob developed by Nick Winner as a template.
-
     def __init__(
         self,
         jdftx_cmd,
