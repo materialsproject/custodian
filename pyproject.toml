@@ -19,7 +19,7 @@ maintainers = [{ name = "Janosh Riebesell" }, { name = "Shyue Ping Ong" }]
 readme = "README.md"
 keywords = ["jit", "job", "just-in-time", "management", "vasp", "nwchem", "qchem"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
