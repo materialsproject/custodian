@@ -21,7 +21,7 @@ class JDFTxJob(Job):
     def __init__(
         self,
         jdftx_cmd,
-        input_file="jdftx.in",
+        input_file="init.in",
         output_file="jdftx.out",
         stderr_file="std_err.txt",
     ) -> None:
