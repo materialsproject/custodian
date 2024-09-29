@@ -12,10 +12,6 @@ logger = logging.getLogger(__name__)
 class JDFTxJob(Job):
     """A basic JDFTx job. Runs whatever is in the working directory."""
 
-    # If testing, use something like:
-    # job = JDFTxJob()
-    # job.run()  # assumes input files already written to directory
-
     # Used Cp2kJob developed by Nick Winner as a template.
 
     def __init__(
@@ -33,7 +29,7 @@ class JDFTxJob(Job):
         Args:
             jdftx_cmd (str): Command to run JDFTx as a string.
             input_file (str): Name of the file to use as input to JDFTx
-                executable. Defaults to "input.in"
+                executable. Defaults to "init.in"
             output_file (str): Name of file to direct standard out to.
                 Defaults to "jdftx.out".
             stderr_file (str): Name of file to direct standard error to.
