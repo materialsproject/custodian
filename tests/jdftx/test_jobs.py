@@ -4,11 +4,11 @@ from unittest import mock
 from unittest.mock import ANY, MagicMock, patch
 
 import psutil
-import pytest
 from custodian.jdftx.jobs import JDFTxJob
 
 TEST_DIR = Path(__file__).resolve().parent.parent
 TEST_FILES = f"{TEST_DIR}/files/jdftx"
+
 
 def create_mock_process(
     name="jdftx", open_files=None, pid=12345, name_side_effect=None, wait_side_effect=None, terminate_side_effect=None

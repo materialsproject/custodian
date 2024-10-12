@@ -2,10 +2,11 @@
 
 import logging
 import os
-import subprocess
 import shlex
+import subprocess
 
 import psutil
+
 from custodian.custodian import Job
 
 logger = logging.getLogger(__name__)
