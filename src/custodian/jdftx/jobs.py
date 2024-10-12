@@ -14,8 +14,6 @@ logger = logging.getLogger(__name__)
 class JDFTxJob(Job):
     """A basic JDFTx job. Runs whatever is in the working directory."""
 
-    # Used Cp2kJob developed by Nick Winner as a template.
-
     def __init__(
         self,
         jdftx_cmd,
