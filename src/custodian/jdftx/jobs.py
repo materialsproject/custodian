@@ -3,9 +3,9 @@
 import logging
 import os
 import subprocess
+import shlex
 
 import psutil
-
 from custodian.custodian import Job
 
 logger = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ class JDFTxJob(Job):
         ):
             # use line buffering for stderr
             return subprocess.run(
-                cmd.split(),
+                shlex.split(),
                 cwd=directory,
                 stdout=f_std,
                 stderr=f_err,
@@ -70,7 +70,6 @@ class JDFTxJob(Job):
 
     def terminate(self, directory="./") -> None:
         """Terminate JDFTx."""
-
         work_dir = directory
         logger.info(f"Killing JDFTx processes in {work_dir=}.")
         for proc in psutil.process_iter():
@@ -94,9 +93,9 @@ class JDFTxJob(Job):
         if "jdftx" in cmd:
             subprocess.run(["killall", f"{cmd}"], check=False)
 
-
     @staticmethod
     def terminate_process(proc, timeout=5):
+        """Terminate a process gracefully, then forcefully if necessary."""
         try:
             proc.terminate()
             try:
@@ -105,10 +104,8 @@ class JDFTxJob(Job):
                 # If process is still running after the timeout, kill it
                 logger.warning(f"Process {proc.pid} did not terminate gracefully, killing it.")
                 proc.kill()
-                #proc.wait()
+                # proc.wait()
             else:
                 logger.info(f"Process {proc.pid} terminated gracefully.")
         except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
             logger.warning(f"Error while terminating process {proc.pid}: {e}")
-
-
