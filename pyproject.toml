@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "custodian"
-version = "2024.6.24"
+version = "2024.10.14"
 description = "A simple JIT job management framework in Python."
 authors = [
     { name = "Janosh Riebesell", email = "janosh.riebesell@gmail.com" },
