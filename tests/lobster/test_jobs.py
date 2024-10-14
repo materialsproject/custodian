@@ -1,10 +1,10 @@
 import os
 import shutil
 
-from custodian.lobster.jobs import LobsterJob
 from monty.os import cd
 from monty.tempfile import ScratchDir
 
+from custodian.lobster.jobs import LobsterJob
 from tests.conftest import TEST_FILES
 
 test_files_lobster2 = f"{TEST_FILES}/lobster/lobsterins"
@@ -63,7 +63,7 @@ class TestLobsterJob:
     def test_as_from_dict(self) -> None:
         v = LobsterJob(lobster_cmd="hello")
         v2 = LobsterJob.from_dict(v.as_dict())
-        assert type(v2) == type(v)
+        assert isinstance(v2, LobsterJob)
         assert v2.lobster_cmd == "hello"
 
     def test_setup(self) -> None:

@@ -1,10 +1,10 @@
 import os
 
-from custodian.feff.jobs import FeffJob
 from monty.os import cd
 from monty.tempfile import ScratchDir
 from pymatgen.io.feff.inputs import Atoms, Tags
 
+from custodian.feff.jobs import FeffJob
 from tests.conftest import TEST_FILES
 
 __author__ = "Chen Zheng"
@@ -20,7 +20,7 @@ TEST_DIR = f"{TEST_FILES}/feff_unconverged"
 def test_as_from_dict() -> None:
     f = FeffJob("hello")
     f2 = FeffJob.from_dict(f.as_dict())
-    assert type(f) == type(f2)
+    assert isinstance(f, FeffJob)
     assert f2.feff_cmd == "hello"
 
 

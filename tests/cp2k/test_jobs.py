@@ -7,9 +7,8 @@ import warnings
 from glob import glob
 from pathlib import Path
 
-from custodian import Custodian
 from custodian.cp2k.jobs import Cp2kJob
-
+from custodian.custodian import Custodian
 from tests.conftest import TEST_FILES
 
 MODULE_DIR = Path(__file__).resolve().parent
