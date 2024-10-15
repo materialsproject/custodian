@@ -6,6 +6,9 @@ nav_order: 2
 
 # Change Log
 
+## 2024.10.15
+* Bug fix for pip installation.
+
 ## 2024.10.14
 * PR #342 from @esoteric-ephemera (#342)
     Minor update to the logic of the `auto_nbands` check for `VaspErrorHandler`. This check sees if the number of bands has been updated by VASP, and currently it only checks to see if that updated number is very large.
