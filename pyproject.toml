@@ -57,7 +57,7 @@ Package = "https://pypi.org/project/custodian"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["custodian"]
+include = ["custodian*"]
 
 [tool.ruff]
 target-version = "py311"
