@@ -6,6 +6,20 @@ nav_order: 2
 
 # Change Log
 
+## 2024.10.16
+* Add a update_incar option in VaspJob which updates parameters from a previous vasprun.xml.
+
+## 2024.10.15
+* Bug fix for pip installation.
+
+## 2024.10.14
+* PR #342 from @esoteric-ephemera (#342)
+    Minor update to the logic of the `auto_nbands` check for `VaspErrorHandler`. This check sees if the number of bands has been updated by VASP, and currently it only checks to see if that updated number is very large.
+    However, there are cases where the user specifies an NBANDS that is incompatible with their parallelization settings, as NBANDS must be divisible by $(\mathrm{ranks}) / (\mathrm{KPAR} \times \mathrm{NCORE})$. In these cases, VASP increases the number of bands to ensure the calculation can still proceed. This can happen in MP's band structure workflows with uniform $k$-point densities.
+    However, since the current `auto_nbands` handler applies no corrections to the job, these otherwise successful runs are killed.
+    This PR adds logic to ensure that the calculation is rerun with a higher number of bands appropriate to the parallelization setting. This is kinda redundant, since VASP already does this. But I think it has to occur this way because `VaspErrorHandler` is monitoring the job and flags it for an `auto_nbands` error.
+    Another implementation concern: it's generally safer to decrease the number of bands since this requires a lower energy cutoff to converge each band. It might be safer to decrease NBANDS as a fix
+
 ## 2024.6.24
 - Improved handling of ISMEAR for NKPT<4 (@Andrew-S-Rosen, @esoteric-ephemera)
 

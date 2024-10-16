@@ -3,10 +3,10 @@ import shutil
 import unittest
 from unittest import TestCase
 
-from custodian.qchem.handlers import QChemErrorHandler
-from custodian.qchem.jobs import QCJob
 from pymatgen.io.qchem.inputs import QCInput
 
+from custodian.qchem.handlers import QChemErrorHandler
+from custodian.qchem.jobs import QCJob
 from tests.conftest import TEST_FILES
 
 try:

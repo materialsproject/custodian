@@ -3,9 +3,9 @@ import shutil
 import unittest
 from unittest import TestCase
 
-from custodian.qchem.handlers import QChemErrorHandler
 from pymatgen.io.qchem.inputs import QCInput
 
+from custodian.qchem.handlers import QChemErrorHandler
 from tests.conftest import TEST_FILES
 
 try:

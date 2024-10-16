@@ -4,12 +4,12 @@ import os
 
 import numpy as np
 import pytest
-from custodian.vasp.utils import _estimate_num_k_points_from_kspacing, increase_k_point_density
 from monty.os.path import zpath
 from pymatgen.core import Lattice, Structure
 from pymatgen.io.vasp import Kpoints
 from pymatgen.util.testing import PymatgenTest
 
+from custodian.vasp.utils import _estimate_num_k_points_from_kspacing, increase_k_point_density
 from tests.conftest import TEST_FILES
 
 

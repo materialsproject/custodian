@@ -5,6 +5,8 @@ import unittest
 from glob import glob
 
 import pytest
+from ruamel.yaml import YAML
+
 from custodian.custodian import (
     Custodian,
     ErrorHandler,
@@ -17,7 +19,6 @@ from custodian.custodian import (
     ValidationError,
     Validator,
 )
-from ruamel.yaml import YAML
 
 
 class ExitCodeJob(Job):

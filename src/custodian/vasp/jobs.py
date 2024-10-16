@@ -84,6 +84,7 @@ class VaspJob(Job):
         gamma_vasp_cmd=None,
         copy_magmom=False,
         auto_continue=False,
+        update_incar=False,
     ) -> None:
         """
         This constructor is necessarily complex due to the need for
@@ -136,6 +137,12 @@ class VaspJob(Job):
                 if a STOPCAR is present. This is very useful if using the
                 wall-time handler which will write a read-only STOPCAR to
                 prevent VASP from deleting it once it finishes
+            update_incar (bool): Whether to update INCAR settings from updated settings
+                in vasprun.xml. This is particularly useful in certain calculatons where VASP
+                automatically sets certain parameters, e.g., NBANDS. Only parameters that are
+                already present in the INCAR will be updated, i.e., no new parameters will be
+                added even if they are in the final vasprun.xml. Note that settings_override take
+                precedence over updated params.
         """
         self.vasp_cmd = tuple(vasp_cmd)
         self.output_file = output_file
@@ -149,6 +156,7 @@ class VaspJob(Job):
         self.gamma_vasp_cmd = tuple(gamma_vasp_cmd) if gamma_vasp_cmd else None
         self.copy_magmom = copy_magmom
         self.auto_continue = auto_continue
+        self.update_incar = update_incar
 
         if SENTRY_DSN:
             # if using Sentry logging, add specific VASP executable to scope
@@ -227,6 +235,17 @@ class VaspJob(Job):
                 else:
                     actions = self.auto_continue
                 dumpfn({"actions": actions}, os.path.join(directory, "continue.json"))
+
+        if self.update_incar:
+            try:
+                vasprun = Vasprun(os.path.join(directory, "vasprun.xml"))
+                params = vasprun.parameters
+                incar = Incar.from_file(os.path.join(directory, "INCAR"))
+                for k, v in incar.items():
+                    incar[k] = params.get(k, v)
+                incar.write_file(os.path.join(directory, "INCAR"))
+            except Exception as ex:
+                logger.error(f"Unable to update INCAR with params from vasprun.xml. {ex}")
 
         if self.settings_override is not None:
             VaspModder(directory=directory).apply_actions(self.settings_override)

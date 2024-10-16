@@ -6,6 +6,10 @@ import shutil
 from glob import glob
 
 import pytest
+from monty.os.path import zpath
+from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
+from pymatgen.util.testing import PymatgenTest
+
 from custodian.utils import tracked_lru_cache
 from custodian.vasp.handlers import (
     AliasingErrorHandler,
@@ -25,10 +29,6 @@ from custodian.vasp.handlers import (
     VaspErrorHandler,
     WalltimeHandler,
 )
-from monty.os.path import zpath
-from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
-from pymatgen.util.testing import PymatgenTest
-
 from tests.conftest import TEST_FILES
 
 __author__ = "Shyue Ping Ong, Stephen Dacek, Janosh Riebesell"
@@ -301,7 +301,7 @@ class VaspErrorHandlerTest(PymatgenTest):
     def test_as_from_dict(self) -> None:
         handler = VaspErrorHandler("random_name")
         h2 = VaspErrorHandler.from_dict(handler.as_dict())
-        assert type(h2) == type(handler)
+        assert isinstance(h2, VaspErrorHandler)
         assert h2.output_filename == "random_name"
 
     def test_pssyevx_pdsyevx(self) -> None:
@@ -742,7 +742,7 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
     def test_as_from_dict(self) -> None:
         handler = UnconvergedErrorHandler("random_name.xml")
         h2 = UnconvergedErrorHandler.from_dict(handler.as_dict())
-        assert type(h2) == UnconvergedErrorHandler
+        assert isinstance(h2, UnconvergedErrorHandler)
         assert h2.output_filename == "random_name.xml"
 
     def test_correct_normal_with_condition(self) -> None:
@@ -1164,5 +1164,5 @@ class NonConvergingErrorHandlerTest(PymatgenTest):
     def test_as_from_dict(self) -> None:
         handler = NonConvergingErrorHandler("OSZICAR_random")
         h2 = NonConvergingErrorHandler.from_dict(handler.as_dict())
-        assert type(h2) == type(handler)
+        assert isinstance(h2, NonConvergingErrorHandler)
         assert h2.output_filename == "OSZICAR_random"

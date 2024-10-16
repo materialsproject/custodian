@@ -2,8 +2,8 @@ import os
 import shutil
 
 import pytest
-from custodian.vasp.validators import VaspAECCARValidator, VaspFilesValidator, VaspNpTMDValidator, VasprunXMLValidator
 
+from custodian.vasp.validators import VaspAECCARValidator, VaspFilesValidator, VaspNpTMDValidator, VasprunXMLValidator
 from tests.conftest import TEST_FILES
 
 

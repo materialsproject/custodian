@@ -5,11 +5,11 @@ from glob import glob
 
 import pymatgen
 import pytest
-from custodian.vasp.jobs import GenerateVaspInputJob, VaspJob, VaspNEBJob
 from monty.os import cd
 from monty.tempfile import ScratchDir
 from pymatgen.io.vasp import Incar, Kpoints, Poscar
 
+from custodian.vasp.jobs import GenerateVaspInputJob, VaspJob, VaspNEBJob
 from tests.conftest import TEST_FILES
 
 pymatgen.core.SETTINGS["PMG_VASP_PSP_DIR"] = TEST_FILES
@@ -19,7 +19,7 @@ class TestVaspJob:
     def test_as_from_dict(self) -> None:
         v = VaspJob(["hello"])
         v2 = VaspJob.from_dict(v.as_dict())
-        assert type(v2) == type(v)
+        assert isinstance(v2, VaspJob)
         assert v2.vasp_cmd == ("hello",)
 
     def test_setup(self) -> None:
@@ -43,6 +43,16 @@ class TestVaspJob:
                 # cmd == "hello", so it successfully parsed the input file
                 # directory.
                 v.run()
+
+    def test_update_incar(self) -> None:
+        # just make sure v.setup() and v.run() exit cleanly when no KPOINTS file is present
+        with cd(f"{TEST_FILES}/update_incar"), ScratchDir(".", copy_from_current_on_enter=True):
+            incar = Incar.from_file("INCAR")
+            assert incar["NBANDS"] == 200
+            v = VaspJob(["hello"], update_incar=True)
+            v.setup()
+            incar = Incar.from_file("INCAR")
+            assert incar["NBANDS"] == 224
 
     def test_postprocess(self) -> None:
         with cd(f"{TEST_FILES}/postprocess"), ScratchDir(".", copy_from_current_on_enter=True):
@@ -103,7 +113,7 @@ class TestVaspNEBJob:
     def test_as_from_dict(self) -> None:
         v = VaspNEBJob(["hello"])
         v2 = VaspNEBJob.from_dict(v.as_dict())
-        assert type(v2) == type(v)
+        assert isinstance(v2, VaspNEBJob)
         assert v2.vasp_cmd == ("hello",)
 
     def test_setup(self) -> None:

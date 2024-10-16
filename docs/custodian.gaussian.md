@@ -8,7 +8,6 @@ nav_exclude: true
 
 This package implements various Gaussian Jobs and Error Handlers.
 
-
 * [custodian.gaussian.handlers module](custodian.gaussian.handlers.md)
   * [`GaussianErrorHandler`](custodian.gaussian.handlers.md#custodian.gaussian.handlers.GaussianErrorHandler)
     * [`GaussianErrorHandler.GRID_NAMES`](custodian.gaussian.handlers.md#custodian.gaussian.handlers.GaussianErrorHandler.GRID_NAMES)
