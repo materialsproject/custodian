@@ -44,6 +44,16 @@ class TestVaspJob:
                 # directory.
                 v.run()
 
+    def test_update_incar(self) -> None:
+        # just make sure v.setup() and v.run() exit cleanly when no KPOINTS file is present
+        with cd(f"{TEST_FILES}/update_incar"), ScratchDir(".", copy_from_current_on_enter=True):
+            incar = Incar.from_file("INCAR")
+            assert incar["NBANDS"] == 200
+            v = VaspJob(["hello"], update_incar=True)
+            v.setup()
+            incar = Incar.from_file("INCAR")
+            assert incar["NBANDS"] == 224
+
     def test_postprocess(self) -> None:
         with cd(f"{TEST_FILES}/postprocess"), ScratchDir(".", copy_from_current_on_enter=True):
             shutil.copy("INCAR", "INCAR.backup")
