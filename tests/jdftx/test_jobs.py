@@ -4,6 +4,7 @@ from unittest import mock
 from unittest.mock import ANY, MagicMock, patch
 
 import psutil
+
 from custodian.jdftx.jobs import JDFTxJob
 
 TEST_DIR = Path(__file__).resolve().parent.parent
