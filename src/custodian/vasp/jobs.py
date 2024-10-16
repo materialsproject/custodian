@@ -268,11 +268,12 @@ class VaspJob(Job):
                     cmd[-1] += ".gamma"
         logger.info(f"Running {' '.join(cmd)}")
         with (
-            open(os.path.join(directory, self.output_file), "w"),
-            open(os.path.join(directory, self.stderr_file), "w", buffering=1),
+            open(os.path.join(directory, self.output_file), "w") as f_std,
+            open(os.path.join(directory, self.stderr_file), "w", buffering=1) as f_err,
         ):
-            # use line buffering for stderrsubprocess.Popen(cmd, cwd=directory, stdout=f_std, stderr=f_err, start_new_session=True)
-            return  # pylint: disable=R1732
+            # use line buffering for stderr
+            return subprocess.Popen(cmd, cwd=directory, stdout=f_std, stderr=f_err, start_new_session=True)
+            # pylint: disable=R1732
 
     def postprocess(self, directory="./") -> None:
         """
