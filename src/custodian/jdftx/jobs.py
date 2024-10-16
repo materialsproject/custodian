@@ -57,7 +57,7 @@ class JDFTxJob(Job):
         ):
             # use line buffering for stderr
             return subprocess.run(
-                shlex.split(),
+                shlex.split(cmd),
                 cwd=directory,
                 stdout=f_std,
                 stderr=f_err,
