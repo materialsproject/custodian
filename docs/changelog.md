@@ -6,6 +6,9 @@ nav_order: 2
 
 # Change Log
 
+## 2024.10.16
+* Add a update_incar option in VaspJob which updates parameters from a previous vasprun.xml.
+
 ## 2024.10.15
 * Bug fix for pip installation.
 
