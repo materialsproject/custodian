@@ -22,20 +22,30 @@ LOBSTERINPUT_FILES = ["lobsterin"]
 LOBSTEROUTPUT_FILES = [
     "lobsterout",
     "CHARGE.lobster",
+    "COBICAR.lobster",
+    "COBICAR.LCFO.lobster"
     "COHPCAR.lobster",
+    "COHPCAR.LCFO.lobster",
     "COOPCAR.lobster",
+    "COOPCAR.LCFO.lobster",
     "DOSCAR.lobster",
+    "DOSCAR.LCFO.lobster",
+    "DOSCAR.LSO.lobster",
     "GROSSPOP.lobster",
+    "ICOBILIST.lobster",
+    "ICOBILIST.LCFO.lobster",
     "ICOHPLIST.lobster",
+    "ICOHPLIST.LCFO.lobster",
     "ICOOPLIST.lobster",
+    "ICOOPLIST.LCFO.lobster",
+    "IMOFELIST.lobster",
     "lobster.out",
     "projectionData.lobster",
+    "POLARIZATION.lobster",
     "MadelungEnergies.lobster",
+    "MOFECAR.lobster",
     "SitePotentials.lobster",
     "bandOverlaps.lobster",
-    "ICOBILIST.lobster",
-    "COBICAR.lobster",
-    "DOSCAR.LSO.lobster",
 ]
 FW_FILES = ["custodian.json", "FW.json", "FW_submit.script"]
 
