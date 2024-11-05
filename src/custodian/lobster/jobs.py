@@ -25,8 +25,7 @@ LOBSTEROUTPUT_FILES = [
     "CHARGE.lobster",
     "CHARGE.LCFO.lobster",
     "COBICAR.lobster",
-    "COBICAR.LCFO.lobster"
-    "COHPCAR.lobster",
+    "COBICAR.LCFO.lobster" "COHPCAR.lobster",
     "COHPCAR.LCFO.lobster",
     "COOPCAR.lobster",
     "COOPCAR.LCFO.lobster",
