@@ -20,8 +20,10 @@ __date__ = "April 27, 2020"
 
 LOBSTERINPUT_FILES = ["lobsterin"]
 LOBSTEROUTPUT_FILES = [
-    "lobsterout",
+    "BWDF.lobster",
+    "BWDFCOHP.lobster",
     "CHARGE.lobster",
+    "CHARGE.LCFO.lobster",
     "COBICAR.lobster",
     "COBICAR.LCFO.lobster"
     "COHPCAR.lobster",
@@ -32,6 +34,7 @@ LOBSTEROUTPUT_FILES = [
     "DOSCAR.LCFO.lobster",
     "DOSCAR.LSO.lobster",
     "GROSSPOP.lobster",
+    "GROSSPOP.LCFO.lobster",
     "ICOBILIST.lobster",
     "ICOBILIST.LCFO.lobster",
     "ICOHPLIST.lobster",
@@ -39,9 +42,13 @@ LOBSTEROUTPUT_FILES = [
     "ICOOPLIST.lobster",
     "ICOOPLIST.LCFO.lobster",
     "IMOFELIST.lobster",
+    "LCFO_Fragments.lobster",
+    "lobsterout",
     "lobster.out",
     "projectionData.lobster",
     "POLARIZATION.lobster",
+    "POSCAR.lobster",
+    "POSCAR.lobster.vasp",
     "MadelungEnergies.lobster",
     "MOFECAR.lobster",
     "SitePotentials.lobster",
