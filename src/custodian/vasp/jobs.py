@@ -983,28 +983,29 @@ class GenerateVaspInputJob(Job):
     def postprocess(self, directory="./") -> None:
         """Dummy postprocess."""
 
+
 def _gamma_point_only_check(vis: VaspInput) -> bool:
     """
-    Check if only a single k-point is used in this calculation
+    Check if only a single k-point is used in this calculation.
 
     Parameters
     -----------
     vis: VaspInput, the VASP input set for the calculation
-   
-    Returns
+
+    Returns:
     -----------
     bool: True --> use vasp_gam, False --> use vasp_std
     """
     kpts = vis["KPOINTS"]
     if (
         kpts is not None
-        and kpts.style == Kpoints.supported_modes.Gamma 
+        and kpts.style == Kpoints.supported_modes.Gamma
         and tuple(kpts.kpts[0]) == (1, 1, 1)
-        and all(abs(ks) < 1.e-6 for ks in kpts.kpts_shift)
+        and all(abs(ks) < 1.0e-6 for ks in kpts.kpts_shift)
     ):
         return True
 
-    if (kspacing := vis["INCAR"].get("KSPACING")) is not None and vis["INCAR"].get("KGAMMA",True):
+    if (kspacing := vis["INCAR"].get("KSPACING")) is not None and vis["INCAR"].get("KGAMMA", True):
         # Get number of kpoints per axis according to the formula given by VASP:
         # https://www.vasp.at/wiki/index.php/KSPACING
         # Note that the VASP definition of the closure relation between reciprocal
@@ -1013,8 +1014,9 @@ def _gamma_point_only_check(vis: VaspInput) -> bool:
         # and instead places the 2 pi factor in the formula for getting the number
         # of kpoints per axis.
         nk = [
-            int(max(1, np.ceil(vis["POSCAR"].structure.lattice.reciprocal_lattice.abc[ik] / kspacing))) for ik in range(3)
+            int(max(1, np.ceil(vis["POSCAR"].structure.lattice.reciprocal_lattice.abc[ik] / kspacing)))
+            for ik in range(3)
         ]
         return np.prod(nk) == 1
-    
+
     return False

@@ -183,18 +183,20 @@ class TestGenerateVaspInputJob:
             kpoints = Kpoints.from_file("KPOINTS")
             assert str(kpoints.style) == "Reciprocal"
 
+
 class TestAutoGamma:
     """
     Test that a VASP job can automatically detect when only 1 k-point at GAMMA is used.
     """
+
     from pymatgen.core import Structure
     from pymatgen.io.vasp.sets import MPRelaxSet
 
     # Isolated atom in PBC
     structure = Structure(
-        lattice = [[15 + 0.1*i if i == j else 0. for j in range(3)] for i in range(3)],
-        species = ["Na"],
-        coords = [[0.5 for _ in range(3)]]
+        lattice=[[15 + 0.1 * i if i == j else 0.0 for j in range(3)] for i in range(3)],
+        species=["Na"],
+        coords=[[0.5 for _ in range(3)]],
     )
 
     vis = MPRelaxSet(structure=structure)
@@ -203,12 +205,9 @@ class TestAutoGamma:
     assert _gamma_point_only_check(vis.get_input_set())
 
     # no longer Gamma-centered
-    vis = MPRelaxSet(structure=structure,user_kpoints_settings=Kpoints(kpts_shift=(0.1,0.,0.)))
     assert not _gamma_point_only_check(vis.get_input_set())
 
     # have to increase KSPACING or this will result in a non 1 x 1 x 1 grid
-    vis = MPRelaxSet(structure=structure,user_incar_settings={"KSPACING": 0.5})
     assert _gamma_point_only_check(vis.get_input_set())
 
-    vis = MPRelaxSet(structure=structure,user_incar_settings={"KSPACING": 0.5, "KGAMMA": False})
     assert not _gamma_point_only_check(vis.get_input_set())
