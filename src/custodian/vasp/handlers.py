@@ -1404,7 +1404,10 @@ class LargeSigmaHandler(ErrorHandler):
             e_step_idx = [step[0] for step in outcar.data.get("electronic_steps", [])]
             smearing_entropy = outcar.data.get("smearing_entropy", [0.0 for _ in e_step_idx])
             for ie_step_idx, ie_step in enumerate(e_step_idx):
-                if ie_step <= completed_ionic_steps:
+                # Because this handler monitors OUTCAR dynamically, it sometimes tries
+                # to retrieve data in OUTCAR before that data is written. To avoid this,
+                # we have two checks for list length here
+                if ie_step <= completed_ionic_steps and ie_step_idx < len(smearing_entropy):
                     entropies_per_atom[ie_step - 1] = smearing_entropy[ie_step_idx]
 
             if len(entropies_per_atom) > 0:
