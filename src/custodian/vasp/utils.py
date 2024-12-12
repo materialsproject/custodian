@@ -18,6 +18,7 @@ def _estimate_num_k_points_from_kspacing(structure: Structure, kspacing: float) 
     Inputs:
         structure (Structure): structure used in the calculation
         kspacing (float): KSPACING used in the calculation
+
     Returns:
         tuple[int,int,int] : the number of estimated k-points on each axis.
 
