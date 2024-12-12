@@ -725,7 +725,7 @@ class VaspJob(Job):
                         proc.kill()
                         return
             except (psutil.NoSuchProcess, psutil.AccessDenied) as exc:
-                logger.warning(f"Exception {exc} encountered while killing VASP.")
+                logger.exception(f"Exception {exc} encountered while killing VASP.")
                 continue
 
         logger.warning(
