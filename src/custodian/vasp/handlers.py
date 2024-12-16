@@ -1396,31 +1396,31 @@ class LargeSigmaHandler(ErrorHandler):
             )
             outcar.read_pattern({"completed_ionic_steps": r"(aborting loop)"}, reverse=False, terminate_on_match=False)
 
+            completed_ionic_steps = len(outcar.data.get("completed_ionic_steps"))
+            entropies_per_atom = [0.0 for _ in range(completed_ionic_steps)]
+            n_atoms = len(Structure.from_file(os.path.join(directory, "POSCAR")))
+
+            # `Iteration (#ionic step # electronic step)` always written before entropy
+            e_step_idx = [step[0] for step in outcar.data.get("electronic_steps", [])]
+            smearing_entropy = outcar.data.get("smearing_entropy", [0.0 for _ in e_step_idx])
+            for ie_step_idx, ie_step in enumerate(e_step_idx):
+                # Because this handler monitors OUTCAR dynamically, it sometimes tries
+                # to retrieve data in OUTCAR before that data is written. To avoid this,
+                # we have two checks for list length here
+                if ie_step <= completed_ionic_steps and ie_step_idx < len(smearing_entropy):
+                    entropies_per_atom[ie_step - 1] = smearing_entropy[ie_step_idx]
+
+            if len(entropies_per_atom) > 0:
+                n_atoms = len(Structure.from_file(os.path.join(directory, "POSCAR")))
+                self.entropy_per_atom = np.max(np.abs(entropies_per_atom)) / n_atoms
+                if self.entropy_per_atom > self.e_entropy_tol:
+                    return True
+
+            return False
+
         except Exception:
             # Can't perform check if outcar not valid, or data is missing
             return False
-
-        completed_ionic_steps = len(outcar.data.get("completed_ionic_steps"))
-        entropies_per_atom = [0.0 for _ in range(completed_ionic_steps)]
-        n_atoms = len(Structure.from_file(os.path.join(directory, "POSCAR")))
-
-        # `Iteration (#ionic step # electronic step)` always written before entropy
-        e_step_idx = [step[0] for step in outcar.data.get("electronic_steps", [])]
-        smearing_entropy = outcar.data.get("smearing_entropy", [0.0 for _ in e_step_idx])
-        for ie_step_idx, ie_step in enumerate(e_step_idx):
-            # Because this handler monitors OUTCAR dynamically, it sometimes tries
-            # to retrieve data in OUTCAR before that data is written. To avoid this,
-            # we have two checks for list length here
-            if ie_step <= completed_ionic_steps and ie_step_idx < len(smearing_entropy):
-                entropies_per_atom[ie_step - 1] = smearing_entropy[ie_step_idx]
-
-        if len(entropies_per_atom) > 0:
-            n_atoms = len(Structure.from_file(os.path.join(directory, "POSCAR")))
-            self.entropy_per_atom = np.max(np.abs(entropies_per_atom)) / n_atoms
-            if self.entropy_per_atom > self.e_entropy_tol:
-                return True
-
-        return False
 
     def correct(self, directory="./"):
         """Perform corrections."""
