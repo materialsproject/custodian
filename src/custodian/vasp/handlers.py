@@ -1365,7 +1365,7 @@ class LargeSigmaHandler(ErrorHandler):
 
     is_monitor: bool = True
 
-    def __init__(self, e_entropy_tol: float = 1e-3, min_sigma: float = 0.01, output_filename: str = "OUTCAR") -> None:
+    def __init__(self, e_entropy_tol: float = 1e-3, min_sigma: float = 0.001, output_filename: str = "OUTCAR") -> None:
         """Initializes the handler with a buffer time."""
         self.e_entropy_tol = e_entropy_tol
         self.min_sigma = min_sigma
@@ -1374,13 +1374,13 @@ class LargeSigmaHandler(ErrorHandler):
     def check(self, directory="./") -> bool:
         """Check for error."""
         incar = Incar.from_file(os.path.join(directory, "INCAR"))
-        try:
-            outcar = load_outcar(os.path.join(directory, self.output_filename))
-        except Exception:
-            # Can't perform check if outcar not valid
+        if incar.get("ISMEAR", 1) < 0:
+            # skip check
             return False
 
-        if incar.get("ISMEAR", 1) >= 0:
+        try:
+            outcar = load_outcar(os.path.join(directory, self.output_filename))
+
             # get entropy terms, ionic step counts, and number of completed ionic steps
             outcar.read_pattern(
                 {"smearing_entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"},
@@ -1404,7 +1404,10 @@ class LargeSigmaHandler(ErrorHandler):
             e_step_idx = [step[0] for step in outcar.data.get("electronic_steps", [])]
             smearing_entropy = outcar.data.get("smearing_entropy", [0.0 for _ in e_step_idx])
             for ie_step_idx, ie_step in enumerate(e_step_idx):
-                if ie_step <= completed_ionic_steps:
+                # Because this handler monitors OUTCAR dynamically, it sometimes tries
+                # to retrieve data in OUTCAR before that data is written. To avoid this,
+                # we have two checks for list length here
+                if ie_step <= completed_ionic_steps and ie_step_idx < len(smearing_entropy):
                     entropies_per_atom[ie_step - 1] = smearing_entropy[ie_step_idx]
 
             if len(entropies_per_atom) > 0:
@@ -1413,7 +1416,11 @@ class LargeSigmaHandler(ErrorHandler):
                 if self.entropy_per_atom > self.e_entropy_tol:
                     return True
 
-        return False
+            return False
+
+        except Exception:
+            # Can't perform check if outcar not valid, or data is missing
+            return False
 
     def correct(self, directory="./"):
         """Perform corrections."""
