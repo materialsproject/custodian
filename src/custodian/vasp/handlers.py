@@ -1389,7 +1389,7 @@ class LargeSigmaHandler(ErrorHandler):
                 terminate_on_match=False,
             )
             outcar.read_pattern(
-                {"electronic_steps": r"Iteration *(\D\d*\ \d*)"},
+                {"electronic_step_indices": r"Iteration\s*\d+\s*\(\s*(\d+)\s*\)"},
                 postprocess=int,
                 reverse=False,
                 terminate_on_match=False,
@@ -1400,12 +1400,15 @@ class LargeSigmaHandler(ErrorHandler):
             entropies_per_atom = [0.0 for _ in range(completed_ionic_steps)]
             n_atoms = len(Structure.from_file(os.path.join(directory, "POSCAR")))
 
-            # `Iteration (#ionic step # electronic step)` always written before entropy
-            e_step_idx = [step[0] for step in outcar.data.get("electronic_steps", [])]
-            smearing_entropy = outcar.data.get("smearing_entropy", [0.0 for _ in e_step_idx])
-            for ie_step_idx, ie_step in enumerate(e_step_idx):
-                if ie_step <= completed_ionic_steps:
-                    entropies_per_atom[ie_step - 1] = smearing_entropy[ie_step_idx]
+            electronic_step_indices = [step[0] for step in outcar.data.get("electronic_step_indices", [])]
+            smearing_entropy = outcar.data.get("smearing_entropy", [0.0 for _ in electronic_step_indices])
+
+            ionic_step_idx = 0
+            for electronic_step_idx, entropy in zip(electronic_step_indices, smearing_entropy, strict=False):
+                if electronic_step_idx == 1:
+                    ionic_step_idx += 1
+                if ionic_step_idx <= completed_ionic_steps:
+                    entropies_per_atom[ionic_step_idx - 1] = entropy
 
             if len(entropies_per_atom) > 0:
                 n_atoms = len(Structure.from_file(os.path.join(directory, "POSCAR")))
