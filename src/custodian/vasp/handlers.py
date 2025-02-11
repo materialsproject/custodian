@@ -394,10 +394,13 @@ class VaspErrorHandler(ErrorHandler):
                     actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
 
         if self.errors.intersection(["subspacematrix"]):
+            # Sometimes, this error can be due to parallelization issues with running across too many cores
+            # on a small structure. If this is the case, try reducing the number of cores or increasing NCORE or NPAR
             if self.error_count["subspacematrix"] == 0 and vi["INCAR"].get("LREAL", False) is not False:
                 actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
             elif self.error_count["subspacematrix"] == 1 and vi["INCAR"].get("PREC", "Normal") != "Accurate":
                 actions.append({"dict": "INCAR", "action": {"_set": {"PREC": "Accurate"}}})
+            elif 
             self.error_count["subspacematrix"] += 1
 
         if (
@@ -570,6 +573,8 @@ class VaspErrorHandler(ErrorHandler):
                 nelect = 1  # dummy value
             if nelect < nprocs:
                 actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": vi["INCAR"].get("NCORE", 1) * 2}}})
+                if "NPAR" in vi["INCAR"]:
+                    actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
 
         if "grad_not_orth" in self.errors:
             # Often coincides with algo_tet, in which the algo_tet error handler will also resolve grad_not_orth.
