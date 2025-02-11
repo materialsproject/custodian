@@ -400,7 +400,6 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
             elif self.error_count["subspacematrix"] == 1 and vi["INCAR"].get("PREC", "Normal") != "Accurate":
                 actions.append({"dict": "INCAR", "action": {"_set": {"PREC": "Accurate"}}})
-            elif 
             self.error_count["subspacematrix"] += 1
 
         if (
