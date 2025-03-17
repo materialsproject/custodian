@@ -38,8 +38,7 @@ from custodian.vasp.io import load_outcar, load_vasprun
 from custodian.vasp.utils import increase_k_point_density
 
 __author__ = (
-    "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen, "
-    "Stephen Dacek, Andrew Rosen, Janosh Riebesell"
+    "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen, Stephen Dacek, Andrew Rosen, Janosh Riebesell"
 )
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
@@ -1352,8 +1351,7 @@ class ScanMetalHandler(KspacingMetalHandler):
             kwargs: Keyword passed to parent class.
         """
         warnings.warn(
-            "ScanMetalHandler is deprecated and will be removed in a future release. "
-            "Use KspacingMetalHandler instead.",
+            "ScanMetalHandler is deprecated and will be removed in a future release. Use KspacingMetalHandler instead.",
             DeprecationWarning,
         )
         super().__init__(*args, **kwargs)
