@@ -38,8 +38,7 @@ from custodian.vasp.io import load_outcar, load_vasprun
 from custodian.vasp.utils import increase_k_point_density
 
 __author__ = (
-    "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen, "
-    "Stephen Dacek, Andrew Rosen, Janosh Riebesell"
+    "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen, Stephen Dacek, Andrew Rosen, Janosh Riebesell"
 )
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
@@ -394,6 +393,8 @@ class VaspErrorHandler(ErrorHandler):
                     actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
 
         if self.errors.intersection(["subspacematrix"]):
+            # Sometimes, this error can be due to parallelization issues with running across too many cores
+            # on a small structure. If this is the case, try reducing the number of cores or increasing NCORE or NPAR
             if self.error_count["subspacematrix"] == 0 and vi["INCAR"].get("LREAL", False) is not False:
                 actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
             elif self.error_count["subspacematrix"] == 1 and vi["INCAR"].get("PREC", "Normal") != "Accurate":
@@ -570,6 +571,8 @@ class VaspErrorHandler(ErrorHandler):
                 nelect = 1  # dummy value
             if nelect < nprocs:
                 actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": vi["INCAR"].get("NCORE", 1) * 2}}})
+                if "NPAR" in vi["INCAR"]:
+                    actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
 
         if "grad_not_orth" in self.errors:
             # Often coincides with algo_tet, in which the algo_tet error handler will also resolve grad_not_orth.
@@ -1348,8 +1351,7 @@ class ScanMetalHandler(KspacingMetalHandler):
             kwargs: Keyword passed to parent class.
         """
         warnings.warn(
-            "ScanMetalHandler is deprecated and will be removed in a future release. "
-            "Use KspacingMetalHandler instead.",
+            "ScanMetalHandler is deprecated and will be removed in a future release. Use KspacingMetalHandler instead.",
             DeprecationWarning,
         )
         super().__init__(*args, **kwargs)
@@ -1365,7 +1367,7 @@ class LargeSigmaHandler(ErrorHandler):
 
     is_monitor: bool = True
 
-    def __init__(self, e_entropy_tol: float = 1e-3, min_sigma: float = 0.01, output_filename: str = "OUTCAR") -> None:
+    def __init__(self, e_entropy_tol: float = 1e-3, min_sigma: float = 0.001, output_filename: str = "OUTCAR") -> None:
         """Initializes the handler with a buffer time."""
         self.e_entropy_tol = e_entropy_tol
         self.min_sigma = min_sigma
@@ -1374,13 +1376,13 @@ class LargeSigmaHandler(ErrorHandler):
     def check(self, directory="./") -> bool:
         """Check for error."""
         incar = Incar.from_file(os.path.join(directory, "INCAR"))
-        try:
-            outcar = load_outcar(os.path.join(directory, self.output_filename))
-        except Exception:
-            # Can't perform check if outcar not valid
+        if incar.get("ISMEAR", 1) < 0:
+            # skip check
             return False
 
-        if incar.get("ISMEAR", 1) >= 0:
+        try:
+            outcar = load_outcar(os.path.join(directory, self.output_filename))
+
             # get entropy terms, ionic step counts, and number of completed ionic steps
             outcar.read_pattern(
                 {"smearing_entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"},
@@ -1404,7 +1406,10 @@ class LargeSigmaHandler(ErrorHandler):
             e_step_idx = [step[0] for step in outcar.data.get("electronic_steps", [])]
             smearing_entropy = outcar.data.get("smearing_entropy", [0.0 for _ in e_step_idx])
             for ie_step_idx, ie_step in enumerate(e_step_idx):
-                if ie_step <= completed_ionic_steps:
+                # Because this handler monitors OUTCAR dynamically, it sometimes tries
+                # to retrieve data in OUTCAR before that data is written. To avoid this,
+                # we have two checks for list length here
+                if ie_step <= completed_ionic_steps and ie_step_idx < len(smearing_entropy):
                     entropies_per_atom[ie_step - 1] = smearing_entropy[ie_step_idx]
 
             if len(entropies_per_atom) > 0:
@@ -1413,7 +1418,11 @@ class LargeSigmaHandler(ErrorHandler):
                 if self.entropy_per_atom > self.e_entropy_tol:
                     return True
 
-        return False
+            return False
+
+        except Exception:
+            # Can't perform check if outcar not valid, or data is missing
+            return False
 
     def correct(self, directory="./"):
         """Perform corrections."""

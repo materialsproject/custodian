@@ -44,8 +44,7 @@ def main() -> None:
         nargs="?",
         default="nwchem",
         type=str,
-        help="Nwchem command. Defaults to nwchem. If you are using mpirun, "
-        'set this to something like "mpirun nwchem".',
+        help='Nwchem command. Defaults to nwchem. If you are using mpirun, set this to something like "mpirun nwchem".',
     )
 
     parser.add_argument(
