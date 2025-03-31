@@ -874,7 +874,7 @@ class StdErrHandler(ErrorHandler):
 
         if "kpoints_trans" in self.errors and self.error_count["kpoints_trans"] == 0:
             m = prod(vi["KPOINTS"].kpts[0])
-            m = max(int(round(m ** (1 / 3))), 1)
+            m = max(round(m ** (1 / 3)), 1)
             if vi["KPOINTS"] and vi["KPOINTS"].style.name.lower().startswith("m"):
                 m += m % 2
             actions.append({"dict": "KPOINTS", "action": {"_set": {"kpoints": [[m] * 3]}}})
@@ -1111,7 +1111,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         backup(VASP_BACKUP_FILES | {self.output_filename}, directory=directory)
         vi = VaspInput.from_directory(directory)
         m = prod(vi["KPOINTS"].kpts[0])
-        m = max(int(round(m ** (1 / 3))), 1)
+        m = max(round(m ** (1 / 3)), 1)
         if vi["KPOINTS"] and vi["KPOINTS"].style.name.lower().startswith("m"):
             m += m % 2
         actions = [{"dict": "KPOINTS", "action": {"_set": {"kpoints": [[m] * 3]}}}]
