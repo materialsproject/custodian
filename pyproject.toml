@@ -172,6 +172,10 @@ lint = [
     "mypy>=1.15.0",
     "ruff>=0.11.2",
 ]
+maintain = [
+    "invoke>=2.2.0",
+    "sphinx>=8.1.3",
+]
 
 [tool.setuptools.package-data]
 custodian = ["py.typed"]
