@@ -49,7 +49,7 @@ class FeffModder(Modder):
             if "dict" in action:
                 key = action["dict"]
                 modified.append(key)
-                self.feffinp[key] = self.modify_object(action["action"], self.feffinp[key])
+                self.feffinp[key] = self.modify_object(action["action"], self.feffinp[key])  # type:ignore[index]
             elif "file" in action:
                 self.modify(action["action"], action["file"])
             else:
@@ -57,9 +57,11 @@ class FeffModder(Modder):
         if modified:
             feff = self.feffinp
             feff_input = "\n\n".join(
-                str(feff[key]) for key in ("HEADER", "PARAMETERS", "POTENTIALS", "ATOMS") if key in feff
+                str(feff[key])  # type:ignore[index,operator]
+                for key in ("HEADER", "PARAMETERS", "POTENTIALS", "ATOMS")
+                if key in feff  # type:ignore[index,operator]
             )
-            for key, val in feff.items():
+            for key, val in feff.items():  # type:ignore[union-attr]
                 with open(os.path.join(self.directory, key), "w") as file:
                     file.write(str(val))
 
