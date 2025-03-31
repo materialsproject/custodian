@@ -141,8 +141,6 @@ class GaussianErrorHandler(ErrorHandler):
         self.stderr_file = stderr_file
         self.cart_coords = cart_coords
         self.errors: set[str] = set()
-        self.gout: GaussianOutput = None
-        self.gin: GaussianInput = None
         self.scf_max_cycles = scf_max_cycles
         self.opt_max_cycles = opt_max_cycles
         self.job_type = job_type
