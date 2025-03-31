@@ -28,14 +28,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Install uv.
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: pip
-          cache-dependency-path: pyproject.toml
-
-      - name: Install uv
-        run: pip install uv
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - uses: conda-incubator/setup-miniconda@v3
         with:
