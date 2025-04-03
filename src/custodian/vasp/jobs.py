@@ -116,17 +116,17 @@ class VaspJob(Job):
             auto_gamma (bool): Whether to automatically check if run is a
                 Gamma 1x1x1 run, and whether a Gamma optimized version of
                 VASP exists with ".gamma" appended to the name of the VASP
-                executable or with "gamma" replacing "std" in the name of 
+                executable or with "gamma" replacing "std" in the name of
                 the VASP executable (typical setup in many systems). If so, run the
                 gamma optimized version of VASP instead of regular VASP. You
                 can also specify the gamma vasp command using the
                 gamma_vasp_cmd argument if the command is named differently.
             auto_ncl (bool): Whether to automatically check if run is a
                 non-collinear run, and whether a non-collinear version of
-                VASP exists with ".ncl" appended to the name of the VASP 
+                VASP exists with ".ncl" appended to the name of the VASP
                 executable or "ncl" replacing "std" in the name of the VASP
                 executable (typical setup in many systems). If so, run the
-                the non-collinear version of VASP instead of regular VASP. You 
+                the non-collinear version of VASP instead of regular VASP. You
                 can also specify the ncl vasp command using the ncl_vasp_cmd
                 argument if the command is named differently.
             settings_override ([dict]): An ansible style list of dict to
