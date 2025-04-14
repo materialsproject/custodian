@@ -173,6 +173,11 @@ dev = [
     "myst-parser>=4.0.1",
     "sphinx-markdown-builder>=0.6.8",
 ]
+lint = [
+    "pre-commit>=4.2.0",
+    "mypy>=1.15.0",
+    "ruff>=0.11.2",
+]
 
 [tool.setuptools.package-data]
 custodian = ["py.typed"]

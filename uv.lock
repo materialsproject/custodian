@@ -281,6 +281,11 @@ dev = [
     { name = "sphinx", version = "8.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "sphinx-markdown-builder" },
 ]
+lint = [
+    { name = "mypy" },
+    { name = "pre-commit" },
+    { name = "ruff" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -306,6 +311,11 @@ dev = [
     { name = "ruff", specifier = ">=0.11.2" },
     { name = "sphinx", specifier = ">=8.1.3" },
     { name = "sphinx-markdown-builder", specifier = ">=0.6.8" },
+]
+lint = [
+    { name = "mypy", specifier = ">=1.15.0" },
+    { name = "pre-commit", specifier = ">=4.2.0" },
+    { name = "ruff", specifier = ">=0.11.2" },
 ]
 
 [[package]]
