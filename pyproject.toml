@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "custodian"
-version = "2024.10.16"
+version = "2025.4.14"
 description = "A simple JIT job management framework in Python."
 authors = [
     { name = "Janosh Riebesell", email = "janosh.riebesell@gmail.com" },
@@ -170,6 +170,8 @@ dev = [
     "ruff>=0.11.2",
     "invoke>=2.2.0",
     "sphinx>=8.1.3",
+    "myst-parser>=4.0.1",
+    "sphinx-markdown-builder>=0.6.8",
 ]
 
 [tool.setuptools.package-data]

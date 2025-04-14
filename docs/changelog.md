@@ -7,6 +7,7 @@ nav_order: 2
 # Change Log
 
 ## 2025.4.14
+* SYMPREC is now properly rounded when they are modified by custodian.
 * PR #362 from @Andrew-S-Rosen (#362)
     Anytime that we modify NCORE, we should also unset NPAR if it's present in the INCAR file since NPAR takes precedence. This is done throughout Custodian, but there was one spot missing it. I added it in.
 * PR #356 from @esoteric-ephemera (#356)
