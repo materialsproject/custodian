@@ -58,7 +58,6 @@ where = ["src"]
 include = ["custodian*"]
 
 [tool.ruff]
-target-version = "py311"
 line-length = 120
 
 [tool.ruff.lint]
@@ -167,12 +166,8 @@ dev = [
     "pymatgen>=2025.3.10",
     "pytest>=8.3.5",
     "pytest-cov>=6.0.0",
-]
-lint = [
     "mypy>=1.15.0",
     "ruff>=0.11.2",
-]
-maintain = [
     "invoke>=2.2.0",
     "sphinx>=8.1.3",
 ]

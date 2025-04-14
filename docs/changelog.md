@@ -6,6 +6,28 @@ nav_order: 2
 
 # Change Log
 
+## 2025.4.14
+* PR #362 from @Andrew-S-Rosen (#362)
+    Anytime that we modify NCORE, we should also unset NPAR if it's present in the INCAR file since NPAR takes precedence. This is done throughout Custodian, but there was one spot missing it. I added it in.
+* PR #356 from @esoteric-ephemera (#356)
+    Two major changes:
+    - Since `LargeSigmaHandler` is a monitor handler (checks while output is still being written), it can occasionally misfire when parsing data from OUTCAR. This adds a fix to prevent jobs from being terminated when the handler itself fails to interpret partial file output
+    - Close [#348](https://github.com/materialsproject/custodian/issues/348) by expanding the scope of k-point checks to include KSPACING, and to also check for grid shifts in KPOINTS
+* PR #349 from @soge8904 (#349)
+    Hi,
+    This PR is to add jobs.py for JDFTx. We have a draft PR open on atomate2 to integrate JDFTx, but it seems that this script belongs here. Jobs.py was created using the CP2K template, with only the basic functionalities for now (just enough to run a job).
+* PR #346 from @Andrew-S-Rosen (#346)
+    As recommended in [pep 0561](https://peps.python.org/pep-0561/), a blank `py.typed` marker should be included when type hints are used so downstream codes can type check with `mypy` and similar tools. There aren't many type hints in this code, but there are some.
+    I also removed the reliance on `numpy==1.26.4` in the test suite since this caused other issues due to https://github.com/materialsproject/pymatgen/issues/3990.
+* PR #342 from @esoteric-ephemera (#342)
+    Minor update to the logic of the `auto_nbands` check for `VaspErrorHandler`. This check sees if the number of bands has been updated by VASP, and currently it only checks to see if that updated number is very large.
+    However, there are cases where the user specifies an NBANDS that is incompatible with their parallelization settings, as NBANDS must be divisible by $(\mathrm{ranks}) / (\mathrm{KPAR} \times \mathrm{NCORE})$. In these cases, VASP increases the number of bands to ensure the calculation can still proceed. This can happen in MP's band structure workflows with uniform $k$-point densities.
+    However, since the current `auto_nbands` handler applies no corrections to the job, these otherwise successful runs are killed.
+    This PR adds logic to ensure that the calculation is rerun with a higher number of bands appropriate to the parallelization setting. This is kinda redundant, since VASP already does this. But I think it has to occur this way because `VaspErrorHandler` is monitoring the job and flags it for an `auto_nbands` error.
+    Another implementation concern: it's generally safer to decrease the number of bands since this requires a lower energy cutoff to converge each band. It might be safer to decrease NBANDS as a fix
+* PR #341 from @zulissimeta (#341)
+    Address #340 . Problem: the base Modder() class also sets the directory, so the call to the super `__init__` also needs the directory.
+
 ## 2024.10.16
 * Add a update_incar option in VaspJob which updates parameters from a previous vasprun.xml.
 
