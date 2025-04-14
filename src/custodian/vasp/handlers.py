@@ -622,11 +622,11 @@ class VaspErrorHandler(ErrorHandler):
             if all(self.error_count[key] == 0 for key in symprec_errors):
                 # first, reduce by 10x
                 orig_symprec = vi["INCAR"].get("SYMPREC", 1e-5)
-                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": orig_symprec / 10}}})
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": float(f"{orig_symprec / 10:.1e}")}}})
             elif all(self.error_count[key] <= 1 for key in symprec_errors):
                 # next, increase by 100x (10x the original)
                 orig_symprec = vi["INCAR"].get("SYMPREC", 1e-6)
-                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": orig_symprec * 100}}})
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": float(f"{orig_symprec * 100:.1e}")}}})
             elif any(self.error_count[key] > 1 for key in symprec_errors) and vi["INCAR"].get("ISYM", 2) > 0:
                 # Failing that, disable symmetry altogether
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
@@ -665,7 +665,7 @@ class VaspErrorHandler(ErrorHandler):
             elif symprec < 1e-4:
                 # try 10xing symprec twice, then set ISYM=0 to not impose potentially artificial symmetry from
                 # too loose symprec on charge density
-                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": symprec * 10}}})
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": float(f"{symprec * 10:.1e}")}}})
             else:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
             self.error_count["bravais"] += 1
