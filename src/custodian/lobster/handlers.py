@@ -27,7 +27,7 @@ class EnoughBandsValidator(Validator):
 
     def check(self, directory: str = "./") -> bool:
         """
-        checks if the VASP calculation had enough bands
+        Checks if the VASP calculation had enough bands
         Returns:
             (bool) if True, too few bands have been applied.
         """

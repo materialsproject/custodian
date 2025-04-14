@@ -531,7 +531,6 @@ class VaspErrorHandlerTest(PymatgenTest):
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["dentet"]
-        print(dct["actions"])
         assert dct["actions"] == [{"action": {"_set": {"KSPACING": 1.333333, "KGAMMA": True}}, "dict": "INCAR"}]
 
     def test_nbands_not_sufficient(self) -> None:
@@ -845,6 +844,33 @@ class LargeSigmaHandlerTest(PymatgenTest):
 
         # second check should find that sigma is correct as-is
         handler = LargeSigmaHandler(output_filename=zpath("OUTCAR_pass_sigma_check"))
+        assert not handler.check()
+
+    def test_no_crash_on_partial_output(self) -> None:
+        from pathlib import Path
+
+        from monty.io import zopen
+        # ensure that the handler doesn't crash when the OUTCAR isn't completely written
+        # this prevents jobs from being killed when the handler itself crashes
+
+        orig_outcar_path = Path(zpath("OUTCAR_pass_sigma_check"))
+        new_outcar_name = str(orig_outcar_path.parent.resolve() / f"temp_{orig_outcar_path.name}")
+        shutil.copy(orig_outcar_path, new_outcar_name)
+
+        # simulate this behavior by manually removing one of the electronic
+        # entropy lines that the handler searches for
+        with zopen(new_outcar_name, "rt") as f:
+            data = f.read().splitlines()
+
+        for rm_idx in range(len(data) - 1, 0, -1):
+            if "T*S" in data[rm_idx]:
+                data.pop(rm_idx)
+                break
+
+        with zopen(new_outcar_name, "wt") as f:
+            f.write("\n".join(data))
+
+        handler = LargeSigmaHandler(output_filename=zpath("OUTCAR_partial_output"))
         assert not handler.check()
 
 
