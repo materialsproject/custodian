@@ -53,8 +53,8 @@ to install the package in editable mode.
 
 # Requirements
 
-Custodian supports Python 3.8+. There are no other required dependencies. However, if you wish to use many of the
-built-in error handlers and Jobs for VASP, NWChem, QChem, etc., you will likely need pymatgen to be installed as well.
+Custodian has no required dependencies. However, if you wish to use many of the built-in error handlers and Jobs for
+VASP, NWChem, QChem, etc., you will likely need pymatgen to be installed as well.
 
 # Usage
 
