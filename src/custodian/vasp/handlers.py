@@ -137,6 +137,8 @@ class VaspErrorHandler(ErrorHandler):
         "set_core_wf": ["internal error in SET_CORE_WF"],
         "read_error": ["Error reading item", "Error code was IERR= 5"],
         "auto_nbands": ["The number of bands has been changed"],
+        "ibzkpt": ["not all point group operations"],
+        "fexcf": ["supplied exchange-correlation table"],
     }
 
     def __init__(
@@ -208,6 +210,20 @@ class VaspErrorHandler(ErrorHandler):
 
         if "tet" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+
+        if "ibzkpt" in self.errors:
+            # Discussion here:
+            # https://www.vasp.at/forum/viewtopic.php?p=24485
+            if self.error_count["ibzkpt"] == 0 and vi["INCAR"].get("ISYM", 2) != 0:
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+            elif self.error_count["ibzkpt"] == 1 and vi["INCAR"].get("SYMPREC", 1e-5) > 1e-6:
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-6}}})
+            self.error_count["ibzkpt"] += 1
+
+        if "fexcf" in self.errors:
+            # Minimal fixes suggested here, only practical one is CONTCAR --> POSCAR
+            # https://www.vasp.at/forum/viewtopic.php?p=14827
+            actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
 
         if "dentet" in self.errors:
             # For dentet: follow advice in this thread
