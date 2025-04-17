@@ -223,7 +223,13 @@ class VaspErrorHandler(ErrorHandler):
         if "fexcf" in self.errors:
             # Minimal fixes suggested here, only practical one is CONTCAR --> POSCAR
             # https://www.vasp.at/forum/viewtopic.php?p=14827
-            actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+            if self.error_count["fexcf"] == 0:
+                # First see if last ionic configuration is more stable on rerun
+                actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+            elif self.error_count["fexcf"] == 1 and vi["INCAR"].get("IBRION", -1) == 1:
+                # Try more stable geometry optimization method
+                actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 2}}})
+            self.error_count["fexcf"] += 1
 
         if "dentet" in self.errors:
             # For dentet: follow advice in this thread
