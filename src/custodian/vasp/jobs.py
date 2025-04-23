@@ -988,6 +988,9 @@ def _gamma_point_only_check(vis: VaspInput) -> bool:
     """
     Check if only a single k-point is used in this calculation.
 
+    Additionally, ensure that density functional perturbation theory
+    (DFPT) calculations are not being run - these cannot use Gamma-only.
+
     Parameters
     -----------
     vis: VaspInput, the VASP input set for the calculation
@@ -997,6 +1000,11 @@ def _gamma_point_only_check(vis: VaspInput) -> bool:
     bool: True --> use vasp_gam, False --> use vasp_std
     """
     kpts = vis["KPOINTS"]
+
+    if any(vis["INCAR"].get(k, False) for k in ("LEPSILON", "LOPTICS")):
+        # Prevent VASP gamma from being run on DFPT tasks.
+        return False
+
     if (
         kpts is not None
         and kpts.style == Kpoints.supported_modes.Gamma
