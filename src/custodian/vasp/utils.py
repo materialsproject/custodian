@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from pymatgen.io.vasp.inputs import Kpoints
@@ -85,7 +85,7 @@ def increase_k_point_density(
     success = False
     for _ in range(max_inc):
         if uses_kspacing:
-            new_kpoints = {"KSPACING": round(kpoints / mult_fac, 6), "KGAMMA": force_gamma}  # type: ignore[operator]
+            new_kpoints: dict[str, Any] = {"KSPACING": round(kpoints / mult_fac, 6), "KGAMMA": force_gamma}  # type: ignore[operator]
             new_nk = _estimate_num_k_points_from_kspacing(structure, new_kpoints["KSPACING"])
         else:
             kpts = Kpoints.automatic_density(structure, mult_fac * kppa, force_gamma=force_gamma)  # type: ignore

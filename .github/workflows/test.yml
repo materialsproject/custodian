@@ -1,4 +1,4 @@
-name: Testing
+name: Test
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-14]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         # not testing on 3.9 because tests use glob("*", root_dir=TEST_FILES)
         # and root_dir only added in 3.10
         python-version: ["3.10", "3.12"]
@@ -28,14 +28,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Install uv.
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: pip
-          cache-dependency-path: pyproject.toml
-
-      - name: Install uv
-        run: pip install uv
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - uses: conda-incubator/setup-miniconda@v3
         with:
@@ -46,15 +43,18 @@ jobs:
         run: conda install -c conda-forge openbabel
 
       - name: Install dependencies
-        run: uv pip install -e '.[dev]' --system
+        run: |
+          uv pip install -e . --system
+          uv pip install pytest pymatgen pytest-cov --system
 
       - name: pytest
         env:
           PMG_MAPI_KEY: ${{ secrets.PMG_MAPI_KEY }}
           MPLBACKEND: Agg
-        run: pytest --cov=custodian --color=yes tests
+        run: pytest --cov=custodian --cov-report=xml --color=yes tests
 
       - name: Upload coverage reports to Codecov
+        if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

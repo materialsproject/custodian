@@ -260,8 +260,7 @@ class VaspJob(Job):
         cmd = list(self.vasp_cmd)
         if self.auto_gamma:
             vi = VaspInput.from_directory(directory)
-            kpts = vi["KPOINTS"]
-            if kpts is not None and kpts.style == Kpoints.supported_modes.Gamma and tuple(kpts.kpts[0]) == (1, 1, 1):
+            if _gamma_point_only_check(vi):
                 if self.gamma_vasp_cmd is not None and which(self.gamma_vasp_cmd[-1]):  # pylint: disable=E1136
                     cmd = self.gamma_vasp_cmd
                 elif which(cmd[-1] + ".gamma"):
@@ -842,7 +841,7 @@ class VaspNEBJob(VaspJob):
 
         if self.half_kpts and os.path.isfile(os.path.join(directory, "KPOINTS")):
             kpts = Kpoints.from_file(os.path.join(directory, "KPOINTS"))
-            kpts.kpts = [tuple(int(nk) for nk in kv) for kv in np.maximum(np.array(kpts.kpts) / 2, 1)]
+            kpts.kpts = [tuple(int(nk) for nk in kv) for kv in np.maximum(np.array(kpts.kpts) / 2, 1)]  # type:ignore[misc]
             if tuple(kpts.kpts[0]) == (1, 1, 1):
                 kpt_dic = kpts.as_dict()
                 kpt_dic["generation_style"] = "Gamma"
@@ -894,12 +893,8 @@ class VaspNEBJob(VaspJob):
         """
         cmd = list(self.vasp_cmd)
         if self.auto_gamma:
-            kpts = Kpoints.from_file(os.path.join(directory, "KPOINTS"))
-            if kpts.style == Kpoints.supported_modes.Gamma and tuple(kpts.kpts[0]) == (
-                1,
-                1,
-                1,
-            ):
+            vi = VaspInput.from_directory(directory)
+            if _gamma_point_only_check(vi):
                 if self.gamma_vasp_cmd is not None and which(self.gamma_vasp_cmd[-1]):  # pylint: disable=E1136
                     cmd = self.gamma_vasp_cmd
                 elif which(cmd[-1] + ".gamma"):
@@ -987,3 +982,49 @@ class GenerateVaspInputJob(Job):
 
     def postprocess(self, directory="./") -> None:
         """Dummy postprocess."""
+
+
+def _gamma_point_only_check(vis: VaspInput) -> bool:
+    """
+    Check if only a single k-point is used in this calculation.
+
+    Additionally, ensure that density functional perturbation theory
+    (DFPT) calculations are not being run - these cannot use Gamma-only.
+
+    Parameters
+    -----------
+    vis: VaspInput, the VASP input set for the calculation
+
+    Returns:
+    -----------
+    bool: True --> use vasp_gam, False --> use vasp_std
+    """
+    kpts = vis["KPOINTS"]
+
+    if any(vis["INCAR"].get(k, False) for k in ("LEPSILON", "LOPTICS")):
+        # Prevent VASP gamma from being run on DFPT tasks.
+        return False
+
+    if (
+        kpts is not None
+        and kpts.style == Kpoints.supported_modes.Gamma
+        and tuple(kpts.kpts[0]) == (1, 1, 1)
+        and all(abs(ks) < 1.0e-6 for ks in kpts.kpts_shift)
+    ):
+        return True
+
+    if (kspacing := vis["INCAR"].get("KSPACING")) is not None and vis["INCAR"].get("KGAMMA", True):
+        # Get number of kpoints per axis according to the formula given by VASP:
+        # https://www.vasp.at/wiki/index.php/KSPACING
+        # Note that the VASP definition of the closure relation between reciprocal
+        # lattice vectors b_i and direct lattice vectors a_j is not the conventional
+        # b_i . a_j = 2 pi delta_ij,
+        # and instead places the 2 pi factor in the formula for getting the number
+        # of kpoints per axis.
+        nk = [
+            int(max(1, np.ceil(vis["POSCAR"].structure.lattice.reciprocal_lattice.abc[ik] / kspacing)))
+            for ik in range(3)
+        ]
+        return np.prod(nk) == 1
+
+    return False

@@ -89,7 +89,7 @@ class Cp2kJob(Job):
         """
         decompress_dir(directory)
 
-        self.ci = Cp2kInput.from_file(zpath(os.path.join(directory, self.input_file)))
+        self.ci = Cp2kInput.from_file(zpath(os.path.join(directory, self.input_file)))  # type:ignore[assignment]
         cleanup_input(self.ci)
 
         if self.restart:
