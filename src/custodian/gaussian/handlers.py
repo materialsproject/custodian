@@ -141,8 +141,6 @@ class GaussianErrorHandler(ErrorHandler):
         self.stderr_file = stderr_file
         self.cart_coords = cart_coords
         self.errors: set[str] = set()
-        self.gout: GaussianOutput = None
-        self.gin: GaussianInput = None
         self.scf_max_cycles = scf_max_cycles
         self.opt_max_cycles = opt_max_cycles
         self.job_type = job_type
@@ -433,7 +431,7 @@ class GaussianErrorHandler(ErrorHandler):
         Returns:
             bool: True if the Gaussian version is not 16, False otherwise.
         """
-        return "16" not in gout.version
+        return "16" not in gout.version  # type:ignore[attr-defined]
 
     @staticmethod
     def _monitor_convergence(data: dict[str, dict[str, Any]], directory: str = "./") -> None:
@@ -487,10 +485,10 @@ class GaussianErrorHandler(ErrorHandler):
         error_patts = set()
         # TODO: move this to pymatgen?
         self.conv_data = {"values": {}, "thresh": {}}
-        with zopen(os.path.join(directory, self.output_file)) as f:
+        with zopen(os.path.join(directory, self.output_file), "rt") as f:
             for line in f:
-                error_match = GaussianErrorHandler.error_patt.search(line)
-                mem_match = GaussianErrorHandler.recom_mem_patt.search(line)
+                error_match = GaussianErrorHandler.error_patt.search(line)  # type:ignore[arg-type]
+                mem_match = GaussianErrorHandler.recom_mem_patt.search(line)  # type:ignore[arg-type]
                 if error_match:
                     patt = error_match.group(0)
                     error_patts.add(patt)

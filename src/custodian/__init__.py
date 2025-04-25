@@ -13,7 +13,7 @@ __author__ = (
     "Samuel M. Blau, Janosh Riebesell"
 )
 try:
-    __version__ = version("pymatgen")
+    __version__ = version("custodian")
 except PackageNotFoundError:  # pragma: no cover
     # package is not installed
     pass

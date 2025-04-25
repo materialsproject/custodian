@@ -52,11 +52,11 @@ every 30 x 10 = 300 seconds, i.e., 5 minutes. -->
 Initializes a Custodian from a list of jobs and error handlers.
 
 * **Parameters**
-  * **handlers** (*[**ErrorHandler**]*) – Error handlers. In order of priority of
+  * **handlers** ( *[**ErrorHandler**]*) – Error handlers. In order of priority of
     fixing.
-  * **jobs** (*[**Job**]*) – Sequence of Jobs to be run. Note that this can be
+  * **jobs** ( *[**Job**]*) – Sequence of Jobs to be run. Note that this can be
     any sequence or even a generator yielding jobs.
-  * **validators** (*[**Validator**]*) – Validators to ensure job success
+  * **validators** ( *[**Validator**]*) – Validators to ensure job success
   * **max_errors_per_job** (*int*) – Maximum number of errors per job allowed
     before exiting. Defaults to None, which means it is set to be
     equal to max_errors..

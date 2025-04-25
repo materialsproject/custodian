@@ -38,8 +38,7 @@ from custodian.vasp.io import load_outcar, load_vasprun
 from custodian.vasp.utils import increase_k_point_density
 
 __author__ = (
-    "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen, "
-    "Stephen Dacek, Andrew Rosen, Janosh Riebesell"
+    "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen, Stephen Dacek, Andrew Rosen, Janosh Riebesell"
 )
 __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
@@ -138,6 +137,8 @@ class VaspErrorHandler(ErrorHandler):
         "set_core_wf": ["internal error in SET_CORE_WF"],
         "read_error": ["Error reading item", "Error code was IERR= 5"],
         "auto_nbands": ["The number of bands has been changed"],
+        "ibzkpt": ["not all point group operations"],
+        "fexcf": ["supplied exchange-correlation table"],
     }
 
     def __init__(
@@ -209,6 +210,26 @@ class VaspErrorHandler(ErrorHandler):
 
         if "tet" in self.errors:
             actions.append({"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}})
+
+        if "ibzkpt" in self.errors:
+            # Discussion here:
+            # https://www.vasp.at/forum/viewtopic.php?p=24485
+            if self.error_count["ibzkpt"] == 0 and vi["INCAR"].get("ISYM", 2) != 0:
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+            elif self.error_count["ibzkpt"] == 1 and vi["INCAR"].get("SYMPREC", 1e-5) > 1e-6:
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-6}}})
+            self.error_count["ibzkpt"] += 1
+
+        if "fexcf" in self.errors:
+            # Minimal fixes suggested here, only practical one is CONTCAR --> POSCAR
+            # https://www.vasp.at/forum/viewtopic.php?p=14827
+            if self.error_count["fexcf"] == 0:
+                # First see if last ionic configuration is more stable on rerun
+                actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+            elif self.error_count["fexcf"] == 1 and vi["INCAR"].get("IBRION", -1) == 1:
+                # Try more stable geometry optimization method
+                actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 2}}})
+            self.error_count["fexcf"] += 1
 
         if "dentet" in self.errors:
             # For dentet: follow advice in this thread
@@ -394,6 +415,8 @@ class VaspErrorHandler(ErrorHandler):
                     actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
 
         if self.errors.intersection(["subspacematrix"]):
+            # Sometimes, this error can be due to parallelization issues with running across too many cores
+            # on a small structure. If this is the case, try reducing the number of cores or increasing NCORE or NPAR
             if self.error_count["subspacematrix"] == 0 and vi["INCAR"].get("LREAL", False) is not False:
                 actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
             elif self.error_count["subspacematrix"] == 1 and vi["INCAR"].get("PREC", "Normal") != "Accurate":
@@ -570,6 +593,8 @@ class VaspErrorHandler(ErrorHandler):
                 nelect = 1  # dummy value
             if nelect < nprocs:
                 actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": vi["INCAR"].get("NCORE", 1) * 2}}})
+                if "NPAR" in vi["INCAR"]:
+                    actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
 
         if "grad_not_orth" in self.errors:
             # Often coincides with algo_tet, in which the algo_tet error handler will also resolve grad_not_orth.
@@ -619,11 +644,11 @@ class VaspErrorHandler(ErrorHandler):
             if all(self.error_count[key] == 0 for key in symprec_errors):
                 # first, reduce by 10x
                 orig_symprec = vi["INCAR"].get("SYMPREC", 1e-5)
-                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": orig_symprec / 10}}})
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": float(f"{orig_symprec / 10:.1e}")}}})
             elif all(self.error_count[key] <= 1 for key in symprec_errors):
                 # next, increase by 100x (10x the original)
                 orig_symprec = vi["INCAR"].get("SYMPREC", 1e-6)
-                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": orig_symprec * 100}}})
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": float(f"{orig_symprec * 100:.1e}")}}})
             elif any(self.error_count[key] > 1 for key in symprec_errors) and vi["INCAR"].get("ISYM", 2) > 0:
                 # Failing that, disable symmetry altogether
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
@@ -662,7 +687,7 @@ class VaspErrorHandler(ErrorHandler):
             elif symprec < 1e-4:
                 # try 10xing symprec twice, then set ISYM=0 to not impose potentially artificial symmetry from
                 # too loose symprec on charge density
-                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": symprec * 10}}})
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": float(f"{symprec * 10:.1e}")}}})
             else:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
             self.error_count["bravais"] += 1
@@ -871,7 +896,7 @@ class StdErrHandler(ErrorHandler):
 
         if "kpoints_trans" in self.errors and self.error_count["kpoints_trans"] == 0:
             m = prod(vi["KPOINTS"].kpts[0])
-            m = max(int(round(m ** (1 / 3))), 1)
+            m = max(round(m ** (1 / 3)), 1)
             if vi["KPOINTS"] and vi["KPOINTS"].style.name.lower().startswith("m"):
                 m += m % 2
             actions.append({"dict": "KPOINTS", "action": {"_set": {"kpoints": [[m] * 3]}}})
@@ -1108,7 +1133,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         backup(VASP_BACKUP_FILES | {self.output_filename}, directory=directory)
         vi = VaspInput.from_directory(directory)
         m = prod(vi["KPOINTS"].kpts[0])
-        m = max(int(round(m ** (1 / 3))), 1)
+        m = max(round(m ** (1 / 3)), 1)
         if vi["KPOINTS"] and vi["KPOINTS"].style.name.lower().startswith("m"):
             m += m % 2
         actions = [{"dict": "KPOINTS", "action": {"_set": {"kpoints": [[m] * 3]}}}]
@@ -1348,8 +1373,7 @@ class ScanMetalHandler(KspacingMetalHandler):
             kwargs: Keyword passed to parent class.
         """
         warnings.warn(
-            "ScanMetalHandler is deprecated and will be removed in a future release. "
-            "Use KspacingMetalHandler instead.",
+            "ScanMetalHandler is deprecated and will be removed in a future release. Use KspacingMetalHandler instead.",
             DeprecationWarning,
         )
         super().__init__(*args, **kwargs)
@@ -1365,7 +1389,7 @@ class LargeSigmaHandler(ErrorHandler):
 
     is_monitor: bool = True
 
-    def __init__(self, e_entropy_tol: float = 1e-3, min_sigma: float = 0.01, output_filename: str = "OUTCAR") -> None:
+    def __init__(self, e_entropy_tol: float = 1e-3, min_sigma: float = 0.001, output_filename: str = "OUTCAR") -> None:
         """Initializes the handler with a buffer time."""
         self.e_entropy_tol = e_entropy_tol
         self.min_sigma = min_sigma
@@ -1374,13 +1398,13 @@ class LargeSigmaHandler(ErrorHandler):
     def check(self, directory="./") -> bool:
         """Check for error."""
         incar = Incar.from_file(os.path.join(directory, "INCAR"))
-        try:
-            outcar = load_outcar(os.path.join(directory, self.output_filename))
-        except Exception:
-            # Can't perform check if outcar not valid
+        if incar.get("ISMEAR", 1) < 0:
+            # skip check
             return False
 
-        if incar.get("ISMEAR", 1) >= 0:
+        try:
+            outcar = load_outcar(os.path.join(directory, self.output_filename))
+
             # get entropy terms, ionic step counts, and number of completed ionic steps
             outcar.read_pattern(
                 {"smearing_entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"},
@@ -1404,7 +1428,10 @@ class LargeSigmaHandler(ErrorHandler):
             e_step_idx = [step[0] for step in outcar.data.get("electronic_steps", [])]
             smearing_entropy = outcar.data.get("smearing_entropy", [0.0 for _ in e_step_idx])
             for ie_step_idx, ie_step in enumerate(e_step_idx):
-                if ie_step <= completed_ionic_steps:
+                # Because this handler monitors OUTCAR dynamically, it sometimes tries
+                # to retrieve data in OUTCAR before that data is written. To avoid this,
+                # we have two checks for list length here
+                if ie_step <= completed_ionic_steps and ie_step_idx < len(smearing_entropy):
                     entropies_per_atom[ie_step - 1] = smearing_entropy[ie_step_idx]
 
             if len(entropies_per_atom) > 0:
@@ -1413,7 +1440,11 @@ class LargeSigmaHandler(ErrorHandler):
                 if self.entropy_per_atom > self.e_entropy_tol:
                     return True
 
-        return False
+            return False
+
+        except Exception:
+            # Can't perform check if outcar not valid, or data is missing
+            return False
 
     def correct(self, directory="./"):
         """Perform corrections."""
