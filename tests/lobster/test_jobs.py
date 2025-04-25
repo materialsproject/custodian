@@ -4,11 +4,12 @@ import shutil
 from monty.os import cd
 from monty.tempfile import ScratchDir
 
-from custodian.lobster.jobs import LobsterJob
+from custodian.lobster.jobs import LOBSTEROUTPUT_FILES, LobsterJob
 from tests.conftest import TEST_FILES
 
 test_files_lobster2 = f"{TEST_FILES}/lobster/lobsterins"
 test_files_lobster3 = f"{TEST_FILES}/lobster/vasp_lobster_output"
+test_files_lobster4 = f"{TEST_FILES}/lobster/vasp_lobster_output_v51"
 
 VASP_OUTPUT_FILES = (
     "OUTCAR",
@@ -95,3 +96,22 @@ class TestLobsterJob:
                 v.postprocess()
                 for file in (*VASP_OUTPUT_FILES, *LOBSTER_FILES, *FW_FILES):
                     assert os.path.isfile(file)
+
+    def test_postprocess_v51(self) -> None:
+        # test gzipped and zipping of additional files for lobster v5.1
+        with cd(os.path.join(test_files_lobster4)):
+            with ScratchDir(".", copy_from_current_on_enter=True):
+                shutil.copy("lobsterin", "lobsterin.orig")
+                v = LobsterJob("hello", gzipped=True, add_files_to_gzip=VASP_OUTPUT_FILES)
+                v.postprocess()
+                for file in (*VASP_OUTPUT_FILES, *LOBSTEROUTPUT_FILES, *FW_FILES):
+                    if file not in ("POSCAR.lobster", "bandOverlaps.lobster"):  # these files are not in the directory
+                        assert os.path.isfile(f"{file}.gz")
+
+            with ScratchDir(".", copy_from_current_on_enter=True):
+                shutil.copy("lobsterin", "lobsterin.orig")
+                v = LobsterJob("hello", gzipped=False, add_files_to_gzip=VASP_OUTPUT_FILES)
+                v.postprocess()
+                for file in (*VASP_OUTPUT_FILES, *LOBSTEROUTPUT_FILES, *FW_FILES):
+                    if file not in ("POSCAR.lobster", "bandOverlaps.lobster"):  # these files are not in the directory
+                        assert os.path.isfile(file)
