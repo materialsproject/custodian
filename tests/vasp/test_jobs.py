@@ -204,7 +204,7 @@ class TestAutoGamma:
         assert _gamma_point_only_check(vis.get_input_set())
 
         # no longer Gamma-centered
-        vis = MPRelaxSet(structure=structure, user_kpoints_settings=Kpoints([(2, 1 ,1)])
+        vis = MPRelaxSet(structure=structure, user_kpoints_settings=Kpoints([(2, 1 ,1)]))
         assert not _gamma_point_only_check(vis.get_input_set())
 
         vis = MPRelaxSet(structure=structure, user_kpoints_settings=Kpoints(kpts_shift=(0.1, 0.0, 0.0)))
