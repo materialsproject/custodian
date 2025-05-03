@@ -2,7 +2,7 @@ exclude: ^(docs|tests/files|tasks.py)
 
 ci:
   autoupdate_schedule: monthly
-  skip: [ mypy, pyright ]
+  skip: [mypy, pyright]
   autofix_commit_msg: pre-commit auto-fixes
   autoupdate_commit_msg: pre-commit autoupdate
 
@@ -11,7 +11,7 @@ repos:
     rev: v0.11.4
     hooks:
       - id: ruff
-        args: [ --fix, --unsafe-fixes ]
+        args: [--fix, --unsafe-fixes]
       - id: ruff-format
 
   - repo: https://github.com/pre-commit/pre-commit-hooks

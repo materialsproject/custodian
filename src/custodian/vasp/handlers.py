@@ -1591,6 +1591,9 @@ class NonConvergingErrorHandler(ErrorHandler):
     Check if a run is hitting the maximum number of electronic steps at the
     last nionic_steps ionic steps (default=10). If so, change ALGO using a
     multi-step ladder scheme or kill the job.
+
+    In some cases (ALGO=All or ALGO=Normal and ISMEAR < 0), this handler also changes AMIX
+    and BMIX but unsure if this helps much. Some anecdotal evidence suggests it doesn't.
     """
 
     is_monitor = True
