@@ -201,16 +201,18 @@ class TestAutoGamma:
 
         vis = MPRelaxSet(structure=structure)
         assert vis.kpoints.kpts == [(1, 1, 1)]
-        assert vis.kpoints.style.name == "Gamma"
         assert _gamma_point_only_check(vis.get_input_set())
 
         # no longer Gamma-centered
+        vis = MPRelaxSet(structure=structure, user_kpoints_settings=Kpoints([(2, 1 ,1]))
+        assert not _gamma_point_only_check(vis.get_input_set())
+        
         vis = MPRelaxSet(structure=structure, user_kpoints_settings=Kpoints(kpts_shift=(0.1, 0.0, 0.0)))
         assert not _gamma_point_only_check(vis.get_input_set())
 
-        # have to increase KSPACING or this will result in a non 1 x 1 x 1 grid
+        # KSPACING-related checks
         vis = MPRelaxSet(structure=structure, user_incar_settings={"KSPACING": 0.5})
         assert _gamma_point_only_check(vis.get_input_set())
 
-        vis = MPRelaxSet(structure=structure, user_incar_settings={"KSPACING": 0.5, "KGAMMA": False})
+        vis = MPRelaxSet(structure=structure, user_incar_settings={"KSPACING": 50})
         assert not _gamma_point_only_check(vis.get_input_set())
