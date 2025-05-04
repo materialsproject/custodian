@@ -1005,15 +1005,10 @@ def _gamma_point_only_check(vis: VaspInput) -> bool:
         # Prevent VASP gamma from being run on DFPT tasks.
         return False
 
-    if (
-        kpts is not None
-        and kpts.style == Kpoints.supported_modes.Gamma
-        and tuple(kpts.kpts[0]) == (1, 1, 1)
-        and all(abs(ks) < 1.0e-6 for ks in kpts.kpts_shift)
-    ):
+    if kpts is not None and tuple(kpts.kpts[0]) == (1, 1, 1) and all(abs(ks) < 1.0e-6 for ks in kpts.kpts_shift):
         return True
 
-    if (kspacing := vis["INCAR"].get("KSPACING")) is not None and vis["INCAR"].get("KGAMMA", True):
+    if (kspacing := vis["INCAR"].get("KSPACING")) is not None:
         # Get number of kpoints per axis according to the formula given by VASP:
         # https://www.vasp.at/wiki/index.php/KSPACING
         # Note that the VASP definition of the closure relation between reciprocal
