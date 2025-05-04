@@ -211,8 +211,8 @@ class TestAutoGamma:
         assert not _gamma_point_only_check(vis.get_input_set())
 
         # KSPACING-related checks
-        vis = MPRelaxSet(structure=structure, user_incar_settings={"KSPACING": 0.5})
-        assert _gamma_point_only_check(vis.get_input_set())
+        vis = MPRelaxSet(structure=structure, user_incar_settings={"KSPACING": 0.005})
+        assert not _gamma_point_only_check(vis.get_input_set())
 
         vis = MPRelaxSet(structure=structure, user_incar_settings={"KSPACING": 50})
-        assert not _gamma_point_only_check(vis.get_input_set())
+        assert _gamma_point_only_check(vis.get_input_set())
