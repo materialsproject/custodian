@@ -1021,7 +1021,6 @@ class PositiveEnergyHandlerTest(PymatgenTest):
         assert os.path.isfile("error.1.tar.gz")
         with tarfile.open("error.1.tar.gz", "r:gz") as tar:
             assert len(tar.getmembers()) > 0
-        
 
         incar = Incar.from_file("INCAR")
 
