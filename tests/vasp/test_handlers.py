@@ -1019,7 +1019,7 @@ class PositiveEnergyHandlerTest(PymatgenTest):
         assert dct["errors"] == ["Positive energy"]
 
         assert os.path.isfile("error.1.tar.gz")
-        with tarfile.open("error1.tar.gz", "r:gz") as tar:
+        with tarfile.open("error.1.tar.gz", "r:gz") as tar:
             assert len(tar.getmembers()) > 0
         
 
