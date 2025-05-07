@@ -3,6 +3,7 @@
 import datetime
 import os
 import shutil
+import tarfile
 from glob import glob
 
 import pytest
@@ -1018,6 +1019,8 @@ class PositiveEnergyHandlerTest(PymatgenTest):
         assert dct["errors"] == ["Positive energy"]
 
         assert os.path.isfile("error.1.tar.gz")
+        with tarfile.open("error.1.tar.gz", "r:gz") as tar:
+            assert len(tar.getmembers()) > 0
 
         incar = Incar.from_file("INCAR")
 
