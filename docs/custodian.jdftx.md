@@ -9,7 +9,6 @@ nav_exclude: true
 This package implements various JDFTx Jobs and Error Handlers.
 Used Cp2kJob developed by Nick Winner as a template.
 
-
 * [custodian.jdftx.jobs module](custodian.jdftx.jobs.md)
   * [`JDFTxJob`](custodian.jdftx.jobs.md#custodian.jdftx.jobs.JDFTxJob)
     * [`JDFTxJob.postprocess()`](custodian.jdftx.jobs.md#custodian.jdftx.jobs.JDFTxJob.postprocess)

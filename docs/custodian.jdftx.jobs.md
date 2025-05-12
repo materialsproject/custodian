@@ -8,7 +8,7 @@ nav_exclude: true
 
 This module implements basic kinds of jobs for JDFTx runs.
 
-### *class* custodian.jdftx.jobs.JDFTxJob(jdftx_cmd, input_file='init.in', output_file='jdftx.out', stderr_file='std_err.txt')
+## *class* custodian.jdftx.jobs.JDFTxJob(jdftx_cmd, input_file=’init.in’, output_file=’jdftx.out’, stderr_file=’std_err.txt’)
 
 Bases: `Job`
 
@@ -23,11 +23,11 @@ A basic JDFTx job. Runs whatever is in the working directory.
   * **stderr_file** (*str*) – Name of file to direct standard error to.
     Defaults to “std_err.txt”.
 
-#### postprocess(directory='./') → None
+### postprocess(directory=’./’) → None
 
 No post-processing required.
 
-#### run(directory='./')
+### run(directory=’./’)
 
 Perform the actual JDFTx run.
 
@@ -35,14 +35,14 @@ Perform the actual JDFTx run.
 
 > (subprocess.Popen) Used for monitoring.
 
-#### setup(directory='./') → None
+### setup(directory=’./’) → None
 
 No setup required.
 
-#### terminate(directory='./') → None
+### terminate(directory=’./’) → None
 
 Terminate JDFTx.
 
-#### *static* terminate_process(proc, timeout=5)
+### *static* terminate_process(proc, timeout=5)
 
 Terminate a process gracefully, then forcefully if necessary.

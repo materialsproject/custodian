@@ -37,7 +37,7 @@ of the static constructors. The defaults are usually fine too.
   * **backup** (*bool*) – Whether to backup the initial input files. If True,
     the input file will be copied with a
     “.orig” appended. Defaults to True.
-  * **settings_override** ( *[**actions**]*) – A list of actions. See the Cp2kModder
+  * **settings_override** (  *[**actions**]*) – A list of actions. See the Cp2kModder
     in interpreter.py
   * **restart** (*bool*) – Whether to run in restart mode, i.e. this a continuation of
     a previous calculation. Default is False.
