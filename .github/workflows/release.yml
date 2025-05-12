@@ -19,7 +19,7 @@ jobs:
     # run test.yml first to ensure that the test suite is passing
     uses: ./.github/workflows/test.yml
 
-  build:
+  release:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
@@ -34,31 +34,6 @@ jobs:
       - name: Build source distribution and wheel
         run: |
           uv build
-
-      - uses: actions/upload-artifact@v4
-        with:
-          path: dist/*.*
-
-  release:
-    needs: [build]
-    runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/p/custodian
-    permissions:
-      # For PyPI trusted publishing
-      id-token: write
-    steps:
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
-      - name: Get build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: dist-*
-          path: dist
 
       - name: Publish to PyPI or TestPyPI
         uses: pypa/gh-action-pypi-publish@release/v1
