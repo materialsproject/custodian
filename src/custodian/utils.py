@@ -25,7 +25,7 @@ def backup(filenames, prefix="error", directory="./") -> None:
     logging.info(f"Backing up run to {filename}.")
     with tarfile.open(filename, "w:gz") as tar:
         for fname in filenames:
-            for file in glob(fname):
+            for file in glob(os.path.join(directory, fname)):
                 tar.add(file)
 
 
