@@ -4,6 +4,12 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      task:
+        type: choice
+        options: [release, test-release]
+        default: release
+        description: Release to PyPI or TestPyPI.
 
 permissions:
   contents: read
@@ -40,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/pymatgen
+      url: https://pypi.org/p/custodian
     permissions:
       # For PyPI trusted publishing
       id-token: write
