@@ -6,6 +6,22 @@ nav_order: 2
 
 # Change Log
 
+## 2025.5.12
+* PR #355 from @naik-aakash (#355) updated the list of output files from LOBSTER
+* PR #361 from @yanghan234 (#361)
+    - In finite field calculations, the OUTCAR prints the calculations for all of the requested directions. Updated the codes to parse electronic iterations.
+* PR #375 from @Andrew-S-Rosen (#375)
+    Closes #374.
+    This PR makes a change to the logic for choosing whether a VASP calculation should be run with the gamma-point only version of VASP (typically `vasp_gam`) or not. Specifically, we no longer check for whether the KPOINTS file is gamma-centered or not. This is because a 1x1x1 Monkhorst-Pack grid should be the same as a 1x1x1 Gamma-centered grid. An analogous change was made for the KSPACING-related check.
+    The tests have been updated, and two previously missing tests have been added:
+    - A test to make sure the standard version of VASP is used when the kpoints are not 1x1x1
+    - A test to make sure that the standard version of VASP is used when a small KSPACING is set
+* PR #373 from @esoteric-ephemera (#373)
+    Adds support for correcting two VASP errors:
+    - [FEXCF](https://www.vasp.at/forum/viewtopic.php?p=14827), close #365
+    - [IBZKPT](https://www.vasp.at/forum/viewtopic.php?p=24485)
+    Also ensure that $\Gamma$-point only VASP isn't run when DFPT calcs are run (either / both `LEPSILON` or `LOPTICS` are True)
+
 ## 2025.4.14
 * SYMPREC is now properly rounded when they are modified by custodian.
 * PR #362 from @Andrew-S-Rosen (#362)
