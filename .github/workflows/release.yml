@@ -21,6 +21,12 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/pymatgen
+    permissions:
+      # For PyPI trusted publishing
+      id-token: write
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
