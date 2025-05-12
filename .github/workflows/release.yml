@@ -20,7 +20,6 @@ jobs:
     uses: ./.github/workflows/test.yml
 
   build:
-    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
@@ -39,7 +38,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          path: dist/*.*
+          path: dist/*.tar.gz, dist/*.whl
 
   release:
     needs: [build]
@@ -59,8 +58,7 @@ jobs:
       - name: Get build artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: dist-*
-          merge-multiple: true
+          pattern: "*.*"
           path: dist
 
       - name: Publish to PyPI or TestPyPI
