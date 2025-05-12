@@ -2,25 +2,84 @@ name: Release
 
 on:
   release:
-    types: [created]
+    types: [published]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test:
     # run test.yml first to ensure that the test suite is passing
     uses: ./.github/workflows/test.yml
 
-  build:
+  build_sdist:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repo
+        uses: actions/checkout@v4
 
-      - name: release
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Build source distribution
         run: |
-          pip install build twine
-          python -m build
-          twine upload --skip-existing dist/*.tar.gz
+          pip install build
+          python -m build --sdist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          path: dist/*.tar.gz
+
+  build_wheels:
+    needs: test
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["311"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.23.2
         env:
-          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+          CIBW_BUILD: cp${{ matrix.python-version }}-*
+
+      - name: Save artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}-${{ matrix.python-version }}
+          path: ./wheelhouse/*.whl
+
+  release:
+    needs: [build_wheels, build_sdist]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/pymatgen
+    permissions:
+      # For PyPI trusted publishing
+      id-token: write
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Get build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dist-*
+          merge-multiple: true
+          path: dist
+
+      - name: Publish to PyPI or TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+          verbose: true
