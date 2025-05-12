@@ -4,12 +4,6 @@ on:
   release:
     types: [published]
   workflow_dispatch:
-    inputs:
-      task:
-        type: choice
-        options: [release, test-release]
-        default: release
-        description: Release to PyPI or TestPyPI.
 
 permissions:
   contents: read
@@ -20,6 +14,7 @@ jobs:
     uses: ./.github/workflows/test.yml
 
   release:
+    needs: test
     runs-on: ubuntu-latest
     environment:
       name: pypi
