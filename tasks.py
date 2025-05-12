@@ -77,7 +77,7 @@ def set_ver(ctx) -> None:
     with open("pyproject.toml", "w") as file:
         file.write("\n".join(lines) + "\n")
 
-    ctx.run("ruff check --fix custodian")
+    ctx.run("ruff check --fix src")
     ctx.run("ruff format pyproject.toml")
 
 
