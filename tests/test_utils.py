@@ -1,6 +1,8 @@
-from custodian.utils import backup, tracked_lru_cache
-from pathlib import Path
 import tarfile
+from pathlib import Path
+
+from custodian.utils import backup, tracked_lru_cache
+
 
 def test_cache_and_clear() -> None:
     n_calls = 0
@@ -26,6 +28,7 @@ def test_cache_and_clear() -> None:
 
     assert some_func(1) == 1
     assert n_calls == 3
+
 
 def test_backup(tmp_path) -> None:
     with open(tmp_path / "INCAR", "w") as f:
