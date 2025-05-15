@@ -6,7 +6,7 @@ import os
 import tarfile
 from glob import glob
 from typing import ClassVar
-
+from pathlib import Path
 
 def backup(filenames, prefix="error", directory="./") -> None:
     """
@@ -27,7 +27,7 @@ def backup(filenames, prefix="error", directory="./") -> None:
     with tarfile.open(filename, "w:gz") as tar:
         for fname in filenames:
             for file in glob(os.path.join(directory, fname)):
-                tar.add(file, arcname=os.path.join(prefix, file))
+                tar.add(file, arcname=os.path.join(prefix, os.path.basename(file)))
 
 
 def get_execution_host_info():
