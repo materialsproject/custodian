@@ -21,7 +21,7 @@ def backup(filenames, prefix="error", directory="./") -> None:
         directory (str): directory where the files exist
     """
     num = max([0] + [int(file.split(".")[-3]) for file in glob(os.path.join(directory, f"{prefix}.*.tar.gz"))])
-    prefix = f"{prefix}.{num + 1}
+    prefix = f"{prefix}.{num + 1}"
     filename = os.path.join(directory, f"{prefix}.tar.gz")
     logging.info(f"Backing up run to {filename}.")
     with tarfile.open(filename, "w:gz") as tar:
