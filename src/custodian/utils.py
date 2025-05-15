@@ -7,6 +7,7 @@ import tarfile
 from glob import glob
 from typing import ClassVar
 
+
 def backup(filenames, prefix="error", directory="./") -> None:
     """
     Backup files to a tar.gz file. Used, for example, in backing up the
