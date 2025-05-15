@@ -29,6 +29,7 @@ def test_cache_and_clear() -> None:
     assert some_func(1) == 1
     assert n_calls == 3
 
+
 def test_backup(tmp_path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     with open("INCAR", "w") as f:
@@ -40,6 +41,7 @@ def test_backup(tmp_path, monkeypatch) -> None:
     with tarfile.open("error.1.tar.gz", "r:gz") as tar:
         assert len(tar.getmembers()) > 0
         assert tar.getnames() == ["error.1/INCAR"]
+
 
 def test_backup_with_glob(tmp_path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
@@ -53,6 +55,7 @@ def test_backup_with_glob(tmp_path, monkeypatch) -> None:
         assert len(tar.getmembers()) > 0
         assert tar.getnames() == ["error.1/INCAR"]
 
+
 def test_backup_with_directory(tmp_path) -> None:
     with open(tmp_path / "INCAR", "w") as f:
         f.write("This is a test file.")
@@ -63,4 +66,3 @@ def test_backup_with_directory(tmp_path) -> None:
     with tarfile.open(tmp_path / "error.1.tar.gz", "r:gz") as tar:
         assert len(tar.getmembers()) > 0
         assert tar.getnames() == ["error.1/INCAR"]
-
