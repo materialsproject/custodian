@@ -6,7 +6,6 @@ import os
 import tarfile
 from glob import glob
 from typing import ClassVar
-from pathlib import Path
 
 def backup(filenames, prefix="error", directory="./") -> None:
     """
