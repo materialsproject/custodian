@@ -39,3 +39,5 @@ def test_backup(tmp_path) -> None:
     assert Path(tmp_path / "error.1.tar.gz").exists()
     with tarfile.open(tmp_path / "error.1.tar.gz", "r:gz") as tar:
         assert len(tar.getmembers()) > 0
+        assert tar.getnames() == ["error.1/INCAR"]
+
