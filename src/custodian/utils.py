@@ -8,7 +8,7 @@ from glob import glob
 from typing import ClassVar
 
 
-def backup(filenames, prefix="error", directory="./") -> None:
+def backup(filenames: list[str], prefix="error", directory="./") -> None:
     """
     Backup files to a tar.gz file. Used, for example, in backing up the
     files of an errored run before performing corrections.
