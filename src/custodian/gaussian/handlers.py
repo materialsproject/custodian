@@ -485,7 +485,7 @@ class GaussianErrorHandler(ErrorHandler):
         error_patts = set()
         # TODO: move this to pymatgen?
         self.conv_data = {"values": {}, "thresh": {}}
-        with zopen(os.path.join(directory, self.output_file), "rt") as f:
+        with zopen(os.path.join(directory, self.output_file), "rt", encoding="utf-8") as f:
             for line in f:
                 error_match = GaussianErrorHandler.error_patt.search(line)  # type:ignore[arg-type]
                 mem_match = GaussianErrorHandler.recom_mem_patt.search(line)  # type:ignore[arg-type]

@@ -183,7 +183,7 @@ class VaspErrorHandler(ErrorHandler):
         incar = Incar.from_file(os.path.join(directory, "INCAR"))
         self.errors = set()
         error_msgs = set()
-        with zopen(os.path.join(directory, self.output_filename), mode="rt") as file:
+        with zopen(os.path.join(directory, self.output_filename), mode="rt", encoding="utf-8") as file:
             text = file.read()
 
             # Check for errors
