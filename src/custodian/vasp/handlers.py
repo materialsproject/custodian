@@ -556,8 +556,10 @@ class VaspErrorHandler(ErrorHandler):
             if vi["INCAR"].get("ALGO", "Normal").lower() in {"fast", "veryfast"}:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
             else:
-                potim = round(vi["INCAR"].get("POTIM", 0.5) / 2.0, 2)
-                actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
+                current_potim = vi["INCAR"].get("POTIM", 0.5)
+                if (potim := round(current_potim / 2.0, 2)) < current_potim:
+                    actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
+
             if vi["INCAR"].get("ICHARG", 0) < 10:
                 actions += [
                     {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}},
