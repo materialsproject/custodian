@@ -320,7 +320,7 @@ class QCJob(Job):
                 vdw_mode=orig_input.vdw_mode,
                 van_der_waals=orig_input.van_der_waals,
                 nbo=orig_input.nbo,
-                geom_opt=opt_geom_opt,
+                geom_opt=opt_geom_opt or None,
             )
             opt_QCInput.write_file(input_file)
             first = False
@@ -437,7 +437,7 @@ class QCJob(Job):
                         vdw_mode=orig_input.vdw_mode,
                         van_der_waals=orig_input.van_der_waals,
                         nbo=orig_input.nbo,
-                        geom_opt=opt_geom_opt,
+                        geom_opt=opt_geom_opt or None,
                     )
                     opt_QCInput.write_file(input_file)
                 else:
