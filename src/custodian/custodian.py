@@ -365,12 +365,14 @@ class Custodian:
             MaxCorrectionsError: if max_errors is reached
             MaxCorrectionsPerHandlerError: if max_errors_per_handler is reached
         """
+        original_directory = self.directory
         with ScratchDir(
             self.scratch_dir,
             create_symbolic_link=True,
             copy_to_current_on_exit=True,
             copy_from_current_on_enter=True,
         ) as temp_dir:
+            self.directory = temp_dir # reset self.directory to the temp_dir
             self.total_errors = 0
             start = datetime.datetime.now()
             logger.info(f"Run started at {start} in {temp_dir}.")
@@ -403,10 +405,13 @@ class Custodian:
                 run_time = end - start
                 logger.info(f"Run completed. Total time taken = {run_time}.")
                 if self.gzipped_output:
-                    gzip_dir(".")
+                    gzip_dir(temp_dir)
 
             # Cleanup checkpoint files (if any) if run is successful.
             Custodian._delete_checkpoints(self.directory)
+
+        # Return self.directory as expected
+        self.directory = original_directory
 
         return self.run_log
 
