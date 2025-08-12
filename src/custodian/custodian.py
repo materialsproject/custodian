@@ -372,7 +372,7 @@ class Custodian:
             copy_to_current_on_exit=True,
             copy_from_current_on_enter=True,
         ) as temp_dir:
-            self.directory = temp_dir # reset self.directory to the temp_dir
+            self.directory = temp_dir  # reset self.directory to the temp_dir
             self.total_errors = 0
             start = datetime.datetime.now()
             logger.info(f"Run started at {start} in {temp_dir}.")
