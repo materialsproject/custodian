@@ -178,7 +178,8 @@ class Custodian:
             terminate_on_nonzero_returncode (bool): If True, a non-zero return
                 code on any Job will result in a termination. Defaults to True.
             directory (str): The directory to run the jobs in. Defaults to
-                the current working directory.
+                the current working directory. If you would like to have the
+                jobs run in a temporary directory, use `scratch_dir` instead.
             **kwargs: Any other kwargs are ignored. This is to allow for easy
                  subclassing and instantiation from a dict.
         """
