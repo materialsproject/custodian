@@ -14,7 +14,7 @@ Backup files to a tar.gz file. Used, for example, in backing up the
 files of an errored run before performing corrections.
 
 * **Parameters**
-  * **filenames** (  *[**str**]*) – List of files to backup. Supports wildcards, e.g.,
+  * **filenames** (   *[**str**]*) – List of files to backup. Supports wildcards, e.g.,
      *.*.
   * **prefix** (*str*) – prefix to the files. Defaults to error, which means a
     series of error.1.tar.gz, error.2.tar.gz, … will be generated.

@@ -15,7 +15,7 @@ Bases: [`Modder`](custodian.ansible.interpreter.md#custodian.ansible.interpreter
 A Modder for FeffInput sets
 
 * **Parameters**
-  * **actions** (  *[**Action**]*) – A sequence of supported actions. See
+  * **actions** (   *[**Action**]*) – A sequence of supported actions. See
   * **actions** – A sequence of supported actions. See
     [`custodian.ansible.actions`](custodian.ansible.actions.md#module-custodian.ansible.actions). Default is None,
     which means DictActions and FileActions are supported.
