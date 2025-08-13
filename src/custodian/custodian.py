@@ -377,7 +377,7 @@ class Custodian:
                 self.directory = temp_dir  # reset self.directory to the temp_dir
             self.total_errors = 0
             start = datetime.datetime.now()
-            logger.info(f"Run started at {start} in {temp_dir}.")
+            logger.info(f"Run started at {start} in {self.directory}.")
             v = sys.version.replace("\n", " ")
             logger.info(f"Custodian running on Python version {v}")
             host, cluster = get_execution_host_info()
@@ -407,7 +407,7 @@ class Custodian:
                 run_time = end - start
                 logger.info(f"Run completed. Total time taken = {run_time}.")
                 if self.gzipped_output:
-                    gzip_dir(temp_dir)
+                    gzip_dir(self.directory)
 
             # Cleanup checkpoint files (if any) if run is successful.
             Custodian._delete_checkpoints(self.directory)
