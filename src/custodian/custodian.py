@@ -377,7 +377,7 @@ class Custodian:
                 self.directory = temp_dir  # reset self.directory to the temp_dir
             self.total_errors = 0
             start = datetime.datetime.now()
-            logger.info(f"Run started at {start} in {self.directory}.")
+            logger.info(f"Run started at {start} in {self.directory}")
             v = sys.version.replace("\n", " ")
             logger.info(f"Custodian running on Python version {v}")
             host, cluster = get_execution_host_info()
@@ -400,7 +400,7 @@ class Custodian:
                     raise
             finally:
                 # Log the corrections to a json file.
-                logger.info(f"Logging to {os.path.join(self.directory, Custodian.LOG_FILE)}...")
+                logger.info(f"Logging to {os.path.join(self.directory, Custodian.LOG_FILE)}")
                 dumpfn(self.run_log, os.path.join(self.directory, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
                 end = datetime.datetime.now()
                 logger.info(f"Run ended at {end}.")
