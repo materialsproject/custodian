@@ -536,10 +536,11 @@ class VaspErrorHandlerTest(PymatgenTest):
 
     def test_nbands_not_sufficient(self) -> None:
         handler = VaspErrorHandler("vasp.nbands_not_sufficient")
+        shutil.copy("OUTCAR_auto_nbands", "OUTCAR")
         assert handler.check() is True
         dct = handler.correct()
-        assert dct["errors"] == ["nbands_not_sufficient"]
-        assert dct["actions"] is None
+        assert "nbands_not_sufficient" in dct["errors"]
+        assert dct["actions"] == [{"action": {"_set": {"NBANDS": 9}}, "dict": "INCAR"}]
 
     def test_too_few_bands_round_error(self) -> None:
         # originally there are NBANDS= 7
