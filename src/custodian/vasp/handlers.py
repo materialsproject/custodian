@@ -15,7 +15,7 @@ import shutil
 import time
 import warnings
 from collections import Counter
-from math import prod
+from math import ceil, prod
 from typing import ClassVar
 
 import numpy as np
@@ -695,14 +695,13 @@ class VaspErrorHandler(ErrorHandler):
             self.error_count["bravais"] += 1
 
         if "nbands_not_sufficient" in self.errors:
-            # There is something very wrong about the value of NBANDS. We don't make
-            # any updates to NBANDS though because it's likely the user screwed something
-            # up pretty badly during setup. For instance, this has happened to me if
-            # MAGMOM = 2*nan or something similar.
-
-            # Unfixable error. Just return None for actions.
-            warnings.warn("Double-check your INCAR. Something is potentially wrong.", UserWarning)
-            return {"errors": ["nbands_not_sufficient"], "actions": None}
+            outcar = load_outcar(os.path.join(directory, "OUTCAR"))
+            nelect = outcar.nelect
+            nions = len(vi["POSCAR"].structure)
+            ncore = vi["INCAR"].get("NCORE", 1)
+            default_nbands = round(max(nelect / 2 + nions / 2, nelect * 0.6))
+            default_nbands_adjusted = ceil(default_nbands / ncore) * ncore
+            actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": default_nbands_adjusted}}})
 
         if "set_core_wf" in self.errors:
             # Unfixable error where the solution is to update the POTCARs
