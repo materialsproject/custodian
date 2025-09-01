@@ -719,7 +719,7 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
         assert dct == {
-            "actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}],
+            "actions": [{"action": {"_set": {"ALGO": "All", "ISEARCH": 1}}, "dict": "INCAR"}],
             "errors": ["Unconverged"],
         }
         tracked_lru_cache.tracked_cache_clear()
