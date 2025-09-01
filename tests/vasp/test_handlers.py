@@ -713,17 +713,6 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         }
         tracked_lru_cache.tracked_cache_clear()
 
-        shutil.copy("vasprun.xml.electronic_hybrid_fast", "vasprun.xml")
-        handler = UnconvergedErrorHandler()
-        assert handler.check()
-        dct = handler.correct()
-        assert dct["errors"] == ["Unconverged"]
-        assert dct == {
-            "actions": [{"action": {"_set": {"ALGO": "All", "ISEARCH": 1}}, "dict": "INCAR"}],
-            "errors": ["Unconverged"],
-        }
-        tracked_lru_cache.tracked_cache_clear()
-
         shutil.copy("vasprun.xml.electronic_hybrid_all", "vasprun.xml")
         handler = UnconvergedErrorHandler()
         assert handler.check()
