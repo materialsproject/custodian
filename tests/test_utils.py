@@ -57,6 +57,7 @@ def test_backup_with_glob(tmp_path, monkeypatch) -> None:
     assert Path("error.1.tar.gz").exists()
     with tarfile.open("error.1.tar.gz", "r:gz") as tar:
         assert len(tar.getmembers()) == 2
+        tar.getnames().sort()
         assert tar.getnames() == ["error.1/INCAR", "error.1/POSCAR"]
 
 
