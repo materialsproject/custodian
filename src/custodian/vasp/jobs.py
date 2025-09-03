@@ -716,32 +716,31 @@ class VaspJob(Job):
         work_dir = directory
         logger.info(f"Killing VASP processes in {work_dir=}.")
 
-        # --- Step 1: Try to kill the launcher (srun/mpirun) ---
-        # This relies on the launcher being included below but is most
-        # robust when running many jobs per Slurm allocation
-        try:
-            for proc in psutil.process_iter(["pid", "name", "cmdline"]):
-                pname = proc.info["name"].lower()
+        for proc in psutil.process_iter(["pid", "name", "cmdline", "open_files"]):
+            pname = proc.info["name"].lower()
+            open_paths = [f.path for f in (proc.info.get("open_files") or [])]
+            vasprun_path = os.path.join(work_dir, "vasprun.xml")
+            if psutil.pid_exists(proc.pid) and vasprun_path in open_paths: 
+                # --- Attempt 1: Try to kill the launcher (srun/mpirun) ---
+                # This relies on the launcher being included below but is most
+                # robust when running many jobs per Slurm allocation
                 if "srun" in pname or "mpirun" in pname:
-                    proc.kill()
-                    return
-        except Exception as exc:
-            logger.exception(f"Exception {exc} while killing launcher.")
-
-        # --- Step 2: Try to kill local VASP processes directly ---
-        # This only works if the Custodian process is on the same node as the VASP process
-        try:
-            for proc in psutil.process_iter(["pid", "name", "open_files"]):
-                if "vasp" in proc.info["name"].lower():
-                    open_paths = [f.path for f in (proc.info.get("open_files") or [])]
-                    vasprun_path = os.path.join(work_dir, "vasprun.xml")
-                    if vasprun_path in open_paths and psutil.pid_exists(proc.pid):
+                    try:
                         proc.kill()
                         return
-        except (psutil.NoSuchProcess, psutil.AccessDenied) as exc:
-            logger.exception(f"Exception {exc} encountered while killing VASP.")
+                    except Exception as exc:
+                        logger.exception(f"Exception {exc} while killing launcher.")
 
-        # --- Step 3: Last resort, killall ---
+                # --- Attempt 2: Try to kill local VASP processes directly ---
+                # This only works if the Custodian process is on the same node as the VASP process
+                if "vasp" in pname:
+                    try:
+                        proc.kill()
+                        return
+                    except Exception as exc:
+                        logger.exception(f"Exception {exc} encountered while killing VASP.")
+
+        # --- Attempt 3: Last resort, killall ---
         # If you have many processes running on one node, this is going to cause a problem
         logger.warning(
             f"Killing VASP processes in {work_dir=} failed with subprocess.Popen.terminate(). Resorting to 'killall'."
