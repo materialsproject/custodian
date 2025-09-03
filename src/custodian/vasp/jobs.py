@@ -708,49 +708,51 @@ class VaspJob(Job):
         """Kill all VASP processes associated with the current job."""
         logger.info(f"Killing VASP processes in {directory}.")
 
+        # If, somehow, the process has already finished
+        if proc.poll() is not None:
+            return
+
         # --- Attempt 1: Try to stored subprocess ---
         try:
-            # Terminate the parent process - this should cascade to children
             self._vasp_process.terminate()
-
-            # Wait for graceful termination
             try:
                 self._vasp_process.wait(timeout=5)
                 return
             except subprocess.TimeoutExpired:
-                # Force kill if it doesn't terminate gracefully
                 logger.info("Graceful termination did not work. Force killing the parent process.")
                 self._vasp_process.kill()
                 self._vasp_process.wait()
                 return
 
         except Exception as exc:
-            logger.exception(f"Could not terminate parent process: {exc}")
+            raise RuntimeError(f"Could not terminate parent process: {exc}")
 
-        # --- Attempt 2: Try to kill local VASP processes directly ---
-        # This assumes the process has "vasp" in the name and that
-        # Custodian is on the same node as the VASP process
-        for proc in psutil.process_iter():
-            try:
-                if "vasp" in proc.name().lower():
-                    open_paths = [file.path for file in proc.open_files()]
-                    vasprun_path = os.path.join(directory, "vasprun.xml")
-                    if vasprun_path in open_paths and psutil.pid_exists(proc.pid):
-                        proc.kill()
-                        return
-            except Exception as exc:
-                logger.exception(f"Exception {exc} encountered while killing {proc.name()} with PID {proc.pid}).")
-                continue
+        # ASR: We likely do not need the attempts below, but they are being kept commented for historical reasons
+        # in case users report any problems.
+        # # --- Attempt 2: Try to kill local VASP processes directly ---
+        # # This assumes the process has "vasp" in the name and that
+        # # Custodian is on the same node as the VASP process
+        # for proc in psutil.process_iter():
+        #     try:
+        #         if "vasp" in proc.name().lower():
+        #             open_paths = [file.path for file in proc.open_files()]
+        #             vasprun_path = os.path.join(directory, "vasprun.xml")
+        #             if vasprun_path in open_paths and psutil.pid_exists(proc.pid):
+        #                 proc.kill()
+        #                 return
+        #     except (psutil.NoSuchProcess, psutil.AccessDenied) as exc
+        #         logger.exception(f"Exception {exc} encountered while killing {proc.name()} with PID {proc.pid}).")
+        #         continue
 
-        # --- Attempt 3: Last resort, killall ---
-        # If you have many processes running on one node, this is going to cause a problem...
-        logger.warning(f"Killing VASP processes in {directory} continues to fail. Resorting to 'killall'.")
-        cmds = self.vasp_cmd
-        if self.gamma_vasp_cmd:
-            cmds += self.gamma_vasp_cmd
-        for cmd in cmds:
-            if "vasp" in cmd:
-                subprocess.run(["killall", f"{cmd}"], check=False)
+        # # --- Attempt 3: Last resort, killall ---
+        # # If you have many processes running on one node, this is going to cause a problem...
+        # logger.warning(f"Killing VASP processes in {directory} continues to fail. Resorting to 'killall'.")
+        # cmds = self.vasp_cmd
+        # if self.gamma_vasp_cmd:
+        #     cmds += self.gamma_vasp_cmd
+        # for cmd in cmds:
+        #     if "vasp" in cmd:
+        #         subprocess.run(["killall", f"{cmd}"], check=False)
 
 
 class VaspNEBJob(VaspJob):
