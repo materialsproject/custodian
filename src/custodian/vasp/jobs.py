@@ -724,8 +724,7 @@ class VaspJob(Job):
                 pname = proc.info["name"].lower()
                 if "srun" in pname or "mpirun" in pname:
                     logger.info(
-                        f"Killing launcher process {proc.info['pid']} ({pname}) "
-                        f"with cmdline: {proc.info['cmdline']}"
+                        f"Killing launcher process {proc.info['pid']} ({pname}) with cmdline: {proc.info['cmdline']}"
                     )
                     proc.kill()
                     return
@@ -748,15 +747,15 @@ class VaspJob(Job):
 
         # --- Step 3: Last resort, killall ---
         logger.warning(
-            f"Killing VASP processes in {work_dir=} failed with subprocess.Popen.terminate(). "
-            f"Resorting to 'killall'."
+            f"Killing VASP processes in {work_dir=} failed with subprocess.Popen.terminate(). Resorting to 'killall'."
         )
         cmds = self.vasp_cmd
         if self.gamma_vasp_cmd:
             cmds += self.gamma_vasp_cmd
         for cmd in cmds:
             if "vasp" in cmd:
-                    subprocess.run(["killall", f"{cmd}"], check=False)
+                subprocess.run(["killall", f"{cmd}"], check=False)
+
 
 class VaspNEBJob(VaspJob):
     """
