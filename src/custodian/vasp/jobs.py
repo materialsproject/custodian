@@ -709,25 +709,23 @@ class VaspJob(Job):
 
         # If, somehow, the process has already finished
         if proc.poll() is not None:
+            logger.warning("The process was already done!")
             return
 
         # --- Attempt 1: Try to kill stored subprocess ---
+        self._vasp_process.terminate()
         try:
-            self._vasp_process.terminate()
-            try:
-                self._vasp_process.wait(timeout=5)
-                return
-            except subprocess.TimeoutExpired:
-                logger.info("Graceful termination did not work. Force killing the parent process.")
-                self._vasp_process.kill()
-                self._vasp_process.wait()
-                return
-
-        except Exception as exc:
-            raise RuntimeError(f"Could not terminate parent process: {exc}")
+            self._vasp_process.wait(timeout=5)
+            return
+        except subprocess.TimeoutExpired:
+            logger.info("Graceful termination did not work. Force killing the parent process.")
+            self._vasp_process.kill()
+            self._vasp_process.wait()
+            return
 
         # ASR: We likely do not need the attempts below, but they are being kept commented for historical reasons
-        # in case users report any problems.
+        # in case users report any problems. If the following needs to be uncommented, make sure to wrap Attempt 1
+        # in a try/except block so it can move smoothly to Attempt 2/3.
         # # --- Attempt 2: Try to kill local VASP processes directly ---
         # # This assumes the process has "vasp" in the name and that
         # # Custodian is on the same node as the VASP process
