@@ -713,13 +713,12 @@ class VaspJob(Job):
         simultaneously executed on the same node). However, this should never
         happen.
         """
-        work_dir = directory
-        logger.info(f"Killing VASP processes in {work_dir=}.")
+        logger.info(f"Killing VASP processes in {directory=}.")
 
         for proc in psutil.process_iter():
             pname = proc.name.lower()
             open_paths = [f.path for f in (proc.open_files() or [])]
-            vasprun_path = os.path.join(work_dir, "vasprun.xml")
+            vasprun_path = os.path.join(directory, "vasprun.xml")
             if psutil.pid_exists(proc.pid) and vasprun_path in open_paths:
                 # --- Attempt 1: Try to kill the launcher (srun/mpirun) ---
                 # This relies on the launcher being included below but is most
@@ -743,7 +742,7 @@ class VaspJob(Job):
         # --- Attempt 3: Last resort, killall ---
         # If you have many processes running on one node, this is going to cause a problem
         logger.warning(
-            f"Killing VASP processes in {work_dir=} failed with subprocess.Popen.terminate(). Resorting to 'killall'."
+            f"Killing VASP processes in {directory=} failed with subprocess.Popen.terminate(). Resorting to 'killall'."
         )
         cmds = self.vasp_cmd
         if self.gamma_vasp_cmd:
