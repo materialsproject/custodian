@@ -716,9 +716,9 @@ class VaspJob(Job):
         work_dir = directory
         logger.info(f"Killing VASP processes in {work_dir=}.")
 
-        for proc in psutil.process_iter(["pid", "name", "open_files"]):
-            pname = proc.info["name"].lower()
-            open_paths = [f.path for f in (proc.info.get("open_files") or [])]
+        for proc in psutil.process_iter():
+            pname = proc.name.lower()
+            open_paths = [f.path for f in (proc.open_files() or [])]
             vasprun_path = os.path.join(work_dir, "vasprun.xml")
             if psutil.pid_exists(proc.pid) and vasprun_path in open_paths:
                 # --- Attempt 1: Try to kill the launcher (srun/mpirun) ---
