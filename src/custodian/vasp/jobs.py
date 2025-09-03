@@ -717,7 +717,7 @@ class VaspJob(Job):
         try:
             # Terminate the parent process - this should cascade to children
             self._vasp_process.terminate()
-            
+
             # Wait for graceful termination
             try:
                 self._vasp_process.wait(timeout=5)
@@ -729,7 +729,7 @@ class VaspJob(Job):
                 self._vasp_process.wait()
                 logger.info("Force killed VASP parent process")
                 return
-                
+
         except (OSError, AttributeError) as exc:
             logger.warning(f"Could not terminate parent process: {exc}")
 
@@ -747,7 +747,7 @@ class VaspJob(Job):
             except (psutil.NoSuchProcess, psutil.AccessDenied) as exc:
                 logger.exception(f"Exception {exc} encountered while killing VASP.")
                 continue
-    
+
         # --- Attempt 3: Last resort, killall ---
         # If you have many processes running on one node, this is going to cause a problem...
         logger.warning(
