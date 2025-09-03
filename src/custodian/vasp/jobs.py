@@ -723,29 +723,26 @@ class VaspJob(Job):
             for proc in psutil.process_iter(["pid", "name", "cmdline"]):
                 pname = proc.info["name"].lower()
                 if "srun" in pname or "mpirun" in pname:
-                    logger.info(
-                        f"Killing launcher process {proc.info['pid']} ({pname}) with cmdline: {proc.info['cmdline']}"
-                    )
                     proc.kill()
                     return
         except Exception as exc:
             logger.exception(f"Exception {exc} while killing launcher.")
 
         # --- Step 2: Try to kill local VASP processes directly ---
-        # This only works if the Custodian process is on the same node
+        # This only works if the Custodian process is on the same node as the VASP process
         try:
             for proc in psutil.process_iter(["pid", "name", "open_files"]):
                 if "vasp" in proc.info["name"].lower():
                     open_paths = [f.path for f in (proc.info.get("open_files") or [])]
                     vasprun_path = os.path.join(work_dir, "vasprun.xml")
                     if vasprun_path in open_paths and psutil.pid_exists(proc.pid):
-                        logger.info(f"Killing VASP process {proc.pid} locally.")
                         proc.kill()
                         return
         except (psutil.NoSuchProcess, psutil.AccessDenied) as exc:
             logger.exception(f"Exception {exc} encountered while killing VASP.")
 
         # --- Step 3: Last resort, killall ---
+        # If you have many processes running on one node, this is going to cause a problem
         logger.warning(
             f"Killing VASP processes in {work_dir=} failed with subprocess.Popen.terminate(). Resorting to 'killall'."
         )
