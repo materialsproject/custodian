@@ -8,7 +8,6 @@ import subprocess
 from shutil import which
 
 import numpy as np
-import psutil
 from monty.serialization import dumpfn, loadfn
 from monty.shutil import decompress_dir
 from pymatgen.core.structure import Structure
