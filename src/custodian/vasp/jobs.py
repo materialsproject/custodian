@@ -705,18 +705,8 @@ class VaspJob(Job):
                 file.write(f"{key} {energies[key]}\n")
 
     def terminate(self, directory="./") -> None:
-        """
-        Kill all VASP processes associated with the current job.
-
-        This is done by looping over all processes and selecting the ones
-        that contain "vasp" as well as access files (vasprun.xml in particular)
-        in the custodian working directory.
-
-        There is also a safety that kills all VASP processes if none of the
-        processes can be killed (This is bad if more than one VASP runs are
-        simultaneously executed on the same node).
-        """
-        logger.info(f"Killing VASP processes in {directory=}.")
+        """Kill all VASP processes associated with the current job."""
+        logger.info(f"Killing VASP processes in {directory}.")
 
         # --- Attempt 1: Try to stored subprocess ---
         try:
@@ -726,17 +716,16 @@ class VaspJob(Job):
             # Wait for graceful termination
             try:
                 self._vasp_process.wait(timeout=5)
-                logger.info("Successfully terminated VASP parent process")
                 return
             except subprocess.TimeoutExpired:
                 # Force kill if it doesn't terminate gracefully
+                logger.info("Graceful termination did not work. Force killing the parent process.")
                 self._vasp_process.kill()
                 self._vasp_process.wait()
-                logger.info("Force killed VASP parent process")
                 return
 
-        except (OSError, AttributeError) as exc:
-            logger.warning(f"Could not terminate parent process: {exc}")
+        except Exception as exc:
+            logger.exception(f"Could not terminate parent process: {exc}")
 
         # --- Attempt 2: Try to kill local VASP processes directly ---
         # This assumes the process has "vasp" in the name and that
@@ -749,14 +738,14 @@ class VaspJob(Job):
                     if vasprun_path in open_paths and psutil.pid_exists(proc.pid):
                         proc.kill()
                         return
-            except (psutil.NoSuchProcess, psutil.AccessDenied) as exc:
-                logger.exception(f"Exception {exc} encountered while killing VASP.")
+            except Exception as exc:
+                logger.exception(f"Exception {exc} encountered while killing {proc.name()} with PID {proc.pid}).")
                 continue
 
         # --- Attempt 3: Last resort, killall ---
         # If you have many processes running on one node, this is going to cause a problem...
         logger.warning(
-            f"Killing VASP processes in {directory=} failed with subprocess.Popen.terminate(). Resorting to 'killall'."
+            f"Killing VASP processes in {directory} continues to fail. Resorting to 'killall'."
         )
         cmds = self.vasp_cmd
         if self.gamma_vasp_cmd:
