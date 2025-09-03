@@ -271,7 +271,9 @@ class VaspJob(Job):
             open(os.path.join(directory, self.stderr_file), "w", buffering=1) as f_err,
         ):
             # use line buffering for stderr
-            self._vasp_process = subprocess.Popen(cmd, cwd=directory, stdout=f_std, stderr=f_err, start_new_session=True)
+            self._vasp_process = subprocess.Popen(
+                cmd, cwd=directory, stdout=f_std, stderr=f_err, start_new_session=True
+            )
             return self._vasp_process
 
     def postprocess(self, directory="./") -> None:
