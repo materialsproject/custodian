@@ -744,9 +744,7 @@ class VaspJob(Job):
 
         # --- Attempt 3: Last resort, killall ---
         # If you have many processes running on one node, this is going to cause a problem...
-        logger.warning(
-            f"Killing VASP processes in {directory} continues to fail. Resorting to 'killall'."
-        )
+        logger.warning(f"Killing VASP processes in {directory} continues to fail. Resorting to 'killall'.")
         cmds = self.vasp_cmd
         if self.gamma_vasp_cmd:
             cmds += self.gamma_vasp_cmd
