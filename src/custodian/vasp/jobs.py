@@ -720,7 +720,7 @@ class VaspJob(Job):
             pname = proc.info["name"].lower()
             open_paths = [f.path for f in (proc.info.get("open_files") or [])]
             vasprun_path = os.path.join(work_dir, "vasprun.xml")
-            if psutil.pid_exists(proc.pid) and vasprun_path in open_paths: 
+            if psutil.pid_exists(proc.pid) and vasprun_path in open_paths:
                 # --- Attempt 1: Try to kill the launcher (srun/mpirun) ---
                 # This relies on the launcher being included below but is most
                 # robust when running many jobs per Slurm allocation
