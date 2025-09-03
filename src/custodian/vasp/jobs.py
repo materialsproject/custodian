@@ -712,7 +712,7 @@ class VaspJob(Job):
         if proc.poll() is not None:
             return
 
-        # --- Attempt 1: Try to stored subprocess ---
+        # --- Attempt 1: Try to kill stored subprocess ---
         try:
             self._vasp_process.terminate()
             try:
