@@ -707,15 +707,18 @@ class VaspJob(Job):
     def terminate(self, directory="./") -> None:
         """
         Kill all VASP processes associated with the current job.
+        
         This is done by looping over all processes and selecting the ones
         that contain "vasp" as well as access files (vasprun.xml in particular)
         in the custodian working directory.
+        
         There is also a safety that kills all VASP processes if none of the
         processes can be killed (This is bad if more than one VASP runs are
-        simultaneously executed on the same node). However, this should never
-        happen.
+        simultaneously executed on the same node).
         """
         logger.info(f"Killing VASP processes in {directory=}.")
+
+        # --- Attempt 1: Try to stored subprocess ---
         try:
             # Terminate the parent process - this should cascade to children
             self._vasp_process.terminate()
