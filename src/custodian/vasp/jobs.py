@@ -716,7 +716,7 @@ class VaspJob(Job):
         work_dir = directory
         logger.info(f"Killing VASP processes in {work_dir=}.")
 
-        for proc in psutil.process_iter(["pid", "name", "cmdline", "open_files"]):
+        for proc in psutil.process_iter(["pid", "name", "open_files"]):
             pname = proc.info["name"].lower()
             open_paths = [f.path for f in (proc.info.get("open_files") or [])]
             vasprun_path = os.path.join(work_dir, "vasprun.xml")
