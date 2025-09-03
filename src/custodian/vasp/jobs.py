@@ -713,8 +713,8 @@ class VaspJob(Job):
             return
 
         # --- Attempt 1: Try to kill stored subprocess ---
-        self._vasp_process.terminate()
         try:
+            self._vasp_process.terminate()
             self._vasp_process.wait(timeout=5)
             return
         except subprocess.TimeoutExpired:
