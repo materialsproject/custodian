@@ -271,8 +271,8 @@ class VaspJob(Job):
             open(os.path.join(directory, self.stderr_file), "w", buffering=1) as f_err,
         ):
             # use line buffering for stderr
-            return subprocess.Popen(cmd, cwd=directory, stdout=f_std, stderr=f_err, start_new_session=True)
-            # pylint: disable=R1732
+            self._vasp_process = subprocess.Popen(cmd, cwd=directory, stdout=f_std, stderr=f_err, start_new_session=True)
+            return self._vasp_process
 
     def postprocess(self, directory="./") -> None:
         """
@@ -714,33 +714,42 @@ class VaspJob(Job):
         happen.
         """
         logger.info(f"Killing VASP processes in {directory=}.")
+        try:
+            # Terminate the parent process - this should cascade to children
+            self._vasp_process.terminate()
+            
+            # Wait for graceful termination
+            try:
+                self._vasp_process.wait(timeout=5)
+                logger.info("Successfully terminated VASP parent process")
+                return
+            except subprocess.TimeoutExpired:
+                # Force kill if it doesn't terminate gracefully
+                self._vasp_process.kill()
+                self._vasp_process.wait()
+                logger.info("Force killed VASP parent process")
+                return
+                
+        except (OSError, AttributeError) as exc:
+            logger.warning(f"Could not terminate parent process: {exc}")
 
+        # --- Attempt 2: Try to kill local VASP processes directly ---
+        # This assumes the process has "vasp" in the name and that
+        # Custodian is on the same node as the VASP process
         for proc in psutil.process_iter():
-            pname = proc.name.lower()
-            open_paths = [f.path for f in (proc.open_files() or [])]
-            vasprun_path = os.path.join(directory, "vasprun.xml")
-            if psutil.pid_exists(proc.pid) and vasprun_path in open_paths:
-                # --- Attempt 1: Try to kill the launcher (srun/mpirun) ---
-                # This relies on the launcher being included below but is most
-                # robust when running many jobs per Slurm allocation
-                if "srun" in pname or "mpirun" in pname:
-                    try:
+            try:
+                if "vasp" in proc.name().lower():
+                    open_paths = [file.path for file in proc.open_files()]
+                    vasprun_path = os.path.join(directory, "vasprun.xml")
+                    if vasprun_path in open_paths)and psutil.pid_exists(proc.pid):
                         proc.kill()
                         return
-                    except Exception as exc:
-                        logger.exception(f"Exception {exc} while killing launcher.")
-
-                # --- Attempt 2: Try to kill local VASP processes directly ---
-                # This only works if the Custodian process is on the same node as the VASP process
-                if "vasp" in pname:
-                    try:
-                        proc.kill()
-                        return
-                    except Exception as exc:
-                        logger.exception(f"Exception {exc} encountered while killing VASP.")
-
+            except (psutil.NoSuchProcess, psutil.AccessDenied) as exc:
+                logger.exception(f"Exception {exc} encountered while killing VASP.")
+                continue
+    
         # --- Attempt 3: Last resort, killall ---
-        # If you have many processes running on one node, this is going to cause a problem
+        # If you have many processes running on one node, this is going to cause a problem...
         logger.warning(
             f"Killing VASP processes in {directory=} failed with subprocess.Popen.terminate(). Resorting to 'killall'."
         )
