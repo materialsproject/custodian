@@ -708,7 +708,7 @@ class VaspJob(Job):
         logger.info(f"Killing VASP processes in {directory}.")
 
         # If, somehow, the process has already finished
-        if proc.poll() is not None:
+        if self._vasp_process.poll() is not None:
             logger.warning("The process was already done!")
             return
 
