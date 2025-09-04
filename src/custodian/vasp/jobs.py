@@ -156,7 +156,6 @@ class VaspJob(Job):
         self.copy_magmom = copy_magmom
         self.auto_continue = auto_continue
         self.update_incar = update_incar
-        self._vasp_process = None
 
         if SENTRY_DSN:
             # if using Sentry logging, add specific VASP executable to scope
