@@ -705,7 +705,7 @@ class VaspJob(Job):
 
     def terminate(self, directory="./") -> None:
         """Kill all VASP processes associated with the current job."""
-        logger.info(f"Killing {proc.name()} with PID {proc.pid}).")
+        logger.info(f"Killing {self._vasp_process.name()} with PID {self._vasp_process.pid}).")
 
         # If, somehow, the process has already finished
         if self._vasp_process.poll() is not None:
@@ -718,7 +718,7 @@ class VaspJob(Job):
             self._vasp_process.wait(timeout=10)
             return
         except subprocess.TimeoutExpired:
-            logger.info("Graceful termination did not work. Force killing the parent process.")
+            logger.warning("Graceful termination did not work. Force killing the parent process.")
             self._vasp_process.kill()
             self._vasp_process.wait()
             return
