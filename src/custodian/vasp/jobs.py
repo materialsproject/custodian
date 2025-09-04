@@ -712,12 +712,12 @@ class VaspJob(Job):
 
         # --- Attempt 1: Try to kill stored subprocess ---
         try:
-            logger.info(f"Killing PID {self._vasp_process.pid}).")
+            logger.info(f"Killing PID {self._vasp_process.pid}")
             self._vasp_process.terminate()
             self._vasp_process.wait(timeout=10)
             return
         except subprocess.TimeoutExpired:
-            logger.warning("Graceful termination did not work. Force killing the parent process.")
+            logger.warning(f"Graceful termination did not work. Force killing PID {self._vasp_process.pid}")
             self._vasp_process.kill()
             self._vasp_process.wait()
             return
