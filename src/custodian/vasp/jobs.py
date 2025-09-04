@@ -8,7 +8,6 @@ import subprocess
 from shutil import which
 
 import numpy as np
-import psutil
 from monty.serialization import dumpfn, loadfn
 from monty.shutil import decompress_dir
 from pymatgen.core.structure import Structure
@@ -271,8 +270,10 @@ class VaspJob(Job):
             open(os.path.join(directory, self.stderr_file), "w", buffering=1) as f_err,
         ):
             # use line buffering for stderr
-            return subprocess.Popen(cmd, cwd=directory, stdout=f_std, stderr=f_err, start_new_session=True)
-            # pylint: disable=R1732
+            self._vasp_process = subprocess.Popen(
+                cmd, cwd=directory, stdout=f_std, stderr=f_err, start_new_session=True
+            )
+            return self._vasp_process
 
     def postprocess(self, directory="./") -> None:
         """
@@ -703,39 +704,19 @@ class VaspJob(Job):
                 file.write(f"{key} {energies[key]}\n")
 
     def terminate(self, directory="./") -> None:
-        """
-        Kill all VASP processes associated with the current job.
-        This is done by looping over all processes and selecting the ones
-        that contain "vasp" as well as access files (vasprun.xml in particular)
-        in the custodian working directory.
-        There is also a safety that kills all VASP processes if none of the
-        processes can be killed (This is bad if more than one VASP runs are
-        simultaneously executed on the same node). However, this should never
-        happen.
-        """
-        work_dir = directory
-        logger.info(f"Killing VASP processes in {work_dir=}.")
-        for proc in psutil.process_iter():
-            try:
-                if "vasp" in proc.name().lower():
-                    open_paths = [file.path for file in proc.open_files()]
-                    vasprun_path = os.path.join(work_dir, "vasprun.xml")
-                    if (vasprun_path in open_paths) and psutil.pid_exists(proc.pid):
-                        proc.kill()
-                        return
-            except (psutil.NoSuchProcess, psutil.AccessDenied) as exc:
-                logger.exception(f"Exception {exc} encountered while killing VASP.")
-                continue
+        """Kill all VASP processes associated with the current job."""
+        if self._vasp_process.poll() is not None:
+            logger.warning("The process was already done!")
+            return
 
-        logger.warning(
-            f"Killing VASP processes in {work_dir=} failed with subprocess.Popen.terminate(). Resorting to 'killall'."
-        )
-        cmds = self.vasp_cmd
-        if self.gamma_vasp_cmd:
-            cmds += self.gamma_vasp_cmd
-        for cmd in cmds:
-            if "vasp" in cmd:
-                subprocess.run(["killall", f"{cmd}"], check=False)
+        try:
+            logger.info(f"Killing PID {self._vasp_process.pid}")
+            self._vasp_process.terminate()
+            self._vasp_process.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            logger.warning(f"Graceful termination did not work. Force killing PID {self._vasp_process.pid}")
+            self._vasp_process.kill()
+            self._vasp_process.wait()
 
 
 class VaspNEBJob(VaspJob):
@@ -905,13 +886,14 @@ class VaspNEBJob(VaspJob):
             open(os.path.join(directory, self.stderr_file), "w", buffering=1) as f_err,
         ):
             # Use line buffering for stderr
-            return subprocess.Popen(
+            self._vasp_process = subprocess.Popen(
                 cmd,
                 cwd=directory,
                 stdout=f_std,
                 stderr=f_err,
                 start_new_session=True,
-            )  # pylint: disable=R1732
+            )
+            return self._vasp_process
 
     def postprocess(self, directory="./") -> None:
         """Postprocessing includes renaming and gzipping where necessary."""
