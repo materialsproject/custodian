@@ -705,8 +705,6 @@ class VaspJob(Job):
 
     def terminate(self, directory="./") -> None:
         """Kill all VASP processes associated with the current job."""
-        logger.info(f"Killing {self._vasp_process.name()} with PID {self._vasp_process.pid}).")
-
         # If, somehow, the process has already finished
         if self._vasp_process.poll() is not None:
             logger.warning("The process was already done!")
@@ -714,6 +712,7 @@ class VaspJob(Job):
 
         # --- Attempt 1: Try to kill stored subprocess ---
         try:
+            logger.info(f"Killing PID {self._vasp_process.pid}).")
             self._vasp_process.terminate()
             self._vasp_process.wait(timeout=10)
             return
@@ -735,6 +734,7 @@ class VaspJob(Job):
         #             open_paths = [file.path for file in proc.open_files()]
         #             vasprun_path = os.path.join(directory, "vasprun.xml")
         #             if vasprun_path in open_paths and psutil.pid_exists(proc.pid):
+        #                 logger.info(f"Killing VASP at {directory} with PID {proc.pid}"}
         #                 proc.kill()
         #                 return
         #     except (psutil.NoSuchProcess, psutil.AccessDenied) as exc
