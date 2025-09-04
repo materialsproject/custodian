@@ -580,7 +580,7 @@ class VaspErrorHandler(ErrorHandler):
 
             # This sometimes comes up with ALGO = Fast. We will switch the ALGO.
             if vi["INCAR"].get("ALGO", "Normal").lower() != "all":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All", "ISEARCH": 1}}})
 
             # This can sometimes be due to load-balancing issues for small systems.
             # See bottom of https://www.vasp.at/wiki/index.php/NCORE. A.S.R. ran some
@@ -1187,14 +1187,14 @@ class UnconvergedErrorHandler(ErrorHandler):
                 # Algo = All is recommended in the VASP manual and some meta-GGAs explicitly
                 # say to set Algo = All for proper convergence. I am using "--" as the check
                 # for METAGGA here because this is the default in the vasprun.xml file
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All", "ISEARCH": 1}}})
 
             # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
             # support these algorithms, but no warning is printed.
             if v.incar.get("LHFCALC", False):
                 if v.incar.get("ISMEAR", -1) >= 0 or not 50 <= v.incar.get("IALGO", 38) <= 59:
                     if algo != "all":
-                        actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+                        actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All", "ISEARCH": 1}}})
                     # See the VASP manual section on LHFCALC for more information.
                     elif algo != "damped":
                         actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}})
@@ -1213,7 +1213,7 @@ class UnconvergedErrorHandler(ErrorHandler):
                 elif algo == "normal" and v.incar.get("ISMEAR", 1) >= 0:
                     # NB: default for ISMEAR is 1. To avoid algo_tet errors, only set
                     # ALGO = ALL if ISMEAR >= 0
-                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All", "ISEARCH": 1}}})
                 else:
                     # Try mixing as last resort
                     new_settings = {
@@ -1665,7 +1665,7 @@ class NonConvergingErrorHandler(ErrorHandler):
         # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
         # I am using "none" here because METAGGA is a string variable and this is the default
         if (incar.get("LHFCALC", False) or incar.get("METAGGA", "none").lower() != "none") and algo != "all":
-            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All", "ISEARCH": 1}}})
 
         # Ladder from VeryFast to Fast to Normal to All
         # (except for meta-GGAs and hybrids).
@@ -1677,7 +1677,7 @@ class NonConvergingErrorHandler(ErrorHandler):
             elif algo == "fast":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
             elif algo == "normal" and incar.get("ISMEAR", 1) >= 0:
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All", "ISEARCH": 1}}})
             elif algo == "all" or (algo == "normal" and incar.get("ISMEAR", 1) < 0):
                 if amix > 0.1 and bmix > 0.01:
                     # Try linear mixing

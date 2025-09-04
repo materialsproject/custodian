@@ -685,7 +685,10 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         assert handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
-        assert dct == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
+        assert dct == {
+            "actions": [{"action": {"_set": {"ALGO": "All", "ISEARCH": 1}}, "dict": "INCAR"}],
+            "errors": ["Unconverged"],
+        }
         tracked_lru_cache.tracked_cache_clear()
 
         shutil.copy("vasprun.xml.electronic_metagga_fast", "vasprun.xml")
@@ -693,7 +696,10 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         assert handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
-        assert dct == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
+        assert dct == {
+            "actions": [{"action": {"_set": {"ALGO": "All", "ISEARCH": 1}}, "dict": "INCAR"}],
+            "errors": ["Unconverged"],
+        }
         tracked_lru_cache.tracked_cache_clear()
 
         shutil.copy("vasprun.xml.electronic_hybrid_fast", "vasprun.xml")
@@ -701,7 +707,10 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         assert handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
-        assert dct == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
+        assert dct == {
+            "actions": [{"action": {"_set": {"ALGO": "All", "ISEARCH": 1}}, "dict": "INCAR"}],
+            "errors": ["Unconverged"],
+        }
         tracked_lru_cache.tracked_cache_clear()
 
         shutil.copy("vasprun.xml.electronic_hybrid_all", "vasprun.xml")
@@ -716,7 +725,10 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         handler = UnconvergedErrorHandler()
         assert handler.check()
         dct = handler.correct()
-        assert dct == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
+        assert dct == {
+            "actions": [{"action": {"_set": {"ALGO": "All", "ISEARCH": 1}}, "dict": "INCAR"}],
+            "errors": ["Unconverged"],
+        }
 
     def test_check_correct_ionic(self) -> None:
         shutil.copy("vasprun.xml.ionic", "vasprun.xml")
@@ -731,7 +743,7 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         assert handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
-        assert {"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}} in dct["actions"]
+        assert {"dict": "INCAR", "action": {"_set": {"ALGO": "All", "ISEARCH": 1}}} in dct["actions"]
 
     def test_amin(self) -> None:
         shutil.copy("vasprun.xml.electronic_amin", "vasprun.xml")
@@ -752,7 +764,10 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         assert handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["Unconverged"]
-        assert dct == {"actions": [{"action": {"_set": {"ALGO": "All"}}, "dict": "INCAR"}], "errors": ["Unconverged"]}
+        assert dct == {
+            "actions": [{"action": {"_set": {"ALGO": "All", "ISEARCH": 1}}, "dict": "INCAR"}],
+            "errors": ["Unconverged"],
+        }
 
     def test_psmaxn(self) -> None:
         shutil.copy("vasprun.xml.electronic", "vasprun.xml")
