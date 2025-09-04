@@ -2,6 +2,7 @@ import multiprocessing
 import os
 import shutil
 import subprocess
+import time
 import unittest
 from glob import glob
 from unittest.mock import Mock, patch
@@ -345,6 +346,20 @@ class TestVaspJobTerminate(unittest.TestCase):
         assert self.mock_process.poll.call_count == 2
         self.mock_process.terminate.assert_called_once()  # Only called on first invocation
         self.mock_logger.warning.assert_called_once_with("The process was already done!")
+
+    @patch("custodian.vasp.jobs.VaspJob.__init__", return_value=None)
+    def test_terminate_integration_with_real_process(self, mock_init):
+        """Test termination with a real subprocess (integration-style test)."""
+        # Arrange
+        vasp_job = VaspJob.__new__(VaspJob)  # Create instance without calling __init__
+
+        real_process = subprocess.Popen(["sleep", "10"])
+        vasp_job._vasp_process = real_process
+
+        with patch("custodian.vasp.jobs.logger") as mock_logger:
+            vasp_job.terminate()
+        assert real_process.poll() is not None  # Process should be terminated
+        mock_logger.info.assert_called_once()
 
 
 class TestVaspJobTerminateEdgeCases(unittest.TestCase):
