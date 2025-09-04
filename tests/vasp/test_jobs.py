@@ -2,7 +2,6 @@ import multiprocessing
 import os
 import shutil
 import subprocess
-import time
 import unittest
 from glob import glob
 from unittest.mock import Mock, patch
