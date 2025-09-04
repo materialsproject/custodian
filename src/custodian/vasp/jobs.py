@@ -703,7 +703,7 @@ class VaspJob(Job):
             for key in sorted(energies):
                 file.write(f"{key} {energies[key]}\n")
 
-    def terminate(self) -> None:
+    def terminate(self, directory="./") -> None:
         """Kill all VASP processes associated with the current job."""
         if self._vasp_process.poll() is not None:
             logger.warning("The process was already done!")
