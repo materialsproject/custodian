@@ -4,8 +4,7 @@ import shutil
 import subprocess
 import unittest
 from glob import glob
-from unittest import mock
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pymatgen
 import pytest
