@@ -156,6 +156,7 @@ class VaspJob(Job):
         self.copy_magmom = copy_magmom
         self.auto_continue = auto_continue
         self.update_incar = update_incar
+        self._vasp_process = None
 
         if SENTRY_DSN:
             # if using Sentry logging, add specific VASP executable to scope
@@ -703,9 +704,8 @@ class VaspJob(Job):
             for key in sorted(energies):
                 file.write(f"{key} {energies[key]}\n")
 
-    def terminate(self, directory="./") -> None:
+    def terminate(self) -> None:
         """Kill all VASP processes associated with the current job."""
-        # If, somehow, the process has already finished...
         if self._vasp_process.poll() is not None:
             logger.warning("The process was already done!")
             return
@@ -714,12 +714,10 @@ class VaspJob(Job):
             logger.info(f"Killing PID {self._vasp_process.pid}")
             self._vasp_process.terminate()
             self._vasp_process.wait(timeout=10)
-            return
         except subprocess.TimeoutExpired:
             logger.warning(f"Graceful termination did not work. Force killing PID {self._vasp_process.pid}")
             self._vasp_process.kill()
             self._vasp_process.wait()
-            return
 
 
 class VaspNEBJob(VaspJob):
