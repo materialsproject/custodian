@@ -623,7 +623,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert handler.check() is True
         assert handler.correct()["errors"] == ["kpt_set_change"]
         incar = Incar.from_file("INCAR")
-        assert "NPAR" not in incar["ISYM"] == 0
+        assert "NPAR" not in incar
 
 
 class AliasingErrorHandlerTest(PymatgenTest):
