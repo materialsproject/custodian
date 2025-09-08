@@ -671,9 +671,9 @@ class VaspErrorHandler(ErrorHandler):
         if "dfpt_ncore" in self.errors:
             # note that when using "_unset" action, the value is ignored
             if "NCORE" in vi["INCAR"]:
-                actions.append({"dict": "INCAR", "action": {"_unset": {"NCORE": 1}}})
+                actions.append({"dict": "INCAR", "action": {"_unset": {"NCORE": 0}}})
             if "NPAR" in vi["INCAR"]:
-                actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
+                actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 0}}})
 
         if self.errors.intersection(["bravais", "ksymm"]):
             # For bravais: VASP recommends refining the lattice parameters
@@ -779,7 +779,7 @@ class VaspErrorHandler(ErrorHandler):
 
         if "kpt_set_change" in self.errors:
             # The error message says to remove NPAR. We will do that.
-            actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": "1"}}})
+            actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 0}}})
 
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
