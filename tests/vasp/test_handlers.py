@@ -618,6 +618,13 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert "auto_nbands" in dct["errors"]
         assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"NBANDS": 64}}}]
 
+    def test_kpt_set_change(self) -> None:
+        handler = VaspErrorHandler("vasp.kpt_set_change")
+        assert handler.check() is True
+        assert handler.correct()["errors"] == ["kpt_set_change"]
+        incar = Incar.from_file("INCAR")
+        assert "NPAR" not in incar["ISYM"] == 0
+
 
 class AliasingErrorHandlerTest(PymatgenTest):
     def setUp(self) -> None:

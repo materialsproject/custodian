@@ -139,6 +139,7 @@ class VaspErrorHandler(ErrorHandler):
         "auto_nbands": ["The number of bands has been changed"],
         "ibzkpt": ["not all point group operations"],
         "fexcf": ["supplied exchange-correlation table"],
+        "kpt_set_change": ["VASP internal routines have requested a change of the k-point set"],
     }
 
     def __init__(
@@ -670,9 +671,9 @@ class VaspErrorHandler(ErrorHandler):
         if "dfpt_ncore" in self.errors:
             # note that when using "_unset" action, the value is ignored
             if "NCORE" in vi["INCAR"]:
-                actions.append({"dict": "INCAR", "action": {"_unset": {"NCORE": 0}}})
+                actions.append({"dict": "INCAR", "action": {"_unset": {"NCORE": 1}}})
             if "NPAR" in vi["INCAR"]:
-                actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 0}}})
+                actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
 
         if self.errors.intersection(["bravais", "ksymm"]):
             # For bravais: VASP recommends refining the lattice parameters
@@ -775,6 +776,10 @@ class VaspErrorHandler(ErrorHandler):
                         f"The number of bands has been decreased accordingly to {nbands + rem_bands}.",
                         UserWarning,
                     )
+
+        if "kpt_set_change" in self.errors:
+            # The error message says to remove NPAR. We will do that.
+            actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": "1"}}})
 
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
