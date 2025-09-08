@@ -139,6 +139,7 @@ class VaspErrorHandler(ErrorHandler):
         "auto_nbands": ["The number of bands has been changed"],
         "ibzkpt": ["not all point group operations"],
         "fexcf": ["supplied exchange-correlation table"],
+        "spin_polarized_harris": ["Spin polarized Harris functional dynamics is a good joke"],
     }
 
     def __init__(
@@ -714,6 +715,14 @@ class VaspErrorHandler(ErrorHandler):
             # Unfixable error --- the user made a mistake in the INCAR
             warnings.warn("Looks like you made a typo in the INCAR. Please double-check it.", UserWarning)
             return {"errors": ["read_error"], "actions": None}
+
+        if "spin_polarized_harris" in self.errors:
+            # Unfixable error --- the user made a mistake in the INCAR
+            warnings.warn(
+                "You cannot run a calculation with ICHARG >= 10, ISPIN = 2, and NSW > 0. Try setting NSW = 0.",
+                UserWarning,
+            )
+            return {"errors": ["spin_polarized_harris"], "actions": None}
 
         if "hnform" in self.errors and vi["INCAR"].get("ISYM", 2) > 0:
             # The only solution is to change your k-point grid or disable symmetry

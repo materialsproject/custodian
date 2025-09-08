@@ -566,6 +566,13 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["errors"] == ["read_error"]
         assert dct["actions"] is None
 
+    def test_harris(self) -> None:
+        handler = VaspErrorHandler("vasp.harris")
+        assert handler.check() is True
+        dct = handler.correct()
+        assert dct["errors"] == ["spin_polarized_harris"]
+        assert dct["actions"] is None
+
     def test_amin(self) -> None:
         # Cell with at least one dimension >= 50 A, but AMIN > 0.01, and calculation not yet complete
         shutil.copy("INCAR.amin", "INCAR")
