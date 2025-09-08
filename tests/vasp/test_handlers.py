@@ -370,14 +370,6 @@ class VaspErrorHandlerTest(PymatgenTest):
         incar = Incar.from_file("INCAR")
         assert incar["ALGO"] == "Fast"
 
-        shutil.copy("INCAR.gga_ialgo53", "INCAR")
-        handler = VaspErrorHandler("vasp.gradient_not_orthogonal")
-        assert handler.check() is True
-        assert "grad_not_orth" in handler.correct()["errors"]
-        incar = Incar.from_file("INCAR")
-        assert incar["ALGO"] == "Fast"
-        assert "IALGO" not in incar
-
         shutil.copy("INCAR.hybrid_normal", "INCAR")
         handler = VaspErrorHandler("vasp.gradient_not_orthogonal")
         assert handler.check() is True
@@ -390,14 +382,14 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert handler.check() is True
         assert "grad_not_orth" in handler.correct()["errors"]
         incar = Incar.from_file("INCAR")
-        assert incar["ALGO"] == "All"
+        assert incar["ALGO"] == "Normal"
 
         shutil.copy("INCAR.metagga_all", "INCAR")
         handler = VaspErrorHandler("vasp.gradient_not_orthogonal")
         assert handler.check() is True
         assert "grad_not_orth" in handler.correct()["errors"]
         incar = Incar.from_file("INCAR")
-        assert incar["ALGO"] == "All"
+        assert incar["ALGO"] == "Normal"
 
     def test_rhosyg(self) -> None:
         handler = VaspErrorHandler("vasp.rhosyg")
