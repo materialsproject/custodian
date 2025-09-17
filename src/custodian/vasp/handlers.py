@@ -603,14 +603,13 @@ class VaspErrorHandler(ErrorHandler):
             # Often coincides with algo_tet, in which the algo_tet error handler will also resolve grad_not_orth.
             # When not present alongside algo_tet, the grad_not_orth error is due to how VASP is compiled.
             # Depending on the optimization flag and choice of compiler, the ALGO = All and Damped algorithms
-            # may not work. The only fix is either to change ALGO or to recompile VASP. Since meta-GGAs/hybrids
-            # are often used with ALGO = All (and hybrids are incompatible with ALGO = VeryFast/Fast and slow with
-            # ALGO = Normal), we do not adjust ALGO in these cases.
-            if vi["INCAR"].get("METAGGA", "none") == "none" and not vi["INCAR"].get("LHFCALC", False):
-                if vi["INCAR"].get("ALGO", "Normal").lower() in {"all", "damped"}:
+            # may not work. The only fix is either to change ALGO or to recompile VASP.
+            if vi["INCAR"].get("ALGO", "Normal").lower() in {"all", "conjugate", "damped"}:
+                if vi["INCAR"].get("METAGGA", "none") == "none" and not vi["INCAR"].get("LHFCALC", False):
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
-                elif 53 <= vi["INCAR"].get("IALGO", 38) <= 58:
-                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}, "_unset": {"IALGO": 38}}})
+                else:
+                    # Meta-GGAs and hybrids should not be run with ALGO = Fast
+                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
             if "algo_tet" not in self.errors:
                 warnings.warn(
                     "EDWAV error reported by VASP without a simultaneous algo_tet error. You may wish to consider "
