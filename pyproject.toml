@@ -163,7 +163,7 @@ exclude = ["**/tests"]
 [dependency-groups]
 dev = [
     "pre-commit>=4.2.0",
-    "pymatgen>=2025.3.10",
+    "pymatgen>=2025.5.16",
     "pytest>=8.3.5",
     "pytest-cov>=6.0.0",
     "mypy>=1.15.0",
