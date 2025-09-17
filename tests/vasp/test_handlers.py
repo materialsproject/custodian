@@ -5,11 +5,13 @@ import os
 import shutil
 import tarfile
 from glob import glob
+from pathlib import Path
 
 import pytest
+from monty.io import zopen
 from monty.os.path import zpath
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
-from pymatgen.util.testing import PymatgenTest
+from pymatgen.util.testing import MatSciTest
 
 from custodian.utils import tracked_lru_cache
 from custodian.vasp.handlers import (
@@ -30,6 +32,7 @@ from custodian.vasp.handlers import (
     VaspErrorHandler,
     WalltimeHandler,
 )
+from custodian.vasp.interpreter import VaspModder
 from tests.conftest import TEST_FILES
 
 __author__ = "Shyue Ping Ong, Stephen Dacek, Janosh Riebesell"
@@ -46,7 +49,6 @@ os.environ.setdefault("PMG_VASP_PSP_DIR", TEST_FILES)
 @pytest.fixture(autouse=True)
 def _clear_tracked_cache() -> None:
     """Clear the cache of the stored functions between the tests."""
-    from custodian.utils import tracked_lru_cache
 
     tracked_lru_cache.tracked_cache_clear()
 
@@ -66,7 +68,7 @@ def copy_tmp_files(tmp_path: str, *file_paths: str) -> None:
     os.chdir(tmp_path)
 
 
-class VaspErrorHandlerTest(PymatgenTest):
+class VaspErrorHandlerTest(MatSciTest):
     def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, *glob("*", root_dir=TEST_FILES))
 
@@ -618,7 +620,7 @@ class VaspErrorHandlerTest(PymatgenTest):
         assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"NBANDS": 64}}}]
 
 
-class AliasingErrorHandlerTest(PymatgenTest):
+class AliasingErrorHandlerTest(MatSciTest):
     def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, *glob("aliasing/*", root_dir=TEST_FILES))
 
@@ -655,7 +657,7 @@ class AliasingErrorHandlerTest(PymatgenTest):
         assert dct["actions"] == [{"action": {"_unset": {"NGY": 1, "NGZ": 1}}, "dict": "INCAR"}]
 
 
-class UnconvergedErrorHandlerTest(PymatgenTest):
+class UnconvergedErrorHandlerTest(MatSciTest):
     def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, *glob("unconverged/*", root_dir=TEST_FILES))
 
@@ -790,7 +792,7 @@ class UnconvergedErrorHandlerTest(PymatgenTest):
         assert dct["actions"] is None
 
 
-class IncorrectSmearingHandlerTest(PymatgenTest):
+class IncorrectSmearingHandlerTest(MatSciTest):
     def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "scan_metal/INCAR", "scan_metal/vasprun.xml")
 
@@ -804,7 +806,7 @@ class IncorrectSmearingHandlerTest(PymatgenTest):
         assert incar["SIGMA"] == 0.2
 
 
-class IncorrectSmearingHandlerStaticTest(PymatgenTest):
+class IncorrectSmearingHandlerStaticTest(MatSciTest):
     def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "static_smearing/INCAR", "static_smearing/vasprun.xml")
 
@@ -813,7 +815,7 @@ class IncorrectSmearingHandlerStaticTest(PymatgenTest):
         assert not handler.check()
 
 
-class IncorrectSmearingHandlerFermiTest(PymatgenTest):
+class IncorrectSmearingHandlerFermiTest(MatSciTest):
     def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "fermi_smearing/INCAR", "fermi_smearing/vasprun.xml")
 
@@ -822,7 +824,7 @@ class IncorrectSmearingHandlerFermiTest(PymatgenTest):
         assert not handler.check()
 
 
-class KspacingMetalHandlerTest(PymatgenTest):
+class KspacingMetalHandlerTest(MatSciTest):
     def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "scan_metal/INCAR", "scan_metal/vasprun.xml")
 
@@ -846,7 +848,7 @@ class KspacingMetalHandlerTest(PymatgenTest):
         assert isinstance(ScanMetalHandler(), KspacingMetalHandler)
 
 
-class LargeSigmaHandlerTest(PymatgenTest):
+class LargeSigmaHandlerTest(MatSciTest):
     def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, *glob("large_sigma/*", root_dir=TEST_FILES))
 
@@ -863,9 +865,6 @@ class LargeSigmaHandlerTest(PymatgenTest):
         assert not handler.check()
 
     def test_no_crash_on_partial_output(self) -> None:
-        from pathlib import Path
-
-        from monty.io import zopen
         # ensure that the handler doesn't crash when the OUTCAR isn't completely written
         # this prevents jobs from being killed when the handler itself crashes
 
@@ -890,7 +889,7 @@ class LargeSigmaHandlerTest(PymatgenTest):
         assert not handler.check()
 
 
-class ZpotrfErrorHandlerTest(PymatgenTest):
+class ZpotrfErrorHandlerTest(MatSciTest):
     def setUp(self) -> None:
         copy_tmp_files(
             self.tmp_path,
@@ -945,7 +944,7 @@ class ZpotrfErrorHandlerTest(PymatgenTest):
         assert Incar.from_file("INCAR")["ISYM"] == 0
 
 
-class ZpotrfErrorHandlerSmallTest(PymatgenTest):
+class ZpotrfErrorHandlerSmallTest(MatSciTest):
     def setUp(self) -> None:
         copy_tmp_files(
             self.tmp_path,
@@ -967,7 +966,7 @@ class ZpotrfErrorHandlerSmallTest(PymatgenTest):
         ]
 
 
-class WalltimeHandlerTest(PymatgenTest):
+class WalltimeHandlerTest(MatSciTest):
     def setUp(self) -> None:
         os.chdir(f"{TEST_FILES}/postprocess")
         os.environ.pop("CUSTODIAN_WALLTIME_START", None)
@@ -1023,7 +1022,7 @@ class WalltimeHandlerTest(PymatgenTest):
         os.chdir(CWD)
 
 
-class PositiveEnergyHandlerTest(PymatgenTest):
+class PositiveEnergyHandlerTest(MatSciTest):
     def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "positive_energy/INCAR", "positive_energy/POSCAR", "positive_energy/OSZICAR")
 
@@ -1042,7 +1041,7 @@ class PositiveEnergyHandlerTest(PymatgenTest):
         assert incar["ALGO"] == "Normal"
 
 
-class PotimHandlerTest(PymatgenTest):
+class PotimHandlerTest(MatSciTest):
     def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "potim/INCAR", "potim/POSCAR", "potim/OSZICAR")
 
@@ -1064,7 +1063,7 @@ class PotimHandlerTest(PymatgenTest):
         assert incar["IBRION"] == 3
 
 
-class LrfCommHandlerTest(PymatgenTest):
+class LrfCommHandlerTest(MatSciTest):
     def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "lrf_comm/INCAR", "lrf_comm/OUTCAR", "lrf_comm/std_err.txt")
 
@@ -1077,7 +1076,7 @@ class LrfCommHandlerTest(PymatgenTest):
         assert vi["INCAR"]["LPEAD"] is True
 
 
-class KpointsTransHandlerTest(PymatgenTest):
+class KpointsTransHandlerTest(MatSciTest):
     def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "KPOINTS", "std_err.txt.kpoints_trans")
 
@@ -1094,13 +1093,12 @@ class KpointsTransHandlerTest(PymatgenTest):
         assert dct["actions"] == []  # don't correct twice
 
 
-class OutOfMemoryHandlerTest(PymatgenTest):
+class OutOfMemoryHandlerTest(MatSciTest):
     def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "INCAR", "std_err.txt.oom")
 
     def test_oom(self) -> None:
         vi = VaspInput.from_directory(".")
-        from custodian.vasp.interpreter import VaspModder
 
         VaspModder(vi=vi).apply_actions([{"dict": "INCAR", "action": {"_set": {"KPAR": 4}}}])
         handler = StdErrHandler("std_err.txt.oom")
@@ -1110,7 +1108,7 @@ class OutOfMemoryHandlerTest(PymatgenTest):
         assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"KPAR": 2}}}]
 
 
-class DriftErrorHandlerTest(PymatgenTest):
+class DriftErrorHandlerTest(MatSciTest):
     def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "INCAR", "drift/OUTCAR", "drift/CONTCAR")
 
@@ -1144,7 +1142,7 @@ class DriftErrorHandlerTest(PymatgenTest):
         assert incar.get("ENAUG", 0) == incar.get("ENCUT", 2) * 2
 
 
-class NonConvergingErrorHandlerTest(PymatgenTest):
+class NonConvergingErrorHandlerTest(MatSciTest):
     n_ionic_steps: int = 3
 
     def setUp(self) -> None:

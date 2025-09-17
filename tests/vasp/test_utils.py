@@ -7,21 +7,20 @@ import pytest
 from monty.os.path import zpath
 from pymatgen.core import Lattice, Structure
 from pymatgen.io.vasp import Kpoints
-from pymatgen.util.testing import PymatgenTest
+from pymatgen.util.testing import MatSciTest
 
 from custodian.vasp.utils import _estimate_num_k_points_from_kspacing, increase_k_point_density
 from tests.conftest import TEST_FILES
 
 
-class TestKPointUtils(PymatgenTest):
-    def setUp(self) -> None:
-        self.large_structure = Structure.from_file(zpath(os.path.join(TEST_FILES, "POSCAR_mp-1200292")))
+class TestKPointUtils(MatSciTest):
+    large_structure = Structure.from_file(zpath(os.path.join(TEST_FILES, "POSCAR_mp-1200292")))
 
-        self.small_structure = Structure(
-            Lattice.from_parameters(a=3.8, b=3.8, c=3.8, alpha=60.0, beta=60.0, gamma=60.0),
-            ["Si", "Si"],
-            [[(-1) ** i * 0.125 for _ in range(3)] for i in range(2)],
-        )
+    small_structure = Structure(
+        Lattice.from_parameters(a=3.8, b=3.8, c=3.8, alpha=60.0, beta=60.0, gamma=60.0),
+        ["Si", "Si"],
+        [[(-1) ** i * 0.125 for _ in range(3)] for i in range(2)],
+    )
 
     def test_k_point_estimate(self) -> None:
         kspacing_values = [1, 0.8, 0.6, 0.4, 0.2, 0.1]
