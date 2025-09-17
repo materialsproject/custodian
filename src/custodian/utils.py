@@ -20,18 +20,19 @@ def backup(filenames, prefix="error", directory="./") -> None:
             series of error.1.tar.gz, error.2.tar.gz, ... will be generated.
         directory (str): directory where the files exist
     """
-
-    backup_files = glob(os.path.join(directory, f"{prefix}.*.tar.gz")) + glob(os.path.join(directory, f"{prefix}.*.tar"))
+    backup_files = glob(os.path.join(directory, f"{prefix}.*.tar.gz")) + glob(
+        os.path.join(directory, f"{prefix}.*.tar")
+    )
     nums = []
     for file in backup_files:
         try:
-            if file.endswith('.tar.gz'):
+            if file.endswith(".tar.gz"):
                 nums.append(int(file.split(".")[-3]))
-            elif file.endswith('.tar'):
+            elif file.endswith(".tar"):
                 nums.append(int(file.split(".")[-2]))
         except (ValueError, IndexError):
             continue
-    num = max([0] + nums)
+    num = max([0, *nums])
     prefix = f"{prefix}.{num + 1}"
     filename = os.path.join(directory, f"{prefix}.tar.gz")
     logging.info(f"Backing up run to {filename}.")
