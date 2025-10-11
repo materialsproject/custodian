@@ -6,6 +6,64 @@ nav_order: 2
 
 # Change Log
 
+## 2025.10.11
+* PR #404 from @NicoPhase (#404)
+    This is a fix to issue #403. It makes sure that backup files aren't overwritten when a series of custodian jobs are executed in the same folder. The fix is achieved by taking both .tar.gz and .tar files into account when determining the file number.
+* PR #396 from @Andrew-S-Rosen (#396)
+    This PR overhauls (and greatly simplifies) the termination logic in the `VaspJob`. The major problem this PR seeks to solve is described in https://github.com/Matgenix/jobflow-remote/issues/323#issuecomment-3249870277 and can be summarized as follows.
+    In some job orchestration setups, Custodian might end up running on a master node with the VASP processes being launched on sister nodes. This is often done, for instance, when requesting a single large Slurm allocation and running many concurrent VASP processes therein.  Currently, Custodian cannot handle this setup, as the Custodian process on the master node seemingly does not have permission to kill the VASP process on the other node(s) in the allocation, and it then defaults to a `killall` command killing everything (including perfectly fine jobs). However, Custodian does have permission to kill the parent process that launches the VASP executable (typically an `srun` or `mpirun` call), which in fact is what the `killall` indiscriminately kills.
+    This PR resolves the issue and fixes the somewhat hacky logic that was in place before.
+* PR #399 from @Andrew-S-Rosen (#399)
+    The `grad_not_orth` handler previously did nothing if a Meta-GGA or hybrid functional was used. Now, it switches ALGO to Normal.
+* PR #402 from @Andrew-S-Rosen (#402)
+    Closes #392. This is a non-fixable error, so we just warn the user to fix their INCAR. We don't make the change for them because it was probably a conceptual error.
+* PR #395 from @Andrew-S-Rosen (#395)
+    Closes #394. As noted in the [VASP manual](https://www.vasp.at/wiki/index.php/ISEARCH), it is strongly recommended to use ISEARCH = 1 (default: ISEARCH = 0) when setting ALGO = All. Currently, Custodian does not do this but should. This PR adds ISEARCH = 1 alongside ALGO = All actions.
+    There are two subtleties to keep in mind:
+* PR #391 from @Andrew-S-Rosen (#391)
+    Previously, the `nbands_not_sufficient` error in VASP was treated as unfixable. Now, the handler will automatically increase `NBANDS` to the default value within VASP.
+* PR #388 from @Andrew-S-Rosen (#388)
+    Closes #387. With the reliance on absolute rather than relative file paths in https://github.com/materialsproject/custodian/pull/317, the use of the `scratch_dir` keyword argument seems to have been broken, as jobs were always run in the current working directory rather than the scratch directory.
+* PR #386 from @esoteric-ephemera (#386)
+    - QCHEM: ensure variables are correctly initialized given their expected type (issues with mixed `dict` / `None` init)
+    - VASP: ensure `eddrm` handler terminates a calculation once POTIM has reached the defined threshhold (0.01)
+* PR #381 from @Andrew-S-Rosen (#381)
+    Closes #380.
+    **Fixes:**
+    - The `error.tar.gz` files now unpack without including the full file path of the original files that were tar'd.
+* PR #355 from @naik-aakash (#355)
+    Hi @JaGeo  and @shyuep, I have updated the list of output files from LOBSTER here. These are optional files that can be generated using lobster >=v5.
+* PR #361 from @yanghan234 (#361)
+    - In finite field calculations, the OUTCAR prints the calculations for all of the requested directions. Updated the codes to parse electronic iterations.
+* PR #375 from @Andrew-S-Rosen (#375)
+    Closes #374.
+    This PR makes a change to the logic for choosing whether a VASP calculation should be run with the gamma-point only version of VASP (typically `vasp_gam`) or not. Specifically, we no longer check for whether the KPOINTS file is gamma-centered or not. This is because a 1x1x1 Monkhorst-Pack grid should be the same as a 1x1x1 Gamma-centered grid. An analogous change was made for the KSPACING-related check.
+* PR #358 from @janosh (#358)
+    also use `logger.exception` instead of `logger.warning` in `VaspJob.terminate` to get full stacktrace which can help a lot with debugging
+    I discussed `AMIX` effectiveness with @Andrew-S-Rosen prior to this PR. also pinging @esoteric-ephemera in case you want to chime in
+* PR #373 from @esoteric-ephemera (#373)
+    Adds support for correcting two VASP errors:
+    - [FEXCF](https://www.vasp.at/forum/viewtopic.php?p=14827), close #365
+    - [IBZKPT](https://www.vasp.at/forum/viewtopic.php?p=24485)
+    Also ensure that $\Gamma$-point only VASP isn't run when DFPT calcs are run (either / both `LEPSILON` or `LOPTICS` are True)
+    To do:
+    - Add tests* PR #362 from @Andrew-S-Rosen (#362)
+    Anytime that we modify NCORE, we should also unset NPAR if it's present in the INCAR file since NPAR takes precedence. This is done throughout Custodian, but there was one spot missing it. I added it in.
+* PR #356 from @esoteric-ephemera (#356)
+    Two major changes:
+    - Since `LargeSigmaHandler` is a monitor handler (checks while output is still being written), it can occasionally misfire when parsing data from OUTCAR. This adds a fix to prevent jobs from being terminated when the handler itself fails to interpret partial file output
+    - Close [#348](https://github.com/materialsproject/custodian/issues/348) by expanding the scope of k-point checks to include KSPACING, and to also check for grid shifts in KPOINTS
+* PR #349 from @soge8904 (#349)
+    This PR is to add jobs.py for JDFTx. We have a draft PR open on atomate2 to integrate JDFTx, but it seems that this script belongs here. Jobs.py was created using the CP2K template, with only the basic functionalities for now (just enough to run a job).
+* PR #342 from @esoteric-ephemera (#342)
+    Minor update to the logic of the `auto_nbands` check for `VaspErrorHandler`. This check sees if the number of bands has been updated by VASP, and currently it only checks to see if that updated number is very large.
+    However, there are cases where the user specifies an NBANDS that is incompatible with their parallelization settings, as NBANDS must be divisible by $(\mathrm{ranks}) / (\mathrm{KPAR} \times \mathrm{NCORE})$. In these cases, VASP increases the number of bands to ensure the calculation can still proceed. This can happen in MP's band structure workflows with uniform $k$-point densities.
+    However, since the current `auto_nbands` handler applies no corrections to the job, these otherwise successful runs are killed.
+    This PR adds logic to ensure that the calculation is rerun with a higher number of bands appropriate to the parallelization setting. This is kinda redundant, since VASP already does this. But I think it has to occur this way because `VaspErrorHandler` is monitoring the job and flags it for an `auto_nbands` error.
+    Another implementation concern: it's generally safer to decrease the number of bands since this requires a lower energy cutoff to converge each band. It might be safer to decrease NBANDS as a fix
+* PR #341 from @zulissimeta (#341)
+    Address #340 . Problem: the base Modder() class also sets the directory, so the call to the super `__init__` also needs the directory.
+
 ## 2025.8.13
 * PR #388 from @Andrew-S-Rosen (#388)
     Closes #387. With the reliance on absolute rather than relative file paths in https://github.com/materialsproject/custodian/pull/317, the use of the `scratch_dir` keyword argument seems to have been broken, as jobs were always run in the current working directory rather than the scratch directory.
