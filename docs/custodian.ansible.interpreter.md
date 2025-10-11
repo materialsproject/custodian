@@ -36,7 +36,7 @@ Examples:
 Initializes a Modder from a list of supported actions.
 
 * **Parameters**
-  * **actions** (   *[**Action**]*) – A sequence of supported actions. See
+  * **actions** (    *[**Action**]*) – A sequence of supported actions. See
     [`custodian.ansible.actions`](custodian.ansible.actions.md#module-custodian.ansible.actions). Default is None,
     which means only DictActions are supported.
   * **strict** (*bool*) – Indicating whether to use strict mode. In non-strict

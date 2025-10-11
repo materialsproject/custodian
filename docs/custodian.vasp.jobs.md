@@ -71,7 +71,7 @@ of the static constructors. The defaults are usually fine too.
     gamma optimized version of VASP instead of regular VASP. You
     can also specify the gamma vasp command using the
     gamma_vasp_cmd argument if the command is named differently.
-  * **settings_override** (   *[**dict**]*) – An ansible style list of dict to
+  * **settings_override** (    *[**dict**]*) – An ansible style list of dict to
     override changes. For example, to set ISTART=1 for subsequent
     runs and to copy the CONTCAR to the POSCAR, you will provide:
 
@@ -269,7 +269,7 @@ usually fine too.
     auto_gamma is True. Should follow the list style of
     subprocess. Defaults to None, which means “.gamma” is added
     to the last argument of the standard vasp_cmd.
-  * **settings_override** (   *[**dict**]*) – An ansible style list of dict to
+  * **settings_override** (    *[**dict**]*) – An ansible style list of dict to
     override changes. For example, to set ISTART=1 for subsequent
     runs and to copy the CONTCAR to the POSCAR, you will provide:
 

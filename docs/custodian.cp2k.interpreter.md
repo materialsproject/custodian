@@ -20,7 +20,7 @@ Initializes a Modder for Cp2kInput sets
 * **Parameters**
   * **filename** (*str*) – name of cp2k input file to modify. This file will be overwritten
     if actions are applied.
-  * **actions** (   *[**Action**]*) – A sequence of supported actions. See
+  * **actions** (    *[**Action**]*) – A sequence of supported actions. See
     [`custodian.ansible.actions`](custodian.ansible.actions.md#module-custodian.ansible.actions). Default is None,
     which means DictActions and FileActions are supported.
   * **strict** (*bool*) – Indicating whether to use strict mode. In non-strict

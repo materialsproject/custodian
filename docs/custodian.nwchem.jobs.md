@@ -17,7 +17,7 @@ A basic Nwchem job.
 Initializes a basic NwChem job.
 
 * **Parameters**
-  * **nwchem_cmd** (   *[**str**]*) – Command to run Nwchem as a list of args. For
+  * **nwchem_cmd** (    *[**str**]*) – Command to run Nwchem as a list of args. For
     example, [“nwchem”].
   * **input_file** (*str*) – Input file to run. Defaults to “mol.nw”.
   * **output_file** (*str*) – Name of file to direct standard out to.
@@ -27,7 +27,7 @@ Initializes a basic NwChem job.
     Defaults to True.
   * **gzipped** (*bool*) – Deprecated. Please use the Custodian class’s
     gzipped_output option instead.
-  * **settings_override** (   *[**dict**]*) – An ansible style list of dict to override changes.
+  * **settings_override** (    *[**dict**]*) – An ansible style list of dict to override changes.
     #TODO: Not implemented yet.
 
 ### postprocess()

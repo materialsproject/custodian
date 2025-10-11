@@ -17,7 +17,7 @@ A Modder for VaspInputSets.
 Initializes a Modder for VaspInput sets
 
 * **Parameters**
-  * **actions** (   *[**Action**]*) – A sequence of supported actions. See
+  * **actions** (    *[**Action**]*) – A sequence of supported actions. See
     [`custodian.ansible.actions`](custodian.ansible.actions.md#module-custodian.ansible.actions). Default is None,
     which means DictActions and FileActions are supported.
   * **strict** (*bool*) – Indicating whether to use strict mode. In non-strict
