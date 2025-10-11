@@ -14,8 +14,9 @@ authors = [
     { name = "Stephen Dacek" },
     { name = "William Davidson Richards" },
     { name = "Xiaohui Qu" },
+    { name = "Andrew Rosen", email = "asrosen@princeton.edu" },
 ]
-maintainers = [{ name = "Janosh Riebesell" }, { name = "Shyue Ping Ong" }]
+maintainers = [{ name = "Shyue Ping Ong" }]
 readme = "README.md"
 keywords = ["jit", "job", "just-in-time", "management", "vasp", "nwchem", "qchem"]
 classifiers = [
