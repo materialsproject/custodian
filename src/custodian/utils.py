@@ -1,11 +1,16 @@
 """Utility function and classes."""
 
+from __future__ import annotations
+
 import functools
 import logging
 import os
 import tarfile
 from glob import glob
-from typing import ClassVar
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any, ClassVar
 
 
 def backup(filenames, prefix="error", directory="./") -> None:
@@ -72,7 +77,7 @@ class tracked_lru_cache:
     Allows Custodian to clear the cache after all the checks have been performed.
     """
 
-    cached_functions: ClassVar = set()
+    cached_functions: ClassVar[set[Any]] = set()
 
     def __init__(self, func) -> None:
         """

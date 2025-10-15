@@ -197,6 +197,19 @@ class VaspErrorHandler(ErrorHandler):
                         # e-density (brmix error)
                         if err == "brmix" and "NELECT" in incar:
                             continue
+
+                        # Treat auto_nbands only as a warning, do not fail a job
+                        if err == "auto_nbands" in self.errors:
+                            if nbands := self._get_nbands_from_outcar(directory):
+                                outcar = load_outcar(os.path.join(directory, "OUTCAR"))
+                                if (nelect := outcar.nelect) and (nbands > 2 * nelect):
+                                    warnings.warn(
+                                        "NBANDS seems to be too high. The electronic structure may be inaccurate. "
+                                        "You may want to rerun this job with a smaller number of cores.",
+                                        UserWarning,
+                                    )
+                            continue
+
                         self.errors.add(err)
                         error_msgs.add(msg)
         for msg in error_msgs:
@@ -535,12 +548,11 @@ class VaspErrorHandler(ErrorHandler):
 
             self.error_count["zbrent"] += 1
 
-        if "too_few_bands" in self.errors:
-            nbands = None
-            nbands = vi["INCAR"]["NBANDS"] if "NBANDS" in vi["INCAR"] else self._get_nbands_from_outcar(directory)
-            if nbands:
-                new_nbands = max(int(1.1 * nbands), nbands + 1)  # This handles the case when nbands is too low (< 8).
-                actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": new_nbands}}})
+        if "too_few_bands" in self.errors and (
+            nbands := vi["INCAR"].get("NBANDS") or self._get_nbands_from_outcar(directory)
+        ):
+            new_nbands = max(int(1.1 * nbands), nbands + 1)  # This handles the case when nbands is too low (< 8).
+            actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": new_nbands}}})
 
         if self.errors & {"pssyevx", "pdsyevx"} and vi["INCAR"].get("ALGO", "Normal").lower() != "normal":
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
@@ -758,50 +770,25 @@ class VaspErrorHandler(ErrorHandler):
                     )
             self.error_count["algo_tet"] += 1
 
-        if "auto_nbands" in self.errors and (nbands := self._get_nbands_from_outcar(directory)):
-            outcar = load_outcar(os.path.join(directory, "OUTCAR"))
-
-            if (nelect := outcar.nelect) and (nbands > 2 * nelect):
-                self.error_count["auto_nbands"] += 1
-                warnings.warn(
-                    "NBANDS seems to be too high. The electronic structure may be inaccurate. "
-                    "You may want to rerun this job with a smaller number of cores.",
-                    UserWarning,
-                )
-
-            elif nbands := vi["INCAR"].get("NBANDS"):
-                kpar = vi["INCAR"].get("KPAR", 1)
-                ncore = vi["INCAR"].get("NCORE", 1)
-                # If the user set an NBANDS that isn't compatible with parallelization settings,
-                # increase NBANDS to ensure correct task distribution and issue a UserWarning.
-                # The number of ranks per band is (number of MPI ranks) / (KPAR * NCORE)
-                if (ranks := outcar.run_stats.get("cores")) and (rem_bands := nbands % (ranks // (kpar * ncore))) != 0:
-                    actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": nbands + rem_bands}}})
-                    warnings.warn(
-                        f"Your NBANDS={nbands} setting was incompatible with your parallelization "
-                        f"settings, KPAR={kpar}, NCORE={ncore}, over {ranks} ranks. "
-                        f"The number of bands has been decreased accordingly to {nbands + rem_bands}.",
-                        UserWarning,
-                    )
-
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
 
     @staticmethod
     def _get_nbands_from_outcar(directory: str) -> int | None:
         nbands = None
-        with open(os.path.join(directory, "OUTCAR")) as file:
-            for line in file:
-                # Have to take the last NBANDS line since sometimes VASP
-                # updates it automatically even if the user specifies it.
-                # The last one is marked by NBANDS= (no space).
-                if "NBANDS=" in line:
-                    try:
-                        d = line.split("=")
-                        nbands = int(d[-1].strip())
-                        break
-                    except (IndexError, ValueError):
-                        pass
+        if os.path.isfile(outcar_path := os.path.join(directory, "OUTCAR")):
+            with open(outcar_path) as file:
+                for line in file:
+                    # Have to take the last NBANDS line since sometimes VASP
+                    # updates it automatically even if the user specifies it.
+                    # The last one is marked by NBANDS= (no space).
+                    if "NBANDS=" in line:
+                        try:
+                            d = line.split("=")
+                            nbands = int(d[-1].strip())
+                            break
+                        except (IndexError, ValueError):
+                            pass
         return nbands
 
 

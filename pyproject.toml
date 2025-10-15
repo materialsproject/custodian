@@ -112,6 +112,7 @@ ignore = [
     "PTH",
     "RUF012", # Disable checks for mutable class args
     "SIM105", # Use contextlib.suppress(OSError) instead of try-except-pass
+    "PLC0415", # Imports at the top of a file
 ]
 pydocstyle.convention = "google"
 isort.split-on-trailing-comma = false

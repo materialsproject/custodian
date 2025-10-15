@@ -305,7 +305,7 @@ class TestVaspJobTerminate(unittest.TestCase):
         self.mock_process.terminate.side_effect = OSError("Permission denied")
 
         # Act & Assert
-        with pytest.raises(OSError):
+        with pytest.raises(OSError, match="Permission denied"):
             self.vasp_job.terminate()
 
         self.mock_process.terminate.assert_called_once()
@@ -323,7 +323,7 @@ class TestVaspJobTerminate(unittest.TestCase):
         self.mock_process.kill.return_value = None
 
         # Act & Assert
-        with pytest.raises(OSError):
+        with pytest.raises(OSError, match="Process not found"):
             self.vasp_job.terminate()
 
         self.mock_process.terminate.assert_called_once()
