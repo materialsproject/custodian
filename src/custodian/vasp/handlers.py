@@ -695,16 +695,11 @@ class VaspErrorHandler(ErrorHandler):
             # direct and reciprocal meshes being incompatible.
             # This is basically the same as bravais
             vasp_recommended_symprec = 1e-6
-            symprec = vi["INCAR"].get("SYMPREC", vasp_recommended_symprec)
-            if symprec < vasp_recommended_symprec:
+            symprec = vi["INCAR"].get("SYMPREC", 1e-5)  # Default SYMPREC is 1e-5
+            if symprec != vasp_recommended_symprec:
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": vasp_recommended_symprec}}})
-            elif symprec < 1e-4:
-                # try 10xing symprec twice, then set ISYM=0 to not impose potentially artificial symmetry from
-                # too loose symprec on charge density
-                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": float(f"{symprec * 10:.1e}")}}})
-            else:
+            elif vi["INCAR"].get("ISYM") != 0:  # Default ISYM is variable, but never 0
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
-            self.error_count["bravais"] += 1
 
         if "nbands_not_sufficient" in self.errors:
             outcar = load_outcar(os.path.join(directory, "OUTCAR"))
