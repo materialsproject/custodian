@@ -199,7 +199,7 @@ class VaspErrorHandler(ErrorHandler):
                             continue
 
                         # Treat auto_nbands only as a warning, do not fail a job
-                        if err == "auto_nbands" in self.errors:
+                        if err == "auto_nbands":
                             if nbands := self._get_nbands_from_outcar(directory):
                                 outcar = load_outcar(os.path.join(directory, "OUTCAR"))
                                 if (nelect := outcar.nelect) and (nbands > 2 * nelect):
