@@ -456,7 +456,7 @@ class Custodian:
         job.setup(self.directory)
 
         attempt = 0
-        p = None  # Initialize p to None in case the while loop never executes
+        process = None  # Initialize p to None in case the while loop never executes
         while self.total_errors < self.max_errors and self.errors_current_job < self.max_errors_per_job:
             attempt += 1
             logger.info(
@@ -464,44 +464,39 @@ class Custodian:
                 f"errors in job thus far = {self.total_errors}, {self.errors_current_job}."
             )
 
-            p = job.run(directory=self.directory)
+            process = job.run(directory=self.directory)
             # Check for errors using the error handlers and perform
             # corrections.
             has_error = False
             zero_return_code = True
 
-            # Choose the terminate function to run. If a terminate_func exists, this
-            # should take priority, followed by Job.terminate if implemented, and finally
-            # subprocess.Popen.terminate if neither of the former exist.
-            terminate = self.terminate_func or job.terminate or p.terminate
-
             # While the job is running, we use the handlers that are
             # monitors to monitor the job.
-            if isinstance(p, subprocess.Popen):
+            if isinstance(process, subprocess.Popen):
                 if self.monitors:
-                    n = 0
+                    poll_idx = 0
                     while True:
-                        n += 1
+                        poll_idx += 1
                         time.sleep(self.polling_time_step)
                         # We poll the process p to check if it is still running.
                         # Note that the process here is not the actual calculation
                         # but whatever is used to control the execution of the
                         # calculation executable. For instance; mpirun, srun, and so on.
-                        if p.poll() is not None:
+                        if process.poll() is not None:
                             break
-                        if n % self.monitor_freq == 0:
+                        if poll_idx % self.monitor_freq == 0:
                             # At every self.polling_time_step * self.monitor_freq seconds,
                             # we check the job for errors using handlers that are monitors.
                             # In order to properly kill a running calculation, we use
                             # the appropriate implementation of terminate.
-                            has_error = self._do_check(self.monitors, terminate)
+                            has_error = self._do_check(self.monitors, process, job)
                 else:
-                    p.wait()
-                    if self.terminate_func is not None and self.terminate_func != p.terminate:
+                    process.wait()
+                    if self.terminate_func is not None and self.terminate_func != process.terminate:
                         self.terminate_func()
                         time.sleep(self.polling_time_step)
 
-                zero_return_code = p.returncode == 0
+                zero_return_code = process.returncode == 0
 
             logger.info(f"{job.name}.run has completed. Checking remaining handlers")
             # Check for errors again, since in some cases non-monitor
@@ -523,7 +518,7 @@ class Custodian:
                 if not zero_return_code:
                     if self.terminate_on_nonzero_returncode:
                         self.run_log[-1]["nonzero_return_code"] = True
-                        msg = f"Job return code is {p.returncode}. Terminating..."
+                        msg = f"Job return code is {process.returncode}. Terminating..."
                         logger.info(msg)
                         raise ReturnCodeError(msg, raises=True)
                     warnings.warn("subprocess returned a non-zero return code. Check outputs carefully...")
@@ -543,25 +538,9 @@ class Custodian:
                     raise NonRecoverableError(msg, raises=False, handler=corr["handler"])
 
         # Terminate any running process before raising max errors exceptions
-        if isinstance(p, subprocess.Popen) and p.poll() is None:
-            logger.warning("Max errors threshold reached. Terminating running process.")
-            terminate = self.terminate_func or job.terminate or p.terminate
-            try:
-                # Call terminate with directory parameter if it's not the default Popen terminate
-                if terminate != p.terminate:
-                    terminate(directory=self.directory)
-                else:
-                    terminate()
-                # Wait briefly for process to terminate
-                if hasattr(p, "wait"):
-                    try:
-                        p.wait(timeout=10)
-                    except subprocess.TimeoutExpired:
-                        logger.warning("Process did not terminate gracefully, force killing")
-                        p.kill()
-                        p.wait()
-            except Exception:
-                logger.exception("Error terminating process")
+        if process is not None:
+            logger.warning("Max errors threshold reached.")
+            self._terminate_process(process, job)
 
         if self.errors_current_job >= self.max_errors_per_job:
             self.run_log[-1]["max_errors_per_job"] = True
@@ -675,8 +654,30 @@ class Custodian:
                 gzip_dir(self.directory)
         return None
 
-    def _do_check(self, handlers, terminate_func=None):
-        """Checks the specified handlers. Returns True iff errors caught."""
+    def _terminate_process(self, process, job) -> None:
+        """Terminate a running subprocess using the job's terminate method or fallback."""
+        if not isinstance(process, subprocess.Popen) or process.poll() is not None:
+            return  # Not a process or already finished
+
+        logger.warning("Terminating running process.")
+        terminate = self.terminate_func or job.terminate or process.terminate
+
+        try:
+            if terminate != process.terminate:
+                terminate(directory=self.directory)
+            else:
+                terminate()
+            try:
+                process.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                logger.warning("Process did not terminate gracefully, force killing")
+                process.kill()
+                process.wait()
+        except Exception:
+            logger.exception("Error terminating process")
+
+    def _do_check(self, handlers, process=None, job=None):
+        """Check handlers and return True if errors were caught."""
         corrections = []
         for handler in handlers:
             try:
@@ -694,11 +695,11 @@ class Custodian:
                             )
                         logger.warning(f"{msg} Correction not applied.")
                         continue
-                    if terminate_func is not None and handler.is_terminating:
+                    if process is not None and job is not None and handler.is_terminating:
                         logger.info("Terminating job")
-                        terminate_func(directory=self.directory)
-                        # make sure we don't terminate twice
-                        terminate_func = None
+                        self._terminate_process(process, job)
+                        # Make sure we don't terminate twice
+                        process = None
                     dct = handler.correct(directory=self.directory)
                     logger.error(type(handler).__name__, extra=dct)
                     dct["handler"] = handler
