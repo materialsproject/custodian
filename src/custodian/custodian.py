@@ -456,6 +456,7 @@ class Custodian:
         job.setup(self.directory)
 
         attempt = 0
+        p = None  # Initialize p to None in case the while loop never executes
         while self.total_errors < self.max_errors and self.errors_current_job < self.max_errors_per_job:
             attempt += 1
             logger.info(
@@ -540,6 +541,27 @@ class Custodian:
                     self.run_log[-1]["handler"] = corr["handler"]
                     msg = f"Unrecoverable error for handler: {corr['handler']}"
                     raise NonRecoverableError(msg, raises=False, handler=corr["handler"])
+
+        # Terminate any running process before raising max errors exceptions
+        if isinstance(p, subprocess.Popen) and p.poll() is None:
+            logger.warning("Max errors threshold reached. Terminating running process.")
+            terminate = self.terminate_func or job.terminate or p.terminate
+            try:
+                # Call terminate with directory parameter if it's not the default Popen terminate
+                if terminate != p.terminate:
+                    terminate(directory=self.directory)
+                else:
+                    terminate()
+                # Wait briefly for process to terminate
+                if hasattr(p, "wait"):
+                    try:
+                        p.wait(timeout=10)
+                    except subprocess.TimeoutExpired:
+                        logger.warning("Process did not terminate gracefully, force killing")
+                        p.kill()
+                        p.wait()
+            except Exception:
+                logger.exception("Error terminating process")
 
         if self.errors_current_job >= self.max_errors_per_job:
             self.run_log[-1]["max_errors_per_job"] = True
