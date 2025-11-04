@@ -1,6 +1,7 @@
 import os
 import random
 import subprocess
+import time
 import unittest
 from glob import glob
 
@@ -133,6 +134,49 @@ class ExampleValidator2(Validator):
         return True
 
 
+class LongRunningJob(Job):
+    """A job that spawns a long-running subprocess to test process termination."""
+
+    def __init__(self) -> None:
+        self.process = None
+
+    def setup(self, directory="./") -> None:
+        pass
+
+    def run(self, directory="./"):
+        """Spawn a long-running sleep process."""
+        # Use sleep command to simulate a long-running VASP job
+        self.process = subprocess.Popen(
+            ["sleep", "300"],  # Sleep for 5 minutes
+            cwd=directory,
+            start_new_session=True,
+        )
+        return self.process
+
+    def postprocess(self, directory="./") -> None:
+        pass
+
+    def terminate(self, directory="./") -> None:
+        """Kill the process and all its children."""
+        if self.process and self.process.poll() is None:
+            self.process.terminate()
+            try:
+                self.process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                self.process.kill()
+                self.process.wait()
+
+
+class AlwaysFailingHandler(ErrorHandler):
+    """Handler that always detects an error to trigger max_errors_per_job."""
+
+    def check(self, directory="./") -> bool:
+        return True
+
+    def correct(self, directory="./"):
+        return {"errors": "simulated error", "actions": "simulated correction"}
+
+
 class CustodianTest(unittest.TestCase):
     def setUp(self) -> None:
         self.cwd = os.getcwd()
@@ -222,6 +266,33 @@ class CustodianTest(unittest.TestCase):
         with pytest.raises(MaxCorrectionsPerJobError):
             c.run()
         assert c.run_log[-1]["max_errors_per_job"]
+
+    def test_max_errors_per_job_terminates_process(self) -> None:
+        """Test that processes are properly terminated when max_errors_per_job is reached."""
+        job = LongRunningJob()
+        handler = AlwaysFailingHandler()
+        c = Custodian(
+            [handler],
+            [job],
+            max_errors=10,
+            max_errors_per_job=2,
+            polling_time_step=1,
+        )
+
+        # Run custodian and expect it to raise MaxCorrectionsPerJobError
+        with pytest.raises(MaxCorrectionsPerJobError):
+            c.run()
+
+        # Verify the max_errors_per_job flag is set
+        assert c.run_log[-1]["max_errors_per_job"]
+
+        # Give the process a moment to fully terminate
+        time.sleep(0.5)
+
+        # Verify the process was actually terminated (not a zombie)
+        # If the process is still running, poll() will return None
+        assert job.process is not None
+        assert job.process.poll() is not None, "Process should be terminated, not left as zombie"
 
     def test_max_errors_per_handler_raise(self) -> None:
         n_jobs = 100
