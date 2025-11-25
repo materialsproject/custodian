@@ -1800,7 +1800,10 @@ class WalltimeHandler(ErrorHandler):
         if self.wall_time:
             run_time = datetime.datetime.now() - self.start_time
             total_secs = run_time.total_seconds()
-            outcar = load_outcar(os.path.join(directory, "OUTCAR"))
+            try:
+                outcar = load_outcar(os.path.join(directory, "OUTCAR"))
+            except Exception:  # Can't perform check if Outcar not valid (e.g. file being written)
+                return False
             if not self.electronic_step_stop:
                 # Determine max time per ionic step.
                 outcar.read_pattern({"timings": r"LOOP\+.+real time(.+)"}, postprocess=float)

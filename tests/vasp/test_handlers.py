@@ -1016,6 +1016,24 @@ class WalltimeHandlerTest(MatSciTest):
             assert content == "LABORT = .TRUE."
         os.remove("STOPCAR")
 
+    def test_check_with_malformed_outcar(self, tmp_path: Path) -> None:
+        """Test that WalltimeHandler.check() returns False on malformed OUTCAR.
+
+        This can happen when VASP is mid-write and the file contains incomplete
+        data like a standalone '-' instead of a float. See
+        https://github.com/materialsproject/pymatgen/issues/2251
+        """
+        os.chdir(tmp_path)
+
+        # Create a malformed OUTCAR that would cause parsing to fail
+        with open("OUTCAR", "w") as file:
+            file.write("Free energy of the ion-electron system (eV)\n")
+            file.write("  alpha Z        PSCENC =         -\n")  # incomplete value
+
+        handler = WalltimeHandler(wall_time=3600, buffer_time=120)
+        # Should return False (not crash) when OUTCAR parsing fails
+        assert handler.check() is False
+
     @classmethod
     def tearDown(cls) -> None:
         os.environ.pop("CUSTODIAN_WALLTIME_START", None)
