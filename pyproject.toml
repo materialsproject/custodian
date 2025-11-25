@@ -18,7 +18,15 @@ authors = [
 ]
 maintainers = [{ name = "Shyue Ping Ong" }]
 readme = "README.md"
-keywords = ["jit", "job", "just-in-time", "management", "vasp", "nwchem", "qchem"]
+keywords = [
+    "jit",
+    "job",
+    "just-in-time",
+    "management",
+    "nwchem",
+    "qchem",
+    "vasp",
+]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
@@ -38,8 +46,10 @@ requires-python = ">=3.10"
 dependencies = ["monty>=2.0.6", "psutil", "ruamel.yaml>=0.15.6"]
 
 [project.optional-dependencies]
-matsci = ["pymatgen"]  # Error handlers and jobs for materials simulations, e.g., VASP, Nwchem, qchem, etc.
-gaussian = ["pymatgen", "matplotlib"]
+matsci = [
+    "pymatgen",
+] # Error handlers and jobs for materials simulations, e.g., VASP, Nwchem, qchem, etc.
+gaussian = ["matplotlib", "pymatgen"]
 error-statistics = ["sentry-sdk>=0.8.0"]
 
 [project.scripts]
@@ -63,55 +73,56 @@ line-length = 120
 
 [tool.ruff.lint]
 select = [
-    "B", # flake8-bugbear
-    "C4", # flake8-comprehensions
-    "D", # pydocstyle
-    "E", # pycodestyle error
-    "EXE", # flake8-executable
-    "F", # pyflakes
-    "FA", # flake8-future-annotations
-    "FLY", # flynt
-    "I", # isort
-    "ICN", # flake8-import-conventions
-    "ISC", # flake8-implicit-str-concat
-    "PD", # pandas-vet
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "D",    # pydocstyle
+    "E",    # pycodestyle error
+    "EXE",  # flake8-executable
+    "F",    # pyflakes
+    "FA",   # flake8-future-annotations
+    "FLY",  # flynt
+    "I",    # isort
+    "ICN",  # flake8-import-conventions
+    "ISC",  # flake8-implicit-str-concat
+    "PD",   # pandas-vet
     "PERF", # perflint
-    "PIE", # flake8-pie
-    "PL", # pylint
-    "PT", # flake8-pytest-style
-    "PYI", # flakes8-pyi
-    "Q", # flake8-quotes
-    "RET", # flake8-return
-    "RSE", # flake8-raise
-    "RUF", # Ruff-specific rules
-    "SIM", # flake8-simplify
+    "PIE",  # flake8-pie
+    "PL",   # pylint
+    "PT",   # flake8-pytest-style
+    "PYI",  # flakes8-pyi
+    "Q",    # flake8-quotes
+    "RET",  # flake8-return
+    "RSE",  # flake8-raise
+    "RUF",  # Ruff-specific rules
+    "SIM",  # flake8-simplify
     "SLOT", # flake8-slots
-    "TCH", # flake8-type-checking
-    "TID", # tidy imports
-    "TID", # flake8-tidy-imports
-    "UP", # pyupgrade
-    "W", # pycodestyle warning
-    "YTT", # flake8-2020
+    "TCH",  # flake8-type-checking
+    "TID",  # tidy imports
+    "TID",  # flake8-tidy-imports
+    "UP",   # pyupgrade
+    "W",    # pycodestyle warning
+    "YTT",  # flake8-2020
 ]
 ignore = [
-    "B023", # Function definition does not bind loop variable
-    "B028", # No explicit stacklevel keyword argument found
-    "B904", # Within an except clause, raise exceptions with ...
-    "C408", # unnecessary-collection-call
+    "B023",    # Function definition does not bind loop variable
+    "B028",    # No explicit stacklevel keyword argument found
+    "B904",    # Within an except clause, raise exceptions with ...
+    "C408",    # unnecessary-collection-call
     "COM812",
-    "D105", # Missing docstring in magic method
-    "D205", # 1 blank line required between summary line and description
-    "D212", # Multi-line docstring summary should start at the first line
+    "D105",    # Missing docstring in magic method
+    "D205",    # 1 blank line required between summary line and description
+    "D212",    # Multi-line docstring summary should start at the first line
     "ISC001",
-    "PD011", # pandas-use-of-dot-values
-    "PD901", # pandas-df-variable-name
+    "PD011",   # pandas-use-of-dot-values
+    "PD901",   # pandas-df-variable-name
     "PERF203", # try-except-in-loop
-    "PLR", # pylint refactor
+    "PLC0415", # import-outside-top-level (used for performance/optional deps)
+    "PLR",     # pylint refactor
     "PLW2901", # Outer for loop variable overwritten by inner assignment target
-    "PT013", # pytest-incorrect-pytest-import
+    "PT013",   # pytest-incorrect-pytest-import
     "PTH",
-    "RUF012", # Disable checks for mutable class args
-    "SIM105", # Use contextlib.suppress(OSError) instead of try-except-pass
+    "RUF012",  # Disable checks for mutable class args
+    "SIM105",  # Use contextlib.suppress(OSError) instead of try-except-pass
 ]
 pydocstyle.convention = "google"
 isort.split-on-trailing-comma = false
@@ -163,22 +174,18 @@ exclude = ["**/tests"]
 
 [dependency-groups]
 dev = [
+    "invoke>=2.2.0",
+    "mypy>=1.15.0",
+    "myst-parser>=4.0.1",
     "pre-commit>=4.2.0",
     "pymatgen>=2025.5.16",
-    "pytest>=8.3.5",
     "pytest-cov>=6.0.0",
-    "mypy>=1.15.0",
+    "pytest>=8.3.5",
     "ruff>=0.11.2",
-    "invoke>=2.2.0",
-    "sphinx>=8.1.3",
-    "myst-parser>=4.0.1",
     "sphinx-markdown-builder>=0.6.8",
+    "sphinx>=8.1.3",
 ]
-lint = [
-    "pre-commit>=4.2.0",
-    "mypy>=1.15.0",
-    "ruff>=0.11.2",
-]
+lint = ["mypy>=1.15.0", "pre-commit>=4.2.0", "ruff>=0.11.2"]
 
 [tool.setuptools.package-data]
 custodian = ["py.typed"]
