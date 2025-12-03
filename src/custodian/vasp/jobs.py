@@ -4,6 +4,7 @@ import logging
 import math
 import os
 import shutil
+import signal
 import subprocess
 from shutil import which
 
@@ -710,13 +711,19 @@ class VaspJob(Job):
             return
 
         try:
-            logger.info(f"Killing PID {self._vasp_process.pid}")
-            self._vasp_process.terminate()
+            logger.info(f"Killing PID {self._vasp_process.pid} and its process group")
+            os.killpg(os.getpgid(self._vasp_process.pid), signal.SIGTERM)
             self._vasp_process.wait(timeout=10)
         except subprocess.TimeoutExpired:
             logger.warning(f"Graceful termination did not work. Force killing PID {self._vasp_process.pid}")
+            try:
+                os.killpg(os.getpgid(self._vasp_process.pid), signal.SIGKILL)
+            except ProcessLookupError:
+                pass
             self._vasp_process.kill()
             self._vasp_process.wait()
+        except ProcessLookupError:
+            logger.warning("Process group not found (already dead?)")
 
 
 class VaspNEBJob(VaspJob):
