@@ -1,9 +1,11 @@
 import multiprocessing
 import os
 import shutil
+import signal
 import subprocess
-import unittest
 from glob import glob
+from types import SimpleNamespace
+from typing import TYPE_CHECKING
 from unittest.mock import Mock, patch
 
 import pymatgen
@@ -16,6 +18,9 @@ from pymatgen.io.vasp.sets import MPRelaxSet
 
 from custodian.vasp.jobs import GenerateVaspInputJob, VaspJob, VaspNEBJob, _gamma_point_only_check
 from tests.conftest import TEST_FILES
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 pymatgen.core.SETTINGS["PMG_VASP_PSP_DIR"] = TEST_FILES
 
@@ -221,166 +226,117 @@ class TestAutoGamma:
         assert _gamma_point_only_check(vis.get_input_set())
 
 
-class TestVaspJobTerminate(unittest.TestCase):
-    """Unit tests for the VaspJob.terminate() method."""
+class TestVaspJobTerminate:
+    """Tests for VaspJob.terminate() process group killing."""
 
-    def setUp(self):
-        """Set up test fixtures before each test method."""
-        # Create a VaspJob instance with minimal required parameters
-        self.vasp_job = VaspJob(vasp_cmd=["srun", "vasp"])
+    @pytest.fixture
+    def mocks(self) -> "Generator[SimpleNamespace, None, None]":
+        """Create VaspJob with mocked process and os functions."""
+        job = VaspJob(vasp_cmd=["srun", "vasp"])
+        process = Mock(pid=12345)
+        job._vasp_process = process
 
-        # Mock the _vasp_process attribute
-        self.mock_process = Mock()
-        self.vasp_job._vasp_process = self.mock_process
+        with (
+            patch("custodian.vasp.jobs.logger") as logger,
+            patch("os.killpg") as killpg,
+            patch("os.getpgid", return_value=12345),
+        ):
+            yield SimpleNamespace(job=job, process=process, logger=logger, killpg=killpg)
 
-        # Set up logging capture
-        self.logger_patcher = patch("custodian.vasp.jobs.logger")
-        self.mock_logger = self.logger_patcher.start()
+    def test_terminate_process_already_finished(self, mocks: SimpleNamespace) -> None:
+        """Early return when process already done."""
+        mocks.process.poll.return_value = 0
 
-    def tearDown(self):
-        """Clean up after each test method."""
-        self.logger_patcher.stop()
+        mocks.job.terminate()
 
-    def test_terminate_process_already_finished(self):
-        """Test termination when process has already finished (poll returns non-None)."""
-        # Arrange
-        self.mock_process.poll.return_value = 0  # Process already finished
+        mocks.logger.warning.assert_called_once_with("The process was already done!")
+        mocks.killpg.assert_not_called()
 
-        # Act
-        self.vasp_job.terminate()
+    def test_terminate_graceful_success(self, mocks: SimpleNamespace) -> None:
+        """Successful SIGTERM to process group."""
+        mocks.process.poll.return_value = None
+        mocks.process.wait.return_value = None
 
-        # Assert
-        self.mock_process.poll.assert_called_once()
-        self.mock_logger.warning.assert_called_once_with("The process was already done!")
-        self.mock_process.terminate.assert_not_called()
-        self.mock_process.kill.assert_not_called()
+        mocks.job.terminate()
 
-    def test_terminate_graceful_success(self):
-        """Test successful graceful termination."""
-        # Arrange
-        self.mock_process.poll.return_value = None  # Process is running
-        self.mock_process.pid = 12345
-        self.mock_process.terminate.return_value = None
-        self.mock_process.wait.return_value = None
+        mocks.killpg.assert_called_once_with(12345, signal.SIGTERM)
+        mocks.process.wait.assert_called_once_with(timeout=10)
+        mocks.process.kill.assert_not_called()
 
-        # Act
-        self.vasp_job.terminate()
+    def test_terminate_force_kill_after_timeout(self, mocks: SimpleNamespace) -> None:
+        """SIGKILL after SIGTERM timeout."""
+        mocks.process.poll.return_value = None
+        mocks.process.wait.side_effect = [subprocess.TimeoutExpired("vasp", 10), None]
 
-        # Assert
-        self.mock_process.poll.assert_called_once()
-        self.mock_process.terminate.assert_called_once()
-        self.mock_process.wait.assert_called_once_with(timeout=10)
-        self.mock_logger.info.assert_called_once_with("Killing PID 12345")
-        self.mock_process.kill.assert_not_called()
+        mocks.job.terminate()
 
-    def test_terminate_graceful_timeout_then_force_kill(self):
-        """Test graceful termination timeout leading to force kill."""
-        # Arrange
-        self.mock_process.poll.return_value = None  # Process is running
-        self.mock_process.pid = 12345
-        self.mock_process.terminate.return_value = None
-        self.mock_process.wait.side_effect = [
-            subprocess.TimeoutExpired(cmd="vasp", timeout=10),  # First call times out
-            None,  # Second call succeeds
-        ]
+        assert mocks.killpg.call_count == 2
+        mocks.killpg.assert_any_call(12345, signal.SIGTERM)
+        mocks.killpg.assert_any_call(12345, signal.SIGKILL)
+        mocks.process.kill.assert_called_once()
 
-        # Act
-        self.vasp_job.terminate()
+    def test_terminate_oserror_during_sigterm(self, mocks: SimpleNamespace) -> None:
+        """OSError during graceful termination propagates."""
+        mocks.process.poll.return_value = None
+        mocks.killpg.side_effect = OSError("Permission denied")
 
-        # Assert
-        self.mock_process.poll.assert_called_once()
-        self.mock_process.terminate.assert_called_once()
-        assert self.mock_process.wait.call_count == 2
-        self.mock_process.kill.assert_called_once()
-
-        # Check logging calls
-        self.mock_logger.info.assert_called_once_with("Killing PID 12345")
-        self.mock_logger.warning.assert_called_once_with("Graceful termination did not work. Force killing PID 12345")
-
-    def test_terminate_exception_during_graceful_termination(self):
-        """Test handling of exceptions during graceful termination."""
-        # Arrange
-        self.mock_process.poll.return_value = None
-        self.mock_process.pid = 12345
-        self.mock_process.terminate.side_effect = OSError("Permission denied")
-
-        # Act & Assert
         with pytest.raises(OSError, match="Permission denied"):
-            self.vasp_job.terminate()
+            mocks.job.terminate()
 
-        self.mock_process.terminate.assert_called_once()
-
-    def test_terminate_exception_during_force_kill(self):
-        """Test handling of exceptions during force kill."""
-        # Arrange
-        self.mock_process.poll.return_value = None
-        self.mock_process.pid = 12345
-        self.mock_process.terminate.return_value = None
-        self.mock_process.wait.side_effect = [
-            subprocess.TimeoutExpired(cmd="vasp", timeout=10),  # Graceful timeout
-            OSError("Process not found"),  # Force kill fails
+    def test_terminate_oserror_during_wait(self, mocks: SimpleNamespace) -> None:
+        """OSError during wait after force kill propagates."""
+        mocks.process.poll.return_value = None
+        mocks.process.wait.side_effect = [
+            subprocess.TimeoutExpired("vasp", 10),
+            OSError("Process not found"),
         ]
-        self.mock_process.kill.return_value = None
 
-        # Act & Assert
         with pytest.raises(OSError, match="Process not found"):
-            self.vasp_job.terminate()
+            mocks.job.terminate()
 
-        self.mock_process.terminate.assert_called_once()
-        self.mock_process.kill.assert_called_once()
+    def test_terminate_process_lookup_error_during_sigterm(self, mocks: SimpleNamespace) -> None:
+        """ProcessLookupError during SIGTERM handled gracefully (process already dead)."""
+        mocks.process.poll.return_value = None
+        mocks.killpg.side_effect = ProcessLookupError("No such process")
 
-    def test_terminate_multiple_calls(self):
-        """Test calling terminate multiple times."""
-        # Arrange
-        self.mock_process.poll.side_effect = [None, 0]  # Running, then finished
-        self.mock_process.pid = 12345
-        self.mock_process.terminate.return_value = None
-        self.mock_process.wait.return_value = None
+        mocks.job.terminate()  # Should not raise
 
-        # Act
-        self.vasp_job.terminate()  # First call
-        self.vasp_job.terminate()  # Second call
+        mocks.killpg.assert_called_once_with(12345, signal.SIGTERM)
+        mocks.logger.warning.assert_called_with("Process group not found (already dead?)")
+        mocks.process.kill.assert_not_called()
 
-        # Assert
-        assert self.mock_process.poll.call_count == 2
-        self.mock_process.terminate.assert_called_once()  # Only called on first invocation
-        self.mock_logger.warning.assert_called_once_with("The process was already done!")
+    def test_terminate_process_lookup_error_during_sigkill(self, mocks: SimpleNamespace) -> None:
+        """ProcessLookupError during SIGKILL caught, falls back to process.kill()."""
+        mocks.process.poll.return_value = None
+        mocks.process.wait.side_effect = [subprocess.TimeoutExpired("vasp", 10), None]
+        mocks.killpg.side_effect = [None, ProcessLookupError("No such process")]
 
-    @patch("custodian.vasp.jobs.VaspJob.__init__", return_value=None)
-    def test_terminate_integration_with_real_process(self, mock_init):
-        """Test termination with a real subprocess (integration-style test)."""
-        # Arrange
-        vasp_job = VaspJob.__new__(VaspJob)  # Create instance without calling __init__
+        mocks.job.terminate()  # Should not raise
 
-        real_process = subprocess.Popen(["sleep", "10"])
+        assert mocks.killpg.call_count == 2
+        mocks.process.kill.assert_called_once()
+
+    def test_terminate_multiple_calls(self, mocks: SimpleNamespace) -> None:
+        """Second call returns early when process finished."""
+        mocks.process.poll.side_effect = [None, 0]
+        mocks.process.wait.return_value = None
+
+        mocks.job.terminate()
+        mocks.job.terminate()
+
+        mocks.killpg.assert_called_once()
+        mocks.logger.warning.assert_called_with("The process was already done!")
+
+    def test_terminate_integration_with_real_process(self) -> None:
+        """Integration test: verify process group killed with real subprocess."""
+        vasp_job = VaspJob.__new__(VaspJob)
+        real_process = subprocess.Popen(["sleep", "30"], start_new_session=True)
         vasp_job._vasp_process = real_process
+        original_pgid = os.getpgid(real_process.pid)
 
-        with patch("custodian.vasp.jobs.logger") as mock_logger:
+        with patch("custodian.vasp.jobs.logger"):
             vasp_job.terminate()
-        assert real_process.poll() is not None  # Process should be terminated
-        mock_logger.info.assert_called_once()
 
-
-class TestVaspJobTerminateEdgeCases(unittest.TestCase):
-    """Additional edge case tests for VaspJob.terminate()."""
-
-    def setUp(self):
-        self.vasp_job = VaspJob(vasp_cmd=["vasp"])
-        self.mock_process = Mock()
-        self.vasp_job._vasp_process = self.mock_process
-
-    @patch("custodian.vasp.jobs")
-    def test_terminate_wait_with_different_timeout_behavior(self, mock_logger):
-        """Test different timeout behaviors in wait()."""
-        # Test case where wait() is called twice with different outcomes
-        self.mock_process.poll.return_value = None
-        self.mock_process.pid = 9999
-        self.mock_process.terminate.return_value = None
-
-        # First wait times out, second wait after kill succeeds
-        self.mock_process.wait.side_effect = [subprocess.TimeoutExpired("vasp", 10), None]
-
-        self.vasp_job.terminate()
-
-        assert self.mock_process.wait.call_count == 2
-        self.mock_process.kill.assert_called_once()
+        assert real_process.poll() is not None
+        with pytest.raises(ProcessLookupError):
+            os.killpg(original_pgid, 0)
