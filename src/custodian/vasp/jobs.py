@@ -712,31 +712,32 @@ class VaspJob(Job):
     def terminate(self, directory="./") -> None:
         """Kill all VASP processes associated with the current job.
 
-        Sends SIGTERM to the entire process group to ensure all MPI workers
-        are terminated, not just the parent process (srun/mpirun). Falls back
-        to SIGKILL if processes don't terminate gracefully within timeout.
+        On POSIX, sends SIGTERM/SIGKILL to entire process group to ensure all
+        MPI workers are terminated. On Windows, falls back to process.terminate().
         """
         pid = self._vasp_process.pid
 
-        # Check if process already finished
         if self._vasp_process.poll() is not None:
             logger.warning(f"Process {pid} already terminated")
             return
 
-        # Get process group ID
-        try:
-            pgid = os.getpgid(pid)
-        except ProcessLookupError:
-            logger.warning(f"Process {pid} not found (already dead)")
-            return
-
-        # Send SIGTERM to process group for graceful shutdown
-        logger.info(f"Sending SIGTERM to process group {pgid}")
-        try:
-            os.killpg(pgid, signal.SIGTERM)
-        except ProcessLookupError:
-            logger.warning(f"Process group {pgid} not found (already dead)")
-            return
+        # POSIX: kill entire process group; Windows: just terminate parent
+        use_pgid = hasattr(os, "killpg")
+        if use_pgid:
+            try:
+                pgid = os.getpgid(pid)
+            except ProcessLookupError:
+                logger.warning(f"Process {pid} not found (already dead)")
+                return
+            logger.info(f"Sending SIGTERM to process group {pgid}")
+            try:
+                os.killpg(pgid, signal.SIGTERM)
+            except ProcessLookupError:
+                logger.warning(f"Process group {pgid} not found (already dead)")
+                return
+        else:
+            logger.info(f"Terminating process {pid}")
+            self._vasp_process.terminate()
 
         # Wait for graceful termination
         try:
@@ -746,12 +747,13 @@ class VaspJob(Job):
         except subprocess.TimeoutExpired:
             pass
 
-        # Force kill with SIGKILL
-        logger.warning(f"SIGTERM timeout ({self.terminate_timeout}s), sending SIGKILL to process group {pgid}")
-        try:
-            os.killpg(pgid, signal.SIGKILL)
-        except ProcessLookupError:
-            pass
+        # Force kill
+        logger.warning(f"Timeout ({self.terminate_timeout}s), force killing {pid}")
+        if use_pgid:
+            try:
+                os.killpg(pgid, signal.SIGKILL)  # type: ignore[possibly-undefined]
+            except ProcessLookupError:
+                pass
         self._vasp_process.kill()
         self._vasp_process.wait()
         logger.info(f"Process {pid} force-killed")
