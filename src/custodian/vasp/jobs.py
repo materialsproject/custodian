@@ -4,6 +4,7 @@ import logging
 import math
 import os
 import shutil
+import signal
 import subprocess
 from shutil import which
 
