@@ -706,17 +706,17 @@ class VaspJob(Job):
 
     def terminate(self, directory="./") -> None:
         """Kill all VASP processes associated with the current job.
-    
+
         Starts by trying to kill the process group. This is the safest method.
         Falls back to killing the parent process. This has the potential danger of
         leaving behind ghost processes from the children.
         """
         pid = self._vasp_process.pid
-    
+
         if self._vasp_process.poll() is not None:
             logger.warning(f"Process {pid} already terminated")
             return
-    
+
         if os.name != "nt":
             # Look up process group ID
             try:
@@ -724,21 +724,21 @@ class VaspJob(Job):
             except ProcessLookupError:
                 logger.warning(f"Process group for {pid} not found")
                 return
-    
+
             # Send SIGTERM to the entire process group
             logger.info(f"Sending SIGTERM to process group {pgid}")
             try:
                 os.killpg(pgid, signal.SIGTERM)
             except Exception as exc:
                 logger.warning(f"Process group {pgid} not terminated: {exc}")
-    
+
             # Send SIGKILL to the entire process group
             logger.info(f"Sending SIGKILL to process group {pgid}")
             try:
                 os.killpg(pgid, signal.SIGKILL)
             except Exception as exc:
                 logger.warning(f"Process group {pgid} not killed: {exc}")
-    
+
             # Confirm os.killpg led to successful termination and return
             try:
                 self._vasp_process.wait(timeout=self.terminate_timeout)
@@ -746,7 +746,7 @@ class VaspJob(Job):
                 return
             except subprocess.TimeoutExpired:
                 pass
-    
+
         # Fall back to killing the parent launcher process
         logger.warning(f"Falling back to killing the parent process {pid}")
         try:
