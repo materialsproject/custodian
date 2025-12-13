@@ -784,7 +784,7 @@ class VaspNEBJob(VaspJob):
         auto_continue=False,
         gamma_vasp_cmd=None,
         settings_override=None,
-        terminate_timeout: 10.0,
+        terminate_timeout: float = 10.0,
     ) -> None:
         """
         This constructor is a simplified version of VaspJob, which satisfies
@@ -852,6 +852,7 @@ class VaspNEBJob(VaspJob):
         self.gamma_vasp_cmd = tuple(gamma_vasp_cmd) if gamma_vasp_cmd else None
         self.auto_continue = auto_continue
         self.settings_override = settings_override
+        self.terminate_timeout = terminate_timeout
 
     def setup(self, directory="./") -> None:
         """Performs initial setup for VaspNEBJob, including overriding any settings
