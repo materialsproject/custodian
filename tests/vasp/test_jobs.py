@@ -228,11 +228,7 @@ class TestAutoGamma:
 
 
 class TestVaspJobTerminate:
-<<<<<<< HEAD
-    """Tests for VaspJob.terminate() process group killing."""
-=======
-    """Tests for VaspJob.terminate() - cross-platform with POSIX process group support."""
->>>>>>> add2f358 (Skip terminate tests on Windows (os.killpg/getpgid are POSIX-only))
+    """Tests for VaspJob.terminate() with process group and fallback support."""
 
     @pytest.fixture
     def mocks(self) -> "Generator[SimpleNamespace, None, None]":
@@ -256,54 +252,58 @@ class TestVaspJobTerminate:
         mocks.logger.warning.assert_called_with("Process 12345 already terminated")
         mocks.killpg.assert_not_called()
 
-    def test_graceful_sigterm(self, mocks: SimpleNamespace) -> None:
-        """Process group terminates gracefully after SIGTERM."""
+    def test_sigterm_success(self, mocks: SimpleNamespace) -> None:
+        """Successful SIGTERM to process group returns immediately."""
         mocks.process.poll.return_value = None
         mocks.job.terminate()
 
-        mocks.logger.info.assert_any_call("Sending SIGTERM to process group 67890")
-        mocks.logger.info.assert_any_call("Process 12345 terminated gracefully")
+        mocks.logger.info.assert_called_with("Sending SIGTERM to process group 67890")
         mocks.killpg.assert_called_once_with(67890, signal.SIGTERM)
-        mocks.process.wait.assert_called_once_with(timeout=10.0)
+        # No wait/kill calls when SIGTERM succeeds
+        mocks.process.wait.assert_not_called()
         mocks.process.kill.assert_not_called()
 
-    def test_force_kill_after_timeout(self, mocks: SimpleNamespace) -> None:
-        """SIGKILL after SIGTERM timeout."""
+    def test_sigkill_after_sigterm_fails(self, mocks: SimpleNamespace) -> None:
+        """SIGKILL sent when SIGTERM raises exception."""
         mocks.process.poll.return_value = None
+        mocks.killpg.side_effect = [OSError("SIGTERM failed"), None]  # SIGTERM fails, SIGKILL succeeds
+        mocks.job.terminate()
+
+        assert mocks.killpg.call_count == 2
+        mocks.killpg.assert_any_call(67890, signal.SIGTERM)
+        mocks.killpg.assert_any_call(67890, signal.SIGKILL)
+        mocks.logger.warning.assert_any_call("Process group 67890 not terminated: SIGTERM failed")
+
+    def test_fallback_to_parent_process(self, mocks: SimpleNamespace) -> None:
+        """Falls back to parent process kill when both SIGTERM and SIGKILL fail."""
+        mocks.process.poll.return_value = None
+        mocks.killpg.side_effect = [OSError("SIGTERM failed"), OSError("SIGKILL failed")]
+        mocks.job.terminate()
+
+        mocks.logger.warning.assert_any_call("Process group 67890 not killed: SIGKILL failed")
+        mocks.logger.warning.assert_any_call("Falling back to killing the parent process 12345")
+        mocks.process.terminate.assert_called_once()
+        mocks.process.wait.assert_called_once_with(timeout=10.0)
+
+    def test_fallback_with_timeout(self, mocks: SimpleNamespace) -> None:
+        """Fallback path uses kill() after terminate() times out."""
+        mocks.process.poll.return_value = None
+        mocks.killpg.side_effect = [OSError("SIGTERM failed"), OSError("SIGKILL failed")]
         mocks.process.wait.side_effect = [subprocess.TimeoutExpired("vasp", 10), None]
         mocks.job.terminate()
 
-        mocks.logger.warning.assert_called_with("Timeout (10.0s), force killing 12345")
-        mocks.logger.info.assert_any_call("Process 12345 force-killed")
-        assert mocks.killpg.call_count == 2
+        mocks.process.terminate.assert_called_once()
         mocks.process.kill.assert_called_once()
+        mocks.logger.info.assert_any_call("Killing process 12345")
 
-    def test_custom_timeout(self, mocks: SimpleNamespace) -> None:
-        """Custom terminate_timeout is respected."""
-        mocks.job.terminate_timeout = 60.0
-        mocks.process.poll.return_value = None
-        mocks.process.wait.side_effect = [subprocess.TimeoutExpired("vasp", 60), None]
-        mocks.job.terminate()
-
-        mocks.process.wait.assert_any_call(timeout=60.0)
-        mocks.logger.warning.assert_called_with("Timeout (60.0s), force killing 12345")
-
-    def test_process_not_found_on_getpgid(self, mocks: SimpleNamespace) -> None:
+    def test_process_group_not_found(self, mocks: SimpleNamespace) -> None:
         """ProcessLookupError when getting PGID."""
         mocks.process.poll.return_value = None
         with patch("os.getpgid", side_effect=ProcessLookupError, create=True):
             mocks.job.terminate()
 
-        mocks.logger.warning.assert_called_with("Process 12345 not found (already dead)")
+        mocks.logger.warning.assert_called_with("Process group for 12345 not found")
         mocks.killpg.assert_not_called()
-
-    def test_process_group_not_found_on_sigterm(self, mocks: SimpleNamespace) -> None:
-        """ProcessLookupError during SIGTERM."""
-        mocks.process.poll.return_value = None
-        mocks.killpg.side_effect = ProcessLookupError
-        mocks.job.terminate()
-
-        mocks.logger.warning.assert_called_with("Process group 67890 not found (already dead)")
 
     @pytest.mark.skipif(sys.platform == "win32", reason="sleep command and PGID not available")
     def test_integration_with_real_process(self) -> None:
@@ -317,6 +317,8 @@ class TestVaspJobTerminate:
         with patch("custodian.vasp.jobs.logger"):
             vasp_job.terminate()
 
+        # Wait for process to actually terminate (SIGTERM is async)
+        real_process.wait(timeout=0.1)
         assert real_process.poll() is not None
         with pytest.raises(ProcessLookupError):
             os.killpg(original_pgid, 0)

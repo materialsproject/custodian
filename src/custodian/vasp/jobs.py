@@ -712,8 +712,9 @@ class VaspJob(Job):
     def terminate(self, directory="./") -> None:
         """Kill all VASP processes associated with the current job.
 
-        On POSIX, sends SIGTERM/SIGKILL to entire process group to ensure all
-        MPI workers are terminated. On Windows, falls back to process.terminate().
+        Starts by trying to kill the process group. This is the safest method.
+        Falls back to killing the parent process. This has the potential danger of
+        leaving behind ghost processes from the children.
         """
         pid = self._vasp_process.pid
 
@@ -721,42 +722,40 @@ class VaspJob(Job):
             logger.warning(f"Process {pid} already terminated")
             return
 
-        # POSIX: kill entire process group; Windows: just terminate parent
-        use_pgid = hasattr(os, "killpg")
-        if use_pgid:
+        if os.name != "nt":
+            # Look up process group ID
             try:
                 pgid = os.getpgid(pid)
             except ProcessLookupError:
-                logger.warning(f"Process {pid} not found (already dead)")
+                logger.warning(f"Process group for {pid} not found")
                 return
+
+            # Send SIGTERM to the entire process group
             logger.info(f"Sending SIGTERM to process group {pgid}")
             try:
                 os.killpg(pgid, signal.SIGTERM)
-            except ProcessLookupError:
-                logger.warning(f"Process group {pgid} not found (already dead)")
                 return
-        else:
+            except Exception as exc:
+                logger.warning(f"Process group {pgid} not terminated: {exc}")
+
+            # Send SIGKILL to the entire process group
+            logger.info(f"Sending SIGKILL to process group {pgid}")
+            try:
+                os.killpg(pgid, signal.SIGKILL)
+                return
+            except Exception as exc:
+                logger.warning(f"Process group {pgid} not killed: {exc}")
+
+        # Fall back to killing the parent launcher process
+        logger.warning(f"Falling back to killing the parent process {pid}")
+        try:
             logger.info(f"Terminating process {pid}")
             self._vasp_process.terminate()
-
-        # Wait for graceful termination
-        try:
             self._vasp_process.wait(timeout=self.terminate_timeout)
-            logger.info(f"Process {pid} terminated gracefully")
-            return
         except subprocess.TimeoutExpired:
-            pass
-
-        # Force kill
-        logger.warning(f"Timeout ({self.terminate_timeout}s), force killing {pid}")
-        if use_pgid:
-            try:
-                os.killpg(pgid, signal.SIGKILL)  # type: ignore[possibly-undefined]
-            except ProcessLookupError:
-                pass
-        self._vasp_process.kill()
-        self._vasp_process.wait()
-        logger.info(f"Process {pid} force-killed")
+            logger.info(f"Killing process {pid}")
+            self._vasp_process.kill()
+            self._vasp_process.wait()
 
 
 class VaspNEBJob(VaspJob):
