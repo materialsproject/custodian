@@ -753,10 +753,14 @@ class VaspJob(Job):
             logger.info(f"Terminating process {pid}")
             self._vasp_process.terminate()
             self._vasp_process.wait(timeout=self.terminate_timeout)
+            return
         except subprocess.TimeoutExpired:
             logger.info(f"Killing process {pid}")
             self._vasp_process.kill()
             self._vasp_process.wait(timeout=self.terminate_timeout)
+            return
+
+        raise OSError("Failed to kill process")
 
 
 class VaspNEBJob(VaspJob):
