@@ -759,8 +759,11 @@ class VaspJob(Job):
                 self._vasp_process.wait(timeout=self.terminate_timeout)
                 logger.info(f"Process {pid} killed with SIGKILL")
                 return
-            except (ProcessLookupError, subprocess.TimeoutExpired):
-                pass
+            except ProcessLookupError:
+                logger.info(f"Process {pid} already dead")
+                return
+            except subprocess.TimeoutExpired:
+                pass  # Fall through to parent process fallback
             except OSError as exc:
                 logger.warning(f"SIGKILL to process group {pgid} failed: {exc}")
 
