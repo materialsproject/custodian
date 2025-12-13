@@ -756,16 +756,19 @@ class VaspJob(Job):
             # Escalate to SIGKILL
             try:
                 os.killpg(pgid, signal.SIGKILL)
-                self._vasp_process.wait(timeout=self.terminate_timeout)
-                logger.info(f"Process {pid} killed with SIGKILL")
-                return
             except ProcessLookupError:
                 logger.info(f"Process {pid} already dead")
                 return
-            except subprocess.TimeoutExpired:
-                pass  # Fall through to parent process fallback
             except OSError as exc:
                 logger.warning(f"SIGKILL to process group {pgid} failed: {exc}")
+            else:
+                # Wait for process to die (only if SIGKILL was sent)
+                try:
+                    self._vasp_process.wait(timeout=self.terminate_timeout)
+                    logger.info(f"Process {pid} killed with SIGKILL")
+                    return
+                except subprocess.TimeoutExpired:
+                    pass  # Fall through to parent process fallback
 
         # Fall back to killing the parent launcher process (Windows or if above failed)
         logger.warning(f"Falling back to killing parent process {pid}")
