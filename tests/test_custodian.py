@@ -1,5 +1,4 @@
 import os
-import random
 import subprocess
 import unittest
 from glob import glob
@@ -47,8 +46,7 @@ class ExampleJob(Job):
         self.params["total"] = 0
 
     def run(self, directory="./") -> None:
-        sequence = [random.uniform(0, 1) for i in range(100)]
-        self.params["total"] = self.params["initial"] + sum(sequence)
+        self.params["total"] = self.params["initial"] + 25  # Starts < 50, crosses after enough corrections
 
     def postprocess(self, directory="./") -> None:
         pass
