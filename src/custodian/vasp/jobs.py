@@ -85,6 +85,7 @@ class VaspJob(Job):
         copy_magmom=False,
         auto_continue=False,
         update_incar=False,
+        terminate_timeout: float = 10.0,
     ) -> None:
         """
         This constructor is necessarily complex due to the need for
@@ -143,6 +144,9 @@ class VaspJob(Job):
                 already present in the INCAR will be updated, i.e., no new parameters will be
                 added even if they are in the final vasprun.xml. Note that settings_override take
                 precedence over updated params.
+            terminate_timeout (float): Timeout in seconds to wait for graceful
+                termination (SIGTERM) before escalating to SIGKILL. Large MPI
+                jobs may need longer timeouts. Defaults to 10.0 seconds.
         """
         self.vasp_cmd = tuple(vasp_cmd)
         self.output_file = output_file
@@ -157,6 +161,7 @@ class VaspJob(Job):
         self.copy_magmom = copy_magmom
         self.auto_continue = auto_continue
         self.update_incar = update_incar
+        self.terminate_timeout = terminate_timeout
 
         if SENTRY_DSN:
             # if using Sentry logging, add specific VASP executable to scope
@@ -784,7 +789,6 @@ class VaspNEBJob(VaspJob):
         auto_continue=False,
         gamma_vasp_cmd=None,
         settings_override=None,
-        terminate_timeout: float = 10.0,
     ) -> None:
         """
         This constructor is a simplified version of VaspJob, which satisfies
@@ -836,9 +840,6 @@ class VaspNEBJob(VaspJob):
                     [{"dict": "INCAR", "action": {"_set": {"ISTART": 1}}},
                      {"file": "CONTCAR",
                       "action": {"_file_copy": {"dest": "POSCAR"}}}]
-            terminate_timeout (float): Timeout in seconds to wait for graceful
-                termination (SIGTERM) before escalating to SIGKILL. Large MPI
-                jobs may need longer timeouts. Defaults to 10.0 seconds.
         """
         self.vasp_cmd = tuple(vasp_cmd)
         self.output_file = output_file
@@ -852,7 +853,6 @@ class VaspNEBJob(VaspJob):
         self.gamma_vasp_cmd = tuple(gamma_vasp_cmd) if gamma_vasp_cmd else None
         self.auto_continue = auto_continue
         self.settings_override = settings_override
-        self.terminate_timeout = terminate_timeout
 
     def setup(self, directory="./") -> None:
         """Performs initial setup for VaspNEBJob, including overriding any settings
