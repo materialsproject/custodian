@@ -227,8 +227,9 @@ class TestAutoGamma:
         assert _gamma_point_only_check(vis.get_input_set())
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX process group tests")
 class TestVaspJobTerminate:
-    """Tests for VaspJob.terminate() with process group and fallback support."""
+    """Tests for VaspJob.terminate() POSIX process group handling."""
 
     @pytest.fixture
     def mocks(self) -> "Generator[SimpleNamespace, None, None]":
@@ -239,9 +240,8 @@ class TestVaspJobTerminate:
 
         with (
             patch("custodian.vasp.jobs.logger") as logger,
-            patch("custodian.vasp.jobs.os.name", "posix"),  # Force POSIX path in terminate()
-            patch("custodian.vasp.jobs.os.killpg", create=True) as killpg,
-            patch("custodian.vasp.jobs.os.getpgid", return_value=67890, create=True),
+            patch("os.killpg") as killpg,
+            patch("os.getpgid", return_value=67890),
         ):
             yield SimpleNamespace(job=job, process=process, logger=logger, killpg=killpg)
 
@@ -307,7 +307,7 @@ class TestVaspJobTerminate:
     def test_process_group_not_found_on_getpgid(self, mocks: SimpleNamespace) -> None:
         """ProcessLookupError when getting PGID."""
         mocks.process.poll.return_value = None
-        with patch("custodian.vasp.jobs.os.getpgid", side_effect=ProcessLookupError, create=True):
+        with patch("os.getpgid", side_effect=ProcessLookupError):
             mocks.job.terminate()
 
         mocks.logger.warning.assert_called_with("Process group for 12345 not found")

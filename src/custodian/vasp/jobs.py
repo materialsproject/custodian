@@ -754,6 +754,7 @@ class VaspJob(Job):
                     logger.warning(f"SIGTERM timeout ({self.terminate_timeout}s), sending SIGKILL")
 
             # Escalate to SIGKILL
+            logger.info(f"Sending SIGKILL to process group {pgid}")
             try:
                 os.killpg(pgid, signal.SIGKILL)
             except ProcessLookupError:
