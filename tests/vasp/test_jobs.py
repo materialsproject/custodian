@@ -239,8 +239,9 @@ class TestVaspJobTerminate:
 
         with (
             patch("custodian.vasp.jobs.logger") as logger,
-            patch("os.killpg", create=True) as killpg,
-            patch("os.getpgid", return_value=67890, create=True),
+            patch("custodian.vasp.jobs.os.name", "posix"),  # Force POSIX path in terminate()
+            patch("custodian.vasp.jobs.os.killpg", create=True) as killpg,
+            patch("custodian.vasp.jobs.os.getpgid", return_value=67890, create=True),
         ):
             yield SimpleNamespace(job=job, process=process, logger=logger, killpg=killpg)
 
@@ -299,7 +300,7 @@ class TestVaspJobTerminate:
     def test_process_group_not_found(self, mocks: SimpleNamespace) -> None:
         """ProcessLookupError when getting PGID."""
         mocks.process.poll.return_value = None
-        with patch("os.getpgid", side_effect=ProcessLookupError, create=True):
+        with patch("custodian.vasp.jobs.os.getpgid", side_effect=ProcessLookupError, create=True):
             mocks.job.terminate()
 
         mocks.logger.warning.assert_called_with("Process group for 12345 not found")
