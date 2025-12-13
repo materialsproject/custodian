@@ -760,7 +760,7 @@ class VaspJob(Job):
             self._vasp_process.wait(timeout=self.terminate_timeout)
             return
 
-        raise OSError("Failed to kill process")
+        raise OSError(f"Failed to kill process {pid}")
 
 
 class VaspNEBJob(VaspJob):
