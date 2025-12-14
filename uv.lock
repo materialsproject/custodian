@@ -259,7 +259,7 @@ toml = [
 
 [[package]]
 name = "custodian"
-version = "2025.8.13"
+version = "2025.10.11"
 source = { editable = "." }
 dependencies = [
     { name = "monty" },

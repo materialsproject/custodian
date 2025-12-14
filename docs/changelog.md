@@ -6,6 +6,22 @@ nav_order: 2
 
 # Change Log
 
+## 2025.12.14
+* PR #419 from @Andrew-S-Rosen (#419)
+    This PR adds my name to the author list but is really done so I can trigger the test suite on the new Python 3.13 runner.
+* PR #418 from @Andrew-S-Rosen (#418)
+    Test on Python 3.13 instead of 3.12. Merging into `master` because the current CI suite only runs on changes to source or tests.
+* PR #416 from @janosh (#416)
+    `CONTCAR` file validation before copying to `POSCAR` across all VASP error handlers. This is a follow-up to #414 which fixed Custodian to properly terminate all MPI worker processes (not just the parent) using `os.killpg()`.
+* PR #414 from @janosh (#414)
+    ### Problem
+    When Custodian terminates a VASP job (e.g., due to walltime or error handling), it previously only sent `SIGTERM` to the parent process (`mpirun`/`srun`). This signal often failed to propagate to child `vasp_std` MPI workers, leaving orphaned "ghost" processes that consume CPU/GPU cycles and memory, blocking subsequent jobs from launching altogether or causing them to OOM
+    **Hypothesis on why this didn't surface before**: we ran into this on thousands of cloud GPUs where process lifecycle differs from traditional HPC clusters. `slurm` automatically cleans up process trees, killing orphaned processes or tasks when a job finishes, ensuring resources are freed. that did not happen in our environment but is Custodian's responsibility since it often kills VASP multiple times (up to 5 by default) in a single job. I think you might see the VASP ghosts even on `slurm` clusters after the first custodian error handler triggers and before the 5th error is reached at which point `slurm` cleans up the whole process tree. this may depend on whether VASP is invoked via `mpirun` or `srun`; if invoked via `srun`, i think it handles process trees on each individual error handler in which case no VASP ghosts. i think `mpirun`spawns processes independently of Slurm’s job step tracking. If VASP crashes, `slurm` may not know about all the children, leaving lingering ghost processes.
+    ### Solution
+    - Use `os.killpg()` to send signals to the entire process group, ensuring all MPI workers are terminated
+    - Graceful `SIGTERM` with configurable timeout (default 10s), escalating to `SIGKILL`
+    - Validate `CONTCAR` (may be empty if job was killed but Custodian would still copy it to `POSCAR`, overwriting atomic positions with blank file) causing next VASP run to fail
+
 ## 2025.10.11
 * PR #404 from @NicoPhase (#404)
     This is a fix to issue #403. It makes sure that backup files aren't overwritten when a series of custodian jobs are executed in the same folder. The fix is achieved by taking both .tar.gz and .tar files into account when determining the file number.
