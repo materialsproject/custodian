@@ -133,5 +133,5 @@ def is_valid_poscar(filename: str, directory: str = "./") -> bool:
     try:
         Poscar.from_file(filepath)
         return True
-    except Exception as exc:
+    except Exception:
         return False
