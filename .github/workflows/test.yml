@@ -16,9 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        # not testing on 3.9 because tests use glob("*", root_dir=TEST_FILES)
-        # and root_dir only added in 3.10
-        python-version: ["3.10", "3.12"]
+        python-version: ["3.10", "3.13"]
 
     runs-on: ${{ matrix.os }}
     defaults:
