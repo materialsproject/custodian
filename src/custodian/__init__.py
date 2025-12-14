@@ -10,7 +10,7 @@ from .custodian import Custodian
 
 __author__ = (
     "Shyue Ping Ong, William Davidson Richards, Stephen Dacek, Xiaohui Qu, Matthew Horton, "
-    "Samuel M. Blau, Janosh Riebesell"
+    "Samuel M. Blau, Janosh Riebesell, Andrew S. Rosen"
 )
 try:
     __version__ = version("custodian")
