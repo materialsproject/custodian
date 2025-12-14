@@ -38,6 +38,7 @@ jobs:
           activate-environment: qchem
 
       - name: Install OpenBabel
+        if: matrix.python-version == '3.10'
         run: conda install -c conda-forge openbabel
 
       - name: Install dependencies
