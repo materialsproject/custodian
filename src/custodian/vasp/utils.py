@@ -137,11 +137,7 @@ def is_valid_poscar(filename: str, directory: str = "./") -> bool:
 
     # Try to parse as POSCAR
     try:
-        poscar = Poscar.from_file(filepath)
-        # Additional validation: structure should have atoms
-        if len(poscar.structure) == 0:
-            logger.warning(f"{filename} has no atoms")
-            return False
+        Poscar.from_file(filepath)
         return True
     except Exception as exc:
         logger.warning(f"{filename} could not be parsed: {exc}")
