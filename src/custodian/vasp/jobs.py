@@ -740,7 +740,7 @@ class VaspJob(Job):
             try:
                 os.killpg(pgid, signal.SIGTERM)
             except ProcessLookupError:
-                logger.warning(f"Process group {pgid} already dead. No SIGTERM sent.")
+                logger.warning(f"Process group {pgid} not found")
                 return
             except OSError as exc:
                 logger.warning(f"SIGTERM to process group {pgid} failed: {exc}")
@@ -758,7 +758,7 @@ class VaspJob(Job):
             try:
                 os.killpg(pgid, signal.SIGKILL)
             except ProcessLookupError:
-                logger.info(f"Process group {pgid} already dead. No SIGKILL sent.")
+                logger.warning(f"Process group {pgid} not found")
                 return
             except OSError as exc:
                 logger.warning(f"SIGKILL to process group {pgid} failed: {exc}")
