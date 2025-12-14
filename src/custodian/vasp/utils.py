@@ -142,21 +142,3 @@ def is_valid_poscar(filename: str, directory: str = "./") -> bool:
     except Exception as exc:
         logger.warning(f"{filename} could not be parsed: {exc}")
         return False
-
-
-def copy_contcar_to_poscar_if_valid(directory: str = "./") -> list[dict]:
-    """Return action to copy CONTCAR to POSCAR only if CONTCAR is valid.
-
-    This prevents copying incomplete CONTCAR files that may result from
-    terminating VASP mid-write.
-
-    Args:
-        directory: Directory containing CONTCAR
-
-    Returns:
-        List containing the copy action if CONTCAR is valid, empty list otherwise.
-    """
-    if is_valid_poscar("CONTCAR", directory):
-        return [{"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}]
-    logger.warning("CONTCAR is not valid, skipping copy to POSCAR")
-    return []
