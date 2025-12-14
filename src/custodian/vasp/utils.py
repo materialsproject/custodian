@@ -125,14 +125,8 @@ def is_valid_poscar(filename: str, directory: str = "./") -> bool:
     """
     filepath = os.path.join(directory, filename)
 
-    # Check file exists
-    if not os.path.isfile(filepath):
-        logger.warning(f"{filename} does not exist in {directory}")
-        return False
-
-    # Check file is not empty
-    if os.path.getsize(filepath) == 0:
-        logger.warning(f"{filename} is empty")
+    # Check file exists and is not blank
+    if not os.path.isfile(filepath) or os.path.getsize(filepath) == 0:
         return False
 
     # Try to parse as POSCAR
@@ -140,5 +134,4 @@ def is_valid_poscar(filename: str, directory: str = "./") -> bool:
         Poscar.from_file(filepath)
         return True
     except Exception as exc:
-        logger.warning(f"{filename} could not be parsed: {exc}")
         return False
