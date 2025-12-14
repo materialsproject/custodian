@@ -9,7 +9,7 @@ from pymatgen.core import Lattice, Structure
 from pymatgen.io.vasp import Kpoints
 from pymatgen.util.testing import MatSciTest
 
-from custodian.vasp.utils import _estimate_num_k_points_from_kspacing, increase_k_point_density
+from custodian.vasp.utils import _estimate_num_k_points_from_kspacing, increase_k_point_density, is_valid_poscar
 from tests.conftest import TEST_FILES
 
 
@@ -41,3 +41,53 @@ class TestKPointUtils(MatSciTest):
 
         new_kpoints = increase_k_point_density(Kpoints(), self.small_structure, force_gamma=True, min_kpoints=14)
         assert new_kpoints["kpoints"] == ((3, 3, 3),)
+
+
+class TestIsValidPoscar:
+    """Tests for is_valid_poscar utility function."""
+
+    def test_valid_poscar(self, tmp_path) -> None:
+        """Valid POSCAR file should return True."""
+        poscar_path = tmp_path / "POSCAR"
+        poscar_path.write_text(
+            """Si2
+1.0
+3.8 0.0 0.0
+0.0 3.8 0.0
+0.0 0.0 3.8
+Si
+2
+direct
+0.0 0.0 0.0
+0.5 0.5 0.5
+"""
+        )
+        assert is_valid_poscar("POSCAR", str(tmp_path)) is True
+
+    def test_empty_poscar(self, tmp_path) -> None:
+        """Empty POSCAR file should return False."""
+        poscar_path = tmp_path / "CONTCAR"
+        poscar_path.write_text("")
+        assert is_valid_poscar("CONTCAR", str(tmp_path)) is False
+
+    def test_missing_poscar(self, tmp_path) -> None:
+        """Missing POSCAR file should return False."""
+        assert is_valid_poscar("CONTCAR", str(tmp_path)) is False
+
+    def test_malformed_poscar(self, tmp_path) -> None:
+        """Malformed POSCAR file should return False."""
+        poscar_path = tmp_path / "CONTCAR"
+        poscar_path.write_text("This is not a valid POSCAR file\nGarbage data")
+        assert is_valid_poscar("CONTCAR", str(tmp_path)) is False
+
+    def test_truncated_poscar(self, tmp_path) -> None:
+        """Truncated POSCAR (incomplete write) should return False."""
+        poscar_path = tmp_path / "CONTCAR"
+        # Incomplete POSCAR - cut off mid-file
+        poscar_path.write_text(
+            """Si2
+1.0
+3.8 0.0 0.0
+"""
+        )
+        assert is_valid_poscar("CONTCAR", str(tmp_path)) is False

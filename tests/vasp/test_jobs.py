@@ -350,5 +350,6 @@ class TestVaspJobTerminate:
 
         # Process should be confirmed dead (terminate() waits internally)
         assert real_process.poll() is not None
+        # Verify process group no longer exists
         with pytest.raises(ProcessLookupError):
             os.killpg(original_pgid, 0)

@@ -35,7 +35,7 @@ from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from custodian.vasp.interpreter import VaspModder
 from custodian.vasp.io import load_outcar, load_vasprun
-from custodian.vasp.utils import increase_k_point_density
+from custodian.vasp.utils import increase_k_point_density, is_valid_poscar
 
 __author__ = (
     "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Wei Chen, Stephen Dacek, Andrew Rosen, Janosh Riebesell"
@@ -226,7 +226,8 @@ class VaspErrorHandler(ErrorHandler):
             # https://www.vasp.at/forum/viewtopic.php?p=14827
             if self.error_count["fexcf"] == 0:
                 # First see if last ionic configuration is more stable on rerun
-                actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+                if is_valid_poscar("CONTCAR", directory):
+                    actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
             elif self.error_count["fexcf"] == 1 and vi["INCAR"].get("IBRION", -1) == 1:
                 # Try more stable geometry optimization method
                 actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 2}}})
@@ -469,7 +470,8 @@ class VaspErrorHandler(ErrorHandler):
 
         if "brions" in self.errors:
             # Copy CONTCAR to POSCAR so we do not lose our progress.
-            actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+            if is_valid_poscar("CONTCAR", directory):
+                actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
 
             # By default, increase POTIM per the VASP error message. But if that does not work,
             # we should try IBRION = 2 since it is less sensitive to POTIM.
@@ -499,8 +501,9 @@ class VaspErrorHandler(ErrorHandler):
 
             ediff = vi["INCAR"].get("EDIFF", 1e-4)
 
-            # Copy CONTCAR to POSCAR. This should always be done so we don't lose our progress.
-            actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+            # Copy CONTCAR to POSCAR so we don't lose our progress.
+            if is_valid_poscar("CONTCAR", directory):
+                actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
 
             # Tighten EDIFF per the VASP warning message. We tighten it by a factor of 10 unless
             # it is > 1e-6 (in which case we set it to 1e-6) or 1e-8 in which case we stop tightening
@@ -548,11 +551,7 @@ class VaspErrorHandler(ErrorHandler):
         if "eddrmm" in self.errors:
             # RMM algorithm is not stable for this calculation
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
-            try:
-                is_contcar = Poscar.from_file(os.path.join(directory, "CONTCAR"))
-            except Exception:
-                is_contcar = False
-            if is_contcar:
+            if is_valid_poscar("CONTCAR", directory):
                 actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
             if vi["INCAR"].get("ALGO", "Normal").lower() in {"fast", "veryfast"}:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
@@ -570,11 +569,7 @@ class VaspErrorHandler(ErrorHandler):
 
         if "edddav" in self.errors:
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
-            try:
-                is_contcar = Poscar.from_file(os.path.join(directory, "CONTCAR"))
-            except Exception:
-                is_contcar = False
-            if is_contcar:
+            if is_valid_poscar("CONTCAR", directory):
                 actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
             if vi["INCAR"].get("ICHARG", 0) < 10:
                 actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
@@ -619,11 +614,7 @@ class VaspErrorHandler(ErrorHandler):
 
         if self.errors & {"zheev", "eddiag"}:
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
-            try:
-                is_contcar = Poscar.from_file(os.path.join(directory, "CONTCAR"))
-            except Exception:
-                is_contcar = False
-            if is_contcar:
+            if is_valid_poscar("CONTCAR", directory):
                 actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
             if vi["INCAR"].get("ALGO", "Normal").lower() == "fast":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
@@ -1057,8 +1048,9 @@ class DriftErrorHandler(ErrorHandler):
         incar = vi["INCAR"]
         outcar = load_outcar(os.path.join(directory, "OUTCAR"))
 
-        # Move CONTCAR to POSCAR
-        actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+        # Move CONTCAR to POSCAR if valid
+        if is_valid_poscar("CONTCAR", directory):
+            actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
 
         # Set PREC to High so ENAUG can be used to control Augmentation Grid Size
         if incar.get("PREC", "Accurate").lower() != "high":
@@ -1239,10 +1231,9 @@ class UnconvergedErrorHandler(ErrorHandler):
         elif not v.converged_ionic:
             # Just continue optimizing and let other handlers fix ionic
             # optimizer parameters
-            actions += [
-                {"dict": "INCAR", "action": {"_set": {"IBRION": 1}}},
-                {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}},
-            ]
+            actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 1}}})
+            if is_valid_poscar("CONTCAR", directory):
+                actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
 
         if actions:
             vi = VaspInput.from_directory(directory)
@@ -1927,7 +1918,9 @@ class StoppedRunHandler(ErrorHandler):
         i = d["Index"]
         name = shutil.make_archive(os.path.join(directory, f"vasp.chk.{i}"), "gztar")
 
-        actions = [{"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}]
+        actions = []
+        if is_valid_poscar("CONTCAR", directory):
+            actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
 
         modder = Modder(actions=[FileActions], directory=directory)
         for action in actions:
