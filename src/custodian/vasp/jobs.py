@@ -4,6 +4,7 @@ import logging
 import math
 import os
 import shutil
+import signal
 import subprocess
 from shutil import which
 
@@ -84,6 +85,7 @@ class VaspJob(Job):
         copy_magmom=False,
         auto_continue=False,
         update_incar=False,
+        terminate_timeout: float = 10.0,
     ) -> None:
         """
         This constructor is necessarily complex due to the need for
@@ -142,6 +144,9 @@ class VaspJob(Job):
                 already present in the INCAR will be updated, i.e., no new parameters will be
                 added even if they are in the final vasprun.xml. Note that settings_override take
                 precedence over updated params.
+            terminate_timeout (float): Timeout in seconds to wait for graceful
+                termination (SIGTERM) before escalating to SIGKILL. Large MPI
+                jobs may need longer timeouts. Defaults to 10.0 seconds.
         """
         self.vasp_cmd = tuple(vasp_cmd)
         self.output_file = output_file
@@ -156,6 +161,7 @@ class VaspJob(Job):
         self.copy_magmom = copy_magmom
         self.auto_continue = auto_continue
         self.update_incar = update_incar
+        self.terminate_timeout = terminate_timeout
 
         if SENTRY_DSN:
             # if using Sentry logging, add specific VASP executable to scope
@@ -703,20 +709,78 @@ class VaspJob(Job):
             for key in sorted(energies):
                 file.write(f"{key} {energies[key]}\n")
 
-    def terminate(self, directory="./") -> None:
-        """Kill all VASP processes associated with the current job."""
+    def terminate(self, directory: str = "./") -> None:
+        """Kill all VASP processes associated with the current job.
+
+        Tries to kill the entire process group (safest for MPI jobs), then waits
+        to confirm termination. Escalates SIGTERM → SIGKILL → parent process fallback.
+
+        Note: The parent process fallback may leave behind ghost MPI child processes
+        (less likely with srun since SLURM purportedly cleans up process trees).
+
+        Args:
+            directory: Unused, kept for API compatibility with base class.
+        """
+        pid = self._vasp_process.pid
+
         if self._vasp_process.poll() is not None:
-            logger.warning("The process was already done!")
+            logger.warning(f"Process {pid} already terminated")
             return
 
+        if os.name != "nt":
+            # Look up process group ID
+            try:
+                pgid = os.getpgid(pid)
+            except ProcessLookupError:
+                logger.warning(f"Process group for {pid} not found")
+                return
+
+            # Send SIGTERM to the entire process group
+            logger.info(f"Sending SIGTERM to process group {pgid}")
+            try:
+                os.killpg(pgid, signal.SIGTERM)
+            except ProcessLookupError:
+                logger.warning(f"Process group {pgid} not found")
+                return
+            except OSError as exc:
+                logger.warning(f"SIGTERM to process group {pgid} failed: {exc}")
+            else:
+                # Wait for graceful termination (only if SIGTERM was sent)
+                try:
+                    self._vasp_process.wait(timeout=self.terminate_timeout)
+                    logger.info(f"Process {pid} terminated gracefully")
+                    return
+                except subprocess.TimeoutExpired:
+                    logger.warning(f"SIGTERM timeout ({self.terminate_timeout}s), sending SIGKILL")
+
+            # Escalate to SIGKILL
+            logger.info(f"Sending SIGKILL to process group {pgid}")
+            try:
+                os.killpg(pgid, signal.SIGKILL)
+            except ProcessLookupError:
+                logger.warning(f"Process group {pgid} not found")
+                return
+            except OSError as exc:
+                logger.warning(f"SIGKILL to process group {pgid} failed: {exc}")
+            else:
+                # Wait for process to die (only if SIGKILL was sent)
+                try:
+                    self._vasp_process.wait(timeout=self.terminate_timeout)
+                    logger.info(f"Process {pid} killed with SIGKILL")
+                    return
+                except subprocess.TimeoutExpired:
+                    pass  # Fall through to parent process fallback
+
+        # Fall back to killing the parent launcher process (Windows or if above failed)
+        logger.warning(f"Falling back to killing parent process {pid}")
         try:
-            logger.info(f"Killing PID {self._vasp_process.pid}")
             self._vasp_process.terminate()
-            self._vasp_process.wait(timeout=10)
+            self._vasp_process.wait(timeout=self.terminate_timeout)
+            logger.info(f"Process {pid} terminated")
         except subprocess.TimeoutExpired:
-            logger.warning(f"Graceful termination did not work. Force killing PID {self._vasp_process.pid}")
             self._vasp_process.kill()
             self._vasp_process.wait()
+            logger.info(f"Process {pid} killed")
 
 
 class VaspNEBJob(VaspJob):
