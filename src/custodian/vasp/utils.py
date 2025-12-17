@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+import logging
+import os
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
-from pymatgen.io.vasp.inputs import Kpoints
+from pymatgen.io.vasp.inputs import Kpoints, Poscar
 
 if TYPE_CHECKING:
     from pymatgen.core import Structure
+
+logger = logging.getLogger(__name__)
 
 
 def _estimate_num_k_points_from_kspacing(structure: Structure, kspacing: float) -> tuple[int, ...]:
@@ -103,3 +107,31 @@ def increase_k_point_density(
         mult_fac += factor
 
     return new_kpoints if success else {}  # type: ignore
+
+
+def is_valid_poscar(filename: str, directory: str = "./") -> bool:
+    """Check if a POSCAR/CONTCAR file is valid and can be parsed.
+
+    This is useful to verify CONTCAR is complete before copying to POSCAR,
+    especially after terminating a VASP job which might leave incomplete files.
+
+    Args:
+        filename: Name of the file (e.g., "CONTCAR", "POSCAR")
+        directory: Directory containing the file
+
+    Returns:
+        True if the file exists, is non-empty, and can be parsed as a valid
+        VASP structure file. False otherwise.
+    """
+    filepath = os.path.join(directory, filename)
+
+    # Check file exists and is not blank
+    if not os.path.isfile(filepath) or os.path.getsize(filepath) == 0:
+        return False
+
+    # Try to parse as POSCAR
+    try:
+        Poscar.from_file(filepath)
+        return True
+    except Exception:
+        return False

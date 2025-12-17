@@ -77,7 +77,7 @@ class tracked_lru_cache:
     Allows Custodian to clear the cache after all the checks have been performed.
     """
 
-    cached_functions: ClassVar[set[Any]] = set()
+    cached_functions: ClassVar[set] = set()
 
     def __init__(self, func) -> None:
         """

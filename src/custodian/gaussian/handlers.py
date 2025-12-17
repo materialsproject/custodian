@@ -503,7 +503,7 @@ class GaussianErrorHandler(ErrorHandler):
 
                 if self.check_convergence and "opt" in self.gin.route_parameters:
                     for k, v in GaussianErrorHandler.conv_criteria.items():
-                        m = v.search(line)
+                        m = v.search(line)  # type:ignore[arg-type]
                         if m:
                             if k not in self.conv_data["values"]:
                                 self.conv_data["values"][k] = [m.group(2)]

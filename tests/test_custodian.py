@@ -7,7 +7,15 @@ from glob import glob
 import pytest
 from ruamel.yaml import YAML
 
-from custodian.custodian import (
+
+@pytest.fixture(autouse=True)
+def _seed_rng() -> None:
+    """Seed RNG for deterministic ExampleJob.run() behavior across all tests.
+    Needed for ExampleJob.run() with random.uniform(0, 1) to not be flaky."""
+    random.seed(42)
+
+
+from custodian.custodian import (  # noqa: E402
     Custodian,
     ErrorHandler,
     Job,
@@ -47,7 +55,7 @@ class ExampleJob(Job):
         self.params["total"] = 0
 
     def run(self, directory="./") -> None:
-        sequence = [random.uniform(0, 1) for i in range(100)]
+        sequence = [random.uniform(0, 1) for _ in range(100)]
         self.params["total"] = self.params["initial"] + sum(sequence)
 
     def postprocess(self, directory="./") -> None:
