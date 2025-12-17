@@ -10,7 +10,7 @@ from glob import glob
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, ClassVar
+    from typing import ClassVar
 
 
 def backup(filenames, prefix="error", directory="./") -> None:
