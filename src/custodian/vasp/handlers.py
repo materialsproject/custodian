@@ -688,7 +688,7 @@ class VaspErrorHandler(ErrorHandler):
 
         if self.errors.intersection(["bravais", "ksymm"]):
             # For bravais: VASP recommends refining the lattice parameters
-            # or changing SYMPREC (default = 1e-5). See 
+            # or changing SYMPREC (default = 1e-5). See
             # https://www.vasp.at/forum/viewtopic.php?f=3&t=19109
             # Appears to occur when SYMPREC is very low, so we change it to
             # the default if it's not already. If it's the default, we x10.
@@ -696,9 +696,11 @@ class VaspErrorHandler(ErrorHandler):
             # direct and reciprocal meshes being incompatible.
             # This is basically the same as bravais
             vasp_recommended_symprec = 1e-6
-            if (symprec := vi["INCAR"].get("SYMPREC", 1e-5) ) > vasp_recommended_symprec:
-                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": min(symprec/10., vasp_recommended_symprec)}}})
-            elif vi["INCAR"].get("ISYM") != 0:  # Default ISYM is variable, but never 0
+            if (symprec := vi["INCAR"].get("SYMPREC", 1e-5)) > vasp_recommended_symprec:
+                actions.append(
+                    {"dict": "INCAR", "action": {"_set": {"SYMPREC": min(symprec / 10.0, vasp_recommended_symprec)}}}
+                )
+            elif vi["INCAR"].get("ISYM") > 0:  # Default ISYM is variable, but never 0
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
         if "nbands_not_sufficient" in self.errors:
