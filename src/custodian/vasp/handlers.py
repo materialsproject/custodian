@@ -688,16 +688,16 @@ class VaspErrorHandler(ErrorHandler):
 
         if self.errors.intersection(["bravais", "ksymm"]):
             # For bravais: VASP recommends refining the lattice parameters
-            # or changing SYMPREC. See https://www.vasp.at/forum/viewtopic.php?f=3&t=19109
+            # or changing SYMPREC (default = 1e-5). See 
+            # https://www.vasp.at/forum/viewtopic.php?f=3&t=19109
             # Appears to occur when SYMPREC is very low, so we change it to
             # the default if it's not already. If it's the default, we x10.
             # For ksymm, there's not much information about the issue other than the
             # direct and reciprocal meshes being incompatible.
             # This is basically the same as bravais
             vasp_recommended_symprec = 1e-6
-            symprec = vi["INCAR"].get("SYMPREC", 1e-5)  # Default SYMPREC is 1e-5
-            if symprec != vasp_recommended_symprec:
-                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": vasp_recommended_symprec}}})
+            if (symprec := vi["INCAR"].get("SYMPREC", 1e-5) ) > vasp_recommended_symprec:
+                actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": min(symprec/10., vasp_recommended_symprec)}}})
             elif vi["INCAR"].get("ISYM") != 0:  # Default ISYM is variable, but never 0
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
