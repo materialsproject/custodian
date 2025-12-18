@@ -44,13 +44,13 @@ jobs:
       - name: Install dependencies
         run: |
           uv pip install -e . --system
-          uv pip install pytest pymatgen pytest-cov --system
+          uv pip install pytest pymatgen pytest-cov pytest-xdist --system
 
       - name: pytest
         env:
           PMG_MAPI_KEY: ${{ secrets.PMG_MAPI_KEY }}
           MPLBACKEND: Agg
-        run: pytest --cov=custodian --cov-report=xml --color=yes tests
+        run: pytest -n auto --cov=custodian --cov-report=xml --color=yes tests
 
       - name: Upload coverage reports to Codecov
         if: matrix.os == 'ubuntu-latest'

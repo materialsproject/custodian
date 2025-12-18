@@ -182,6 +182,7 @@ dev = [
     "pymatgen>=2025.5.16",
     "pytest-cov>=6.0.0",
     "pytest>=8.3.5",
+    "pytest-xdist",
     "ruff>=0.11.2",
     "sphinx-markdown-builder>=0.6.8",
     "sphinx>=8.1.3",
