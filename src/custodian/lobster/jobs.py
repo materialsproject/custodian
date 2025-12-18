@@ -109,16 +109,12 @@ class LobsterJob(Job):
     def postprocess(self, directory="./") -> None:
         """Will gzip relevant files (won't gzip custodian.json and other output files from the cluster)."""
         if self.gzipped:
-            for file in LOBSTEROUTPUT_FILES:
-                if os.path.isfile(os.path.join(directory, file)):
-                    compress_file(os.path.join(directory, file), compression="gz")
-            for file in LOBSTERINPUT_FILES:
-                if os.path.isfile(os.path.join(directory, file)):
-                    compress_file(os.path.join(directory, file), compression="gz")
-            if self.backup and os.path.isfile(os.path.join(directory, "lobsterin.orig")):
-                compress_file(os.path.join(directory, "lobsterin.orig"), compression="gz")
-            for file in FW_FILES:
-                if os.path.isfile(os.path.join(directory, file)):
-                    compress_file(os.path.join(directory, file), compression="gz")
-            for file in self.add_files_to_gzip:
-                compress_file(os.path.join(directory, file), compression="gz")
+            files_to_zip = (
+                set(LOBSTEROUTPUT_FILES).union(LOBSTERINPUT_FILES).union(FW_FILES).union(self.add_files_to_gzip)
+            )
+            if self.backup:
+                files_to_zip.add("lobsterin.orig")
+
+            for file in files_to_zip:
+                if os.path.isfile(file_path := os.path.join(directory, file)):
+                    compress_file(file_path, compression="gz")

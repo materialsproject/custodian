@@ -1,5 +1,7 @@
 import os
 import shutil
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from monty.os import cd
 from monty.tempfile import ScratchDir
@@ -82,36 +84,38 @@ class TestLobsterJob:
 
     def test_postprocess(self) -> None:
         # test gzipped and zipping of additional files
-        with cd(os.path.join(test_files_lobster3)):
-            with ScratchDir(".", copy_from_current_on_enter=True):
-                shutil.copy("lobsterin", "lobsterin.orig")
-                v = LobsterJob("hello", gzipped=True, add_files_to_gzip=VASP_OUTPUT_FILES)
-                v.postprocess()
-                for file in (*VASP_OUTPUT_FILES, *LOBSTER_FILES, *FW_FILES):
-                    assert os.path.isfile(f"{file}.gz")
-
-            with ScratchDir(".", copy_from_current_on_enter=True):
-                shutil.copy("lobsterin", "lobsterin.orig")
-                v = LobsterJob("hello", gzipped=False, add_files_to_gzip=VASP_OUTPUT_FILES)
-                v.postprocess()
-                for file in (*VASP_OUTPUT_FILES, *LOBSTER_FILES, *FW_FILES):
-                    assert os.path.isfile(file)
+        src_path = Path(test_files_lobster3).absolute()
+        for gzipped in (True, False):
+            with TemporaryDirectory() as tmp_dir:
+                cwd = Path(tmp_dir).absolute()
+                for file_obj in Path(src_path).glob("*"):
+                    if file_obj.is_file():
+                        shutil.copy(src_path / file_obj, cwd / file_obj.name)
+                    shutil.copy(src_path / "lobsterin", cwd / "lobsterin.orig")
+                with cd(cwd):
+                    v = LobsterJob("hello", gzipped=gzipped, add_files_to_gzip=VASP_OUTPUT_FILES)
+                    v.postprocess()
+                    assert all(
+                        os.path.isfile(f"{file}{'.gz' if gzipped else ''}")
+                        for file in (*VASP_OUTPUT_FILES, *LOBSTER_FILES, *FW_FILES)
+                    )
 
     def test_postprocess_v51(self) -> None:
         # test gzipped and zipping of additional files for lobster v5.1
-        with cd(os.path.join(test_files_lobster4)):
-            with ScratchDir(".", copy_from_current_on_enter=True):
-                shutil.copy("lobsterin", "lobsterin.orig")
-                v = LobsterJob("hello", gzipped=True, add_files_to_gzip=VASP_OUTPUT_FILES)
-                v.postprocess()
-                for file in (*VASP_OUTPUT_FILES, *LOBSTEROUTPUT_FILES, *FW_FILES):
-                    if file not in ("POSCAR.lobster", "bandOverlaps.lobster"):  # these files are not in the directory
-                        assert os.path.isfile(f"{file}.gz")
-
-            with ScratchDir(".", copy_from_current_on_enter=True):
-                shutil.copy("lobsterin", "lobsterin.orig")
-                v = LobsterJob("hello", gzipped=False, add_files_to_gzip=VASP_OUTPUT_FILES)
-                v.postprocess()
-                for file in (*VASP_OUTPUT_FILES, *LOBSTEROUTPUT_FILES, *FW_FILES):
-                    if file not in ("POSCAR.lobster", "bandOverlaps.lobster"):  # these files are not in the directory
-                        assert os.path.isfile(file)
+        src_path = Path(test_files_lobster4).absolute()
+        for gzipped in (True, False):
+            with TemporaryDirectory() as tmp_dir:
+                cwd = Path(tmp_dir).absolute()
+                for file_obj in Path(src_path).glob("*"):
+                    if file_obj.is_file():
+                        shutil.copy(src_path / file_obj, cwd / file_obj.name)
+                    shutil.copy(src_path / "lobsterin", cwd / "lobsterin.orig")
+                with cd(cwd):
+                    v = LobsterJob("hello", gzipped=gzipped, add_files_to_gzip=VASP_OUTPUT_FILES)
+                    v.postprocess()
+                    assert all(
+                        os.path.isfile(f"{file}{'.gz' if gzipped else ''}")
+                        for file in {*VASP_OUTPUT_FILES, *LOBSTEROUTPUT_FILES, *FW_FILES}.difference(
+                            {"POSCAR.lobster", "bandOverlaps.lobster"}  # these files are not in the directory
+                        )
+                    )
