@@ -1,11 +1,16 @@
 """Utility function and classes."""
 
+from __future__ import annotations
+
 import functools
 import logging
 import os
 import tarfile
 from glob import glob
-from typing import ClassVar
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import ClassVar
 
 
 def backup(filenames, prefix="error", directory="./") -> None:
