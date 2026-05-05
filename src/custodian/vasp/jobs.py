@@ -80,8 +80,10 @@ class VaspJob(Job):
         backup=True,
         auto_npar=False,
         auto_gamma=True,
+        auto_ncl=True,
         settings_override=None,
         gamma_vasp_cmd=None,
+        ncl_vasp_cmd=None,
         copy_magmom=False,
         auto_continue=False,
         update_incar=False,
@@ -115,10 +117,19 @@ class VaspJob(Job):
             auto_gamma (bool): Whether to automatically check if run is a
                 Gamma 1x1x1 run, and whether a Gamma optimized version of
                 VASP exists with ".gamma" appended to the name of the VASP
-                executable (typical setup in many systems). If so, run the
+                executable or with "gamma" replacing "std" in the name of
+                the VASP executable (typical setup in many systems). If so, run the
                 gamma optimized version of VASP instead of regular VASP. You
                 can also specify the gamma vasp command using the
                 gamma_vasp_cmd argument if the command is named differently.
+            auto_ncl (bool): Whether to automatically check if run is a
+                non-collinear run, and whether a non-collinear version of
+                VASP exists with ".ncl" appended to the name of the VASP
+                executable or "ncl" replacing "std" in the name of the VASP
+                executable (typical setup in many systems). If so, run the
+                the non-collinear version of VASP instead of regular VASP. You
+                can also specify the ncl vasp command using the ncl_vasp_cmd
+                argument if the command is named differently.
             settings_override ([dict]): An ansible style list of dict to
                 override changes. For example, to set ISTART=1 for subsequent
                 runs and to copy the CONTCAR to the POSCAR, you will provide::
@@ -130,6 +141,10 @@ class VaspJob(Job):
                 auto_gamma is True. Should follow the list style of
                 subprocess. Defaults to None, which means ".gamma" is added
                 to the last argument of the standard vasp_cmd.
+            ncl_vasp_cmd (str): Command for non-collinear vasp version when
+                auto_ncl is True. Should follow the list style of subprocess.
+                Defaults to none, which means "ncl" will replace "std" in
+                the last argument of the standard vasp_cmd.
             copy_magmom (bool): Whether to copy the final magmom from the
                 OUTCAR to the next INCAR. Useful for multi-relaxation runs
                 where the CHGCAR and WAVECAR are sometimes deleted (due to
@@ -157,7 +172,9 @@ class VaspJob(Job):
         self.settings_override = settings_override
         self.auto_npar = auto_npar
         self.auto_gamma = auto_gamma
+        self.auto_ncl = auto_ncl
         self.gamma_vasp_cmd = tuple(gamma_vasp_cmd) if gamma_vasp_cmd else None
+        self.ncl_vasp_cmd = tuple(ncl_vasp_cmd) if ncl_vasp_cmd else None
         self.copy_magmom = copy_magmom
         self.auto_continue = auto_continue
         self.update_incar = update_incar
@@ -270,6 +287,15 @@ class VaspJob(Job):
                     cmd = self.gamma_vasp_cmd
                 elif which(cmd[-1] + ".gamma"):
                     cmd[-1] += ".gamma"
+        if self.auto_ncl:
+            vi = VaspInput.from_directory(directory)
+            if vi["INCAR"].get("LNONCOLLINEAR") or vi["INCAR"].get("LSORBIT"):
+                if self.ncl_vasp_cmd is not None and which(self.ncl_vasp_cmd[-1]):  # pylint: disable=E1136
+                    cmd = self.ncl_vasp_cmd
+                elif which(cmd[-1] + ".ncl"):
+                    cmd[-1] += ".ncl"
+                elif which(cmd[-1].replace("std", "ncl")):
+                    cmd[-1] = cmd[-1].replace("std", "ncl")
         logger.info(f"Running {' '.join(cmd)}")
         with (
             open(os.path.join(directory, self.output_file), "w") as f_std,
