@@ -1,5 +1,7 @@
 exclude: ^(docs|tests/files|tasks.py)
 
+default_install_hook_types: [pre-commit, commit-msg]
+
 ci:
   autoupdate_schedule: monthly
   skip: [mypy, pyright]
