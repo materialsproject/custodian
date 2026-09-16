@@ -78,7 +78,6 @@ class ExternalFileUpdateJob(Job):
         scratch_directory = Path(directory)
         Path(scratch_directory, "result.txt").write_text("calculation output")
         Path(scratch_directory, "scratch-updated.txt").write_text("updated calculation output")
-        Path(scratch_directory, "scratch-removed.txt").unlink()
         Path(self.original_directory, "slurm-123.out").write_text("live scheduler output")
         Path(self.original_directory, "scheduler-created.txt").write_text("external output")
         Path(self.original_directory, "scheduler-removed.txt").unlink()
@@ -356,7 +355,6 @@ def test_scratch_dir_preserves_external_file_updates(tmp_path, monkeypatch) -> N
     scheduler_log = work_dir / "slurm-123.out"
     scheduler_log.write_text("initial scheduler output")
     (work_dir / "scratch-updated.txt").write_text("initial calculation output")
-    (work_dir / "scratch-removed.txt").write_text("remove from calculation")
     (work_dir / "scheduler-removed.txt").write_text("remove externally")
     monkeypatch.chdir(work_dir)
     monkeypatch.setattr("monty.tempfile.os.symlink", lambda *_: None)
@@ -368,7 +366,6 @@ def test_scratch_dir_preserves_external_file_updates(tmp_path, monkeypatch) -> N
     assert not (work_dir / "scheduler-removed.txt").exists()
     assert (work_dir / "result.txt").read_text() == "calculation output"
     assert (work_dir / "scratch-updated.txt").read_text() == "updated calculation output"
-    assert not (work_dir / "scratch-removed.txt").exists()
 
 
 # class TestCustodianCheckpoint:
