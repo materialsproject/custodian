@@ -21,7 +21,7 @@ from itertools import islice
 
 from monty.json import MontyDecoder, MontyEncoder, MSONable
 from monty.serialization import dumpfn, loadfn
-from monty.shutil import gzip_dir
+from monty.shutil import gzip_dir, remove
 from monty.tempfile import ScratchDir
 
 from .utils import get_execution_host_info, tracked_lru_cache
@@ -63,6 +63,69 @@ if SENTRY_DSN:
         import socket
 
         scope.set_tag("hostname", socket.gethostname())
+
+
+def _get_file_state(directory: str) -> dict[str, tuple[int, int, int, int, int, int]]:
+    """Collect metadata used to detect files changed outside the scratch directory."""
+    state = {}
+    for root, _, filenames in os.walk(directory):
+        for filename in filenames:
+            path = os.path.join(root, filename)
+            try:
+                file_stat = os.lstat(path)
+            except FileNotFoundError:
+                continue
+            relative_path = os.path.relpath(path, directory)
+            state[relative_path] = (
+                file_stat.st_mode,
+                file_stat.st_dev,
+                file_stat.st_ino,
+                file_stat.st_size,
+                file_stat.st_mtime_ns,
+                file_stat.st_ctime_ns,
+            )
+    return state
+
+
+class _ScratchDir(ScratchDir):
+    """Scratch directory that preserves files concurrently changed in the original directory."""
+
+    def __enter__(self):
+        self._original_file_state = {}
+        self._original_entries = set()
+        if self.rootpath is not None and os.path.exists(self.rootpath) and self.end_copy:
+            self._original_file_state = _get_file_state(self.cwd)
+            self._original_entries = set(os.listdir(self.cwd))
+        return super().__enter__()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        removed_entries = set()
+        if self.rootpath is not None and os.path.exists(self.rootpath) and self.end_copy:
+            current_file_state = _get_file_state(self.cwd)
+            changed_paths = {
+                path
+                for path in self._original_file_state.keys() | current_file_state.keys()
+                if self._original_file_state.get(path) != current_file_state.get(path)
+            }
+            changed_entries = {path.split(os.sep, 1)[0] for path in changed_paths}
+            scratch_entries = set(os.listdir(self.tempdir))
+            removed_entries = self._original_entries - scratch_entries - changed_entries
+
+            for relative_path in changed_paths:
+                scratch_path = os.path.join(self.tempdir, relative_path)
+                if os.path.lexists(scratch_path):
+                    remove(scratch_path)
+
+            # Monty otherwise deletes every new top-level file in the original
+            # directory, including files created by a scheduler during the run.
+            self.delete_removed_files = False
+
+        result = super().__exit__(exc_type, exc_val, exc_tb)
+        for entry in removed_entries:
+            original_path = os.path.join(self.cwd, entry)
+            if os.path.lexists(original_path):
+                remove(original_path)
+        return result
 
 
 class Custodian:
@@ -367,7 +430,7 @@ class Custodian:
             MaxCorrectionsPerHandlerError: if max_errors_per_handler is reached
         """
         original_directory = self.directory
-        with ScratchDir(
+        with _ScratchDir(
             self.scratch_dir,
             create_symbolic_link=True,
             copy_to_current_on_exit=True,

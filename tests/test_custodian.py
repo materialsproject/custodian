@@ -3,6 +3,7 @@ import random
 import subprocess
 import unittest
 from glob import glob
+from pathlib import Path
 
 import pytest
 from ruamel.yaml import YAML
@@ -64,6 +65,26 @@ class ExampleJob(Job):
     @property
     def name(self) -> str:
         return f"ExampleJob{self.jobid}"
+
+
+class ExternalFileUpdateJob(Job):
+    def __init__(self, original_directory) -> None:
+        self.original_directory = Path(original_directory)
+
+    def setup(self, directory="./") -> None:
+        pass
+
+    def run(self, directory="./") -> None:
+        scratch_directory = Path(directory)
+        Path(scratch_directory, "result.txt").write_text("calculation output")
+        Path(scratch_directory, "scratch-updated.txt").write_text("updated calculation output")
+        Path(scratch_directory, "scratch-removed.txt").unlink()
+        Path(self.original_directory, "slurm-123.out").write_text("live scheduler output")
+        Path(self.original_directory, "scheduler-created.txt").write_text("external output")
+        Path(self.original_directory, "scheduler-removed.txt").unlink()
+
+    def postprocess(self, directory="./") -> None:
+        pass
 
 
 class ExampleHandler(ErrorHandler):
@@ -325,6 +346,29 @@ custodian_params:
         except OSError:
             pass  # Ignore if file cannot be found.
         os.chdir(self.cwd)
+
+
+def test_scratch_dir_preserves_external_file_updates(tmp_path, monkeypatch) -> None:
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    scratch_root = tmp_path / "scratch"
+    scratch_root.mkdir()
+    scheduler_log = work_dir / "slurm-123.out"
+    scheduler_log.write_text("initial scheduler output")
+    (work_dir / "scratch-updated.txt").write_text("initial calculation output")
+    (work_dir / "scratch-removed.txt").write_text("remove from calculation")
+    (work_dir / "scheduler-removed.txt").write_text("remove externally")
+    monkeypatch.chdir(work_dir)
+    monkeypatch.setattr("monty.tempfile.os.symlink", lambda *_: None)
+
+    Custodian([], [ExternalFileUpdateJob(work_dir)], scratch_dir=scratch_root).run()
+
+    assert scheduler_log.read_text() == "live scheduler output"
+    assert (work_dir / "scheduler-created.txt").read_text() == "external output"
+    assert not (work_dir / "scheduler-removed.txt").exists()
+    assert (work_dir / "result.txt").read_text() == "calculation output"
+    assert (work_dir / "scratch-updated.txt").read_text() == "updated calculation output"
+    assert not (work_dir / "scratch-removed.txt").exists()
 
 
 # class TestCustodianCheckpoint:
