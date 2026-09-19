@@ -721,6 +721,16 @@ class VaspJob(Job):
         Args:
             directory: Unused, kept for API compatibility with base class.
         """
+        stopcar = os.path.join(directory, "STOPCAR")
+        if not os.path.isfile(stopcar):
+            with open(stopcar, "w") as f:
+                f.write("LSTOP = .TRUE.\n")
+            try:
+                self._vasp_process.wait(timeout=self.terminate_timeout)
+                if self._vasp_process.poll() is not None:
+                    return
+            except subprocess.TimeoutExpired:
+                pass
         pid = self._vasp_process.pid
 
         if self._vasp_process.poll() is not None:
