@@ -1,8 +1,8 @@
 ![Custodian logo](https://raw.githubusercontent.com/materialsproject/custodian/master/docs/assets/custodian_logo.png)
 [![GitHub license](https://img.shields.io/github/license/materialsproject/custodian)](https://github.com/materialsproject/custodian/blob/main/LICENSE)
-[![Lint](https://github.com/materialsproject/custodian/workflows/Lint/badge.svg)](https://github.com/materialsproject/custodian/workflows/Lint/badge.svg)
+[![Lint](https://github.com/materialsproject/custodian/workflows/Lint/badge.svg)](https://github.com/materialsproject/custodian/actions/workflows/lint.yml)
 [![Test](https://github.com/materialsproject/custodian/actions/workflows/test.yml/badge.svg)](https://github.com/materialsproject/custodian/actions/workflows/test.yml)
-[![Downloads](https://pepy.tech/badge/custodian)](https://pepy.tech/project/custodian)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/custodian?logo=pypi&logoColor=white&color=blue&label=PyPI)](https://pypi.org/project/custodian)
 [![codecov](https://codecov.io/gh/materialsproject/custodian/branch/master/graph/badge.svg?token=OwDQVJnghu)](https://codecov.io/gh/materialsproject/custodian)
 
 Custodian is a simple, robust and flexible just-in-time (JIT) job management
