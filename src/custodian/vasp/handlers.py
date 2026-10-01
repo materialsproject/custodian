@@ -59,6 +59,28 @@ VASP_BACKUP_FILES = {
 }
 
 
+def _correct_grad_not_orth(incar: Incar, errors: set[str]) -> list[dict]:
+    """Return corrections for a non-orthogonal EDWAV gradient."""
+    actions = []
+    # Often coincides with algo_tet, in which the algo_tet error handler will also resolve grad_not_orth.
+    # When not present alongside algo_tet, the grad_not_orth error is due to how VASP is compiled.
+    # Depending on the optimization flag and choice of compiler, the ALGO = All and Damped algorithms
+    # may not work. The only fix is either to change ALGO or to recompile VASP.
+    if incar.get("ALGO", "Normal").lower() in {"all", "conjugate", "damped"}:
+        if incar.get("METAGGA", "none") == "none" and not incar.get("LHFCALC", False):
+            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
+        else:
+            # Meta-GGAs and hybrids should not be run with ALGO = Fast
+            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
+    if "algo_tet" not in errors:
+        warnings.warn(
+            "EDWAV error reported by VASP without a simultaneous algo_tet error. You may wish to consider "
+            "recompiling VASP with the -O1 optimization if you used -O2 and this error keeps cropping up.",
+            UserWarning,
+        )
+    return actions
+
+
 class VaspErrorHandler(ErrorHandler):
     """
     Master VaspErrorHandler class that handles a number of common errors
@@ -607,22 +629,7 @@ class VaspErrorHandler(ErrorHandler):
                     actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
 
         if "grad_not_orth" in self.errors:
-            # Often coincides with algo_tet, in which the algo_tet error handler will also resolve grad_not_orth.
-            # When not present alongside algo_tet, the grad_not_orth error is due to how VASP is compiled.
-            # Depending on the optimization flag and choice of compiler, the ALGO = All and Damped algorithms
-            # may not work. The only fix is either to change ALGO or to recompile VASP.
-            if vi["INCAR"].get("ALGO", "Normal").lower() in {"all", "conjugate", "damped"}:
-                if vi["INCAR"].get("METAGGA", "none") == "none" and not vi["INCAR"].get("LHFCALC", False):
-                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
-                else:
-                    # Meta-GGAs and hybrids should not be run with ALGO = Fast
-                    actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
-            if "algo_tet" not in self.errors:
-                warnings.warn(
-                    "EDWAV error reported by VASP without a simultaneous algo_tet error. You may wish to consider "
-                    "recompiling VASP with the -O1 optimization if you used -O2 and this error keeps cropping up.",
-                    UserWarning,
-                )
+            actions.extend(_correct_grad_not_orth(vi["INCAR"], self.errors))
 
         if self.errors & {"zheev", "eddiag"}:
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
@@ -845,6 +852,7 @@ class StdErrHandler(ErrorHandler):
     error_msgs: ClassVar = {
         "kpoints_trans": ["internal error in GENERATE_KPOINTS_TRANS: number of G-vector changed in star"],
         "out_of_memory": ["Allocation would exceed memory limit"],
+        "grad_not_orth": VaspErrorHandler.error_msgs["grad_not_orth"],
     }
 
     def __init__(self, output_filename: str = "std_err.txt") -> None:
@@ -889,6 +897,9 @@ class StdErrHandler(ErrorHandler):
         if "out_of_memory" in self.errors and vi["INCAR"].get("KPAR", 1) > 1:
             reduced_kpar = max(vi["INCAR"].get("KPAR", 1) // 2, 1)
             actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": reduced_kpar}}})
+
+        if "grad_not_orth" in self.errors:
+            actions.extend(_correct_grad_not_orth(vi["INCAR"], self.errors))
 
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
