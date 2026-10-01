@@ -1111,6 +1111,30 @@ class KpointsTransHandlerTest(MatSciTest):
         assert dct["actions"] == []  # don't correct twice
 
 
+@pytest.mark.parametrize("algo", ["All", "Conjugate", "Damped", "Normal"])
+@pytest.mark.parametrize("functional", [{}, {"METAGGA": "SCAN"}, {"LHFCALC": True}])
+def test_stderr_gradient_not_orthogonal(tmp_path, algo, functional) -> None:
+    incar = Incar({"ALGO": algo, **functional})
+    incar.write_file(tmp_path / "INCAR")
+    stderr = tmp_path / "std_err.txt"
+    stderr.write_text("| EDWAV: internal error, the gradient is not orthogonal 2 1 -8.611e-4 |\n")
+    handler = StdErrHandler()
+    assert handler.check(directory=tmp_path)
+    with pytest.warns(UserWarning, match="recompiling VASP"):
+        result = handler.correct(directory=tmp_path)
+    expected_algo = "Normal" if functional or algo == "Normal" else "Fast"
+    assert result["errors"] == ["grad_not_orth"]
+    assert result["actions"] == (
+        [] if algo == "Normal" else [{"dict": "INCAR", "action": {"_set": {"ALGO": expected_algo}}}]
+    )
+    assert Incar.from_file(tmp_path / "INCAR")["ALGO"] == expected_algo
+    with tarfile.open(tmp_path / "error.1.tar.gz") as backup:
+        assert "error.1/std_err.txt" in backup.getnames()
+    stderr.write_text("")
+    assert not handler.check(directory=tmp_path)
+    assert handler.errors == set()
+
+
 class OutOfMemoryHandlerTest(MatSciTest):
     def setUp(self) -> None:
         copy_tmp_files(self.tmp_path, "INCAR", "std_err.txt.oom")

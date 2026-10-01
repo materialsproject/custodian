@@ -53,17 +53,14 @@ class TestVaspFilesValidator:
 class TestVaspNpTMDValidator:
     def test_check_and_correct(self) -> None:
         # NPT-AIMD using correct VASP
-        os.chdir(f"{TEST_FILES}/npt_common")
         handler = VaspNpTMDValidator()
-        assert not handler.check()
+        assert not handler.check(directory=f"{TEST_FILES}/npt_common")
 
         # NVT-AIMD using correct VASP
-        os.chdir(f"{TEST_FILES}/npt_nvt")
-        assert not handler.check()
+        assert not handler.check(directory=f"{TEST_FILES}/npt_nvt")
 
         # NPT-AIMD using incorrect VASP
-        os.chdir(f"{TEST_FILES}/npt_bad_vasp")
-        assert handler.check()
+        assert handler.check(directory=f"{TEST_FILES}/npt_bad_vasp")
 
     def test_as_dict(self) -> None:
         handler = VaspNpTMDValidator()

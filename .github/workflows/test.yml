@@ -44,6 +44,9 @@ jobs:
 
       - name: Install dependencies
         run: |
+          if [[ -n "${SSL_CERT_FILE:-}" && ! -f "$SSL_CERT_FILE" ]]; then
+            unset SSL_CERT_FILE
+          fi
           uv pip install -e . --system
           uv pip install pytest pymatgen pytest-cov --system
 
