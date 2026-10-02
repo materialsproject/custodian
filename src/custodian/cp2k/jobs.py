@@ -3,6 +3,7 @@
 import logging
 import os
 import shutil
+import signal
 import subprocess
 
 from monty.os.path import zpath
@@ -39,6 +40,7 @@ class Cp2kJob(Job):
         backup=True,
         settings_override=None,
         restart=False,
+        terminate_timeout: float = 10.0,
     ) -> None:
         """
         This constructor is necessarily complex due to the need for
@@ -67,6 +69,8 @@ class Cp2kJob(Job):
                 in interpreter.py
             restart (bool): Whether to run in restart mode, i.e. this a continuation of
                 a previous calculation. Default is False.
+            terminate_timeout (float): Timeout in seconds to wait for graceful
+                termination before escalating to a forceful kill. Defaults to 10.0.
 
         """
         self.cp2k_cmd = cp2k_cmd
@@ -79,6 +83,7 @@ class Cp2kJob(Job):
         self.suffix = suffix
         self.settings_override = settings_override or []
         self.restart = restart
+        self.terminate_timeout = terminate_timeout
 
     def setup(self, directory="./") -> None:
         """
@@ -132,7 +137,15 @@ class Cp2kJob(Job):
             open(os.path.join(directory, self.stderr_file), "w", buffering=1) as f_err,
         ):
             # use line buffering for stderr
-            return subprocess.Popen(cmd, cwd=directory, stdout=f_std, stderr=f_err, shell=False)
+            self._cp2k_process = subprocess.Popen(
+                cmd,
+                cwd=directory,
+                stdout=f_std,
+                stderr=f_err,
+                shell=False,
+                start_new_session=True,
+            )
+            return self._cp2k_process
 
     # TODO double jobs, file manipulations, etc. should be done in atomate in the future
     # and custodian should only run the job itself
@@ -161,14 +174,72 @@ class Cp2kJob(Job):
         if os.path.isfile(os.path.join(directory, "continue.json")):
             os.remove(os.path.join(directory, "continue.json"))
 
-    def terminate(self, directory="./") -> None:
-        """Terminate cp2k."""
-        for cmd in self.cp2k_cmd:
-            if "cp2k" in cmd:
+    def terminate(self, directory: str = "./") -> None:
+        """Terminate only the CP2K process group associated with this job.
+
+        On POSIX, terminate the isolated process group created by :meth:`run`,
+        then escalate from ``SIGTERM`` to ``SIGKILL`` if needed. On Windows, or
+        if process-group signaling cannot finish the job, terminate the launcher
+        process directly. This avoids a host-wide ``killall`` that can stop
+        unrelated calculations.
+
+        Args:
+            directory: Unused, kept for API compatibility with the base class.
+        """
+        pid = self._cp2k_process.pid
+
+        if self._cp2k_process.poll() is not None:
+            logger.warning(f"Process {pid} already terminated")
+            return
+
+        if os.name != "nt":
+            try:
+                pgid = os.getpgid(pid)  # type: ignore[attr-defined]
+            except ProcessLookupError:
+                logger.warning(f"Process group for {pid} not found")
+                return
+
+            logger.info(f"Sending SIGTERM to process group {pgid}")
+            try:
+                os.killpg(pgid, signal.SIGTERM)  # type: ignore[attr-defined]
+            except ProcessLookupError:
+                logger.warning(f"Process group {pgid} not found")
+                return
+            except OSError as exc:
+                logger.warning(f"SIGTERM to process group {pgid} failed: {exc}")
+            else:
                 try:
-                    os.system(f"killall {cmd}")
-                except Exception:
+                    self._cp2k_process.wait(timeout=self.terminate_timeout)
+                    logger.info(f"Process {pid} terminated gracefully")
+                    return
+                except subprocess.TimeoutExpired:
+                    logger.warning(f"SIGTERM timeout ({self.terminate_timeout}s), sending SIGKILL")
+
+            logger.info(f"Sending SIGKILL to process group {pgid}")
+            try:
+                os.killpg(pgid, signal.SIGKILL)  # type: ignore[attr-defined]
+            except ProcessLookupError:
+                logger.warning(f"Process group {pgid} not found")
+                return
+            except OSError as exc:
+                logger.warning(f"SIGKILL to process group {pgid} failed: {exc}")
+            else:
+                try:
+                    self._cp2k_process.wait(timeout=self.terminate_timeout)
+                    logger.info(f"Process {pid} killed with SIGKILL")
+                    return
+                except subprocess.TimeoutExpired:
                     pass
+
+        logger.warning(f"Falling back to killing parent process {pid}")
+        try:
+            self._cp2k_process.terminate()
+            self._cp2k_process.wait(timeout=self.terminate_timeout)
+            logger.info(f"Process {pid} terminated")
+        except subprocess.TimeoutExpired:
+            self._cp2k_process.kill()
+            self._cp2k_process.wait()
+            logger.info(f"Process {pid} killed")
 
     @classmethod
     def gga_static_to_hybrid(
