@@ -6,6 +6,20 @@ nav_order: 2
 
 # Change Log
 
+## Unreleased
+* **Breaking:** Python 3.10 support dropped; custodian now requires Python >= 3.11 (needed by pymatgen >= 2026.9.24).
+* Dev dependency bumped to pymatgen >= 2026.9.24; `uv.lock` updated.
+* PR #451 from @Andrew-S-Rosen (#451)
+    Handle VASP non-orthogonal gradients (`grad_not_orth`) in `StdErrHandler`.
+* PR #409 from @esoteric-ephemera (#409)
+    Remove `auto_nbands` handling (now only warns) and fix Bravais lattice inconsistency handling to follow VASP's advice.
+* PR #422 from @Andrew-S-Rosen (#422)
+    Make `is_valid_poscar` less noisy.
+* PR #420 from @Andrew-S-Rosen (#420)
+    Remove unused `copy_contcar_to_poscar_if_valid` function.
+* PR #424, #423 from @Andrew-S-Rosen
+    CI: drop macOS from the test matrix; set a 10-minute workflow timeout.
+
 ## 2025.12.14
 * PR #419 from @Andrew-S-Rosen (#419)
     This PR adds my name to the author list but is really done so I can trigger the test suite on the new Python 3.13 runner.
