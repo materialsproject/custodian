@@ -6,7 +6,7 @@ nav_order: 2
 
 # Change Log
 
-## Unreleased
+## 2026.10.9
 * **Breaking:** Python 3.10 support dropped; custodian now requires Python >= 3.11 (needed by pymatgen >= 2026.9.24).
 * Dev dependency bumped to pymatgen >= 2026.9.24; `uv.lock` updated.
 * PR #451 from @Andrew-S-Rosen (#451)
