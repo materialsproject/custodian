@@ -1014,16 +1014,11 @@ class StdErrHandler(ErrorHandler):
         actions = []
         vi = VaspInput.from_directory(directory)
 
-        if "kpoints_trans" in self.errors:
-            # Per the VASP wiki (Number_of_G-vectors_changed_in_the_star), the fix is to perturb
-            # the G-vector sphere via ENCUT or to switch off symmetry. The k-mesh is not the cause.
-            incar = vi["INCAR"]
-            if self.error_count["kpoints_trans"] == 0 and "ENCUT" in incar:
-                actions.append({"dict": "INCAR", "action": {"_set": {"ENCUT": incar["ENCUT"] + 1}}})
-                self.error_count["kpoints_trans"] += 1
-            elif incar.get("ISYM", 2) > 0:
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
-                self.error_count["kpoints_trans"] += 1
+        # Per the VASP wiki (Number_of_G-vectors_changed_in_the_star), the k-mesh is not the cause.
+        # Of the advised fixes, only switching off symmetry leaves the user's ENCUT and k-points intact.
+        if "kpoints_trans" in self.errors and vi["INCAR"].get("ISYM", 2) > 0:
+            actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+            self.error_count["kpoints_trans"] += 1
 
         if "out_of_memory" in self.errors and vi["INCAR"].get("KPAR", 1) > 1:
             reduced_kpar = max(vi["INCAR"].get("KPAR", 1) // 2, 1)

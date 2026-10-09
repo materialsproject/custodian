@@ -1128,18 +1128,14 @@ class KpointsTransHandlerTest(MatSciTest):
         assert handler.check() is True
         dct = handler.correct()
         assert dct["errors"] == ["kpoints_trans"]
-        assert dct["actions"] == [{"action": {"_set": {"ENCUT": 521}}, "dict": "INCAR"}]
-
-        assert handler.check() is True
-        dct = handler.correct()
         assert dct["actions"] == [{"action": {"_set": {"ISYM": 0}}, "dict": "INCAR"}]
 
         assert handler.check() is True
         dct = handler.correct()
-        assert dct["actions"] == []  # unrecoverable once ENCUT and ISYM are exhausted
+        assert dct["actions"] == []  # unrecoverable once symmetry is off
 
         incar = Incar.from_file("INCAR")
-        assert incar["ENCUT"] == 521
+        assert incar["ENCUT"] == 520  # ENCUT is never changed
         assert incar["ISYM"] == 0
         kpoints = Kpoints.from_file("KPOINTS")
         assert kpoints.style == Kpoints.supported_modes.Monkhorst
@@ -1295,7 +1291,7 @@ MESH_SYMMETRY_MSG = "Reciprocal lattice and k-lattice belong to different class 
 
 
 def test_kpoints_trans_kspacing(tmp_path) -> None:
-    """kpoints_trans with KSPACING (no KPOINTS file) and no ENCUT goes straight to ISYM = 0."""
+    """kpoints_trans with KSPACING (no KPOINTS file) also goes to ISYM = 0."""
     Incar({"KSPACING": 0.3}).write_file(tmp_path / "INCAR")
     (tmp_path / "std_err.txt").write_text(KPOINTS_TRANS_MSG)
     handler = StdErrHandler()
@@ -1306,28 +1302,19 @@ def test_kpoints_trans_kspacing(tmp_path) -> None:
     assert handler.correct(directory=tmp_path)["actions"] == []
 
 
+@pytest.mark.parametrize("encut", [None, 450])
 @pytest.mark.parametrize("isym", [0, -1])
-def test_kpoints_trans_symmetry_off(tmp_path, isym) -> None:
-    """With no ENCUT and symmetry already off, kpoints_trans is unrecoverable."""
-    Incar({"ISYM": isym}).write_file(tmp_path / "INCAR")
+def test_kpoints_trans_symmetry_off(tmp_path, isym, encut) -> None:
+    """With symmetry already off, kpoints_trans is unrecoverable; ENCUT and KPOINTS are never touched."""
+    incar = Incar({"ISYM": isym} if encut is None else {"ISYM": isym, "ENCUT": encut})
+    incar.write_file(tmp_path / "INCAR")
     Kpoints.monkhorst_automatic((8, 8, 1)).write_file(tmp_path / "KPOINTS")
     (tmp_path / "std_err.txt").write_text(KPOINTS_TRANS_MSG)
     handler = StdErrHandler()
     assert handler.check(directory=tmp_path)
     assert handler.correct(directory=tmp_path)["actions"] == []
     assert tuple(Kpoints.from_file(tmp_path / "KPOINTS").kpts[0]) == (8, 8, 1)
-
-
-def test_kpoints_trans_encut_with_isym_off(tmp_path) -> None:
-    """The ENCUT nudge is applied once; with ISYM already off, the next occurrence is unrecoverable."""
-    Incar({"ENCUT": 450, "ISYM": 0}).write_file(tmp_path / "INCAR")
-    (tmp_path / "std_err.txt").write_text(KPOINTS_TRANS_MSG)
-    handler = StdErrHandler()
-    assert handler.check(directory=tmp_path)
-    assert handler.correct(directory=tmp_path)["actions"] == [{"dict": "INCAR", "action": {"_set": {"ENCUT": 451}}}]
-    assert handler.check(directory=tmp_path)
-    assert handler.correct(directory=tmp_path)["actions"] == []
-    assert Incar.from_file(tmp_path / "INCAR")["ENCUT"] == 451
+    assert Incar.from_file(tmp_path / "INCAR") == incar
 
 
 def test_mesh_symmetry_slab_mp_to_gamma(tmp_path) -> None:
