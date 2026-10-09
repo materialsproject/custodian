@@ -878,6 +878,26 @@ class LargeSigmaHandlerTest(MatSciTest):
         handler = LargeSigmaHandler(output_filename=zpath("OUTCAR_pass_sigma_check"))
         assert not handler.check()
 
+    @pytest.mark.parametrize(("ismear", "exponent"), [(0, 2), (1, 4), (2, 6)])
+    def test_correct_sigma_exponent(self, ismear: int, exponent: int) -> None:
+        # T*S scales as sigma**2 for Gaussian and sigma**(2N + 2) for Methfessel-Paxton order N
+        incar = Incar.from_file("INCAR")
+        incar["ISMEAR"] = ismear
+        incar.write_file("INCAR")
+        sigma = incar["SIGMA"]
+
+        reference = LargeSigmaHandler(output_filename=zpath("OUTCAR_fail_sigma_check"))
+        assert reference.check()
+        entropy_per_atom = reference.entropy_per_atom
+
+        # correct() on a deserialized handler must work without a prior check()
+        handler = LargeSigmaHandler.from_dict(reference.as_dict())
+        assert not hasattr(handler, "entropy_per_atom")
+        dct = handler.correct()
+        assert dct["errors"] == ["LargeSigma"]
+        expected = 0.8 * (handler.e_entropy_tol / entropy_per_atom) ** (1 / exponent) * sigma
+        assert Incar.from_file("INCAR")["SIGMA"] == pytest.approx(expected, rel=1e-10)
+
     def test_no_crash_on_partial_output(self) -> None:
         # ensure that the handler doesn't crash when the OUTCAR isn't completely written
         # this prevents jobs from being killed when the handler itself crashes

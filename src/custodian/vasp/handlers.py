@@ -1439,7 +1439,6 @@ class LargeSigmaHandler(ErrorHandler):
 
             completed_ionic_steps = len(outcar.data.get("completed_ionic_steps"))
             entropies_per_atom = [0.0 for _ in range(completed_ionic_steps)]
-            n_atoms = len(Structure.from_file(os.path.join(directory, "POSCAR")))
 
             electronic_step_indices = [step[0] for step in outcar.data.get("electronic_step_indices", [])]
             smearing_entropy = outcar.data.get("smearing_entropy", [0.0 for _ in electronic_step_indices])
@@ -1465,6 +1464,10 @@ class LargeSigmaHandler(ErrorHandler):
 
     def correct(self, directory="./"):
         """Perform corrections."""
+        # entropy_per_atom is set by check(); it is absent on a fresh or deserialized handler
+        if not hasattr(self, "entropy_per_atom"):
+            self.check(directory)
+
         backup(VASP_BACKUP_FILES, directory=directory)
         actions = []
         vi = VaspInput.from_directory(directory)
@@ -1473,16 +1476,24 @@ class LargeSigmaHandler(ErrorHandler):
 
         # From F.J. dos Santos and N. Marzari, Phys. Rev. B 107, 195122 (2023),
         # DOI: 10.1103/PhysRevB.107.195122, Eq. (19)
-        # When the smearing width is acceptably small, the electronic free energy
-        # F(sigma) \approx E(0) + gamma * sigma**2 / 2
-        # where E(0) = F(sigma --> 0) is the actual ground-state energy
-        # E_entropy(sigma) = gamma * sigma**2 / 2
-        # is the contribution electronic smearing entropy
-        # We can approximate the ``optimal'' sigma to reduce to via
-        # sigma_new = [E_entropy(new) / E_entropy(current) ]**(0.5) * sigma_current,
-        # Practically, E_entropy(new) = 1 meV/atom
+        # For Gaussian smearing (ISMEAR = 0) and small sigma, the electronic free energy is
+        # F(sigma) \approx E(0) - gamma * sigma**2 / 2
+        # where E(0) = F(sigma --> 0) is the actual ground-state energy, and the
+        # smearing entropy term T*S = sigma * S(sigma) scales as sigma**2.
+        # For Methfessel-Paxton smearing of order N = ISMEAR >= 1 (M. Methfessel and
+        # A.T. Paxton, Phys. Rev. B 40, 3616 (1989)), the broadening function has vanishing
+        # moments up to order 2N + 1, so S(sigma) = O(sigma**(2N + 1)) and
+        # T*S = O(sigma**(2N + 2)) (dos Santos and Marzari, Eqs. (12), (13) and (24): N = 1
+        # removes the terms linear and quadratic in sigma from S).
+        # Hence T*S \propto sigma**p with p = 2 for ISMEAR = 0 and p = 2N + 2 otherwise,
+        # and the ``optimal'' sigma to reduce to is approximately
+        # sigma_new = [E_entropy(new) / E_entropy(current) ]**(1 / p) * sigma_current,
+        # Practically, E_entropy(new) = e_entropy_tol (default 1 meV/atom), with a 0.8 safety factor
         if sigma > self.min_sigma:
-            updated_sigma = max(self.min_sigma, 0.8 * (self.e_entropy_tol / self.entropy_per_atom) ** (0.5) * sigma)
+            exponent = 2 * ismear + 2
+            updated_sigma = max(
+                self.min_sigma, 0.8 * (self.e_entropy_tol / self.entropy_per_atom) ** (1 / exponent) * sigma
+            )
             actions.append(
                 {
                     "dict": "INCAR",
