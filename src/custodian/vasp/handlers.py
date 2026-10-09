@@ -70,22 +70,40 @@ def _fallback_algo(incar: Incar) -> str:
     return "Normal"
 
 
-def _correct_grad_not_orth(incar: Incar, errors: set[str]) -> list[dict]:
-    """Return corrections for a non-orthogonal EDWAV gradient."""
-    actions = []
-    # Often coincides with algo_tet, in which the algo_tet error handler will also resolve grad_not_orth.
-    # When not present alongside algo_tet, the grad_not_orth error is due to how VASP is compiled.
-    # Depending on the optimization flag and choice of compiler, the ALGO = All and Damped algorithms
-    # may not work. The only fix is either to change ALGO or to recompile VASP.
+def _correct_grad_not_orth(incar: Incar, errors: set[str], error_count: int, directory: str) -> list[dict]:
+    """Return corrections for a non-orthogonal EDWAV gradient.
+
+    Args:
+        incar (Incar): Current INCAR.
+        errors (set[str]): All errors detected in this check.
+        error_count (int): Number of previous grad_not_orth corrections without a simultaneous algo_tet.
+        directory (str): Calculation directory, used to read NBANDS from the OUTCAR.
+
+    Returns:
+        list[dict]: Actions to apply.
+    """
+    fallback = []
     if incar.get("ALGO", "Normal").lower() in {"all", "conjugate", "damped"}:
-        actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": _fallback_algo(incar)}}})
-    if "algo_tet" not in errors:
-        warnings.warn(
-            "EDWAV error reported by VASP without a simultaneous algo_tet error. You may wish to consider "
-            "recompiling VASP with the -O1 optimization if you used -O2 and this error keeps cropping up.",
-            UserWarning,
-        )
-    return actions
+        fallback = [{"dict": "INCAR", "action": {"_set": {"ALGO": _fallback_algo(incar)}}}]
+    # Often coincides with algo_tet, in which case changing ALGO resolves both.
+    if "algo_tet" in errors:
+        return fallback
+
+    # Otherwise the error is numerical: the wavefunctions lose orthonormality in the Davidson steps.
+    # VASP staff have traced it to Intel-compiled VASP on AMD CPUs (https://vasp.at/forum/viewtopic.php?p=25241)
+    # and to meta-GGAs restarted from CHGCAR without TAUCAR or too few NBANDS
+    # (https://vasp.at/forum/viewtopic.php?p=33191). Try more bands first, then a different ALGO.
+    warnings.warn(
+        "EDWAV error reported by VASP without a simultaneous algo_tet error. This has been traced to "
+        "Intel-compiled VASP on AMD CPUs, where a GNU or AOCC build avoids it, and, for meta-GGAs restarted "
+        "from CHGCAR, to a missing TAUCAR.",
+        UserWarning,
+    )
+    if error_count == 0 and (nbands := incar.get("NBANDS") or VaspErrorHandler._get_nbands_from_outcar(directory)):
+        return [{"dict": "INCAR", "action": {"_set": {"NBANDS": max(int(1.1 * nbands), nbands + 1)}}}]
+    if error_count <= 1:
+        return fallback
+    return []
 
 
 def _uniform_kpoint_mesh(kpoints: Kpoints | None) -> list[list[int]] | None:
@@ -650,7 +668,11 @@ class VaspErrorHandler(ErrorHandler):
                     actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
 
         if "grad_not_orth" in self.errors:
-            actions.extend(_correct_grad_not_orth(vi["INCAR"], self.errors))
+            actions.extend(
+                _correct_grad_not_orth(vi["INCAR"], self.errors, self.error_count["grad_not_orth"], directory)
+            )
+            if "algo_tet" not in self.errors:
+                self.error_count["grad_not_orth"] += 1
 
         if self.errors & {"zheev", "eddiag"}:
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
@@ -921,7 +943,11 @@ class StdErrHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": reduced_kpar}}})
 
         if "grad_not_orth" in self.errors:
-            actions.extend(_correct_grad_not_orth(vi["INCAR"], self.errors))
+            actions.extend(
+                _correct_grad_not_orth(vi["INCAR"], self.errors, self.error_count["grad_not_orth"], directory)
+            )
+            if "algo_tet" not in self.errors:
+                self.error_count["grad_not_orth"] += 1
 
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
