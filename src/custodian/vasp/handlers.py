@@ -59,6 +59,78 @@ VASP_BACKUP_FILES = {
 }
 
 
+# See https://www.vasp.at/wiki/index.php/ALGO. Except for the spelled-out values, only the first letter
+# of an electronic-minimisation ALGO matters, so e.g. "F" == "Fast". Conjugate and All are synonymous.
+_ALGO_SPELLED_OUT = {"exact", "eigenval", "none", "nothing"}
+_ALGO_BY_FIRST_LETTER = {
+    "n": "normal",
+    "v": "veryfast",
+    "f": "fast",
+    "a": "all",
+    "c": "all",
+    "d": "damped",
+    "s": "subrot",
+}
+# Response-function, GW, BSE and ACFDT/RPA values are full names and must not be read by first letter.
+_ALGO_MANY_BODY = {
+    "chi",
+    "tdhf",
+    "bse",
+    "timeev",
+    "acfdt",
+    "rpa",
+    "acfdtr",
+    "rpar",
+    "crpa",
+    "evgw0",
+    "evgw",
+    "qpgw0",
+    "qpgw",
+    "gw0r",
+    "gwr",
+    "g0w0r",
+    "evgw0r",
+    "gw0",
+    "gw",
+    "scgw0",
+    "scgw",
+}
+# vasp.6 variants selecting the vasp.5 Fast/VeryFast algorithms.
+_ALGO_OLD = {"old fast": "fast", "of": "fast", "old veryfast": "veryfast", "ov": "veryfast"}
+# See https://www.vasp.at/wiki/index.php/ALGO and https://www.vasp.at/wiki/index.php/IALGO.
+_IALGO_TO_ALGO = {
+    38: "normal",
+    48: "veryfast",
+    68: "fast",
+    58: "all",
+    53: "damped",
+    90: "exact",
+    4: "subrot",
+    3: "eigenval",
+    2: "none",
+}
+
+
+def _get_algo(incar: Incar) -> str:
+    """Return the canonical lowercase ALGO of an INCAR.
+
+    Electronic-minimisation values are resolved by their first letter as VASP does ("F" -> "fast",
+    "Conjugate" -> "all"). Exact, Eigenval, None and Nothing are passed through as spelled-out names, as are
+    many-body and unrecognised values. If ALGO is absent, a common IALGO is mapped to its ALGO equivalent.
+    Otherwise the VASP default "normal" is returned.
+    """
+    if (algo := incar.get("ALGO")) is None:
+        return _IALGO_TO_ALGO.get(incar.get("IALGO"), "normal")
+    algo = " ".join(str(algo).lower().split())
+    if not algo:
+        return "normal"
+    if algo in _ALGO_SPELLED_OUT or algo in _ALGO_MANY_BODY:
+        return algo
+    if algo in _ALGO_OLD:
+        return _ALGO_OLD[algo]
+    return _ALGO_BY_FIRST_LETTER.get(algo[0], algo)
+
+
 def _fallback_algo(incar: Incar) -> str:
     """Return a stable ALGO to fall back to.
 
@@ -77,7 +149,7 @@ def _correct_grad_not_orth(incar: Incar, errors: set[str]) -> list[dict]:
     # When not present alongside algo_tet, the grad_not_orth error is due to how VASP is compiled.
     # Depending on the optimization flag and choice of compiler, the ALGO = All and Damped algorithms
     # may not work. The only fix is either to change ALGO or to recompile VASP.
-    if incar.get("ALGO", "Normal").lower() in {"all", "conjugate", "damped"}:
+    if _get_algo(incar) in {"all", "damped"}:
         actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": _fallback_algo(incar)}}})
     if "algo_tet" not in errors:
         warnings.warn(
@@ -600,7 +672,7 @@ class VaspErrorHandler(ErrorHandler):
             new_nbands = max(int(1.1 * nbands), nbands + 1)  # This handles the case when nbands is too low (< 8).
             actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": new_nbands}}})
 
-        if self.errors & {"pssyevx", "pdsyevx"} and vi["INCAR"].get("ALGO", "Normal").lower() != "normal":
+        if self.errors & {"pssyevx", "pdsyevx"} and _get_algo(vi["INCAR"]) != "normal":
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
 
         if "eddrmm" in self.errors:
@@ -608,7 +680,7 @@ class VaspErrorHandler(ErrorHandler):
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
             if is_valid_poscar("CONTCAR", directory):
                 actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
-            if vi["INCAR"].get("ALGO", "Normal").lower() in {"fast", "veryfast"}:
+            if _get_algo(vi["INCAR"]) in {"fast", "veryfast"}:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
             else:
                 current_potim = vi["INCAR"].get("POTIM", 0.5)
@@ -630,7 +702,7 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}})
 
             # This sometimes comes up with ALGO = Fast. We will switch the ALGO.
-            if vi["INCAR"].get("ALGO", "Normal").lower() != "all":
+            if _get_algo(vi["INCAR"]) != "all":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All", "ISEARCH": 1}}})
 
             # This can sometimes be due to load-balancing issues for small systems.
@@ -656,9 +728,9 @@ class VaspErrorHandler(ErrorHandler):
             # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
             if is_valid_poscar("CONTCAR", directory):
                 actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
-            if vi["INCAR"].get("ALGO", "Normal").lower() == "fast":
+            if (algo := _get_algo(vi["INCAR"])) == "fast":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
-            elif vi["INCAR"].get("ALGO", "Normal").lower() == "normal":
+            elif algo == "normal":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "exact"}}})
 
         if "elf_kpar" in self.errors and vi["INCAR"].get("KPAR", 1) != 1:
@@ -724,12 +796,15 @@ class VaspErrorHandler(ErrorHandler):
 
         if "nbands_not_sufficient" in self.errors:
             outcar = load_outcar(os.path.join(directory, "OUTCAR"))
-            nelect = outcar.nelect
-            nions = len(vi["POSCAR"].structure)
+            nbands = self._default_nbands(vi["INCAR"], outcar.nelect, len(vi["POSCAR"].structure))
+            # Never lower an NBANDS the user set or VASP actually used.
+            used_nbands = self._get_nbands_from_outcar(directory) or 0
+            nbands = max(nbands, vi["INCAR"].get("NBANDS") or 0, used_nbands)
             ncore = vi["INCAR"].get("NCORE", 1)
-            default_nbands = round(max(nelect / 2 + nions / 2, nelect * 0.6))
-            default_nbands_adjusted = ceil(default_nbands / ncore) * ncore
-            actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": default_nbands_adjusted}}})
+            default_nbands_adjusted = ceil(nbands / ncore) * ncore
+            # Rerunning with the NBANDS that just failed would not help, so only act if it increases.
+            if default_nbands_adjusted > used_nbands:
+                actions.append({"dict": "INCAR", "action": {"_set": {"NBANDS": default_nbands_adjusted}}})
 
         if "set_core_wf" in self.errors:
             # Unfixable error where the solution is to update the POTCARs
@@ -758,7 +833,7 @@ class VaspErrorHandler(ErrorHandler):
 
         if "algo_tet" in self.errors:
             # NOTE: This is the algo_tet handler response.
-            algo = vi["INCAR"].get("ALGO", "Normal").lower()
+            algo = _get_algo(vi["INCAR"])
             # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP
             # suggests: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
             # 2) Use ALGO = Damped but only *after* an ISMEAR = 0 run where the wavefunction
@@ -789,6 +864,29 @@ class VaspErrorHandler(ErrorHandler):
 
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
+
+    @staticmethod
+    def _default_nbands(incar: Incar, nelect: float, nions: int) -> int:
+        """Return the default NBANDS that VASP would use.
+
+        The base formula is from https://www.vasp.at/wiki/index.php/NBANDS. The wiki only says that the
+        spin-polarised default is increased for the initial magnetic moments; the floor((sum(MAGMOM) + 1) / 2)
+        term follows VASP's main.F (as in pymatgen's VaspInputSet.estimate_nbands). Noncollinear runs
+        (LNONCOLLINEAR or LSORBIT) double the default.
+        """
+        nbands = max(int(nelect + 2.5) // 2 + max(nions // 2, 3), int(0.6 * nelect))  # int(x + 0.5) is NINT
+        noncollinear = incar.get("LNONCOLLINEAR", False) or incar.get("LSORBIT", False)
+        if incar.get("ISPIN", 1) == 2 and not noncollinear:
+            magmom = incar.get("MAGMOM", [1.0] * nions)  # VASP default is 1 muB per ion
+            try:
+                total_mag = sum(float(m) for m in magmom)
+            except (TypeError, ValueError):
+                total_mag = 0.0
+            if np.isfinite(total_mag):
+                nbands += max(int((total_mag + 1) // 2), 0)
+        if noncollinear:
+            nbands *= 2
+        return nbands
 
     @staticmethod
     def _get_nbands_from_outcar(directory: str) -> int | None:
@@ -1184,7 +1282,7 @@ class UnconvergedErrorHandler(ErrorHandler):
     def correct(self, directory="./"):
         """Perform corrections."""
         v = load_vasprun(os.path.join(directory, self.output_filename))
-        algo = v.incar.get("ALGO", "Normal").lower()
+        algo = _get_algo(v.incar)
         actions = []
         errors = ["Unconverged"]
         if not v.converged_electronic:
@@ -1593,7 +1691,7 @@ class FrozenJobErrorHandler(ErrorHandler):
 
         vi = VaspInput.from_directory(directory)
         actions = []
-        if vi["INCAR"].get("ALGO", "Normal").lower() == "fast":
+        if _get_algo(vi["INCAR"]) == "fast":
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
         else:
             actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8}}})
@@ -1644,16 +1742,14 @@ class NonConvergingErrorHandler(ErrorHandler):
     def correct(self, directory="./"):
         """Perform corrections."""
         incar = (vi := VaspInput.from_directory(directory))["INCAR"]
-        algo = incar.get("ALGO", "Normal").lower()
+        algo = _get_algo(incar)
         amix = incar.get("AMIX", 0.4)
         bmix = incar.get("BMIX", 1.0)
         amin = incar.get("AMIN", 0.1)
         actions = []
 
         # NOTE: This is the algo_tet handler response.
-        if (
-            incar.get("ALGO", "Normal").lower() in {"all", "damped"} or (50 <= incar.get("IALGO", 38) <= 59)
-        ) and incar.get("ISMEAR", 1) < 0:
+        if (algo in {"all", "damped"} or (50 <= incar.get("IALGO", 38) <= 59)) and incar.get("ISMEAR", 1) < 0:
             # ALGO=All/Damped / IALGO=5X often fails with ISMEAR < 0. There are two options VASP
             # suggests: 1) Use ISMEAR = 0 (and a small sigma) to get the SCF to converge.
             # 2) Use ALGO = Damped but only *after* an ISMEAR = 0 run where the wavefunction
@@ -1984,8 +2080,8 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         """Perform corrections."""
         # change ALGO = Fast to Normal if ALGO is !Normal
         vi = VaspInput.from_directory(directory)
-        algo = vi["INCAR"].get("ALGO", "Normal").lower()
-        if algo not in {"normal", "n"}:
+        algo = _get_algo(vi["INCAR"])
+        if algo != "normal":
             backup(VASP_BACKUP_FILES | {self.output_filename}, directory=directory)
             actions = [{"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}}]
             VaspModder(vi=vi, directory=directory).apply_actions(actions)
