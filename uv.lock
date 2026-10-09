@@ -5,8 +5,8 @@ resolution-markers = [
     "python_full_version >= '3.13' and sys_platform == 'win32'",
     "python_full_version >= '3.13' and sys_platform != 'win32'",
     "python_full_version == '3.12.*' and sys_platform == 'win32'",
-    "python_full_version < '3.12' and sys_platform == 'win32'",
     "python_full_version == '3.12.*' and sys_platform != 'win32'",
+    "python_full_version < '3.12' and sys_platform == 'win32'",
     "python_full_version < '3.12' and sys_platform != 'win32'",
 ]
 
@@ -313,7 +313,7 @@ toml = [
 
 [[package]]
 name = "custodian"
-version = "2025.12.14"
+version = "2026.10.9"
 source = { editable = "." }
 dependencies = [
     { name = "monty" },
