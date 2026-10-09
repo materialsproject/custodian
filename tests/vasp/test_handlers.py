@@ -2,6 +2,7 @@
 
 import datetime
 import os
+import re
 import shutil
 import tarfile
 from glob import glob
@@ -11,6 +12,7 @@ import pytest
 from monty.io import zopen
 from monty.os.path import zpath
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
+from pymatgen.symmetry.bandstructure import HighSymmKpath
 from pymatgen.util.testing import MatSciTest
 
 from custodian.utils import tracked_lru_cache
@@ -69,7 +71,8 @@ def copy_tmp_files(tmp_path: str, *file_paths: str) -> None:
 
 
 class VaspErrorHandlerTest(MatSciTest):
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         copy_tmp_files(self.tmp_path, *glob("*", root_dir=TEST_FILES))
 
     def test_frozen_job(self) -> None:
@@ -112,7 +115,7 @@ class VaspErrorHandlerTest(MatSciTest):
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["ksymm"]
-        assert dct["actions"] == [{"action": {"_set": {"SYMPREC": 1.0e-4}}, "dict": "INCAR"}]
+        assert dct["actions"] == [{"action": {"_set": {"SYMPREC": 1.0e-6}}, "dict": "INCAR"}]
 
         handler = VaspErrorHandler("vasp.ksymm", errors_subset_to_catch=["eddrmm"])
         assert not handler.check()
@@ -425,14 +428,21 @@ class VaspErrorHandlerTest(MatSciTest):
         assert handler.check() is True
         assert handler.correct()["errors"] == ["bravais"]
         incar = Incar.from_file("INCAR")
-        assert incar["SYMPREC"] == 0.0001
+        assert incar["SYMPREC"] == 1e-6
+
+        # SYMPREC already <= 1e-6 and ISYM unset: turn off symmetry (used to raise TypeError).
+        incar.pop("ISYM", None)
+        incar.write_file("INCAR")
+        assert handler.check() is True
+        assert handler.correct()["actions"] == [{"dict": "INCAR", "action": {"_set": {"ISYM": 0}}}]
+        assert Incar.from_file("INCAR")["ISYM"] == 0
 
         shutil.copy("INCAR.symprec", "INCAR")
         handler = VaspErrorHandler("vasp6.bravais")
         assert handler.check() is True
-        assert handler.correct()["errors"] == ["bravais"]
-        incar = Incar.from_file("INCAR")
-        assert incar["SYMPREC"] == 1e-6
+        dct = handler.correct()
+        assert dct["errors"] == ["bravais"]
+        assert dct["actions"] == []  # SYMPREC = 1e-8 and ISYM = 0 already: unrecoverable
 
     def test_posmap_and_pricelv(self) -> None:
         incar_orig = Incar.from_file("INCAR")
@@ -600,28 +610,26 @@ class VaspErrorHandlerTest(MatSciTest):
         ]
 
     def test_auto_nbands(self) -> None:
+        # auto_nbands is only a warning and never fails the job.
         shutil.copy("OUTCAR_auto_nbands", "OUTCAR")
         handler = VaspErrorHandler(zpath("vasp.auto_nbands"))
-        handler.check()
         with pytest.warns(UserWarning, match="NBANDS seems to be too high"):
-            dct = handler.correct()
-        assert "auto_nbands" in dct["errors"]
+            assert handler.check() is False
+        assert handler.errors == set()
 
-    def test_auto_nbands_bad_parallelization(self) -> None:
+    def test_auto_nbands_bad_parallelization(self, recwarn) -> None:
         shutil.copy("OUTCAR_auto_nbands_parallel", "OUTCAR")
         # hacky way to deal with custodian CI unzipping test files
         Incar.from_file(zpath("INCAR.auto_nbands_parallel")).write_file("INCAR")
-
         handler = VaspErrorHandler(zpath("vasp.auto_nbands"))
-        handler.check()
-        with pytest.warns(UserWarning, match="setting was incompatible with your parallelization"):
-            dct = handler.correct()
-        assert "auto_nbands" in dct["errors"]
-        assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"NBANDS": 64}}}]
+        assert handler.check() is False  # NBANDS = 64 < 2 * NELECT, so no warning either
+        assert handler.errors == set()
+        assert not [w for w in recwarn if "NBANDS" in str(w.message)]
 
 
 class AliasingErrorHandlerTest(MatSciTest):
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         copy_tmp_files(self.tmp_path, *glob("aliasing/*", root_dir=TEST_FILES))
 
     def test_aliasing(self) -> None:
@@ -658,7 +666,8 @@ class AliasingErrorHandlerTest(MatSciTest):
 
 
 class UnconvergedErrorHandlerTest(MatSciTest):
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         copy_tmp_files(self.tmp_path, *glob("unconverged/*", root_dir=TEST_FILES))
 
     def test_check_correct_electronic(self) -> None:
@@ -793,7 +802,8 @@ class UnconvergedErrorHandlerTest(MatSciTest):
 
 
 class IncorrectSmearingHandlerTest(MatSciTest):
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         copy_tmp_files(self.tmp_path, "scan_metal/INCAR", "scan_metal/vasprun.xml")
 
     def test_check_correct_scan_metal(self) -> None:
@@ -807,7 +817,8 @@ class IncorrectSmearingHandlerTest(MatSciTest):
 
 
 class IncorrectSmearingHandlerStaticTest(MatSciTest):
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         copy_tmp_files(self.tmp_path, "static_smearing/INCAR", "static_smearing/vasprun.xml")
 
     def test_check_correct_scan_metal(self) -> None:
@@ -816,7 +827,8 @@ class IncorrectSmearingHandlerStaticTest(MatSciTest):
 
 
 class IncorrectSmearingHandlerFermiTest(MatSciTest):
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         copy_tmp_files(self.tmp_path, "fermi_smearing/INCAR", "fermi_smearing/vasprun.xml")
 
     def test_check_correct_scan_metal(self) -> None:
@@ -825,7 +837,8 @@ class IncorrectSmearingHandlerFermiTest(MatSciTest):
 
 
 class KspacingMetalHandlerTest(MatSciTest):
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         copy_tmp_files(self.tmp_path, "scan_metal/INCAR", "scan_metal/vasprun.xml")
 
     def test_check_correct_scan_metal(self) -> None:
@@ -849,7 +862,8 @@ class KspacingMetalHandlerTest(MatSciTest):
 
 
 class LargeSigmaHandlerTest(MatSciTest):
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         copy_tmp_files(self.tmp_path, *glob("large_sigma/*", root_dir=TEST_FILES))
 
     def test_check_correct_large_sigma(self) -> None:
@@ -890,7 +904,8 @@ class LargeSigmaHandlerTest(MatSciTest):
 
 
 class ZpotrfErrorHandlerTest(MatSciTest):
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         copy_tmp_files(
             self.tmp_path,
             "zpotrf/INCAR",
@@ -945,7 +960,8 @@ class ZpotrfErrorHandlerTest(MatSciTest):
 
 
 class ZpotrfErrorHandlerSmallTest(MatSciTest):
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         copy_tmp_files(
             self.tmp_path,
             "zpotrf_small/INCAR",
@@ -967,7 +983,8 @@ class ZpotrfErrorHandlerSmallTest(MatSciTest):
 
 
 class WalltimeHandlerTest(MatSciTest):
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         os.chdir(f"{TEST_FILES}/postprocess")
         os.environ.pop("CUSTODIAN_WALLTIME_START", None)
 
@@ -1041,7 +1058,8 @@ class WalltimeHandlerTest(MatSciTest):
 
 
 class PositiveEnergyHandlerTest(MatSciTest):
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         copy_tmp_files(self.tmp_path, "positive_energy/INCAR", "positive_energy/POSCAR", "positive_energy/OSZICAR")
 
     def test_check_correct(self) -> None:
@@ -1060,7 +1078,8 @@ class PositiveEnergyHandlerTest(MatSciTest):
 
 
 class PotimHandlerTest(MatSciTest):
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         copy_tmp_files(self.tmp_path, "potim/INCAR", "potim/POSCAR", "potim/OSZICAR")
 
     def test_check_correct(self) -> None:
@@ -1082,7 +1101,8 @@ class PotimHandlerTest(MatSciTest):
 
 
 class LrfCommHandlerTest(MatSciTest):
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         copy_tmp_files(self.tmp_path, "lrf_comm/INCAR", "lrf_comm/OUTCAR", "lrf_comm/std_err.txt")
 
     def test_lrf_comm(self) -> None:
@@ -1095,7 +1115,8 @@ class LrfCommHandlerTest(MatSciTest):
 
 
 class KpointsTransHandlerTest(MatSciTest):
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         copy_tmp_files(self.tmp_path, "KPOINTS", "std_err.txt.kpoints_trans")
 
     def test_kpoints_trans(self) -> None:
@@ -1136,7 +1157,8 @@ def test_stderr_gradient_not_orthogonal(tmp_path, algo, functional) -> None:
 
 
 class OutOfMemoryHandlerTest(MatSciTest):
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         copy_tmp_files(self.tmp_path, "INCAR", "std_err.txt.oom")
 
     def test_oom(self) -> None:
@@ -1151,7 +1173,8 @@ class OutOfMemoryHandlerTest(MatSciTest):
 
 
 class DriftErrorHandlerTest(MatSciTest):
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         copy_tmp_files(self.tmp_path, "INCAR", "drift/OUTCAR", "drift/CONTCAR")
 
     def test_check(self) -> None:
@@ -1187,7 +1210,8 @@ class DriftErrorHandlerTest(MatSciTest):
 class NonConvergingErrorHandlerTest(MatSciTest):
     n_ionic_steps: int = 3
 
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def _setup(self, _tmp_dir) -> None:
         copy_tmp_files(self.tmp_path, *glob("nonconv/*", root_dir=TEST_FILES))
 
     def test_check(self) -> None:
@@ -1250,3 +1274,117 @@ class NonConvergingErrorHandlerTest(MatSciTest):
         h2 = NonConvergingErrorHandler.from_dict(handler.as_dict())
         assert isinstance(h2, NonConvergingErrorHandler)
         assert h2.output_filename == "OSZICAR_random"
+
+
+def test_kpoints_trans_kspacing(tmp_path) -> None:
+    """kpoints_trans with KSPACING (no KPOINTS file) must not crash; it is unrecoverable."""
+    Incar({"KSPACING": 0.3}).write_file(tmp_path / "INCAR")
+    (tmp_path / "std_err.txt").write_text(
+        "internal error in GENERATE_KPOINTS_TRANS: number of G-vector changed in star\n"
+    )
+    handler = StdErrHandler()
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert dct == {"errors": ["kpoints_trans"], "actions": []}
+
+
+def test_mesh_symmetry_line_mode(tmp_path) -> None:
+    """Only Gamma/MP meshes are replaced; explicit k-point lists are left alone."""
+    Incar({"ISYM": 2}).write_file(tmp_path / "INCAR")
+    Kpoints.automatic_linemode(2, HighSymmKpath(Structure.from_file(f"{TEST_FILES}/POSCAR"))).write_file(
+        tmp_path / "KPOINTS"
+    )
+    (tmp_path / "vasp.out").write_text("Reciprocal lattice and k-lattice belong to different class of lattices.\n")
+    handler = MeshSymmetryErrorHandler()
+    assert handler.check(directory=tmp_path)
+    assert handler.correct(directory=tmp_path)["actions"] is None
+
+
+@pytest.mark.parametrize(
+    ("functional", "expected_algo"),
+    [({}, "Fast"), ({"METAGGA": "R2scan"}, "Normal"), ({"LHFCALC": True}, "Normal")],
+)
+def test_algo_tet_with_grad_not_orth(tmp_path, functional, expected_algo) -> None:
+    """algo_tet and grad_not_orth must agree on the fallback ALGO; no ALGO = Fast for meta-GGAs/hybrids."""
+    Incar({"ALGO": "All", "ISMEAR": -5, **functional}).write_file(tmp_path / "INCAR")
+    (tmp_path / "vasp.out").write_text(
+        "ALGO=A and IALGO=5X tend to fail with the tetrahedron method\n"
+        "EDWAV: internal error, the gradient is not orthogonal\n"
+    )
+    handler = VaspErrorHandler()
+    assert handler.check(directory=tmp_path)
+    assert handler.errors == {"algo_tet", "grad_not_orth"}
+    dct = handler.correct(directory=tmp_path)
+    assert {a["action"]["_set"]["ALGO"] for a in dct["actions"]} == {expected_algo}
+    assert Incar.from_file(tmp_path / "INCAR")["ALGO"] == expected_algo
+
+
+def test_brmix_kspacing_ladder(tmp_path) -> None:
+    """With KSPACING, KGAMMA is set once and the ladder then advances to ISYM = 0."""
+    Incar({"KSPACING": 0.3, "KGAMMA": False}).write_file(tmp_path / "INCAR")
+    (tmp_path / "vasp.out").write_text("BRMIX: very serious problems\n")
+    handler = VaspErrorHandler()
+    handler.error_count["brmix"] = 2
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"KGAMMA": True}}}]
+    assert handler.error_count["brmix"] == 3
+
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert {"dict": "INCAR", "action": {"_set": {"ISYM": 0}}} in dct["actions"]
+    assert {"dict": "INCAR", "action": {"_set": {"KGAMMA": True}}} not in dct["actions"]
+    assert handler.error_count["brmix"] == 4
+
+
+def test_brmix_no_outcar_skips_rerun(tmp_path) -> None:
+    """Without a valid OUTCAR the ISTART = 1 rerun is skipped (does not rely on assert)."""
+    Incar({"ISMEAR": 0}).write_file(tmp_path / "INCAR")
+    (tmp_path / "vasp.out").write_text("BRMIX: very serious problems\n")
+    handler = VaspErrorHandler()
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"IMIX": 1}}}]
+
+
+def _write_vasprun(src: str, dest: Path, algo: str) -> None:
+    with zopen(zpath(f"{TEST_FILES}/unconverged/{src}"), mode="rt", encoding="utf-8") as file:
+        text = file.read()
+    text = re.sub(r'(<i type="string" name="ALGO">)\s*\w+', rf"\1 {algo}", text, count=1)
+    dest.write_text(text)
+
+
+def test_unconverged_metagga_already_all(tmp_path) -> None:
+    """A meta-GGA already on ALGO = All moves on to the mixing fallback instead of re-setting ALGO = All."""
+    _write_vasprun("vasprun.xml.electronic_metagga_fast", tmp_path / "vasprun.xml", "All")
+    handler = UnconvergedErrorHandler()
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert dct["actions"]
+    assert all(a["action"]["_set"].get("ALGO") != "All" for a in dct["actions"])
+
+
+def test_unconverged_hybrid_damped_no_ping_pong(tmp_path) -> None:
+    """A hybrid already on ALGO = Damped must not be switched back to ALGO = All."""
+    _write_vasprun("vasprun.xml.electronic_hybrid_all", tmp_path / "vasprun.xml", "Damped")
+    handler = UnconvergedErrorHandler()
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert all(a["action"]["_set"].get("ALGO") != "All" for a in dct["actions"] or [])
+
+
+def test_potim_check_uses_directory(tmp_path, monkeypatch) -> None:
+    run_dir = tmp_path / "run"
+    shutil.copytree(f"{TEST_FILES}/potim", run_dir)
+    monkeypatch.chdir(tmp_path)  # no POSCAR in cwd
+    assert PotimErrorHandler().check(directory=str(run_dir))
+
+
+def test_nonconverging_hybrid_damped_not_switched_to_all(tmp_path) -> None:
+    """NonConvergingErrorHandler must not move a hybrid from ALGO = Damped back to All."""
+    shutil.copytree(f"{TEST_FILES}/nonconv", tmp_path, dirs_exist_ok=True)
+    incar = Incar.from_file(tmp_path / "INCAR")
+    incar.update({"LHFCALC": True, "ALGO": "Damped", "ISMEAR": 0})
+    incar.write_file(tmp_path / "INCAR")
+    dct = NonConvergingErrorHandler(nionic_steps=3).correct(directory=str(tmp_path))
+    assert all(a["action"]["_set"].get("ALGO") != "All" for a in dct["actions"] or [])
