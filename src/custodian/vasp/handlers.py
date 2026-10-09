@@ -740,13 +740,20 @@ class VaspErrorHandler(ErrorHandler):
             actions.extend(_correct_grad_not_orth(vi["INCAR"], self.errors))
 
         if self.errors & {"zheev", "eddiag"}:
-            # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
-            if is_valid_poscar("CONTCAR", directory):
-                actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
-            if (algo := _get_algo(vi["INCAR"])) == "fast":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
-            elif algo == "normal":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "exact"}}})
+            # Escalate VeryFast/Fast -> Normal -> All. ALGO = Exact is avoided since it is expensive
+            # and memory-heavy, and ALGO = All is skipped for ISMEAR < 0 since it triggers algo_tet.
+            # If ALGO cannot be changed, no actions are returned so the error is unrecoverable.
+            algo = _get_algo(vi["INCAR"])
+            algo_action = None
+            if algo in {"veryfast", "fast"}:
+                algo_action = {"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}}
+            elif algo == "normal" and vi["INCAR"].get("ISMEAR", 1) >= 0:
+                algo_action = {"dict": "INCAR", "action": {"_set": {"ALGO": "All", "ISEARCH": 1}}}
+            if algo_action:
+                # Copy CONTCAR to POSCAR if CONTCAR has already been populated.
+                if is_valid_poscar("CONTCAR", directory):
+                    actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+                actions.append(algo_action)
 
         if "elf_kpar" in self.errors and vi["INCAR"].get("KPAR", 1) != 1:
             actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": 1}}})
