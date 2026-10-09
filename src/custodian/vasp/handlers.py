@@ -1655,17 +1655,18 @@ class PotimErrorHandler(ErrorHandler):
 
     def correct(self, directory="./"):
         """Perform corrections."""
-        backup(VASP_BACKUP_FILES, directory=directory)
         vi = VaspInput.from_directory(directory)
         potim = vi["INCAR"].get("POTIM", 0.5)
         ibrion = vi["INCAR"].get("IBRION", 0)
         if potim < 0.2 and ibrion != 3:
             actions = [{"dict": "INCAR", "action": {"_set": {"IBRION": 3, "SMASS": 0.75}}}]
         elif potim < 0.1:
-            actions = [{"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8}}}]
+            # Already on damped MD with a tiny POTIM. Nothing left to try.
+            return {"errors": ["POTIM"], "actions": None}
         else:
             actions = [{"dict": "INCAR", "action": {"_set": {"POTIM": potim * 0.5}}}]
 
+        backup(VASP_BACKUP_FILES, directory=directory)
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": ["POTIM"], "actions": actions}
 
@@ -1673,7 +1674,8 @@ class PotimErrorHandler(ErrorHandler):
 class FrozenJobErrorHandler(ErrorHandler):
     """
     Detects an error when the output file has not been updated
-    in timeout seconds. Changes ALGO to Normal from Fast.
+    in timeout seconds. Changes ALGO to Normal from Fast. Otherwise, for
+    ionic runs, restarts from CONTCAR so that ionic progress is kept.
     """
 
     is_monitor = True
@@ -1688,7 +1690,7 @@ class FrozenJobErrorHandler(ErrorHandler):
                 default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
             timeout (int): The time in seconds between checks where if there
                 is no activity on the output file, the run is considered
-                frozen. Defaults to 3600 seconds, i.e., 1 hour.
+                frozen. Defaults to 21600 seconds, i.e., 6 hours.
         """
         self.output_filename = output_filename
         self.timeout = timeout
@@ -1702,15 +1704,18 @@ class FrozenJobErrorHandler(ErrorHandler):
 
     def correct(self, directory="./"):
         """Perform corrections."""
-        backup(VASP_BACKUP_FILES | {self.output_filename}, directory=directory)
-
         vi = VaspInput.from_directory(directory)
         actions = []
         if _get_algo(vi["INCAR"]) == "fast":
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
+        elif vi["INCAR"].get("NSW", 0) > 0 and is_valid_poscar("CONTCAR", directory):
+            # Restart from the last geometry to keep ionic progress.
+            actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
         else:
-            actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8}}})
+            # Unfixable error. Just return None for actions.
+            return {"errors": ["Frozen job"], "actions": None}
 
+        backup(VASP_BACKUP_FILES | {self.output_filename}, directory=directory)
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
 
         return {"errors": ["Frozen job"], "actions": actions}
