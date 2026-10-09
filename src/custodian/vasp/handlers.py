@@ -354,8 +354,23 @@ class VaspErrorHandler(ErrorHandler):
         if "amin" in self.errors and vi["INCAR"].get("AMIN", 0.1) > 0.01:
             actions.append({"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}})
 
-        if "inv_rot_mat" in self.errors and vi["INCAR"].get("SYMPREC", 1e-5) > 1e-8:
-            actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8}}})
+        if "inv_rot_mat" in self.errors:
+            # VASP itself says to increase SYMPREC. VASP staff note that the k-mesh often breaks the
+            # symmetry (e.g. even meshes on hexagonal/low-symmetry cells) and recommend an odd mesh:
+            # https://vasp.at/forum/viewtopic.php?p=486
+            # SYMPREC = 1e-4 can already over-symmetrise the density and 1e-2 should never be used:
+            # https://vasp.at/forum/viewtopic.php?p=33600
+            # Ladder: 1. MP -> Gamma-centred mesh, 2. SYMPREC x10 (capped at 1e-4), 3. ISYM = 0, 4. give up.
+            symprec = vi["INCAR"].get("SYMPREC", 1e-5)
+            if vi["KPOINTS"] is not None and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
+                actions.append({"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma"}}})
+            elif symprec < 1e-4:
+                actions.append(
+                    {"dict": "INCAR", "action": {"_set": {"SYMPREC": float(f"{min(symprec * 10, 1e-4):.1e}")}}}
+                )
+            elif vi["INCAR"].get("ISYM", 2) > 0:
+                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+            self.error_count["inv_rot_mat"] += 1
 
         if "brmix" in self.errors:
             # If there is not a valid OUTCAR already, increment
