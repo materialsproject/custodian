@@ -70,6 +70,43 @@ def _fallback_algo(incar: Incar) -> str:
     return "Normal"
 
 
+# BMIX ~ 0 gives linear mixing; 0 itself crashes some VASP versions (https://vasp.at/wiki/AMIX_MAG).
+_LINEAR_BMIX = 0.0001
+
+
+def _linear_mixing(incar: dict, halve: bool = True) -> dict[str, float]:
+    """Return the VASP wiki linear-mixing recipe (https://vasp.at/wiki/AMIX_MAG).
+
+    AMIX = 0.2, BMIX = 0.0001 and, for ISPIN = 2, AMIX_MAG = 0.8, BMIX_MAG = 0.0001.
+
+    Args:
+        incar: INCAR parameters of the failed run.
+        halve: If True, a mixing amplitude already at or below the recipe value is
+            halved (the VASP forum advice is to mix more slowly). If False, it is kept.
+
+    Returns:
+        dict: INCAR settings to apply.
+    """
+
+    def amplitude(key: str, target: float, default: float) -> float:
+        current = incar.get(key, default)
+        if current > target:
+            return target
+        return current / 2 if halve else current
+
+    settings = {"AMIX": amplitude("AMIX", 0.2, 0.4), "BMIX": _LINEAR_BMIX}
+    if incar.get("ISPIN", 1) == 2:
+        settings |= {"AMIX_MAG": amplitude("AMIX_MAG", 0.8, 1.6), "BMIX_MAG": _LINEAR_BMIX}
+    return settings
+
+
+def _uses_linear_mixing(incar: dict) -> bool:
+    """Whether the run already uses linear mixing (BMIX, and BMIX_MAG for ISPIN = 2, ~ 0)."""
+    if incar.get("BMIX", 1.0) > _LINEAR_BMIX:
+        return False
+    return incar.get("ISPIN", 1) != 2 or incar.get("BMIX_MAG", 1.0) <= _LINEAR_BMIX
+
+
 def _correct_grad_not_orth(incar: Incar, errors: set[str]) -> list[dict]:
     """Return corrections for a non-orthogonal EDWAV gradient."""
     actions = []
@@ -374,34 +411,19 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISTART": 1}}})
                 self.error_count["brmix"] += 1
 
-            elif self.error_count["brmix"] == 1 and vi["INCAR"].get("IMIX", 4) != 1:
-                # Use Kerker mixing w/ default values for other parameters
-                actions.append({"dict": "INCAR", "action": {"_set": {"IMIX": 1}}})
+            elif self.error_count["brmix"] == 1 and not _uses_linear_mixing(vi["INCAR"]):
+                # Linear mixing, per https://vasp.at/wiki/AMIX_MAG and the VASP forum advice
+                # to reduce the charge and spin mixing parameters for BRMIX.
+                actions.append({"dict": "INCAR", "action": {"_set": _linear_mixing(vi["INCAR"])}})
                 self.error_count["brmix"] += 1
 
             elif (
-                self.error_count["brmix"] == 2
-                and vi["KPOINTS"]
-                and vi["KPOINTS"].style == Kpoints.supported_modes.Gamma
-            ):
-                actions.append(
-                    {
-                        "dict": "KPOINTS",
-                        "action": {"_set": {"generation_style": "Monkhorst"}},
-                    }
-                )
-                if "IMIX" in vi["INCAR"]:
-                    actions.append({"dict": "INCAR", "action": {"_unset": {"IMIX": 1}}})
-                self.error_count["brmix"] += 1
-
-            elif (
-                self.error_count["brmix"] in {2, 3}
+                self.error_count["brmix"] in {1, 2, 3}
                 and vi["KPOINTS"]
                 and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst
             ):
+                # Gamma-centered, odd mesh; ISYM = 0 is the next step if this fails.
                 actions.append({"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma"}}})
-                if "IMIX" in vi["INCAR"]:
-                    actions.append({"dict": "INCAR", "action": {"_unset": {"IMIX": 1}}})
                 self.error_count["brmix"] += 1
 
                 if vi["KPOINTS"] and vi["KPOINTS"].num_kpts < 1 and all(n % 2 == 0 for n in vi["KPOINTS"].kpts[0]):
@@ -414,7 +436,7 @@ class VaspErrorHandler(ErrorHandler):
                     )
 
             elif (
-                self.error_count["brmix"] in {2, 3}
+                self.error_count["brmix"] in {1, 2, 3}
                 and vi["INCAR"].get("KSPACING")
                 and not vi["INCAR"].get("KGAMMA", True)
             ):
@@ -1232,15 +1254,9 @@ class UnconvergedErrorHandler(ErrorHandler):
                     # ALGO = ALL if ISMEAR >= 0
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All", "ISEARCH": 1}}})
                 else:
-                    # Try mixing as last resort
-                    new_settings = {
-                        "ISTART": 1,
-                        "ALGO": "Normal",
-                        "NELMDL": -6,
-                        "BMIX": 0.001,
-                        "AMIX_MAG": 0.8,
-                        "BMIX_MAG": 0.001,
-                    }
+                    # Try linear mixing (https://vasp.at/wiki/AMIX_MAG) as last resort. No NELMDL:
+                    # its default is 0 when a WAVECAR is read (https://vasp.at/wiki/NELMDL).
+                    new_settings = {"ISTART": 1, "ALGO": "Normal", **_linear_mixing(v.incar, halve=False)}
 
                     if not all(v.incar.get(k, "") == val for k, val in new_settings.items()):
                         actions.append({"dict": "INCAR", "action": {"_set": new_settings}})
@@ -1609,8 +1625,8 @@ class NonConvergingErrorHandler(ErrorHandler):
     last nionic_steps ionic steps (default=10). If so, change ALGO using a
     multi-step ladder scheme or kill the job.
 
-    In some cases (ALGO=All or ALGO=Normal and ISMEAR < 0), this handler also changes AMIX
-    and BMIX but unsure if this helps much. Some anecdotal evidence suggests it doesn't.
+    In some cases (ALGO=All or ALGO=Normal and ISMEAR < 0), this handler switches to linear
+    density mixing as a last resort (https://vasp.at/wiki/AMIX_MAG).
     """
 
     is_monitor = True
@@ -1645,8 +1661,6 @@ class NonConvergingErrorHandler(ErrorHandler):
         """Perform corrections."""
         incar = (vi := VaspInput.from_directory(directory))["INCAR"]
         algo = incar.get("ALGO", "Normal").lower()
-        amix = incar.get("AMIX", 0.4)
-        bmix = incar.get("BMIX", 1.0)
         amin = incar.get("AMIN", 0.1)
         actions = []
 
@@ -1699,23 +1713,17 @@ class NonConvergingErrorHandler(ErrorHandler):
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
             elif algo == "normal" and incar.get("ISMEAR", 1) >= 0:
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All", "ISEARCH": 1}}})
-            elif algo == "all" or (algo == "normal" and incar.get("ISMEAR", 1) < 0):
-                if amix > 0.1 and bmix > 0.01:
-                    # Try linear mixing
-                    actions.append(
-                        {
-                            "dict": "INCAR",
-                            "action": {"_set": {"ALGO": "Normal", "AMIX": 0.1, "BMIX": 0.01, "ICHARG": 2}},
-                        }
-                    )
-                elif bmix < 3.0 and amin > 0.01:
-                    # Try increasing bmix
-                    actions.append(
-                        {
-                            "dict": "INCAR",
-                            "action": {"_set": {"Algo": "Normal", "AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}},
-                        }
-                    )
+            elif (algo == "all" or (algo == "normal" and incar.get("ISMEAR", 1) < 0)) and not _uses_linear_mixing(
+                incar
+            ):
+                # Try linear mixing (https://vasp.at/wiki/AMIX_MAG). Increasing BMIX should only be
+                # based on the dielectric eigenvalues in the OUTCAR (https://vasp.at/wiki/BMIX), so
+                # there is no further mixing step.
+                new_settings = {"ALGO": "Normal", **_linear_mixing(incar)}
+                # ICHARG >= 10 is a non-self-consistent run; restarting from atomic densities would make it SCF.
+                if incar.get("ICHARG", 0) < 10:
+                    new_settings["ICHARG"] = 2
+                actions.append({"dict": "INCAR", "action": {"_set": new_settings}})
 
         if actions:
             backup(VASP_BACKUP_FILES, directory=directory)
