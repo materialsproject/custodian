@@ -134,6 +134,7 @@ isort.split-on-trailing-comma = false
 
 [tool.pytest.ini_options]
 addopts = "--color=yes -p no:warnings --import-mode=importlib"
+python_classes = ["Test*", "*Test"]
 
 [tool.mypy]
 ignore_missing_imports = true

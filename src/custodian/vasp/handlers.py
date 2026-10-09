@@ -59,6 +59,17 @@ VASP_BACKUP_FILES = {
 }
 
 
+def _fallback_algo(incar: Incar) -> str:
+    """Return a stable ALGO to fall back to.
+
+    ALGO = Fast is not properly supported for hybrids (https://www.vasp.at/wiki/index.php/LHFCALC).
+    Meta-GGAs are conservatively kept on ALGO = Normal as well.
+    """
+    if str(incar.get("METAGGA", "None")).lower() == "none" and not incar.get("LHFCALC", False):
+        return "Fast"
+    return "Normal"
+
+
 def _correct_grad_not_orth(incar: Incar, errors: set[str]) -> list[dict]:
     """Return corrections for a non-orthogonal EDWAV gradient."""
     actions = []
@@ -67,11 +78,7 @@ def _correct_grad_not_orth(incar: Incar, errors: set[str]) -> list[dict]:
     # Depending on the optimization flag and choice of compiler, the ALGO = All and Damped algorithms
     # may not work. The only fix is either to change ALGO or to recompile VASP.
     if incar.get("ALGO", "Normal").lower() in {"all", "conjugate", "damped"}:
-        if incar.get("METAGGA", "none") == "none" and not incar.get("LHFCALC", False):
-            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
-        else:
-            # Meta-GGAs and hybrids should not be run with ALGO = Fast
-            actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
+        actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": _fallback_algo(incar)}}})
     if "algo_tet" not in errors:
         warnings.warn(
             "EDWAV error reported by VASP without a simultaneous algo_tet error. You may wish to consider "
@@ -79,6 +86,20 @@ def _correct_grad_not_orth(incar: Incar, errors: set[str]) -> list[dict]:
             UserWarning,
         )
     return actions
+
+
+def _uniform_kpoint_mesh(kpoints: Kpoints | None) -> list[list[int]] | None:
+    """Return a uniform m x m x m mesh with the same number of k-points as a Gamma or MP mesh.
+
+    Returns None if there is no KPOINTS file (e.g., KSPACING is used) or if it does not
+    specify a Gamma-centered or Monkhorst-Pack mesh.
+    """
+    if kpoints is None or kpoints.style not in {Kpoints.supported_modes.Gamma, Kpoints.supported_modes.Monkhorst}:
+        return None
+    m = max(round(prod(kpoints.kpts[0]) ** (1 / 3)), 1)
+    if kpoints.style == Kpoints.supported_modes.Monkhorst:
+        m += m % 2
+    return [[m] * 3]
 
 
 class VaspErrorHandler(ErrorHandler):
@@ -341,8 +362,10 @@ class VaspErrorHandler(ErrorHandler):
             # error count to 1 to skip first fix
             if self.error_count["brmix"] == 0:
                 try:
-                    assert load_outcar(zpath(os.path.join(directory, "OUTCAR"))).is_stopped is False
+                    valid_outcar = load_outcar(zpath(os.path.join(directory, "OUTCAR"))).is_stopped is False
                 except Exception:
+                    valid_outcar = False
+                if not valid_outcar:
                     self.error_count["brmix"] += 1
 
             if self.error_count["brmix"] == 0:
@@ -390,19 +413,17 @@ class VaspErrorHandler(ErrorHandler):
                         }
                     )
 
-            elif self.error_count["brmix"] in {2, 3} and vi["INCAR"].get("KSPACING"):
+            elif (
+                self.error_count["brmix"] in {2, 3}
+                and vi["INCAR"].get("KSPACING")
+                and not vi["INCAR"].get("KGAMMA", True)
+            ):
                 actions.append({"dict": "INCAR", "action": {"_set": {"KGAMMA": True}}})
+                self.error_count["brmix"] += 1
 
             else:
                 if vi["INCAR"].get("ISYM", 2) > 0:
                     actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
-                if vi["KPOINTS"] and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
-                    actions.append(
-                        {
-                            "dict": "KPOINTS",
-                            "action": {"_set": {"generation_style": "Gamma"}},
-                        }
-                    )
                 if vi["KPOINTS"] and vi["KPOINTS"].style == Kpoints.supported_modes.Monkhorst:
                     actions.append(
                         {
@@ -688,8 +709,8 @@ class VaspErrorHandler(ErrorHandler):
             # For bravais: VASP recommends refining the lattice parameters
             # or changing SYMPREC (default = 1e-5). See
             # https://www.vasp.at/forum/viewtopic.php?f=3&t=19109
-            # Appears to occur when SYMPREC is very low, so we change it to
-            # the default if it's not already. If it's the default, we x10.
+            # Following VASP's advice, we first reduce SYMPREC to 1e-6. If that
+            # fails, we turn off symmetry.
             # For ksymm, there's not much information about the issue other than the
             # direct and reciprocal meshes being incompatible.
             # This is basically the same as bravais
@@ -698,7 +719,7 @@ class VaspErrorHandler(ErrorHandler):
                 actions.append(
                     {"dict": "INCAR", "action": {"_set": {"SYMPREC": min(symprec / 10.0, vasp_recommended_symprec)}}}
                 )
-            elif vi["INCAR"].get("ISYM") > 0:  # Default ISYM is variable, but never 0
+            elif vi["INCAR"].get("ISYM", 2) > 0:  # Default ISYM is variable, but always > 0
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
         if "nbands_not_sufficient" in self.errors:
@@ -747,10 +768,11 @@ class VaspErrorHandler(ErrorHandler):
                 and vi["INCAR"].get("ISMEAR", 1) < 0
                 and self.error_count["algo_tet"] == 0
             ):
-                # first recovery attempt is to set ALGO to fast. Could fail again in which
-                # case we end up here again if some other handler switches algo back to all/damped.
-                # This time try the recovery below.
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
+                # first recovery attempt is to set ALGO to fast (normal for meta-GGAs and hybrids,
+                # consistent with the grad_not_orth fix that often accompanies this error). Could fail
+                # again in which case we end up here again if some other handler switches algo back to
+                # all/damped. This time try the recovery below.
+                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": _fallback_algo(vi["INCAR"])}}})
             #
             # We will only hit the 2nd algo_tet error if the ALGO was changed back from Fast to All/Damped
             # by e.g. NonConvergingErrorHandler
@@ -886,12 +908,12 @@ class StdErrHandler(ErrorHandler):
         actions = []
         vi = VaspInput.from_directory(directory)
 
-        if "kpoints_trans" in self.errors and self.error_count["kpoints_trans"] == 0:
-            m = prod(vi["KPOINTS"].kpts[0])
-            m = max(round(m ** (1 / 3)), 1)
-            if vi["KPOINTS"] and vi["KPOINTS"].style.name.lower().startswith("m"):
-                m += m % 2
-            actions.append({"dict": "KPOINTS", "action": {"_set": {"kpoints": [[m] * 3]}}})
+        if (
+            "kpoints_trans" in self.errors
+            and self.error_count["kpoints_trans"] == 0
+            and (kpts := _uniform_kpoint_mesh(vi["KPOINTS"]))
+        ):
+            actions.append({"dict": "KPOINTS", "action": {"_set": {"kpoints": kpts}}})
             self.error_count["kpoints_trans"] += 1
 
         if "out_of_memory" in self.errors and vi["INCAR"].get("KPAR", 1) > 1:
@@ -1128,11 +1150,9 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         """Perform corrections."""
         backup(VASP_BACKUP_FILES | {self.output_filename}, directory=directory)
         vi = VaspInput.from_directory(directory)
-        m = prod(vi["KPOINTS"].kpts[0])
-        m = max(round(m ** (1 / 3)), 1)
-        if vi["KPOINTS"] and vi["KPOINTS"].style.name.lower().startswith("m"):
-            m += m % 2
-        actions = [{"dict": "KPOINTS", "action": {"_set": {"kpoints": [[m] * 3]}}}]
+        if not (kpts := _uniform_kpoint_mesh(vi["KPOINTS"])):
+            return {"errors": ["mesh_symmetry"], "actions": None}
+        actions = [{"dict": "KPOINTS", "action": {"_set": {"kpoints": kpts}}}]
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": ["mesh_symmetry"], "actions": actions}
 
@@ -1176,7 +1196,8 @@ class UnconvergedErrorHandler(ErrorHandler):
             if (
                 v.incar.get("ISMEAR", -1) >= 0
                 and v.incar.get("METAGGA", "--") != "--"
-                and (algo != "all" or (not 50 <= v.incar.get("IALGO", 38) <= 59))
+                and algo != "all"
+                and not 50 <= v.incar.get("IALGO", 38) <= 59
             ):
                 # If meta-GGA, go straight to Algo = All only if ISMEAR is greater or equal 0.
                 # Algo = All is recommended in the VASP manual and some meta-GGAs explicitly
@@ -1186,12 +1207,13 @@ class UnconvergedErrorHandler(ErrorHandler):
 
             # If a hybrid is used, do not set Algo = Fast or VeryFast. Hybrid calculations do not
             # support these algorithms, but no warning is printed.
+            # The ladder is All -> Damped. If ALGO is already Damped, fall through to the mixing settings below.
             if v.incar.get("LHFCALC", False):
                 if v.incar.get("ISMEAR", -1) >= 0 or not 50 <= v.incar.get("IALGO", 38) <= 59:
-                    if algo != "all":
+                    if algo not in {"all", "damped"}:
                         actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All", "ISEARCH": 1}}})
                     # See the VASP manual section on LHFCALC for more information.
-                    elif algo != "damped":
+                    elif algo == "all":
                         actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Damped", "TIME": 0.5}}})
                 else:
                     actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
@@ -1510,7 +1532,7 @@ class PotimErrorHandler(ErrorHandler):
         """Check for error."""
         try:
             oszicar = Oszicar(os.path.join(directory, self.output_filename))
-            n = len(Poscar.from_file(self.input_filename).structure)
+            n = len(Poscar.from_file(os.path.join(directory, self.input_filename)).structure)
             max_dE = max(s["dE"] for s in oszicar.ionic_steps[1:]) / n
             if max_dE > self.dE_threshold:
                 return True
@@ -1657,8 +1679,13 @@ class NonConvergingErrorHandler(ErrorHandler):
         # support these algorithms, but no warning is printed.
         # If meta-GGA, go straight to Algo = All. Algo = All is recommended in the VASP
         # manual and some meta-GGAs explicitly say to set Algo = All for proper convergence.
+        # Damped is the preferred algorithm for hybrids, so don't switch it back to All (this
+        # would also fight UnconvergedErrorHandler, which moves hybrids from All to Damped).
         # I am using "none" here because METAGGA is a string variable and this is the default
-        if (incar.get("LHFCALC", False) or incar.get("METAGGA", "none").lower() != "none") and algo != "all":
+        if (incar.get("LHFCALC", False) or incar.get("METAGGA", "none").lower() != "none") and algo not in {
+            "all",
+            "damped",
+        }:
             actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All", "ISEARCH": 1}}})
 
         # Ladder from VeryFast to Fast to Normal to All
