@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import tarfile
+import warnings
 from glob import glob
 from pathlib import Path
 
@@ -1196,15 +1197,98 @@ class DriftErrorHandlerTest(MatSciTest):
 
         handler = DriftErrorHandler()
         handler.check()
-        assert handler.max_drift == 0.01
+        assert handler.max_drift is None
+        assert handler.curr_max_drift == 0.01
+
+    def test_check_max_drift_follows_ediffg(self) -> None:
+        # max_drift derived from EDIFFG must be recomputed for each job, not frozen at the first one
+        incar = Incar.from_file("INCAR")
+        incar["EDIFFG"] = -0.001
+        incar.write_file("INCAR")
+        handler = DriftErrorHandler()
+        assert handler.check()
+        assert handler.curr_max_drift == 0.001
+
+        incar["EDIFFG"] = -0.01
+        incar.write_file("INCAR")
+        assert not handler.check()
+        assert handler.curr_max_drift == 0.01
+        assert handler.max_drift is None
 
     def test_correct(self) -> None:
-        handler = DriftErrorHandler(max_drift=0.0001, enaug_multiply=2)
-        handler.check()
+        incar = Incar.from_file("INCAR")
+        incar["EDIFFG"] = -0.01
+        incar.write_file("INCAR")
+        handler = DriftErrorHandler(max_drift=0.0001)
+        assert handler.check()
+
+        # PREC unset (Normal) -> Accurate
+        dct = handler.correct()
+        assert len(dct["errors"]) == 1
+        assert dct["errors"][0].startswith("Excessive drift ")
+        assert dct["errors"][0].endswith(" > 0.0001")
+        assert {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}} in dct["actions"]
+        incar = Incar.from_file("INCAR")
+        assert incar["PREC"] == "Accurate"
+        assert "ENAUG" not in incar
+        assert "ADDGRID" not in incar
+        assert incar["ENCUT"] == 520
+
+        # PREC = Accurate -> ADDGRID = True
         handler.correct()
         incar = Incar.from_file("INCAR")
-        assert incar.get("PREC") == "High"
-        assert incar.get("ENAUG", 0) == incar.get("ENCUT", 2) * 2
+        assert incar["ADDGRID"] is True
+        assert incar["ENCUT"] == 520
+
+        # ADDGRID = True -> ENCUT raised by 30%, once
+        handler.correct()
+        incar = Incar.from_file("INCAR")
+        assert incar["ENCUT"] == 676
+
+        # Nothing left to try
+        dct = handler.correct()
+        assert dct["actions"] is None
+        assert len(dct["errors"]) == 1
+        assert Incar.from_file("INCAR")["ENCUT"] == 676
+
+    @pytest.mark.parametrize("prec", ["high", "Medium", "Low", "Normal"])
+    def test_correct_prec_to_accurate(self, prec) -> None:
+        incar = Incar.from_file("INCAR")
+        incar["PREC"] = prec
+        incar.write_file("INCAR")
+        handler = DriftErrorHandler(max_drift=0.0001)
+        handler.correct()
+        incar = Incar.from_file("INCAR")
+        assert incar["PREC"] == "Accurate"
+        assert "ENAUG" not in incar
+
+    def test_correct_lowercase_accurate_sets_addgrid(self) -> None:
+        incar = Incar.from_file("INCAR")
+        incar["PREC"] = "accurate"
+        incar.write_file("INCAR")
+        handler = DriftErrorHandler(max_drift=0.0001)
+        handler.correct()
+        incar = Incar.from_file("INCAR")
+        assert incar["ADDGRID"] is True
+        assert incar["PREC"].lower() == "accurate"
+
+    def test_correct_no_encut_unrecoverable(self) -> None:
+        incar = Incar.from_file("INCAR")
+        incar.update({"PREC": "Accurate", "ADDGRID": True})
+        del incar["ENCUT"]
+        incar.write_file("INCAR")
+        handler = DriftErrorHandler(max_drift=0.0001)
+        dct = handler.correct()
+        assert dct["actions"] is None
+        assert "ENCUT" not in Incar.from_file("INCAR")
+
+    def test_enaug_multiply_deprecated(self) -> None:
+        with pytest.warns(DeprecationWarning, match="enaug_multiply"):
+            DriftErrorHandler(enaug_multiply=3)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            handler = DriftErrorHandler(enaug_multiply=2)
+        assert DriftErrorHandler.from_dict(handler.as_dict()).enaug_multiply == 2
 
 
 class NonConvergingErrorHandlerTest(MatSciTest):

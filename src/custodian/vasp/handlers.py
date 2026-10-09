@@ -1019,17 +1019,40 @@ class AliasingErrorHandler(ErrorHandler):
 
 
 class DriftErrorHandler(ErrorHandler):
-    """Corrects for total drift exceeding the force convergence criteria."""
+    """Corrects for total drift exceeding the force convergence criteria.
+
+    Drift is reduced by improving the accuracy of the forces, in this order:
+    PREC = Accurate, then ADDGRID = True, then a one-off 30% increase in ENCUT.
+    PREC = High with ENAUG is not used, since PREC = High is deprecated and
+    ENAUG only has an effect with the deprecated PREC settings.
+    """
 
     def __init__(self, max_drift=None, to_average=3, enaug_multiply=2) -> None:
-        """Initialize the handler with max drift
+        """Initialize the handler with max drift.
+
         Args:
-            max_drift (float): This defines the max drift. Leaving this at the default of None gets the max_drift from
-                EDFIFFG.
+            max_drift (float): Max allowed drift in eV/Å. Leaving this at the default of None uses
+                -EDIFFG from the INCAR of the job being checked.
+            to_average (int): Number of most recent ionic steps over which the drift is averaged.
+            enaug_multiply (float): Deprecated and unused. Kept only so that serialized handlers
+                can still be loaded.
         """
         self.max_drift = max_drift
         self.to_average = int(to_average)
         self.enaug_multiply = enaug_multiply
+        if enaug_multiply != 2:
+            warnings.warn(
+                "enaug_multiply is deprecated and has no effect; DriftErrorHandler no longer adjusts ENAUG.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+        # Effective max drift for the current job, recomputed on every check
+        self.curr_max_drift = max_drift
+        self.encut_raised = False
+
+    def _get_curr_drift(self, outcar) -> float:
+        drifts = outcar.data.get("drift", [])[::-1][: self.to_average]
+        return np.average([np.linalg.norm(dct) for dct in drifts])
 
     def check(self, directory="./"):
         """Check for error."""
@@ -1039,8 +1062,7 @@ class DriftErrorHandler(ErrorHandler):
             # NSW check prevents accidental effects when running DFPT
             return False
 
-        if not self.max_drift:
-            self.max_drift = incar["EDIFFG"] * -1
+        self.curr_max_drift = self.max_drift or -incar["EDIFFG"]
 
         try:
             outcar = load_outcar(os.path.join(directory, "OUTCAR"))
@@ -1052,9 +1074,7 @@ class DriftErrorHandler(ErrorHandler):
             # Ensure enough steps to get average drift
             return False
 
-        curr_drift = outcar.data.get("drift", [])[::-1][: self.to_average]
-        curr_drift = np.average([np.linalg.norm(dct) for dct in curr_drift])
-        return curr_drift > self.max_drift
+        return self._get_curr_drift(outcar) > self.curr_max_drift
 
     def correct(self, directory="./"):
         """Perform corrections."""
@@ -1064,33 +1084,27 @@ class DriftErrorHandler(ErrorHandler):
 
         incar = vi["INCAR"]
         outcar = load_outcar(os.path.join(directory, "OUTCAR"))
+        errors = [f"Excessive drift {self._get_curr_drift(outcar)} > {self.curr_max_drift}"]
 
         # Move CONTCAR to POSCAR if valid
         if is_valid_poscar("CONTCAR", directory):
             actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
 
-        # Set PREC to High so ENAUG can be used to control Augmentation Grid Size
-        if incar.get("PREC", "Accurate").lower() != "high":
-            actions += [
-                {"dict": "INCAR", "action": {"_set": {"PREC": "High"}}},
-                {"dict": "INCAR", "action": {"_set": {"ENAUG": incar.get("ENCUT", 520) * 2}}},
-            ]
-        # PREC is already high and ENAUG set so just increase it
+        # Denser FFT grid reduces egg-box effects and noise in the forces
+        if str(incar.get("PREC", "Normal")).lower() != "accurate":
+            actions.append({"dict": "INCAR", "action": {"_set": {"PREC": "Accurate"}}})
+        # Finer support grid for the augmentation charges
+        elif incar.get("ADDGRID") is not True:
+            actions.append({"dict": "INCAR", "action": {"_set": {"ADDGRID": True}}})
+        # Drift is very sensitive to ENCUT (especially with SCAN); raise it only once
+        elif incar.get("ENCUT") and not self.encut_raised:
+            actions.append({"dict": "INCAR", "action": {"_set": {"ENCUT": round(1.3 * incar["ENCUT"])}}})
+            self.encut_raised = True
         else:
-            actions.append(
-                {
-                    "dict": "INCAR",
-                    "action": {"_set": {"ENAUG": int(incar.get("ENAUG", 1040) * self.enaug_multiply)}},
-                }
-            )
+            return {"errors": errors, "actions": None}
 
-        curr_drift = outcar.data.get("drift", [])[::-1][: self.to_average]
-        curr_drift = np.average([np.linalg.norm(dct) for dct in curr_drift])
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
-        return {
-            "errors": f"Excessive drift {curr_drift} > {self.max_drift}",
-            "actions": actions,
-        }
+        return {"errors": errors, "actions": actions}
 
 
 class MeshSymmetryErrorHandler(ErrorHandler):
