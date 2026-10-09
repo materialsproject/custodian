@@ -15,7 +15,7 @@ import shutil
 import time
 import warnings
 from collections import Counter
-from math import ceil, prod
+from math import ceil
 from typing import ClassVar
 
 import numpy as np
@@ -158,20 +158,6 @@ def _correct_grad_not_orth(incar: Incar, errors: set[str]) -> list[dict]:
             UserWarning,
         )
     return actions
-
-
-def _uniform_kpoint_mesh(kpoints: Kpoints | None) -> list[list[int]] | None:
-    """Return a uniform m x m x m mesh with the same number of k-points as a Gamma or MP mesh.
-
-    Returns None if there is no KPOINTS file (e.g., KSPACING is used) or if it does not
-    specify a Gamma-centered or Monkhorst-Pack mesh.
-    """
-    if kpoints is None or kpoints.style not in {Kpoints.supported_modes.Gamma, Kpoints.supported_modes.Monkhorst}:
-        return None
-    m = max(round(prod(kpoints.kpts[0]) ** (1 / 3)), 1)
-    if kpoints.style == Kpoints.supported_modes.Monkhorst:
-        m += m % 2
-    return [[m] * 3]
 
 
 class VaspErrorHandler(ErrorHandler):
@@ -1028,12 +1014,10 @@ class StdErrHandler(ErrorHandler):
         actions = []
         vi = VaspInput.from_directory(directory)
 
-        if (
-            "kpoints_trans" in self.errors
-            and self.error_count["kpoints_trans"] == 0
-            and (kpts := _uniform_kpoint_mesh(vi["KPOINTS"]))
-        ):
-            actions.append({"dict": "KPOINTS", "action": {"_set": {"kpoints": kpts}}})
+        # Per the VASP wiki (Number_of_G-vectors_changed_in_the_star), the k-mesh is not the cause.
+        # Of the advised fixes, only switching off symmetry leaves the user's ENCUT and k-points intact.
+        if "kpoints_trans" in self.errors and vi["INCAR"].get("ISYM", 2) > 0:
+            actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
             self.error_count["kpoints_trans"] += 1
 
         if "out_of_memory" in self.errors and vi["INCAR"].get("KPAR", 1) > 1:
@@ -1270,9 +1254,16 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         """Perform corrections."""
         backup(VASP_BACKUP_FILES | {self.output_filename}, directory=directory)
         vi = VaspInput.from_directory(directory)
-        if not (kpts := _uniform_kpoint_mesh(vi["KPOINTS"])):
+        kpoints = vi.get("KPOINTS")
+        # A Gamma-centred mesh with the same subdivisions preserves the lattice symmetry
+        # (only Gamma-centred meshes are safe for hexagonal and fcc cells). Failing that,
+        # switch off symmetry.
+        if kpoints is not None and kpoints.style == Kpoints.supported_modes.Monkhorst:
+            actions = [{"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma"}}}]
+        elif vi["INCAR"].get("ISYM", 2) > 0:
+            actions = [{"dict": "INCAR", "action": {"_set": {"ISYM": 0}}}]
+        else:
             return {"errors": ["mesh_symmetry"], "actions": None}
-        actions = [{"dict": "KPOINTS", "action": {"_set": {"kpoints": kpts}}}]
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": ["mesh_symmetry"], "actions": actions}
 
