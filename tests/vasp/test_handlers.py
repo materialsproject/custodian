@@ -7,6 +7,7 @@ import shutil
 import tarfile
 from glob import glob
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from monty.io import zopen
@@ -33,6 +34,7 @@ from custodian.vasp.handlers import (
     UnconvergedErrorHandler,
     VaspErrorHandler,
     WalltimeHandler,
+    _get_algo,
 )
 from custodian.vasp.interpreter import VaspModder
 from tests.conftest import TEST_FILES
@@ -515,8 +517,8 @@ class VaspErrorHandlerTest(MatSciTest):
         handler = VaspErrorHandler("vasp6.inv_rot_mat")
         assert handler.check() is True
         assert handler.correct()["errors"] == ["inv_rot_mat"]
-        incar = Incar.from_file("INCAR")
-        assert incar["SYMPREC"] == 1e-08
+        assert Kpoints.from_file("KPOINTS").style == Kpoints.supported_modes.Gamma
+        assert Incar.from_file("INCAR")["SYMPREC"] == 1e-5
 
     def test_bzint_vasp6(self) -> None:
         # the BZINT error message is formatted differently in VASP6 compared to VASP5
@@ -544,7 +546,9 @@ class VaspErrorHandlerTest(MatSciTest):
         assert handler.check() is True
         dct = handler.correct()
         assert "nbands_not_sufficient" in dct["errors"]
-        assert dct["actions"] == [{"action": {"_set": {"NBANDS": 9}}, "dict": "INCAR"}]
+        # The OUTCAR fixture reports NBANDS= 64, more than the default (9). NBANDS must not be lowered,
+        # and rerunning with the NBANDS that VASP already used would not help, so this is unrecoverable.
+        assert dct["actions"] == []
 
     def test_too_few_bands_round_error(self) -> None:
         # originally there are NBANDS= 7
@@ -1444,3 +1448,160 @@ def test_frozen_job_unrecoverable(tmp_path, nsw, write_contcar) -> None:
     assert Incar.from_file(tmp_path / "INCAR") == incar
     assert (tmp_path / "POSCAR").read_text() == poscar
     assert not glob(f"{tmp_path}/error.*.tar.gz")
+
+
+def test_inv_rot_mat_ladder(tmp_path) -> None:
+    """inv_rot_mat: MP -> Gamma mesh, then SYMPREC up to 1e-4, then ISYM = 0, then unrecoverable."""
+    Incar({"ISMEAR": 0}).write_file(tmp_path / "INCAR")
+    Kpoints.monkhorst_automatic((4, 4, 4)).write_file(tmp_path / "KPOINTS")
+    (tmp_path / "vasp.out").write_text("rotation matrix was not found (increase SYMPREC)\n")
+    handler = VaspErrorHandler()
+
+    expected = [
+        [{"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma"}}}],
+        [{"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-4}}}],
+        [{"dict": "INCAR", "action": {"_set": {"ISYM": 0}}}],
+        [],
+    ]
+    for step, actions in enumerate(expected, start=1):
+        assert handler.check(directory=tmp_path)
+        assert handler.correct(directory=tmp_path)["actions"] == actions
+        assert handler.error_count["inv_rot_mat"] == step
+    assert Kpoints.from_file(tmp_path / "KPOINTS").style == Kpoints.supported_modes.Gamma
+    incar = Incar.from_file(tmp_path / "INCAR")
+    assert incar["SYMPREC"] == pytest.approx(1e-4)
+    assert incar["ISYM"] == 0
+
+
+@pytest.mark.parametrize(("symprec", "expected"), [(1e-6, 1e-5), (1e-5, 1e-4), (5e-5, 1e-4)])
+def test_inv_rot_mat_kspacing_symprec(tmp_path, symprec, expected) -> None:
+    """Without a KPOINTS file, inv_rot_mat goes straight to increasing SYMPREC (x10, capped at 1e-4)."""
+    Incar({"KSPACING": 0.3, "SYMPREC": symprec}).write_file(tmp_path / "INCAR")
+    (tmp_path / "vasp.out").write_text("rotation matrix was not found (increase SYMPREC)\n")
+    handler = VaspErrorHandler()
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"SYMPREC": expected}}}]
+
+
+@pytest.mark.parametrize(
+    ("incar", "expected"),
+    [
+        ({"ALGO": "F"}, "fast"),
+        ({"ALGO": "n"}, "normal"),
+        ({"ALGO": "V"}, "veryfast"),
+        ({"ALGO": "A"}, "all"),
+        ({"ALGO": "Conjugate"}, "all"),
+        ({"ALGO": "D"}, "damped"),
+        ({"ALGO": "Exact"}, "exact"),
+        ({"ALGO": "None"}, "none"),
+        ({"ALGO": "Nothing"}, "nothing"),
+        ({"ALGO": "Eigenval"}, "eigenval"),
+        ({"ALGO": "CHI"}, "chi"),
+        ({"ALGO": "ACFDT"}, "acfdt"),
+        ({}, "normal"),
+        ({"IALGO": 48}, "veryfast"),
+        ({"IALGO": 68}, "fast"),
+        ({"IALGO": 58}, "all"),
+        ({"IALGO": 53}, "damped"),
+    ],
+)
+def test_get_algo(incar, expected) -> None:
+    assert _get_algo(Incar(incar)) == expected
+
+
+def _setup_error_run(tmp_path: Path, incar: dict, message: str) -> None:
+    for name in ("KPOINTS", "POSCAR"):
+        shutil.copy(f"{TEST_FILES}/{name}", tmp_path / name)
+    Incar(incar).write_file(tmp_path / "INCAR")
+    (tmp_path / "vasp.out").write_text(f"{message}\n")
+
+
+@pytest.mark.parametrize(
+    ("algo", "message", "expected"),
+    [
+        ("F", "WARNING in EDDRMM: call to ZHEGV failed", "Normal"),
+        ("V", "WARNING in EDDRMM: call to ZHEGV failed", "Normal"),
+        ("F", "ERROR EDDIAG: Call to routine ZHEEV failed!", "Normal"),
+        ("N", "ERROR EDDIAG: Call to routine ZHEEV failed!", "exact"),
+    ],
+)
+def test_vasp_error_handler_abbreviated_algo(tmp_path, algo, message, expected) -> None:
+    """Abbreviated ALGO values (only the first letter matters in VASP) trigger the same corrections."""
+    _setup_error_run(tmp_path, {"ALGO": algo}, message)
+    handler = VaspErrorHandler()
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert {"dict": "INCAR", "action": {"_set": {"ALGO": expected}}} in dct["actions"]
+
+
+@pytest.mark.parametrize(
+    ("algo", "message"),
+    [("A", "Error EDDDAV: Call to ZHEGV failed"), ("N", "ERROR in subspace rotation PSSYEVX")],
+)
+def test_vasp_error_handler_abbreviated_algo_unchanged(tmp_path, algo, message) -> None:
+    """ALGO = A is already All (edddav) and ALGO = N is already Normal (pssyevx), so ALGO is not re-set."""
+    _setup_error_run(tmp_path, {"ALGO": algo}, message)
+    handler = VaspErrorHandler()
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert all("ALGO" not in a["action"].get("_set", {}) for a in dct["actions"] if "dict" in a)
+
+
+@pytest.mark.parametrize(("algo", "expected"), [("V", "Fast"), ("F", "Normal")])
+def test_nonconverging_abbreviated_algo(tmp_path, algo, expected) -> None:
+    shutil.copytree(f"{TEST_FILES}/nonconv", tmp_path, dirs_exist_ok=True)
+    incar = Incar.from_file(tmp_path / "INCAR")
+    incar.update({"ALGO": algo, "ISMEAR": 0})
+    incar.write_file(tmp_path / "INCAR")
+    dct = NonConvergingErrorHandler(nionic_steps=3).correct(directory=str(tmp_path))
+    assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"ALGO": expected}}}]
+
+
+@pytest.mark.parametrize(("algo", "expected"), [("V", "Fast"), ("F", "Normal")])
+def test_unconverged_abbreviated_algo(tmp_path, algo, expected) -> None:
+    _write_vasprun("vasprun.xml.electronic_veryfast", tmp_path / "vasprun.xml", algo)
+    handler = UnconvergedErrorHandler()
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert {"dict": "INCAR", "action": {"_set": {"ALGO": expected}}} in dct["actions"]
+
+
+def _nbands_correction(tmp_path: Path, monkeypatch, incar: dict, outcar_nbands: int | None = None) -> int:
+    """Return the NBANDS set for nbands_not_sufficient with NELECT = 40 and the 8-ion test POSCAR."""
+    _setup_error_run(tmp_path, incar, "The number of bands is not sufficient to hold all electrons.")
+    if outcar_nbands is not None:
+        (tmp_path / "OUTCAR").write_text(f"   number of bands    NBANDS=     {outcar_nbands}\n")
+    monkeypatch.setattr("custodian.vasp.handlers.load_outcar", lambda _path: SimpleNamespace(nelect=40.0))
+    handler = VaspErrorHandler()
+    assert handler.check(directory=tmp_path)
+    assert "nbands_not_sufficient" in handler.errors
+    dct = handler.correct(directory=tmp_path)
+    return next(a["action"]["_set"]["NBANDS"] for a in dct["actions"] if "NBANDS" in a["action"].get("_set", {}))
+
+
+@pytest.mark.parametrize("ncl_tag", ["LSORBIT", "LNONCOLLINEAR"])
+def test_nbands_not_sufficient_noncollinear(tmp_path, monkeypatch, ncl_tag) -> None:
+    """The collinear default is max(NINT(40 + 2) / 2 + max(8 / 2, 3), INT(0.6 * 40)) = 25; doubled if noncollinear."""
+    assert _nbands_correction(tmp_path, monkeypatch, {"ISPIN": 1}) == 25
+    assert _nbands_correction(tmp_path, monkeypatch, {"ISPIN": 1, ncl_tag: True}) == 50
+
+
+def test_nbands_not_sufficient_spin_polarized(tmp_path, monkeypatch) -> None:
+    """ISPIN = 2 adds floor((sum(MAGMOM) + 1) / 2) bands: 4 for the default 1 muB on each of 8 ions."""
+    assert _nbands_correction(tmp_path, monkeypatch, {"ISPIN": 2}) == 29
+    assert _nbands_correction(tmp_path, monkeypatch, {"ISPIN": 2, "MAGMOM": [5.0] * 8}) == 45
+
+
+@pytest.mark.parametrize(("incar_nbands", "outcar_nbands"), [(200, None), (200, 160)])
+def test_nbands_not_sufficient_never_lowers(tmp_path, monkeypatch, incar_nbands, outcar_nbands) -> None:
+    nbands = _nbands_correction(tmp_path, monkeypatch, {"ISPIN": 1, "NBANDS": incar_nbands}, outcar_nbands)
+    assert nbands == incar_nbands
+
+
+@pytest.mark.parametrize("incar_nbands", [None, 120])
+def test_nbands_not_sufficient_no_increase_unrecoverable(tmp_path, monkeypatch, incar_nbands) -> None:
+    """If NBANDS cannot be increased beyond what VASP already used (160), there is nothing to try."""
+    incar = {"ISPIN": 1} if incar_nbands is None else {"ISPIN": 1, "NBANDS": incar_nbands}
+    with pytest.raises(StopIteration):
+        _nbands_correction(tmp_path, monkeypatch, incar, outcar_nbands=160)
