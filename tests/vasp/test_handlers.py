@@ -517,8 +517,8 @@ class VaspErrorHandlerTest(MatSciTest):
         handler = VaspErrorHandler("vasp6.inv_rot_mat")
         assert handler.check() is True
         assert handler.correct()["errors"] == ["inv_rot_mat"]
-        incar = Incar.from_file("INCAR")
-        assert incar["SYMPREC"] == 1e-08
+        assert Kpoints.from_file("KPOINTS").style == Kpoints.supported_modes.Gamma
+        assert Incar.from_file("INCAR")["SYMPREC"] == 1e-5
 
     def test_bzint_vasp6(self) -> None:
         # the BZINT error message is formatted differently in VASP6 compared to VASP5
@@ -1392,6 +1392,40 @@ def test_nonconverging_hybrid_damped_not_switched_to_all(tmp_path) -> None:
     incar.write_file(tmp_path / "INCAR")
     dct = NonConvergingErrorHandler(nionic_steps=3).correct(directory=str(tmp_path))
     assert all(a["action"]["_set"].get("ALGO") != "All" for a in dct["actions"] or [])
+
+
+def test_inv_rot_mat_ladder(tmp_path) -> None:
+    """inv_rot_mat: MP -> Gamma mesh, then SYMPREC up to 1e-4, then ISYM = 0, then unrecoverable."""
+    Incar({"ISMEAR": 0}).write_file(tmp_path / "INCAR")
+    Kpoints.monkhorst_automatic((4, 4, 4)).write_file(tmp_path / "KPOINTS")
+    (tmp_path / "vasp.out").write_text("rotation matrix was not found (increase SYMPREC)\n")
+    handler = VaspErrorHandler()
+
+    expected = [
+        [{"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma"}}}],
+        [{"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-4}}}],
+        [{"dict": "INCAR", "action": {"_set": {"ISYM": 0}}}],
+        [],
+    ]
+    for step, actions in enumerate(expected, start=1):
+        assert handler.check(directory=tmp_path)
+        assert handler.correct(directory=tmp_path)["actions"] == actions
+        assert handler.error_count["inv_rot_mat"] == step
+    assert Kpoints.from_file(tmp_path / "KPOINTS").style == Kpoints.supported_modes.Gamma
+    incar = Incar.from_file(tmp_path / "INCAR")
+    assert incar["SYMPREC"] == pytest.approx(1e-4)
+    assert incar["ISYM"] == 0
+
+
+@pytest.mark.parametrize(("symprec", "expected"), [(1e-6, 1e-5), (1e-5, 1e-4), (5e-5, 1e-4)])
+def test_inv_rot_mat_kspacing_symprec(tmp_path, symprec, expected) -> None:
+    """Without a KPOINTS file, inv_rot_mat goes straight to increasing SYMPREC (x10, capped at 1e-4)."""
+    Incar({"KSPACING": 0.3, "SYMPREC": symprec}).write_file(tmp_path / "INCAR")
+    (tmp_path / "vasp.out").write_text("rotation matrix was not found (increase SYMPREC)\n")
+    handler = VaspErrorHandler()
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"SYMPREC": expected}}}]
 
 
 @pytest.mark.parametrize(
