@@ -1388,3 +1388,59 @@ def test_nonconverging_hybrid_damped_not_switched_to_all(tmp_path) -> None:
     incar.write_file(tmp_path / "INCAR")
     dct = NonConvergingErrorHandler(nionic_steps=3).correct(directory=str(tmp_path))
     assert all(a["action"]["_set"].get("ALGO") != "All" for a in dct["actions"] or [])
+
+
+def test_potim_unrecoverable_when_damped_md_with_tiny_potim(tmp_path) -> None:
+    """IBRION = 3 with POTIM < 0.1 has nothing left to try; inputs are left untouched."""
+    shutil.copytree(f"{TEST_FILES}/potim", tmp_path, dirs_exist_ok=True)
+    incar = Incar.from_file(tmp_path / "INCAR")
+    incar.update({"IBRION": 3, "POTIM": 0.05})
+    incar.write_file(tmp_path / "INCAR")
+    handler = PotimErrorHandler()
+    assert handler.check(directory=str(tmp_path))
+    dct = handler.correct(directory=str(tmp_path))
+    assert dct == {"errors": ["POTIM"], "actions": None}
+    assert Incar.from_file(tmp_path / "INCAR") == incar
+    assert not glob(f"{tmp_path}/error.*.tar.gz")
+
+
+def _setup_frozen_job(tmp_path: Path, incar_params: dict) -> Incar:
+    for fname in ("INCAR", "KPOINTS", "POSCAR", "POTCAR"):
+        shutil.copy(f"{TEST_FILES}/{fname}", tmp_path / fname)
+    incar = Incar.from_file(tmp_path / "INCAR")
+    incar.update({"ALGO": "Normal", **incar_params})
+    incar.write_file(tmp_path / "INCAR")
+    (tmp_path / "vasp.out").write_text("")
+    return incar
+
+
+def test_frozen_job_restarts_from_contcar(tmp_path) -> None:
+    """An ionic run that is not on ALGO = Fast restarts from CONTCAR to keep ionic progress."""
+    incar = _setup_frozen_job(tmp_path, {"NSW": 10})
+    contcar = Structure.from_file(tmp_path / "POSCAR")
+    contcar.perturb(0.05)
+    contcar.to(filename=str(tmp_path / "CONTCAR"), fmt="poscar")
+
+    dct = FrozenJobErrorHandler().correct(directory=str(tmp_path))
+    assert dct == {
+        "errors": ["Frozen job"],
+        "actions": [{"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}],
+    }
+    assert (tmp_path / "POSCAR").read_text() == (tmp_path / "CONTCAR").read_text()
+    assert Incar.from_file(tmp_path / "INCAR") == incar
+    assert glob(f"{tmp_path}/error.*.tar.gz")
+
+
+@pytest.mark.parametrize(("nsw", "write_contcar"), [(0, True), (10, False)])
+def test_frozen_job_unrecoverable(tmp_path, nsw, write_contcar) -> None:
+    """Static runs, or ionic runs without a valid CONTCAR, are unrecoverable once ALGO is not Fast."""
+    incar = _setup_frozen_job(tmp_path, {"NSW": nsw})
+    poscar = (tmp_path / "POSCAR").read_text()
+    if write_contcar:
+        shutil.copy(f"{TEST_FILES}/CONTCAR", tmp_path / "CONTCAR")
+
+    dct = FrozenJobErrorHandler().correct(directory=str(tmp_path))
+    assert dct == {"errors": ["Frozen job"], "actions": None}
+    assert Incar.from_file(tmp_path / "INCAR") == incar
+    assert (tmp_path / "POSCAR").read_text() == poscar
+    assert not glob(f"{tmp_path}/error.*.tar.gz")
