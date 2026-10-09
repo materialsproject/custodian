@@ -137,7 +137,10 @@ class VaspErrorHandlerTest(MatSciTest):
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["mesh_symmetry"]
-        assert dct["actions"] == [{"action": {"_set": {"kpoints": [[4, 4, 4]]}}, "dict": "KPOINTS"}]
+        assert dct["actions"] == [{"action": {"_set": {"generation_style": "Gamma"}}, "dict": "KPOINTS"}]
+        kpoints = Kpoints.from_file("KPOINTS")
+        assert kpoints.style == Kpoints.supported_modes.Gamma
+        assert tuple(kpoints.kpts[0]) == (8, 2, 2)
 
     def test_brions(self) -> None:
         shutil.copy("INCAR.ibrion", "INCAR")
@@ -1117,19 +1120,29 @@ class LrfCommHandlerTest(MatSciTest):
 class KpointsTransHandlerTest(MatSciTest):
     @pytest.fixture(autouse=True)
     def _setup(self, _tmp_dir) -> None:
-        copy_tmp_files(self.tmp_path, "KPOINTS", "std_err.txt.kpoints_trans")
+        copy_tmp_files(self.tmp_path, "INCAR", "KPOINTS", "std_err.txt.kpoints_trans")
 
     def test_kpoints_trans(self) -> None:
         handler = StdErrHandler("std_err.txt.kpoints_trans")
         assert handler.check() is True
         dct = handler.correct()
         assert dct["errors"] == ["kpoints_trans"]
-        assert dct["actions"] == [{"action": {"_set": {"kpoints": [[4, 4, 4]]}}, "dict": "KPOINTS"}]
+        assert dct["actions"] == [{"action": {"_set": {"ENCUT": 521}}, "dict": "INCAR"}]
 
         assert handler.check() is True
         dct = handler.correct()
-        assert dct["errors"] == ["kpoints_trans"]
-        assert dct["actions"] == []  # don't correct twice
+        assert dct["actions"] == [{"action": {"_set": {"ISYM": 0}}, "dict": "INCAR"}]
+
+        assert handler.check() is True
+        dct = handler.correct()
+        assert dct["actions"] == []  # unrecoverable once ENCUT and ISYM are exhausted
+
+        incar = Incar.from_file("INCAR")
+        assert incar["ENCUT"] == 521
+        assert incar["ISYM"] == 0
+        kpoints = Kpoints.from_file("KPOINTS")
+        assert kpoints.style == Kpoints.supported_modes.Monkhorst
+        assert tuple(kpoints.kpts[0]) == (8, 2, 2)
 
 
 @pytest.mark.parametrize("algo", ["All", "Conjugate", "Damped", "Normal"])
@@ -1276,28 +1289,94 @@ class NonConvergingErrorHandlerTest(MatSciTest):
         assert h2.output_filename == "OSZICAR_random"
 
 
+KPOINTS_TRANS_MSG = "internal error in GENERATE_KPOINTS_TRANS: number of G-vector changed in star\n"
+MESH_SYMMETRY_MSG = "Reciprocal lattice and k-lattice belong to different class of lattices.\n"
+
+
 def test_kpoints_trans_kspacing(tmp_path) -> None:
-    """kpoints_trans with KSPACING (no KPOINTS file) must not crash; it is unrecoverable."""
+    """kpoints_trans with KSPACING (no KPOINTS file) and no ENCUT goes straight to ISYM = 0."""
     Incar({"KSPACING": 0.3}).write_file(tmp_path / "INCAR")
-    (tmp_path / "std_err.txt").write_text(
-        "internal error in GENERATE_KPOINTS_TRANS: number of G-vector changed in star\n"
-    )
+    (tmp_path / "std_err.txt").write_text(KPOINTS_TRANS_MSG)
     handler = StdErrHandler()
     assert handler.check(directory=tmp_path)
     dct = handler.correct(directory=tmp_path)
-    assert dct == {"errors": ["kpoints_trans"], "actions": []}
+    assert dct == {"errors": ["kpoints_trans"], "actions": [{"dict": "INCAR", "action": {"_set": {"ISYM": 0}}}]}
+    assert handler.check(directory=tmp_path)
+    assert handler.correct(directory=tmp_path)["actions"] == []
+
+
+@pytest.mark.parametrize("isym", [0, -1])
+def test_kpoints_trans_symmetry_off(tmp_path, isym) -> None:
+    """With no ENCUT and symmetry already off, kpoints_trans is unrecoverable."""
+    Incar({"ISYM": isym}).write_file(tmp_path / "INCAR")
+    Kpoints.monkhorst_automatic((8, 8, 1)).write_file(tmp_path / "KPOINTS")
+    (tmp_path / "std_err.txt").write_text(KPOINTS_TRANS_MSG)
+    handler = StdErrHandler()
+    assert handler.check(directory=tmp_path)
+    assert handler.correct(directory=tmp_path)["actions"] == []
+    assert tuple(Kpoints.from_file(tmp_path / "KPOINTS").kpts[0]) == (8, 8, 1)
+
+
+def test_kpoints_trans_encut_with_isym_off(tmp_path) -> None:
+    """The ENCUT nudge is applied once; with ISYM already off, the next occurrence is unrecoverable."""
+    Incar({"ENCUT": 450, "ISYM": 0}).write_file(tmp_path / "INCAR")
+    (tmp_path / "std_err.txt").write_text(KPOINTS_TRANS_MSG)
+    handler = StdErrHandler()
+    assert handler.check(directory=tmp_path)
+    assert handler.correct(directory=tmp_path)["actions"] == [{"dict": "INCAR", "action": {"_set": {"ENCUT": 451}}}]
+    assert handler.check(directory=tmp_path)
+    assert handler.correct(directory=tmp_path)["actions"] == []
+    assert Incar.from_file(tmp_path / "INCAR")["ENCUT"] == 451
+
+
+def test_mesh_symmetry_slab_mp_to_gamma(tmp_path) -> None:
+    """A slab-like 8x8x1 MP mesh becomes Gamma 8x8x1, not a uniform 4x4x4 mesh."""
+    Incar({"ISYM": 2}).write_file(tmp_path / "INCAR")
+    Kpoints.monkhorst_automatic((8, 8, 1)).write_file(tmp_path / "KPOINTS")
+    (tmp_path / "vasp.out").write_text(MESH_SYMMETRY_MSG)
+    handler = MeshSymmetryErrorHandler()
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert dct["actions"] == [{"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma"}}}]
+    kpoints = Kpoints.from_file(tmp_path / "KPOINTS")
+    assert kpoints.style == Kpoints.supported_modes.Gamma
+    assert tuple(kpoints.kpts[0]) == (8, 8, 1)
+    assert Incar.from_file(tmp_path / "INCAR")["ISYM"] == 2
+
+
+def test_mesh_symmetry_gamma_to_isym0(tmp_path) -> None:
+    """An already Gamma-centred mesh is kept and symmetry is switched off instead."""
+    Incar({"ISYM": 2}).write_file(tmp_path / "INCAR")
+    Kpoints.gamma_automatic((8, 8, 1)).write_file(tmp_path / "KPOINTS")
+    (tmp_path / "vasp.out").write_text(MESH_SYMMETRY_MSG)
+    handler = MeshSymmetryErrorHandler()
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"ISYM": 0}}}]
+    assert Incar.from_file(tmp_path / "INCAR")["ISYM"] == 0
+    assert tuple(Kpoints.from_file(tmp_path / "KPOINTS").kpts[0]) == (8, 8, 1)
+    assert not handler.check(directory=tmp_path)
+
+
+def test_mesh_symmetry_isym_off_no_action(tmp_path) -> None:
+    """With a Gamma mesh and symmetry already off there is nothing left to change."""
+    Incar({"ISYM": 0}).write_file(tmp_path / "INCAR")
+    Kpoints.gamma_automatic((8, 8, 1)).write_file(tmp_path / "KPOINTS")
+    (tmp_path / "vasp.out").write_text(MESH_SYMMETRY_MSG)
+    assert MeshSymmetryErrorHandler().correct(directory=tmp_path)["actions"] is None
 
 
 def test_mesh_symmetry_line_mode(tmp_path) -> None:
-    """Only Gamma/MP meshes are replaced; explicit k-point lists are left alone."""
+    """Explicit k-point lists are left alone; symmetry is switched off instead."""
     Incar({"ISYM": 2}).write_file(tmp_path / "INCAR")
     Kpoints.automatic_linemode(2, HighSymmKpath(Structure.from_file(f"{TEST_FILES}/POSCAR"))).write_file(
         tmp_path / "KPOINTS"
     )
-    (tmp_path / "vasp.out").write_text("Reciprocal lattice and k-lattice belong to different class of lattices.\n")
+    (tmp_path / "vasp.out").write_text(MESH_SYMMETRY_MSG)
     handler = MeshSymmetryErrorHandler()
     assert handler.check(directory=tmp_path)
-    assert handler.correct(directory=tmp_path)["actions"] is None
+    assert handler.correct(directory=tmp_path)["actions"] == [{"dict": "INCAR", "action": {"_set": {"ISYM": 0}}}]
+    assert Kpoints.from_file(tmp_path / "KPOINTS").style == Kpoints.supported_modes.Line_mode
 
 
 @pytest.mark.parametrize(
