@@ -598,16 +598,13 @@ class VaspErrorHandlerTest(MatSciTest):
         # ALGO = Fast --> ALGO = Normal
         assert dct["actions"] == [{"action": {"_set": {"ALGO": "Normal"}}, "dict": "INCAR"}]
 
-        # now copy CONTCAR and check that both CONTCAR->POSCAR
-        # and INCAR updates are included: ALGO = Normal --> ALGO = exact
+        # now ALGO = Normal with ISMEAR = -5: ALGO = All would trigger algo_tet, so no
+        # actions (not even the CONTCAR copy) are returned and the error is unrecoverable
         shutil.copy("CONTCAR.eddiag", "CONTCAR")
         handler = VaspErrorHandler("vasp.eddiag")
         handler.check()
         dct = handler.correct()
-        assert dct["actions"] == [
-            {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}},
-            {"action": {"_set": {"ALGO": "exact"}}, "dict": "INCAR"},
-        ]
+        assert dct["actions"] == []
 
     def test_auto_nbands(self) -> None:
         # auto_nbands is only a warning and never fails the job.
@@ -1388,3 +1385,47 @@ def test_nonconverging_hybrid_damped_not_switched_to_all(tmp_path) -> None:
     incar.write_file(tmp_path / "INCAR")
     dct = NonConvergingErrorHandler(nionic_steps=3).correct(directory=str(tmp_path))
     assert all(a["action"]["_set"].get("ALGO") != "All" for a in dct["actions"] or [])
+
+
+_CONTCAR_COPY = {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
+
+
+@pytest.mark.parametrize(
+    ("incar", "expected"),
+    [
+        ({"ALGO": "VeryFast"}, {"ALGO": "Normal"}),
+        ({"ALGO": "Normal", "ISMEAR": 0}, {"ALGO": "All", "ISEARCH": 1}),
+        ({}, {"ALGO": "All", "ISEARCH": 1}),  # defaults: ALGO = Normal, ISMEAR = 1
+    ],
+)
+@pytest.mark.parametrize("error", ["zheev", "eddiag"])
+def test_zheev_eddiag_algo_escalation(tmp_path, incar, expected, error) -> None:
+    """ALGO is escalated VeryFast/Fast -> Normal -> All, never to the expensive ALGO = Exact."""
+    shutil.copy(f"{TEST_FILES}/CONTCAR.eddiag", tmp_path / "CONTCAR")
+    Incar(incar).write_file(tmp_path / "INCAR")
+    (tmp_path / "vasp.out").write_text(f"{VaspErrorHandler.error_msgs[error][0]}\n")
+    handler = VaspErrorHandler()
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert dct["actions"] == [_CONTCAR_COPY, {"dict": "INCAR", "action": {"_set": expected}}]
+
+
+@pytest.mark.parametrize(
+    "incar",
+    [
+        {"ALGO": "Normal", "ISMEAR": -5},  # ALGO = All with tetrahedron smearing triggers algo_tet
+        {"ALGO": "All"},
+        {"ALGO": "Conjugate"},
+        {"ALGO": "Damped"},
+        {"ALGO": "Exact"},
+    ],
+)
+def test_zheev_eddiag_unrecoverable(tmp_path, incar) -> None:
+    """With no ALGO change available, no actions (not even the CONTCAR copy) are returned."""
+    shutil.copy(f"{TEST_FILES}/CONTCAR.eddiag", tmp_path / "CONTCAR")
+    Incar(incar).write_file(tmp_path / "INCAR")
+    (tmp_path / "vasp.out").write_text(f"{VaspErrorHandler.error_msgs['eddiag'][0]}\n")
+    handler = VaspErrorHandler()
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert dct["actions"] == []
