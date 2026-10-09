@@ -23,6 +23,8 @@ from monty.dev import deprecated
 from monty.io import zopen
 from monty.os.path import zpath
 from monty.serialization import loadfn
+from pymatgen.analysis.molecule_structure_comparator import CovalentRadius
+from pymatgen.core.periodic_table import Element
 from pymatgen.core.structure import Structure
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Poscar, VaspInput
 from pymatgen.io.vasp.outputs import Oszicar
@@ -57,6 +59,57 @@ VASP_BACKUP_FILES = {
     "vasp.out",
     "std_err.txt",
 }
+
+# Minimum allowed ratio of an interatomic distance to the sum of the two covalent
+# radii. Contacts below this are treated as unphysically close (e.g., ZPOTRF on the
+# first ionic step). 0.7 is a conservative heuristic; real bonds are typically >0.85.
+MIN_COVALENT_DISTANCE_RATIO = 0.7
+
+# Maximum isotropic linear strain applied in one correction to relieve close contacts.
+MAX_CLOSE_CONTACT_STRAIN = 0.1
+
+
+def _get_covalent_radius(element: Element) -> float | None:
+    """Covalent radius in Angstrom, falling back to the atomic radius if unavailable."""
+    radius = CovalentRadius.radius.get(element.symbol)
+    if radius is None and element.atomic_radius is not None:
+        radius = float(element.atomic_radius)
+    return radius
+
+
+def _min_covalent_distance_ratio(structure: Structure) -> float | None:
+    """Minimum d_ij / (r_cov_i + r_cov_j) over all site pairs, including periodic images.
+
+    Args:
+        structure: Structure to check.
+
+    Returns:
+        The minimum ratio, or None if no pair lies within MIN_COVALENT_DISTANCE_RATIO
+        of contact (or no radii are known).
+    """
+    radii = []
+    for site in structure:
+        try:
+            radii.append(_get_covalent_radius(Element(site.specie.symbol)))
+        except ValueError:  # e.g., DummySpecies
+            radii.append(None)
+    known = [r for r in radii if r is not None]
+    if not known:
+        return None
+    # Only pairs closer than threshold * (r_i + r_j) matter, so this cutoff suffices.
+    cutoff = MIN_COVALENT_DISTANCE_RATIO * 2 * max(known)
+    min_ratio = None
+    for i, neighbors in enumerate(structure.get_all_neighbors(cutoff)):
+        if radii[i] is None:
+            continue
+        for nn in neighbors:
+            r_j = radii[nn.index]
+            if r_j is None:
+                continue
+            ratio = nn.nn_distance / (radii[i] + r_j)
+            if min_ratio is None or ratio < min_ratio:
+                min_ratio = ratio
+    return min_ratio
 
 
 def _fallback_algo(incar: Incar) -> str:
@@ -443,15 +496,16 @@ class VaspErrorHandler(ErrorHandler):
                 self.error_count["brmix"] += 1
 
         if "zpotrf" in self.errors:
-            # Usually caused by short bond distances. If on the first step,
-            # volume needs to be increased. Otherwise, it was due to a step
+            # Usually caused by short bond distances. If on the first step and
+            # atoms are too close, the volume is increased. Otherwise, it was due to a step
             # being too big and POTIM should be decreased. If a static run
             # try turning off symmetry. This also happens if NCORE or NPAR
             # is set to a large value for a small structure.
 
             try:
                 oszicar = Oszicar(os.path.join(directory, "OSZICAR"))
-                nsteps = len(oszicar.ionic_steps)
+                # Oszicar returns [{}] for an empty file, so only count populated steps.
+                nsteps = len([step for step in oszicar.ionic_steps if step])
             except Exception:
                 nsteps = 0
 
@@ -465,9 +519,21 @@ class VaspErrorHandler(ErrorHandler):
                     actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
             elif vi["INCAR"].get("NSW", 0) > 0:
                 if nsteps == 0:
-                    s = vi["POSCAR"].structure
-                    s.apply_strain(0.2)
-                    actions.append({"dict": "POSCAR", "action": {"_set": {"structure": s.as_dict()}}})
+                    # Only expand the cell if atoms are actually too close. Scale isotropically
+                    # so the closest contact reaches the threshold, capping the linear strain.
+                    structure = vi["POSCAR"].structure
+                    min_ratio = _min_covalent_distance_ratio(structure)
+                    if min_ratio is not None and min_ratio < MIN_COVALENT_DISTANCE_RATIO:
+                        scale = MIN_COVALENT_DISTANCE_RATIO / max(min_ratio, 1e-8)
+                        strain = min(scale - 1, MAX_CLOSE_CONTACT_STRAIN)
+                        structure.apply_strain(strain)
+                        actions.append({"dict": "POSCAR", "action": {"_set": {"structure": structure.as_dict()}}})
+                        # VASP recommends deleting CHGCAR/WAVECAR if incompatible with the structure.
+                        if vi["INCAR"].get("ICHARG", 0) < 10:
+                            actions += [
+                                {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}},
+                                {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}},
+                            ]
                 else:
                     potim = round(vi["INCAR"].get("POTIM", 0.5) / 2.0, 2)
                     actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
