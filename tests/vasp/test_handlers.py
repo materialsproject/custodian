@@ -250,21 +250,24 @@ class VaspErrorHandlerTest(MatSciTest):
         handler = VaspErrorHandler("vasp.brmix")
         assert handler.check() is True
 
-        # The first (no good OUTCAR) correction, check IMIX
+        # The first (no good OUTCAR) correction: linear mixing (ISPIN = 2)
         dct = handler.correct()
         assert dct["errors"] == ["brmix"]
-        vi = VaspInput.from_directory(".")
-        assert vi["INCAR"]["IMIX"] == 1
+        assert dct["actions"] == [
+            {
+                "dict": "INCAR",
+                "action": {"_set": {"AMIX": 0.2, "BMIX": 0.0001, "AMIX_MAG": 0.8, "BMIX_MAG": 0.0001}},
+            }
+        ]
         assert os.path.isfile("CHGCAR")
 
-        # The next correction check Gamma and evenize
+        # The next correction: Monkhorst-Pack 8x2x2 -> Gamma-centered odd mesh
         handler.correct()
         vi = VaspInput.from_directory(".")
-        assert "IMIX" not in vi["INCAR"]
+        assert vi["INCAR"]["BMIX"] == 0.0001
         assert os.path.isfile("CHGCAR")
-        if vi["KPOINTS"].style == Kpoints.supported_modes.Gamma and vi["KPOINTS"].num_kpts < 1:
-            all_kpts_even = all(n % 2 == 0 for n in vi["KPOINTS"].kpts[0])
-            assert not all_kpts_even
+        assert vi["KPOINTS"].style == Kpoints.supported_modes.Gamma
+        assert tuple(vi["KPOINTS"].kpts[0]) == (9, 3, 3)
 
         # The next correction check ISYM and no CHGCAR
         handler.correct()
@@ -801,12 +804,39 @@ class UnconvergedErrorHandlerTest(MatSciTest):
         tracked_lru_cache.tracked_cache_clear()
 
     def test_uncorrectable(self) -> None:
-        shutil.copy("vasprun.xml.unconverged_unfixable", "vasprun.xml")
+        # ALGO = Normal, ISMEAR = -5 and the linear-mixing recipe already in place
+        text = Path("vasprun.xml.unconverged_unfixable").read_text()
+        for key in ("BMIX", "BMIX_MAG"):
+            text = text.replace(f'<i name="{key}">      0.00100000</i>', f'<i name="{key}">      0.00010000</i>')
+        text = text.replace('<i name="AMIX_MAG">', '<i name="AMIX">      0.20000000</i>\n  <i name="AMIX_MAG">')
+        Path("vasprun.xml").write_text(text)
         handler = UnconvergedErrorHandler()
         assert handler.check()
         dct = handler.correct()
         assert set(dct["errors"]) == {"Unconverged"}
         assert dct["actions"] is None
+
+    def test_linear_mixing_last_resort(self) -> None:
+        """The last-resort mixing follows the VASP wiki recipe, without NELMDL."""
+        shutil.copy("vasprun.xml.unconverged_unfixable", "vasprun.xml")  # old recipe: BMIX = 0.001
+        handler = UnconvergedErrorHandler()
+        assert handler.check()
+        dct = handler.correct()
+        assert dct["actions"] == [
+            {
+                "dict": "INCAR",
+                "action": {
+                    "_set": {
+                        "ISTART": 1,
+                        "ALGO": "Normal",
+                        "AMIX": 0.2,
+                        "BMIX": 0.0001,
+                        "AMIX_MAG": 0.8,
+                        "BMIX_MAG": 0.0001,
+                    }
+                },
+            }
+        ]
 
 
 class IncorrectSmearingHandlerTest(MatSciTest):
@@ -1485,17 +1515,21 @@ class NonConvergingErrorHandlerTest(MatSciTest):
         incar = Incar.from_file("INCAR")
         assert incar["ALGO"].lower() == "normal"
 
-        # because ISMEAR = -5, skip ALGO = all and adjust
-        post_all_corrections = {"ALGO": "Normal", "AMIX": 0.1, "BMIX": 0.01, "ICHARG": 2}
+        # because ISMEAR = -5, skip ALGO = all and use linear mixing (ISPIN = 2)
+        post_all_corrections = {
+            "ALGO": "Normal",
+            "AMIX": 0.2,
+            "BMIX": 0.0001,
+            "AMIX_MAG": 0.8,
+            "BMIX_MAG": 0.0001,
+            "ICHARG": 2,
+        }
         handler.correct()
         incar = Incar.from_file("INCAR")
         assert all(value == incar[key] for key, value in post_all_corrections.items())
 
-        incar.update({"AMIX": 0.02, "BMIX": 2.9})
-        post_all_corrections = {"ALGO": "Normal", "AMIN": 0.01, "BMIX": 3.0, "ICHARG": 2}
-        handler.correct()
-        incar = Incar.from_file("INCAR")
-        assert all(value == incar[key] for key, value in post_all_corrections.items())
+        # linear mixing is the last resort
+        assert handler.correct()["actions"] is None
 
         # now replace ISMEAR --> 0, ALGO --> VeryFast to get ladder
         incar = Incar(original_incar)  # incar.copy() returns dict
@@ -1668,7 +1702,7 @@ def test_brmix_no_outcar_skips_rerun(tmp_path) -> None:
     handler = VaspErrorHandler()
     assert handler.check(directory=tmp_path)
     dct = handler.correct(directory=tmp_path)
-    assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"IMIX": 1}}}]
+    assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"AMIX": 0.2, "BMIX": 0.0001}}}]
 
 
 def _write_vasprun(src: str, dest: Path, algo: str) -> None:
@@ -1712,6 +1746,64 @@ def test_nonconverging_hybrid_damped_not_switched_to_all(tmp_path) -> None:
     incar.write_file(tmp_path / "INCAR")
     dct = NonConvergingErrorHandler(nionic_steps=3).correct(directory=str(tmp_path))
     assert all(a["action"]["_set"].get("ALGO") != "All" for a in dct["actions"] or [])
+
+
+def test_brmix_gamma_mesh_not_switched_to_monkhorst(tmp_path) -> None:
+    """A Gamma-centered mesh is kept; after linear mixing the ladder goes to ISYM = 0."""
+    Incar({"ISMEAR": 0}).write_file(tmp_path / "INCAR")
+    Kpoints.gamma_automatic((3, 3, 3)).write_file(tmp_path / "KPOINTS")
+    (tmp_path / "CHGCAR").touch()
+    (tmp_path / "vasp.out").write_text("BRMIX: very serious problems\n")
+    handler = VaspErrorHandler()
+    handler.error_count["brmix"] = 2
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert all(action.get("dict") != "KPOINTS" for action in dct["actions"])
+    assert {"dict": "INCAR", "action": {"_set": {"ISYM": 0}}} in dct["actions"]
+    assert Kpoints.from_file(tmp_path / "KPOINTS").style == Kpoints.supported_modes.Gamma
+    assert not (tmp_path / "CHGCAR").exists()
+
+
+def test_brmix_linear_mixing_halves_small_amix(tmp_path) -> None:
+    """Mixing amplitudes already at or below the recipe values are halved."""
+    Incar({"ISPIN": 2, "AMIX": 0.1, "AMIX_MAG": 0.8}).write_file(tmp_path / "INCAR")
+    (tmp_path / "vasp.out").write_text("BRMIX: very serious problems\n")
+    handler = VaspErrorHandler()
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert dct["actions"] == [
+        {"dict": "INCAR", "action": {"_set": {"AMIX": 0.05, "BMIX": 0.0001, "AMIX_MAG": 0.4, "BMIX_MAG": 0.0001}}}
+    ]
+
+
+@pytest.mark.parametrize(
+    ("ispin", "expected_mag"), [(1, {}), (2, {"AMIX_MAG": 0.8, "BMIX_MAG": 0.0001})], ids=["ispin1", "ispin2"]
+)
+def test_nonconverging_linear_mixing(tmp_path, ispin, expected_mag) -> None:
+    """Linear mixing per the VASP wiki; magnetic mixing parameters only for ISPIN = 2."""
+    shutil.copytree(f"{TEST_FILES}/nonconv", tmp_path, dirs_exist_ok=True)
+    incar = Incar.from_file(tmp_path / "INCAR")
+    incar.update({"ALGO": "All", "ISMEAR": 0, "ISPIN": ispin})
+    incar.write_file(tmp_path / "INCAR")
+    dct = NonConvergingErrorHandler(nionic_steps=3).correct(directory=str(tmp_path))
+    assert dct["actions"] == [
+        {
+            "dict": "INCAR",
+            "action": {"_set": {"ALGO": "Normal", "AMIX": 0.2, "BMIX": 0.0001, **expected_mag, "ICHARG": 2}},
+        }
+    ]
+
+
+def test_nonconverging_nscf_keeps_icharg(tmp_path) -> None:
+    """ICHARG >= 10 (non-SCF) must not be reset to ICHARG = 2."""
+    shutil.copytree(f"{TEST_FILES}/nonconv", tmp_path, dirs_exist_ok=True)
+    incar = Incar.from_file(tmp_path / "INCAR")
+    incar.update({"ALGO": "All", "ISMEAR": 0, "ICHARG": 11})
+    incar.write_file(tmp_path / "INCAR")
+    dct = NonConvergingErrorHandler(nionic_steps=3).correct(directory=str(tmp_path))
+    assert dct["actions"]
+    assert all("ICHARG" not in action["action"]["_set"] for action in dct["actions"])
+    assert Incar.from_file(tmp_path / "INCAR")["ICHARG"] == 11
 
 
 def test_potim_unrecoverable_when_damped_md_with_tiny_potim(tmp_path) -> None:
