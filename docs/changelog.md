@@ -6,6 +6,29 @@ nav_order: 2
 
 # Change Log
 
+## 2026.10.10
+* **Behavior changes:** several VASP handlers now apply different corrections, or declare an error unrecoverable, where they previously applied ad hoc fixes. Workflows that relied on the old corrections may see different INCAR/KPOINTS changes or earlier termination.
+* PR #464 from @shyuep (#464)
+    `LargeSigmaHandler`: rescale SIGMA with exponent 2N + 2 for Methfessel-Paxton order N (previously assumed Gaussian sigma^2 scaling, over-reducing SIGMA). `correct()` no longer raises after `from_dict`.
+* PR #463 from @shyuep (#463)
+    `grad_not_orth`: after the ALGO fallback, try NBANDS +10% before giving up.
+* PR #462 from @shyuep (#462)
+    `DriftErrorHandler`: replace the deprecated PREC = High/unbounded ENAUG escalation with PREC = Accurate; unrecoverable if already Accurate. `max_drift` is recomputed on every check. `enaug_multiply` is deprecated.
+* PR #460 from @shyuep (#460)
+    `zheev`/`eddiag`: escalate ALGO VeryFast/Fast -> Normal -> All (ISEARCH = 1) instead of Exact, skipping All when ISMEAR < 0; unrecoverable when no ALGO change is available.
+* PR #459 from @shyuep (#459)
+    `zpotrf`: replace the blind 20% linear strain with an isotropic expansion only when atoms are too close (min d_ij / (r_cov_i + r_cov_j) -> 0.7, capped at 10%), and only when ISIF allows volume changes. Also delete CHGCAR/WAVECAR and fix empty-OSZICAR step counting.
+* PR #458 from @shyuep (#458)
+    `kpoints_trans`: set ISYM = 0 instead of rewriting KPOINTS. Mesh symmetry: switch Monkhorst-Pack to Gamma-centred with the same subdivisions, else ISYM = 0, instead of forcing a uniform m x m x m mesh.
+* PR #457 from @shyuep (#457)
+    Drop SYMPREC = 1e-8 fallbacks in `PotimErrorHandler` and `FrozenJobErrorHandler`; the latter restarts ionic runs from a valid CONTCAR, otherwise unrecoverable.
+* PR #456 from @shyuep (#456)
+    `inv_rot_mat`: replace SYMPREC = 1e-8 with a ladder: Gamma-centred mesh, then SYMPREC x10 (capped at 1e-4), then ISYM = 0.
+* PR #455 from @shyuep (#455)
+    Canonicalise abbreviated ALGO values (F, N, V, A, Conjugate, IALGO) in all handlers. `nbands_not_sufficient` uses the VASP default NBANDS formula with magnetic and noncollinear terms and never lowers NBANDS.
+* PR #454 from @shyuep (#454)
+    Fix crashes and correction loops in VASP handlers: unset ISYM in bravais/ksymm, missing or line-mode KPOINTS, `algo_tet`/`grad_not_orth` ALGO consistency, `brmix` KSPACING ladder, and All/Damped ping-pong for meta-GGA and hybrid runs.
+
 ## 2026.10.9
 * **Breaking:** Python 3.10 support dropped; custodian now requires Python >= 3.11 (needed by pymatgen >= 2026.9.24).
 * Dev dependency bumped to pymatgen >= 2026.9.24; `uv.lock` updated.
