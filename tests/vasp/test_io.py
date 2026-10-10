@@ -9,8 +9,6 @@ from tests.conftest import TEST_FILES
 @pytest.fixture(autouse=True)
 def _clear_tracked_cache() -> None:
     """Clear the cache of the stored functions between the tests."""
-    from custodian.utils import tracked_lru_cache
-
     tracked_lru_cache.tracked_cache_clear()
 
 

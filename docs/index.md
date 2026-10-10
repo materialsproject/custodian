@@ -6,9 +6,9 @@ nav_order: 1
 
 ![Custodian logo](assets/custodian_logo.png)
 [![GitHub license](https://img.shields.io/github/license/materialsproject/custodian)](https://github.com/materialsproject/custodian/blob/main/LICENSE)
-[![Linting](https://github.com/materialsproject/custodian/workflows/Linting/badge.svg)](https://github.com/materialsproject/custodian/workflows/Linting/badge.svg)
-[![Testing](https://github.com/materialsproject/custodian/actions/workflows/test.yml/badge.svg)](https://github.com/materialsproject/custodian/actions/workflows/test.yml)
-[![Downloads](https://pepy.tech/badge/custodian)](https://pepy.tech/project/custodian)
+[![Lint](https://github.com/materialsproject/custodian/workflows/Lint/badge.svg)](https://github.com/materialsproject/custodian/actions/workflows/lint.yml)
+[![Test](https://github.com/materialsproject/custodian/actions/workflows/test.yml/badge.svg)](https://github.com/materialsproject/custodian/actions/workflows/test.yml)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/custodian?logo=pypi&logoColor=white&color=blue&label=PyPI)](https://pypi.org/project/custodian)
 [![codecov](https://codecov.io/gh/materialsproject/custodian/branch/master/graph/badge.svg?token=OwDQVJnghu)](https://codecov.io/gh/materialsproject/custodian)
 
 # Custodian
@@ -196,12 +196,10 @@ is as follows:
 
 ```python
 from custodian.custodian import Custodian
-from custodian.vasp.handlers import VaspErrorHandler, \
-    UnconvergedErrorHandler, PoscarErrorHandler, DentetErrorHandler
+from custodian.vasp.handlers import VaspErrorHandler, UnconvergedErrorHandler
 from custodian.vasp.jobs import VaspJob
 
-handlers = [VaspErrorHandler(), UnconvergedErrorHandler(),
-            PoscarErrorHandler(), DentetErrorHandler()]
+handlers = [VaspErrorHandler(), UnconvergedErrorHandler()]
 jobs = VaspJob.double_relaxation_run(args.command.split())
 c = Custodian(handlers, jobs, max_errors=10)
 c.run()

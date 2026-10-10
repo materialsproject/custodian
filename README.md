@@ -1,8 +1,8 @@
 ![Custodian logo](https://raw.githubusercontent.com/materialsproject/custodian/master/docs/assets/custodian_logo.png)
 [![GitHub license](https://img.shields.io/github/license/materialsproject/custodian)](https://github.com/materialsproject/custodian/blob/main/LICENSE)
-[![Linting](https://github.com/materialsproject/custodian/workflows/Linting/badge.svg)](https://github.com/materialsproject/custodian/workflows/Linting/badge.svg)
-[![Testing](https://github.com/materialsproject/custodian/actions/workflows/test.yml/badge.svg)](https://github.com/materialsproject/custodian/actions/workflows/test.yml)
-[![Downloads](https://pepy.tech/badge/custodian)](https://pepy.tech/project/custodian)
+[![Lint](https://github.com/materialsproject/custodian/workflows/Lint/badge.svg)](https://github.com/materialsproject/custodian/actions/workflows/lint.yml)
+[![Test](https://github.com/materialsproject/custodian/actions/workflows/test.yml/badge.svg)](https://github.com/materialsproject/custodian/actions/workflows/test.yml)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/custodian?logo=pypi&logoColor=white&color=blue&label=PyPI)](https://pypi.org/project/custodian)
 [![codecov](https://codecov.io/gh/materialsproject/custodian/branch/master/graph/badge.svg?token=OwDQVJnghu)](https://codecov.io/gh/materialsproject/custodian)
 
 Custodian is a simple, robust and flexible just-in-time (JIT) job management
@@ -53,8 +53,8 @@ to install the package in editable mode.
 
 # Requirements
 
-Custodian supports Python 3.8+. There are no other required dependencies. However, if you wish to use many of the
-built-in error handlers and Jobs for VASP, NWChem, QChem, etc., you will likely need pymatgen to be installed as well.
+Custodian has no required dependencies. However, if you wish to use many of the built-in error handlers and Jobs for
+VASP, NWChem, QChem, etc., you will likely need pymatgen to be installed as well.
 
 # Usage
 

@@ -1,0 +1,12 @@
+COHPstartEnergy  -4
+COHPendEnergy     4
+cohpsteps 10
+basisSet Bunge
+basisfunctions Na 3s 2p
+basisfunctions Cl 3s 3p
+writeGrossPopulation
+cohpbetween atom 1 and atom 6
+cohpGenerator from 0.1 to 4.0 orbitalwise
+printMofeAtomWise
+BWDF
+BWDFCOHP

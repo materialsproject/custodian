@@ -1,12 +1,11 @@
 # Copyright (c) Pymatgen Development Team.
 # Distributed under the terms of the MIT License.
 
-import os
 import shutil
+import tempfile
 import time
 import unittest
 import warnings
-from glob import glob
 
 from pymatgen.io.cp2k.inputs import Keyword, KeywordList
 from pymatgen.io.cp2k.sets import StaticSet
@@ -25,24 +24,17 @@ from tests.conftest import TEST_FILES
 TEST_FILES_DIR = f"{TEST_FILES}/cp2k"
 
 
-def clean_dir(dct) -> None:
-    for file in glob(os.path.join(dct, "error.*.tar.gz")):
-        os.remove(file)
-    for file in glob(os.path.join(dct, "custodian.chk.*.tar.gz")):
-        os.remove(file)
-
-
 class HandlerTests(unittest.TestCase):
     def setUp(self) -> None:
         warnings.filterwarnings("ignore")
 
-        clean_dir(TEST_FILES_DIR)
-
         time.sleep(1)  # for frozenhandler
 
-        shutil.copy(f"{TEST_FILES_DIR}/cp2k.inp.orig", f"{TEST_FILES_DIR}/cp2k.inp")
-
-        self.input_file = f"{TEST_FILES_DIR}/cp2k.inp"
+        # Handlers modify the input in place, so work on a copy outside the fixture directory.
+        tmp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp_dir.cleanup)
+        self.input_file = f"{tmp_dir.name}/cp2k.inp"
+        shutil.copy(f"{TEST_FILES_DIR}/cp2k.inp.orig", self.input_file)
 
         self.output_file_preconditioner = f"{TEST_FILES_DIR}/cp2k.out.precondstuck"
         self.output_file_cholesky = f"{TEST_FILES_DIR}/cp2k.out.cholesky"

@@ -4,11 +4,11 @@ import logging
 import math
 import os
 import shutil
+import signal
 import subprocess
 from shutil import which
 
 import numpy as np
-import psutil
 from monty.serialization import dumpfn, loadfn
 from monty.shutil import decompress_dir
 from pymatgen.core.structure import Structure
@@ -87,6 +87,7 @@ class VaspJob(Job):
         copy_magmom=False,
         auto_continue=False,
         update_incar=False,
+        terminate_timeout: float = 10.0,
     ) -> None:
         """
         This constructor is necessarily complex due to the need for
@@ -158,6 +159,9 @@ class VaspJob(Job):
                 already present in the INCAR will be updated, i.e., no new parameters will be
                 added even if they are in the final vasprun.xml. Note that settings_override take
                 precedence over updated params.
+            terminate_timeout (float): Timeout in seconds to wait for graceful
+                termination (SIGTERM) before escalating to SIGKILL. Large MPI
+                jobs may need longer timeouts. Defaults to 10.0 seconds.
         """
         self.vasp_cmd = tuple(vasp_cmd)
         self.output_file = output_file
@@ -174,6 +178,7 @@ class VaspJob(Job):
         self.copy_magmom = copy_magmom
         self.auto_continue = auto_continue
         self.update_incar = update_incar
+        self.terminate_timeout = terminate_timeout
 
         if SENTRY_DSN:
             # if using Sentry logging, add specific VASP executable to scope
@@ -297,8 +302,10 @@ class VaspJob(Job):
             open(os.path.join(directory, self.stderr_file), "w", buffering=1) as f_err,
         ):
             # use line buffering for stderr
-            return subprocess.Popen(cmd, cwd=directory, stdout=f_std, stderr=f_err, start_new_session=True)
-            # pylint: disable=R1732
+            self._vasp_process = subprocess.Popen(
+                cmd, cwd=directory, stdout=f_std, stderr=f_err, start_new_session=True
+            )
+            return self._vasp_process
 
     def postprocess(self, directory="./") -> None:
         """
@@ -728,40 +735,78 @@ class VaspJob(Job):
             for key in sorted(energies):
                 file.write(f"{key} {energies[key]}\n")
 
-    def terminate(self, directory="./") -> None:
-        """
-        Kill all VASP processes associated with the current job.
-        This is done by looping over all processes and selecting the ones
-        that contain "vasp" as well as access files (vasprun.xml in particular)
-        in the custodian working directory.
-        There is also a safety that kills all VASP processes if none of the
-        processes can be killed (This is bad if more than one VASP runs are
-        simultaneously executed on the same node). However, this should never
-        happen.
-        """
-        work_dir = directory
-        logger.info(f"Killing VASP processes in {work_dir=}.")
-        for proc in psutil.process_iter():
-            try:
-                if "vasp" in proc.name().lower():
-                    open_paths = [file.path for file in proc.open_files()]
-                    vasprun_path = os.path.join(work_dir, "vasprun.xml")
-                    if (vasprun_path in open_paths) and psutil.pid_exists(proc.pid):
-                        proc.kill()
-                        return
-            except (psutil.NoSuchProcess, psutil.AccessDenied) as exc:
-                logger.warning(f"Exception {exc} encountered while killing VASP.")
-                continue
+    def terminate(self, directory: str = "./") -> None:
+        """Kill all VASP processes associated with the current job.
 
-        logger.warning(
-            f"Killing VASP processes in {work_dir=} failed with subprocess.Popen.terminate(). Resorting to 'killall'."
-        )
-        cmds = self.vasp_cmd
-        if self.gamma_vasp_cmd:
-            cmds += self.gamma_vasp_cmd
-        for cmd in cmds:
-            if "vasp" in cmd:
-                subprocess.run(["killall", f"{cmd}"], check=False)
+        Tries to kill the entire process group (safest for MPI jobs), then waits
+        to confirm termination. Escalates SIGTERM → SIGKILL → parent process fallback.
+
+        Note: The parent process fallback may leave behind ghost MPI child processes
+        (less likely with srun since SLURM purportedly cleans up process trees).
+
+        Args:
+            directory: Unused, kept for API compatibility with base class.
+        """
+        pid = self._vasp_process.pid
+
+        if self._vasp_process.poll() is not None:
+            logger.warning(f"Process {pid} already terminated")
+            return
+
+        if os.name != "nt":
+            # Look up process group ID
+            try:
+                pgid = os.getpgid(pid)
+            except ProcessLookupError:
+                logger.warning(f"Process group for {pid} not found")
+                return
+
+            # Send SIGTERM to the entire process group
+            logger.info(f"Sending SIGTERM to process group {pgid}")
+            try:
+                os.killpg(pgid, signal.SIGTERM)
+            except ProcessLookupError:
+                logger.warning(f"Process group {pgid} not found")
+                return
+            except OSError as exc:
+                logger.warning(f"SIGTERM to process group {pgid} failed: {exc}")
+            else:
+                # Wait for graceful termination (only if SIGTERM was sent)
+                try:
+                    self._vasp_process.wait(timeout=self.terminate_timeout)
+                    logger.info(f"Process {pid} terminated gracefully")
+                    return
+                except subprocess.TimeoutExpired:
+                    logger.warning(f"SIGTERM timeout ({self.terminate_timeout}s), sending SIGKILL")
+
+            # Escalate to SIGKILL
+            logger.info(f"Sending SIGKILL to process group {pgid}")
+            try:
+                os.killpg(pgid, signal.SIGKILL)
+            except ProcessLookupError:
+                logger.warning(f"Process group {pgid} not found")
+                return
+            except OSError as exc:
+                logger.warning(f"SIGKILL to process group {pgid} failed: {exc}")
+            else:
+                # Wait for process to die (only if SIGKILL was sent)
+                try:
+                    self._vasp_process.wait(timeout=self.terminate_timeout)
+                    logger.info(f"Process {pid} killed with SIGKILL")
+                    return
+                except subprocess.TimeoutExpired:
+                    pass  # Fall through to parent process fallback
+
+        # Fall back to killing the parent launcher process (Windows or if above failed)
+        logger.warning(f"Falling back to killing parent process {pid}")
+        try:
+            self._vasp_process.terminate()
+            self._vasp_process.wait(timeout=self.terminate_timeout)
+            logger.info(f"Process {pid} terminated")
+        except subprocess.TimeoutExpired:
+            self._vasp_process.kill()
+            self._vasp_process.wait()
+            logger.info(f"Process {pid} killed")
 
 
 class VaspNEBJob(VaspJob):
@@ -931,13 +976,14 @@ class VaspNEBJob(VaspJob):
             open(os.path.join(directory, self.stderr_file), "w", buffering=1) as f_err,
         ):
             # Use line buffering for stderr
-            return subprocess.Popen(
+            self._vasp_process = subprocess.Popen(
                 cmd,
                 cwd=directory,
                 stdout=f_std,
                 stderr=f_err,
                 start_new_session=True,
-            )  # pylint: disable=R1732
+            )
+            return self._vasp_process
 
     def postprocess(self, directory="./") -> None:
         """Postprocessing includes renaming and gzipping where necessary."""
@@ -1014,6 +1060,9 @@ def _gamma_point_only_check(vis: VaspInput) -> bool:
     """
     Check if only a single k-point is used in this calculation.
 
+    Additionally, ensure that density functional perturbation theory
+    (DFPT) calculations are not being run - these cannot use Gamma-only.
+
     Parameters
     -----------
     vis: VaspInput, the VASP input set for the calculation
@@ -1023,15 +1072,15 @@ def _gamma_point_only_check(vis: VaspInput) -> bool:
     bool: True --> use vasp_gam, False --> use vasp_std
     """
     kpts = vis["KPOINTS"]
-    if (
-        kpts is not None
-        and kpts.style == Kpoints.supported_modes.Gamma
-        and tuple(kpts.kpts[0]) == (1, 1, 1)
-        and all(abs(ks) < 1.0e-6 for ks in kpts.kpts_shift)
-    ):
+
+    if any(vis["INCAR"].get(k, False) for k in ("LEPSILON", "LOPTICS")):
+        # Prevent VASP gamma from being run on DFPT tasks.
+        return False
+
+    if kpts is not None and tuple(kpts.kpts[0]) == (1, 1, 1) and all(abs(ks) < 1.0e-6 for ks in kpts.kpts_shift):
         return True
 
-    if (kspacing := vis["INCAR"].get("KSPACING")) is not None and vis["INCAR"].get("KGAMMA", True):
+    if (kspacing := vis["INCAR"].get("KSPACING")) is not None:
         # Get number of kpoints per axis according to the formula given by VASP:
         # https://www.vasp.at/wiki/index.php/KSPACING
         # Note that the VASP definition of the closure relation between reciprocal

@@ -1,0 +1,31 @@
+  NWRITE =      1   
+  LPETIM =      F 
+  PREC   = Accurate 
+  ISPIN  =      1 
+  ENCUT  =    500
+  NPAR = 4
+  ADDGRID = .TRUE.
+  NBANDS = 32
+   
+  LWAVE = .TRUE.
+  EDIFF  =  1E-08
+  LREAL  = .FALSE.
+  ALGO = Normal
+
+  NELMIN =      4
+  NELM = 200
+  LCHARG = .FALSE. 
+
+  EDIFFG =     1E-06
+  NSW    =      0 
+  IBRION =      2 
+  ISIF   =      3 
+
+  ISYM   =      -1 
+  POTIM  =    0.5 
+    
+  EMIN   =    10.0 
+  EMAX   =   -10.0
+  ISMEAR =     -5 
+  SIGMA = 0.05
+ 

@@ -13,7 +13,7 @@ from monty.os import cd
 
 from custodian import __version__ as CURRENT_VER
 
-NEW_VER = datetime.datetime.now(tz=datetime.UTC).strftime("%Y.%-m.%-d")
+NEW_VER = datetime.datetime.now().strftime("%Y.%-m.%-d")
 
 
 @task
@@ -77,7 +77,7 @@ def set_ver(ctx) -> None:
     with open("pyproject.toml", "w") as file:
         file.write("\n".join(lines) + "\n")
 
-    ctx.run("ruff check --fix custodian")
+    ctx.run("ruff check --fix src")
     ctx.run("ruff format pyproject.toml")
 
 

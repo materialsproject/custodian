@@ -3,6 +3,7 @@ import shutil
 
 import pytest
 
+from custodian.utils import tracked_lru_cache
 from custodian.vasp.validators import VaspAECCARValidator, VaspFilesValidator, VaspNpTMDValidator, VasprunXMLValidator
 from tests.conftest import TEST_FILES
 
@@ -10,8 +11,6 @@ from tests.conftest import TEST_FILES
 @pytest.fixture(autouse=True)
 def _clear_tracked_cache() -> None:
     """Clear the cache of the stored functions between the tests."""
-    from custodian.utils import tracked_lru_cache
-
     tracked_lru_cache.tracked_cache_clear()
 
 
@@ -54,17 +53,14 @@ class TestVaspFilesValidator:
 class TestVaspNpTMDValidator:
     def test_check_and_correct(self) -> None:
         # NPT-AIMD using correct VASP
-        os.chdir(f"{TEST_FILES}/npt_common")
         handler = VaspNpTMDValidator()
-        assert not handler.check()
+        assert not handler.check(directory=f"{TEST_FILES}/npt_common")
 
         # NVT-AIMD using correct VASP
-        os.chdir(f"{TEST_FILES}/npt_nvt")
-        assert not handler.check()
+        assert not handler.check(directory=f"{TEST_FILES}/npt_nvt")
 
         # NPT-AIMD using incorrect VASP
-        os.chdir(f"{TEST_FILES}/npt_bad_vasp")
-        assert handler.check()
+        assert handler.check(directory=f"{TEST_FILES}/npt_bad_vasp")
 
     def test_as_dict(self) -> None:
         handler = VaspNpTMDValidator()

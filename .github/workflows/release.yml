@@ -2,25 +2,42 @@ name: Release
 
 on:
   release:
-    types: [created]
+    types: [published]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test:
     # run test.yml first to ensure that the test suite is passing
     uses: ./.github/workflows/test.yml
 
-  build:
+  release:
     needs: test
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/pymatgen
+    permissions:
+      # For PyPI trusted publishing
+      id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repo
+        uses: actions/checkout@v4
 
-      - name: release
+      - name: Install uv.
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Build source distribution and wheel
         run: |
-          pip install build twine
-          python -m build
-          twine upload --skip-existing dist/*.tar.gz
-        env:
-          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+          uv build
+
+      - name: Publish to PyPI or TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+          verbose: true

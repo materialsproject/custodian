@@ -178,7 +178,8 @@ class Custodian:
             terminate_on_nonzero_returncode (bool): If True, a non-zero return
                 code on any Job will result in a termination. Defaults to True.
             directory (str): The directory to run the jobs in. Defaults to
-                the current working directory.
+                the current working directory. If you would like to have the
+                jobs run in a temporary directory, use `scratch_dir` instead.
             **kwargs: Any other kwargs are ignored. This is to allow for easy
                  subclassing and instantiation from a dict.
         """
@@ -365,15 +366,18 @@ class Custodian:
             MaxCorrectionsError: if max_errors is reached
             MaxCorrectionsPerHandlerError: if max_errors_per_handler is reached
         """
+        original_directory = self.directory
         with ScratchDir(
             self.scratch_dir,
             create_symbolic_link=True,
             copy_to_current_on_exit=True,
             copy_from_current_on_enter=True,
         ) as temp_dir:
+            if self.scratch_dir:
+                self.directory = temp_dir  # reset self.directory to the temp_dir
             self.total_errors = 0
             start = datetime.datetime.now()
-            logger.info(f"Run started at {start} in {temp_dir}.")
+            logger.info(f"Run started at {start} in {self.directory}")
             v = sys.version.replace("\n", " ")
             logger.info(f"Custodian running on Python version {v}")
             host, cluster = get_execution_host_info()
@@ -396,17 +400,21 @@ class Custodian:
                     raise
             finally:
                 # Log the corrections to a json file.
-                logger.info(f"Logging to {os.path.join(self.directory, Custodian.LOG_FILE)}...")
+                logger.info(f"Logging to {os.path.join(self.directory, Custodian.LOG_FILE)}")
                 dumpfn(self.run_log, os.path.join(self.directory, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
                 end = datetime.datetime.now()
                 logger.info(f"Run ended at {end}.")
                 run_time = end - start
                 logger.info(f"Run completed. Total time taken = {run_time}.")
                 if self.gzipped_output:
-                    gzip_dir(".")
+                    gzip_dir(self.directory)
 
             # Cleanup checkpoint files (if any) if run is successful.
             Custodian._delete_checkpoints(self.directory)
+
+        # Return self.directory as expected
+        if self.scratch_dir:
+            self.directory = original_directory
 
         return self.run_log
 

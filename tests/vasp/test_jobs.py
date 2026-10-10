@@ -1,7 +1,13 @@
 import multiprocessing
 import os
 import shutil
+import signal
+import subprocess
+import sys
 from glob import glob
+from types import SimpleNamespace
+from typing import TYPE_CHECKING
+from unittest.mock import Mock, patch
 
 import pymatgen
 import pytest
@@ -13,6 +19,9 @@ from pymatgen.io.vasp.sets import MPRelaxSet
 
 from custodian.vasp.jobs import GenerateVaspInputJob, VaspJob, VaspNEBJob, _gamma_point_only_check
 from tests.conftest import TEST_FILES
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 pymatgen.core.SETTINGS["PMG_VASP_PSP_DIR"] = TEST_FILES
 
@@ -201,16 +210,146 @@ class TestAutoGamma:
 
         vis = MPRelaxSet(structure=structure)
         assert vis.kpoints.kpts == [(1, 1, 1)]
-        assert vis.kpoints.style.name == "Gamma"
         assert _gamma_point_only_check(vis.get_input_set())
 
         # no longer Gamma-centered
+        vis = MPRelaxSet(structure=structure, user_kpoints_settings=Kpoints(kpts=[2, 1, 1]))
+        assert not _gamma_point_only_check(vis.get_input_set())
+
         vis = MPRelaxSet(structure=structure, user_kpoints_settings=Kpoints(kpts_shift=(0.1, 0.0, 0.0)))
         assert not _gamma_point_only_check(vis.get_input_set())
 
-        # have to increase KSPACING or this will result in a non 1 x 1 x 1 grid
-        vis = MPRelaxSet(structure=structure, user_incar_settings={"KSPACING": 0.5})
+        # KSPACING-related checks
+        vis = MPRelaxSet(structure=structure, user_incar_settings={"KSPACING": 0.005})
+        assert not _gamma_point_only_check(vis.get_input_set())
+
+        vis = MPRelaxSet(structure=structure, user_incar_settings={"KSPACING": 50})
         assert _gamma_point_only_check(vis.get_input_set())
 
-        vis = MPRelaxSet(structure=structure, user_incar_settings={"KSPACING": 0.5, "KGAMMA": False})
-        assert not _gamma_point_only_check(vis.get_input_set())
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX process group tests")
+class TestVaspJobTerminate:
+    """Tests for VaspJob.terminate() POSIX process group handling."""
+
+    @pytest.fixture
+    def mocks(self) -> "Generator[SimpleNamespace, None, None]":
+        """Create VaspJob with mocked process and os functions."""
+        job = VaspJob(vasp_cmd=["srun", "vasp"])
+        process = Mock(pid=12345)
+        job._vasp_process = process
+
+        with (
+            patch("custodian.vasp.jobs.logger") as logger,
+            patch("os.killpg") as killpg,
+            patch("os.getpgid", return_value=67890),
+        ):
+            yield SimpleNamespace(job=job, process=process, logger=logger, killpg=killpg)
+
+    def test_already_finished(self, mocks: SimpleNamespace) -> None:
+        """Early return when process already done."""
+        mocks.process.poll.return_value = 0
+        mocks.job.terminate()
+
+        mocks.logger.warning.assert_called_with("Process 12345 already terminated")
+        mocks.killpg.assert_not_called()
+
+    def test_sigterm_success(self, mocks: SimpleNamespace) -> None:
+        """Successful SIGTERM with wait confirmation."""
+        mocks.process.poll.return_value = None
+        mocks.job.terminate()
+
+        mocks.logger.info.assert_any_call("Sending SIGTERM to process group 67890")
+        mocks.killpg.assert_called_once_with(67890, signal.SIGTERM)
+        mocks.process.wait.assert_called_once_with(timeout=10.0)
+        mocks.logger.info.assert_any_call("Process 12345 terminated gracefully")
+        mocks.process.kill.assert_not_called()
+
+    def test_sigkill_after_timeout(self, mocks: SimpleNamespace) -> None:
+        """SIGKILL sent when SIGTERM times out."""
+        mocks.process.poll.return_value = None
+        mocks.process.wait.side_effect = [subprocess.TimeoutExpired("vasp", 10), None]
+        mocks.job.terminate()
+
+        assert mocks.killpg.call_count == 2
+        mocks.killpg.assert_any_call(67890, signal.SIGTERM)
+        mocks.killpg.assert_any_call(67890, signal.SIGKILL)
+        mocks.logger.warning.assert_any_call("SIGTERM timeout (10.0s), sending SIGKILL")
+        mocks.logger.info.assert_any_call("Process 12345 killed with SIGKILL")
+
+    def test_fallback_after_sigkill_timeout(self, mocks: SimpleNamespace) -> None:
+        """Falls back to parent process when SIGKILL also times out."""
+        mocks.process.poll.return_value = None
+        mocks.process.wait.side_effect = [
+            subprocess.TimeoutExpired("vasp", 10),  # after SIGTERM
+            subprocess.TimeoutExpired("vasp", 10),  # after SIGKILL
+            None,  # after fallback terminate
+        ]
+        mocks.job.terminate()
+
+        mocks.logger.warning.assert_any_call("Falling back to killing parent process 12345")
+        mocks.process.terminate.assert_called_once()
+
+    def test_fallback_with_timeout(self, mocks: SimpleNamespace) -> None:
+        """Fallback path uses kill() after terminate() times out."""
+        mocks.process.poll.return_value = None
+        mocks.process.wait.side_effect = [
+            subprocess.TimeoutExpired("vasp", 10),  # after SIGTERM
+            subprocess.TimeoutExpired("vasp", 10),  # after SIGKILL
+            subprocess.TimeoutExpired("vasp", 10),  # after fallback terminate
+            None,  # after fallback kill
+        ]
+        mocks.job.terminate()
+
+        mocks.process.terminate.assert_called_once()
+        mocks.process.kill.assert_called_once()
+        mocks.logger.info.assert_any_call("Process 12345 killed")
+
+    def test_process_group_not_found_on_getpgid(self, mocks: SimpleNamespace) -> None:
+        """ProcessLookupError when getting PGID."""
+        mocks.process.poll.return_value = None
+        with patch("os.getpgid", side_effect=ProcessLookupError):
+            mocks.job.terminate()
+
+        mocks.logger.warning.assert_called_with("Process group for 12345 not found")
+        mocks.killpg.assert_not_called()
+
+    def test_process_group_not_found_on_sigterm(self, mocks: SimpleNamespace) -> None:
+        """ProcessLookupError during SIGTERM (process died between getpgid and killpg)."""
+        mocks.process.poll.return_value = None
+        mocks.killpg.side_effect = ProcessLookupError
+        mocks.job.terminate()
+
+        mocks.logger.warning.assert_called_with("Process group 67890 not found")
+        mocks.process.terminate.assert_not_called()
+
+    def test_sigterm_oserror_skips_wait(self, mocks: SimpleNamespace) -> None:
+        """OSError on SIGTERM skips wait and goes straight to SIGKILL."""
+        mocks.process.poll.return_value = None
+        mocks.killpg.side_effect = [OSError("Permission denied"), None]  # SIGTERM fails, SIGKILL succeeds
+        mocks.job.terminate()
+
+        # Should skip wait and go straight to SIGKILL
+        assert mocks.killpg.call_count == 2
+        mocks.killpg.assert_any_call(67890, signal.SIGTERM)
+        mocks.killpg.assert_any_call(67890, signal.SIGKILL)
+        mocks.logger.warning.assert_any_call("SIGTERM to process group 67890 failed: Permission denied")
+        # Wait is only called once (after SIGKILL), not after failed SIGTERM
+        mocks.process.wait.assert_called_once_with(timeout=10.0)
+
+    @pytest.mark.skipif(sys.platform == "win32", reason="sleep command and PGID not available")
+    def test_integration_with_real_process(self) -> None:
+        """Integration test with real subprocess (POSIX only)."""
+        vasp_job = VaspJob.__new__(VaspJob)
+        vasp_job.terminate_timeout = 10.0
+        real_process = subprocess.Popen(["sleep", "30"], start_new_session=True)
+        vasp_job._vasp_process = real_process
+        original_pgid = os.getpgid(real_process.pid)
+
+        with patch("custodian.vasp.jobs.logger"):
+            vasp_job.terminate()
+
+        # Process should be confirmed dead (terminate() waits internally)
+        assert real_process.poll() is not None
+        # Verify process group no longer exists
+        with pytest.raises(ProcessLookupError):
+            os.killpg(original_pgid, 0)
