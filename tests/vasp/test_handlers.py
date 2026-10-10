@@ -18,6 +18,8 @@ from pymatgen.util.testing import MatSciTest
 
 from custodian.utils import tracked_lru_cache
 from custodian.vasp.handlers import (
+    MAX_CLOSE_CONTACT_STRAIN,
+    MIN_COVALENT_DISTANCE_RATIO,
     AliasingErrorHandler,
     DriftErrorHandler,
     FrozenJobErrorHandler,
@@ -35,6 +37,7 @@ from custodian.vasp.handlers import (
     VaspErrorHandler,
     WalltimeHandler,
     _get_algo,
+    _min_covalent_distance_ratio,
 )
 from custodian.vasp.interpreter import VaspModder
 from tests.conftest import TEST_FILES
@@ -947,11 +950,111 @@ class ZpotrfErrorHandlerTest(MatSciTest):
         dct = handler.correct()
         assert dct["errors"] == ["zpotrf"]
         s2 = Structure.from_file("POSCAR")
-        # NOTE (@janosh on 2023-09-10) next code line used to be:
-        # assert s2.volume == pytest.approx(s1.volume * 1.2**3)
-        # unclear why s2.volume changed
+        # No close contacts in this structure, so no strain and no POTIM change.
         assert s2.volume == pytest.approx(s1.volume)
         assert s1.volume == pytest.approx(64.346221)
+        assert not any(a["dict"] == "POSCAR" for a in dct["actions"] if "dict" in a)
+        assert "POTIM" not in Incar.from_file("INCAR")
+
+    @pytest.mark.parametrize(("fe_o_dist", "capped"), [(1.4, False), (0.8, True)])
+    def test_first_step_close_contact(self, fe_o_dist, capped) -> None:
+        shutil.copy("OSZICAR.empty", "OSZICAR")
+        s1 = Structure.from_file("POSCAR")
+        # Move one O next to Fe (r_cov sum ~2.08 A) to create a close contact.
+        coords = s1[2].coords.copy()
+        coords[0] += fe_o_dist
+        s1.replace(4, "O", coords, coords_are_cartesian=True)
+        s1.to(filename="POSCAR")
+        ratio = _min_covalent_distance_ratio(s1)
+        assert ratio < MIN_COVALENT_DISTANCE_RATIO
+        handler = VaspErrorHandler("vasp.out")
+        assert handler.check() is True
+        dct = handler.correct()
+        assert dct["errors"] == ["zpotrf"]
+        s2 = Structure.from_file("POSCAR")
+        vol_ratio = s2.volume / s1.volume
+        assert 1 < vol_ratio <= (1 + MAX_CLOSE_CONTACT_STRAIN) ** 3 + 1e-6
+        if capped:
+            assert vol_ratio == pytest.approx((1 + MAX_CLOSE_CONTACT_STRAIN) ** 3)
+        else:
+            assert vol_ratio == pytest.approx((MIN_COVALENT_DISTANCE_RATIO / ratio) ** 3)
+            assert _min_covalent_distance_ratio(s2) == pytest.approx(MIN_COVALENT_DISTANCE_RATIO)
+
+    @pytest.mark.parametrize("isif", [None, 0, 2, 4, 5])
+    def test_first_step_close_contact_fixed_cell(self, isif) -> None:
+        """With a fixed volume (e.g. slabs at the default ISIF = 2), the cell is never changed and no
+        zpotrf correction is made, so the error is unrecoverable."""
+        shutil.copy("OSZICAR.empty", "OSZICAR")
+        structure = Structure.from_file("POSCAR")
+        coords = structure[2].coords.copy()
+        coords[0] += 1.4
+        structure.replace(4, "O", coords, coords_are_cartesian=True)
+        structure.to(filename="POSCAR")
+        incar = Incar.from_file("INCAR")
+        del incar["ISIF"]
+        incar["ISYM"] = 2
+        if isif is not None:
+            incar["ISIF"] = isif
+        incar.write_file("INCAR")
+        for fname in ("CHGCAR", "WAVECAR"):
+            Path(fname).write_text("dummy")
+        handler = VaspErrorHandler("vasp.out")
+        assert handler.check() is True
+        with pytest.warns(UserWarning, match="ISIF does not allow volume changes"):
+            dct = handler.correct()
+        assert dct["errors"] == ["zpotrf"]
+        assert dct["actions"] == []
+        assert Structure.from_file("POSCAR") == structure
+        assert Incar.from_file("INCAR") == incar
+        assert os.path.isfile("CHGCAR")
+        assert os.path.isfile("WAVECAR")
+
+    @pytest.mark.parametrize(("oszicar", "close_contact"), [("OSZICAR.empty", True), ("OSZICAR.one_step", False)])
+    def test_delete_chgcar_wavecar(self, oszicar, close_contact) -> None:
+        """CHGCAR/WAVECAR are deleted only when the structure is changed."""
+        shutil.copy(oszicar, "OSZICAR")
+        if close_contact:
+            structure = Structure.from_file("POSCAR")
+            coords = structure[2].coords.copy()
+            coords[0] += 1.4
+            structure.replace(4, "O", coords, coords_are_cartesian=True)
+            structure.to(filename="POSCAR")
+        for fname in ("CHGCAR", "WAVECAR"):
+            Path(fname).write_text("dummy")
+        handler = VaspErrorHandler("vasp.out")
+        assert handler.check() is True
+        handler.correct()
+        assert os.path.isfile("CHGCAR") is not close_contact
+        assert os.path.isfile("WAVECAR") is not close_contact
+
+    def test_static_run_unrecoverable(self) -> None:
+        """Static run with symmetry already off: nothing to change, so no actions (unrecoverable)."""
+        shutil.copy("OSZICAR.empty", "OSZICAR")
+        incar = Incar.from_file("INCAR")
+        incar.update({"NSW": 0, "ISYM": 0})
+        incar.write_file("INCAR")
+        handler = VaspErrorHandler("vasp.out")
+        assert handler.check() is True
+        assert handler.correct()["actions"] == []
+
+    def test_no_delete_chgcar_wavecar_high_icharg(self) -> None:
+        shutil.copy("OSZICAR.empty", "OSZICAR")
+        structure = Structure.from_file("POSCAR")
+        coords = structure[2].coords.copy()
+        coords[0] += 1.4
+        structure.replace(4, "O", coords, coords_are_cartesian=True)
+        structure.to(filename="POSCAR")
+        incar = Incar.from_file("INCAR")
+        incar["ICHARG"] = 11
+        incar.write_file("INCAR")
+        for fname in ("CHGCAR", "WAVECAR"):
+            Path(fname).write_text("dummy")
+        handler = VaspErrorHandler("vasp.out")
+        assert handler.check() is True
+        dct = handler.correct()
+        assert not any("file" in a for a in dct["actions"])
+        assert os.path.isfile("CHGCAR")
+        assert os.path.isfile("WAVECAR")
 
     def test_potim_correction(self) -> None:
         shutil.copy("OSZICAR.one_step", "OSZICAR")
