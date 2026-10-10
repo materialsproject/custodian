@@ -142,13 +142,18 @@ def _fallback_algo(incar: Incar) -> str:
     return "Normal"
 
 
-def _correct_grad_not_orth(incar: Incar, errors: set[str], error_count: int, directory: str) -> list[dict]:
+def _correct_grad_not_orth(incar: Incar, errors: set[str], error_count: Counter, directory: str) -> list[dict]:
     """Return corrections for a non-orthogonal EDWAV gradient.
+
+    Without a simultaneous algo_tet, the ladder is: a different ALGO if ALGO = All/Damped,
+    then a one-off 10% increase in NBANDS, then unrecoverable. At most two corrections are made.
 
     Args:
         incar (Incar): Current INCAR.
         errors (set[str]): All errors detected in this check.
-        error_count (int): Number of previous grad_not_orth corrections without a simultaneous algo_tet.
+        error_count (Counter): The handler's error counts. The "grad_not_orth" (corrections made
+            without a simultaneous algo_tet) and "grad_not_orth_nbands" (NBANDS increases) counts
+            are updated here.
         directory (str): Calculation directory, used to read NBANDS from the OUTCAR.
 
     Returns:
@@ -164,17 +169,24 @@ def _correct_grad_not_orth(incar: Incar, errors: set[str], error_count: int, dir
     # Otherwise the error is numerical: the wavefunctions lose orthonormality in the Davidson steps.
     # VASP staff have traced it to Intel-compiled VASP on AMD CPUs (https://vasp.at/forum/viewtopic.php?p=25241)
     # and to meta-GGAs restarted from CHGCAR without TAUCAR or too few NBANDS
-    # (https://vasp.at/forum/viewtopic.php?p=33191). Try more bands first, then a different ALGO.
+    # (https://vasp.at/forum/viewtopic.php?p=33191). Moving off ALGO = All/Damped is the fix that works
+    # in practice, so it is tried first; more bands are tried once ALGO is already Normal/Fast.
     warnings.warn(
         "EDWAV error reported by VASP without a simultaneous algo_tet error. This has been traced to "
         "Intel-compiled VASP on AMD CPUs, where a GNU or AOCC build avoids it, and, for meta-GGAs restarted "
         "from CHGCAR, to a missing TAUCAR.",
         UserWarning,
     )
-    if error_count == 0 and (nbands := incar.get("NBANDS") or VaspErrorHandler._get_nbands_from_outcar(directory)):
-        return [{"dict": "INCAR", "action": {"_set": {"NBANDS": max(int(1.1 * nbands), nbands + 1)}}}]
-    if error_count <= 1:
+    if error_count["grad_not_orth"] >= 2:
+        return []
+    error_count["grad_not_orth"] += 1
+    if fallback:
         return fallback
+    if error_count["grad_not_orth_nbands"] == 0 and (
+        nbands := incar.get("NBANDS") or VaspErrorHandler._get_nbands_from_outcar(directory)
+    ):
+        error_count["grad_not_orth_nbands"] += 1
+        return [{"dict": "INCAR", "action": {"_set": {"NBANDS": max(int(1.1 * nbands), nbands + 1)}}}]
     return []
 
 
@@ -741,11 +753,7 @@ class VaspErrorHandler(ErrorHandler):
                     actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
 
         if "grad_not_orth" in self.errors:
-            actions.extend(
-                _correct_grad_not_orth(vi["INCAR"], self.errors, self.error_count["grad_not_orth"], directory)
-            )
-            if "algo_tet" not in self.errors:
-                self.error_count["grad_not_orth"] += 1
+            actions.extend(_correct_grad_not_orth(vi["INCAR"], self.errors, self.error_count, directory))
 
         if self.errors & {"zheev", "eddiag"}:
             # Escalate VeryFast/Fast -> Normal -> All. ALGO = Exact is avoided since it is expensive
@@ -1047,11 +1055,7 @@ class StdErrHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": reduced_kpar}}})
 
         if "grad_not_orth" in self.errors:
-            actions.extend(
-                _correct_grad_not_orth(vi["INCAR"], self.errors, self.error_count["grad_not_orth"], directory)
-            )
-            if "algo_tet" not in self.errors:
-                self.error_count["grad_not_orth"] += 1
+            actions.extend(_correct_grad_not_orth(vi["INCAR"], self.errors, self.error_count, directory))
 
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}

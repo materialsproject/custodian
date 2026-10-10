@@ -1148,30 +1148,28 @@ GRAD_NOT_ORTH = "| EDWAV: internal error, the gradient is not orthogonal 2 1 -8.
 @pytest.mark.parametrize("algo", ["All", "Conjugate", "Damped", "Normal"])
 @pytest.mark.parametrize("functional", [{}, {"METAGGA": "SCAN"}, {"LHFCALC": True}])
 def test_stderr_gradient_not_orthogonal(tmp_path, algo, functional) -> None:
-    """Without algo_tet: NBANDS first, then the ALGO fallback, then give up."""
+    """Without algo_tet: the ALGO fallback (for All/Damped), then more NBANDS, then give up."""
     Incar({"ALGO": algo, "NBANDS": 40, **functional}).write_file(tmp_path / "INCAR")
     stderr = tmp_path / "std_err.txt"
     stderr.write_text(GRAD_NOT_ORTH)
     handler = StdErrHandler()
-    assert handler.check(directory=tmp_path)
-    with pytest.warns(UserWarning, match="TAUCAR"):
-        result = handler.correct(directory=tmp_path)
-    assert result["errors"] == ["grad_not_orth"]
-    assert result["actions"] == [{"dict": "INCAR", "action": {"_set": {"NBANDS": 44}}}]
+    fallback_algo = "Normal" if functional or algo == "Normal" else "Fast"
+    expected = [
+        [{"dict": "INCAR", "action": {"_set": {"NBANDS": 44}}}],
+        [],
+    ]
+    if algo != "Normal":
+        expected.insert(0, [{"dict": "INCAR", "action": {"_set": {"ALGO": fallback_algo}}}])
+    for actions in expected:
+        assert handler.check(directory=tmp_path)
+        with pytest.warns(UserWarning, match="TAUCAR"):
+            result = handler.correct(directory=tmp_path)
+        assert result["errors"] == ["grad_not_orth"]
+        assert result["actions"] == actions
     incar = Incar.from_file(tmp_path / "INCAR")
-    assert (incar["NBANDS"], incar["ALGO"]) == (44, algo)
+    assert (incar["NBANDS"], incar["ALGO"]) == (44, fallback_algo)
     with tarfile.open(tmp_path / "error.1.tar.gz") as backup:
         assert "error.1/std_err.txt" in backup.getnames()
-
-    assert handler.check(directory=tmp_path)
-    with pytest.warns(UserWarning, match="TAUCAR"):
-        result = handler.correct(directory=tmp_path)
-    expected_algo = "Normal" if functional or algo == "Normal" else "Fast"
-    assert result["actions"] == (
-        [] if algo == "Normal" else [{"dict": "INCAR", "action": {"_set": {"ALGO": expected_algo}}}]
-    )
-    incar = Incar.from_file(tmp_path / "INCAR")
-    assert (incar["NBANDS"], incar["ALGO"]) == (44, expected_algo)
 
     # Unrecoverable: no further changes, even if ALGO was switched back by another handler.
     Incar({**incar, "ALGO": algo}).write_file(tmp_path / "INCAR")
@@ -1186,7 +1184,7 @@ def test_stderr_gradient_not_orthogonal(tmp_path, algo, functional) -> None:
 
 def test_stderr_gradient_not_orthogonal_nbands_from_outcar(tmp_path) -> None:
     """NBANDS is read from the OUTCAR when it is not set in the INCAR."""
-    Incar({"ALGO": "All"}).write_file(tmp_path / "INCAR")
+    Incar({"ALGO": "Normal"}).write_file(tmp_path / "INCAR")
     shutil.copy(f"{TEST_FILES}/OUTCAR_auto_nbands", tmp_path / "OUTCAR")
     (tmp_path / "std_err.txt").write_text(GRAD_NOT_ORTH)
     handler = StdErrHandler()
@@ -1197,7 +1195,7 @@ def test_stderr_gradient_not_orthogonal_nbands_from_outcar(tmp_path) -> None:
 
 
 def test_gradient_not_orthogonal_without_nbands(tmp_path) -> None:
-    """If NBANDS cannot be determined, go straight to the ALGO fallback, then give up."""
+    """If NBANDS cannot be determined, only the ALGO fallback is available (at most twice), then give up."""
     Incar({"ALGO": "All"}).write_file(tmp_path / "INCAR")
     (tmp_path / "vasp.out").write_text(GRAD_NOT_ORTH)
     handler = VaspErrorHandler()
