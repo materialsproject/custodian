@@ -1125,10 +1125,11 @@ class AliasingErrorHandler(ErrorHandler):
 class DriftErrorHandler(ErrorHandler):
     """Corrects for total drift exceeding the force convergence criteria.
 
-    Drift is reduced by improving the accuracy of the forces, in this order:
-    PREC = Accurate, then ADDGRID = True, then a one-off 30% increase in ENCUT.
-    PREC = High with ENAUG is not used, since PREC = High is deprecated and
-    ENAUG only has an effect with the deprecated PREC settings.
+    Drift is reduced by setting PREC = Accurate, which gives more accurate forces. If PREC is
+    already Accurate, the error is unrecoverable. PREC = High with ENAUG is not used, since
+    PREC = High is deprecated and ENAUG only has an effect with the deprecated PREC settings.
+    ADDGRID and ENCUT are never changed: VASP advises against setting ADDGRID by default, and
+    ENCUT is the user's choice of basis.
     """
 
     def __init__(self, max_drift=None, to_average=3, enaug_multiply=2) -> None:
@@ -1152,7 +1153,6 @@ class DriftErrorHandler(ErrorHandler):
             )
         # Effective max drift for the current job, recomputed on every check
         self.curr_max_drift = max_drift
-        self.encut_raised = False
 
     def _get_curr_drift(self, outcar) -> float:
         drifts = outcar.data.get("drift", [])[::-1][: self.to_average]
@@ -1182,30 +1182,21 @@ class DriftErrorHandler(ErrorHandler):
 
     def correct(self, directory="./"):
         """Perform corrections."""
-        backup(VASP_BACKUP_FILES, directory=directory)
-        actions = []
         vi = VaspInput.from_directory(directory)
-
-        incar = vi["INCAR"]
         outcar = load_outcar(os.path.join(directory, "OUTCAR"))
         errors = [f"Excessive drift {self._get_curr_drift(outcar)} > {self.curr_max_drift}"]
 
+        # PREC = Accurate is the only correction, so there is nothing left to try once it is set.
+        if str(vi["INCAR"].get("PREC", "Normal")).lower() == "accurate":
+            return {"errors": errors, "actions": None}
+
+        backup(VASP_BACKUP_FILES, directory=directory)
+        actions = []
         # Move CONTCAR to POSCAR if valid
         if is_valid_poscar("CONTCAR", directory):
             actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
-
         # Denser FFT grid reduces egg-box effects and noise in the forces
-        if str(incar.get("PREC", "Normal")).lower() != "accurate":
-            actions.append({"dict": "INCAR", "action": {"_set": {"PREC": "Accurate"}}})
-        # Finer support grid for the augmentation charges
-        elif incar.get("ADDGRID") is not True:
-            actions.append({"dict": "INCAR", "action": {"_set": {"ADDGRID": True}}})
-        # Drift is very sensitive to ENCUT (especially with SCAN); raise it only once
-        elif incar.get("ENCUT") and not self.encut_raised:
-            actions.append({"dict": "INCAR", "action": {"_set": {"ENCUT": round(1.3 * incar["ENCUT"])}}})
-            self.encut_raised = True
-        else:
-            return {"errors": errors, "actions": None}
+        actions.append({"dict": "INCAR", "action": {"_set": {"PREC": "Accurate"}}})
 
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": errors, "actions": actions}

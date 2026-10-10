@@ -1241,25 +1241,14 @@ class DriftErrorHandlerTest(MatSciTest):
         incar = Incar.from_file("INCAR")
         assert incar["PREC"] == "Accurate"
         assert "ENAUG" not in incar
-        assert "ADDGRID" not in incar
-        assert incar["ENCUT"] == 520
 
-        # PREC = Accurate -> ADDGRID = True
-        handler.correct()
-        incar = Incar.from_file("INCAR")
-        assert incar["ADDGRID"] is True
-        assert incar["ENCUT"] == 520
-
-        # ADDGRID = True -> ENCUT raised by 30%, once
-        handler.correct()
-        incar = Incar.from_file("INCAR")
-        assert incar["ENCUT"] == 676
-
-        # Nothing left to try
+        # PREC = Accurate -> nothing left to try; ADDGRID and ENCUT are never changed
         dct = handler.correct()
         assert dct["actions"] is None
         assert len(dct["errors"]) == 1
-        assert Incar.from_file("INCAR")["ENCUT"] == 676
+        incar = Incar.from_file("INCAR")
+        assert "ADDGRID" not in incar
+        assert incar["ENCUT"] == 520
 
     @pytest.mark.parametrize("prec", ["high", "Medium", "Low", "Normal"])
     def test_correct_prec_to_accurate(self, prec) -> None:
@@ -1272,25 +1261,17 @@ class DriftErrorHandlerTest(MatSciTest):
         assert incar["PREC"] == "Accurate"
         assert "ENAUG" not in incar
 
-    def test_correct_lowercase_accurate_sets_addgrid(self) -> None:
+    @pytest.mark.parametrize("prec", ["Accurate", "accurate"])
+    def test_correct_accurate_unrecoverable(self, prec) -> None:
         incar = Incar.from_file("INCAR")
-        incar["PREC"] = "accurate"
-        incar.write_file("INCAR")
-        handler = DriftErrorHandler(max_drift=0.0001)
-        handler.correct()
-        incar = Incar.from_file("INCAR")
-        assert incar["ADDGRID"] is True
-        assert incar["PREC"].lower() == "accurate"
-
-    def test_correct_no_encut_unrecoverable(self) -> None:
-        incar = Incar.from_file("INCAR")
-        incar.update({"PREC": "Accurate", "ADDGRID": True})
-        del incar["ENCUT"]
+        incar["PREC"] = prec
         incar.write_file("INCAR")
         handler = DriftErrorHandler(max_drift=0.0001)
         dct = handler.correct()
         assert dct["actions"] is None
-        assert "ENCUT" not in Incar.from_file("INCAR")
+        assert Incar.from_file("INCAR") == incar
+        assert not (self.tmp_path / "POSCAR").exists()
+        assert not glob(f"{self.tmp_path}/error.*.tar.gz")
 
     def test_enaug_multiply_deprecated(self) -> None:
         with pytest.warns(DeprecationWarning, match="enaug_multiply"):
