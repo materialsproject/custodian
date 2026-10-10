@@ -23,6 +23,8 @@ from monty.dev import deprecated
 from monty.io import zopen
 from monty.os.path import zpath
 from monty.serialization import loadfn
+from pymatgen.analysis.molecule_structure_comparator import CovalentRadius
+from pymatgen.core.periodic_table import Element
 from pymatgen.core.structure import Structure
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Poscar, VaspInput
 from pymatgen.io.vasp.outputs import Oszicar
@@ -57,6 +59,57 @@ VASP_BACKUP_FILES = {
     "vasp.out",
     "std_err.txt",
 }
+
+# Minimum allowed ratio of an interatomic distance to the sum of the two covalent
+# radii. Contacts below this are treated as unphysically close (e.g., ZPOTRF on the
+# first ionic step). 0.7 is a conservative heuristic; real bonds are typically >0.85.
+MIN_COVALENT_DISTANCE_RATIO = 0.7
+
+# Maximum isotropic linear strain applied in one correction to relieve close contacts.
+MAX_CLOSE_CONTACT_STRAIN = 0.1
+
+
+def _get_covalent_radius(element: Element) -> float | None:
+    """Covalent radius in Angstrom, falling back to the atomic radius if unavailable."""
+    radius = CovalentRadius.radius.get(element.symbol)
+    if radius is None and element.atomic_radius is not None:
+        radius = float(element.atomic_radius)
+    return radius
+
+
+def _min_covalent_distance_ratio(structure: Structure) -> float | None:
+    """Minimum d_ij / (r_cov_i + r_cov_j) over all site pairs, including periodic images.
+
+    Args:
+        structure: Structure to check.
+
+    Returns:
+        The minimum ratio, or None if no pair lies within MIN_COVALENT_DISTANCE_RATIO
+        of contact (or no radii are known).
+    """
+    radii = []
+    for site in structure:
+        try:
+            radii.append(_get_covalent_radius(Element(site.specie.symbol)))
+        except ValueError:  # e.g., DummySpecies
+            radii.append(None)
+    known = [r for r in radii if r is not None]
+    if not known:
+        return None
+    # Only pairs closer than threshold * (r_i + r_j) matter, so this cutoff suffices.
+    cutoff = MIN_COVALENT_DISTANCE_RATIO * 2 * max(known)
+    min_ratio = None
+    for i, neighbors in enumerate(structure.get_all_neighbors(cutoff)):
+        if radii[i] is None:
+            continue
+        for nn in neighbors:
+            r_j = radii[nn.index]
+            if r_j is None:
+                continue
+            ratio = nn.nn_distance / (radii[i] + r_j)
+            if min_ratio is None or ratio < min_ratio:
+                min_ratio = ratio
+    return min_ratio
 
 
 # See https://www.vasp.at/wiki/index.php/ALGO. Except for the spelled-out values, only the first letter
@@ -179,22 +232,52 @@ def _uses_linear_mixing(incar: dict) -> bool:
     return incar.get("ISPIN", 1) != 2 or incar.get("BMIX_MAG", 1.0) <= _LINEAR_BMIX
 
 
-def _correct_grad_not_orth(incar: Incar, errors: set[str]) -> list[dict]:
-    """Return corrections for a non-orthogonal EDWAV gradient."""
-    actions = []
-    # Often coincides with algo_tet, in which the algo_tet error handler will also resolve grad_not_orth.
-    # When not present alongside algo_tet, the grad_not_orth error is due to how VASP is compiled.
-    # Depending on the optimization flag and choice of compiler, the ALGO = All and Damped algorithms
-    # may not work. The only fix is either to change ALGO or to recompile VASP.
+def _correct_grad_not_orth(incar: Incar, errors: set[str], error_count: Counter, directory: str) -> list[dict]:
+    """Return corrections for a non-orthogonal EDWAV gradient.
+
+    Without a simultaneous algo_tet, the ladder is: a different ALGO if ALGO = All/Damped,
+    then a one-off 10% increase in NBANDS, then unrecoverable. At most two corrections are made.
+
+    Args:
+        incar (Incar): Current INCAR.
+        errors (set[str]): All errors detected in this check.
+        error_count (Counter): The handler's error counts. The "grad_not_orth" (corrections made
+            without a simultaneous algo_tet) and "grad_not_orth_nbands" (NBANDS increases) counts
+            are updated here.
+        directory (str): Calculation directory, used to read NBANDS from the OUTCAR.
+
+    Returns:
+        list[dict]: Actions to apply.
+    """
+    fallback = []
     if _get_algo(incar) in {"all", "damped"}:
-        actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": _fallback_algo(incar)}}})
-    if "algo_tet" not in errors:
-        warnings.warn(
-            "EDWAV error reported by VASP without a simultaneous algo_tet error. You may wish to consider "
-            "recompiling VASP with the -O1 optimization if you used -O2 and this error keeps cropping up.",
-            UserWarning,
-        )
-    return actions
+        fallback = [{"dict": "INCAR", "action": {"_set": {"ALGO": _fallback_algo(incar)}}}]
+    # Often coincides with algo_tet, in which case changing ALGO resolves both.
+    if "algo_tet" in errors:
+        return fallback
+
+    # Otherwise the error is numerical: the wavefunctions lose orthonormality in the Davidson steps.
+    # VASP staff have traced it to Intel-compiled VASP on AMD CPUs (https://vasp.at/forum/viewtopic.php?p=25241)
+    # and to meta-GGAs restarted from CHGCAR without TAUCAR or too few NBANDS
+    # (https://vasp.at/forum/viewtopic.php?p=33191). Moving off ALGO = All/Damped is the fix that works
+    # in practice, so it is tried first; more bands are tried once ALGO is already Normal/Fast.
+    warnings.warn(
+        "EDWAV error reported by VASP without a simultaneous algo_tet error. This has been traced to "
+        "Intel-compiled VASP on AMD CPUs, where a GNU or AOCC build avoids it, and, for meta-GGAs restarted "
+        "from CHGCAR, to a missing TAUCAR.",
+        UserWarning,
+    )
+    if error_count["grad_not_orth"] >= 2:
+        return []
+    error_count["grad_not_orth"] += 1
+    if fallback:
+        return fallback
+    if error_count["grad_not_orth_nbands"] == 0 and (
+        nbands := incar.get("NBANDS") or VaspErrorHandler._get_nbands_from_outcar(directory)
+    ):
+        error_count["grad_not_orth_nbands"] += 1
+        return [{"dict": "INCAR", "action": {"_set": {"NBANDS": max(int(1.1 * nbands), nbands + 1)}}}]
+    return []
 
 
 class VaspErrorHandler(ErrorHandler):
@@ -538,34 +621,65 @@ class VaspErrorHandler(ErrorHandler):
                 self.error_count["brmix"] += 1
 
         if "zpotrf" in self.errors:
-            # Usually caused by short bond distances. If on the first step,
-            # volume needs to be increased. Otherwise, it was due to a step
-            # being too big and POTIM should be decreased. If a static run
+            # Usually caused by short bond distances. If on the first step and
+            # atoms are too close, the volume is increased, but only if VASP is
+            # allowed to change the volume (ISIF = 3, 6 or 7). Otherwise, it was due
+            # to a step being too big and POTIM should be decreased. If a static run
             # try turning off symmetry. This also happens if NCORE or NPAR
             # is set to a large value for a small structure.
+            incar = vi["INCAR"]
+            zpotrf_actions = []
 
             try:
                 oszicar = Oszicar(os.path.join(directory, "OSZICAR"))
-                nsteps = len(oszicar.ionic_steps)
+                # Oszicar returns [{}] for an empty file, so only count populated steps.
+                nsteps = len([step for step in oszicar.ionic_steps if step])
             except Exception:
                 nsteps = 0
 
-            if vi["INCAR"].get("ISYM", 2) > 0:
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+            if incar.get("ISYM", 2) > 0:
+                zpotrf_actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
             # The natoms of 5 was chosen somewhat arbitrarily. Could be worth revisiting to fine-tune.
-            if len(vi["POSCAR"].structure) < 5 and (vi["INCAR"].get("NCORE", 1) > 1 or vi["INCAR"].get("NPAR", 1) > 1):
-                actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": 1}}})
-                if vi["INCAR"].get("NPAR", 1) > 1:
-                    actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
-            elif vi["INCAR"].get("NSW", 0) > 0:
+            if len(vi["POSCAR"].structure) < 5 and (incar.get("NCORE", 1) > 1 or incar.get("NPAR", 1) > 1):
+                zpotrf_actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": 1}}})
+                if incar.get("NPAR", 1) > 1:
+                    zpotrf_actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
+            elif incar.get("NSW", 0) > 0:
                 if nsteps == 0:
-                    s = vi["POSCAR"].structure
-                    s.apply_strain(0.2)
-                    actions.append({"dict": "POSCAR", "action": {"_set": {"structure": s.as_dict()}}})
+                    # Only expand the cell if atoms are actually too close. Scale isotropically
+                    # so the closest contact reaches the threshold, capping the linear strain.
+                    structure = vi["POSCAR"].structure
+                    min_ratio = _min_covalent_distance_ratio(structure)
+                    if min_ratio is not None and min_ratio < MIN_COVALENT_DISTANCE_RATIO:
+                        # The default ISIF (0 for MD, 2 otherwise) and ISIF = 4, 5 keep the volume fixed,
+                        # e.g. for slabs. The cell is the user's choice there, so the input is unrecoverable.
+                        if incar.get("ISIF", 2) not in {3, 6, 7}:
+                            warnings.warn(
+                                f"ZPOTRF on the first ionic step with interatomic distances down to {min_ratio:.2f} "
+                                "times the sum of covalent radii. The cell is not expanded since ISIF does not "
+                                "allow volume changes; check the input structure.",
+                                UserWarning,
+                            )
+                            zpotrf_actions = []
+                        else:
+                            scale = MIN_COVALENT_DISTANCE_RATIO / max(min_ratio, 1e-8)
+                            strain = min(scale - 1, MAX_CLOSE_CONTACT_STRAIN)
+                            structure.apply_strain(strain)
+                            zpotrf_actions.append(
+                                {"dict": "POSCAR", "action": {"_set": {"structure": structure.as_dict()}}}
+                            )
+                            # VASP recommends deleting CHGCAR/WAVECAR if incompatible with the structure.
+                            if incar.get("ICHARG", 0) < 10:
+                                zpotrf_actions += [
+                                    {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}},
+                                    {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}},
+                                ]
                 else:
-                    potim = round(vi["INCAR"].get("POTIM", 0.5) / 2.0, 2)
-                    actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
+                    potim = round(incar.get("POTIM", 0.5) / 2.0, 2)
+                    zpotrf_actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
+
+            actions.extend(zpotrf_actions)
 
         if self.errors.intersection(["subspacematrix"]):
             # Sometimes, this error can be due to parallelization issues with running across too many cores
@@ -745,7 +859,7 @@ class VaspErrorHandler(ErrorHandler):
                     actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
 
         if "grad_not_orth" in self.errors:
-            actions.extend(_correct_grad_not_orth(vi["INCAR"], self.errors))
+            actions.extend(_correct_grad_not_orth(vi["INCAR"], self.errors, self.error_count, directory))
 
         if self.errors & {"zheev", "eddiag"}:
             # Escalate VeryFast/Fast -> Normal -> All. ALGO = Exact is avoided since it is expensive
@@ -1047,7 +1161,7 @@ class StdErrHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": reduced_kpar}}})
 
         if "grad_not_orth" in self.errors:
-            actions.extend(_correct_grad_not_orth(vi["INCAR"], self.errors))
+            actions.extend(_correct_grad_not_orth(vi["INCAR"], self.errors, self.error_count, directory))
 
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}
@@ -1145,17 +1259,40 @@ class AliasingErrorHandler(ErrorHandler):
 
 
 class DriftErrorHandler(ErrorHandler):
-    """Corrects for total drift exceeding the force convergence criteria."""
+    """Corrects for total drift exceeding the force convergence criteria.
+
+    Drift is reduced by setting PREC = Accurate, which gives more accurate forces. If PREC is
+    already Accurate, the error is unrecoverable. PREC = High with ENAUG is not used, since
+    PREC = High is deprecated and ENAUG only has an effect with the deprecated PREC settings.
+    ADDGRID and ENCUT are never changed: VASP advises against setting ADDGRID by default, and
+    ENCUT is the user's choice of basis.
+    """
 
     def __init__(self, max_drift=None, to_average=3, enaug_multiply=2) -> None:
-        """Initialize the handler with max drift
+        """Initialize the handler with max drift.
+
         Args:
-            max_drift (float): This defines the max drift. Leaving this at the default of None gets the max_drift from
-                EDFIFFG.
+            max_drift (float): Max allowed drift in eV/Å. Leaving this at the default of None uses
+                -EDIFFG from the INCAR of the job being checked.
+            to_average (int): Number of most recent ionic steps over which the drift is averaged.
+            enaug_multiply (float): Deprecated and unused. Kept only so that serialized handlers
+                can still be loaded.
         """
         self.max_drift = max_drift
         self.to_average = int(to_average)
         self.enaug_multiply = enaug_multiply
+        if enaug_multiply != 2:
+            warnings.warn(
+                "enaug_multiply is deprecated and has no effect; DriftErrorHandler no longer adjusts ENAUG.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+        # Effective max drift for the current job, recomputed on every check
+        self.curr_max_drift = max_drift
+
+    def _get_curr_drift(self, outcar) -> float:
+        drifts = outcar.data.get("drift", [])[::-1][: self.to_average]
+        return np.average([np.linalg.norm(dct) for dct in drifts])
 
     def check(self, directory="./"):
         """Check for error."""
@@ -1165,8 +1302,7 @@ class DriftErrorHandler(ErrorHandler):
             # NSW check prevents accidental effects when running DFPT
             return False
 
-        if not self.max_drift:
-            self.max_drift = incar["EDIFFG"] * -1
+        self.curr_max_drift = self.max_drift or -incar["EDIFFG"]
 
         try:
             outcar = load_outcar(os.path.join(directory, "OUTCAR"))
@@ -1178,45 +1314,28 @@ class DriftErrorHandler(ErrorHandler):
             # Ensure enough steps to get average drift
             return False
 
-        curr_drift = outcar.data.get("drift", [])[::-1][: self.to_average]
-        curr_drift = np.average([np.linalg.norm(dct) for dct in curr_drift])
-        return curr_drift > self.max_drift
+        return self._get_curr_drift(outcar) > self.curr_max_drift
 
     def correct(self, directory="./"):
         """Perform corrections."""
+        vi = VaspInput.from_directory(directory)
+        outcar = load_outcar(os.path.join(directory, "OUTCAR"))
+        errors = [f"Excessive drift {self._get_curr_drift(outcar)} > {self.curr_max_drift}"]
+
+        # PREC = Accurate is the only correction, so there is nothing left to try once it is set.
+        if str(vi["INCAR"].get("PREC", "Normal")).lower() == "accurate":
+            return {"errors": errors, "actions": None}
+
         backup(VASP_BACKUP_FILES, directory=directory)
         actions = []
-        vi = VaspInput.from_directory(directory)
-
-        incar = vi["INCAR"]
-        outcar = load_outcar(os.path.join(directory, "OUTCAR"))
-
         # Move CONTCAR to POSCAR if valid
         if is_valid_poscar("CONTCAR", directory):
             actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+        # Denser FFT grid reduces egg-box effects and noise in the forces
+        actions.append({"dict": "INCAR", "action": {"_set": {"PREC": "Accurate"}}})
 
-        # Set PREC to High so ENAUG can be used to control Augmentation Grid Size
-        if incar.get("PREC", "Accurate").lower() != "high":
-            actions += [
-                {"dict": "INCAR", "action": {"_set": {"PREC": "High"}}},
-                {"dict": "INCAR", "action": {"_set": {"ENAUG": incar.get("ENCUT", 520) * 2}}},
-            ]
-        # PREC is already high and ENAUG set so just increase it
-        else:
-            actions.append(
-                {
-                    "dict": "INCAR",
-                    "action": {"_set": {"ENAUG": int(incar.get("ENAUG", 1040) * self.enaug_multiply)}},
-                }
-            )
-
-        curr_drift = outcar.data.get("drift", [])[::-1][: self.to_average]
-        curr_drift = np.average([np.linalg.norm(dct) for dct in curr_drift])
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
-        return {
-            "errors": f"Excessive drift {curr_drift} > {self.max_drift}",
-            "actions": actions,
-        }
+        return {"errors": errors, "actions": actions}
 
 
 class MeshSymmetryErrorHandler(ErrorHandler):
@@ -1566,7 +1685,6 @@ class LargeSigmaHandler(ErrorHandler):
 
             completed_ionic_steps = len(outcar.data.get("completed_ionic_steps"))
             entropies_per_atom = [0.0 for _ in range(completed_ionic_steps)]
-            n_atoms = len(Structure.from_file(os.path.join(directory, "POSCAR")))
 
             electronic_step_indices = [step[0] for step in outcar.data.get("electronic_step_indices", [])]
             smearing_entropy = outcar.data.get("smearing_entropy", [0.0 for _ in electronic_step_indices])
@@ -1592,6 +1710,10 @@ class LargeSigmaHandler(ErrorHandler):
 
     def correct(self, directory="./"):
         """Perform corrections."""
+        # entropy_per_atom is set by check(); it is absent on a fresh or deserialized handler
+        if not hasattr(self, "entropy_per_atom"):
+            self.check(directory)
+
         backup(VASP_BACKUP_FILES, directory=directory)
         actions = []
         vi = VaspInput.from_directory(directory)
@@ -1600,16 +1722,24 @@ class LargeSigmaHandler(ErrorHandler):
 
         # From F.J. dos Santos and N. Marzari, Phys. Rev. B 107, 195122 (2023),
         # DOI: 10.1103/PhysRevB.107.195122, Eq. (19)
-        # When the smearing width is acceptably small, the electronic free energy
-        # F(sigma) \approx E(0) + gamma * sigma**2 / 2
-        # where E(0) = F(sigma --> 0) is the actual ground-state energy
-        # E_entropy(sigma) = gamma * sigma**2 / 2
-        # is the contribution electronic smearing entropy
-        # We can approximate the ``optimal'' sigma to reduce to via
-        # sigma_new = [E_entropy(new) / E_entropy(current) ]**(0.5) * sigma_current,
-        # Practically, E_entropy(new) = 1 meV/atom
+        # For Gaussian smearing (ISMEAR = 0) and small sigma, the electronic free energy is
+        # F(sigma) \approx E(0) - gamma * sigma**2 / 2
+        # where E(0) = F(sigma --> 0) is the actual ground-state energy, and the
+        # smearing entropy term T*S = sigma * S(sigma) scales as sigma**2.
+        # For Methfessel-Paxton smearing of order N = ISMEAR >= 1 (M. Methfessel and
+        # A.T. Paxton, Phys. Rev. B 40, 3616 (1989)), the broadening function has vanishing
+        # moments up to order 2N + 1, so S(sigma) = O(sigma**(2N + 1)) and
+        # T*S = O(sigma**(2N + 2)) (dos Santos and Marzari, Eqs. (12), (13) and (24): N = 1
+        # removes the terms linear and quadratic in sigma from S).
+        # Hence T*S \propto sigma**p with p = 2 for ISMEAR = 0 and p = 2N + 2 otherwise,
+        # and the ``optimal'' sigma to reduce to is approximately
+        # sigma_new = [E_entropy(new) / E_entropy(current) ]**(1 / p) * sigma_current,
+        # Practically, E_entropy(new) = e_entropy_tol (default 1 meV/atom), with a 0.8 safety factor
         if sigma > self.min_sigma:
-            updated_sigma = max(self.min_sigma, 0.8 * (self.e_entropy_tol / self.entropy_per_atom) ** (0.5) * sigma)
+            exponent = 2 * ismear + 2
+            updated_sigma = max(
+                self.min_sigma, 0.8 * (self.e_entropy_tol / self.entropy_per_atom) ** (1 / exponent) * sigma
+            )
             actions.append(
                 {
                     "dict": "INCAR",

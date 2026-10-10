@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import tarfile
+import warnings
 from glob import glob
 from pathlib import Path
 from types import SimpleNamespace
@@ -18,6 +19,8 @@ from pymatgen.util.testing import MatSciTest
 
 from custodian.utils import tracked_lru_cache
 from custodian.vasp.handlers import (
+    MAX_CLOSE_CONTACT_STRAIN,
+    MIN_COVALENT_DISTANCE_RATIO,
     AliasingErrorHandler,
     DriftErrorHandler,
     FrozenJobErrorHandler,
@@ -35,6 +38,7 @@ from custodian.vasp.handlers import (
     VaspErrorHandler,
     WalltimeHandler,
     _get_algo,
+    _min_covalent_distance_ratio,
 )
 from custodian.vasp.interpreter import VaspModder
 from tests.conftest import TEST_FILES
@@ -912,6 +916,26 @@ class LargeSigmaHandlerTest(MatSciTest):
         handler = LargeSigmaHandler(output_filename=zpath("OUTCAR_pass_sigma_check"))
         assert not handler.check()
 
+    @pytest.mark.parametrize(("ismear", "exponent"), [(0, 2), (1, 4), (2, 6)])
+    def test_correct_sigma_exponent(self, ismear: int, exponent: int) -> None:
+        # T*S scales as sigma**2 for Gaussian and sigma**(2N + 2) for Methfessel-Paxton order N
+        incar = Incar.from_file("INCAR")
+        incar["ISMEAR"] = ismear
+        incar.write_file("INCAR")
+        sigma = incar["SIGMA"]
+
+        reference = LargeSigmaHandler(output_filename=zpath("OUTCAR_fail_sigma_check"))
+        assert reference.check()
+        entropy_per_atom = reference.entropy_per_atom
+
+        # correct() on a deserialized handler must work without a prior check()
+        handler = LargeSigmaHandler.from_dict(reference.as_dict())
+        assert not hasattr(handler, "entropy_per_atom")
+        dct = handler.correct()
+        assert dct["errors"] == ["LargeSigma"]
+        expected = 0.8 * (handler.e_entropy_tol / entropy_per_atom) ** (1 / exponent) * sigma
+        assert Incar.from_file("INCAR")["SIGMA"] == pytest.approx(expected, rel=1e-10)
+
     def test_no_crash_on_partial_output(self) -> None:
         # ensure that the handler doesn't crash when the OUTCAR isn't completely written
         # this prevents jobs from being killed when the handler itself crashes
@@ -957,11 +981,111 @@ class ZpotrfErrorHandlerTest(MatSciTest):
         dct = handler.correct()
         assert dct["errors"] == ["zpotrf"]
         s2 = Structure.from_file("POSCAR")
-        # NOTE (@janosh on 2023-09-10) next code line used to be:
-        # assert s2.volume == pytest.approx(s1.volume * 1.2**3)
-        # unclear why s2.volume changed
+        # No close contacts in this structure, so no strain and no POTIM change.
         assert s2.volume == pytest.approx(s1.volume)
         assert s1.volume == pytest.approx(64.346221)
+        assert not any(a["dict"] == "POSCAR" for a in dct["actions"] if "dict" in a)
+        assert "POTIM" not in Incar.from_file("INCAR")
+
+    @pytest.mark.parametrize(("fe_o_dist", "capped"), [(1.4, False), (0.8, True)])
+    def test_first_step_close_contact(self, fe_o_dist, capped) -> None:
+        shutil.copy("OSZICAR.empty", "OSZICAR")
+        s1 = Structure.from_file("POSCAR")
+        # Move one O next to Fe (r_cov sum ~2.08 A) to create a close contact.
+        coords = s1[2].coords.copy()
+        coords[0] += fe_o_dist
+        s1.replace(4, "O", coords, coords_are_cartesian=True)
+        s1.to(filename="POSCAR")
+        ratio = _min_covalent_distance_ratio(s1)
+        assert ratio < MIN_COVALENT_DISTANCE_RATIO
+        handler = VaspErrorHandler("vasp.out")
+        assert handler.check() is True
+        dct = handler.correct()
+        assert dct["errors"] == ["zpotrf"]
+        s2 = Structure.from_file("POSCAR")
+        vol_ratio = s2.volume / s1.volume
+        assert 1 < vol_ratio <= (1 + MAX_CLOSE_CONTACT_STRAIN) ** 3 + 1e-6
+        if capped:
+            assert vol_ratio == pytest.approx((1 + MAX_CLOSE_CONTACT_STRAIN) ** 3)
+        else:
+            assert vol_ratio == pytest.approx((MIN_COVALENT_DISTANCE_RATIO / ratio) ** 3)
+            assert _min_covalent_distance_ratio(s2) == pytest.approx(MIN_COVALENT_DISTANCE_RATIO)
+
+    @pytest.mark.parametrize("isif", [None, 0, 2, 4, 5])
+    def test_first_step_close_contact_fixed_cell(self, isif) -> None:
+        """With a fixed volume (e.g. slabs at the default ISIF = 2), the cell is never changed and no
+        zpotrf correction is made, so the error is unrecoverable."""
+        shutil.copy("OSZICAR.empty", "OSZICAR")
+        structure = Structure.from_file("POSCAR")
+        coords = structure[2].coords.copy()
+        coords[0] += 1.4
+        structure.replace(4, "O", coords, coords_are_cartesian=True)
+        structure.to(filename="POSCAR")
+        incar = Incar.from_file("INCAR")
+        del incar["ISIF"]
+        incar["ISYM"] = 2
+        if isif is not None:
+            incar["ISIF"] = isif
+        incar.write_file("INCAR")
+        for fname in ("CHGCAR", "WAVECAR"):
+            Path(fname).write_text("dummy")
+        handler = VaspErrorHandler("vasp.out")
+        assert handler.check() is True
+        with pytest.warns(UserWarning, match="ISIF does not allow volume changes"):
+            dct = handler.correct()
+        assert dct["errors"] == ["zpotrf"]
+        assert dct["actions"] == []
+        assert Structure.from_file("POSCAR") == structure
+        assert Incar.from_file("INCAR") == incar
+        assert os.path.isfile("CHGCAR")
+        assert os.path.isfile("WAVECAR")
+
+    @pytest.mark.parametrize(("oszicar", "close_contact"), [("OSZICAR.empty", True), ("OSZICAR.one_step", False)])
+    def test_delete_chgcar_wavecar(self, oszicar, close_contact) -> None:
+        """CHGCAR/WAVECAR are deleted only when the structure is changed."""
+        shutil.copy(oszicar, "OSZICAR")
+        if close_contact:
+            structure = Structure.from_file("POSCAR")
+            coords = structure[2].coords.copy()
+            coords[0] += 1.4
+            structure.replace(4, "O", coords, coords_are_cartesian=True)
+            structure.to(filename="POSCAR")
+        for fname in ("CHGCAR", "WAVECAR"):
+            Path(fname).write_text("dummy")
+        handler = VaspErrorHandler("vasp.out")
+        assert handler.check() is True
+        handler.correct()
+        assert os.path.isfile("CHGCAR") is not close_contact
+        assert os.path.isfile("WAVECAR") is not close_contact
+
+    def test_static_run_unrecoverable(self) -> None:
+        """Static run with symmetry already off: nothing to change, so no actions (unrecoverable)."""
+        shutil.copy("OSZICAR.empty", "OSZICAR")
+        incar = Incar.from_file("INCAR")
+        incar.update({"NSW": 0, "ISYM": 0})
+        incar.write_file("INCAR")
+        handler = VaspErrorHandler("vasp.out")
+        assert handler.check() is True
+        assert handler.correct()["actions"] == []
+
+    def test_no_delete_chgcar_wavecar_high_icharg(self) -> None:
+        shutil.copy("OSZICAR.empty", "OSZICAR")
+        structure = Structure.from_file("POSCAR")
+        coords = structure[2].coords.copy()
+        coords[0] += 1.4
+        structure.replace(4, "O", coords, coords_are_cartesian=True)
+        structure.to(filename="POSCAR")
+        incar = Incar.from_file("INCAR")
+        incar["ICHARG"] = 11
+        incar.write_file("INCAR")
+        for fname in ("CHGCAR", "WAVECAR"):
+            Path(fname).write_text("dummy")
+        handler = VaspErrorHandler("vasp.out")
+        assert handler.check() is True
+        dct = handler.correct()
+        assert not any("file" in a for a in dct["actions"])
+        assert os.path.isfile("CHGCAR")
+        assert os.path.isfile("WAVECAR")
 
     def test_potim_correction(self) -> None:
         shutil.copy("OSZICAR.one_step", "OSZICAR")
@@ -1172,28 +1296,79 @@ class KpointsTransHandlerTest(MatSciTest):
         assert tuple(kpoints.kpts[0]) == (8, 2, 2)
 
 
+GRAD_NOT_ORTH = "| EDWAV: internal error, the gradient is not orthogonal 2 1 -8.611e-4 |\n"
+
+
 @pytest.mark.parametrize("algo", ["All", "Conjugate", "Damped", "Normal"])
 @pytest.mark.parametrize("functional", [{}, {"METAGGA": "SCAN"}, {"LHFCALC": True}])
 def test_stderr_gradient_not_orthogonal(tmp_path, algo, functional) -> None:
-    incar = Incar({"ALGO": algo, **functional})
-    incar.write_file(tmp_path / "INCAR")
+    """Without algo_tet: the ALGO fallback (for All/Damped), then more NBANDS, then give up."""
+    Incar({"ALGO": algo, "NBANDS": 40, **functional}).write_file(tmp_path / "INCAR")
     stderr = tmp_path / "std_err.txt"
-    stderr.write_text("| EDWAV: internal error, the gradient is not orthogonal 2 1 -8.611e-4 |\n")
+    stderr.write_text(GRAD_NOT_ORTH)
     handler = StdErrHandler()
-    assert handler.check(directory=tmp_path)
-    with pytest.warns(UserWarning, match="recompiling VASP"):
-        result = handler.correct(directory=tmp_path)
-    expected_algo = "Normal" if functional or algo == "Normal" else "Fast"
-    assert result["errors"] == ["grad_not_orth"]
-    assert result["actions"] == (
-        [] if algo == "Normal" else [{"dict": "INCAR", "action": {"_set": {"ALGO": expected_algo}}}]
-    )
-    assert Incar.from_file(tmp_path / "INCAR")["ALGO"] == expected_algo
+    fallback_algo = "Normal" if functional or algo == "Normal" else "Fast"
+    expected = [
+        [{"dict": "INCAR", "action": {"_set": {"NBANDS": 44}}}],
+        [],
+    ]
+    if algo != "Normal":
+        expected.insert(0, [{"dict": "INCAR", "action": {"_set": {"ALGO": fallback_algo}}}])
+    for actions in expected:
+        assert handler.check(directory=tmp_path)
+        with pytest.warns(UserWarning, match="TAUCAR"):
+            result = handler.correct(directory=tmp_path)
+        assert result["errors"] == ["grad_not_orth"]
+        assert result["actions"] == actions
+    incar = Incar.from_file(tmp_path / "INCAR")
+    assert (incar["NBANDS"], incar["ALGO"]) == (44, fallback_algo)
     with tarfile.open(tmp_path / "error.1.tar.gz") as backup:
         assert "error.1/std_err.txt" in backup.getnames()
+
+    # Unrecoverable: no further changes, even if ALGO was switched back by another handler.
+    Incar({**incar, "ALGO": algo}).write_file(tmp_path / "INCAR")
+    assert handler.check(directory=tmp_path)
+    with pytest.warns(UserWarning, match="TAUCAR"):
+        assert handler.correct(directory=tmp_path)["actions"] == []
+
     stderr.write_text("")
     assert not handler.check(directory=tmp_path)
     assert handler.errors == set()
+
+
+def test_stderr_gradient_not_orthogonal_nbands_from_outcar(tmp_path) -> None:
+    """NBANDS is read from the OUTCAR when it is not set in the INCAR."""
+    Incar({"ALGO": "Normal"}).write_file(tmp_path / "INCAR")
+    shutil.copy(f"{TEST_FILES}/OUTCAR_auto_nbands", tmp_path / "OUTCAR")
+    (tmp_path / "std_err.txt").write_text(GRAD_NOT_ORTH)
+    handler = StdErrHandler()
+    assert handler.check(directory=tmp_path)
+    with pytest.warns(UserWarning, match="AOCC"):
+        result = handler.correct(directory=tmp_path)
+    assert result["actions"] == [{"dict": "INCAR", "action": {"_set": {"NBANDS": 70}}}]
+
+
+def test_gradient_not_orthogonal_without_nbands(tmp_path) -> None:
+    """If NBANDS cannot be determined, only the ALGO fallback is available (at most twice), then give up."""
+    Incar({"ALGO": "All"}).write_file(tmp_path / "INCAR")
+    (tmp_path / "vasp.out").write_text(GRAD_NOT_ORTH)
+    handler = VaspErrorHandler()
+    assert handler.check(directory=tmp_path)
+    with pytest.warns(UserWarning, match="Intel-compiled VASP on AMD"):
+        result = handler.correct(directory=tmp_path)
+    assert result["actions"] == [{"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}}]
+    assert handler.error_count["grad_not_orth"] == 1
+
+    Incar({"ALGO": "All"}).write_file(tmp_path / "INCAR")
+    assert handler.check(directory=tmp_path)
+    with pytest.warns(UserWarning, match="TAUCAR"):
+        result = handler.correct(directory=tmp_path)
+    assert result["actions"] == [{"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}}]
+
+    Incar({"ALGO": "All"}).write_file(tmp_path / "INCAR")
+    assert handler.check(directory=tmp_path)
+    with pytest.warns(UserWarning, match="TAUCAR"):
+        assert handler.correct(directory=tmp_path)["actions"] == []
 
 
 class OutOfMemoryHandlerTest(MatSciTest):
@@ -1236,15 +1411,79 @@ class DriftErrorHandlerTest(MatSciTest):
 
         handler = DriftErrorHandler()
         handler.check()
-        assert handler.max_drift == 0.01
+        assert handler.max_drift is None
+        assert handler.curr_max_drift == 0.01
+
+    def test_check_max_drift_follows_ediffg(self) -> None:
+        # max_drift derived from EDIFFG must be recomputed for each job, not frozen at the first one
+        incar = Incar.from_file("INCAR")
+        incar["EDIFFG"] = -0.001
+        incar.write_file("INCAR")
+        handler = DriftErrorHandler()
+        assert handler.check()
+        assert handler.curr_max_drift == 0.001
+
+        incar["EDIFFG"] = -0.01
+        incar.write_file("INCAR")
+        assert not handler.check()
+        assert handler.curr_max_drift == 0.01
+        assert handler.max_drift is None
 
     def test_correct(self) -> None:
-        handler = DriftErrorHandler(max_drift=0.0001, enaug_multiply=2)
-        handler.check()
+        incar = Incar.from_file("INCAR")
+        incar["EDIFFG"] = -0.01
+        incar.write_file("INCAR")
+        handler = DriftErrorHandler(max_drift=0.0001)
+        assert handler.check()
+
+        # PREC unset (Normal) -> Accurate
+        dct = handler.correct()
+        assert len(dct["errors"]) == 1
+        assert dct["errors"][0].startswith("Excessive drift ")
+        assert dct["errors"][0].endswith(" > 0.0001")
+        assert {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}} in dct["actions"]
+        incar = Incar.from_file("INCAR")
+        assert incar["PREC"] == "Accurate"
+        assert "ENAUG" not in incar
+
+        # PREC = Accurate -> nothing left to try; ADDGRID and ENCUT are never changed
+        dct = handler.correct()
+        assert dct["actions"] is None
+        assert len(dct["errors"]) == 1
+        incar = Incar.from_file("INCAR")
+        assert "ADDGRID" not in incar
+        assert incar["ENCUT"] == 520
+
+    @pytest.mark.parametrize("prec", ["high", "Medium", "Low", "Normal"])
+    def test_correct_prec_to_accurate(self, prec) -> None:
+        incar = Incar.from_file("INCAR")
+        incar["PREC"] = prec
+        incar.write_file("INCAR")
+        handler = DriftErrorHandler(max_drift=0.0001)
         handler.correct()
         incar = Incar.from_file("INCAR")
-        assert incar.get("PREC") == "High"
-        assert incar.get("ENAUG", 0) == incar.get("ENCUT", 2) * 2
+        assert incar["PREC"] == "Accurate"
+        assert "ENAUG" not in incar
+
+    @pytest.mark.parametrize("prec", ["Accurate", "accurate"])
+    def test_correct_accurate_unrecoverable(self, prec) -> None:
+        incar = Incar.from_file("INCAR")
+        incar["PREC"] = prec
+        incar.write_file("INCAR")
+        handler = DriftErrorHandler(max_drift=0.0001)
+        dct = handler.correct()
+        assert dct["actions"] is None
+        assert Incar.from_file("INCAR") == incar
+        assert not (self.tmp_path / "POSCAR").exists()
+        assert not glob(f"{self.tmp_path}/error.*.tar.gz")
+
+    def test_enaug_multiply_deprecated(self) -> None:
+        with pytest.warns(DeprecationWarning, match="enaug_multiply"):
+            DriftErrorHandler(enaug_multiply=3)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            handler = DriftErrorHandler(enaug_multiply=2)
+        assert DriftErrorHandler.from_dict(handler.as_dict()).enaug_multiply == 2
 
 
 class NonConvergingErrorHandlerTest(MatSciTest):
@@ -1418,6 +1657,24 @@ def test_algo_tet_with_grad_not_orth(tmp_path, functional, expected_algo) -> Non
     dct = handler.correct(directory=tmp_path)
     assert {a["action"]["_set"]["ALGO"] for a in dct["actions"]} == {expected_algo}
     assert Incar.from_file(tmp_path / "INCAR")["ALGO"] == expected_algo
+
+
+def test_algo_tet_with_grad_not_orth_keeps_nbands_ladder(tmp_path) -> None:
+    """A co-occurring algo_tet only changes ALGO and does not consume the NBANDS step."""
+    Incar({"ALGO": "All", "ISMEAR": -5, "NBANDS": 20}).write_file(tmp_path / "INCAR")
+    (tmp_path / "vasp.out").write_text("ALGO=A and IALGO=5X tend to fail with the tetrahedron method\n" + GRAD_NOT_ORTH)
+    handler = VaspErrorHandler()
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}}] * 2
+    assert handler.error_count["grad_not_orth"] == 0
+
+    (tmp_path / "vasp.out").write_text(GRAD_NOT_ORTH)
+    assert handler.check(directory=tmp_path)
+    assert handler.errors == {"grad_not_orth"}
+    with pytest.warns(UserWarning, match="TAUCAR"):
+        dct = handler.correct(directory=tmp_path)
+    assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"NBANDS": 22}}}]
 
 
 def test_brmix_kspacing_ladder(tmp_path) -> None:
