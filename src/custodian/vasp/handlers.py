@@ -195,22 +195,52 @@ def _fallback_algo(incar: Incar) -> str:
     return "Normal"
 
 
-def _correct_grad_not_orth(incar: Incar, errors: set[str]) -> list[dict]:
-    """Return corrections for a non-orthogonal EDWAV gradient."""
-    actions = []
-    # Often coincides with algo_tet, in which the algo_tet error handler will also resolve grad_not_orth.
-    # When not present alongside algo_tet, the grad_not_orth error is due to how VASP is compiled.
-    # Depending on the optimization flag and choice of compiler, the ALGO = All and Damped algorithms
-    # may not work. The only fix is either to change ALGO or to recompile VASP.
+def _correct_grad_not_orth(incar: Incar, errors: set[str], error_count: Counter, directory: str) -> list[dict]:
+    """Return corrections for a non-orthogonal EDWAV gradient.
+
+    Without a simultaneous algo_tet, the ladder is: a different ALGO if ALGO = All/Damped,
+    then a one-off 10% increase in NBANDS, then unrecoverable. At most two corrections are made.
+
+    Args:
+        incar (Incar): Current INCAR.
+        errors (set[str]): All errors detected in this check.
+        error_count (Counter): The handler's error counts. The "grad_not_orth" (corrections made
+            without a simultaneous algo_tet) and "grad_not_orth_nbands" (NBANDS increases) counts
+            are updated here.
+        directory (str): Calculation directory, used to read NBANDS from the OUTCAR.
+
+    Returns:
+        list[dict]: Actions to apply.
+    """
+    fallback = []
     if _get_algo(incar) in {"all", "damped"}:
-        actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": _fallback_algo(incar)}}})
-    if "algo_tet" not in errors:
-        warnings.warn(
-            "EDWAV error reported by VASP without a simultaneous algo_tet error. You may wish to consider "
-            "recompiling VASP with the -O1 optimization if you used -O2 and this error keeps cropping up.",
-            UserWarning,
-        )
-    return actions
+        fallback = [{"dict": "INCAR", "action": {"_set": {"ALGO": _fallback_algo(incar)}}}]
+    # Often coincides with algo_tet, in which case changing ALGO resolves both.
+    if "algo_tet" in errors:
+        return fallback
+
+    # Otherwise the error is numerical: the wavefunctions lose orthonormality in the Davidson steps.
+    # VASP staff have traced it to Intel-compiled VASP on AMD CPUs (https://vasp.at/forum/viewtopic.php?p=25241)
+    # and to meta-GGAs restarted from CHGCAR without TAUCAR or too few NBANDS
+    # (https://vasp.at/forum/viewtopic.php?p=33191). Moving off ALGO = All/Damped is the fix that works
+    # in practice, so it is tried first; more bands are tried once ALGO is already Normal/Fast.
+    warnings.warn(
+        "EDWAV error reported by VASP without a simultaneous algo_tet error. This has been traced to "
+        "Intel-compiled VASP on AMD CPUs, where a GNU or AOCC build avoids it, and, for meta-GGAs restarted "
+        "from CHGCAR, to a missing TAUCAR.",
+        UserWarning,
+    )
+    if error_count["grad_not_orth"] >= 2:
+        return []
+    error_count["grad_not_orth"] += 1
+    if fallback:
+        return fallback
+    if error_count["grad_not_orth_nbands"] == 0 and (
+        nbands := incar.get("NBANDS") or VaspErrorHandler._get_nbands_from_outcar(directory)
+    ):
+        error_count["grad_not_orth_nbands"] += 1
+        return [{"dict": "INCAR", "action": {"_set": {"NBANDS": max(int(1.1 * nbands), nbands + 1)}}}]
+    return []
 
 
 class VaspErrorHandler(ErrorHandler):
@@ -807,7 +837,7 @@ class VaspErrorHandler(ErrorHandler):
                     actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
 
         if "grad_not_orth" in self.errors:
-            actions.extend(_correct_grad_not_orth(vi["INCAR"], self.errors))
+            actions.extend(_correct_grad_not_orth(vi["INCAR"], self.errors, self.error_count, directory))
 
         if self.errors & {"zheev", "eddiag"}:
             # Escalate VeryFast/Fast -> Normal -> All. ALGO = Exact is avoided since it is expensive
@@ -1109,7 +1139,7 @@ class StdErrHandler(ErrorHandler):
             actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": reduced_kpar}}})
 
         if "grad_not_orth" in self.errors:
-            actions.extend(_correct_grad_not_orth(vi["INCAR"], self.errors))
+            actions.extend(_correct_grad_not_orth(vi["INCAR"], self.errors, self.error_count, directory))
 
         VaspModder(vi=vi, directory=directory).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}

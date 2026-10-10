@@ -1266,28 +1266,79 @@ class KpointsTransHandlerTest(MatSciTest):
         assert tuple(kpoints.kpts[0]) == (8, 2, 2)
 
 
+GRAD_NOT_ORTH = "| EDWAV: internal error, the gradient is not orthogonal 2 1 -8.611e-4 |\n"
+
+
 @pytest.mark.parametrize("algo", ["All", "Conjugate", "Damped", "Normal"])
 @pytest.mark.parametrize("functional", [{}, {"METAGGA": "SCAN"}, {"LHFCALC": True}])
 def test_stderr_gradient_not_orthogonal(tmp_path, algo, functional) -> None:
-    incar = Incar({"ALGO": algo, **functional})
-    incar.write_file(tmp_path / "INCAR")
+    """Without algo_tet: the ALGO fallback (for All/Damped), then more NBANDS, then give up."""
+    Incar({"ALGO": algo, "NBANDS": 40, **functional}).write_file(tmp_path / "INCAR")
     stderr = tmp_path / "std_err.txt"
-    stderr.write_text("| EDWAV: internal error, the gradient is not orthogonal 2 1 -8.611e-4 |\n")
+    stderr.write_text(GRAD_NOT_ORTH)
     handler = StdErrHandler()
-    assert handler.check(directory=tmp_path)
-    with pytest.warns(UserWarning, match="recompiling VASP"):
-        result = handler.correct(directory=tmp_path)
-    expected_algo = "Normal" if functional or algo == "Normal" else "Fast"
-    assert result["errors"] == ["grad_not_orth"]
-    assert result["actions"] == (
-        [] if algo == "Normal" else [{"dict": "INCAR", "action": {"_set": {"ALGO": expected_algo}}}]
-    )
-    assert Incar.from_file(tmp_path / "INCAR")["ALGO"] == expected_algo
+    fallback_algo = "Normal" if functional or algo == "Normal" else "Fast"
+    expected = [
+        [{"dict": "INCAR", "action": {"_set": {"NBANDS": 44}}}],
+        [],
+    ]
+    if algo != "Normal":
+        expected.insert(0, [{"dict": "INCAR", "action": {"_set": {"ALGO": fallback_algo}}}])
+    for actions in expected:
+        assert handler.check(directory=tmp_path)
+        with pytest.warns(UserWarning, match="TAUCAR"):
+            result = handler.correct(directory=tmp_path)
+        assert result["errors"] == ["grad_not_orth"]
+        assert result["actions"] == actions
+    incar = Incar.from_file(tmp_path / "INCAR")
+    assert (incar["NBANDS"], incar["ALGO"]) == (44, fallback_algo)
     with tarfile.open(tmp_path / "error.1.tar.gz") as backup:
         assert "error.1/std_err.txt" in backup.getnames()
+
+    # Unrecoverable: no further changes, even if ALGO was switched back by another handler.
+    Incar({**incar, "ALGO": algo}).write_file(tmp_path / "INCAR")
+    assert handler.check(directory=tmp_path)
+    with pytest.warns(UserWarning, match="TAUCAR"):
+        assert handler.correct(directory=tmp_path)["actions"] == []
+
     stderr.write_text("")
     assert not handler.check(directory=tmp_path)
     assert handler.errors == set()
+
+
+def test_stderr_gradient_not_orthogonal_nbands_from_outcar(tmp_path) -> None:
+    """NBANDS is read from the OUTCAR when it is not set in the INCAR."""
+    Incar({"ALGO": "Normal"}).write_file(tmp_path / "INCAR")
+    shutil.copy(f"{TEST_FILES}/OUTCAR_auto_nbands", tmp_path / "OUTCAR")
+    (tmp_path / "std_err.txt").write_text(GRAD_NOT_ORTH)
+    handler = StdErrHandler()
+    assert handler.check(directory=tmp_path)
+    with pytest.warns(UserWarning, match="AOCC"):
+        result = handler.correct(directory=tmp_path)
+    assert result["actions"] == [{"dict": "INCAR", "action": {"_set": {"NBANDS": 70}}}]
+
+
+def test_gradient_not_orthogonal_without_nbands(tmp_path) -> None:
+    """If NBANDS cannot be determined, only the ALGO fallback is available (at most twice), then give up."""
+    Incar({"ALGO": "All"}).write_file(tmp_path / "INCAR")
+    (tmp_path / "vasp.out").write_text(GRAD_NOT_ORTH)
+    handler = VaspErrorHandler()
+    assert handler.check(directory=tmp_path)
+    with pytest.warns(UserWarning, match="Intel-compiled VASP on AMD"):
+        result = handler.correct(directory=tmp_path)
+    assert result["actions"] == [{"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}}]
+    assert handler.error_count["grad_not_orth"] == 1
+
+    Incar({"ALGO": "All"}).write_file(tmp_path / "INCAR")
+    assert handler.check(directory=tmp_path)
+    with pytest.warns(UserWarning, match="TAUCAR"):
+        result = handler.correct(directory=tmp_path)
+    assert result["actions"] == [{"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}}]
+
+    Incar({"ALGO": "All"}).write_file(tmp_path / "INCAR")
+    assert handler.check(directory=tmp_path)
+    with pytest.warns(UserWarning, match="TAUCAR"):
+        assert handler.correct(directory=tmp_path)["actions"] == []
 
 
 class OutOfMemoryHandlerTest(MatSciTest):
@@ -1572,6 +1623,24 @@ def test_algo_tet_with_grad_not_orth(tmp_path, functional, expected_algo) -> Non
     dct = handler.correct(directory=tmp_path)
     assert {a["action"]["_set"]["ALGO"] for a in dct["actions"]} == {expected_algo}
     assert Incar.from_file(tmp_path / "INCAR")["ALGO"] == expected_algo
+
+
+def test_algo_tet_with_grad_not_orth_keeps_nbands_ladder(tmp_path) -> None:
+    """A co-occurring algo_tet only changes ALGO and does not consume the NBANDS step."""
+    Incar({"ALGO": "All", "ISMEAR": -5, "NBANDS": 20}).write_file(tmp_path / "INCAR")
+    (tmp_path / "vasp.out").write_text("ALGO=A and IALGO=5X tend to fail with the tetrahedron method\n" + GRAD_NOT_ORTH)
+    handler = VaspErrorHandler()
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}}] * 2
+    assert handler.error_count["grad_not_orth"] == 0
+
+    (tmp_path / "vasp.out").write_text(GRAD_NOT_ORTH)
+    assert handler.check(directory=tmp_path)
+    assert handler.errors == {"grad_not_orth"}
+    with pytest.warns(UserWarning, match="TAUCAR"):
+        dct = handler.correct(directory=tmp_path)
+    assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"NBANDS": 22}}}]
 
 
 def test_brmix_kspacing_ladder(tmp_path) -> None:
