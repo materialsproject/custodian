@@ -570,10 +570,13 @@ class VaspErrorHandler(ErrorHandler):
 
         if "zpotrf" in self.errors:
             # Usually caused by short bond distances. If on the first step and
-            # atoms are too close, the volume is increased. Otherwise, it was due to a step
-            # being too big and POTIM should be decreased. If a static run
+            # atoms are too close, the volume is increased, but only if VASP is
+            # allowed to change the volume (ISIF = 3, 6 or 7). Otherwise, it was due
+            # to a step being too big and POTIM should be decreased. If a static run
             # try turning off symmetry. This also happens if NCORE or NPAR
             # is set to a large value for a small structure.
+            incar = vi["INCAR"]
+            zpotrf_actions = []
 
             try:
                 oszicar = Oszicar(os.path.join(directory, "OSZICAR"))
@@ -582,34 +585,49 @@ class VaspErrorHandler(ErrorHandler):
             except Exception:
                 nsteps = 0
 
-            if vi["INCAR"].get("ISYM", 2) > 0:
-                actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+            if incar.get("ISYM", 2) > 0:
+                zpotrf_actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
             # The natoms of 5 was chosen somewhat arbitrarily. Could be worth revisiting to fine-tune.
-            if len(vi["POSCAR"].structure) < 5 and (vi["INCAR"].get("NCORE", 1) > 1 or vi["INCAR"].get("NPAR", 1) > 1):
-                actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": 1}}})
-                if vi["INCAR"].get("NPAR", 1) > 1:
-                    actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
-            elif vi["INCAR"].get("NSW", 0) > 0:
+            if len(vi["POSCAR"].structure) < 5 and (incar.get("NCORE", 1) > 1 or incar.get("NPAR", 1) > 1):
+                zpotrf_actions.append({"dict": "INCAR", "action": {"_set": {"NCORE": 1}}})
+                if incar.get("NPAR", 1) > 1:
+                    zpotrf_actions.append({"dict": "INCAR", "action": {"_unset": {"NPAR": 1}}})
+            elif incar.get("NSW", 0) > 0:
                 if nsteps == 0:
                     # Only expand the cell if atoms are actually too close. Scale isotropically
                     # so the closest contact reaches the threshold, capping the linear strain.
                     structure = vi["POSCAR"].structure
                     min_ratio = _min_covalent_distance_ratio(structure)
                     if min_ratio is not None and min_ratio < MIN_COVALENT_DISTANCE_RATIO:
-                        scale = MIN_COVALENT_DISTANCE_RATIO / max(min_ratio, 1e-8)
-                        strain = min(scale - 1, MAX_CLOSE_CONTACT_STRAIN)
-                        structure.apply_strain(strain)
-                        actions.append({"dict": "POSCAR", "action": {"_set": {"structure": structure.as_dict()}}})
-                        # VASP recommends deleting CHGCAR/WAVECAR if incompatible with the structure.
-                        if vi["INCAR"].get("ICHARG", 0) < 10:
-                            actions += [
-                                {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}},
-                                {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}},
-                            ]
+                        # The default ISIF (0 for MD, 2 otherwise) and ISIF = 4, 5 keep the volume fixed,
+                        # e.g. for slabs. The cell is the user's choice there, so the input is unrecoverable.
+                        if incar.get("ISIF", 2) not in {3, 6, 7}:
+                            warnings.warn(
+                                f"ZPOTRF on the first ionic step with interatomic distances down to {min_ratio:.2f} "
+                                "times the sum of covalent radii. The cell is not expanded since ISIF does not "
+                                "allow volume changes; check the input structure.",
+                                UserWarning,
+                            )
+                            zpotrf_actions = []
+                        else:
+                            scale = MIN_COVALENT_DISTANCE_RATIO / max(min_ratio, 1e-8)
+                            strain = min(scale - 1, MAX_CLOSE_CONTACT_STRAIN)
+                            structure.apply_strain(strain)
+                            zpotrf_actions.append(
+                                {"dict": "POSCAR", "action": {"_set": {"structure": structure.as_dict()}}}
+                            )
+                            # VASP recommends deleting CHGCAR/WAVECAR if incompatible with the structure.
+                            if incar.get("ICHARG", 0) < 10:
+                                zpotrf_actions += [
+                                    {"file": "CHGCAR", "action": {"_file_delete": {"mode": "actual"}}},
+                                    {"file": "WAVECAR", "action": {"_file_delete": {"mode": "actual"}}},
+                                ]
                 else:
-                    potim = round(vi["INCAR"].get("POTIM", 0.5) / 2.0, 2)
-                    actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
+                    potim = round(incar.get("POTIM", 0.5) / 2.0, 2)
+                    zpotrf_actions.append({"dict": "INCAR", "action": {"_set": {"POTIM": potim}}})
+
+            actions.extend(zpotrf_actions)
 
         if self.errors.intersection(["subspacematrix"]):
             # Sometimes, this error can be due to parallelization issues with running across too many cores

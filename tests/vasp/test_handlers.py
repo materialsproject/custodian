@@ -960,6 +960,35 @@ class ZpotrfErrorHandlerTest(MatSciTest):
             assert vol_ratio == pytest.approx((MIN_COVALENT_DISTANCE_RATIO / ratio) ** 3)
             assert _min_covalent_distance_ratio(s2) == pytest.approx(MIN_COVALENT_DISTANCE_RATIO)
 
+    @pytest.mark.parametrize("isif", [None, 0, 2, 4, 5])
+    def test_first_step_close_contact_fixed_cell(self, isif) -> None:
+        """With a fixed volume (e.g. slabs at the default ISIF = 2), the cell is never changed and no
+        zpotrf correction is made, so the error is unrecoverable."""
+        shutil.copy("OSZICAR.empty", "OSZICAR")
+        structure = Structure.from_file("POSCAR")
+        coords = structure[2].coords.copy()
+        coords[0] += 1.4
+        structure.replace(4, "O", coords, coords_are_cartesian=True)
+        structure.to(filename="POSCAR")
+        incar = Incar.from_file("INCAR")
+        del incar["ISIF"]
+        incar["ISYM"] = 2
+        if isif is not None:
+            incar["ISIF"] = isif
+        incar.write_file("INCAR")
+        for fname in ("CHGCAR", "WAVECAR"):
+            Path(fname).write_text("dummy")
+        handler = VaspErrorHandler("vasp.out")
+        assert handler.check() is True
+        with pytest.warns(UserWarning, match="ISIF does not allow volume changes"):
+            dct = handler.correct()
+        assert dct["errors"] == ["zpotrf"]
+        assert dct["actions"] == []
+        assert Structure.from_file("POSCAR") == structure
+        assert Incar.from_file("INCAR") == incar
+        assert os.path.isfile("CHGCAR")
+        assert os.path.isfile("WAVECAR")
+
     @pytest.mark.parametrize(("oszicar", "close_contact"), [("OSZICAR.empty", True), ("OSZICAR.one_step", False)])
     def test_delete_chgcar_wavecar(self, oszicar, close_contact) -> None:
         """CHGCAR/WAVECAR are deleted only when the structure is changed."""
