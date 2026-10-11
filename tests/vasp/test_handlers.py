@@ -1,6 +1,6 @@
 """Created on Jun 1, 2012."""
 
-import datetime
+import datetime as dt
 import os
 import re
 import shutil
@@ -1132,14 +1132,14 @@ class WalltimeHandlerTest(MatSciTest):
 
         # This makes sure the check returns True when the time left is less
         # than the buffer time.
-        handler.start_time = datetime.datetime.now() - datetime.timedelta(minutes=59)
+        handler.start_time = dt.datetime.now() - dt.timedelta(minutes=59)
         assert handler.check()
 
         # This makes sure the check returns True when the time left is less
         # than 3 x the average time per ionic step. We have a 62 min wall
         # time, a very short buffer time, but the start time was 62 mins ago
         handler = WalltimeHandler(wall_time=3720, buffer_time=10)
-        handler.start_time = datetime.datetime.now() - datetime.timedelta(minutes=62)
+        handler.start_time = dt.datetime.now() - dt.timedelta(minutes=62)
         assert handler.check()
 
         # Test that the STOPCAR is written correctly.
@@ -1152,7 +1152,7 @@ class WalltimeHandlerTest(MatSciTest):
         handler = WalltimeHandler(wall_time=3600, buffer_time=120, electronic_step_stop=True)
 
         assert not handler.check()
-        handler.start_time = datetime.datetime.now() - datetime.timedelta(minutes=59)
+        handler.start_time = dt.datetime.now() - dt.timedelta(minutes=59)
         assert handler.check()
 
         handler.correct()

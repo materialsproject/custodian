@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import glob
 import gzip
 import os
@@ -354,7 +354,7 @@ class TestWallTimeErrorHandler(TestCase):
         assert not handler.check()
 
         # Make sure the check returns True when the remaining time is <= buffer time
-        handler.init_time = datetime.datetime.now() - datetime.timedelta(minutes=59)
+        handler.init_time = dt.datetime.now() - dt.timedelta(minutes=59)
         assert handler.check()
 
         # Test that the input file is written correctly

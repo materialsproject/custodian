@@ -1,6 +1,6 @@
 """Deployment file to facilitate releases of custodian."""
 
-import datetime
+import datetime as dt
 import json
 import os
 import re
@@ -13,7 +13,7 @@ from monty.os import cd
 
 from custodian import __version__ as CURRENT_VER
 
-NEW_VER = datetime.datetime.now().strftime("%Y.%-m.%-d")
+NEW_VER = dt.datetime.now().strftime("%Y.%-m.%-d")
 
 
 @task
@@ -88,7 +88,7 @@ def update_changelog(ctx, version=None, sim=False) -> None:
 
     :param ctx:
     """
-    version = version or datetime.datetime.now().strftime("%Y.%-m.%-d")
+    version = version or dt.datetime.now().strftime("%Y.%-m.%-d")
     output = subprocess.check_output(["git", "log", "--pretty=format:%s", f"v{CURRENT_VER}..HEAD"])
     lines = []
     misc = []

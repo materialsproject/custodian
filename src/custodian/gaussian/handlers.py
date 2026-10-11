@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import glob
 import logging
 import math
@@ -853,16 +853,16 @@ class WallTimeErrorHandler(ErrorHandler):
         self.logger: logging.Logger = logging.getLogger(self.__class__.__name__)
         logging.basicConfig(level=logging.INFO)
 
-        now_ = datetime.datetime.now()
-        now_str = datetime.datetime.strftime(now_, "%a %b %d %H:%M:%S UTC %Y")
+        now_ = dt.datetime.now()
+        now_str = dt.datetime.strftime(now_, "%a %b %d %H:%M:%S UTC %Y")
         init_time_str = os.environ.get("JOB_START_TIME", now_str)
         os.environ["JOB_START_TIME"] = init_time_str
-        self.init_time = datetime.datetime.strptime(init_time_str, "%a %b %d %H:%M:%S %Z %Y")
+        self.init_time = dt.datetime.strptime(init_time_str, "%a %b %d %H:%M:%S %Z %Y")
 
     def check(self, directory: str = "./") -> bool:
         """Check if the job is nearing the walltime. If so, return True, else False."""
         if self.wall_time:
-            run_time = datetime.datetime.now() - self.init_time
+            run_time = dt.datetime.now() - self.init_time
             remaining_time = self.wall_time - run_time.total_seconds()
             if remaining_time <= self.buffer_time:
                 return True

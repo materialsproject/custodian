@@ -6,7 +6,7 @@ ErrorHandlers and Jobs.
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import logging
 import os
 import subprocess
@@ -224,7 +224,7 @@ class Custodian:
                     abs_directory = os.path.abspath(directory)
                     abs_target = os.path.abspath(target)
 
-                    prefix = os.path.commonprefix([abs_directory, abs_target])
+                    prefix = os.path.commonpath([abs_directory, abs_target])
 
                     return prefix == abs_directory
 
@@ -376,7 +376,7 @@ class Custodian:
             if self.scratch_dir:
                 self.directory = temp_dir  # reset self.directory to the temp_dir
             self.total_errors = 0
-            start = datetime.datetime.now()
+            start = dt.datetime.now()
             logger.info(f"Run started at {start} in {self.directory}")
             v = sys.version.replace("\n", " ")
             logger.info(f"Custodian running on Python version {v}")
@@ -402,7 +402,7 @@ class Custodian:
                 # Log the corrections to a json file.
                 logger.info(f"Logging to {os.path.join(self.directory, Custodian.LOG_FILE)}")
                 dumpfn(self.run_log, os.path.join(self.directory, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
-                end = datetime.datetime.now()
+                end = dt.datetime.now()
                 logger.info(f"Run ended at {end}.")
                 run_time = end - start
                 logger.info(f"Run completed. Total time taken = {run_time}.")
@@ -568,7 +568,7 @@ class Custodian:
             MaxCorrectionsError: if max_errors is reached
             MaxCorrectionsPerHandlerError: if max_errors_per_handler is reached
         """
-        start = datetime.datetime.now()
+        start = dt.datetime.now()
         try:
             validator = sys.version.replace("\n", " ")
             logger.info(f"Custodian started in singleshot mode at {start} in {self.directory}.")
@@ -645,7 +645,7 @@ class Custodian:
             # Log the corrections to a json file.
             logger.info(f"Logging to {Custodian.LOG_FILE}...")
             dumpfn(self.run_log, os.path.join(self.directory, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
-            end = datetime.datetime.now()
+            end = dt.datetime.now()
             logger.info(f"Run ended at {end}.")
             run_time = end - start
             logger.info(f"Run completed. Total time taken = {run_time}.")

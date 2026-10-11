@@ -6,7 +6,7 @@ by modifying the input files.
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import logging
 import multiprocessing
 import os
@@ -2039,14 +2039,10 @@ class WalltimeHandler(ErrorHandler):
         # future jobs in the same batch environment.  Can also be
         # set manually be the user in the batch environment.
         if "CUSTODIAN_WALLTIME_START" in os.environ:
-            self.start_time = datetime.datetime.strptime(
-                os.environ["CUSTODIAN_WALLTIME_START"], "%a %b %d %H:%M:%S %Z %Y"
-            )
+            self.start_time = dt.datetime.strptime(os.environ["CUSTODIAN_WALLTIME_START"], "%a %b %d %H:%M:%S %Z %Y")
         else:
-            self.start_time = datetime.datetime.now()
-            os.environ["CUSTODIAN_WALLTIME_START"] = datetime.datetime.strftime(
-                self.start_time, "%a %b %d %H:%M:%S UTC %Y"
-            )
+            self.start_time = dt.datetime.now()
+            os.environ["CUSTODIAN_WALLTIME_START"] = dt.datetime.strftime(self.start_time, "%a %b %d %H:%M:%S UTC %Y")
 
         self.electronic_step_stop = electronic_step_stop
         self.electronic_steps_timings = [0]
@@ -2055,7 +2051,7 @@ class WalltimeHandler(ErrorHandler):
     def check(self, directory="./") -> bool:
         """Check for error."""
         if self.wall_time:
-            run_time = datetime.datetime.now() - self.start_time
+            run_time = dt.datetime.now() - self.start_time
             total_secs = run_time.total_seconds()
             try:
                 outcar = load_outcar(os.path.join(directory, "OUTCAR"))
@@ -2116,19 +2112,19 @@ class CheckpointHandler(ErrorHandler):
             Defaults to 3600 (1 hr).
         """
         self.interval = interval
-        self.start_time = datetime.datetime.now()
+        self.start_time = dt.datetime.now()
         self.chk_counter = 0
 
     def check(self, directory="./"):
         """Check for error."""
-        run_time = datetime.datetime.now() - self.start_time
+        run_time = dt.datetime.now() - self.start_time
         total_secs = run_time.seconds + run_time.days * 3600 * 24
         return total_secs > self.interval
 
     def correct(self, directory="./"):
         """Perform corrections."""
         content = "LSTOP = .TRUE."
-        chkpt_content = f'Index: {self.chk_counter}\nTime: "{datetime.datetime.now()}"'
+        chkpt_content = f'Index: {self.chk_counter}\nTime: "{dt.datetime.now()}"'
         self.chk_counter += 1
 
         # Write STOPCAR
@@ -2145,7 +2141,7 @@ class CheckpointHandler(ErrorHandler):
             modder.modify(action["action"], action["file"])
 
         # Reset the clock.
-        self.start_time = datetime.datetime.now()
+        self.start_time = dt.datetime.now()
 
         return {"errors": ["Checkpoint reached"], "actions": actions}
 
