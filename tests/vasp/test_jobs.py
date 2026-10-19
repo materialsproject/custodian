@@ -336,11 +336,70 @@ class TestVaspJobTerminate:
         # Wait is only called once (after SIGKILL), not after failed SIGTERM
         mocks.process.wait.assert_called_once_with(timeout=10.0)
 
+    def test_graceful_stopcar_success(self, mocks: SimpleNamespace, tmp_path) -> None:
+        """STOPCAR is written, VASP exits on its own, no signals sent and STOPCAR cleaned up."""
+        mocks.job.graceful_termination = True
+        mocks.process.poll.return_value = None
+        stopcar = tmp_path / "STOPCAR"
+
+        def fake_wait(timeout):
+            assert stopcar.read_text() == "LABORT = .TRUE.\n"
+
+        mocks.process.wait.side_effect = fake_wait
+        mocks.job.terminate(directory=str(tmp_path))
+
+        mocks.process.wait.assert_called_once_with(timeout=300.0)
+        mocks.killpg.assert_not_called()
+        mocks.logger.info.assert_any_call("Process 12345 stopped gracefully via STOPCAR")
+        assert not stopcar.exists()
+
+    def test_graceful_stopcar_timeout(self, mocks: SimpleNamespace, tmp_path) -> None:
+        """Falls back to SIGTERM when VASP does not exit after the STOPCAR."""
+        mocks.job.graceful_termination = True
+        mocks.job.graceful_termination_timeout = 5.0
+        mocks.process.poll.return_value = None
+        mocks.process.wait.side_effect = [subprocess.TimeoutExpired("vasp", 5), None]
+        mocks.job.terminate(directory=str(tmp_path))
+
+        mocks.logger.warning.assert_any_call("STOPCAR timeout (5.0s), falling back to signals")
+        mocks.killpg.assert_called_once_with(67890, signal.SIGTERM)
+        assert not (tmp_path / "STOPCAR").exists()
+
+    def test_graceful_stopcar_write_fails(self, mocks: SimpleNamespace, tmp_path) -> None:
+        """Falls back to SIGTERM immediately when the STOPCAR cannot be written."""
+        mocks.job.graceful_termination = True
+        mocks.process.poll.return_value = None
+        mocks.job.terminate(directory=str(tmp_path / "missing"))
+
+        mocks.killpg.assert_called_once_with(67890, signal.SIGTERM)
+        mocks.process.wait.assert_called_once_with(timeout=10.0)
+
+    def test_neb_graceful_stopcar(self, mocks: SimpleNamespace, tmp_path) -> None:
+        """VaspNEBJob supports the same graceful termination options."""
+        job = VaspNEBJob(vasp_cmd=["srun", "vasp"], graceful_termination=True, graceful_termination_timeout=60.0)
+        job._vasp_process = mocks.process
+        mocks.process.poll.return_value = None
+        job.terminate(directory=str(tmp_path))
+
+        mocks.process.wait.assert_called_once_with(timeout=60.0)
+        mocks.killpg.assert_not_called()
+
+    def test_neb_default_terminate(self, mocks: SimpleNamespace) -> None:
+        """VaspNEBJob.terminate works with default settings (previously lacked terminate_timeout)."""
+        job = VaspNEBJob(vasp_cmd=["srun", "vasp"])
+        job._vasp_process = mocks.process
+        mocks.process.poll.return_value = None
+        job.terminate()
+
+        mocks.killpg.assert_called_once_with(67890, signal.SIGTERM)
+        mocks.process.wait.assert_called_once_with(timeout=10.0)
+
     @pytest.mark.skipif(sys.platform == "win32", reason="sleep command and PGID not available")
     def test_integration_with_real_process(self) -> None:
         """Integration test with real subprocess (POSIX only)."""
         vasp_job = VaspJob.__new__(VaspJob)
         vasp_job.terminate_timeout = 10.0
+        vasp_job.graceful_termination = False
         real_process = subprocess.Popen(["sleep", "30"], start_new_session=True)
         vasp_job._vasp_process = real_process
         original_pgid = os.getpgid(real_process.pid)

@@ -86,6 +86,8 @@ class VaspJob(Job):
         auto_continue=False,
         update_incar=False,
         terminate_timeout: float = 10.0,
+        graceful_termination: bool = False,
+        graceful_termination_timeout: float = 300.0,
     ) -> None:
         """
         This constructor is necessarily complex due to the need for
@@ -147,6 +149,16 @@ class VaspJob(Job):
             terminate_timeout (float): Timeout in seconds to wait for graceful
                 termination (SIGTERM) before escalating to SIGKILL. Large MPI
                 jobs may need longer timeouts. Defaults to 10.0 seconds.
+            graceful_termination (bool): If True, terminate() first writes a
+                STOPCAR with LABORT = .TRUE. and waits for VASP to exit on its
+                own before falling back to signals. This lets VASP close its
+                output files cleanly and avoids truncated vasprun.xml files when
+                a monitor handler stops a run (common with GPU VASP). Defaults
+                to False.
+            graceful_termination_timeout (float): Timeout in seconds to wait for
+                VASP to exit after the STOPCAR is written. VASP only reads the
+                STOPCAR at the end of an electronic step, so this should exceed
+                the duration of one SCF step. Defaults to 300.0 seconds.
         """
         self.vasp_cmd = tuple(vasp_cmd)
         self.output_file = output_file
@@ -162,6 +174,8 @@ class VaspJob(Job):
         self.auto_continue = auto_continue
         self.update_incar = update_incar
         self.terminate_timeout = terminate_timeout
+        self.graceful_termination = graceful_termination
+        self.graceful_termination_timeout = graceful_termination_timeout
 
         if SENTRY_DSN:
             # if using Sentry logging, add specific VASP executable to scope
@@ -712,19 +726,26 @@ class VaspJob(Job):
     def terminate(self, directory: str = "./") -> None:
         """Kill all VASP processes associated with the current job.
 
-        Tries to kill the entire process group (safest for MPI jobs), then waits
-        to confirm termination. Escalates SIGTERM → SIGKILL → parent process fallback.
+        If graceful_termination is enabled, first writes a STOPCAR with
+        LABORT = .TRUE. and waits for VASP to exit cleanly. Otherwise (or if that
+        times out), tries to kill the entire process group (safest for MPI jobs),
+        then waits to confirm termination. Escalates SIGTERM → SIGKILL → parent
+        process fallback.
 
         Note: The parent process fallback may leave behind ghost MPI child processes
         (less likely with srun since SLURM purportedly cleans up process trees).
 
         Args:
-            directory: Unused, kept for API compatibility with base class.
+            directory: Directory of the VASP run. Used to write the STOPCAR when
+                graceful_termination is enabled.
         """
         pid = self._vasp_process.pid
 
         if self._vasp_process.poll() is not None:
             logger.warning(f"Process {pid} already terminated")
+            return
+
+        if self.graceful_termination and self._terminate_with_stopcar(directory):
             return
 
         if os.name != "nt":
@@ -782,6 +803,40 @@ class VaspJob(Job):
             self._vasp_process.wait()
             logger.info(f"Process {pid} killed")
 
+    def _terminate_with_stopcar(self, directory: str) -> bool:
+        """Ask VASP to stop via a STOPCAR with LABORT = .TRUE. and wait for it to exit.
+
+        Args:
+            directory: Directory of the VASP run.
+
+        Returns:
+            bool: True if the process exited within graceful_termination_timeout.
+        """
+        pid = self._vasp_process.pid
+        timeout = self.graceful_termination_timeout
+        stopcar = os.path.join(directory, "STOPCAR")
+        logger.info(f"Writing STOPCAR with LABORT = .TRUE. to stop process {pid}")
+        try:
+            with open(stopcar, "w") as file:
+                file.write("LABORT = .TRUE.\n")
+        except OSError as exc:
+            logger.warning(f"Failed to write STOPCAR: {exc}")
+            return False
+
+        try:
+            self._vasp_process.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            logger.warning(f"STOPCAR timeout ({timeout}s), falling back to signals")
+            exited = False
+        else:
+            logger.info(f"Process {pid} stopped gracefully via STOPCAR")
+            exited = True
+
+        # VASP does not always delete the STOPCAR. Remove it so a restarted run does not abort immediately.
+        if os.path.isfile(stopcar):
+            os.remove(stopcar)
+        return exited
+
 
 class VaspNEBJob(VaspJob):
     """
@@ -804,6 +859,9 @@ class VaspNEBJob(VaspJob):
         auto_continue=False,
         gamma_vasp_cmd=None,
         settings_override=None,
+        terminate_timeout: float = 10.0,
+        graceful_termination: bool = False,
+        graceful_termination_timeout: float = 300.0,
     ) -> None:
         """
         This constructor is a simplified version of VaspJob, which satisfies
@@ -855,6 +913,16 @@ class VaspNEBJob(VaspJob):
                     [{"dict": "INCAR", "action": {"_set": {"ISTART": 1}}},
                      {"file": "CONTCAR",
                       "action": {"_file_copy": {"dest": "POSCAR"}}}]
+            terminate_timeout (float): Timeout in seconds to wait for graceful
+                termination (SIGTERM) before escalating to SIGKILL. Defaults to
+                10.0 seconds.
+            graceful_termination (bool): If True, terminate() first writes a
+                STOPCAR with LABORT = .TRUE. to the NEB root directory and waits
+                for VASP to exit on its own before falling back to signals.
+                Defaults to False.
+            graceful_termination_timeout (float): Timeout in seconds to wait for
+                VASP to exit after the STOPCAR is written. Defaults to 300.0
+                seconds.
         """
         self.vasp_cmd = tuple(vasp_cmd)
         self.output_file = output_file
@@ -868,6 +936,9 @@ class VaspNEBJob(VaspJob):
         self.gamma_vasp_cmd = tuple(gamma_vasp_cmd) if gamma_vasp_cmd else None
         self.auto_continue = auto_continue
         self.settings_override = settings_override
+        self.terminate_timeout = terminate_timeout
+        self.graceful_termination = graceful_termination
+        self.graceful_termination_timeout = graceful_termination_timeout
 
     def setup(self, directory="./") -> None:
         """Performs initial setup for VaspNEBJob, including overriding any settings
