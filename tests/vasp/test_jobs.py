@@ -491,11 +491,6 @@ class TestVaspJobInit:
         sentry_scope.set_tag.assert_any_call("vasp_path", expected_path)
         sentry_scope.set_tag.assert_any_call("vasp_cmd", vasp_cmd)
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="VaspJob.__init__ only resolves vasp_path for str/list vasp_cmd; a tuple leaves vasp_path "
-        "unbound, so the UnboundLocalError is swallowed and the vasp_path tag is never set",
-    )
     def test_sentry_tags_tuple_cmd(self, sentry_scope, monkeypatch) -> None:
         monkeypatch.setattr("custodian.vasp.jobs.which", lambda cmd: f"/opt/bin/{cmd}")
         VaspJob(("mpirun", "vasp_std"))

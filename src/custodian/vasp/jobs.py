@@ -185,7 +185,7 @@ class VaspJob(Job):
                 try:
                     if isinstance(vasp_cmd, str):
                         vasp_path = which(vasp_cmd.split(" ")[-1])
-                    elif isinstance(vasp_cmd, list):
+                    elif isinstance(vasp_cmd, (list, tuple)):
                         vasp_path = which(vasp_cmd[-1])
                     scope.set_tag("vasp_path", vasp_path)  # type: ignore
                     scope.set_tag("vasp_cmd", vasp_cmd)
