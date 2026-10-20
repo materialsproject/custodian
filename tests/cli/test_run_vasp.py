@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
-from pymatgen.io.vasp import Incar, Kpoints
+from pymatgen.io.vasp import Incar, Kpoints, Poscar
 from pymatgen.io.vasp import sets as vasp_sets
 
 from custodian.vasp.handlers import (
@@ -137,14 +137,10 @@ class TestGetJobs:
         assert ldauu == [[0, 0, 0, 0], [0, 2, 3, 0], [0, 4, 6, 0]]
         assert ldauj == [[0, 0, 0, 0]] * 3
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=ZeroDivisionError,
-        reason="run_vasp.get_jobs divides by (n_ramp_u - 1), so a single rampU job raises ZeroDivisionError",
-    )
     def test_single_ramp_u(self) -> None:
         (job,) = run_vasp.get_jobs(make_args(["rampU"]))
         assert job.copy_magmom
+        assert job.settings_override[-1]["action"]["_set"]["LDAUU"] == [0, 4, 6, 0]
 
     def test_full_relax_delegates_to_full_opt_run(self, monkeypatch) -> None:
         calls = []
@@ -204,25 +200,37 @@ class TestGetJobs:
             {"dict": "KPOINTS", "action": {"_set": static_vis.kpoints.as_dict()}},
         ]
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="static_derived also matches the later `elif job_type.startswith('static')` branch, which "
-        "re-sets KPOINTS to the original grid and overrides the MPStaticSet-derived KPOINTS",
-    )
     def test_static_derived_kpoints_not_overridden(self, static_vis) -> None:
         _, derived = run_vasp.get_jobs(make_args(["relax", "static_derived"]))
         assert kpoints_actions(derived.settings_override) == [
             {"dict": "KPOINTS", "action": {"_set": static_vis.kpoints.as_dict()}}
         ]
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=ImportError,
-        reason="MPStaticDielectricDFPTVaspInputSet no longer exists in pymatgen.io.vasp.sets",
-    )
+    @pytest.fixture
+    def prev_calc_from_poscar(self, monkeypatch) -> None:
+        """Run the real input-set constructors, but take the previous structure from POSCAR instead of vasprun.xml."""
+
+        def fake_override(self, prev_calc_dir):
+            self.structure = Poscar.from_file(f"{prev_calc_dir}/POSCAR").structure
+            return self
+
+        monkeypatch.setattr(vasp_sets.VaspInputSet, "override_from_prev_calc", fake_override)
+
+    @pytest.mark.usefixtures("prev_calc_from_poscar")
     def test_static_dielectric_derived(self) -> None:
         _, derived = run_vasp.get_jobs(make_args(["relax", "static_dielectric_derived"]))
         assert not derived.auto_npar
+        incar_action, kpoints_action = derived.settings_override[1:]
+        incar = incar_action["action"]["_set"]
+        assert {"IBRION": 8, "LEPSILON": True, "LPEAD": True, "EDIFF": 1e-6}.items() <= incar.items()
+        assert not {"NPAR", "NSW", "LCHARG"} & incar.keys()
+        assert kpoints_action["dict"] == "KPOINTS"
+
+    @pytest.mark.usefixtures("prev_calc_from_poscar")
+    @pytest.mark.parametrize("job", ["static_derived", "nonscf_derived", "optics_derived"])
+    def test_derived_jobs_pass_valid_input_set_kwargs(self, job) -> None:
+        _, derived = run_vasp.get_jobs(make_args(["relax", job]))
+        assert derived.settings_override[1]["action"]["_set"]["LWAVE"] is True
 
 
 class TestDoRun:

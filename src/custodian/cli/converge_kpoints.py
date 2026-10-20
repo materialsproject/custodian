@@ -19,7 +19,7 @@ def get_runs(vasp_command, target=1e-3, max_steps=10, mode="linear"):
     vasp_input = VaspInput.from_directory(".")
     kpoints = vasp_input["KPOINTS"].kpts[0]
     for step in range(max_steps):
-        m = [(kpt * (step + 1)) for kpt in kpoints] if mode == "linear" else [(kpt + 1) for kpt in kpoints]
+        m = [(kpt * (step + 1)) for kpt in kpoints] if mode == "linear" else [(kpt + step) for kpt in kpoints]
         if step == 0:
             settings = None
             backup = True
@@ -36,7 +36,7 @@ def get_runs(vasp_command, target=1e-3, max_steps=10, mode="linear"):
                 {"dict": "INCAR", "action": {"_set": {"ISTART": 1}}},
                 {"dict": "KPOINTS", "action": {"_set": {"kpoints": [m]}}},
                 {
-                    "filename": "CONTCAR",
+                    "file": "CONTCAR",
                     "action": {"_file_copy": {"dest": "POSCAR"}},
                 },
             ]

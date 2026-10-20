@@ -78,22 +78,12 @@ class TestGetRuns:
         jobs = list(converge_kpoints.get_runs(["vasp"], mode="inc", max_steps=2))
         assert kpoints_set(jobs[1]) == [[9, 3, 3]]
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="inc mode computes kpt + 1 independent of step, so the grid never grows beyond the first "
-        "increment (8x2x2 -> 9x3x3 -> 9x3x3), and step 0 is labelled 9x3x3 although it runs 8x2x2",
-    )
     def test_inc_mode_keeps_incrementing(self, converge_kpoints, fake_vasprun) -> None:
         fake_vasprun.energies.extend([-1.0, -2.0, -3.0])
         jobs = list(converge_kpoints.get_runs(["vasp"], mode="inc", max_steps=3))
         assert jobs[0].suffix == ".kpoints.8x2x2"
         assert [kpoints_set(j) for j in jobs[1:]] == [[[9, 3, 3]], [[10, 4, 4]]]
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=ValueError,
-        reason="the CONTCAR copy action uses the key 'filename' instead of 'file', which VaspModder rejects",
-    )
     def test_settings_are_valid_modder_actions(self, converge_kpoints, fake_vasprun, vasp_dir) -> None:
         shutil.copy(f"{TEST_FILES}/CONTCAR", vasp_dir / "CONTCAR")
         fake_vasprun.energies.extend([-1.0, -2.0])

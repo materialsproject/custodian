@@ -85,10 +85,5 @@ def test_do_run(converge_geometry, monkeypatch, gzip) -> None:
     mock_custodian.return_value.run.assert_called_once_with()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="pyproject.toml registers the converge_geometry console script as custodian.cli.converge_geometry:main, "
-    "but the module only has an `if __name__ == '__main__'` block and no main()",
-)
 def test_has_main_entry_point(converge_geometry) -> None:
     assert callable(getattr(converge_geometry, "main", None))

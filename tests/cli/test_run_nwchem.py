@@ -21,8 +21,7 @@ def mock_custodian(monkeypatch) -> MagicMock:
 
 
 def test_do_run(mock_custodian) -> None:
-    # do_run reads args.gzipped; see test_main_gzip_flag_reaches_custodian for the mismatch with the parser
-    args = Namespace(command="mpirun nwchem", infile="a.nw", outfile="a.nwout", scratch="/scratch", gzipped=True)
+    args = Namespace(command="mpirun nwchem", infile="a.nw", outfile="a.nwout", scratch="/scratch", gzip=True)
     run_nwchem.do_run(args)
 
     ((handler,), (job,)), kwargs = mock_custodian.call_args
@@ -55,11 +54,6 @@ def test_main_parses_args(monkeypatch, argv, expected) -> None:
     assert vars(args) == expected
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AttributeError,
-    reason="the parser stores -z/--gzip as args.gzip but do_run reads args.gzipped, so the CLI always crashes",
-)
 def test_main_gzip_flag_reaches_custodian(monkeypatch, mock_custodian) -> None:
     monkeypatch.setattr(sys, "argv", ["run_nwchem", "-z"])
     run_nwchem.main()
