@@ -55,9 +55,9 @@ def test_activate_diag() -> None:
     activate_diag(actions)
 
     assert len(actions) == 4
-    assert actions[1]["action"] == ("_unset", {"FORCE_EVAL": {"DFT": {"SCF": "OT"}}})
-    assert actions[2]["action"] == ("_unset", {"FORCE_EVAL": {"DFT": {"SCF": "OUTER_SCF"}}})
-    op, settings = actions[3]["action"]
+    assert actions[1]["action"] == [("_unset", {"FORCE_EVAL": {"DFT": {"SCF": "OT"}}})]
+    assert actions[2]["action"] == [("_unset", {"FORCE_EVAL": {"DFT": {"SCF": "OUTER_SCF"}}})]
+    [(op, settings)] = actions[3]["action"]
     assert op == "_set"
     scf = settings["FORCE_EVAL"]["DFT"]["SCF"]
     assert scf["DIAGONALIZATION"] == {}
@@ -65,11 +65,6 @@ def test_activate_diag() -> None:
     assert scf["MIXING"] == {"ALPHA": 0.05}
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Bug: activate_diag emits each 'action' as a bare (op, settings) tuple instead of a dict or a list of"
-    " tuples (cf. activate_ot), so Cp2kModder._modify iterates over the tuple and fails to unpack '_unset'.",
-)
 def test_activate_diag_applies(cp2k_dir) -> None:
     actions: list = []
     activate_diag(actions)
@@ -77,7 +72,9 @@ def test_activate_diag_applies(cp2k_dir) -> None:
 
     new = Cp2kInput.from_file("cp2k.inp")
     assert not new.check("FORCE_EVAL/DFT/SCF/OT")
+    assert not new.check("FORCE_EVAL/DFT/SCF/OUTER_SCF")
     assert new.check("FORCE_EVAL/DFT/SCF/DIAGONALIZATION")
+    assert new.by_path("FORCE_EVAL/DFT/SCF/SMEAR")["METHOD"].values[0] == "FERMI_DIRAC"
 
 
 def _fake_output(band_gap):
