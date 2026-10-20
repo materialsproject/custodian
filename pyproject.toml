@@ -10,11 +10,11 @@ authors = [
     { name = "Janosh Riebesell", email = "janosh.riebesell@gmail.com" },
     { name = "Matthew Horton" },
     { name = "Samuel M. Blau" },
-    { name = "Shyue Ping Ong", email = "ongsp@ucsd.edu" },
     { name = "Stephen Dacek" },
     { name = "William Davidson Richards" },
     { name = "Xiaohui Qu" },
     { name = "Andrew Rosen", email = "asrosen@princeton.edu" },
+    { name = "Shyue Ping Ong", email = "shyue@nus.edu.sg" },
 ]
 maintainers = [{ name = "Shyue Ping Ong" }]
 readme = "README.md"
@@ -44,7 +44,7 @@ classifiers = [
 license = { text = "MIT" }
 requires-python = ">=3.11"
 
-dependencies = ["monty>=2.0.6", "psutil", "ruamel.yaml>=0.15.6"]
+dependencies = ["monty>=2026.7.16", "psutil", "ruamel.yaml>=0.15.6"]
 
 [project.optional-dependencies]
 matsci = [
