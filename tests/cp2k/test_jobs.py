@@ -119,11 +119,6 @@ def test_setup_restart_copies_restart_file(run_dir) -> None:
     assert new["GLOBAL"]["RUN_TYPE"].values[0] == "GEO_OPT"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Bug: Cp2kJob.setup passes filename=os.path.join(directory, input_file) together with "
-    "directory=directory to Cp2kModder, which joins them again; a relative directory writes to dir/dir/cp2k.inp.",
-)
 def test_setup_relative_directory(tmp_path, monkeypatch) -> None:
     (tmp_path / "run").mkdir()
     shutil.copy(f"{TEST_FILES_DIR}/cp2k.inp.orig", tmp_path / "run" / "cp2k.inp")
@@ -131,6 +126,7 @@ def test_setup_relative_directory(tmp_path, monkeypatch) -> None:
     override = [{"dict": "cp2k.inp", "action": {"_set": {"GLOBAL": {"RUN_TYPE": "ENERGY"}}}}]
     Cp2kJob(cp2k_cmd=["cp2k.popt"], settings_override=override, backup=False).setup(directory="run")
     assert run_type(tmp_path / "run" / "cp2k.inp") == "ENERGY"
+    assert not (tmp_path / "run" / "run").exists()
 
 
 def test_run_launches_popen(run_dir, monkeypatch) -> None:
@@ -182,11 +178,6 @@ def test_postprocess_without_suffix(finished_dir) -> None:
     assert not (finished_dir / "continue.json").exists()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Bug: Cp2kJob.postprocess checks os.path.isfile(self.output_file) and mkdirs run{suffix} relative to "
-    "the cwd, ignoring the directory argument.",
-)
 def test_postprocess_in_other_directory(tmp_path, monkeypatch) -> None:
     run = tmp_path / "run"
     run.mkdir()
@@ -194,6 +185,7 @@ def test_postprocess_in_other_directory(tmp_path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     Cp2kJob(cp2k_cmd=["cp2k.popt"], suffix=".1").postprocess(directory=str(run))
     assert (run / "run.1" / "cp2k.out").exists()
+    assert not (tmp_path / "run.1").exists()
 
 
 def test_terminate(monkeypatch) -> None:
