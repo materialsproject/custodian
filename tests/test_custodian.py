@@ -917,3 +917,118 @@ def test_sentry_disabled_by_default(monkeypatch, sentry_stub) -> None:
     module = _exec_custodian_module()
     assert module.SENTRY_DSN is None
     assert sentry_stub.dsn is None
+
+
+# ------------------------------- from_spec ----------------------------------
+
+
+class ParamJob(Job):
+    """Job that just stores the parameters it was constructed with."""
+
+    def __init__(self, env=None, cmd=None, payload=None) -> None:
+        self.env = env
+        self.cmd = cmd
+        self.payload = payload
+
+    def setup(self, directory="./") -> None:
+        pass
+
+    def run(self, directory="./") -> None:
+        pass
+
+    def postprocess(self, directory="./") -> None:
+        pass
+
+
+def test_from_spec_expands_env_vars_and_decodes_params(monkeypatch) -> None:
+    monkeypatch.setenv("CUSTODIAN_TEST_FOO", "foo-value")
+    monkeypatch.setenv("CUSTODIAN_TEST_SCRATCH", "/scratch/here")
+    mod = __name__
+    spec = {
+        "jobs": [
+            # "$"-prefixed dict params have each value env-expanded.
+            {"jb": f"{mod}.ParamJob", "params": {"$env": {"A": "$CUSTODIAN_TEST_FOO", "B": "plain"}}},
+            # Non-"$" params are passed through verbatim, but MSON dicts are decoded.
+            {
+                "jb": f"{mod}.ParamJob",
+                "params": {"env": {"A": "$CUSTODIAN_TEST_FOO"}, "payload": ExampleValidator1().as_dict()},
+            },
+        ],
+        "jobs_common_params": {"$cmd": ["run", "$CUSTODIAN_TEST_FOO"]},
+        "handlers": [{"hdlr": f"{mod}.FlagFileHandler", "params": {"flag": "stop.flag"}}],
+        "validators": [{"vldr": f"{mod}.ExampleValidator2"}],
+        "custodian_params": {"max_errors": 7, "$scratch_dir": "$CUSTODIAN_TEST_SCRATCH"},
+    }
+    c = Custodian.from_spec(spec)
+
+    job1, job2 = c.jobs
+    assert job1.env == {"A": "foo-value", "B": "plain"}
+    assert job2.env == {"A": "$CUSTODIAN_TEST_FOO"}
+    assert isinstance(job2.payload, ExampleValidator1)
+    assert job1.cmd == job2.cmd == ["run", "foo-value"]
+    assert [type(h) for h in c.handlers] == [FlagFileHandler]
+    assert c.handlers[0].flag == "stop.flag"
+    assert [type(v) for v in c.validators] == [ExampleValidator2]
+    assert c.max_errors == 7
+    assert c.max_errors_per_job == 7
+    assert c.scratch_dir == "/scratch/here"
+
+
+def test_from_spec_minimal(workdir) -> None:
+    c = Custodian.from_spec({"jobs": [{"jb": f"{__name__}.RecordingJob", "params": {"jobid": 5}}]})
+    assert c.handlers == []
+    assert c.validators == []
+    assert c.max_errors == 1
+    c.run()
+    assert RUN_CALLS == [5]
+
+
+def test_from_spec_unknown_class_raises() -> None:
+    with pytest.raises(AttributeError):
+        Custodian.from_spec({"jobs": [{"jb": f"{__name__}.NoSuchJob"}]})
+
+
+# --------------------------- default Job.terminate --------------------------
+
+
+class PlainSleepJob(Job):
+    """Popen job that does NOT override Job.terminate; first run sleeps, later runs exit at once."""
+
+    def __init__(self, first_sleep=1.0) -> None:
+        self.first_sleep = first_sleep
+        self.procs: list[subprocess.Popen] = []
+
+    def setup(self, directory="./") -> None:
+        pass
+
+    def run(self, directory="./"):
+        duration = self.first_sleep if not self.procs else 0
+        proc = subprocess.Popen([sys.executable, "-c", f"import time; time.sleep({duration})"], cwd=directory)
+        self.procs.append(proc)
+        return proc
+
+    def postprocess(self, directory="./") -> None:
+        pass
+
+
+def test_job_default_terminate_is_noop() -> None:
+    job = PlainSleepJob()
+    assert job.terminate() is None
+    assert job.terminate(directory="elsewhere") is None
+    assert job.name == "PlainSleepJob"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="custodian.py:486 `job.terminate or p.terminate` - the base Job.terminate bound method is always "
+    "truthy, so the documented Popen.terminate fallback is unreachable and a terminating monitor cannot "
+    "kill a job that does not override terminate().",
+)
+def test_terminating_monitor_kills_job_without_terminate_override(workdir) -> None:
+    job = PlainSleepJob(first_sleep=1.0)
+    monitor = OneShotMonitor(is_terminating=True)
+    c = Custodian([monitor], [job], max_errors=10, polling_time_step=0.02, monitor_freq=2)
+    c.run()
+    assert len(job.procs) == 2
+    # The first process should have been killed by the monitor, not run to a clean exit.
+    assert job.procs[0].returncode != 0
