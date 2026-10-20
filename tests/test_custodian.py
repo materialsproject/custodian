@@ -691,22 +691,42 @@ def test_do_check_skip_over_errors_records_bad_handler(workdir, handler_cls) -> 
     corrections = c.run_log[-1]["corrections"]
     assert corrections[0]["errors"][0].startswith("Bad handler=")
     assert corrections[0]["actions"] == []
+    assert corrections[0]["skipped"] is True
+    assert isinstance(corrections[0]["handler"], handler_cls)
     # The subsequent handler still ran.
     assert corrections[1]["handler"] is good
     assert not (workdir / "error.flag").exists()
-    assert c.total_errors == c.errors_current_job == 2
+    # Only the real correction counts as an error.
+    assert c.total_errors == c.errors_current_job == 1
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=KeyError,
-    reason="With skip_over_errors=True, _do_check records the failed handler as a correction dict without a "
-    "'handler' key; _run_job then evaluates corr['handler'].raises_runtime_error and crashes with KeyError.",
-)
-def test_run_skip_over_errors_does_not_crash(workdir) -> None:
-    c = Custodian([BrokenCheckHandler()], [RecordingJob(0)], skip_over_errors=True, max_errors=10)
+@pytest.mark.parametrize("handler_cls", [BrokenCheckHandler, BrokenCorrectHandler])
+def test_do_check_only_skipped_handlers_is_not_an_error(workdir, handler_cls) -> None:
+    c = Custodian([handler_cls()], [RecordingJob(0)], skip_over_errors=True)
+    c.run_log = [{"corrections": []}]
+    assert c._do_check(c.handlers) is False
+    assert c.total_errors == c.errors_current_job == 0
+    assert c.run_log[-1]["corrections"][0]["skipped"] is True
+
+
+@pytest.mark.parametrize("handler_cls", [BrokenCheckHandler, BrokenCorrectHandler])
+def test_run_skip_over_errors_skips_bad_handler(workdir, handler_cls) -> None:
+    job = RecordingJob(0)
+    c = Custodian([handler_cls()], [job], skip_over_errors=True)
     run_log = c.run()
+    # The job runs once and finishes; the failed handler is logged but neither reruns nor aborts it.
+    assert len(run_log) == 1
     assert run_log[0]["corrections"][0]["errors"][0].startswith("Bad handler=")
+    assert RUN_CALLS == [0]
+    assert c.total_errors == 0
+
+
+def test_run_interrupted_skip_over_errors_skips_bad_handler(workdir) -> None:
+    jobs = [RecordingJob(0)]
+    assert _interrupted(jobs).run_interrupted() == 1
+    c = _interrupted(jobs, [BrokenCorrectHandler()], skip_over_errors=True)
+    assert c.run_interrupted() == 0
+    assert c.finished
 
 
 class SleepJob(Job):

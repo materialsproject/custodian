@@ -542,12 +542,12 @@ class Custodian:
 
             # Check that all errors could be handled
             for corr in self.run_log[-1]["corrections"]:
-                if not corr["actions"] and corr["handler"].raises_runtime_error:
+                if not corr["actions"] and not corr.get("skipped") and corr["handler"].raises_runtime_error:
                     self.run_log[-1]["handler"] = corr["handler"]
                     msg = f"Unrecoverable error for handler: {corr['handler']}"
                     raise NonRecoverableError(msg, raises=True, handler=corr["handler"])
             for corr in self.run_log[-1]["corrections"]:
-                if not corr["actions"]:
+                if not corr["actions"] and not corr.get("skipped"):
                     self.run_log[-1]["handler"] = corr["handler"]
                     msg = f"Unrecoverable error for handler: {corr['handler']}"
                     raise NonRecoverableError(msg, raises=False, handler=corr["handler"])
@@ -613,7 +613,7 @@ class Custodian:
                 logger.info("Failed validation based on error handlers")
                 # raise an error for an unrecoverable error
                 for corr in self.run_log[-1]["corrections"]:
-                    if not corr["actions"] and corr["handler"].raises_runtime_error:
+                    if not corr["actions"] and not corr.get("skipped") and corr["handler"].raises_runtime_error:
                         self.run_log[-1]["handler"] = corr["handler"]
                         s = f"Unrecoverable error for handler: {corr['handler']}. Raising RuntimeError"
                         raise NonRecoverableError(s, raises=True, handler=corr["handler"])
@@ -665,7 +665,12 @@ class Custodian:
         return None
 
     def _do_check(self, handlers, terminate_func=None):
-        """Checks the specified handlers. Returns True iff errors caught."""
+        """Checks the specified handlers. Returns True iff errors caught.
+
+        With skip_over_errors, a handler that raises is logged as a correction
+        flagged "skipped" but is not counted as an error and does not trigger
+        a rerun.
+        """
         corrections = []
         for handler in handlers:
             try:
@@ -700,15 +705,16 @@ class Custodian:
 
                 logger.error(f"Bad {handler=}")
                 logger.error(traceback.format_exc())
-                corrections.append({"errors": [f"Bad {handler=}"], "actions": []})
-        self.total_errors += len(corrections)
-        self.errors_current_job += len(corrections)
+                corrections.append({"errors": [f"Bad {handler=}"], "actions": [], "handler": handler, "skipped": True})
+        n_errors = sum(not corr.get("skipped") for corr in corrections)
+        self.total_errors += n_errors
+        self.errors_current_job += n_errors
         self.run_log[-1]["corrections"] += corrections
         # We do a dump of the run log after each check.
         dumpfn(self.run_log, os.path.join(self.directory, Custodian.LOG_FILE), cls=MontyEncoder, indent=4)
         # Clear all the cached values to avoid reusing them in a subsequent check
         tracked_lru_cache.tracked_cache_clear()
-        return len(corrections) > 0
+        return n_errors > 0
 
 
 class Job(MSONable):
