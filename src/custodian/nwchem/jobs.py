@@ -60,7 +60,7 @@ class NwchemJob(Job):
 
     def run(self, directory="./"):
         """Performs actual nwchem run."""
-        with zopen(self.output_file, "w") as fout:
+        with zopen(os.path.join(directory, self.output_file), "wt") as fout:
             return subprocess.Popen([*self.nwchem_cmd, self.input_file], cwd=directory, stdout=fout)  # pylint: disable=R1732
 
     def postprocess(self, directory="./") -> None:
