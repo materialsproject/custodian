@@ -1,4 +1,3 @@
-import os
 import shutil
 
 import pytest
@@ -15,16 +14,15 @@ def _clear_tracked_cache() -> None:
 
 
 class TestVasprunXMLValidator:
-    def test_check_and_correct(self) -> None:
-        os.chdir(f"{TEST_FILES}/bad_vasprun")
+    def test_check_and_correct(self, tmp_path, monkeypatch) -> None:
+        monkeypatch.chdir(f"{TEST_FILES}/bad_vasprun")
         handler = VasprunXMLValidator()
         assert handler.check()
 
         # Unconverged still has a valid vasprun.
-        os.chdir(f"{TEST_FILES}/unconverged")
-        shutil.copy("vasprun.xml.electronic", "vasprun.xml")
+        monkeypatch.chdir(tmp_path)
+        shutil.copy(f"{TEST_FILES}/unconverged/vasprun.xml.electronic", "vasprun.xml")
         assert not handler.check()
-        os.remove("vasprun.xml")
 
     def test_as_dict(self) -> None:
         handler = VasprunXMLValidator()
@@ -34,13 +32,13 @@ class TestVasprunXMLValidator:
 
 
 class TestVaspFilesValidator:
-    def test_check_and_correct(self) -> None:
+    def test_check_and_correct(self, monkeypatch) -> None:
         # just an example where CONTCAR is not present
-        os.chdir(f"{TEST_FILES}/positive_energy")
+        monkeypatch.chdir(f"{TEST_FILES}/positive_energy")
         handler = VaspFilesValidator()
         assert handler.check()
 
-        os.chdir(f"{TEST_FILES}/postprocess")
+        monkeypatch.chdir(f"{TEST_FILES}/postprocess")
         assert not handler.check()
 
     def test_as_dict(self) -> None:
@@ -70,8 +68,8 @@ class TestVaspNpTMDValidator:
 
 
 class TestVaspAECCARValidator:
-    def test_check_and_correct(self) -> None:
+    def test_check_and_correct(self, monkeypatch) -> None:
         # NPT-AIMD using correct VASP
-        os.chdir(f"{TEST_FILES}/bad_aeccar")
+        monkeypatch.chdir(f"{TEST_FILES}/bad_aeccar")
         handler = VaspAECCARValidator()
         assert handler.check()

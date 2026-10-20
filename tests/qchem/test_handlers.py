@@ -1,8 +1,8 @@
-import os
 import shutil
 import unittest
 from unittest import TestCase
 
+import pytest
 from pymatgen.io.qchem.inputs import QCInput
 
 from custodian.qchem.handlers import QChemErrorHandler
@@ -24,16 +24,15 @@ __credits__ = "Xiaohui Qu"
 
 
 TEST_DIR = f"{TEST_FILES}/qchem/new_test_files"
-SCR_DIR = f"{TEST_DIR}/scratch"
-CWD = os.getcwd()
 skip_if_no_openbabel = unittest.skipIf(ob is None, "openbabel not installed")
 
 
 @skip_if_no_openbabel
 class QChemErrorHandlerTest(TestCase):
-    def setUp(self) -> None:
-        os.makedirs(SCR_DIR)
-        os.chdir(SCR_DIR)
+    @pytest.fixture(autouse=True)
+    def _run_in_tmp_path(self, tmp_path, monkeypatch) -> None:
+        monkeypatch.chdir(tmp_path)
+        self.scr_dir = str(tmp_path)
 
     def _check_equivalent_inputs(self, input1, input2) -> None:
         QCinput1 = QCInput.from_file(input1)
@@ -48,11 +47,11 @@ class QChemErrorHandlerTest(TestCase):
         for ii in range(2):
             shutil.copyfile(
                 f"{TEST_DIR}/unable_to_determine_lamda.qin.{ii}",
-                f"{SCR_DIR}/unable_to_determine_lamda.qin.{ii}",
+                f"{self.scr_dir}/unable_to_determine_lamda.qin.{ii}",
             )
             shutil.copyfile(
                 f"{TEST_DIR}/unable_to_determine_lamda.qout.{ii}",
-                f"{SCR_DIR}/unable_to_determine_lamda.qout.{ii}",
+                f"{self.scr_dir}/unable_to_determine_lamda.qout.{ii}",
             )
 
         handler = QChemErrorHandler(
@@ -74,11 +73,11 @@ class QChemErrorHandlerTest(TestCase):
         for ii in range(1, 3):
             shutil.copyfile(
                 f"{TEST_DIR}/unable_to_determine_lamda.qin.{ii}",
-                f"{SCR_DIR}/unable_to_determine_lamda.qin.{ii}",
+                f"{self.scr_dir}/unable_to_determine_lamda.qin.{ii}",
             )
             shutil.copyfile(
                 f"{TEST_DIR}/unable_to_determine_lamda.qout.{ii}",
-                f"{SCR_DIR}/unable_to_determine_lamda.qout.{ii}",
+                f"{self.scr_dir}/unable_to_determine_lamda.qout.{ii}",
             )
 
         handler = QChemErrorHandler(
@@ -93,8 +92,8 @@ class QChemErrorHandlerTest(TestCase):
 
     def test_failed_to_transform(self) -> None:
         for ii in range(2):
-            shutil.copyfile(f"{TEST_DIR}/qunino_vinyl.qin.{ii}", f"{SCR_DIR}/qunino_vinyl.qin.{ii}")
-            shutil.copyfile(f"{TEST_DIR}/qunino_vinyl.qout.{ii}", f"{SCR_DIR}/qunino_vinyl.qout.{ii}")
+            shutil.copyfile(f"{TEST_DIR}/qunino_vinyl.qin.{ii}", f"{self.scr_dir}/qunino_vinyl.qin.{ii}")
+            shutil.copyfile(f"{TEST_DIR}/qunino_vinyl.qout.{ii}", f"{self.scr_dir}/qunino_vinyl.qout.{ii}")
 
         handler = QChemErrorHandler(input_file="qunino_vinyl.qin.0", output_file="qunino_vinyl.qout.0")
         handler.check()
@@ -108,8 +107,8 @@ class QChemErrorHandlerTest(TestCase):
 
     def test_scf_failed_to_converge(self) -> None:
         for ii in range(3):
-            shutil.copyfile(f"{TEST_DIR}/crowd_gradient.qin.{ii}", f"{SCR_DIR}/crowd_gradient.qin.{ii}")
-            shutil.copyfile(f"{TEST_DIR}/crowd_gradient.qout.{ii}", f"{SCR_DIR}/crowd_gradient.qout.{ii}")
+            shutil.copyfile(f"{TEST_DIR}/crowd_gradient.qin.{ii}", f"{self.scr_dir}/crowd_gradient.qin.{ii}")
+            shutil.copyfile(f"{TEST_DIR}/crowd_gradient.qout.{ii}", f"{self.scr_dir}/crowd_gradient.qout.{ii}")
 
         handler = QChemErrorHandler(input_file="crowd_gradient.qin.0", output_file="crowd_gradient.qout.0")
         handler.check()
@@ -119,9 +118,9 @@ class QChemErrorHandlerTest(TestCase):
         self._check_equivalent_inputs("crowd_gradient.qin.0", "crowd_gradient.qin.1")
 
     def test_scf_failed_to_converge_gdm_add_cycles(self) -> None:
-        shutil.copyfile(f"{TEST_DIR}/gdm_add_cycles/mol.qin", f"{SCR_DIR}/mol.qin")
-        shutil.copyfile(f"{TEST_DIR}/gdm_add_cycles/mol.qin.1", f"{SCR_DIR}/mol.qin.1")
-        shutil.copyfile(f"{TEST_DIR}/gdm_add_cycles/mol.qout", f"{SCR_DIR}/mol.qout")
+        shutil.copyfile(f"{TEST_DIR}/gdm_add_cycles/mol.qin", f"{self.scr_dir}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/gdm_add_cycles/mol.qin.1", f"{self.scr_dir}/mol.qin.1")
+        shutil.copyfile(f"{TEST_DIR}/gdm_add_cycles/mol.qout", f"{self.scr_dir}/mol.qout")
 
         handler = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         handler.check()
@@ -131,9 +130,9 @@ class QChemErrorHandlerTest(TestCase):
         self._check_equivalent_inputs("mol.qin", "mol.qin.1")
 
     def test_advanced_scf_failed_to_converge_1(self) -> None:
-        shutil.copyfile(f"{TEST_DIR}/diis_guess_always/mol.qin.0", f"{SCR_DIR}/mol.qin")
-        shutil.copyfile(f"{TEST_DIR}/diis_guess_always/mol.qout.0", f"{SCR_DIR}/mol.qout")
-        shutil.copyfile(f"{TEST_DIR}/diis_guess_always/mol.qin.1", f"{SCR_DIR}/mol.qin.1")
+        shutil.copyfile(f"{TEST_DIR}/diis_guess_always/mol.qin.0", f"{self.scr_dir}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/diis_guess_always/mol.qout.0", f"{self.scr_dir}/mol.qout")
+        shutil.copyfile(f"{TEST_DIR}/diis_guess_always/mol.qin.1", f"{self.scr_dir}/mol.qin.1")
 
         handler = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         handler.check()
@@ -143,9 +142,9 @@ class QChemErrorHandlerTest(TestCase):
         self._check_equivalent_inputs("mol.qin", "mol.qin.1")
 
     def test_scf_into_opt(self) -> None:
-        shutil.copyfile(f"{TEST_DIR}/scf_into_opt/mol.qin.0", f"{SCR_DIR}/mol.qin")
-        shutil.copyfile(f"{TEST_DIR}/scf_into_opt/mol.qout.0", f"{SCR_DIR}/mol.qout")
-        shutil.copyfile(f"{TEST_DIR}/scf_into_opt/mol.qin.1", f"{SCR_DIR}/mol.qin.1")
+        shutil.copyfile(f"{TEST_DIR}/scf_into_opt/mol.qin.0", f"{self.scr_dir}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/scf_into_opt/mol.qout.0", f"{self.scr_dir}/mol.qout")
+        shutil.copyfile(f"{TEST_DIR}/scf_into_opt/mol.qin.1", f"{self.scr_dir}/mol.qin.1")
 
         handler = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         handler.check()
@@ -154,7 +153,7 @@ class QChemErrorHandlerTest(TestCase):
         assert dct["actions"] == [{"scf_algorithm": "gdm"}, {"max_scf_cycles": "500"}]
         self._check_equivalent_inputs("mol.qin", "mol.qin.1")
 
-        shutil.copyfile(f"{TEST_DIR}/scf_into_opt/mol.qout.1", f"{SCR_DIR}/mol.qout")
+        shutil.copyfile(f"{TEST_DIR}/scf_into_opt/mol.qout.1", f"{self.scr_dir}/mol.qout")
 
         handler.check()
         dct = handler.correct()
@@ -162,9 +161,9 @@ class QChemErrorHandlerTest(TestCase):
         assert dct["actions"] == [{"molecule": "molecule_from_last_geometry"}]
 
     def test_custom_smd(self) -> None:
-        shutil.copyfile(f"{TEST_DIR}/custom_smd/mol.qin.0", f"{SCR_DIR}/mol.qin")
-        shutil.copyfile(f"{TEST_DIR}/custom_smd/mol.qout.0", f"{SCR_DIR}/mol.qout")
-        shutil.copyfile(f"{TEST_DIR}/custom_smd/mol.qin.1", f"{SCR_DIR}/mol.qin.1")
+        shutil.copyfile(f"{TEST_DIR}/custom_smd/mol.qin.0", f"{self.scr_dir}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/custom_smd/mol.qout.0", f"{self.scr_dir}/mol.qout")
+        shutil.copyfile(f"{TEST_DIR}/custom_smd/mol.qin.1", f"{self.scr_dir}/mol.qin.1")
 
         handler = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         handler.check()
@@ -173,7 +172,7 @@ class QChemErrorHandlerTest(TestCase):
         assert dct["actions"] == [{"scf_algorithm": "gdm"}, {"max_scf_cycles": "500"}]
         self._check_equivalent_inputs("mol.qin", "mol.qin.1")
 
-        shutil.copyfile(f"{TEST_DIR}/custom_smd/mol.qout.1", f"{SCR_DIR}/mol.qout")
+        shutil.copyfile(f"{TEST_DIR}/custom_smd/mol.qout.1", f"{self.scr_dir}/mol.qout")
 
         handler.check()
         dct = handler.correct()
@@ -181,9 +180,9 @@ class QChemErrorHandlerTest(TestCase):
         assert dct["actions"] is None
 
     def test_out_of_opt_cycles(self) -> None:
-        shutil.copyfile(f"{TEST_DIR}/crowd_gradient.qin.2", f"{SCR_DIR}/crowd_gradient.qin.2")
-        shutil.copyfile(f"{TEST_DIR}/crowd_gradient.qout.2", f"{SCR_DIR}/crowd_gradient.qout.2")
-        shutil.copyfile(f"{TEST_DIR}/crowd_gradient.qin.3", f"{SCR_DIR}/crowd_gradient.qin.3")
+        shutil.copyfile(f"{TEST_DIR}/crowd_gradient.qin.2", f"{self.scr_dir}/crowd_gradient.qin.2")
+        shutil.copyfile(f"{TEST_DIR}/crowd_gradient.qout.2", f"{self.scr_dir}/crowd_gradient.qout.2")
+        shutil.copyfile(f"{TEST_DIR}/crowd_gradient.qin.3", f"{self.scr_dir}/crowd_gradient.qin.3")
 
         handler = QChemErrorHandler(input_file="crowd_gradient.qin.2", output_file="crowd_gradient.qout.2")
         handler.check()
@@ -193,9 +192,9 @@ class QChemErrorHandlerTest(TestCase):
         self._check_equivalent_inputs("crowd_gradient.qin.2", "crowd_gradient.qin.3")
 
     def test_advanced_out_of_opt_cycles(self) -> None:
-        shutil.copyfile(f"{TEST_DIR}/2564_complete/error1/mol.qin", f"{SCR_DIR}/mol.qin")
-        shutil.copyfile(f"{TEST_DIR}/2564_complete/error1/mol.qout", f"{SCR_DIR}/mol.qout")
-        shutil.copyfile(f"{TEST_DIR}/2564_complete/mol.qin.opt_0", f"{SCR_DIR}/mol.qin.opt_0")
+        shutil.copyfile(f"{TEST_DIR}/2564_complete/error1/mol.qin", f"{self.scr_dir}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/2564_complete/error1/mol.qout", f"{self.scr_dir}/mol.qout")
+        shutil.copyfile(f"{TEST_DIR}/2564_complete/mol.qin.opt_0", f"{self.scr_dir}/mol.qin.opt_0")
         handler = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         handler.check()
         dct = handler.correct()
@@ -203,20 +202,20 @@ class QChemErrorHandlerTest(TestCase):
         assert dct["actions"] == [{"s2thresh": "16"}, {"molecule": "molecule_from_last_geometry"}]
         self._check_equivalent_inputs("mol.qin.opt_0", "mol.qin")
         assert handler.opt_error_history[0] == "more_bonds"
-        shutil.copyfile(f"{TEST_DIR}/2564_complete/mol.qin.opt_0", f"{SCR_DIR}/mol.qin")
-        shutil.copyfile(f"{TEST_DIR}/2564_complete/mol.qout.opt_0", f"{SCR_DIR}/mol.qout")
+        shutil.copyfile(f"{TEST_DIR}/2564_complete/mol.qin.opt_0", f"{self.scr_dir}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/2564_complete/mol.qout.opt_0", f"{self.scr_dir}/mol.qout")
         handler.check()
         assert handler.opt_error_history == []
 
     def test_advanced_out_of_opt_cycles1(self) -> None:
-        shutil.copyfile(f"{TEST_DIR}/2620_complete/mol.qin.opt_0", f"{SCR_DIR}/mol.qin")
-        shutil.copyfile(f"{TEST_DIR}/2620_complete/mol.qout.opt_0", f"{SCR_DIR}/mol.qout")
+        shutil.copyfile(f"{TEST_DIR}/2620_complete/mol.qin.opt_0", f"{self.scr_dir}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/2620_complete/mol.qout.opt_0", f"{self.scr_dir}/mol.qout")
         handler = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         assert handler.check() is False
 
     def test_failed_to_read_input(self) -> None:
-        shutil.copyfile(f"{TEST_DIR}/unable_lamda_weird.qin", f"{SCR_DIR}/unable_lamda_weird.qin")
-        shutil.copyfile(f"{TEST_DIR}/unable_lamda_weird.qout", f"{SCR_DIR}/unable_lamda_weird.qout")
+        shutil.copyfile(f"{TEST_DIR}/unable_lamda_weird.qin", f"{self.scr_dir}/unable_lamda_weird.qin")
+        shutil.copyfile(f"{TEST_DIR}/unable_lamda_weird.qout", f"{self.scr_dir}/unable_lamda_weird.qout")
         handler = QChemErrorHandler(input_file="unable_lamda_weird.qin", output_file="unable_lamda_weird.qout")
         handler.check()
         dct = handler.correct()
@@ -225,8 +224,8 @@ class QChemErrorHandlerTest(TestCase):
         self._check_equivalent_inputs("unable_lamda_weird.qin.last", "unable_lamda_weird.qin")
 
     def test_input_file_error(self) -> None:
-        shutil.copyfile(f"{TEST_DIR}/bad_input.qin", f"{SCR_DIR}/bad_input.qin")
-        shutil.copyfile(f"{TEST_DIR}/bad_input.qout", f"{SCR_DIR}/bad_input.qout")
+        shutil.copyfile(f"{TEST_DIR}/bad_input.qin", f"{self.scr_dir}/bad_input.qin")
+        shutil.copyfile(f"{TEST_DIR}/bad_input.qout", f"{self.scr_dir}/bad_input.qout")
         handler = QChemErrorHandler(input_file="bad_input.qin", output_file="bad_input.qout")
         handler.check()
         dct = handler.correct()
@@ -234,8 +233,8 @@ class QChemErrorHandlerTest(TestCase):
         assert dct["actions"] is None
 
     def test_basis_not_supported(self) -> None:
-        shutil.copyfile(f"{TEST_DIR}/basis_not_supported.qin", f"{SCR_DIR}/basis_not_supported.qin")
-        shutil.copyfile(f"{TEST_DIR}/basis_not_supported.qout", f"{SCR_DIR}/basis_not_supported.qout")
+        shutil.copyfile(f"{TEST_DIR}/basis_not_supported.qin", f"{self.scr_dir}/basis_not_supported.qin")
+        shutil.copyfile(f"{TEST_DIR}/basis_not_supported.qout", f"{self.scr_dir}/basis_not_supported.qout")
         handler = QChemErrorHandler(input_file="basis_not_supported.qin", output_file="basis_not_supported.qout")
         handler.check()
         dct = handler.correct()
@@ -243,8 +242,8 @@ class QChemErrorHandlerTest(TestCase):
         assert dct["actions"] is None
 
     def test_NLebdevPts(self) -> None:
-        shutil.copyfile(f"{TEST_DIR}/lebdevpts.qin", f"{SCR_DIR}/lebdevpts.qin")
-        shutil.copyfile(f"{TEST_DIR}/lebdevpts.qout", f"{SCR_DIR}/lebdevpts.qout")
+        shutil.copyfile(f"{TEST_DIR}/lebdevpts.qin", f"{self.scr_dir}/lebdevpts.qin")
+        shutil.copyfile(f"{TEST_DIR}/lebdevpts.qout", f"{self.scr_dir}/lebdevpts.qout")
         handler = QChemErrorHandler(input_file="lebdevpts.qin", output_file="lebdevpts.qout")
         handler.check()
         dct = handler.correct()
@@ -252,8 +251,8 @@ class QChemErrorHandlerTest(TestCase):
         assert dct["actions"] == [{"esp_surface_density": "250"}]
 
     def test_read_error(self) -> None:
-        shutil.copyfile(f"{TEST_DIR}/molecule_read_error/mol.qin", f"{SCR_DIR}/mol.qin")
-        shutil.copyfile(f"{TEST_DIR}/molecule_read_error/mol.qout", f"{SCR_DIR}/mol.qout")
+        shutil.copyfile(f"{TEST_DIR}/molecule_read_error/mol.qin", f"{self.scr_dir}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/molecule_read_error/mol.qout", f"{self.scr_dir}/mol.qout")
         handler = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         handler.check()
         dct = handler.correct()
@@ -262,8 +261,8 @@ class QChemErrorHandlerTest(TestCase):
         self._check_equivalent_inputs("mol.qin.last", "mol.qin")
 
     def test_never_called_qchem_error(self) -> None:
-        shutil.copyfile(f"{TEST_DIR}/mpi_error/mol.qin", f"{SCR_DIR}/mol.qin")
-        shutil.copyfile(f"{TEST_DIR}/mpi_error/mol.qout", f"{SCR_DIR}/mol.qout")
+        shutil.copyfile(f"{TEST_DIR}/mpi_error/mol.qin", f"{self.scr_dir}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/mpi_error/mol.qout", f"{self.scr_dir}/mol.qout")
         handler = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         handler.check()
         dct = handler.correct()
@@ -272,8 +271,8 @@ class QChemErrorHandlerTest(TestCase):
         self._check_equivalent_inputs("mol.qin.last", "mol.qin")
 
     def test_OOS_read_hess(self) -> None:
-        shutil.copyfile(f"{TEST_DIR}/OOS_read_hess.qin", f"{SCR_DIR}/mol.qin")
-        shutil.copyfile(f"{TEST_DIR}/OOS_read_hess.qout", f"{SCR_DIR}/mol.qout")
+        shutil.copyfile(f"{TEST_DIR}/OOS_read_hess.qin", f"{self.scr_dir}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/OOS_read_hess.qout", f"{self.scr_dir}/mol.qout")
         handler = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         handler.check()
         dct = handler.correct()
@@ -286,8 +285,8 @@ class QChemErrorHandlerTest(TestCase):
         self._check_equivalent_inputs(f"{TEST_DIR}/OOS_read_hess_next.qin", "mol.qin")
 
     def test_gdm_neg_precon_error(self) -> None:
-        shutil.copyfile(f"{TEST_DIR}/gdm_neg_precon_error.qin", f"{SCR_DIR}/mol.qin")
-        shutil.copyfile(f"{TEST_DIR}/gdm_neg_precon_error.qout", f"{SCR_DIR}/mol.qout")
+        shutil.copyfile(f"{TEST_DIR}/gdm_neg_precon_error.qin", f"{self.scr_dir}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/gdm_neg_precon_error.qout", f"{self.scr_dir}/mol.qout")
         handler = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         handler.check()
         dct = handler.correct()
@@ -295,14 +294,10 @@ class QChemErrorHandlerTest(TestCase):
         assert dct["actions"] == [{"molecule": "molecule_from_last_geometry"}]
 
     def test_fileman_cpscf_nseg_error(self) -> None:
-        shutil.copyfile(f"{TEST_DIR}/fileman_cpscf.qin", f"{SCR_DIR}/mol.qin")
-        shutil.copyfile(f"{TEST_DIR}/fileman_cpscf.qout", f"{SCR_DIR}/mol.qout")
+        shutil.copyfile(f"{TEST_DIR}/fileman_cpscf.qin", f"{self.scr_dir}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/fileman_cpscf.qout", f"{self.scr_dir}/mol.qout")
         handler = QChemErrorHandler(input_file="mol.qin", output_file="mol.qout")
         handler.check()
         dct = handler.correct()
         assert dct["errors"] == ["premature_end_FileMan_error"]
         assert dct["actions"] == [{"cpscf_nseg": "3"}]
-
-    def tearDown(self) -> None:
-        os.chdir(CWD)
-        shutil.rmtree(SCR_DIR)

@@ -858,12 +858,10 @@ class KspacingMetalHandlerTest(MatSciTest):
         os.remove("vasprun.xml")
 
     def test_check_with_non_kspacing_wf(self) -> None:
-        os.chdir(TEST_FILES)
-        shutil.copy("INCAR", f"{self.tmp_path}/INCAR")
-        shutil.copy("vasprun.xml", f"{self.tmp_path}/vasprun.xml")
+        shutil.copy(f"{TEST_FILES}/INCAR", f"{self.tmp_path}/INCAR")
+        shutil.copy(f"{TEST_FILES}/vasprun.xml", f"{self.tmp_path}/vasprun.xml")
         handler = KspacingMetalHandler(output_filename=f"{self.tmp_path}/vasprun.xml")
         assert handler.check() is False
-        os.chdir(f"{TEST_FILES}/scan_metal")
 
         # TODO (@janosh 2023-11-03) remove when ending ScanMetalHandler deprecation period
         assert isinstance(ScanMetalHandler(), KspacingMetalHandler)
@@ -1113,7 +1111,8 @@ class ZpotrfErrorHandlerSmallTest(MatSciTest):
 class WalltimeHandlerTest(MatSciTest):
     @pytest.fixture(autouse=True)
     def _setup(self, _tmp_dir) -> None:
-        os.chdir(f"{TEST_FILES}/postprocess")
+        shutil.copytree(f"{TEST_FILES}/postprocess", self.tmp_path, dirs_exist_ok=True)
+        os.chdir(self.tmp_path)
         os.environ.pop("CUSTODIAN_WALLTIME_START", None)
 
     def test_walltime_start(self) -> None:

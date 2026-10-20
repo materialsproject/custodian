@@ -1,9 +1,10 @@
 import datetime as dt
-import glob
 import gzip
 import os
 import shutil
 from unittest import TestCase
+
+import pytest
 
 from custodian.gaussian.handlers import GaussianErrorHandler, WallTimeErrorHandler
 from tests.conftest import TEST_FILES
@@ -16,27 +17,26 @@ __status__ = "Alpha"
 __date__ = "3/21/24"
 
 TEST_DIR = f"{TEST_FILES}/gaussian"
-SCR_DIR = f"{TEST_DIR}/scratch"
-CWD = os.getcwd()
 
 
-def gunzip_file(gauss_file):
-    output_file = os.path.splitext(gauss_file)[0]
-    if not os.path.exists(output_file) and os.path.exists(gauss_file):
-        with gzip.open(gauss_file, "rb") as f_in, open(output_file, "wb") as f_out:
-            shutil.copyfileobj(f_in, f_out)
-    return output_file
+def copy_input(file):
+    """Copy a test file from TEST_DIR into the cwd, gunzipping it if only a .gz exists."""
+    src = f"{TEST_DIR}/{file}"
+    if os.path.exists(src):
+        shutil.copyfile(src, file)
+        return
+    with gzip.open(f"{src}.gz", "rb") as f_in, open(file, "wb") as f_out:
+        shutil.copyfileobj(f_in, f_out)
 
 
 class TestGaussianErrorHandler(TestCase):
-    def setUp(self):
-        os.makedirs(SCR_DIR, exist_ok=True)
-        os.chdir(SCR_DIR)
+    @pytest.fixture(autouse=True)
+    def _run_in_tmp_path(self, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
 
     def test_opt_steps_cycles(self):
-        gunzip_file(f"{TEST_DIR}/opt_steps_cycles.out.gz")
         for file in ["opt_steps_cycles.com", "opt_steps_cycles.out"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="opt_steps_cycles.com",
             output_file="opt_steps_cycles.out",
@@ -51,9 +51,8 @@ class TestGaussianErrorHandler(TestCase):
         ]
 
     def test_opt_steps_from_structure(self):
-        gunzip_file(f"{TEST_DIR}/opt_steps_from_structure.out.gz")
         for file in ["opt_steps_from_structure.com", "opt_steps_from_structure.out"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="opt_steps_from_structure.com",
             output_file="opt_steps_from_structure.out",
@@ -65,9 +64,8 @@ class TestGaussianErrorHandler(TestCase):
         assert dct["actions"] == [{"structure": "from_final_structure"}]
 
     def test_opt_steps_int_grid(self):
-        gunzip_file(f"{TEST_DIR}/opt_steps_int_grid.out.gz")
         for file in ["opt_steps_int_grid.com", "opt_steps_int_grid.out"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="opt_steps_int_grid.com",
             output_file="opt_steps_int_grid.out",
@@ -79,9 +77,8 @@ class TestGaussianErrorHandler(TestCase):
         assert dct["actions"] == [{"integral": "ultra_fine"}]
 
     def test_opt_steps_better_guess(self):
-        gunzip_file(f"{TEST_DIR}/opt_steps_better_guess.out.gz")
         for file in ["opt_steps_better_guess.com", "opt_steps_better_guess.out"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="opt_steps_better_guess.com",
             output_file="opt_steps_better_guess.out",
@@ -98,9 +95,8 @@ class TestGaussianErrorHandler(TestCase):
         GaussianErrorHandler.activate_better_guess = False
 
     def test_scf_convergence_cycles(self):
-        gunzip_file(f"{TEST_DIR}/scf_convergence_cycles.out.gz")
         for file in ["scf_convergence_cycles.com", "scf_convergence_cycles.out"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="scf_convergence_cycles.com",
             output_file="scf_convergence_cycles.out",
@@ -112,9 +108,8 @@ class TestGaussianErrorHandler(TestCase):
         assert dct["actions"] == [{"scf_max_cycles": 100}]
 
     def test_scf_convergence_algorithm(self):
-        gunzip_file(f"{TEST_DIR}/scf_convergence_algorithm.out.gz")
         for file in ["scf_convergence_algorithm.com", "scf_convergence_algorithm.out"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="scf_convergence_algorithm.com",
             output_file="scf_convergence_algorithm.out",
@@ -126,12 +121,11 @@ class TestGaussianErrorHandler(TestCase):
         assert dct["actions"] == [{"scf_algorithm": "xqc"}]
 
     def test_scf_convergence_better_guess(self):
-        gunzip_file(f"{TEST_DIR}/scf_convergence_better_guess.out.gz")
         for file in [
             "scf_convergence_better_guess.com",
             "scf_convergence_better_guess.out",
         ]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="scf_convergence_better_guess.com",
             output_file="scf_convergence_better_guess.out",
@@ -149,9 +143,8 @@ class TestGaussianErrorHandler(TestCase):
         GaussianErrorHandler.activate_better_guess = False
 
     def test_linear_bend(self):
-        gunzip_file(f"{TEST_DIR}/linear_bend.out.gz")
         for file in ["linear_bend.com", "linear_bend.out"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="linear_bend.com",
             output_file="linear_bend.out",
@@ -162,9 +155,8 @@ class TestGaussianErrorHandler(TestCase):
         assert dct["actions"] == [{"coords": "rebuild_redundant_internals"}]
 
     def test_solute_solvent_surface(self):
-        gunzip_file(f"{TEST_DIR}/solute_solvent_surface.out.gz")
         for file in ["solute_solvent_surface.com", "solute_solvent_surface.out"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="solute_solvent_surface.com",
             output_file="solute_solvent_surface.out",
@@ -178,9 +170,8 @@ class TestGaussianErrorHandler(TestCase):
         pass
 
     def test_blank_line(self):
-        gunzip_file(f"{TEST_DIR}/zmatrix.out.gz")
         for file in ["zmatrix.com", "zmatrix.out"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="zmatrix.com",
             output_file="zmatrix.out",
@@ -191,9 +182,8 @@ class TestGaussianErrorHandler(TestCase):
         assert dct["actions"] == [{"blank_lines": "rewrite_input_file"}]
 
     def test_missing_mol(self):
-        gunzip_file(f"{TEST_DIR}/missing_mol.out.gz")
         for file in ["missing_mol.com", "missing_mol.out", "Optimization.chk"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="missing_mol.com",
             output_file="missing_mol.out",
@@ -204,9 +194,8 @@ class TestGaussianErrorHandler(TestCase):
         assert dct["actions"] == [{"mol": "get_from_checkpoint"}]
 
     def test_found_coords(self):
-        gunzip_file(f"{TEST_DIR}/found_coords.out.gz")
         for file in ["found_coords.com", "found_coords.out"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="found_coords.com",
             output_file="found_coords.out",
@@ -217,9 +206,8 @@ class TestGaussianErrorHandler(TestCase):
         assert dct["actions"] == [{"mol": "remove_from_input"}]
 
     def test_coords_dict_geom(self):
-        gunzip_file(f"{TEST_DIR}/coords_dict_geom.out.gz")
         for file in ["coords_dict_geom.com", "coords_dict_geom.out"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="coords_dict_geom.com",
             output_file="coords_dict_geom.out",
@@ -230,9 +218,8 @@ class TestGaussianErrorHandler(TestCase):
         assert dct["actions"] == [{"coords": "remove_connectivity"}]
 
     def test_coords_string_geom(self):
-        gunzip_file(f"{TEST_DIR}/coords_string_geom.out.gz")
         for file in ["coords_string_geom.com", "coords_string_geom.out"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="coords_string_geom.com",
             output_file="coords_string_geom.out",
@@ -243,9 +230,8 @@ class TestGaussianErrorHandler(TestCase):
         assert dct["actions"] == [{"coords": "remove_connectivity"}]
 
     def test_missing_file(self):
-        gunzip_file(f"{TEST_DIR}/missing_file.out.gz")
         for file in ["missing_file.com", "missing_file.out"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="missing_file.com",
             output_file="missing_file.out",
@@ -256,9 +242,8 @@ class TestGaussianErrorHandler(TestCase):
         assert dct["actions"] is None
 
     def test_bad_file(self):
-        gunzip_file(f"{TEST_DIR}/bad_file.out.gz")
         for file in ["bad_file.com", "bad_file.out"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="bad_file.com",
             output_file="bad_file.out",
@@ -269,9 +254,8 @@ class TestGaussianErrorHandler(TestCase):
         assert dct["actions"] is None
 
     def test_coord_inputs(self):
-        gunzip_file(f"{TEST_DIR}/coord_inputs.out.gz")
         for file in ["coord_inputs.com", "coord_inputs.out"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="coord_inputs.com",
             output_file="coord_inputs.out",
@@ -282,9 +266,8 @@ class TestGaussianErrorHandler(TestCase):
         assert dct["actions"] == [{"coords": "use_zmatrix_format"}]
 
     def test_syntax(self):
-        gunzip_file(f"{TEST_DIR}/syntax.out.gz")
         for file in ["syntax.com", "syntax.out"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="syntax.com",
             output_file="syntax.out",
@@ -295,9 +278,8 @@ class TestGaussianErrorHandler(TestCase):
         assert dct["actions"] is None
 
     def test_insufficient_memory(self):
-        gunzip_file(f"{TEST_DIR}/insufficient_memory.out.gz")
         for file in ["insufficient_memory.com", "insufficient_memory.out"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
         handler = GaussianErrorHandler(
             input_file="insufficient_memory.com",
             output_file="insufficient_memory.out",
@@ -307,23 +289,14 @@ class TestGaussianErrorHandler(TestCase):
         assert dct["errors"] == ["insufficient_mem"]
         assert dct["actions"] == [{"memory": "increase_to_gaussian_recommendation"}]
 
-    def tearDown(self):
-        os.chdir(CWD)
-        shutil.rmtree(SCR_DIR)
-        files_to_remove = glob.glob(f"{TEST_DIR}/*.out")
-        if files_to_remove and glob.glob(f"{TEST_DIR}/*.out.gz"):
-            for file_path in files_to_remove:
-                os.remove(file_path)
-
 
 class TestWallTimeErrorHandler(TestCase):
-    def setUp(self):
-        os.makedirs(SCR_DIR, exist_ok=True)
-        os.chdir(SCR_DIR)
-        os.environ.pop("JOB_START_TIME", None)
-        gunzip_file(f"{TEST_DIR}/walltime.out.gz")
+    @pytest.fixture(autouse=True)
+    def _run_in_tmp_path(self, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.delenv("JOB_START_TIME", raising=False)
         for file in ["walltime.com", "walltime.out", "Gau-mock.rwf"]:
-            shutil.copyfile(f"{TEST_DIR}/{file}", f"{SCR_DIR}/{file}")
+            copy_input(file)
 
     def test_walltime_init(self):
         handler = WallTimeErrorHandler(
@@ -364,11 +337,3 @@ class TestWallTimeErrorHandler(TestCase):
             first_line = file.readline().strip()
         # assert first_line == "%rwf=./Gau-mock.rwf"
         assert "rwf" in first_line
-
-    def tearDown(self):
-        os.chdir(CWD)
-        shutil.rmtree(SCR_DIR)
-        files_to_remove = glob.glob(f"{TEST_DIR}/*.out")
-        if files_to_remove and glob.glob(f"{TEST_DIR}/*.out.gz"):
-            for file_path in files_to_remove:
-                os.remove(file_path)

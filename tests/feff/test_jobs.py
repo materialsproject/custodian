@@ -24,8 +24,8 @@ def test_as_from_dict() -> None:
     assert f2.feff_cmd == "hello"
 
 
-def test_setup() -> None:
-    with cd(TEST_DIR), ScratchDir(".", copy_from_current_on_enter=True):
+def test_setup(tmp_path) -> None:
+    with cd(TEST_DIR), ScratchDir(str(tmp_path), copy_from_current_on_enter=True):
         f = FeffJob("hello", backup=True)
         f.setup()
 
@@ -38,8 +38,8 @@ def test_setup() -> None:
         assert atom == atom_origin
 
 
-def test_postprocess() -> None:
-    with cd(TEST_DIR), ScratchDir(".", copy_from_current_on_enter=True):
+def test_postprocess(tmp_path) -> None:
+    with cd(TEST_DIR), ScratchDir(str(tmp_path), copy_from_current_on_enter=True):
         f = FeffJob("hello", backup=True, gzipped=True)
         f.postprocess()
         assert os.path.isfile("feff_out.1.tar.gz")

@@ -13,8 +13,9 @@ __status__ = "Beta"
 __date__ = "6/18/13"
 
 
-def test_check_correct() -> None:
-    os.chdir(f"{TEST_FILES}/nwchem")
+def test_check_correct(tmp_path, monkeypatch) -> None:
+    shutil.copytree(f"{TEST_FILES}/nwchem", tmp_path, dirs_exist_ok=True)
+    monkeypatch.chdir(tmp_path)
     shutil.copy("C1N1Cl1_1.nw", "C1N1Cl1_1.nw.orig")
     handler = NwchemErrorHandler(output_filename="C1N1Cl1_1.nwout")
     handler.check()

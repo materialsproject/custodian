@@ -3,6 +3,8 @@ import shutil
 import unittest
 from glob import glob
 
+import pytest
+
 from custodian.feff.handlers import UnconvergedErrorHandler
 from tests.conftest import TEST_FILES
 
@@ -20,10 +22,12 @@ def clean_dir() -> None:
 
 
 class UnconvergedErrorHandlerTest(unittest.TestCase):
+    @pytest.fixture(autouse=True)
+    def _run_in_tmp_path(self, tmp_path, monkeypatch) -> None:
+        shutil.copytree(f"{TEST_FILES}/feff_unconverged", tmp_path, dirs_exist_ok=True)
+        monkeypatch.chdir(tmp_path)
+
     def setUp(self) -> None:
-        os.chdir(TEST_FILES)
-        subdir = f"{TEST_FILES}/feff_unconverged"
-        os.chdir(subdir)
         shutil.copy("ATOMS", "ATOMS.orig")
         shutil.copy("PARAMETERS", "PARAMETERS.orig")
         shutil.copy("HEADER", "HEADER.orig")

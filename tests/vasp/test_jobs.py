@@ -33,8 +33,8 @@ class TestVaspJob:
         assert isinstance(v2, VaspJob)
         assert v2.vasp_cmd == ("hello",)
 
-    def test_setup(self) -> None:
-        with cd(TEST_FILES), ScratchDir(".", copy_from_current_on_enter=True):
+    def test_setup(self, tmp_path) -> None:
+        with cd(TEST_FILES), ScratchDir(str(tmp_path), copy_from_current_on_enter=True):
             v = VaspJob(["hello"], auto_npar=True)
             v.setup()
             incar = Incar.from_file("INCAR")
@@ -43,9 +43,9 @@ class TestVaspJob:
             if count > 3:
                 assert incar["NPAR"] > 1
 
-    def test_setup_run_no_kpts(self) -> None:
+    def test_setup_run_no_kpts(self, tmp_path) -> None:
         # just make sure v.setup() and v.run() exit cleanly when no KPOINTS file is present
-        with cd(f"{TEST_FILES}/kspacing"), ScratchDir(".", copy_from_current_on_enter=True):
+        with cd(f"{TEST_FILES}/kspacing"), ScratchDir(str(tmp_path), copy_from_current_on_enter=True):
             v = VaspJob(["hello"], auto_npar=True)
             v.setup()
             with pytest.raises(FileNotFoundError):
@@ -55,9 +55,9 @@ class TestVaspJob:
                 # directory.
                 v.run()
 
-    def test_update_incar(self) -> None:
+    def test_update_incar(self, tmp_path) -> None:
         # just make sure v.setup() and v.run() exit cleanly when no KPOINTS file is present
-        with cd(f"{TEST_FILES}/update_incar"), ScratchDir(".", copy_from_current_on_enter=True):
+        with cd(f"{TEST_FILES}/update_incar"), ScratchDir(str(tmp_path), copy_from_current_on_enter=True):
             incar = Incar.from_file("INCAR")
             assert incar["NBANDS"] == 200
             v = VaspJob(["hello"], update_incar=True)
@@ -65,8 +65,8 @@ class TestVaspJob:
             incar = Incar.from_file("INCAR")
             assert incar["NBANDS"] == 224
 
-    def test_postprocess(self) -> None:
-        with cd(f"{TEST_FILES}/postprocess"), ScratchDir(".", copy_from_current_on_enter=True):
+    def test_postprocess(self, tmp_path) -> None:
+        with cd(f"{TEST_FILES}/postprocess"), ScratchDir(str(tmp_path), copy_from_current_on_enter=True):
             shutil.copy("INCAR", "INCAR.backup")
 
             v = VaspJob(["hello"], final=False, suffix=".test", copy_magmom=True)
@@ -90,11 +90,11 @@ class TestVaspJob:
             assert incar["MAGMOM"] == pytest.approx([3.007, 1.397, -0.189, -0.189])
             assert incar_prev["MAGMOM"] == pytest.approx([5, -5, 0.6, 0.6])
 
-    def test_continue(self) -> None:
+    def test_continue(self, tmp_path) -> None:
         # Test the continuation functionality
         with cd(f"{TEST_FILES}/postprocess"):
             # Test default functionality
-            with ScratchDir(".", copy_from_current_on_enter=True):
+            with ScratchDir(str(tmp_path), copy_from_current_on_enter=True):
                 v = VaspJob("hello", auto_continue=True)
                 v.setup()
                 assert os.path.isfile("continue.json"), "continue.json not created"
@@ -104,7 +104,7 @@ class TestVaspJob:
                 v.postprocess()
                 assert not os.path.isfile("continue.json"), "continue.json not deleted after postprocessing"
             # Test explicit action functionality
-            with ScratchDir(".", copy_from_current_on_enter=True):
+            with ScratchDir(str(tmp_path), copy_from_current_on_enter=True):
                 v = VaspJob(
                     ["hello"],
                     auto_continue=[{"dict": "INCAR", "action": {"_set": {"ISTART": 1}}}],
@@ -127,8 +127,8 @@ class TestVaspNEBJob:
         assert isinstance(v2, VaspNEBJob)
         assert v2.vasp_cmd == ("hello",)
 
-    def test_setup(self) -> None:
-        with cd(f"{TEST_FILES}/setup_neb"), ScratchDir(".", copy_from_current_on_enter=True):
+    def test_setup(self, tmp_path) -> None:
+        with cd(f"{TEST_FILES}/setup_neb"), ScratchDir(str(tmp_path), copy_from_current_on_enter=True):
             v = VaspNEBJob("hello", half_kpts=True)
             v.setup()
 
@@ -142,7 +142,7 @@ class TestVaspNEBJob:
             assert kpt_pre.style.name == "Monkhorst"
             assert kpt.style.name == "Gamma"
 
-    def test_postprocess(self) -> None:
+    def test_postprocess(self, tmp_path) -> None:
         neb_outputs = ["INCAR", "KPOINTS", "POTCAR", "vasprun.xml"]
         neb_sub_outputs = [
             "CHG",
@@ -161,7 +161,8 @@ class TestVaspNEBJob:
             "XDATCAR",
         ]
 
-        with cd(f"{TEST_FILES}/postprocess_neb"):
+        shutil.copytree(f"{TEST_FILES}/postprocess_neb", tmp_path, dirs_exist_ok=True)
+        with cd(tmp_path):
             postprocess_neb = os.path.abspath(".")
 
             v = VaspNEBJob("hello", final=False, suffix=".test")
@@ -181,8 +182,8 @@ class TestVaspNEBJob:
 
 
 class TestGenerateVaspInputJob:
-    def test_run(self) -> None:
-        with ScratchDir("."):
+    def test_run(self, tmp_path) -> None:
+        with cd(tmp_path):
             for file in ("INCAR", "POSCAR", "POTCAR", "KPOINTS"):
                 shutil.copy(f"{TEST_FILES}/{file}", file)
             old_incar = Incar.from_file("INCAR")

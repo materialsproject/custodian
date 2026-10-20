@@ -1,5 +1,3 @@
-import os
-
 from custodian.lobster.handlers import ChargeSpillingValidator, EnoughBandsValidator, LobsterFilesValidator
 from tests.conftest import TEST_FILES
 
@@ -31,23 +29,23 @@ class TestChargeSpillingValidator:
 
 
 class TestLobsterFilesValidator:
-    def test_check_and_correct_1(self) -> None:
-        os.chdir(test_files_lobster)
+    def test_check_and_correct_1(self, monkeypatch) -> None:
+        monkeypatch.chdir(test_files_lobster)
         v = LobsterFilesValidator()
         assert not v.check()
 
-    def test_check_and_correct_2(self) -> None:
-        os.chdir(f"{test_files_lobster}/../lobsterins")
+    def test_check_and_correct_2(self, monkeypatch) -> None:
+        monkeypatch.chdir(f"{test_files_lobster}/../lobsterins")
         v2 = LobsterFilesValidator()
         assert v2.check()
 
-    def test_check_and_correct_3(self) -> None:
-        os.chdir(f"{test_files_lobster}/crash")
+    def test_check_and_correct_3(self, monkeypatch) -> None:
+        monkeypatch.chdir(f"{test_files_lobster}/crash")
         v3 = LobsterFilesValidator()
         assert v3.check()
 
-    def test_as_dict(self) -> None:
-        os.chdir(test_files_lobster)
+    def test_as_dict(self, monkeypatch) -> None:
+        monkeypatch.chdir(test_files_lobster)
         v = LobsterFilesValidator()
         dct = v.as_dict()
         v2 = LobsterFilesValidator.from_dict(dct)
