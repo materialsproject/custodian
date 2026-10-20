@@ -90,7 +90,7 @@ class GaussianJob(Job):
             open(os.path.join(directory, self.output_file), "w") as out_file,
             open(os.path.join(directory, self.stderr_file), "w", buffering=1) as error_file,
         ):
-            process = subprocess.Popen(self.gaussian_cmd, stdout=out_file, stderr=error_file, shell=True)
+            process = subprocess.Popen(self.gaussian_cmd, cwd=directory, stdout=out_file, stderr=error_file, shell=True)
         self.process = process
         return process
 
@@ -166,7 +166,7 @@ class GaussianJob(Job):
             lower_output = GaussianOutput(os.path.join(directory, output_file))
             if len(lower_output.errors) == 0:
                 # if the calculation at the lower level of theory succeeded
-                if not filter(os.listdir("."), "*.[Cc][Hh][Kk]"):
+                if not filter(os.listdir(directory), "*.[Cc][Hh][Kk]"):
                     raise FileNotFoundError("Missing checkpoint file. Required to read initial guesses")
 
                 gin = GaussianInput(
