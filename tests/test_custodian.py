@@ -2,7 +2,6 @@ import os
 import random
 import subprocess
 import unittest
-from glob import glob
 
 import pytest
 from ruamel.yaml import YAML
@@ -142,9 +141,9 @@ class ExampleValidator2(Validator):
 
 
 class CustodianTest(unittest.TestCase):
-    def setUp(self) -> None:
-        self.cwd = os.getcwd()
-        os.chdir(os.path.abspath(os.path.dirname(__file__)))
+    @pytest.fixture(autouse=True)
+    def _run_in_tmp_path(self, tmp_path, monkeypatch) -> None:
+        monkeypatch.chdir(tmp_path)
 
     def test_exitcode_error(self) -> None:
         c = Custodian([], [ExitCodeJob(0)])
@@ -316,15 +315,6 @@ custodian_params:
         assert len(c.jobs) == 2
         assert len(c.handlers) == 3
         assert len(c.validators) == 1
-
-    def tearDown(self) -> None:
-        for file in glob("custodian.*.tar.gz"):
-            os.remove(file)
-        try:
-            os.remove("custodian.json")
-        except OSError:
-            pass  # Ignore if file cannot be found.
-        os.chdir(self.cwd)
 
 
 # class TestCustodianCheckpoint:

@@ -3,6 +3,7 @@ import shutil
 import unittest
 from unittest import TestCase
 
+import pytest
 from pymatgen.io.qchem.inputs import QCInput
 
 from custodian.qchem.handlers import QChemErrorHandler
@@ -23,13 +24,16 @@ __status__ = "Alpha"
 __date__ = "6/3/22"
 
 TEST_DIR = f"{TEST_FILES}/qchem/new_test_files"
-SCR_DIR = f"{TEST_DIR}/scratch"
-CWD = os.getcwd()
 skip_if_no_openbabel = unittest.skipIf(ob is None, "openbabel not installed")
 
 
 @skip_if_no_openbabel
 class FFOptJobHandlerInteraction(TestCase):
+    @pytest.fixture(autouse=True)
+    def _run_in_tmp_path(self, tmp_path, monkeypatch) -> None:
+        monkeypatch.chdir(tmp_path)
+        self.scr_dir = str(tmp_path)
+
     def _check_equivalent_inputs(self, input1, input2) -> None:
         QCinput1 = QCInput.from_file(input1)
         QCinput2 = QCInput.from_file(input2)
@@ -40,25 +44,20 @@ class FFOptJobHandlerInteraction(TestCase):
             assert QCinput1.as_dict().get(key) == QCinput2.as_dict().get(key)
 
     def setUp(self) -> None:
-        os.makedirs(f"{SCR_DIR}/scratch", exist_ok=True)
-        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/mol.qin.orig", f"{SCR_DIR}/mol.qin")
-        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/error.1/mol.qout", f"{SCR_DIR}/mol.qout.error1")
-        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/error.2/mol.qin", f"{SCR_DIR}/mol.qin.error2")
-        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/error.2/mol.qout", f"{SCR_DIR}/mol.qout.error2")
-        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/error.3/mol.qin", f"{SCR_DIR}/mol.qin.error3")
-        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/error.3/mol.qout", f"{SCR_DIR}/mol.qout.error3")
-        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/mol.qin.opt_0", f"{SCR_DIR}/mol.qin.opt_0")
-        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/mol.qout.opt_0", f"{SCR_DIR}/mol.qout.opt_0")
-        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/error.5/mol.qin", f"{SCR_DIR}/mol.qin.error5")
-        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/error.5/mol.qout", f"{SCR_DIR}/mol.qout.error5")
-        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/mol.qin.freq_0", f"{SCR_DIR}/mol.qin.freq_0")
-        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/mol.qout.freq_0", f"{SCR_DIR}/mol.qout.freq_0")
-        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/mol.qin.opt_1", f"{SCR_DIR}/mol.qin.opt_1")
-        os.chdir(SCR_DIR)
-
-    def tearDown(self) -> None:
-        os.chdir(CWD)
-        shutil.rmtree(SCR_DIR)
+        os.makedirs(f"{self.scr_dir}/scratch", exist_ok=True)
+        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/mol.qin.orig", f"{self.scr_dir}/mol.qin")
+        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/error.1/mol.qout", f"{self.scr_dir}/mol.qout.error1")
+        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/error.2/mol.qin", f"{self.scr_dir}/mol.qin.error2")
+        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/error.2/mol.qout", f"{self.scr_dir}/mol.qout.error2")
+        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/error.3/mol.qin", f"{self.scr_dir}/mol.qin.error3")
+        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/error.3/mol.qout", f"{self.scr_dir}/mol.qout.error3")
+        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/mol.qin.opt_0", f"{self.scr_dir}/mol.qin.opt_0")
+        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/mol.qout.opt_0", f"{self.scr_dir}/mol.qout.opt_0")
+        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/error.5/mol.qin", f"{self.scr_dir}/mol.qin.error5")
+        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/error.5/mol.qout", f"{self.scr_dir}/mol.qout.error5")
+        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/mol.qin.freq_0", f"{self.scr_dir}/mol.qin.freq_0")
+        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/mol.qout.freq_0", f"{self.scr_dir}/mol.qout.freq_0")
+        shutil.copyfile(f"{TEST_DIR}/job_handler_interaction/mol.qin.opt_1", f"{self.scr_dir}/mol.qin.opt_1")
 
     def test_OptFF(self) -> None:
         job = QCJob.opt_with_frequency_flattener(

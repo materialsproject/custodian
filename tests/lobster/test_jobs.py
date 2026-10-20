@@ -69,15 +69,15 @@ class TestLobsterJob:
         assert isinstance(v2, LobsterJob)
         assert v2.lobster_cmd == "hello"
 
-    def test_setup(self) -> None:
+    def test_setup(self, tmp_path) -> None:
         with cd(test_files_lobster2):
-            with ScratchDir(".", copy_from_current_on_enter=True):
+            with ScratchDir(str(tmp_path), copy_from_current_on_enter=True):
                 # check if backup is done correctly
                 v = LobsterJob("hello", backup=True)
                 v.setup()
                 assert os.path.isfile("lobsterin.orig")
                 # check if backup id done correctly
-            with ScratchDir(".", copy_from_current_on_enter=True):
+            with ScratchDir(str(tmp_path), copy_from_current_on_enter=True):
                 v = LobsterJob("hello", backup=False)
                 v.setup()
                 assert not os.path.isfile("lobsterin.orig")
