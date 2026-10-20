@@ -19,17 +19,10 @@ from tests.cp2k.conftest import (
     ("content", "failed"),
     [
         pytest.param(SCF_CONVERGED + PROGRAM_ENDED, False, id="completed-static"),
-        pytest.param(
-            PROGRAM_ENDED,
-            False,
-            id="completed-no-scf-info",
-            marks=pytest.mark.xfail(
-                strict=True,
-                reason="Bug: Cp2kOutput.convergence() always sets data['scf_converged'] (to [] when no SCF lines),"
-                " so the [True] default in Cp2kOutputValidator.check never applies and [][-1] raises IndexError,"
-                " which is swallowed and reported as a failed validation (e.g. completed FIST/MM runs).",
-            ),
-        ),
+        # Completed runs without SCF lines (e.g. FIST/MM) are valid.
+        pytest.param(PROGRAM_ENDED, False, id="completed-no-scf-info"),
+        pytest.param(GEO_OPT_CONVERGED + PROGRAM_ENDED, False, id="completed-geo-opt-no-scf-info"),
+        pytest.param(GEO_OPT_NOT_CONVERGED + PROGRAM_ENDED, True, id="geo-opt-not-converged-no-scf-info"),
         pytest.param(SCF_CONVERGED + GEO_OPT_CONVERGED + PROGRAM_ENDED, False, id="completed-geo-opt"),
         pytest.param(SCF_CONVERGED, True, id="not-ended"),
         pytest.param(SCF_NOT_CONVERGED + PROGRAM_ENDED, True, id="scf-not-converged"),
