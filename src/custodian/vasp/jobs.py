@@ -1059,9 +1059,12 @@ class VaspNEBJob(VaspJob):
                     shutil.copy(file, f"{file}{self.suffix}")
 
     def _get_neb_dirs(self, directory):
-        neb_dirs = sorted(  # 00, 01, etc.
-            path for path in os.listdir(directory) if os.path.isdir(path) and path.isdigit()
-        )
+        """Image folders (00, 01, ...) in directory, as paths joined with directory."""
+        neb_dirs = [  # 00, 01, etc.
+            os.path.join(directory, name)
+            for name in sorted(os.listdir(directory))
+            if name.isdigit() and os.path.isdir(os.path.join(directory, name))
+        ]
         neb_sub = neb_dirs[1:-1]  # 01, 02, etc.
         return neb_dirs, neb_sub
 

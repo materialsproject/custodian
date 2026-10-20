@@ -1200,8 +1200,8 @@ class TestVaspNEBJobExtended:
         (neb_dir / "abc").mkdir()
         (neb_dir / "05").write_text("not a dir")
         neb_dirs, neb_sub = VaspNEBJob(["vasp"])._get_neb_dirs("./")
-        assert neb_dirs == ["00", "01", "02", "03", "04", "10"]
-        assert neb_sub == ["01", "02", "03", "04"]
+        assert neb_dirs == [os.path.join("./", name) for name in ("00", "01", "02", "03", "04", "10")]
+        assert neb_sub == [os.path.join("./", name) for name in ("01", "02", "03", "04")]
 
     def test_setup_backup(self, neb_dir) -> None:
         VaspNEBJob(["vasp"], auto_npar=False).setup()
@@ -1276,17 +1276,20 @@ class TestVaspNEBJobExtended:
         assert incar["SPRING"] == -5
         assert Incar.from_file("INCAR.orig")["IMAGES"] == 3
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="VaspNEBJob._get_neb_dirs checks os.path.isdir() relative to cwd and returns bare names, "
-        "so setup/postprocess ignore image folders when `directory` is not the cwd",
-    )
-    def test_setup_respects_directory(self, tmp_path, monkeypatch) -> None:
+    def test_setup_and_postprocess_respect_directory(self, tmp_path, monkeypatch) -> None:
         run_dir = tmp_path / "neb"
         shutil.copytree(f"{TEST_FILES}/setup_neb", run_dir)
+        # Same-named image folders in the cwd must be ignored.
+        (tmp_path / "01").mkdir()
         monkeypatch.chdir(tmp_path)
-        VaspNEBJob(["vasp"], auto_npar=False).setup(directory=str(run_dir))
+        job = VaspNEBJob(["vasp"], auto_npar=False, suffix=".test")
+        job.setup(directory=str(run_dir))
         assert (run_dir / "01" / "POSCAR.orig").is_file()
+        assert not (tmp_path / "01" / "POSCAR.orig").exists()
+
+        (run_dir / "02" / "CONTCAR").write_text("contcar")
+        job.postprocess(directory=str(run_dir))
+        assert (run_dir / "02" / "CONTCAR.test").read_text() == "contcar"
 
     @pytest.mark.parametrize(
         ("gamma_only", "gamma_cmd", "available", "expected"),
