@@ -294,12 +294,12 @@ class FileActions:
 
         Args:
             filename (str): Filename.
-            settings (dict): Can be "mode" or "owners"
+            settings (dict): Can be "mode" or "owners", where "owners" is a (uid, gid) tuple.
             directory (str): Directory to modify file in
         """
         for key, val in settings.items():
             if key == "mode":
                 os.chmod(os.path.join(directory, filename), val)
             if key == "owners":
-                # TODO fix this mypy error, missing 3rd positional argument to chown
-                os.chown(os.path.join(directory, filename), val)  # type: ignore[call-arg]
+                uid, gid = val
+                os.chown(os.path.join(directory, filename), uid, gid)
