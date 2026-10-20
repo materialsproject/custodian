@@ -838,13 +838,10 @@ class TestMetaGGAOptRun:
         assert incar["ISTART"] == 1
         assert incar["LWAVE"] is False
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="metagga_opt_run accepts auto_continue but never forwards it to any of the generated jobs",
-    )
-    def test_auto_continue_forwarded(self, vasp_dir) -> None:
-        jobs = VaspJob.metagga_opt_run(["vasp"], auto_continue=True)
-        assert all(job.auto_continue for job in jobs)
+    @pytest.mark.parametrize("auto_continue", [True, False])
+    def test_auto_continue_forwarded(self, vasp_dir, auto_continue) -> None:
+        jobs = VaspJob.metagga_opt_run(["vasp"], auto_continue=auto_continue)
+        assert [job.auto_continue for job in jobs] == [auto_continue] * 3
 
 
 def _scale_contcar(directory, vol_scale: float) -> None:

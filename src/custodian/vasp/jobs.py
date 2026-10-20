@@ -431,6 +431,7 @@ class VaspJob(Job):
                 auto_npar=auto_npar,
                 final=False,
                 suffix=".precondition",
+                auto_continue=auto_continue,
                 settings_override=pre_opt_settings,
             )
         ]
@@ -441,6 +442,7 @@ class VaspJob(Job):
             auto_npar=auto_npar,
             ediffg=ediffg,
             half_kpts_first_relax=half_kpts_first_relax,
+            auto_continue=auto_continue,
             directory=directory,
         )
 
