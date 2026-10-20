@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from argparse import Namespace
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -87,3 +88,19 @@ def test_do_run(converge_geometry, monkeypatch, gzip) -> None:
 
 def test_has_main_entry_point(converge_geometry) -> None:
     assert callable(getattr(converge_geometry, "main", None))
+
+
+@pytest.mark.parametrize(
+    ("argv", "expected"),
+    [
+        ([], {"command": "pvasp", "gzip": False, "max_relax": 10}),
+        (["-c", "mpirun vasp", "-z", "-mr", "3"], {"command": "mpirun vasp", "gzip": True, "max_relax": 3}),
+    ],
+)
+def test_main_parses_args(converge_geometry, monkeypatch, argv, expected) -> None:
+    parsed: list[Namespace] = []
+    monkeypatch.setattr(converge_geometry, "do_run", parsed.append)
+    monkeypatch.setattr(sys, "argv", ["converge_geometry", *argv])
+    converge_geometry.main()
+    (args,) = parsed
+    assert vars(args) == expected
