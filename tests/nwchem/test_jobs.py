@@ -4,9 +4,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
-from monty.io import zopen
 
-import custodian.nwchem.jobs as nwchem_jobs
 from custodian.nwchem.jobs import NwchemJob
 from tests.conftest import TEST_FILES
 
@@ -23,13 +21,7 @@ def run_dir(tmp_path, monkeypatch) -> Path:
 
 
 @pytest.fixture
-def text_mode_zopen(monkeypatch) -> None:
-    """Work around jobs.py:63, which calls zopen(..., "w"); current monty rejects implicit text/binary mode."""
-    monkeypatch.setattr(nwchem_jobs, "zopen", lambda filename, mode, **kw: zopen(filename, f"{mode}t", **kw))
-
-
-@pytest.fixture
-def mock_popen(monkeypatch, text_mode_zopen) -> list[dict]:
+def mock_popen(monkeypatch) -> list[dict]:
     """Replace subprocess.Popen with a recorder; returns the list of recorded calls."""
     calls: list[dict] = []
 
@@ -82,14 +74,11 @@ def test_setup_backup_with_directory(tmp_path, monkeypatch) -> None:
     assert not (tmp_path / f"{INPUT}.orig").exists()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=RuntimeError,
-    reason="NwchemJob.run calls zopen(output_file, 'w') without t/b; monty raises RuntimeError (jobs.py:63).",
-)
-def test_run_without_zopen_workaround(run_dir, monkeypatch) -> None:
+def test_run_opens_output_in_text_mode(run_dir, monkeypatch) -> None:
+    """Regression: zopen(output_file, "w") without t/b raised RuntimeError under current monty."""
     monkeypatch.setattr(subprocess, "Popen", lambda *args, **kwargs: None)
     NwchemJob(["nwchem"], input_file=INPUT).run()
+    assert (run_dir / "mol.nwout").exists()
 
 
 def test_run_constructs_command(run_dir, mock_popen) -> None:
@@ -110,10 +99,6 @@ def test_run_passes_directory_as_cwd(run_dir, mock_popen) -> None:
     assert mock_popen[0]["cwd"] == str(run_dir)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="NwchemJob.run opens output_file relative to the cwd instead of `directory` (jobs.py:63).",
-)
 def test_run_writes_output_into_directory(tmp_path, monkeypatch, mock_popen) -> None:
     run = tmp_path / "run"
     run.mkdir()

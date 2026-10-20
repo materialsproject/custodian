@@ -95,10 +95,6 @@ def test_correct_unknown_error(nwchem_dir) -> None:
     assert Path("Li1_1.nw").read_text() == before
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="NwchemErrorHandler.correct writes the corrected input relative to cwd, not `directory` (handlers.py:73).",
-)
 def test_correct_writes_into_directory(tmp_path, monkeypatch) -> None:
     run = tmp_path / "run"
     shutil.copytree(f"{TEST_FILES}/nwchem", run)

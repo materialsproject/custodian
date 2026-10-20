@@ -70,7 +70,7 @@ class NwchemErrorHandler(ErrorHandler):
         m = Modder(directory=directory)
         for action in actions:
             nwi = m.modify_object(action, nwi)
-        nwi.write_file(self.input_file)
+        nwi.write_file(os.path.join(directory, self.input_file))
         return {"errors": self.errors, "actions": actions}
 
     def __str__(self) -> str:
