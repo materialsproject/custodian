@@ -1981,13 +1981,43 @@ class NonConvergingErrorHandler(ErrorHandler):
         )
 
 
+def _parse_slurm_time(time_limit: str) -> int | None:
+    """Convert a Slurm time limit to seconds.
+
+    Slurm accepts "minutes", "minutes:seconds", "hours:minutes:seconds", "days-hours",
+    "days-hours:minutes" and "days-hours:minutes:seconds". A bare number is minutes.
+
+    Args:
+        time_limit (str): Slurm time limit, e.g. the value of SBATCH_TIMELIMIT.
+
+    Returns:
+        int | None: Time limit in seconds, or None if the limit is unlimited.
+    """
+    time_limit = time_limit.strip()
+    if time_limit.upper() in {"UNLIMITED", "INFINITE"}:
+        return None
+    days, _, clock = time_limit.rpartition("-")
+    fields = [int(f) for f in clock.split(":")]
+    if days:
+        # "days-hours[:minutes[:seconds]]"
+        hours, minutes, seconds = [*fields, 0, 0][:3]
+    elif len(fields) == 3:
+        hours, minutes, seconds = fields
+    else:
+        # "minutes" or "minutes:seconds"
+        hours = 0
+        minutes, seconds = [*fields, 0][:2]
+    return ((int(days or 0) * 24 + hours) * 60 + minutes) * 60 + seconds
+
+
 class WalltimeHandler(ErrorHandler):
     """
     Check if a run is nearing the walltime. If so, write a STOPCAR with
     LSTOP or LABORT = .True.. You can specify the walltime either in the init (
     which is unfortunately necessary for SGE and SLURM systems. If you happen
     to be running on a PBS system and the PBS_WALLTIME variable is in the run
-    environment, the wall time will be automatically determined if not set.
+    environment, or SBATCH_TIMELIMIT is set on a SLURM system, the wall time
+    will be automatically determined if not set.
     """
 
     is_monitor = True
@@ -2031,7 +2061,7 @@ class WalltimeHandler(ErrorHandler):
         elif "PBS_WALLTIME" in os.environ:
             self.wall_time = int(os.environ["PBS_WALLTIME"])
         elif "SBATCH_TIMELIMIT" in os.environ:
-            self.wall_time = int(os.environ["SBATCH_TIMELIMIT"])
+            self.wall_time = _parse_slurm_time(os.environ["SBATCH_TIMELIMIT"])
         else:
             self.wall_time = None
         self.buffer_time = buffer_time
@@ -2178,7 +2208,7 @@ class StoppedRunHandler(ErrorHandler):
         """Perform corrections."""
         d = loadfn(os.path.join(directory, "chkpt.yaml"))
         i = d["Index"]
-        name = shutil.make_archive(os.path.join(directory, f"vasp.chk.{i}"), "gztar")
+        name = shutil.make_archive(os.path.join(directory, f"vasp.chk.{i}"), "gztar", root_dir=directory)
 
         actions = []
         if is_valid_poscar("CONTCAR", directory):

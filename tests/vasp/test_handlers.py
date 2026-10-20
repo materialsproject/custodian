@@ -2351,7 +2351,7 @@ def test_nonconverging_large_cell_sets_amin(tmp_path) -> None:
 
 @pytest.mark.parametrize(
     ("env", "expected"),
-    [({"PBS_WALLTIME": "7200"}, 7200), ({"SBATCH_TIMELIMIT": "3600"}, 3600), ({}, None)],
+    [({"PBS_WALLTIME": "7200"}, 7200), ({"SBATCH_TIMELIMIT": "60"}, 3600), ({}, None)],
 )
 def test_walltime_from_environment(monkeypatch, env, expected) -> None:
     for var in ("PBS_WALLTIME", "SBATCH_TIMELIMIT", "CUSTODIAN_WALLTIME_START"):
@@ -2364,17 +2364,23 @@ def test_walltime_from_environment(monkeypatch, env, expected) -> None:
         assert not handler.check()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=ValueError,
-    reason="WalltimeHandler parses SBATCH_TIMELIMIT with int(), but Slurm time limits are "
-    "'[days-]hours:minutes:seconds' or minutes (handlers.py:2034).",
+@pytest.mark.parametrize(
+    ("time_limit", "expected"),
+    [
+        ("90", 5400),
+        ("30:15", 1815),
+        ("01:00:00", 3600),
+        ("2-00", 172800),
+        ("1-02:30", 95400),
+        ("1-02:03:04", 93784),
+        ("UNLIMITED", None),
+    ],
 )
-def test_walltime_sbatch_timelimit_hms(monkeypatch) -> None:
+def test_walltime_sbatch_timelimit_formats(monkeypatch, time_limit, expected) -> None:
     monkeypatch.delenv("PBS_WALLTIME", raising=False)
     monkeypatch.delenv("CUSTODIAN_WALLTIME_START", raising=False)
-    monkeypatch.setenv("SBATCH_TIMELIMIT", "01:00:00")
-    assert WalltimeHandler().wall_time == 3600
+    monkeypatch.setenv("SBATCH_TIMELIMIT", time_limit)
+    assert WalltimeHandler().wall_time == expected
 
 
 def test_checkpoint_handler(tmp_path, monkeypatch) -> None:
@@ -2395,11 +2401,6 @@ def test_checkpoint_handler(tmp_path, monkeypatch) -> None:
     assert not handler.check(directory=str(tmp_path))
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="FileActions.file_create ignores `directory` (ansible/actions.py:234), so the STOPCAR is "
-    "written to the cwd instead of the run directory.",
-)
 @pytest.mark.parametrize("handler_cls", [CheckpointHandler, WalltimeHandler])
 def test_stopcar_written_to_run_directory(tmp_path, monkeypatch, handler_cls) -> None:
     monkeypatch.delenv("CUSTODIAN_WALLTIME_START", raising=False)
@@ -2435,11 +2436,6 @@ def test_stopped_run_handler(tmp_path, monkeypatch) -> None:
         assert "./CONTCAR" in tar.getnames()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="StoppedRunHandler.correct archives the cwd, not `directory` (shutil.make_archive is called "
-    "without root_dir; handlers.py:2181).",
-)
 def test_stopped_run_handler_archives_directory(tmp_path, monkeypatch) -> None:
     _setup_stopped_run(run_dir := tmp_path / "run")
     (elsewhere := tmp_path / "elsewhere").mkdir()
