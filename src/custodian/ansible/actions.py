@@ -231,7 +231,7 @@ class FileActions:
             raise ValueError("Settings must only contain one item with key 'content'.")
         for key, val in settings.items():
             if key == "content":
-                with open(filename, "w") as file:
+                with open(os.path.join(directory, filename), "w") as file:
                     file.write(val)
 
     @staticmethod

@@ -10,9 +10,12 @@ from glob import glob
 from pathlib import Path
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
 from monty.io import zopen
 from monty.os.path import zpath
+from pymatgen.analysis.molecule_structure_comparator import CovalentRadius
+from pymatgen.core import DummySpecies, Element, Lattice
 from pymatgen.io.vasp.inputs import Incar, Kpoints, Structure, VaspInput
 from pymatgen.symmetry.bandstructure import HighSymmKpath
 from pymatgen.util.testing import MatSciTest
@@ -22,6 +25,7 @@ from custodian.vasp.handlers import (
     MAX_CLOSE_CONTACT_STRAIN,
     MIN_COVALENT_DISTANCE_RATIO,
     AliasingErrorHandler,
+    CheckpointHandler,
     DriftErrorHandler,
     FrozenJobErrorHandler,
     IncorrectSmearingHandler,
@@ -34,6 +38,7 @@ from custodian.vasp.handlers import (
     PotimErrorHandler,
     ScanMetalHandler,
     StdErrHandler,
+    StoppedRunHandler,
     UnconvergedErrorHandler,
     VaspErrorHandler,
     WalltimeHandler,
@@ -1969,3 +1974,490 @@ def test_zheev_eddiag_unrecoverable(tmp_path, incar) -> None:
     assert handler.check(directory=tmp_path)
     dct = handler.correct(directory=tmp_path)
     assert dct["actions"] == []
+
+
+def _si_dimer(*extra_species) -> Structure:
+    """Two Si atoms 1.0 A apart in a 10 A cubic cell, plus extra species near the first Si."""
+    species = ["Si", "Si", *extra_species]
+    coords = [[0, 0, 0], [0.1, 0, 0]] + [[0, 0.05, 0]] * len(extra_species)
+    return Structure(Lattice.cubic(10), species, coords)
+
+
+def test_vasp_modder_rejects_unrecognized_action(tmp_path) -> None:
+    modder = VaspModder(vi={"INCAR": Incar({"ISMEAR": 0})}, directory=str(tmp_path))
+    with pytest.raises(ValueError, match="Unrecognized format"):
+        modder.apply_actions([{"action": {"_set": {"ISMEAR": 1}}}])
+
+
+def test_min_covalent_distance_ratio_skips_dummy_species() -> None:
+    """Pairs involving a DummySpecies (no covalent radius) are ignored in either position."""
+    ratio = _min_covalent_distance_ratio(_si_dimer(DummySpecies("X")))
+    assert ratio == pytest.approx(1.0 / (2 * CovalentRadius.radius["Si"]))
+
+
+def test_min_covalent_distance_ratio_all_dummy() -> None:
+    structure = Structure(Lattice.cubic(10), [DummySpecies("X"), DummySpecies("X")], [[0, 0, 0], [0.1, 0, 0]])
+    assert _min_covalent_distance_ratio(structure) is None
+
+
+def test_min_covalent_distance_ratio_atomic_radius_fallback(monkeypatch) -> None:
+    """Without a tabulated covalent radius, the atomic radius is used instead."""
+    monkeypatch.delitem(CovalentRadius.radius, "Si")
+    ratio = _min_covalent_distance_ratio(_si_dimer())
+    assert ratio == pytest.approx(1.0 / (2 * float(Element("Si").atomic_radius)))
+
+
+@pytest.mark.parametrize(
+    ("incar", "expected"),
+    [({"ALGO": "  "}, "normal"), ({"ALGO": "Old Fast"}, "fast"), ({"ALGO": "OV"}, "veryfast")],
+)
+def test_get_algo_blank_and_old(incar, expected) -> None:
+    """A blank ALGO is the VASP default; vasp.6 'Old' variants map to the vasp.5 algorithms."""
+    assert _get_algo(incar) == expected
+
+
+def _correct_error(tmp_path: Path, incar: dict, message: str, kpoints: Kpoints | None = None) -> dict:
+    """Run VaspErrorHandler.check/correct once for one error message and return the correction."""
+    _setup_error_run(tmp_path, incar, message)
+    if kpoints is not None:
+        kpoints.write_file(tmp_path / "KPOINTS")
+    handler = VaspErrorHandler()
+    assert handler.check(directory=tmp_path)
+    return handler.correct(directory=tmp_path)
+
+
+_GAMMA_444 = Kpoints.gamma_automatic((4, 4, 4))
+_MP_444 = Kpoints.monkhorst_automatic((4, 4, 4))
+
+
+@pytest.mark.parametrize(
+    ("incar", "message", "kpoints", "expected"),
+    [
+        pytest.param(
+            {"KSPACING": 0.5, "KGAMMA": False, "ISMEAR": -5},
+            "DENTET",
+            None,
+            [{"dict": "INCAR", "action": {"_set": {"KGAMMA": True}}}],
+            id="dentet-kspacing-recentre-at-gamma",
+        ),
+        pytest.param(
+            {"ISMEAR": 0},
+            "Could not get correct shifts",
+            _MP_444,
+            [{"dict": "KPOINTS", "action": {"_set": {"generation_style": "Gamma"}}}],
+            id="incorrect_shift-mp-to-gamma",
+        ),
+        pytest.param(
+            {"ISMEAR": 0},
+            "Found some non-integer element in rotation matrix",
+            _GAMMA_444,
+            [{"dict": "INCAR", "action": {"_set": {"ISYM": 0}}}],
+            id="rot_matrix-gamma-isym0",
+        ),
+        pytest.param(
+            {"ISMEAR": 0, "ISYM": 0},
+            "Found some non-integer element in rotation matrix",
+            _GAMMA_444,
+            [],
+            id="rot_matrix-symmetry-off-unrecoverable",
+        ),
+        pytest.param(
+            {"ISMEAR": 0},
+            "internal error in subroutine PRICEL",
+            None,
+            [{"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8, "ISYM": 0}}}],
+            id="pricel",
+        ),
+        pytest.param(
+            {"ISMEAR": 0, "SYMPREC": 1e-8},
+            "internal error in subroutine PRICEL",
+            None,
+            [],
+            id="pricel-symprec-already-tight",
+        ),
+        pytest.param(
+            {"KPAR": 4, "LELF": True},
+            "ELF: KPAR>1 not implemented",
+            None,
+            [{"dict": "INCAR", "action": {"_set": {"KPAR": 1}}}],
+            id="elf_kpar",
+        ),
+        pytest.param(
+            {"SYMPREC": 1e-6},
+            "determination of the symmetry of your systems shows a strong",
+            None,
+            [{"dict": "INCAR", "action": {"_set": {"ISYM": 0}}}],
+            id="symprec_noise-symprec-already-tight",
+        ),
+        pytest.param(
+            {"NCORE": 4, "LCALCEPS": True},
+            "PEAD routines do not work for NCORE",
+            None,
+            [{"dict": "INCAR", "action": {"_unset": {"NCORE": 0}}}],
+            id="dfpt_ncore",
+        ),
+    ],
+)
+def test_vasp_error_handler_single_corrections(tmp_path, incar, message, kpoints, expected) -> None:
+    """Each error maps to the expected correction, which is written to INCAR/KPOINTS."""
+    dct = _correct_error(tmp_path, incar, message, kpoints)
+    assert dct["actions"] == expected
+    written = Incar.from_file(tmp_path / "INCAR")
+    for action in expected:
+        if action["dict"] == "KPOINTS":
+            assert Kpoints.from_file(tmp_path / "KPOINTS").style == Kpoints.supported_modes.Gamma
+            continue
+        for key, val in action["action"].get("_set", {}).items():
+            assert written[key] == val
+        for key in action["action"].get("_unset", {}):
+            assert key not in written
+
+
+def test_ibzkpt_ladder(tmp_path) -> None:
+    """ibzkpt: ISYM = 0, then SYMPREC = 1e-6, then nothing left to try."""
+    _setup_error_run(tmp_path, {"ISMEAR": 0}, "not all point group operations")
+    handler = VaspErrorHandler()
+    expected = [
+        [{"dict": "INCAR", "action": {"_set": {"ISYM": 0}}}],
+        [{"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-6}}}],
+        [],
+    ]
+    for step, actions in enumerate(expected, start=1):
+        assert handler.check(directory=tmp_path)
+        assert handler.correct(directory=tmp_path)["actions"] == actions
+        assert handler.error_count["ibzkpt"] == step
+    incar = Incar.from_file(tmp_path / "INCAR")
+    assert incar["ISYM"] == 0
+    assert incar["SYMPREC"] == pytest.approx(1e-6)
+
+
+def test_fexcf_ladder(tmp_path) -> None:
+    """fexcf: restart from CONTCAR, then IBRION 1 -> 2, then nothing left to try."""
+    _setup_error_run(tmp_path, {"IBRION": 1, "NSW": 50}, "supplied exchange-correlation table")
+    contcar = Structure.from_file(tmp_path / "POSCAR")
+    contcar.perturb(0.05)
+    contcar.to(filename=str(tmp_path / "CONTCAR"), fmt="poscar")
+    handler = VaspErrorHandler()
+
+    assert handler.check(directory=tmp_path)
+    assert handler.correct(directory=tmp_path)["actions"] == [_CONTCAR_COPY]
+    assert (tmp_path / "POSCAR").read_text() == (tmp_path / "CONTCAR").read_text()
+
+    assert handler.check(directory=tmp_path)
+    assert handler.correct(directory=tmp_path)["actions"] == [{"dict": "INCAR", "action": {"_set": {"IBRION": 2}}}]
+    assert Incar.from_file(tmp_path / "INCAR")["IBRION"] == 2
+
+    assert handler.check(directory=tmp_path)
+    assert handler.correct(directory=tmp_path)["actions"] == []
+    assert handler.error_count["fexcf"] == 3
+
+
+def test_fexcf_without_contcar(tmp_path) -> None:
+    """Without a valid CONTCAR the first fexcf correction has nothing to do."""
+    assert _correct_error(tmp_path, {"IBRION": 2}, "supplied exchange-correlation table")["actions"] == []
+
+
+def test_brmix_valid_outcar_reruns_with_istart(tmp_path, monkeypatch) -> None:
+    """With a valid, unstopped OUTCAR the first BRMIX correction just restarts from the WAVECAR."""
+    monkeypatch.setattr("custodian.vasp.handlers.load_outcar", lambda _path: SimpleNamespace(is_stopped=False))
+    _setup_error_run(tmp_path, {"ISMEAR": 0}, "BRMIX: very serious problems")
+    handler = VaspErrorHandler()
+    assert handler.check(directory=tmp_path)
+    dct = handler.correct(directory=tmp_path)
+    assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"ISTART": 1}}}]
+    assert handler.error_count["brmix"] == 1
+    assert Incar.from_file(tmp_path / "INCAR")["ISTART"] == 1
+
+
+def test_brmix_ignored_for_charged_cell(tmp_path) -> None:
+    """BRMIX is expected when NELECT is set (charged cells), so it is not flagged."""
+    _setup_error_run(tmp_path, {"NELECT": 41}, "BRMIX: very serious problems")
+    assert not VaspErrorHandler().check(directory=tmp_path)
+
+
+def test_zpotrf_first_step_without_oszicar(tmp_path) -> None:
+    """Without a readable OSZICAR the run is treated as on its first ionic step, so POTIM is kept.
+
+    With no close contacts in the structure, only symmetry is switched off.
+    """
+    dct = _correct_error(tmp_path, {"NSW": 10, "ISIF": 3, "POTIM": 0.5}, "LAPACK: Routine ZPOTRF failed")
+    assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"ISYM": 0}}}]
+    assert Incar.from_file(tmp_path / "INCAR")["POTIM"] == 0.5
+
+
+def test_triple_product_swaps_lattice_vectors(tmp_path) -> None:
+    """A left-handed basis is made right-handed by swapping the b and c lattice vectors."""
+    _setup_error_run(tmp_path, {"ISMEAR": 0}, "ERROR: the triple product of the basis vectors")
+    # Written by hand: pymatgen's POSCAR writer would invert a left-handed lattice.
+    (tmp_path / "POSCAR").write_text("Si2\n1.0\n4 0 0\n0 0 5\n0 6 0\nSi\n2\ndirect\n0 0 0 Si\n0.25 0.5 0.75 Si\n")
+    left_handed = Structure.from_file(tmp_path / "POSCAR")
+    assert np.linalg.det(left_handed.lattice.matrix) < 0
+    handler = VaspErrorHandler()
+    assert handler.check(directory=tmp_path)
+    (action,) = handler.correct(directory=tmp_path)["actions"]
+    assert action["dict"] == "POSCAR"
+    assert action["transformation"]["@class"] == "SupercellTransformation"
+    new = Structure.from_dict(action["action"]["_set"]["structure"])
+    assert new.lattice.matrix == pytest.approx(np.diag([4, 6, 5]))
+    assert new.frac_coords[1] == pytest.approx([0.25, 0.75, 0.5])
+    assert Structure.from_file(tmp_path / "POSCAR").lattice.matrix == pytest.approx(np.diag([4, 6, 5]))
+
+
+def test_algo_tet_second_error_warns_for_dos_run(tmp_path) -> None:
+    """A repeated algo_tet on a DOS run (NEDOS set) falls back to Gaussian smearing and warns."""
+    _setup_error_run(tmp_path, {"ALGO": "Fast", "ISMEAR": -5, "NEDOS": 2001}, "ALGO=A and IALGO=5X tend to fail")
+    handler = VaspErrorHandler()
+    handler.error_count["algo_tet"] = 1
+    assert handler.check(directory=tmp_path)
+    with pytest.warns(UserWarning, match="DOS run"):
+        dct = handler.correct(directory=tmp_path)
+    assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}}]
+    assert handler.error_count["algo_tet"] == 2
+
+
+def test_default_nbands_non_numeric_magmom() -> None:
+    """An unparseable MAGMOM adds no extra bands for ISPIN = 2."""
+    assert VaspErrorHandler._default_nbands({"ISPIN": 2, "MAGMOM": ["8*1.0"]}, 40, 8) == 25
+
+
+def test_get_nbands_from_outcar_skips_malformed_line(tmp_path) -> None:
+    (tmp_path / "OUTCAR").write_text("   NBANDS=  ***\n   number of bands    NBANDS=     24\n")
+    assert VaspErrorHandler._get_nbands_from_outcar(str(tmp_path)) == 24
+
+
+def test_drift_check_needs_outcar_and_enough_steps(tmp_path) -> None:
+    Incar({"EDIFFG": -0.01, "NSW": 99}).write_file(tmp_path / "INCAR")
+    # No OUTCAR: the check cannot be performed.
+    assert not DriftErrorHandler(max_drift=0.0001).check(directory=str(tmp_path))
+    shutil.copy(f"{TEST_FILES}/drift/OUTCAR", tmp_path / "OUTCAR")
+    assert DriftErrorHandler(max_drift=0.0001).check(directory=str(tmp_path))
+    # Fewer ionic steps than to_average: not enough data to average.
+    assert not DriftErrorHandler(max_drift=0.0001, to_average=1000).check(directory=str(tmp_path))
+
+
+def test_mesh_symmetry_check_skips(tmp_path, monkeypatch) -> None:
+    """MeshSymmetry is ignored with KSPACING, for converged runs and when the message is absent."""
+    Incar({"KSPACING": 0.3}).write_file(tmp_path / "INCAR")
+    (tmp_path / "vasp.out").write_text(MESH_SYMMETRY_MSG)
+    handler = MeshSymmetryErrorHandler()
+    assert not handler.check(directory=tmp_path)
+
+    Incar({"ISYM": 2}).write_file(tmp_path / "INCAR")
+    _MP_444.write_file(tmp_path / "KPOINTS")
+    assert handler.check(directory=tmp_path)  # no vasprun.xml
+
+    (tmp_path / "vasp.out").write_text("nothing to see here\n")
+    assert not handler.check(directory=tmp_path)
+
+    (tmp_path / "vasp.out").write_text(MESH_SYMMETRY_MSG)
+    monkeypatch.setattr("custodian.vasp.handlers.load_vasprun", lambda _path: SimpleNamespace(converged=True))
+    assert not handler.check(directory=tmp_path)
+
+
+@pytest.mark.parametrize(
+    "handler_cls",
+    [UnconvergedErrorHandler, IncorrectSmearingHandler, KspacingMetalHandler, PositiveEnergyErrorHandler],
+)
+def test_output_based_checks_without_output(tmp_path, handler_cls) -> None:
+    """Handlers that parse vasprun.xml/OSZICAR do not flag missing output as an error."""
+    assert not handler_cls().check(directory=str(tmp_path))
+
+
+def test_potim_check_without_oszicar(tmp_path) -> None:
+    assert not PotimErrorHandler().check(directory=str(tmp_path))
+
+
+def test_potim_check_below_threshold() -> None:
+    assert not PotimErrorHandler(dE_threshold=1e6).check(directory=f"{TEST_FILES}/potim")
+
+
+def test_nonconverging_check_without_oszicar(tmp_path) -> None:
+    Incar({"NELM": 60}).write_file(tmp_path / "INCAR")
+    assert not NonConvergingErrorHandler().check(directory=str(tmp_path))
+
+
+def test_unconverged_hybrid_tetrahedron_falls_back_to_normal(tmp_path, monkeypatch) -> None:
+    """A hybrid with IALGO = 5X and ISMEAR < 0 (prone to algo_tet) is moved to ALGO = Normal."""
+    incar = Incar({"LHFCALC": True, "IALGO": 58, "ISMEAR": -5})
+    incar.write_file(tmp_path / "INCAR")
+    vasprun = SimpleNamespace(
+        incar=incar,
+        converged=False,
+        converged_electronic=False,
+        final_structure=Structure.from_file(f"{TEST_FILES}/POSCAR"),
+    )
+    monkeypatch.setattr("custodian.vasp.handlers.load_vasprun", lambda _path: vasprun)
+    dct = UnconvergedErrorHandler().correct(directory=str(tmp_path))
+    assert dct == {"errors": ["Unconverged"], "actions": [{"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}}]}
+    assert Incar.from_file(tmp_path / "INCAR")["ALGO"] == "Normal"
+
+
+def test_large_sigma_check_skips_tetrahedron(tmp_path) -> None:
+    Incar({"ISMEAR": -5}).write_file(tmp_path / "INCAR")
+    assert not LargeSigmaHandler().check(directory=str(tmp_path))
+
+
+@pytest.mark.parametrize(
+    ("ismear", "expected"),
+    [(1, [{"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}}]), (0, [])],
+)
+def test_large_sigma_at_min_sigma(tmp_path, ismear, expected) -> None:
+    """Once SIGMA cannot be reduced further, Methfessel-Paxton falls back to Gaussian smearing."""
+    Incar({"ISMEAR": ismear, "SIGMA": 0.001}).write_file(tmp_path / "INCAR")
+    handler = LargeSigmaHandler(min_sigma=0.001)
+    handler.entropy_per_atom = 0.01
+    dct = handler.correct(directory=str(tmp_path))
+    assert dct == {"errors": ["LargeSigma"], "actions": expected}
+
+
+def test_potim_halved(tmp_path) -> None:
+    """A POTIM that is not yet small is halved before switching to damped MD."""
+    Incar({"IBRION": 2, "POTIM": 0.5}).write_file(tmp_path / "INCAR")
+    dct = PotimErrorHandler().correct(directory=str(tmp_path))
+    assert dct == {"errors": ["POTIM"], "actions": [{"dict": "INCAR", "action": {"_set": {"POTIM": 0.25}}}]}
+    assert Incar.from_file(tmp_path / "INCAR")["POTIM"] == 0.25
+
+
+def test_frozen_job_check(tmp_path) -> None:
+    (tmp_path / "vasp.out").write_text("")
+    handler = FrozenJobErrorHandler(timeout=3600)
+    assert not handler.check(directory=str(tmp_path))
+    old = dt.datetime.now().timestamp() - 7200
+    os.utime(tmp_path / "vasp.out", (old, old))
+    assert handler.check(directory=str(tmp_path))
+
+
+def test_nonconverging_tetrahedron_dos_run(tmp_path) -> None:
+    """ALGO = All with ISMEAR < 0 switches to Gaussian smearing, warning if it looks like a DOS run."""
+    shutil.copytree(f"{TEST_FILES}/nonconv", tmp_path, dirs_exist_ok=True)
+    incar = Incar.from_file(tmp_path / "INCAR")
+    incar.update({"ALGO": "All", "ISMEAR": -5, "NEDOS": 2001})
+    incar.write_file(tmp_path / "INCAR")
+    with pytest.warns(UserWarning, match="DOS run"):
+        dct = NonConvergingErrorHandler().correct(directory=str(tmp_path))
+    assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"ISMEAR": 0, "SIGMA": 0.05}}}]
+
+
+def test_nonconverging_large_cell_sets_amin(tmp_path) -> None:
+    """A lattice vector > 50 A gets AMIN = 0.01, which takes the place of the ALGO ladder step."""
+    shutil.copytree(f"{TEST_FILES}/nonconv", tmp_path, dirs_exist_ok=True)
+    Structure(Lattice.tetragonal(5, 60), ["Si"], [[0, 0, 0]]).to(filename=str(tmp_path / "CONTCAR"), fmt="poscar")
+    incar = Incar.from_file(tmp_path / "INCAR")
+    incar.update({"ALGO": "Fast", "ISMEAR": 0})
+    incar.write_file(tmp_path / "INCAR")
+    dct = NonConvergingErrorHandler().correct(directory=str(tmp_path))
+    assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"AMIN": 0.01}}}]
+
+
+@pytest.mark.parametrize(
+    ("env", "expected"),
+    [({"PBS_WALLTIME": "7200"}, 7200), ({"SBATCH_TIMELIMIT": "60"}, 3600), ({}, None)],
+)
+def test_walltime_from_environment(monkeypatch, env, expected) -> None:
+    for var in ("PBS_WALLTIME", "SBATCH_TIMELIMIT", "CUSTODIAN_WALLTIME_START"):
+        monkeypatch.delenv(var, raising=False)
+    for var, val in env.items():
+        monkeypatch.setenv(var, val)
+    handler = WalltimeHandler()
+    assert handler.wall_time == expected
+    if expected is None:
+        assert not handler.check()
+
+
+@pytest.mark.parametrize(
+    ("time_limit", "expected"),
+    [
+        ("90", 5400),
+        ("30:15", 1815),
+        ("01:00:00", 3600),
+        ("2-00", 172800),
+        ("1-02:30", 95400),
+        ("1-02:03:04", 93784),
+        ("UNLIMITED", None),
+    ],
+)
+def test_walltime_sbatch_timelimit_formats(monkeypatch, time_limit, expected) -> None:
+    monkeypatch.delenv("PBS_WALLTIME", raising=False)
+    monkeypatch.delenv("CUSTODIAN_WALLTIME_START", raising=False)
+    monkeypatch.setenv("SBATCH_TIMELIMIT", time_limit)
+    assert WalltimeHandler().wall_time == expected
+
+
+def test_checkpoint_handler(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    handler = CheckpointHandler(interval=3600)
+    assert str(handler) == "CheckpointHandler with interval 3600"
+    assert not handler.check(directory=str(tmp_path))
+
+    handler.start_time -= dt.timedelta(hours=2)
+    assert handler.check(directory=str(tmp_path))
+    dct = handler.correct(directory=str(tmp_path))
+    assert dct["errors"] == ["Checkpoint reached"]
+    assert [a["file"] for a in dct["actions"]] == ["STOPCAR", "chkpt.yaml"]
+    assert (tmp_path / "STOPCAR").read_text() == "LSTOP = .TRUE."
+    assert (tmp_path / "chkpt.yaml").read_text().startswith("Index: 0")
+    assert handler.chk_counter == 1
+    # The clock is reset after checkpointing.
+    assert not handler.check(directory=str(tmp_path))
+
+
+@pytest.mark.parametrize("handler_cls", [CheckpointHandler, WalltimeHandler])
+def test_stopcar_written_to_run_directory(tmp_path, monkeypatch, handler_cls) -> None:
+    monkeypatch.delenv("CUSTODIAN_WALLTIME_START", raising=False)
+    (run_dir := tmp_path / "run").mkdir()
+    (elsewhere := tmp_path / "elsewhere").mkdir()
+    monkeypatch.chdir(elsewhere)
+    handler_cls().correct(directory=str(run_dir))
+    assert not (elsewhere / "STOPCAR").exists()
+    assert (run_dir / "STOPCAR").read_text() == "LSTOP = .TRUE."
+
+
+def _setup_stopped_run(run_dir: Path) -> None:
+    run_dir.mkdir()
+    shutil.copy(f"{TEST_FILES}/POSCAR", run_dir / "POSCAR")
+    contcar = Structure.from_file(run_dir / "POSCAR")
+    contcar.perturb(0.05)
+    contcar.to(filename=str(run_dir / "CONTCAR"), fmt="poscar")
+    (run_dir / "chkpt.yaml").write_text('Index: 3\nTime: "2026-01-01 00:00:00"')
+
+
+def test_stopped_run_handler(tmp_path, monkeypatch) -> None:
+    """A checkpointed run is archived and restarted from CONTCAR."""
+    _setup_stopped_run(run_dir := tmp_path / "run")
+    monkeypatch.chdir(run_dir)
+    handler = StoppedRunHandler()
+    assert handler.check()
+    dct = handler.correct()
+    assert dct["errors"] == ["Stopped run."]
+    assert dct["actions"][0] == _CONTCAR_COPY
+    assert dct["actions"][1]["Checkpoint"].endswith("vasp.chk.3.tar.gz")
+    assert (run_dir / "POSCAR").read_text() == (run_dir / "CONTCAR").read_text()
+    with tarfile.open(run_dir / "vasp.chk.3.tar.gz") as tar:
+        assert "./CONTCAR" in tar.getnames()
+
+
+def test_stopped_run_handler_archives_directory(tmp_path, monkeypatch) -> None:
+    _setup_stopped_run(run_dir := tmp_path / "run")
+    (elsewhere := tmp_path / "elsewhere").mkdir()
+    (elsewhere / "unrelated.txt").write_text("not part of the run")
+    monkeypatch.chdir(elsewhere)
+    StoppedRunHandler().correct(directory=str(run_dir))
+    with tarfile.open(run_dir / "vasp.chk.3.tar.gz") as tar:
+        names = tar.getnames()
+    assert "./CONTCAR" in names
+    assert "./unrelated.txt" not in names
+
+
+@pytest.mark.parametrize(
+    ("incar", "expected"),
+    [
+        ({"ALGO": "Normal", "IBRION": 2, "POTIM": 0.5}, [{"dict": "INCAR", "action": {"_set": {"POTIM": 0.25}}}]),
+        ({"ALGO": "Normal", "IBRION": -1}, None),
+    ],
+)
+def test_positive_energy_on_normal(tmp_path, incar, expected) -> None:
+    """With ALGO = Normal, relaxations halve POTIM; static runs are unrecoverable."""
+    Incar(incar).write_file(tmp_path / "INCAR")
+    dct = PositiveEnergyErrorHandler().correct(directory=str(tmp_path))
+    assert dct == {"errors": ["Positive energy"], "actions": expected}
+    assert Incar.from_file(tmp_path / "INCAR") == {**incar, **(expected[0]["action"]["_set"] if expected else {})}
