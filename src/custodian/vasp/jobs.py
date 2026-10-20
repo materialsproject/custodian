@@ -431,6 +431,7 @@ class VaspJob(Job):
                 auto_npar=auto_npar,
                 final=False,
                 suffix=".precondition",
+                auto_continue=auto_continue,
                 settings_override=pre_opt_settings,
             )
         ]
@@ -441,6 +442,7 @@ class VaspJob(Job):
             auto_npar=auto_npar,
             ediffg=ediffg,
             half_kpts_first_relax=half_kpts_first_relax,
+            auto_continue=auto_continue,
             directory=directory,
         )
 
@@ -504,6 +506,7 @@ class VaspJob(Job):
         Returns:
             Generator of jobs.
         """
+        orig_kpts_dict = None
         for step in range(max_steps):
             if step == 0:
                 settings = None
@@ -515,7 +518,8 @@ class VaspJob(Job):
                 ):
                     kpts = Kpoints.from_file(os.path.join(directory, "KPOINTS"))
                     orig_kpts_dict = kpts.as_dict()
-                    kpts.kpts = np.maximum(np.array(kpts.kpts) / 2, 1).tolist()
+                    # lattice vectors with length < 8 will get >1 KPOINT
+                    kpts.kpts = np.round(np.maximum(np.array(kpts.kpts) / 2, 1)).astype(int).tolist()
                     low_kpts_dict = kpts.as_dict()
                     settings = [{"dict": "KPOINTS", "action": {"_set": low_kpts_dict}}]
             else:
@@ -538,8 +542,8 @@ class VaspJob(Job):
                         "action": {"_file_copy": {"dest": "POSCAR"}},
                     },
                 ]
-                if step == 1 and half_kpts_first_relax:
-                    settings.append({"dict": "KPOINTS", "action": {"_set": orig_kpts_dict}})  # type: ignore
+                if step == 1 and orig_kpts_dict is not None:
+                    settings.append({"dict": "KPOINTS", "action": {"_set": orig_kpts_dict}})
             logger.info(f"Generating job = {step + 1}!")
             yield VaspJob(
                 vasp_cmd,
@@ -629,7 +633,7 @@ class VaspJob(Job):
                 backup = True
             else:
                 backup = False
-                v = Vasprun("vasprun.xml")
+                v = Vasprun(os.path.join(directory, "vasprun.xml"))
                 structure = v.final_structure
                 energy = v.final_energy
                 lattice = structure.lattice
@@ -694,7 +698,7 @@ class VaspJob(Job):
                             x = (min_x + sorted_x[other]) / 2
                             logger.info(f"Bisection {lattice_direction} = {x}.")
 
-                lattice = lattice.matrix
+                lattice = lattice.matrix.copy()
                 lattice[lattice_index] = lattice[lattice_index] / np.linalg.norm(lattice[lattice_index]) * x
 
                 s = Structure(lattice, structure.species, structure.frac_coords)
@@ -1055,9 +1059,12 @@ class VaspNEBJob(VaspJob):
                     shutil.copy(file, f"{file}{self.suffix}")
 
     def _get_neb_dirs(self, directory):
-        neb_dirs = sorted(  # 00, 01, etc.
-            path for path in os.listdir(directory) if os.path.isdir(path) and path.isdigit()
-        )
+        """Image folders (00, 01, ...) in directory, as paths joined with directory."""
+        neb_dirs = [  # 00, 01, etc.
+            os.path.join(directory, name)
+            for name in sorted(os.listdir(directory))
+            if name.isdigit() and os.path.isdir(os.path.join(directory, name))
+        ]
         neb_sub = neb_dirs[1:-1]  # 01, 02, etc.
         return neb_dirs, neb_sub
 
