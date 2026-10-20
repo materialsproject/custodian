@@ -363,6 +363,32 @@ class TestVaspJobTerminate:
         mocks.killpg.assert_called_once_with(67890, signal.SIGTERM)
         assert not (tmp_path / "STOPCAR").exists()
 
+    def test_graceful_stopcar_removed_by_vasp(self, mocks: SimpleNamespace, tmp_path) -> None:
+        """No error when VASP has already deleted the STOPCAR on exit."""
+        mocks.job.graceful_termination = True
+        mocks.process.poll.return_value = None
+        stopcar = tmp_path / "STOPCAR"
+        mocks.process.wait.side_effect = lambda timeout: stopcar.unlink()
+        mocks.job.terminate(directory=str(tmp_path))
+
+        mocks.killpg.assert_not_called()
+        mocks.logger.info.assert_any_call("Process 12345 stopped gracefully via STOPCAR")
+        assert not stopcar.exists()
+
+    @pytest.mark.parametrize("terminate_times_out", [False, True])
+    def test_windows_skips_process_group(self, mocks: SimpleNamespace, monkeypatch, terminate_times_out: bool) -> None:
+        """On Windows no process-group signals are sent; the parent process is terminated/killed directly."""
+        monkeypatch.setattr("custodian.vasp.jobs.os.name", "nt")
+        mocks.process.poll.return_value = None
+        if terminate_times_out:
+            mocks.process.wait.side_effect = [subprocess.TimeoutExpired("vasp", 10), None]
+        mocks.job.terminate()
+
+        mocks.killpg.assert_not_called()
+        mocks.logger.warning.assert_any_call("Falling back to killing parent process 12345")
+        mocks.process.terminate.assert_called_once()
+        assert mocks.process.kill.called is terminate_times_out
+
     def test_graceful_stopcar_write_fails(self, mocks: SimpleNamespace, tmp_path) -> None:
         """Falls back to SIGTERM immediately when the STOPCAR cannot be written."""
         mocks.job.graceful_termination = True
@@ -464,6 +490,16 @@ class TestVaspJobInit:
         VaspJob(vasp_cmd)
         sentry_scope.set_tag.assert_any_call("vasp_path", expected_path)
         sentry_scope.set_tag.assert_any_call("vasp_cmd", vasp_cmd)
+
+    @pytest.mark.xfail(
+        strict=True,
+        reason="VaspJob.__init__ only resolves vasp_path for str/list vasp_cmd; a tuple leaves vasp_path "
+        "unbound, so the UnboundLocalError is swallowed and the vasp_path tag is never set",
+    )
+    def test_sentry_tags_tuple_cmd(self, sentry_scope, monkeypatch) -> None:
+        monkeypatch.setattr("custodian.vasp.jobs.which", lambda cmd: f"/opt/bin/{cmd}")
+        VaspJob(("mpirun", "vasp_std"))
+        sentry_scope.set_tag.assert_any_call("vasp_path", "/opt/bin/vasp_std")
 
     def test_sentry_tag_failure_still_tags_cmd(self, sentry_scope, monkeypatch) -> None:
         monkeypatch.setattr("custodian.vasp.jobs.which", Mock(side_effect=RuntimeError("boom")))
@@ -1215,7 +1251,8 @@ class TestVaspNEBJobExtended:
         VaspNEBJob(["vasp"], backup=False, auto_npar=False).setup()
         assert not list(neb_dir.glob("**/*.orig"))
 
-    @pytest.mark.parametrize(("nslots", "expected"), [(None, 8), ("16", 4)])
+    # Prime core count: no divisor in [sqrt(n), n), so the input NPAR (2) is kept.
+    @pytest.mark.parametrize(("nslots", "expected"), [(None, 8), ("16", 4), ("7", 2)])
     def test_setup_auto_npar(self, neb_dir, monkeypatch, nslots, expected) -> None:
         if nslots is None:
             monkeypatch.delenv("NSLOTS", raising=False)
