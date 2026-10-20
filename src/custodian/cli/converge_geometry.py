@@ -78,7 +78,8 @@ def do_run(args) -> None:
     logging.info("Geometry optimization complete")
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Main method."""
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -122,3 +123,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     do_run(args)
+
+
+if __name__ == "__main__":
+    main()

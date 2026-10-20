@@ -20,7 +20,7 @@ def do_run(args) -> None:
         [job],
         max_errors=5,
         scratch_dir=args.scratch,
-        gzipped_output=args.gzipped,
+        gzipped_output=args.gzip,
         checkpoint=True,
     )
     c.run()

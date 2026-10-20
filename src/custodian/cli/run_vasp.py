@@ -32,7 +32,7 @@ def get_jobs(args):
     """Returns a generator of jobs. Allows of "infinite" jobs."""
     vasp_command = args.command.split()
     # save initial INCAR for rampU runs
-    n_ramp_u = args.jobs.count("rampU")
+    n_ramp_u = sum(job.lower().startswith("rampu") for job in args.jobs)
     ramps = 0
     if n_ramp_u:
         incar = Incar.from_file("INCAR")
@@ -64,40 +64,29 @@ def get_jobs(args):
             vis = MPStaticSet.from_prev_calc(
                 ".",
                 user_incar_settings={"LWAVE": True, "EDIFF": 1e-6},
-                ediff_per_atom=False,
             )
             settings += [
                 {"dict": "INCAR", "action": {"_set": dict(vis.incar)}},
                 {"dict": "KPOINTS", "action": {"_set": vis.kpoints.as_dict()}},
             ]
 
-        if job_type.startswith("static_dielectric_derived"):
-            from pymatgen.io.vasp.sets import MPStaticDielectricDFPTVaspInputSet, MPStaticSet
+        elif job_type.startswith("static_dielectric_derived"):
+            from pymatgen.io.vasp.sets import MPStaticSet
 
-            # vis = MPStaticSet.from_prev_calc(
-            #     ".",
-            #     user_incar_settings={
-            #         "EDIFF": 1e-6,
-            #         "IBRION": 8,
-            #         "LEPSILON": True,
-            #         "LREAL": False,
-            #         "LPEAD": True,
-            #         "ISMEAR": 0,
-            #         "SIGMA": 0.01,
-            #     },
-            #     ediff_per_atom=False,
-            # )
-            vis = MPStaticDielectricDFPTVaspInputSet()
-            incar = vis.get_incar(vinput["POSCAR"].structure)
+            vis = MPStaticSet.from_prev_calc(
+                ".",
+                lepsilon=True,
+                user_incar_settings={"EDIFF": 1e-6, "LREAL": False, "ISMEAR": 0, "SIGMA": 0.01},
+            )
+            incar = dict(vis.incar)
             unset = {}
             for key in ("NPAR", "KPOINT_BSE", "LAECHG", "LCHARG", "LVHAR", "NSW"):
                 incar.pop(key, None)
                 if key in vinput["INCAR"]:
                     unset[key] = 1
-            kpoints = vis.get_kpoints(vinput["POSCAR"].structure)
             settings += [
-                {"dict": "INCAR", "action": {"_set": dict(incar), "_unset": unset}},
-                {"dict": "KPOINTS", "action": {"_set": kpoints.as_dict()}},
+                {"dict": "INCAR", "action": {"_set": incar, "_unset": unset}},
+                {"dict": "KPOINTS", "action": {"_set": vis.kpoints.as_dict()}},
             ]
             auto_npar = False
         elif job_type.startswith("static") and vinput["KPOINTS"]:
@@ -132,7 +121,6 @@ def get_jobs(args):
                     "SIGMA": 0.01,
                     "EDIFF": 1e-6,
                 },
-                ediff_per_atom=False,
             )
             settings += [
                 {"dict": "INCAR", "action": {"_set": dict(vis.incar)}},
@@ -140,7 +128,8 @@ def get_jobs(args):
             ]
 
         elif job_type.startswith("rampu"):
-            f = ramps / (n_ramp_u - 1)
+            # Ramp U linearly from 0 to its full value; a single rampU job uses the full U.
+            f = ramps / (n_ramp_u - 1) if n_ramp_u > 1 else 1
             settings.append(
                 {
                     "dict": "INCAR",
