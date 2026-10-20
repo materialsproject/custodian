@@ -495,7 +495,7 @@ class FrozenJobErrorHandler(ErrorHandler):
         except ValueError:
             pass
 
-        t = tail(self.output_file, 2)
+        t = tail(os.path.join(directory, self.output_file), 2)
         if time.time() - st.st_mtime > self.timeout:
             if t[0].split() == ["Step", "Update", "method", "Time", "Convergence", "Total", "energy", "Change"]:
                 self.frozen_preconditioner = True
@@ -582,7 +582,7 @@ class FrozenJobErrorHandler(ErrorHandler):
         else:
             errors.append("Frozen job")
 
-        restart(actions, os.path.join(directory, self.output_file), os.path.join(self.input_file))
+        restart(actions, os.path.join(directory, self.output_file), os.path.join(directory, self.input_file))
         Cp2kModder(ci=ci, filename=self.input_file, directory=directory).apply_actions(actions)
         return {"errors": errors, "actions": actions}
 
@@ -739,7 +739,7 @@ class AbortHandler(ErrorHandler):
                         }
                     )
 
-        restart(actions, os.path.join(directory, self.output_file), os.path.join(self.input_file))
+        restart(actions, os.path.join(directory, self.output_file), os.path.join(directory, self.input_file))
         Cp2kModder(ci=ci, filename=self.input_file, directory=directory).apply_actions(actions)
         return {"errors": [self.responses[-1]], "actions": actions}
 
@@ -828,7 +828,7 @@ class NumericalPrecisionHandler(ErrorHandler):
         counts = [len([*group]) for _k, group in itertools.groupby(conv)]
         return bool(any(cnt > self.max_same for cnt in counts))
 
-    def correct(self, directory="/."):
+    def correct(self, directory="./"):
         """Correct issue if possible."""
         ci = Cp2kInput.from_file(os.path.join(directory, self.input_file))
         actions = []
@@ -851,7 +851,7 @@ class NumericalPrecisionHandler(ErrorHandler):
                     )
 
             m = regrep(
-                self.output_file,
+                os.path.join(directory, self.output_file),
                 patterns={"PGF": re.compile(r"WARNING in hfx_energy_potential.F:592 :: The Kohn Sham matrix is not")},
             )
             eps_default = ci.by_path("FORCE_EVAL/DFT/QS").get("EPS_DEFAULT", Keyword("EPS_DEFAULT", 1e-10)).values[0]
@@ -914,7 +914,7 @@ class NumericalPrecisionHandler(ErrorHandler):
                     }
                 )
 
-        restart(actions, os.path.join(directory, self.output_file), os.path.join(self.input_file))
+        restart(actions, os.path.join(directory, self.output_file), os.path.join(directory, self.input_file))
         Cp2kModder(ci=ci, filename=self.input_file, directory=directory).apply_actions(actions)
         return {"errors": ["Insufficient precision"], "actions": actions}
 
@@ -975,7 +975,7 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
         o.convergence()
         return bool(o.data.get("geo_opt_not_converged"))
 
-    def correct(self, directory):
+    def correct(self, directory="./"):
         """Correct issue if possible."""
         ci = Cp2kInput.from_file(os.path.join(directory, self.input_file))
         actions = []
@@ -1012,7 +1012,7 @@ class UnconvergedRelaxationErrorHandler(ErrorHandler):
             )
 
         self.optimizer_id += 1
-        restart(actions, os.path.join(directory, self.output_file), os.path.join(self.input_file))
+        restart(actions, os.path.join(directory, self.output_file), os.path.join(directory, self.input_file))
         Cp2kModder(ci=ci, filename=self.input_file, directory=directory).apply_actions(actions)
         return {"errors": ["Unsuccessful relaxation"], "actions": actions}
 

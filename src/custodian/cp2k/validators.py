@@ -59,13 +59,13 @@ class Cp2kOutputValidator(Cp2kValidator):
             o = Cp2kOutput(os.path.join(directory, self.output_file))
             o.ran_successfully()
             o.convergence()
-            if (not o.data.get("geo_opt_converged") and not o.data.get("geo_opt_not_converged")) or o.data.get(  # type:ignore[index]
-                "geo_opt_converged"
-            )[-1]:
-                geom = True
-            else:
-                geom = False
-            if o.completed and o.data.get("scf_converged", [True])[-1] and geom:
+            # convergence() sets these keys to [] when the output has no matching lines,
+            # so treat empty lists as "no information" rather than indexing into them.
+            geo_converged = o.data.get("geo_opt_converged") or []
+            geo_not_converged = o.data.get("geo_opt_not_converged") or []
+            geom = bool(geo_converged[-1]) if geo_converged else not geo_not_converged
+            scf_converged = o.data.get("scf_converged") or [True]
+            if o.completed and scf_converged[-1] and geom:
                 return False
             self._check = True
             return True

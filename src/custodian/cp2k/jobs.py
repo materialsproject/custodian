@@ -102,7 +102,7 @@ class Cp2kJob(Job):
 
         if self.settings_override or self.restart:
             modder = Cp2kModder(
-                filename=os.path.join(directory, self.input_file),
+                filename=self.input_file,
                 actions=[],
                 ci=self.ci,
                 directory=directory,
@@ -139,8 +139,8 @@ class Cp2kJob(Job):
     def postprocess(self, directory="./") -> None:
         """Postprocessing includes renaming and gzipping where necessary."""
         files = os.listdir(directory)
-        if os.path.isfile(self.output_file) and self.suffix != "":
-            os.mkdir(f"run{self.suffix}")
+        if os.path.isfile(os.path.join(directory, self.output_file)) and self.suffix != "":
+            os.mkdir(os.path.join(directory, f"run{self.suffix}"))
             for file in files:
                 if "json" in file:
                     continue

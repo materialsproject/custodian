@@ -126,27 +126,29 @@ def activate_diag(actions) -> None:
         list of actions that are being applied. Will be modified in-place
     """
     diag_actions = [
-        {"dict": "cp2k.inp", "action": ("_unset", {"FORCE_EVAL": {"DFT": {"SCF": "OT"}}})},
-        {"dict": "cp2k.inp", "action": ("_unset", {"FORCE_EVAL": {"DFT": {"SCF": "OUTER_SCF"}}})},
+        {"dict": "cp2k.inp", "action": [("_unset", {"FORCE_EVAL": {"DFT": {"SCF": "OT"}}})]},
+        {"dict": "cp2k.inp", "action": [("_unset", {"FORCE_EVAL": {"DFT": {"SCF": "OUTER_SCF"}}})]},
         {
             "dict": "cp2k.inp",
-            "action": (
-                "_set",
-                {
-                    "FORCE_EVAL": {
-                        "DFT": {
-                            "SCF": {
-                                "MAX_SCF": 200,
-                                "ADDED_MOS": 100,  # TODO needs to be dynamic value
-                                "MAX_DIIS": 15,
-                                "DIAGONALIZATION": {},
-                                "MIXING": {"ALPHA": 0.05},
-                                "SMEAR": {"ELEC_TEMP": 300, "METHOD": "FERMI_DIRAC"},
+            "action": [
+                (
+                    "_set",
+                    {
+                        "FORCE_EVAL": {
+                            "DFT": {
+                                "SCF": {
+                                    "MAX_SCF": 200,
+                                    "ADDED_MOS": 100,  # TODO needs to be dynamic value
+                                    "MAX_DIIS": 15,
+                                    "DIAGONALIZATION": {},
+                                    "MIXING": {"ALPHA": 0.05},
+                                    "SMEAR": {"ELEC_TEMP": 300, "METHOD": "FERMI_DIRAC"},
+                                }
                             }
                         }
-                    }
-                },
-            ),
+                    },
+                )
+            ],
         },
     ]
     actions += diag_actions
