@@ -50,10 +50,6 @@ def test_file_modify_mode(tmp_path) -> None:
     assert stat.S_IMODE((tmp_path / "f").stat().st_mode) == 0o600
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="actions.py:234 file_create opens `filename` relative to the CWD and ignores `directory`.",
-)
 def test_file_create_uses_directory(tmp_path, monkeypatch) -> None:
     cwd = tmp_path / "cwd"
     target = tmp_path / "target"
@@ -66,11 +62,6 @@ def test_file_create_uses_directory(tmp_path, monkeypatch) -> None:
 
 
 @pytest.mark.skipif(not hasattr(os, "getuid"), reason="POSIX ownership only")
-@pytest.mark.xfail(
-    strict=True,
-    raises=TypeError,
-    reason="actions.py:305 calls os.chown(path, val) with a single owner argument, which always raises TypeError.",
-)
 def test_file_modify_owners(tmp_path) -> None:
     (tmp_path / "f").write_text("x")
     owners = (os.getuid(), os.getgid())

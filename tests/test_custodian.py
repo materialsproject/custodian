@@ -1018,12 +1018,6 @@ def test_job_default_terminate_is_noop() -> None:
     assert job.name == "PlainSleepJob"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="custodian.py:486 `job.terminate or p.terminate` - the base Job.terminate bound method is always "
-    "truthy, so the documented Popen.terminate fallback is unreachable and a terminating monitor cannot "
-    "kill a job that does not override terminate().",
-)
 def test_terminating_monitor_kills_job_without_terminate_override(workdir) -> None:
     job = PlainSleepJob(first_sleep=1.0)
     monitor = OneShotMonitor(is_terminating=True)

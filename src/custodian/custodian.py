@@ -481,9 +481,15 @@ class Custodian:
             zero_return_code = True
 
             # Choose the terminate function to run. If a terminate_func exists, this
-            # should take priority, followed by Job.terminate if implemented, and finally
-            # subprocess.Popen.terminate if neither of the former exist.
-            terminate = self.terminate_func or job.terminate or p.terminate
+            # should take priority, followed by Job.terminate if the job overrides it, and
+            # finally subprocess.Popen.terminate. The base Job.terminate is a no-op, so it
+            # must not shadow the Popen fallback.
+            terminate = self.terminate_func
+            if terminate is None:
+                if type(job).terminate is not Job.terminate:
+                    terminate = job.terminate
+                elif isinstance(p, subprocess.Popen):
+                    terminate = _popen_terminator(p)
 
             # While the job is running, we use the handlers that are
             # monitors to monitor the job.
@@ -731,6 +737,15 @@ class Custodian:
         # Clear all the cached values to avoid reusing them in a subsequent check
         tracked_lru_cache.tracked_cache_clear()
         return n_errors > 0
+
+
+def _popen_terminator(process: subprocess.Popen):
+    """Wrap Popen.terminate to accept the `directory` kwarg passed to terminate functions."""
+
+    def terminate(directory="./") -> None:
+        process.terminate()
+
+    return terminate
 
 
 class Job(MSONable):
