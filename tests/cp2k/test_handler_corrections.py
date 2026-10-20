@@ -173,12 +173,6 @@ def test_abort_cholesky_scf_repeat_is_noop(cp2k_dir) -> None:
     assert handler.correct()["actions"] == []
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Bug: Abort/Frozen/NumericalPrecision/UnconvergedRelaxation handlers pass "
-    "os.path.join(self.input_file) (no directory) to restart(), so correct(directory=...) reads the input "
-    "relative to the cwd instead of the run directory.",
-)
 def test_abort_correct_in_other_directory(tmp_path, monkeypatch) -> None:
     run_dir = tmp_path / "run"
     run_dir.mkdir()
@@ -449,11 +443,6 @@ def test_numerical_precision_correct_hybrid_falls_back(hybrid_dir) -> None:
     assert len(result["actions"]) == 3
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Bug: NumericalPrecisionHandler.correct defaults to directory='/.' (typo for './'), so a relative "
-    "input_file is resolved against the filesystem root.",
-)
 def test_numerical_precision_correct_default_directory(cp2k_dir) -> None:
     NumericalPrecisionHandler().correct()
     assert val(read_ci(), "FORCE_EVAL/DFT/QS/EPS_DEFAULT") == pytest.approx(1e-12)
@@ -529,11 +518,6 @@ def test_frozen_correct_davidson_preconditioner(cp2k_dir, davidson, key, expecte
     assert val(read_ci(), f"FORCE_EVAL/DFT/SCF/DIAGONALIZATION/DAVIDSON/{key}") == expected
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Bug: FrozenJobErrorHandler.check calls tail(self.output_file) without joining the directory, so it "
-    "reads the output relative to the cwd (FileNotFoundError when cwd != directory).",
-)
 def test_frozen_check_in_other_directory(tmp_path, monkeypatch) -> None:
     run_dir = tmp_path / "run"
     run_dir.mkdir()
@@ -612,3 +596,67 @@ def test_walltime_correct(cp2k_dir, enable_checkpointing) -> None:
     assert checkpoint.exists() is enable_checkpointing
     if enable_checkpointing:
         assert loadfn(checkpoint) == {"_path": str(cp2k_dir)}
+
+
+# --------------------------------------------------------------------------- directory handling
+
+
+def _frozen_handler():
+    handler = FrozenJobErrorHandler()
+    handler.frozen_preconditioner = True
+    return handler
+
+
+def _abort_handler():
+    handler = AbortHandler()
+    handler.responses = ["cholesky_scf"]
+    return handler
+
+
+@pytest.mark.parametrize(
+    ("make_handler", "geo_opt"),
+    [
+        pytest.param(_abort_handler, False, id="abort"),
+        pytest.param(_frozen_handler, False, id="frozen"),
+        pytest.param(NumericalPrecisionHandler, False, id="numerical-precision"),
+        pytest.param(UnconvergedRelaxationErrorHandler, True, id="unconverged-relaxation"),
+    ],
+)
+def test_correct_passes_directory_to_restart(tmp_path, monkeypatch, make_handler, geo_opt) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    shutil.copy(f"{CP2K_FILES}/cp2k.inp.orig", run_dir / "cp2k.inp")
+    (run_dir / "cp2k.out").write_text(PROGRAM_ENDED)
+    if geo_opt:
+        edit_ci(
+            update={"GLOBAL": {"RUN_TYPE": "GEO_OPT"}, "MOTION": {"GEO_OPT": {"MAX_ITER": 20, "OPTIMIZER": "BFGS"}}},
+            path=run_dir / "cp2k.inp",
+        )
+    calls = []
+    monkeypatch.setattr(
+        "custodian.cp2k.handlers.restart", lambda actions, output_file, input_file: calls.append(input_file)
+    )
+    monkeypatch.chdir(tmp_path)  # cwd has no CP2K files
+
+    make_handler().correct(directory=str(run_dir))
+    assert calls == [os.path.join(str(run_dir), "cp2k.inp")]
+
+
+def test_numerical_precision_correct_reads_output_from_directory(tmp_path, monkeypatch) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    shutil.copy(f"{CP2K_FILES}/cp2k.inp.orig", run_dir / "cp2k.inp")
+    edit_ci(
+        update={"FORCE_EVAL": {"DFT": {"XC": {"HF": {"SCREENING": {"EPS_SCHWARZ": 1e-8}}}}}}, path=run_dir / "cp2k.inp"
+    )
+    (run_dir / "cp2k.out").write_text(
+        " *** WARNING in hfx_energy_potential.F:592 :: The Kohn Sham matrix is not  ***\n" + PROGRAM_ENDED
+    )
+    monkeypatch.chdir(tmp_path)
+    result = NumericalPrecisionHandler().correct(directory=str(run_dir))
+    # The PGF warning in run_dir/cp2k.out was found, so only the hybrid EPS_PGF_ORB fix is applied
+    # (without it, the generic fallback would also set EPS_DEFAULT and EPS_GVG_RSPACE).
+    assert len(result["actions"]) == 1
+    ci = read_ci(run_dir / "cp2k.inp")
+    assert val(ci, "FORCE_EVAL/DFT/QS/EPS_PGF_ORB") == pytest.approx(1e-20)
+    assert val(ci, "FORCE_EVAL/DFT/QS/EPS_GVG_RSPACE") is None
