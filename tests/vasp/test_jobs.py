@@ -934,7 +934,7 @@ class _FakeVasprun:
     """Stand-in for Vasprun used by constrained_opt_run.
 
     Reads the current POSCAR and returns an energy from a model E(x) of the constrained
-    lattice parameter. The lattice matrix is a writable copy (see the xfail test below).
+    lattice parameter.
     """
 
     energy_fn = staticmethod(lambda x: 0.0)
@@ -1166,10 +1166,6 @@ class TestConstrainedOptRun:
         jobs = _drive_constrained(VaspJob.constrained_opt_run(["vasp"], "c", initial_strain=-0.05))
         assert len(jobs) == 2
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="constrained_opt_run reads Vasprun('vasprun.xml') relative to cwd instead of `directory`",
-    )
     def test_reads_vasprun_from_directory(self, vasp_dir, fake_vasprun) -> None:
         fake = fake_vasprun(lambda x: (x - 4.5) ** 2)
         gen = VaspJob.constrained_opt_run(["vasp"], "c", initial_strain=-0.05, directory=str(vasp_dir))
@@ -1177,20 +1173,18 @@ class TestConstrainedOptRun:
         next(gen)
         assert fake.calls == [os.path.join(str(vasp_dir), "vasprun.xml")]
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=ValueError,
-        reason="constrained_opt_run mutates Lattice.matrix in place, but pymatgen returns a read-only "
-        "array, so every step after the first raises 'assignment destination is read-only'",
-    )
     def test_real_structure_lattice_is_writable(self, vasp_dir, monkeypatch) -> None:
         structure = Poscar.from_file("POSCAR").structure
         vasprun = SimpleNamespace(final_structure=structure, final_energy=-1.0)
         monkeypatch.setattr("custodian.vasp.jobs.Vasprun", lambda *args, **kwargs: vasprun)
         gen = VaspJob.constrained_opt_run(["vasp"], "c", initial_strain=-0.05)
         next(gen)
+        c0 = structure.lattice.c
         job = next(gen)
-        assert _suffix_x(job) == pytest.approx(structure.lattice.c * 0.95)
+        assert _suffix_x(job) == pytest.approx(c0 * 0.95)
+        assert Structure.from_file(f"POSCAR.{_suffix_x(job)}").lattice.c == pytest.approx(c0 * 0.95)
+        # The Vasprun's structure is not modified in place.
+        assert structure.lattice.c == pytest.approx(c0)
 
 
 @pytest.fixture

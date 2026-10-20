@@ -629,7 +629,7 @@ class VaspJob(Job):
                 backup = True
             else:
                 backup = False
-                v = Vasprun("vasprun.xml")
+                v = Vasprun(os.path.join(directory, "vasprun.xml"))
                 structure = v.final_structure
                 energy = v.final_energy
                 lattice = structure.lattice
@@ -694,7 +694,7 @@ class VaspJob(Job):
                             x = (min_x + sorted_x[other]) / 2
                             logger.info(f"Bisection {lattice_direction} = {x}.")
 
-                lattice = lattice.matrix
+                lattice = lattice.matrix.copy()
                 lattice[lattice_index] = lattice[lattice_index] / np.linalg.norm(lattice[lattice_index]) * x
 
                 s = Structure(lattice, structure.species, structure.frac_coords)
