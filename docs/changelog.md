@@ -6,6 +6,27 @@ nav_order: 2
 
 # Change Log
 
+## 2026.10.21
+* **Behavior changes:** `run_interrupted` now enforces `max_errors`/`max_errors_per_job`; terminating monitors now kill jobs that do not override `terminate()`; `FileActions.file_modify` `"owners"` takes a `(uid, gid)` tuple; `WalltimeHandler` parses `SBATCH_TIMELIMIT` in Slurm time formats instead of as integer seconds.
+* PR #465 from @shyuep (#465)
+    `VaspJob`/`VaspNEBJob`: new `graceful_termination` option writes a STOPCAR with LABORT = .TRUE. and waits `terminate_timeout` before SIGTERM/SIGKILL, avoiding truncated vasprun.xml (common with GPU VASP). Fixes `VaspNEBJob.terminate()` AttributeError. Closes #425.
+* PR #467 from @shyuep (#467)
+    Core: checkpoint `safe_extract` rejects tar symlinks/hard links pointing outside the run directory and applies the tarfile `"data"` filter. `skip_over_errors=True` no longer crashes with KeyError; skipped handlers are logged but do not count toward `max_errors`. `run_interrupted` rebuilds error counts from the run log and raises `MaxCorrectionsError`/`MaxCorrectionsPerJobError`.
+* PR #473 from @shyuep (#473)
+    Core: the `Popen.terminate` fallback for terminating monitors was unreachable (base `Job.terminate` is always truthy). `FileActions.file_modify` `"owners"` no longer always raises TypeError.
+* PR #469, #471, #472 from @shyuep
+    VASP: `constrained_opt_run` no longer writes into read-only `Lattice.matrix` and reads vasprun.xml from `directory`. `full_opt_run` rounds halved k-points to int and supports KSPACING. `metagga_opt_run` forwards `auto_continue`. `VaspNEBJob` resolves image folders relative to `directory`. `FileActions.file_create` writes into `directory`, so STOPCARs from `WalltimeHandler`/`CheckpointHandler` reach VASP; `StoppedRunHandler` archives `directory` instead of the cwd. Sentry `vasp_path` tagging works for tuple `vasp_cmd`.
+* PR #468, #475 from @shyuep
+    CP2K: `Cp2kOutputValidator` accepts completed runs without SCF lines (FIST/MM). `activate_diag` emits actions `Cp2kModder` can apply. Handlers and `Cp2kJob` setup/postprocess honor `directory`.
+* PR #474 from @shyuep (#474)
+    Gaussian: unfixable branches return JSON-serializable error lists; no TypeError when geom/guess route keywords are absent; `os.replace` for .prev swaps (Windows); `internal_coords` no longer always adds symmetry=none; `GaussianJob` and handlers honor `directory`.
+* PR #477 from @shyuep (#477)
+    NWChem: `NwchemJob.run` opens output in text mode (every run previously failed with current monty) inside `directory`; `NwchemErrorHandler.correct` writes the corrected input to `directory`.
+* PR #470 from @shyuep (#470)
+    CLI: fix `run_nwchem` gzip flag, `converge_kpoints` copy action and inc mode, missing `converge_geometry` `main()`, and `run_vasp` dielectric/static branches, removed pymatgen input set, `ediff_per_atom` kwarg and rampU handling.
+* PR #466, #476, #478 from @shyuep
+    Tests: suite is pytest-xdist safe and CI runs with `-n auto` (20 min timeout); feff, cp2k, gaussian, nwchem, cli and core modules at or near 100% coverage.
+
 ## 2026.10.10
 * **Behavior changes:** several VASP handlers now apply different corrections, or declare an error unrecoverable, where they previously applied ad hoc fixes. Workflows that relied on the old corrections may see different INCAR/KPOINTS changes or earlier termination.
 * PR #464 from @shyuep (#464)
