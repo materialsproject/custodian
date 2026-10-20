@@ -45,9 +45,13 @@ def test_file_move_and_copy_use_directory(tmp_path) -> None:
 
 
 def test_file_modify_mode(tmp_path) -> None:
+    # Windows chmod only toggles the read-only bit, so make the file read-only, which works on both.
     (tmp_path / "f").write_text("x")
-    FileActions.file_modify("f", {"mode": 0o600}, str(tmp_path))
-    assert stat.S_IMODE((tmp_path / "f").stat().st_mode) == 0o600
+    FileActions.file_modify("f", {"mode": stat.S_IREAD}, str(tmp_path))
+    mode = stat.S_IMODE((tmp_path / "f").stat().st_mode)
+    assert not mode & stat.S_IWUSR
+    if os.name != "nt":
+        assert mode == stat.S_IREAD
 
 
 def test_file_create_uses_directory(tmp_path, monkeypatch) -> None:
