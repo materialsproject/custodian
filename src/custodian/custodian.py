@@ -602,6 +602,10 @@ class Custodian:
             job_n = self.run_log[-1]["job_n"]
             job = self.jobs[job_n]
 
+            # Each call may be a fresh process, so recount errors from the run log.
+            self.total_errors = sum(not corr.get("skipped") for entry in self.run_log for corr in entry["corrections"])
+            self.errors_current_job = sum(not corr.get("skipped") for corr in self.run_log[-1]["corrections"])
+
             # If we had to fix errors from a previous run, insert clean log
             # dict
             if len(self.run_log[-1]["corrections"]) > 0:
@@ -617,6 +621,18 @@ class Custodian:
                         self.run_log[-1]["handler"] = corr["handler"]
                         s = f"Unrecoverable error for handler: {corr['handler']}. Raising RuntimeError"
                         raise NonRecoverableError(s, raises=True, handler=corr["handler"])
+                if self.errors_current_job >= self.max_errors_per_job:
+                    self.run_log[-1]["max_errors_per_job"] = True
+                    msg = f"Max errors per job reached: {self.max_errors_per_job}."
+                    logger.info(msg)
+                    raise MaxCorrectionsPerJobError(
+                        msg, raises=True, max_errors_per_job=self.max_errors_per_job, job=job
+                    )
+                if self.total_errors >= self.max_errors:
+                    self.run_log[-1]["max_errors"] = True
+                    msg = f"Max errors reached: {self.max_errors}."
+                    logger.info(msg)
+                    raise MaxCorrectionsError(msg, raises=True, max_errors=self.max_errors)
                 logger.info("Corrected input based on error handlers")
                 # Return with more jobs to run if recoverable error caught
                 # and corrected for

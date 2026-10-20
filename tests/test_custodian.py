@@ -649,24 +649,35 @@ def test_run_interrupted_non_raising_custodian_error_is_swallowed(workdir) -> No
     assert (workdir / "custodian.json").exists()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="run_interrupted documents MaxCorrectionsError/MaxCorrectionsPerJobError but never enforces "
-    "max_errors or max_errors_per_job; it returns the remaining job count indefinitely.",
-)
 @pytest.mark.parametrize(
-    ("kwargs", "exc"),
+    ("kwargs", "exc", "flag"),
     [
-        ({"max_errors": 2}, MaxCorrectionsError),
-        ({"max_errors": 10, "max_errors_per_job": 2}, MaxCorrectionsPerJobError),
+        ({"max_errors": 2, "max_errors_per_job": 10}, MaxCorrectionsError, "max_errors"),
+        ({"max_errors": 10, "max_errors_per_job": 2}, MaxCorrectionsPerJobError, "max_errors_per_job"),
     ],
 )
-def test_run_interrupted_enforces_max_errors(workdir, kwargs, exc) -> None:
+def test_run_interrupted_enforces_max_errors(workdir, kwargs, exc, flag) -> None:
     jobs = [RecordingJob(0)]
-    _interrupted(jobs, [AlwaysCorrectHandler()], **kwargs).run_interrupted()
-    with pytest.raises(exc):  # noqa: PT012
-        for _ in range(5):
-            _interrupted(jobs, [AlwaysCorrectHandler()], **kwargs).run_interrupted()
+    assert _interrupted(jobs, [AlwaysCorrectHandler()], **kwargs).run_interrupted() == 1  # set up
+    # First correction stays under the limit; the second reaches it.
+    assert _interrupted(jobs, [AlwaysCorrectHandler()], **kwargs).run_interrupted() == 1
+    with pytest.raises(exc):
+        _interrupted(jobs, [AlwaysCorrectHandler()], **kwargs).run_interrupted()
+    run_log = loadfn(workdir / "custodian.json")
+    assert run_log[-1][flag] is True
+    assert len(run_log[-1]["corrections"]) == 2
+
+
+def test_run_interrupted_max_errors_counts_across_jobs(workdir) -> None:
+    jobs = [RecordingJob(0), RecordingJob(1)]
+    handler = FlagFileHandler()
+    assert _interrupted(jobs, [handler], max_errors=2).run_interrupted() == 2
+    (workdir / "error.flag").touch()
+    assert _interrupted(jobs, [handler], max_errors=2).run_interrupted() == 2  # 1 error in job 0
+    assert _interrupted(jobs, [handler], max_errors=2).run_interrupted() == 1  # job 0 done, job 1 set up
+    (workdir / "error.flag").touch()
+    with pytest.raises(MaxCorrectionsError):  # 2nd error overall, 1st in job 1
+        _interrupted(jobs, [handler], max_errors=2, max_errors_per_job=5).run_interrupted()
 
 
 # --------------------------- _run_job / _do_check ---------------------------
