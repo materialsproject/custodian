@@ -906,22 +906,17 @@ class TestFullOptRun:
         # Only the second job restores the original k-point grid.
         assert len(next(gen).settings_override) == 2
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="full_opt_run halves k-points without rounding to int (unlike double_relaxation_run), "
-        "producing float subdivisions such as 4.0 or 1.5 in the KPOINTS file",
-    )
-    def test_half_kpts_are_integers(self, vasp_dir) -> None:
+    @pytest.mark.parametrize(("kpts", "expected"), [((8, 4, 2), [4, 2, 1]), ((3, 5, 1), [2, 2, 1])])
+    def test_half_kpts_are_integers(self, vasp_dir, kpts, expected) -> None:
+        Kpoints.monkhorst_automatic(kpts).write_file("KPOINTS")
         job1 = next(VaspJob.full_opt_run(["vasp"], half_kpts_first_relax=True))
-        kpts = job1.settings_override[0]["action"]["_set"]["kpoints"]
-        assert all(isinstance(k, int) for k in kpts[0])
+        new_kpts = list(job1.settings_override[0]["action"]["_set"]["kpoints"][0])
+        assert new_kpts == expected
+        assert all(isinstance(k, int) for k in new_kpts)
+        # Matches double_relaxation_run's halving.
+        relax1, _ = VaspJob.double_relaxation_run(["vasp"], half_kpts_first_relax=True)
+        assert list(relax1.settings_override[0]["action"]["_set"]["kpoints"][0]) == expected
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=UnboundLocalError,
-        reason="full_opt_run with half_kpts_first_relax=True and no KPOINTS file (e.g. KSPACING) "
-        "references the undefined orig_kpts_dict when generating the second job",
-    )
     def test_half_kpts_first_relax_without_kpoints(self, vasp_dir) -> None:
         (vasp_dir / "KPOINTS").unlink()
         gen = VaspJob.full_opt_run(["vasp"], half_kpts_first_relax=True)

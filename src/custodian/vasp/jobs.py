@@ -504,6 +504,7 @@ class VaspJob(Job):
         Returns:
             Generator of jobs.
         """
+        orig_kpts_dict = None
         for step in range(max_steps):
             if step == 0:
                 settings = None
@@ -515,7 +516,8 @@ class VaspJob(Job):
                 ):
                     kpts = Kpoints.from_file(os.path.join(directory, "KPOINTS"))
                     orig_kpts_dict = kpts.as_dict()
-                    kpts.kpts = np.maximum(np.array(kpts.kpts) / 2, 1).tolist()
+                    # lattice vectors with length < 8 will get >1 KPOINT
+                    kpts.kpts = np.round(np.maximum(np.array(kpts.kpts) / 2, 1)).astype(int).tolist()
                     low_kpts_dict = kpts.as_dict()
                     settings = [{"dict": "KPOINTS", "action": {"_set": low_kpts_dict}}]
             else:
@@ -538,8 +540,8 @@ class VaspJob(Job):
                         "action": {"_file_copy": {"dest": "POSCAR"}},
                     },
                 ]
-                if step == 1 and half_kpts_first_relax:
-                    settings.append({"dict": "KPOINTS", "action": {"_set": orig_kpts_dict}})  # type: ignore
+                if step == 1 and orig_kpts_dict is not None:
+                    settings.append({"dict": "KPOINTS", "action": {"_set": orig_kpts_dict}})
             logger.info(f"Generating job = {step + 1}!")
             yield VaspJob(
                 vasp_cmd,
