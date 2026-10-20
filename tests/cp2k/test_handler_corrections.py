@@ -443,6 +443,29 @@ def test_numerical_precision_correct_hybrid_falls_back(hybrid_dir) -> None:
     assert len(result["actions"]) == 3
 
 
+def test_numerical_precision_correct_hybrid_without_screening(hybrid_dir) -> None:
+    edit_ci(unset={"FORCE_EVAL": {"DFT": {"XC": {"HF": "SCREENING"}}}})
+    result = NumericalPrecisionHandler().correct(directory="./")
+    # No SCREENING section to tighten and no PGF warning: generic fixes only, SCREENING not created.
+    ci = read_ci()
+    assert not ci.check("FORCE_EVAL/DFT/XC/HF/SCREENING")
+    assert val(ci, "FORCE_EVAL/DFT/SCF/OT/MINIMIZER") == "CG"
+    assert val(ci, "FORCE_EVAL/DFT/QS/EPS_PGF_ORB") == pytest.approx(1e-20)
+    assert len(result["actions"]) == 3
+
+
+def test_numerical_precision_correct_diagonalization(cp2k_dir) -> None:
+    # Without OT there is no minimizer to switch; only the precision thresholds are tightened.
+    edit_ci(unset={"FORCE_EVAL": {"DFT": {"SCF": "OT"}}})
+    result = NumericalPrecisionHandler().correct(directory="./")
+    assert len(result["actions"]) == 3
+    ci = read_ci()
+    assert not ci.check("FORCE_EVAL/DFT/SCF/OT")
+    assert val(ci, "FORCE_EVAL/DFT/QS/EPS_DEFAULT") == pytest.approx(1e-12)
+    assert val(ci, "FORCE_EVAL/DFT/QS/EPS_PGF_ORB") == pytest.approx(1e-20)
+    assert val(ci, "FORCE_EVAL/DFT/QS/EPS_GVG_RSPACE") == pytest.approx(1e-10)
+
+
 def test_numerical_precision_correct_default_directory(cp2k_dir) -> None:
     NumericalPrecisionHandler().correct()
     assert val(read_ci(), "FORCE_EVAL/DFT/QS/EPS_DEFAULT") == pytest.approx(1e-12)
@@ -525,6 +548,22 @@ def test_frozen_check_in_other_directory(tmp_path, monkeypatch) -> None:
     make_stale(run_dir / "cp2k.out")
     monkeypatch.chdir(tmp_path)
     assert FrozenJobErrorHandler(timeout=100).check(directory=str(run_dir))
+
+
+def test_frozen_correct_preconditioner_plain_diagonalization(cp2k_dir) -> None:
+    # Neither OT nor Davidson: there is no preconditioner to swap, so only the error is logged.
+    edit_ci(
+        unset={"FORCE_EVAL": {"DFT": {"SCF": "OT"}}},
+        update={"FORCE_EVAL": {"DFT": {"SCF": {"DIAGONALIZATION": {"ALGORITHM": "STANDARD"}}}}},
+    )
+    handler = FrozenJobErrorHandler()
+    handler.frozen_preconditioner = True
+    result = handler.correct()
+    assert result == {"errors": ["Frozen preconditioner"], "actions": []}
+    assert not handler.frozen_preconditioner
+    ci = read_ci()
+    assert not ci.check("FORCE_EVAL/DFT/SCF/OT")
+    assert not ci.check("FORCE_EVAL/DFT/SCF/DIAGONALIZATION/DAVIDSON")
 
 
 # --------------------------------------------------------------------------- UnconvergedRelaxationErrorHandler
