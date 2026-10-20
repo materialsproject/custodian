@@ -471,7 +471,7 @@ class GaussianErrorHandler(ErrorHandler):
         """Check for errors in the Gaussian output file."""
         # TODO: this backups the original file instead of the actual one
         if "linear_bend" in self.errors:
-            os.rename(
+            os.replace(
                 os.path.join(directory, self.input_file + ".prev"),
                 os.path.join(directory, self.input_file),
             )
@@ -517,7 +517,7 @@ class GaussianErrorHandler(ErrorHandler):
                 # convert strings to float taking into account the
                 # possibility of having ******** values
                 self.conv_data["values"][k] = np.genfromtxt(np.array(v))
-            GaussianErrorHandler._monitor_convergence(self.conv_data)
+            GaussianErrorHandler._monitor_convergence(self.conv_data, directory=directory)
         for patt in error_patts:
             self.logger.error(patt)
         return len(self.errors) > 0
@@ -658,7 +658,7 @@ class GaussianErrorHandler(ErrorHandler):
                 actions.append({"surface": "SAS"})
             else:
                 self.logger.info("Not sure how to fix solute_solvent_surface_error if surface is already SAS!")
-                return {"errors": [self.errors], "actions": None}
+                return {"errors": list(self.errors), "actions": None}
 
         elif "internal_coords" in self.errors:
             # check if optimization is requested to be performed in cartesian
@@ -672,9 +672,10 @@ class GaussianErrorHandler(ErrorHandler):
                 if isinstance(self.gin.route_parameters["opt"], dict):
                     [self.gin.route_parameters["opt"].pop(i, None) for i in ["redundant", "zmatrix", "z-matrix"]]
 
+                # nosymmetry is a bare keyword, so its value is None; check for the key
                 if (
-                    not self.gin.route_parameters.get("nosymmetry")
-                    or self.gin.route_parameters.get("symmetry") != "none"
+                    "nosymmetry" not in self.gin.route_parameters
+                    and self.gin.route_parameters.get("symmetry") != "none"
                 ):
                     self.gin.route_parameters["symmetry"] = "none"
                     actions.append({"symmetry": False})
@@ -687,7 +688,7 @@ class GaussianErrorHandler(ErrorHandler):
                     "to generate internal coordinates. Try to "
                     "modify your structure input?"
                 )
-                return {"errors": [self.errors], "actions": None}
+                return {"errors": list(self.errors), "actions": None}
 
         elif "zmatrix" in self.errors:
             with open(os.path.join(directory, self.input_file)) as gfile:
@@ -700,10 +701,10 @@ class GaussianErrorHandler(ErrorHandler):
                 actions.append({"blank_lines": "rewrite_input_file"})
             else:
                 self.logger.info("Not sure how to fix zmatrix error. Check manually?")
-                return {"errors": [self.errors], "actions": None}
+                return {"errors": list(self.errors), "actions": None}
 
         elif "coords" in self.errors:
-            if "connectivity" in self.gin.route_parameters.get("geom"):
+            if "connectivity" in (self.gin.route_parameters.get("geom") or {}):
                 self.logger.info("Explicit atom bonding is requested but no such input is provided")
                 if isinstance(self.gin.route_parameters["geom"], dict) and len(self.gin.route_parameters["geom"]) > 1:
                     self.gin.route_parameters["geom"].pop("connectivity", None)
@@ -712,7 +713,7 @@ class GaussianErrorHandler(ErrorHandler):
                 actions.append({"coords": "remove_connectivity"})
             else:
                 self.logger.info("Missing connectivity info. Not sure how to fix this error. Exiting!")
-                return {"errors": [self.errors], "actions": None}
+                return {"errors": list(self.errors), "actions": None}
 
         elif "found_coords" in self.errors:
             if self.gin.molecule and any(
@@ -725,7 +726,7 @@ class GaussianErrorHandler(ErrorHandler):
                 actions.append({"mol": "remove_from_input"})
             else:
                 self.logger.info("Not sure why atom specifications should not be found in the input. Examine manually!")
-                return {"errors": [self.errors], "actions": None}
+                return {"errors": list(self.errors), "actions": None}
 
         elif "coord_inputs" in self.errors:
             if (
@@ -744,12 +745,12 @@ class GaussianErrorHandler(ErrorHandler):
                     "optimization if coords are already input in"
                     "z-matrix format. Examine manually!"
                 )
-                return {"errors": [self.errors], "actions": None}
+                return {"errors": list(self.errors), "actions": None}
 
         elif "missing_mol" in self.errors:
             if (
                 not self.gin.molecule
-                and "read" in self.gin.route_parameters.get("guess")
+                and "read" in (self.gin.route_parameters.get("guess") or {})
                 and not any(
                     key in self.gin.route_parameters.get("geom", {}) for key in ["checkpoint", "check", "allcheck"]
                 )
@@ -757,7 +758,7 @@ class GaussianErrorHandler(ErrorHandler):
                 # if molecule is not specified and the user requests that the
                 # initial guess be read from the checkpoint file but forgot to
                 # take the geom from the checkpoint file, add geom=check
-                if not glob.glob("*.[Cc][Hh][Kk]"):
+                if not glob.glob(os.path.join(directory, "*.[Cc][Hh][Kk]")):
                     raise FileNotFoundError("This remedy reads geometry from checkpoint file. This file is missing!")
                 GaussianErrorHandler._update_route_params(self.gin.route_parameters, "geom", "check")
                 self.gin.route_parameters["geom"] = "check"
@@ -796,7 +797,7 @@ class GaussianErrorHandler(ErrorHandler):
             self.logger.info("Must have gotten an error that is parsed but not handled yet. Fix manually!")
             return {"errors": list(self.errors), "actions": None}
 
-        os.rename(
+        os.replace(
             os.path.join(directory, self.input_file),
             os.path.join(directory, self.input_file + ".prev"),
         )
@@ -880,7 +881,8 @@ class WallTimeErrorHandler(ErrorHandler):
             # gin.link0_parameters.update({'%rwf': rwf})
             # gin.route_parameters = {'Restart': None}
             # os.rename(self.input_file, self.input_file + '.prev')
-            input_str = [f"%rwf={rwf}"] + [f"{i}={j}" for i, j in gin.link0_parameters.items()]
+            # Gaussian runs in `directory`, so refer to the rwf file relative to it
+            input_str = [f"%rwf={os.path.basename(rwf)}"] + [f"{i}={j}" for i, j in gin.link0_parameters.items()]
             input_str.append(f"{gin.dieze_tag} Restart\n\n")
             with open(os.path.join(directory, self.input_file + ".wt"), "w") as f:
                 f.write("\n".join(input_str))

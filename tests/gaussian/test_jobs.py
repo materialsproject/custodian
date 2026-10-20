@@ -103,6 +103,7 @@ def test_run_and_terminate(job_dir, monkeypatch):
     args, kwargs = mock_popen.call_args
     assert args == ("g16 < test.com",)
     assert kwargs["shell"] is True
+    assert kwargs["cwd"] == str(job_dir)
     assert kwargs["stdout"].name == os.path.join(str(job_dir), "test.out")
     assert kwargs["stderr"].name == os.path.join(str(job_dir), "err.txt")
     assert (job_dir / "test.out").exists()
@@ -167,3 +168,17 @@ def test_better_guess_missing_chk(job_dir):
     GaussianErrorHandler.activate_better_guess = True
     with pytest.raises(FileNotFoundError, match="checkpoint"):
         next(job_gen)
+
+
+def test_better_guess_finds_chk_in_directory(tmp_path, monkeypatch):
+    (run_dir := tmp_path / "run").mkdir()
+    (cwd := tmp_path / "cwd").mkdir()
+    monkeypatch.chdir(cwd)
+    monkeypatch.setattr(GaussianErrorHandler, "activate_better_guess", False)
+    shutil.copyfile(f"{TEST_DIR}/mol_opt.com", run_dir / "test.com")
+    copy_gz(f"{TEST_DIR}/mol_opt.out.gz", run_dir / "test.out")
+    shutil.copyfile(f"{TEST_DIR}/Optimization.chk", run_dir / "Optimization.chk")
+    job_gen = GaussianJob.generate_better_guess("g16", "test.com", "test.out", directory=str(run_dir))
+    next(job_gen)
+    GaussianErrorHandler.activate_better_guess = True
+    assert next(job_gen).suffix == ".guess2"

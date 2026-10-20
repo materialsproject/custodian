@@ -726,11 +726,6 @@ def test_find_dynamic_memory_allocated_missing():
     assert GaussianErrorHandler._find_dynamic_memory_allocated({"%chk": "a.chk"}) == (None, None)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="handlers.py returns {'errors': [self.errors]} (a list wrapping a set) in several unfixable "
-    "branches, which is not JSON serializable and breaks Custodian's run log",
-)
 def test_unfixable_errors_are_serializable(in_tmp_path):
     handler = checked_handler("solute_solvent_surface")
     handler.gin.input_parameters["Surface"] = "SAS"
@@ -739,28 +734,58 @@ def test_unfixable_errors_are_serializable(in_tmp_path):
     json.dumps(dct)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=TypeError,
-    reason="handlers.py:706 does `'connectivity' in route_parameters.get('geom')`, which raises TypeError "
-    "when no geom keyword is present",
-)
 def test_coords_without_geom_keyword(in_tmp_path):
     handler = checked_handler("coords_string_geom")
     del handler.gin.route_parameters["geom"]
     assert_unfixable(handler, "coords_string_geom")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=TypeError,
-    reason="handlers.py:752 does `'read' in route_parameters.get('guess')`, which raises TypeError "
-    "when no guess keyword is present",
-)
 def test_missing_mol_without_guess_keyword(in_tmp_path):
     handler = checked_handler("missing_mol")
     del handler.gin.route_parameters["guess"]
     assert_unfixable(handler, "missing_mol")
+
+
+@pytest.mark.parametrize("route_update", [{"nosymmetry": None}, {"symmetry": "none"}])
+def test_internal_coords_symmetry_already_off(in_tmp_path, route_update):
+    handler = checked_handler("zmatrix")
+    handler.errors = {"internal_coords"}
+    handler.gin.route_parameters.update(route_update)
+    dct = handler.correct()
+    assert dct["actions"] == [{"opt_cart_coords": True}]
+
+
+@pytest.fixture
+def run_elsewhere(tmp_path, monkeypatch):
+    """A run directory that is not the cwd; returns (run_dir, cwd)."""
+    (run_dir := tmp_path / "run").mkdir()
+    (cwd := tmp_path / "cwd").mkdir()
+    monkeypatch.chdir(cwd)
+    monkeypatch.setattr(GaussianErrorHandler, "activate_better_guess", False)
+    return run_dir, cwd
+
+
+def copy_into(run_dir, *files):
+    for file in files:
+        copy_input(file)
+        shutil.move(file, run_dir / file)
+
+
+def test_convergence_plot_written_to_directory(run_elsewhere):
+    run_dir, cwd = run_elsewhere
+    copy_into(run_dir, "mol_opt.com", "mol_opt.out")
+    GaussianErrorHandler(input_file="mol_opt.com", output_file="mol_opt.out").check(directory=str(run_dir))
+    assert (run_dir / "convergence.png").exists()
+    assert not (cwd / "convergence.png").exists()
+
+
+def test_missing_mol_finds_chk_in_directory(run_elsewhere):
+    run_dir, _ = run_elsewhere
+    copy_into(run_dir, "missing_mol.com", "missing_mol.out", "Optimization.chk")
+    handler = GaussianErrorHandler(input_file="missing_mol.com", output_file="missing_mol.out")
+    handler.check(directory=str(run_dir))
+    dct = handler.correct(directory=str(run_dir))
+    assert dct["actions"] == [{"mol": "get_from_checkpoint"}]
 
 
 @pytest.fixture
@@ -790,7 +815,7 @@ def test_walltime_restart_input(walltime_dir):
     assert dct == {"errors": ["wall_time_limit"], "actions": None}
     with open("walltime.com.wt") as file:
         lines = file.read().splitlines()
-    assert lines[0] == "%rwf=./Gau-mock.rwf"
+    assert lines[0] == "%rwf=Gau-mock.rwf"
     assert "%chk=Optimization.chk" in lines
     assert "%mem=48GB" in lines
     assert "#P Restart" in lines
