@@ -543,30 +543,42 @@ def test_load_checkpoint_rejects_path_traversal(tmp_path, member_name) -> None:
     assert sorted(os.listdir(run_dir)) == ["custodian.chk.1.tar.gz"]
 
 
-@pytest.mark.xfail(
-    sys.version_info < (3, 14),
-    strict=True,
-    reason="safe_extract only checks member names, not link targets: a symlink member pointing outside "
-    "the directory followed by a file member written through it escapes the directory. "
-    "On Python >= 3.14 tarfile's default 'data' filter blocks this independently.",
-)
-def test_load_checkpoint_rejects_symlink_traversal(tmp_path) -> None:
+@pytest.mark.parametrize("link_type", [tarfile.SYMTYPE, tarfile.LNKTYPE])
+def test_load_checkpoint_rejects_link_traversal(tmp_path, link_type) -> None:
     run_dir = tmp_path / "run"
     run_dir.mkdir()
     outside = tmp_path / "outside"
     outside.mkdir()
     with tarfile.open(run_dir / "custodian.chk.1.tar.gz", mode="w:gz") as tar:
         link = tarfile.TarInfo("link")
-        link.type = tarfile.SYMTYPE
+        link.type = link_type
         link.linkname = str(outside)
         tar.addfile(link)
         for name, data in {"link/evil.txt": b"pwned", "custodian.json": b"[]"}.items():
             info = tarfile.TarInfo(name)
             info.size = len(data)
             tar.addfile(info, io.BytesIO(data))
-    with contextlib.suppress(Exception):
+    with pytest.raises(Exception, match="Attempted Path Traversal in Tar File"):
         Custodian._load_checkpoint(str(run_dir))
     assert not (outside / "evil.txt").exists(), "tar member was written outside the checkpoint directory"
+    assert sorted(os.listdir(run_dir)) == ["custodian.chk.1.tar.gz"]
+
+
+def test_load_checkpoint_keeps_internal_symlinks(tmp_path) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    with tarfile.open(run_dir / "custodian.chk.1.tar.gz", mode="w:gz") as tar:
+        for name, data in {"custodian.json": b"[]", "sub/CONTCAR": b"structure"}.items():
+            info = tarfile.TarInfo(name)
+            info.size = len(data)
+            tar.addfile(info, io.BytesIO(data))
+        link = tarfile.TarInfo("POSCAR")
+        link.type = tarfile.SYMTYPE
+        link.linkname = "sub/CONTCAR"
+        tar.addfile(link)
+    assert Custodian._load_checkpoint(str(run_dir)) == (1, [])
+    assert (run_dir / "POSCAR").is_symlink()
+    assert (run_dir / "POSCAR").read_text() == "structure"
 
 
 # ----------------------------- run_interrupted ------------------------------

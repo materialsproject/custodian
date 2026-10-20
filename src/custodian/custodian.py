@@ -233,8 +233,19 @@ class Custodian:
                         member_path = os.path.join(path, member.name)
                         if not is_within_directory(path, member_path):
                             raise Exception("Attempted Path Traversal in Tar File")
+                        # Links must also stay inside, or later members can be written through them.
+                        if member.issym():
+                            link_target = os.path.join(path, os.path.dirname(member.name), member.linkname)
+                        elif member.islnk():
+                            link_target = os.path.join(path, member.linkname)
+                        else:
+                            continue
+                        if not is_within_directory(path, link_target):
+                            raise Exception("Attempted Path Traversal in Tar File")
 
-                    tar.extractall(path, members, numeric_owner=numeric_owner)
+                    # The "data" filter (Python >= 3.11.4) adds tarfile's own checks on top.
+                    kwargs = {"filter": "data"} if hasattr(tarfile, "data_filter") else {}
+                    tar.extractall(path, members, numeric_owner=numeric_owner, **kwargs)
 
                 safe_extract(file, directory)
             # Log the corrections to a json file.
