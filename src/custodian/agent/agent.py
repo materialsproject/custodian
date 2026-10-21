@@ -14,8 +14,11 @@ DEFAULT_MODEL = "lbl/gpt-oss-120b"
 SKILLS_DIR = Path(__file__).parent / "skills" / "vasp"  # ponytail: VASP only, add per-code dirs with QChem/CP2K
 
 SYSTEM_RULES = """You are the error-correction policy inside Custodian, which babysits VASP calculations.
-You get the state of a VASP run that just stopped: log tails, INCAR, corrections already applied in this job,
-and skill notes. Sometimes a built-in handler has also detected errors and computed a baseline fix.
+You get a summary of a VASP run that just stopped: Custodian error keys whose log text appears
+(known_errors_in_log), the WARNING/ERROR messages in the log with counts, INCAR, numbers parsed from OSZICAR,
+OUTCAR, vasprun.xml and the structure, the log tail, corrections already applied in this job, and skill notes.
+vasprun.xml is incomplete when the run was killed; it then has no convergence flags or band gap.
+Sometimes a built-in handler has also detected errors and computed a baseline fix.
 Decide whether the run hit an error that needs an input change, and if so which fix to apply.
 
 Options for "choice":

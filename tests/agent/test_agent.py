@@ -8,11 +8,21 @@ from monty.json import MontyDecoder, MontyEncoder
 from pymatgen.io.vasp.inputs import Incar
 
 from custodian.agent.agent import ERROR_MSGS, SYSTEM, LLMInterface, canonical_error
-from custodian.agent.handlers import AgentHandler
+from custodian.agent.handlers import AgentHandler, read_context
 from custodian.vasp.handlers import StdErrHandler, VaspErrorHandler
 from tests.conftest import TEST_FILES
 
 AMIX = [{"dict": "INCAR", "action": {"_set": {"AMIX": 0.05}}}]
+SCF_BOX = """ -----------------------------------------------------------------------------
+|                                                                             |
+|           W    W    AA    RRRRR   N    N  II  N    N   GGGG   !!!           |
+|           W WW W  AAAAAA  RRRRR   N  N N  II  N  N N  G  GGG   !            |
+|                                                                             |
+|     The electronic self-consistency was not achieved in the given           |
+|     number of steps (NELM).                                                 |
+|                                                                             |
+ -----------------------------------------------------------------------------
+"""
 
 
 class FakeLLM:
@@ -93,6 +103,44 @@ def test_prompt_lists_custodian_error_keys():
 @pytest.mark.parametrize("decision", [{"errors": [], "choice": "none", "actions": []}, RuntimeError("CBorg down")])
 def test_no_error_or_llm_failure_reports_no_error(run_dir, decision):
     assert not handler(decision).check(directory=run_dir)
+
+
+def test_read_context_finds_errors_beyond_the_log_tail(run_dir):
+    ctx = read_context(run_dir, "vasp.algo_tet")
+    assert {"algo_tet", "grad_not_orth"} <= set(ctx["known_errors_in_log"])  # algo_tet is at line 43 of 1284
+    assert ctx["scf_and_ionic"]["ionic_steps"] > 0
+    assert ctx["structure"]["nsites"] > 0
+    assert ctx["vasprun"].startswith("unreadable")  # tests/files/vasprun.xml is a deliberate stub
+    assert ctx["outcar"] == "missing"
+    json.dumps(ctx)  # plain JSON types only
+
+
+def test_read_context_groups_boxes_and_guards_killed_vasprun(tmp_path):
+    shutil.copy(Path(TEST_FILES) / "INCAR", tmp_path)
+    shutil.copy(Path(TEST_FILES) / "bad_vasprun" / "vasprun.xml", tmp_path)  # cut off mid-run, never closed
+    noise = " WARNING: random wavefunctions but no delay for mixing, default for NELMDL\n"
+    (tmp_path / "vasp.out").write_text(SCF_BOX + "RMM: 100 -0.7436E+03\n" + SCF_BOX + noise)
+    ctx = read_context(tmp_path)
+    assert ctx["log_messages"][0] == {
+        "kind": "WARNING box",
+        "count": 2,
+        "text": "The electronic self-consistency was not achieved in the given number of steps (NELM).",
+    }
+    assert ctx["log_messages"][1]["kind"] == "line"
+    assert ctx["scf_and_ionic"] == "missing"
+    vr = ctx["vasprun"]
+    assert vr["complete"] is False
+    assert vr["ionic_steps_written"] > 0
+    assert vr["max_force_last5"]
+    assert "converged_ionic" not in vr  # pymatgen would call a killed run ionically converged
+    assert "band_gap" not in vr
+
+
+def test_read_context_complete_vasprun_has_flags_and_gap(tmp_path):
+    shutil.copy(Path(TEST_FILES) / "unconverged" / "vasprun.xml.unconverged_unfixable", tmp_path / "vasprun.xml")
+    vr = read_context(tmp_path)["vasprun"]
+    assert vr["complete"] is True
+    assert {"converged_electronic", "converged_ionic", "band_gap"} <= set(vr)
 
 
 def test_handler_roundtrips_without_api_key(monkeypatch):
