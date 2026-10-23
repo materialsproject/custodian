@@ -1,4 +1,3 @@
-
 def read_context(directory, output_filename="vasp.out") -> dict:
     """Summarize a stopped VASP run for the LLM without sending whole files.
 

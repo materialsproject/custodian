@@ -9,7 +9,6 @@ from datetime import datetime
 
 from pymatgen.io.vasp.inputs import VaspInput
 
-from custodian.agent.agent import canonical_error
 from custodian.custodian import ErrorHandler
 from custodian.utils import backup
 from custodian.vasp.handlers import VASP_BACKUP_FILES

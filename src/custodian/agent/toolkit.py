@@ -89,7 +89,7 @@ class FileManagementToolkit:
         start, n = max(1, start_line), min(max(1, num_lines), self.max_lines)
         out, total = [], 0
         with zopen(file, mode="rb") as f:
-            for total, raw in enumerate(f, start=1):  # noqa: B007
+            for total, raw in enumerate(f, start=1):
                 if total >= start + n:
                     break
                 if total >= start:

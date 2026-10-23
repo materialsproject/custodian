@@ -1,21 +1,17 @@
 """LLMInterface: the LLM client, skill notes, prompt and decision call used by AgentHandler."""
 
 import json
+import logging
 import os
 import re
+import textwrap
 from pathlib import Path
-import logging
-
-
-from monty.json import MSONable
-from ruamel.yaml import YAML
 
 from langchain_core.messages import ToolMessage, convert_to_openai_messages
+from monty.json import MSONable
 
 from custodian.agent.toolkit import FileManagementToolkit
 from custodian.vasp.handlers import AliasingErrorHandler, LrfCommutatorHandler, StdErrHandler, VaspErrorHandler
-
-import textwrap
 
 logger = logging.getLogger(__name__)
 
@@ -180,7 +176,7 @@ class LLMInterface(MSONable):
         When the budget is spent the LLM is asked once more, with no tools bound, for its decision.
         Returns the final reply.
         """
-        logger.info("="*60)
+        logger.info("=" * 60)
         logger.info(f"Prompt:\n{messages}")
         logger.info(textwrap.indent(str(messages), "\t"))
 
@@ -189,34 +185,34 @@ class LLMInterface(MSONable):
 
         for _ in range(self.max_tool_rounds):
             reply = llm.invoke(messages)
-            logger.info("="*30)
-            logger.info(f"pre-tools reoponse:\n")
+            logger.info("=" * 30)
+            logger.info("pre-tools reoponse:\n")
             logger.info(textwrap.indent(str(reply), "\t"))
             if not reply.tool_calls:
-                logger.info("="*15)
+                logger.info("=" * 15)
                 logger.warning("No tools_calls")
                 return reply
             messages.append(reply)
             for cidx, call in enumerate(reply.tool_calls):
                 tool = tools.get(call["name"])
                 out = tool.invoke(call["args"]) if tool else f"ERROR: unknown tool {call['name']!r}"
-                logger.info("="*30)
+                logger.info("=" * 30)
                 logger.info(f"Using Tool calling {cidx}: {tool}. Response:")
                 logger.info(textwrap.indent(str(out), "\t"))
                 messages.append(ToolMessage(content=str(out), tool_call_id=call["id"]))
-        logger.info("="*60)
-        logger.info(f"Final Prompt:\n")
+        logger.info("=" * 60)
+        logger.info("Final Prompt:\n")
         logger.info(textwrap.indent(str(messages), "\t"))
-        logger.info("="*60)
+        logger.info("=" * 60)
 
         final_reply = self.llm.invoke(messages)
-        logger.info(f"Final response:\n")
+        logger.info("Final response:\n")
         logger.info(textwrap.indent(str(final_reply), "\t"))
-        logger.info("="*60)
+        logger.info("=" * 60)
 
         if final_reply.content:
             return final_reply
-        
+
         # An OpenAI-compatible server (here gpt-oss on vLLM) sometimes returns an empty `content`: the
         # model's output can end up only in a provider-specific field such as `reasoning_content`.
         # LangChain's `ChatOpenAI` keeps only the standard OpenAI fields and drops the rest, so `invoke`
@@ -239,7 +235,7 @@ class LLMInterface(MSONable):
             or ""
         )
         logger.info(f"Final reasonign: {reasoning}")
-        
+
         return extras
 
     @staticmethod
