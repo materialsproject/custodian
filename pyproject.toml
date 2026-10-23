@@ -52,6 +52,12 @@ matsci = [
 ] # Error handlers and jobs for materials simulations, e.g., VASP, Nwchem, qchem, etc.
 gaussian = ["matplotlib", "pymatgen"]
 error-statistics = ["sentry-sdk>=0.8.0"]
+agent = [
+    "langchain_openai",
+    "langchain_core",
+    "pymatgen",
+    "textwrap"
+]
 
 [project.scripts]
 cstdn = "custodian.cli.cstdn:main"
