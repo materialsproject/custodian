@@ -524,6 +524,16 @@ class VaspErrorHandlerTest(MatSciTest):
         incar = Incar.from_file("INCAR")
         assert incar["ISYM"] == 0
 
+    def test_kpoints_trans_vasp6(self) -> None:
+        # VASP 6 boxes this error and wraps it over two lines
+        handler = VaspErrorHandler("vasp6.kpoints_trans")
+        assert handler.check() is True
+        dct = handler.correct()
+        assert dct["errors"] == ["kpoints_trans"]
+        assert dct["actions"] == [{"dict": "INCAR", "action": {"_set": {"ISYM": 0}}}]
+        assert handler.check() is True
+        assert handler.correct()["actions"] == []  # unrecoverable once symmetry is off
+
     def test_inv_rot_matrix_vasp6(self) -> None:
         # the error message is formatted differently in VASP6 compared to VASP5
         handler = VaspErrorHandler("vasp6.inv_rot_mat")
@@ -1249,7 +1259,9 @@ class LrfCommHandlerTest(MatSciTest):
 class KpointsTransHandlerTest(MatSciTest):
     @pytest.fixture(autouse=True)
     def _setup(self, _tmp_dir) -> None:
-        copy_tmp_files(self.tmp_path, "INCAR", "KPOINTS", "std_err.txt.kpoints_trans")
+        copy_tmp_files(
+            self.tmp_path, "INCAR", "KPOINTS", "std_err.txt.kpoints_trans", "std_err.txt.kpoints_trans_vasp6"
+        )
 
     def test_kpoints_trans(self) -> None:
         handler = StdErrHandler("std_err.txt.kpoints_trans")
@@ -1268,6 +1280,19 @@ class KpointsTransHandlerTest(MatSciTest):
         kpoints = Kpoints.from_file("KPOINTS")
         assert kpoints.style == Kpoints.supported_modes.Monkhorst
         assert tuple(kpoints.kpts[0]) == (8, 2, 2)
+
+    def test_kpoints_trans_vasp6(self) -> None:
+        # VASP 6 boxes this error and wraps it over two lines
+        handler = StdErrHandler("std_err.txt.kpoints_trans_vasp6")
+        assert handler.check() is True
+        dct = handler.correct()
+        assert dct["errors"] == ["kpoints_trans"]
+        assert dct["actions"] == [{"action": {"_set": {"ISYM": 0}}, "dict": "INCAR"}]
+
+    def test_no_kpoints_trans(self) -> None:
+        with open("std_err.txt", "w") as file:
+            file.write("| internal error in: mkpoints.F at line: 123 |\n| internal error in SET_CORE_WF |\n")
+        assert StdErrHandler().check() is False
 
 
 GRAD_NOT_ORTH = "| EDWAV: internal error, the gradient is not orthogonal 2 1 -8.611e-4 |\n"
