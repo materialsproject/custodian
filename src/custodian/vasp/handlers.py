@@ -319,6 +319,8 @@ class VaspErrorHandler(ErrorHandler):
         "hnform": ["HNFORM: k-point generating"],
         "coef": ["while reading plane", "while reading WAVECAR"],
         "set_core_wf": ["internal error in SET_CORE_WF"],
+        # VASP 6 boxes this message and wraps it, so match only the part before the wrap
+        "kpoints_trans": ["internal error in GENERATE_KPOINTS_TRANS"],
         "read_error": ["Error reading item", "Error code was IERR= 5"],
         "auto_nbands": ["The number of bands has been changed"],
         "ibzkpt": ["not all point group operations"],
@@ -886,6 +888,10 @@ class VaspErrorHandler(ErrorHandler):
         if "point_group" in self.errors and vi["INCAR"].get("ISYM", 2) > 0:
             actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
 
+        # Same correction as StdErrHandler: VASP may print this error to either stream.
+        if "kpoints_trans" in self.errors and vi["INCAR"].get("ISYM", 2) > 0:
+            actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
+
         if "symprec_noise" in self.errors and vi["INCAR"].get("ISYM", 2) > 0:
             if vi["INCAR"].get("SYMPREC", 1e-5) > 1e-6:
                 actions.append({"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-6}}})
@@ -1092,7 +1098,7 @@ class StdErrHandler(ErrorHandler):
     is_monitor = True
 
     error_msgs: ClassVar = {
-        "kpoints_trans": ["internal error in GENERATE_KPOINTS_TRANS: number of G-vector changed in star"],
+        "kpoints_trans": VaspErrorHandler.error_msgs["kpoints_trans"],
         "out_of_memory": ["Allocation would exceed memory limit"],
         "grad_not_orth": VaspErrorHandler.error_msgs["grad_not_orth"],
     }
