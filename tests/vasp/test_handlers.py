@@ -640,6 +640,15 @@ class VaspErrorHandlerTest(MatSciTest):
             assert handler.check() is False
         assert handler.errors == set()
 
+    def test_auto_nbands_partial_outcar(self) -> None:
+        # VaspErrorHandler is a monitor, so it can read an OUTCAR that VASP is still writing.
+        full_outcar = Path("OUTCAR_auto_nbands").read_text()
+        cut_after = "energy(sigma->0) =      -"
+        Path("OUTCAR").write_text(full_outcar[: full_outcar.index(cut_after) + len(cut_after)])
+        handler = VaspErrorHandler(zpath("vasp.auto_nbands"))
+        assert handler.check() is False
+        assert handler.errors == set()
+
     def test_auto_nbands_bad_parallelization(self, recwarn) -> None:
         shutil.copy("OUTCAR_auto_nbands_parallel", "OUTCAR")
         # hacky way to deal with custodian CI unzipping test files
