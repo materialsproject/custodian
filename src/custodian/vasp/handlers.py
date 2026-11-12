@@ -387,7 +387,10 @@ class VaspErrorHandler(ErrorHandler):
                         # Treat auto_nbands only as a warning, do not fail a job
                         if err == "auto_nbands":
                             if nbands := self._get_nbands_from_outcar(directory):
-                                outcar = load_outcar(os.path.join(directory, "OUTCAR"))
+                                try:
+                                    outcar = load_outcar(os.path.join(directory, "OUTCAR"))
+                                except Exception:  # Can't perform check if Outcar not valid (e.g. file being written)
+                                    continue
                                 if (nelect := outcar.nelect) and (nbands > 2 * nelect):
                                     warnings.warn(
                                         "NBANDS seems to be too high. The electronic structure may be inaccurate. "
