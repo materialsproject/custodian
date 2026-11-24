@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import tarfile
+import time
 import warnings
 from glob import glob
 from pathlib import Path
@@ -1806,6 +1807,31 @@ def test_frozen_job_unrecoverable(tmp_path, nsw, write_contcar) -> None:
     assert Incar.from_file(tmp_path / "INCAR") == incar
     assert (tmp_path / "POSCAR").read_text() == poscar
     assert not glob(f"{tmp_path}/error.*.tar.gz")
+
+
+def test_frozen_job_recheck_cadence(tmp_path, monkeypatch) -> None:
+    """A job that stays frozen is not reported again until another timeout has elapsed."""
+    (tmp_path / "vasp.out").write_text("")
+    handler = FrozenJobErrorHandler(timeout=10)
+
+    now = time.time()
+    stale = now - 20
+    os.utime(tmp_path / "vasp.out", (stale, stale))
+    monkeypatch.setattr(time, "time", lambda: now)
+
+    assert handler.check(directory=str(tmp_path)) is True
+    # The still-unchanged output must not retrigger at the monitor polling cadence.
+    assert handler.check(directory=str(tmp_path)) is None
+
+    # An output file that resumes updating clears the frozen state.
+    fresh = now + 30
+    monkeypatch.setattr(time, "time", lambda: fresh)
+    os.utime(tmp_path / "vasp.out", (fresh, fresh))
+    assert handler.check(directory=str(tmp_path)) is None
+
+    # Once it freezes again and stays that way for a full timeout, it reports again.
+    monkeypatch.setattr(time, "time", lambda: fresh + 11)
+    assert handler.check(directory=str(tmp_path)) is True
 
 
 def test_inv_rot_mat_ladder(tmp_path) -> None:

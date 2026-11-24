@@ -1827,17 +1827,25 @@ class FrozenJobErrorHandler(ErrorHandler):
                 default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
             timeout (int): The time in seconds between checks where if there
                 is no activity on the output file, the run is considered
-                frozen. Defaults to 21600 seconds, i.e., 6 hours.
+                frozen. Defaults to 21600 seconds, i.e., 6 hours. A job that
+                stays frozen is not reported again until another timeout has
+                elapsed, so the error is not re-triggered on every monitor
+                polling step.
         """
         self.output_filename = output_filename
         self.timeout = timeout
+        self._last_frozen_time: float | None = None
 
     def check(self, directory="./") -> bool | None:
         """Check for error."""
         st = os.stat(os.path.join(directory, self.output_filename))
-        if time.time() - st.st_mtime > self.timeout:
-            return True
-        return None
+        now = time.time()
+        if now - st.st_mtime <= self.timeout:
+            return None
+        if self._last_frozen_time is not None and now - self._last_frozen_time <= self.timeout:
+            return None
+        self._last_frozen_time = now
+        return True
 
     def correct(self, directory="./"):
         """Perform corrections."""
