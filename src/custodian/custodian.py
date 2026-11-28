@@ -52,17 +52,17 @@ if SENTRY_DSN:
 
     sentry_sdk.init(dsn=SENTRY_DSN)  # pylint: disable=E0110
 
-    with sentry_sdk.configure_scope() as scope:
-        from getpass import getuser
+    # configure_scope() was removed in sentry-sdk 3; set_user() and set_tag() work on all releases
+    from getpass import getuser
 
-        try:
-            scope.user = {"username": getuser()}
-        except Exception:
-            pass
+    try:
+        sentry_sdk.set_user({"username": getuser()})
+    except Exception:
+        pass
 
-        import socket
+    import socket
 
-        scope.set_tag("hostname", socket.gethostname())
+    sentry_sdk.set_tag("hostname", socket.gethostname())
 
 
 class Custodian:
