@@ -1,4 +1,3 @@
-import contextlib
 import getpass
 import importlib.util
 import io
@@ -858,17 +857,16 @@ def test_run_with_scratch_dir_and_gzip(workdir, monkeypatch) -> None:
 def sentry_stub(monkeypatch):
     """Stub sentry_sdk in sys.modules, recording init and scope calls."""
     stub = types.SimpleNamespace(dsn=None, scope=types.SimpleNamespace(user=None, tags={}))
-    stub.scope.set_tag = stub.scope.tags.__setitem__
 
     def init(dsn=None) -> None:
         stub.dsn = dsn
 
-    @contextlib.contextmanager
-    def configure_scope():
-        yield stub.scope
+    def set_user(user) -> None:
+        stub.scope.user = user
 
     stub.init = init
-    stub.configure_scope = configure_scope
+    stub.set_user = set_user
+    stub.set_tag = stub.scope.tags.__setitem__
     monkeypatch.setitem(sys.modules, "sentry_sdk", stub)
     return stub
 
